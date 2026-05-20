@@ -34,8 +34,8 @@ function SidebarSkeleton() {
       </div>
       <Skeleton className="mt-2 h-10 w-full rounded-[var(--radius-md)]" />
       <div className="mt-4 flex flex-col gap-2">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <Skeleton key={i} className="h-10 w-full rounded-[var(--radius-sm)]" />
+        {Array.from({ length: 5 }, (_, i) => `sidebar-skeleton-${i}`).map((key) => (
+          <Skeleton key={key} className="h-10 w-full rounded-[var(--radius-sm)]" />
         ))}
       </div>
     </div>
@@ -53,8 +53,8 @@ export function LoadingState({ type = "messages", className }: LoadingStateProps
         <Skeleton className="h-8 w-48 rounded-[var(--radius-md)]" />
         <Skeleton className="h-4 w-96 rounded-[var(--radius-sm)]" />
         <div className="mt-4 grid grid-cols-3 gap-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-32 w-full rounded-[var(--radius-lg)]" />
+          {Array.from({ length: 3 }, (_, i) => `page-skeleton-${i}`).map((key) => (
+            <Skeleton key={key} className="h-32 w-full rounded-[var(--radius-lg)]" />
           ))}
         </div>
         <Skeleton className="mt-4 h-64 w-full rounded-[var(--radius-lg)]" />

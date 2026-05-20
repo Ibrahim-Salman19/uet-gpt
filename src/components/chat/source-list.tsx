@@ -19,6 +19,7 @@ export function SourceList({ sources, className }: SourceListProps) {
   return (
     <div className={cn("px-1", className)}>
       <button
+        type="button"
         onClick={() => setIsExpanded(!isExpanded)}
         className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors duration-[var(--duration-fast)]"
       >
@@ -36,7 +37,7 @@ export function SourceList({ sources, className }: SourceListProps) {
       {isExpanded && (
         <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
           {sources.map((source, i) => (
-            <SourceCard key={`${source.chunkId}-${i}`} source={source} index={i} />
+            <SourceCard key={source.chunkId} source={source} index={i} />
           ))}
         </div>
       )}

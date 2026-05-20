@@ -1,11 +1,15 @@
 import { v } from "convex/values";
 import { action } from "../_generated/server";
 
+interface CrawlResponse {
+  job_id: string;
+}
+
 export const startCrawlAction = action({
   args: {
     seedUrls: v.array(v.string()),
   },
-  handler: async (ctx, args) => {
+  handler: async (_ctx, args) => {
     // 1. Contact local Crawl4AI instance
     const response = await fetch("http://localhost:11235/crawl", {
       method: "POST",
@@ -30,7 +34,7 @@ export const startCrawlAction = action({
       throw new Error(`Crawl4AI API error (${response.status}): ${errorText}`);
     }
 
-    const data = (await response.json()) as any;
+    const data = (await response.json()) as CrawlResponse;
     return data.job_id;
   },
 });
@@ -42,7 +46,7 @@ export const processPageAction = action({
     title: v.string(),
     content: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (_ctx, args) => {
     if (!args.content || args.content.trim().length === 0) {
       throw new Error("Content is empty");
     }

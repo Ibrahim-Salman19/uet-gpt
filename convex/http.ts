@@ -1,4 +1,4 @@
-import { createTextStreamResponse } from "ai";
+import { createTextStreamResponse, type LanguageModel } from "ai";
 import { httpRouter } from "convex/server";
 import { api } from "./_generated/api";
 import { httpAction } from "./_generated/server";
@@ -152,9 +152,9 @@ http.route({
   }),
 });
 
-function modelName(model: any): string {
+function modelName(model: LanguageModel | string): string {
   if (typeof model === "string") return model;
-  if (model && typeof model.modelId === "string") return model.modelId;
+  if (model?.modelId) return model.modelId;
   return String(model);
 }
 

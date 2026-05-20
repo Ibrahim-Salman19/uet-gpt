@@ -61,6 +61,7 @@ function RadioOption<T extends string>({
   const id = `radio-${value}`;
   return (
     <button
+      type="button"
       onClick={() => onChange(value)}
       className={cn(
         "flex w-full items-center gap-3 rounded-[var(--radius-md)] border px-4 py-3 text-left transition-all duration-[var(--duration-fast)]",

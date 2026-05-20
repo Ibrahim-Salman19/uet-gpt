@@ -3,7 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
 
-export function useChat(threadId?: string) {
+export function useChat(_threadId?: string) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const lastMessageRef = useRef<string>("");

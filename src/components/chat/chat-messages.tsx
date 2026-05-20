@@ -54,7 +54,7 @@ export function ChatMessages({
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, []);
 
   if (messages.length === 0 && !isLoading && !isSending && !error) {
     return (

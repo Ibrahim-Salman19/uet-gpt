@@ -4,16 +4,26 @@ import { createGroq } from "@ai-sdk/groq";
 import { type LanguageModel, streamText } from "ai";
 import { v } from "convex/values";
 import { api } from "../_generated/api";
+import type { Id } from "../_generated/dataModel";
 import { action } from "../_generated/server";
+
+interface SearchResult {
+  documentId: Id<"documents">;
+  _id: Id<"chunks">;
+  url: string;
+  title: string;
+  relevanceScore: number;
+  content: string;
+}
 
 // Initialize LLM Providers
 const groq = createGroq({ apiKey: process.env.GROQ_API_KEY || "" });
 const google = createGoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 const cerebras = createCerebras({ apiKey: process.env.CEREBRAS_API_KEY || "" });
 
-function modelName(model: LanguageModel): string {
+function modelName(model: LanguageModel | string): string {
   if (typeof model === "string") return model;
-  if (model && typeof (model as any).modelId === "string") return (model as any).modelId;
+  if (model?.modelId) return model.modelId;
   return String(model);
 }
 
@@ -26,7 +36,7 @@ export async function robustStreamText(
   models: LanguageModel[],
   options: Omit<Parameters<typeof streamText>[0], "model">,
 ) {
-  let lastError: any;
+  let lastError: unknown;
   for (const model of models) {
     try {
       console.log(`Attempting RAG stream with model: ${modelName(model)}`);
@@ -47,7 +57,7 @@ export async function robustStreamText(
  * getFallbackModels returns the array of valid configured language models.
  * In a zero-budget setup, we fall back between Groq, Cerebras, and Gemini.
  */
-export function getFallbackModels(intent: string) {
+export function getFallbackModels(_intent: string) {
   const models: LanguageModel[] = [];
 
   // 1. Groq Llama 4 Scout (Primary for complex RAG)
@@ -136,7 +146,7 @@ export const retrieveContext = action({
     }
 
     // 5. Hybrid search retrieval
-    let searchResults: any[] = [];
+    let searchResults: SearchResult[] = [];
     if (queryEmbedding.length > 0) {
       try {
         searchResults = await ctx.runAction(api.embeddings.search.searchDocumentsAction, {
@@ -149,7 +159,7 @@ export const retrieveContext = action({
       }
     }
 
-    const sources = searchResults.map((r: any) => ({
+    const sources = searchResults.map((r) => ({
       documentId: r.documentId,
       chunkId: r._id,
       url: r.url,

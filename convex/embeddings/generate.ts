@@ -33,12 +33,14 @@ export const generate = action({
       throw new Error(`Gemini API error (${response.status}): ${body}`);
     }
 
-    const data = (await response.json()) as any;
+    const data = (await response.json()) as {
+      embedding: { values: number[] };
+    };
 
     if (!data.embedding?.values) {
       throw new Error("Unexpected Gemini API response shape");
     }
 
-    return data.embedding.values as number[];
+    return data.embedding.values;
   },
 });

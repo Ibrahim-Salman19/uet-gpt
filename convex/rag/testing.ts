@@ -1,6 +1,12 @@
 import { v } from "convex/values";
 import { api } from "../_generated/api";
+import type { Id } from "../_generated/dataModel";
 import { action, mutation, query } from "../_generated/server";
+
+interface VectorSearchResult {
+  _id: Id<"chunks">;
+  _score: number;
+}
 
 // --- MUTATIONS ---
 export const insertTestChunk = mutation({
@@ -86,12 +92,12 @@ export const verify = action({
     // 3. Output results
     console.log(`Found ${results.length} chunks.`);
     const formattedResults = await Promise.all(
-      results.map(async (r: any) => {
+      (results as VectorSearchResult[]).map(async (r) => {
         const chunk = await ctx.runQuery(api.rag.testing.getChunkContent, { chunkId: r._id });
         return {
           id: r._id,
           score: r._score,
-          text: chunk?.content?.substring(0, 100) + "...",
+          text: `${chunk?.content?.substring(0, 100)}...`,
         };
       }),
     );

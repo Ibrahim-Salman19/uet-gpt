@@ -15,7 +15,7 @@ export const buildContextAction = action({
     ),
     maxTokens: v.optional(v.number()),
   },
-  handler: async (ctx, args) => {
+  handler: async (_ctx, args) => {
     // 1. Sort chunks by relevance score descending
     const sortedChunks = [...args.chunks].sort((a, b) => b.relevanceScore - a.relevanceScore);
 

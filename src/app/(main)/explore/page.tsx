@@ -1,12 +1,9 @@
 "use client";
 
-import { BookOpen, ExternalLink, FileText, Grid3X3, List, Search } from "lucide-react";
-import Link from "next/link";
+import { BookOpen, ExternalLink, Grid3X3, List, Search } from "lucide-react";
 import { useState } from "react";
-import { EmptyState } from "@/components/empty-state";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
@@ -120,6 +117,7 @@ export default function ExplorePage() {
             </div>
             <div className="flex items-center gap-1 rounded-[var(--radius-md)] border border-[var(--border)] p-0.5">
               <button
+                type="button"
                 onClick={() => setViewMode("grid")}
                 className={cn(
                   "rounded-[var(--radius-sm)] p-1.5 transition-colors duration-[var(--duration-fast)]",
@@ -131,6 +129,7 @@ export default function ExplorePage() {
                 <Grid3X3 className="h-4 w-4" />
               </button>
               <button
+                type="button"
                 onClick={() => setViewMode("list")}
                 className={cn(
                   "rounded-[var(--radius-sm)] p-1.5 transition-colors duration-[var(--duration-fast)]",

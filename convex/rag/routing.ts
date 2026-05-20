@@ -10,7 +10,7 @@ const groq = createGroq({
 
 export const classifyQueryAction = action({
   args: { query: v.string() },
-  handler: async (ctx, args) => {
+  handler: async (_ctx, args) => {
     if (!process.env.GROQ_API_KEY) {
       console.warn("GROQ_API_KEY missing, falling back to 'general' category");
       return "general";
@@ -44,7 +44,7 @@ export const classifyQueryAction = action({
 
 export const rewriteQueryAction = action({
   args: { query: v.string() },
-  handler: async (ctx, args) => {
+  handler: async (_ctx, args) => {
     if (!process.env.GROQ_API_KEY) return args.query;
 
     try {
@@ -64,7 +64,7 @@ export const rewriteQueryAction = action({
 
 export const hydeQueryAction = action({
   args: { query: v.string() },
-  handler: async (ctx, args) => {
+  handler: async (_ctx, args) => {
     if (!process.env.GROQ_API_KEY) return args.query;
 
     try {

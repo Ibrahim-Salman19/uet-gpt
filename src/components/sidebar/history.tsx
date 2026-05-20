@@ -52,6 +52,7 @@ export function SidebarHistory({ chats, onDelete }: SidebarHistoryProps) {
                   <MessageSquare className="h-4 w-4 shrink-0 text-[var(--text-muted)]" />
                   <span className="flex-1 truncate text-left leading-snug">{chat.title}</span>
                   <button
+                    type="button"
                     onClick={(e) => onDelete(e, chat.id)}
                     className="opacity-0 transition-opacity duration-[var(--duration-fast)] group-hover:opacity-60 hover:!opacity-100"
                     aria-label="Delete chat"

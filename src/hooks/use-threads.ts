@@ -20,7 +20,7 @@ const initialThreads: ThreadItem[] = [
 
 export function useThreads() {
   const [threads, setThreads] = useState<ThreadItem[]>(initialThreads);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, _setIsLoading] = useState(false);
 
   const sortedThreads = [...threads].sort((a, b) => b._creationTime - a._creationTime);
 

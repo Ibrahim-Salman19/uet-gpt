@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import type { Id } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
 
 export const getOrCreate = mutation({
@@ -15,7 +16,7 @@ export const getOrCreate = mutation({
       .unique();
 
     if (existing) {
-      await ctx.db.patch(existing._id as any, {
+      await ctx.db.patch(existing._id as Id<"users">, {
         name: args.name,
         email: args.email,
         imageUrl: args.imageUrl ?? existing.imageUrl,
