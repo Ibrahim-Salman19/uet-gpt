@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 
 describe("clerk webhook", () => {
   it("exports POST handler", async () => {

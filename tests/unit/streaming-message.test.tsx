@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, act } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { StreamingMessage } from "@/components/chat/streaming-message";
 
 describe("StreamingMessage", () => {
@@ -20,23 +20,19 @@ describe("StreamingMessage", () => {
     const { container } = render(<StreamingMessage content="Hello world" isStreaming={true} />);
     const spans = container.querySelectorAll("span");
     const hasEmptyContent = Array.from(spans).some(
-      (s) => s.className.includes("whitespace-pre-wrap") && s.textContent === ""
+      (s) => s.className.includes("whitespace-pre-wrap") && s.textContent === "",
     );
     expect(hasEmptyContent).toBe(true);
   });
 
   it("shows cursor during streaming", () => {
-    const { container } = render(
-      <StreamingMessage content="Hello" isStreaming={true} />
-    );
+    const { container } = render(<StreamingMessage content="Hello" isStreaming={true} />);
     const cursor = container.querySelector(".animate-pulse");
     expect(cursor).toBeInTheDocument();
   });
 
   it("hides cursor when not streaming", () => {
-    const { container } = render(
-      <StreamingMessage content="Hello" isStreaming={false} />
-    );
+    const { container } = render(<StreamingMessage content="Hello" isStreaming={false} />);
     const cursor = container.querySelector(".animate-pulse");
     expect(cursor).not.toBeInTheDocument();
   });
@@ -53,9 +49,7 @@ describe("StreamingMessage", () => {
   });
 
   it("shows full content when streaming completes", () => {
-    const { rerender } = render(
-      <StreamingMessage content="Hello" isStreaming={true} />
-    );
+    const { rerender } = render(<StreamingMessage content="Hello" isStreaming={true} />);
 
     rerender(<StreamingMessage content="Hello" isStreaming={false} />);
 

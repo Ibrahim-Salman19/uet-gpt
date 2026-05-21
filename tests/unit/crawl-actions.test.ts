@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { startCrawlAction, processPageAction } from "../../convex/crawl/actions";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { processPageAction, startCrawlAction } from "../../convex/crawl/actions";
 
 describe("crawl:actions", () => {
   beforeEach(() => {
@@ -27,7 +27,7 @@ describe("crawl:actions", () => {
         expect.objectContaining({
           method: "POST",
           headers: { "Content-Type": "application/json" },
-        })
+        }),
       );
 
       // It should include the magic flags specified in Phase 2
@@ -48,7 +48,7 @@ describe("crawl:actions", () => {
           url: "https://web.uettaxila.edu.pk/",
           title: "Home",
           content: "",
-        })
+        }),
       ).rejects.toThrow("Content is empty");
     });
   });

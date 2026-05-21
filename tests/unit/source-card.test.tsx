@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
 import { SourceCard } from "@/components/chat/source-card";
 import type { Source } from "@/lib/types";
 
@@ -16,9 +16,7 @@ describe("SourceCard", () => {
   it("renders the title and excerpt", () => {
     render(<SourceCard source={mockSource} index={0} />);
     expect(screen.getByText("Admission Guidelines")).toBeInTheDocument();
-    expect(
-      screen.getByText(/Application process for undergraduate programs/)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Application process for undergraduate programs/)).toBeInTheDocument();
   });
 
   it("renders the relevance score", () => {

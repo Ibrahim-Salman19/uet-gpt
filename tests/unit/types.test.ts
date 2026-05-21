@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 
 describe("types", () => {
   it("Id type is a branded string", () => {

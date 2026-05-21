@@ -1,11 +1,8 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import { ChatSuggestions } from "@/components/chat/chat-suggestions";
 
-const suggestions = [
-  "What is the fee structure?",
-  "When do admissions open?",
-];
+const suggestions = ["What is the fee structure?", "When do admissions open?"];
 
 describe("ChatSuggestions", () => {
   it("renders suggestion buttons", () => {
@@ -16,15 +13,11 @@ describe("ChatSuggestions", () => {
 
   it("renders default suggestions when none provided", () => {
     render(<ChatSuggestions onSelect={() => {}} />);
-    expect(
-      screen.getByText("What is the fee structure for BS programs?")
-    ).toBeInTheDocument();
+    expect(screen.getByText("What is the fee structure for BS programs?")).toBeInTheDocument();
   });
 
   it("returns null for empty suggestions", () => {
-    const { container } = render(
-      <ChatSuggestions suggestions={[]} onSelect={() => {}} />
-    );
+    const { container } = render(<ChatSuggestions suggestions={[]} onSelect={() => {}} />);
     expect(container.innerHTML).toBe("");
   });
 

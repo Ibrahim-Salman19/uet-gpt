@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import type { Id } from "../../convex/_generated/dataModel";
 import { submit } from "../../convex/feedback/submit";
-import { Id } from "../../convex/_generated/dataModel";
 
 describe("feedback:submit", () => {
   it("should not insert empty string for comment if comment is undefined", async () => {
@@ -23,7 +23,7 @@ describe("feedback:submit", () => {
 
     expect(mockInsert).toHaveBeenCalled();
     const insertedData = mockInsert.mock.calls[0]![1];
-    
+
     // We expect comment to be undefined, but currently it will fail because it inserts ""
     expect(insertedData.comment).toBeUndefined();
   });

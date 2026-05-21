@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useLocalStorage } from "../../src/hooks/use-local-storage";
 
 describe("useLocalStorage", () => {
@@ -21,7 +21,7 @@ describe("useLocalStorage", () => {
 
   it("should update localStorage when the value changes", () => {
     const { result } = renderHook(() => useLocalStorage("test-key", "default-value"));
-    
+
     act(() => {
       const setValue = result.current[1];
       setValue("new-value");
@@ -38,7 +38,7 @@ describe("useLocalStorage", () => {
     });
 
     const { result } = renderHook(() => useLocalStorage("restricted-key", "fallback"));
-    
+
     expect(result.current[0]).toBe("fallback");
     getItemSpy.mockRestore();
   });

@@ -1,8 +1,6 @@
 const config = {
   darkMode: "class",
-  content: [
-    "./src/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
+  content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {
       colors: {
@@ -22,7 +20,14 @@ const config = {
         },
       },
       fontFamily: {
-        sans: ["Geist", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "system-ui", "sans-serif"],
+        sans: [
+          "Geist",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Segoe UI",
+          "system-ui",
+          "sans-serif",
+        ],
         mono: ["JetBrains Mono", "Fira Code", "monospace"],
       },
       borderRadius: {

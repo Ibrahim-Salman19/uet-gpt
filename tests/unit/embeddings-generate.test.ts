@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { generate } from "../../convex/embeddings/generate";
 
 describe("embeddings:generate", () => {
@@ -11,7 +11,7 @@ describe("embeddings:generate", () => {
 
   it("should call Gemini API with text-embedding-004 and outputDimensionality 768", async () => {
     process.env.GEMINI_API_KEY = "test_gemini_key";
-    
+
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
@@ -38,7 +38,7 @@ describe("embeddings:generate", () => {
           },
           outputDimensionality: 768,
         }),
-      })
+      }),
     );
 
     expect(result).toEqual([0.1, 0.2, 0.3]);
@@ -46,18 +46,22 @@ describe("embeddings:generate", () => {
 
   it("should throw an error if GEMINI_API_KEY is not set", async () => {
     delete process.env.GEMINI_API_KEY;
-    await expect((generate as any).handler({} as any, { text: "test" })).rejects.toThrow("GEMINI_API_KEY environment variable is not set");
+    await expect((generate as any).handler({} as any, { text: "test" })).rejects.toThrow(
+      "GEMINI_API_KEY environment variable is not set",
+    );
   });
 
   it("should throw an error if the API request fails", async () => {
     process.env.GEMINI_API_KEY = "test_gemini_key";
-    
+
     global.fetch = vi.fn().mockResolvedValue({
       ok: false,
       status: 400,
       text: async () => "Bad Request",
     });
 
-    await expect((generate as any).handler({} as any, { text: "test" })).rejects.toThrow("Gemini API error (400): Bad Request");
+    await expect((generate as any).handler({} as any, { text: "test" })).rejects.toThrow(
+      "Gemini API error (400): Bad Request",
+    );
   });
 });

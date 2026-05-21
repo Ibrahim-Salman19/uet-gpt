@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { SidebarHistory } from "../../src/components/sidebar/history";
 import { usePathname } from "next/navigation";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { SidebarHistory } from "../../src/components/sidebar/history";
 
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
@@ -40,7 +40,7 @@ describe("SidebarHistory", () => {
     render(<SidebarHistory chats={mockChats} onDelete={mockOnDelete} />);
 
     const links = screen.getAllByTestId("mock-link");
-    
+
     // First link should be active
     expect(links[0]!.className).toContain("bg-[var(--accent)]/10");
     expect(links[0]!.className).not.toContain("text-[var(--text-sidebar)]");

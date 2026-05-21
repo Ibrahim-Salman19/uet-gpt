@@ -9,9 +9,7 @@ const nextConfig: NextConfig = {
     ],
   },
   async redirects() {
-    return [
-      { source: "/", destination: "/chat", permanent: false },
-    ];
+    return [{ source: "/", destination: "/chat", permanent: false }];
   },
   async headers() {
     return [
