@@ -126,4 +126,57 @@ export default defineSchema({
   })
     .index("by_userId", ["userId"])
     .index("by_isRead", ["isRead"]),
+
+  documents: defineTable({
+    url: v.string(),
+    title: v.string(),
+    content: v.string(),
+    indexedAt: v.optional(v.number()),
+    metadata: v.optional(v.any()),
+  }),
+
+  chunks: defineTable({
+    documentId: v.id("documents"),
+    content: v.string(),
+    embedding: v.array(v.float64()),
+    chunkIndex: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_documentId", ["documentId"])
+    .vectorIndex("by_embedding", { vectorField: "embedding", dimensions: 768 })
+    .searchIndex("search_content", { searchField: "content" }),
+
+  threads: defineTable({
+    userId: v.id("users"),
+    title: v.string(),
+    isArchived: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_userId", ["userId"]),
+
+  messages: defineTable({
+    threadId: v.id("threads"),
+    role: v.union(v.literal("user"), v.literal("assistant")),
+    content: v.string(),
+    sources: v.optional(
+      v.array(
+        v.object({
+          documentId: v.id("documents"),
+          chunkId: v.id("chunks"),
+          url: v.string(),
+          title: v.string(),
+          relevanceScore: v.number(),
+          excerpt: v.string(),
+        }),
+      ),
+    ),
+    tokenCount: v.optional(
+      v.object({
+        prompt: v.number(),
+        completion: v.number(),
+        total: v.number(),
+      }),
+    ),
+    createdAt: v.number(),
+  }).index("by_threadId", ["threadId"]),
 });
