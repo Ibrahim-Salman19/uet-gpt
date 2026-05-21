@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm biome check src convex tests next.config.ts vitest.config.ts
+        env:
+          BIOME_LOG_PATH: /dev/null
+
+      - run: pnpm run typecheck
+
+      - run: pnpm run test
+        env:
+          NEXT_PUBLIC_CONVEX_URL: ${{ vars.NEXT_PUBLIC_CONVEX_URL }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+          CLERK_SIGNING_SECRET: ${{ secrets.CLERK_SIGNING_SECRET }}
+          CLERK_JWT_ISSUER: ${{ secrets.CLERK_JWT_ISSUER }}
+
+      - run: pnpm run build
+        env:
+          NEXT_PUBLIC_CONVEX_URL: ${{ vars.NEXT_PUBLIC_CONVEX_URL }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+          CLERK_SIGNING_SECRET: ${{ secrets.CLERK_SIGNING_SECRET }}
+          CLERK_JWT_ISSUER: ${{ secrets.CLERK_JWT_ISSUER }}
