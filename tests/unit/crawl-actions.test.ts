@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { processPageAction, startCrawlAction } from "../../convex/crawl/actions";
 
+interface MockActionCtx {
+  runMutation: ReturnType<typeof vi.fn>;
+}
+
 describe("crawl:actions", () => {
   beforeEach(() => {
     vi.resetAllMocks();
@@ -14,11 +18,15 @@ describe("crawl:actions", () => {
       });
       global.fetch = mockFetch;
 
-      const mockCtx = {
+      const mockCtx: MockActionCtx = {
         runMutation: vi.fn().mockResolvedValue("job_123"),
-      } as any;
+      };
 
-      const result = await (startCrawlAction as any).handler(mockCtx, {
+      const result = await (
+        startCrawlAction as unknown as {
+          handler: (ctx: MockActionCtx, args: { seedUrls: string[] }) => Promise<string>;
+        }
+      ).handler(mockCtx, {
         seedUrls: ["https://web.uettaxila.edu.pk/"],
       });
 
@@ -31,7 +39,7 @@ describe("crawl:actions", () => {
       );
 
       // It should include the magic flags specified in Phase 2
-      const requestBody = JSON.parse(mockFetch.mock.calls[0]![1].body);
+      const requestBody = JSON.parse(mockFetch.mock.calls[0]?.[1].body);
       expect(requestBody.magic).toBe(true);
       expect(requestBody.flatten_shadow_dom).toBe(true);
       expect(requestBody.check_robots_txt).toBe(true);
@@ -43,12 +51,22 @@ describe("crawl:actions", () => {
   describe("processPageAction", () => {
     it("should throw an error if no content is provided", async () => {
       await expect(
-        (processPageAction as any).handler({} as any, {
-          jobId: "job_123",
-          url: "https://web.uettaxila.edu.pk/",
-          title: "Home",
-          content: "",
-        }),
+        (
+          processPageAction as unknown as {
+            handler: (
+              ctx: object,
+              args: { jobId: string; url: string; title: string; content: string },
+            ) => Promise<void>;
+          }
+        ).handler(
+          {},
+          {
+            jobId: "job_123",
+            url: "https://web.uettaxila.edu.pk/",
+            title: "Home",
+            content: "",
+          },
+        ),
       ).rejects.toThrow("Content is empty");
     });
   });

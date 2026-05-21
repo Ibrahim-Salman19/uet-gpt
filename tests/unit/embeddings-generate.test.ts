@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { generate } from "../../convex/embeddings/generate";
 
+interface MockCtx {
+  runQuery: ReturnType<typeof vi.fn>;
+}
+
 describe("embeddings:generate", () => {
   const originalEnv = process.env;
 
@@ -22,7 +26,12 @@ describe("embeddings:generate", () => {
     });
     global.fetch = mockFetch;
 
-    const result = await (generate as any).handler({} as any, { text: "Hello world" });
+    const mockCtx: MockCtx = { runQuery: vi.fn() };
+    const result = await (
+      generate as unknown as {
+        handler: (ctx: MockCtx, args: { text: string }) => Promise<number[]>;
+      }
+    ).handler(mockCtx, { text: "Hello world" });
 
     expect(mockFetch).toHaveBeenCalledWith(
       "https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=test_gemini_key",
@@ -46,9 +55,14 @@ describe("embeddings:generate", () => {
 
   it("should throw an error if GEMINI_API_KEY is not set", async () => {
     delete process.env.GEMINI_API_KEY;
-    await expect((generate as any).handler({} as any, { text: "test" })).rejects.toThrow(
-      "GEMINI_API_KEY environment variable is not set",
-    );
+    const mockCtx: MockCtx = { runQuery: vi.fn() };
+    await expect(
+      (
+        generate as unknown as {
+          handler: (ctx: MockCtx, args: { text: string }) => Promise<number[]>;
+        }
+      ).handler(mockCtx, { text: "test" }),
+    ).rejects.toThrow("GEMINI_API_KEY environment variable is not set");
   });
 
   it("should throw an error if the API request fails", async () => {
@@ -60,8 +74,13 @@ describe("embeddings:generate", () => {
       text: async () => "Bad Request",
     });
 
-    await expect((generate as any).handler({} as any, { text: "test" })).rejects.toThrow(
-      "Gemini API error (400): Bad Request",
-    );
+    const mockCtx: MockCtx = { runQuery: vi.fn() };
+    await expect(
+      (
+        generate as unknown as {
+          handler: (ctx: MockCtx, args: { text: string }) => Promise<number[]>;
+        }
+      ).handler(mockCtx, { text: "test" }),
+    ).rejects.toThrow("Gemini API error (400): Bad Request");
   });
 });

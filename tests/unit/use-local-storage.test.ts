@@ -28,7 +28,7 @@ describe("useLocalStorage", () => {
     });
 
     expect(result.current[0]).toBe("new-value");
-    expect(JSON.parse(window.localStorage.getItem("test-key")!)).toBe("new-value");
+    expect(JSON.parse(window.localStorage.getItem("test-key") ?? "")).toBe("new-value");
   });
 
   it("should handle cases where localStorage is not available (like SSR/privacy mode) and return initialValue", () => {

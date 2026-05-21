@@ -1,10 +1,17 @@
 import { describe, expect, it } from "vitest";
 import nextConfig from "../../next.config";
 
+interface NextConfig {
+  output?: string;
+  redirects?: () => Promise<unknown[]>;
+  headers?: () => Promise<unknown[]>;
+}
+
 describe("next config", () => {
   it("defines redirects and standalone output", () => {
-    expect((nextConfig as any).output).toBe("standalone");
-    expect(typeof (nextConfig as any).redirects).toBe("function");
-    expect(typeof (nextConfig as any).headers).toBe("function");
+    const config = nextConfig as NextConfig;
+    expect(config.output).toBe("standalone");
+    expect(typeof config.redirects).toBe("function");
+    expect(typeof config.headers).toBe("function");
   });
 });
