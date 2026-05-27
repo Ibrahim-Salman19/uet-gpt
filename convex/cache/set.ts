@@ -8,8 +8,7 @@ export const set = mutation({
     response: v.string(),
     sources: v.array(
       v.object({
-        documentId: v.id("documents"),
-        chunkId: v.id("chunks"),
+        entryId: v.string(),
         url: v.string(),
         title: v.string(),
         relevanceScore: v.number(),
@@ -26,18 +25,20 @@ export const set = mutation({
     ),
     ttlMs: v.optional(v.number()),
   },
+  returns: v.id("semanticCache"),
   handler: async (ctx, args) => {
-    const ttl = (args.ttlMs as number | undefined) ?? 86400000;
-    return await ctx.db.insert("semanticCache", {
+    const ttl = args.ttlMs ?? 86400000;
+    const id = await ctx.db.insert("semanticCache", {
       queryText: args.queryText,
       queryEmbedding: args.queryEmbedding,
       response: args.response,
       sources: args.sources,
       model: args.model,
-      ...(args.tokenCount && { tokenCount: args.tokenCount }),
+      tokenCount: args.tokenCount,
       hits: 0,
       expiresAt: Date.now() + ttl,
       createdAt: Date.now(),
     });
+    return id;
   },
 });

@@ -1,53 +1,135 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
+import { components } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
+import { threadValidator } from "./threads/validator";
 
 export const create = mutation({
   args: {
-    userId: v.id("users"),
     title: v.string(),
   },
+  returns: v.string(),
   handler: async (ctx, args) => {
-    return await ctx.db.insert("threads", {
-      userId: args.userId,
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new ConvexError("Authentication required");
+    }
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+    if (!user) {
+      throw new ConvexError("User not found");
+    }
+
+    const thread = await ctx.runMutation(components.agent.threads.createThread, {
+      userId: identity.subject,
       title: args.title,
-      isArchived: false,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
     });
+
+    return thread._id as string;
   },
 });
 
 export const list = query({
-  args: { userId: v.id("users") },
-  handler: async (ctx, args) => {
-    const list = await ctx.db
-      .query("threads")
-      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
-      .collect();
+  args: {},
+  returns: v.array(threadValidator),
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return [];
+    }
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+    if (!user) return [];
 
-    return list.filter((t) => !t.isArchived);
+    const result = await ctx.runQuery(components.agent.threads.listThreadsByUserId, {
+      userId: identity.subject,
+      paginationOpts: { numItems: 100, cursor: null },
+    });
+
+    // Transform component format → app format
+    return result.page
+      .filter((t: any) => t.status === "active")
+      .map((t: any) => ({
+        _id: t._id as string,
+        _creationTime: t._creationTime,
+        userId: t.userId ?? "",
+        title: t.title ?? undefined,
+        isArchived: false,
+        createdAt: t._creationTime,
+        updatedAt: t._creationTime,
+      }));
   },
 });
 
 export const rename = mutation({
   args: {
-    id: v.id("threads"),
+    id: v.string(),
     title: v.string(),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.id, {
-      title: args.title,
-      updatedAt: Date.now(),
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new ConvexError("Authentication required");
+    }
+
+    // Verify thread exists via component query
+    const thread = await ctx.runQuery(components.agent.threads.getThread, { threadId: args.id });
+    if (!thread) {
+      throw new ConvexError("Thread not found");
+    }
+
+    // Authorize: thread owner must match current user
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+    if (!user || thread.userId !== identity.subject) {
+      throw new ConvexError("Not authorized");
+    }
+
+    await ctx.runMutation(components.agent.threads.updateThread, {
+      threadId: args.id,
+      patch: { title: args.title },
     });
+
+    return null;
   },
 });
 
 export const remove = mutation({
-  args: { id: v.id("threads") },
+  args: { id: v.string() },
+  returns: v.null(),
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.id, {
-      isArchived: true,
-      updatedAt: Date.now(),
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new ConvexError("Authentication required");
+    }
+
+    // Verify thread exists via component query
+    const thread = await ctx.runQuery(components.agent.threads.getThread, { threadId: args.id });
+    if (!thread) {
+      throw new ConvexError("Thread not found");
+    }
+
+    // Authorize: thread owner must match current user
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+    if (!user || thread.userId !== identity.subject) {
+      throw new ConvexError("Not authorized");
+    }
+
+    // Soft-delete: update status to "archived" instead of hard delete
+    await ctx.runMutation(components.agent.threads.updateThread, {
+      threadId: args.id,
+      patch: { status: "archived" },
     });
+
+    return null;
   },
 });

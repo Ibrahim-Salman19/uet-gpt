@@ -43,7 +43,7 @@ export function SidebarHistory({ chats, onDelete }: SidebarHistoryProps) {
                   key={chat.id}
                   href={`/chat/${chat.id}`}
                   className={cn(
-                    "group flex w-full items-center gap-2.5 rounded-[var(--radius-sm)] px-3 py-2 text-sm transition-all duration-[var(--duration-fast)] ease-[var(--ease-out-quart)]",
+                    "group flex w-full items-center gap-2.5 rounded-[var(--radius-sm)] px-3 py-2 text-sm transition-[background-color] duration-[var(--duration-fast)] ease-[var(--ease-out-quart)]",
                     isActive
                       ? "bg-[var(--accent)]/10 text-[var(--accent)]"
                       : "text-[var(--text-sidebar)] hover:bg-white/5",

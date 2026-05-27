@@ -37,7 +37,7 @@ export function ChatSuggestions({
             type="button"
             key={suggestion}
             onClick={() => onSelect(suggestion)}
-            className="rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface-card)] px-3 py-1.5 text-xs text-[var(--text-secondary)] transition-all duration-[var(--duration-fast)] hover:border-[var(--accent-muted)] hover:bg-[var(--surface-elevated)] hover:text-[var(--text-primary)] active:scale-[0.98]"
+            className="rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface-card)] px-3 py-1.5 text-xs text-[var(--text-secondary)] transition-[border-color,background-color,color,transform] duration-[var(--duration-fast)] hover:border-[var(--accent-muted)] hover:bg-[var(--surface-elevated)] hover:text-[var(--text-primary)] active:scale-[0.98]"
           >
             {suggestion}
           </button>

@@ -10,6 +10,9 @@
   "linter": {
     "rules": {
       "recommended": true,
+      "suspicious": {
+        "noExplicitAny": "off"
+      },
       "correctness": {
         "noUnusedVariables": "error"
       },

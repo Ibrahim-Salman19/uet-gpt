@@ -16,7 +16,7 @@ export function SidebarSearch({ value, onChange }: SidebarSearchProps) {
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Search conversations..."
-          className="w-full rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface-sidebar)] py-1.5 pl-8 pr-3 text-sm text-[var(--text-sidebar)] placeholder:text-[var(--text-muted)] outline-none transition-all duration-[var(--duration-fast)] focus:border-[var(--accent-muted)]"
+          className="w-full rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface-sidebar)] py-1.5 pl-8 pr-3 text-sm text-[var(--text-sidebar)] placeholder:text-[var(--text-muted)] outline-none transition-[border-color,box-shadow] duration-[var(--duration-fast)] focus:border-[var(--accent-muted)]"
           aria-label="Search conversations"
         />
       </div>

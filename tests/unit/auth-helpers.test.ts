@@ -15,7 +15,11 @@ type TestCtx = {
 };
 
 function createMockCtx(): {
-  auth: { getUserIdentity: ReturnType<typeof vi.fn<() => Promise<{ subject: string; tokenIdentifier?: string } | null>>> };
+  auth: {
+    getUserIdentity: ReturnType<
+      typeof vi.fn<() => Promise<{ subject: string; tokenIdentifier?: string } | null>>
+    >;
+  };
   db: {
     query: ReturnType<
       typeof vi.fn<
@@ -35,14 +39,15 @@ function createMockCtx(): {
       getUserIdentity: vi.fn<() => Promise<{ subject: string; tokenIdentifier?: string } | null>>(),
     },
     db: {
-      query: vi.fn<
-        (table: "users") => {
-          withIndex: (
-            name: "by_clerkId",
-            fn: (q: { eq: (field: "clerkId", value: string) => unknown }) => unknown,
-          ) => { unique: () => Promise<{ _id: Id<"users">; role: string } | null> };
-        }
-      >(),
+      query:
+        vi.fn<
+          (table: "users") => {
+            withIndex: (
+              name: "by_clerkId",
+              fn: (q: { eq: (field: "clerkId", value: string) => unknown }) => unknown,
+            ) => { unique: () => Promise<{ _id: Id<"users">; role: string } | null> };
+          }
+        >(),
       get: vi.fn<(id: Id<"users">) => Promise<{ role: string } | null>>(),
     },
   };
@@ -70,7 +75,7 @@ describe("convex/auth helpers", () => {
       const { getUserId } = await import("../../convex/auth");
       const ctx = createMockCtx();
       ctx.auth.getUserIdentity.mockResolvedValue(null);
-      const result = await getUserId(ctx as unknown as TestCtx);
+      const result = await getUserId(ctx as any);
       expect(result).toBeNull();
     });
 
@@ -83,7 +88,7 @@ describe("convex/auth helpers", () => {
       });
       const withIndex = vi.fn().mockReturnValue({ unique: vi.fn().mockResolvedValue(null) });
       ctx.db.query.mockReturnValue({ withIndex });
-      const result = await getUserId(ctx as unknown as TestCtx);
+      const result = await getUserId(ctx as any);
       expect(result).toBeNull();
     });
 
@@ -97,7 +102,7 @@ describe("convex/auth helpers", () => {
       const fakeUser = { _id: "some-user-id", clerkId: "user_abc123" };
       const withIndex = vi.fn().mockReturnValue({ unique: vi.fn().mockResolvedValue(fakeUser) });
       ctx.db.query.mockReturnValue({ withIndex });
-      const result = await getUserId(ctx as unknown as TestCtx);
+      const result = await getUserId(ctx as any);
       expect(result).toBe(fakeUser._id);
     });
 
@@ -110,7 +115,7 @@ describe("convex/auth helpers", () => {
       });
       const withIndex = vi.fn().mockReturnValue({ unique: vi.fn().mockResolvedValue(null) });
       ctx.db.query.mockReturnValue({ withIndex });
-      await getUserId(ctx as unknown as TestCtx);
+      await getUserId(ctx as any);
       expect(ctx.db.query).toHaveBeenCalledWith("users");
       expect(withIndex).toHaveBeenCalledWith("by_clerkId", expect.any(Function));
     });
@@ -121,7 +126,7 @@ describe("convex/auth helpers", () => {
       const { isAuthenticated } = await import("../../convex/auth");
       const ctx = createMockCtx();
       ctx.auth.getUserIdentity.mockResolvedValue(null);
-      const result = await isAuthenticated(ctx as unknown as TestCtx);
+      const result = await isAuthenticated(ctx as any);
       expect(result).toBe(false);
     });
 
@@ -132,7 +137,7 @@ describe("convex/auth helpers", () => {
         subject: "user_abc",
         tokenIdentifier: "token_abc",
       });
-      const result = await isAuthenticated(ctx as unknown as TestCtx);
+      const result = await isAuthenticated(ctx as any);
       expect(result).toBe(true);
     });
   });
@@ -142,7 +147,7 @@ describe("convex/auth helpers", () => {
       const { isAdmin } = await import("../../convex/auth");
       const ctx = createMockCtx();
       ctx.auth.getUserIdentity.mockResolvedValue(null);
-      const result = await isAdmin(ctx as unknown as TestCtx);
+      const result = await isAdmin(ctx as any);
       expect(result).toBe(false);
     });
 
@@ -159,7 +164,7 @@ describe("convex/auth helpers", () => {
       });
       const withIndex = vi.fn().mockReturnValue({ unique: vi.fn().mockResolvedValue(null) });
       ctx.db.query.mockReturnValue({ withIndex });
-      const result = await isAdmin(ctx as unknown as TestCtx);
+      const result = await isAdmin(ctx as any);
       expect(result).toBe(false);
     });
 
@@ -173,7 +178,7 @@ describe("convex/auth helpers", () => {
       const fakeUser = { _id: "uid1", role: "user" };
       const withIndex = vi.fn().mockReturnValue({ unique: vi.fn().mockResolvedValue(fakeUser) });
       ctx.db.query.mockReturnValue({ withIndex });
-      const result = await isAdmin(ctx as unknown as TestCtx);
+      const result = await isAdmin(ctx as any);
       expect(result).toBe(false);
     });
 
@@ -187,7 +192,7 @@ describe("convex/auth helpers", () => {
       const fakeUser = { _id: "uid1", role: "admin" };
       const withIndex = vi.fn().mockReturnValue({ unique: vi.fn().mockResolvedValue(fakeUser) });
       ctx.db.query.mockReturnValue({ withIndex });
-      const result = await isAdmin(ctx as unknown as TestCtx);
+      const result = await isAdmin(ctx as any);
       expect(result).toBe(true);
     });
 
@@ -201,7 +206,7 @@ describe("convex/auth helpers", () => {
       const fakeUser = { _id: "uid1", role: "superadmin" };
       const withIndex = vi.fn().mockReturnValue({ unique: vi.fn().mockResolvedValue(fakeUser) });
       ctx.db.query.mockReturnValue({ withIndex });
-      const result = await isAdmin(ctx as unknown as TestCtx);
+      const result = await isAdmin(ctx as any);
       expect(result).toBe(true);
     });
   });

@@ -39,6 +39,10 @@ export function ChatInput({
         e.preventDefault();
         handleSubmit();
       }
+      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        handleSubmit();
+      }
     },
     [handleSubmit],
   );
@@ -55,11 +59,12 @@ export function ChatInput({
   return (
     <div
       className={cn(
-        "border-t border-[var(--border)] bg-[var(--surface-card)] px-4 py-3",
+        "bg-gradient-to-t from-[var(--surface-base)] via-[var(--surface-base)] to-transparent px-4 pb-6 pt-4",
         className,
       )}
     >
-      <div className="mx-auto flex max-w-3xl items-end gap-2">
+      <div className="mx-auto flex max-w-3xl flex-col items-center gap-2">
+        <div className="flex w-full items-end gap-2 rounded-[var(--radius-xl)] bg-[var(--surface-elevated)] p-1.5 shadow-[var(--shadow-md)] border border-[var(--border)] transition-all duration-[var(--duration-normal)] hover:shadow-[var(--shadow-lg)] focus-within:shadow-[var(--shadow-lg)] focus-within:border-[var(--accent-muted)]">
         <div className="relative flex-1">
           <textarea
             ref={inputRef}
@@ -69,7 +74,7 @@ export function ChatInput({
             placeholder={placeholder}
             rows={1}
             disabled={isLoading}
-            className="w-full resize-none rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface-base)] px-4 py-2.5 pr-10 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-disabled)] outline-none transition-all duration-[var(--duration-fast)] ease-[var(--ease-out-quart)] hover:border-[var(--accent-muted)] focus:border-[var(--accent)] focus:shadow-[0_0_0_3px_var(--accent-muted)] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full resize-none bg-transparent px-3 py-2.5 pr-10 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-disabled)] outline-none disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Chat input"
           />
           {!isLoading && (
@@ -92,22 +97,24 @@ export function ChatInput({
           </Button>
         ) : (
           <Button
+            type="submit"
             onClick={handleSubmit}
             disabled={!canSend}
             size="icon"
             aria-label="Send message"
             className={cn(
-              "shrink-0 transition-all duration-[var(--duration-fast)]",
+              "shrink-0 transition-[opacity,transform] duration-[var(--duration-normal)] mb-0.5 mr-0.5 rounded-full",
               !canSend && "opacity-50",
             )}
           >
             <Send className="h-4 w-4" />
           </Button>
         )}
+        </div>
+        <p className="mt-1 text-center text-[11px] text-[var(--text-disabled)]">
+          UET GPT may produce inaccurate information. Verify critical details with official sources.
+        </p>
       </div>
-      <p className="mt-2 text-center text-[11px] text-[var(--text-disabled)]">
-        UET GPT may produce inaccurate information. Verify critical details with official sources.
-      </p>
     </div>
   );
 }

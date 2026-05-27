@@ -6,3 +6,5 @@ describe("types", () => {
     expect(typeof docId).toBe("string");
   });
 });
+
+

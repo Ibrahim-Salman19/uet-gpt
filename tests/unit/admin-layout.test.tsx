@@ -1,0 +1,88 @@
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+
+// Mock next/navigation
+vi.mock("next/navigation", () => ({
+  usePathname: vi.fn(),
+}));
+
+// Mock lucide-react icons
+vi.mock("lucide-react", () => ({
+  Shield: () => <svg data-testid="icon-shield" />,
+  LayoutDashboard: () => <svg data-testid="icon-dashboard" />,
+  Globe: () => <svg data-testid="icon-globe" />,
+  FileText: () => <svg data-testid="icon-filetext" />,
+  BarChart3: () => <svg data-testid="icon-barchart" />,
+  MessageSquare: () => <svg data-testid="icon-messagesquare" />,
+  Settings: () => <svg data-testid="icon-settings" />,
+}));
+
+import { usePathname } from "next/navigation";
+import AdminLayout from "@/app/admin/layout";
+
+describe("AdminLayout", () => {
+  it("renders the admin panel title", () => {
+    vi.mocked(usePathname).mockReturnValue("/admin");
+    render(<AdminLayout><div>Content</div></AdminLayout>);
+    expect(screen.getByText("Admin Panel")).toBeTruthy();
+  });
+
+  it("renders all navigation items", () => {
+    vi.mocked(usePathname).mockReturnValue("/admin");
+    render(<AdminLayout><div>Content</div></AdminLayout>);
+    // Nav items appear in both sidebar and header; use getAllByText
+    expect(screen.getAllByText("Overview").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Crawls").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Documents").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Analytics").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Feedback").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Settings").length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("highlights the active nav item based on pathname", () => {
+    vi.mocked(usePathname).mockReturnValue("/admin/crawls");
+    const { container } = render(<AdminLayout><div>Content</div></AdminLayout>);
+
+    // The active link should have bg-primary/10 class
+    const links = container.querySelectorAll("a");
+    const crawlsLink = Array.from(links).find((l) => l.textContent?.includes("Crawls"));
+    expect(crawlsLink?.className).toContain("bg-primary/10");
+    const overviewLink = Array.from(links).find((l) => l.textContent?.includes("Overview"));
+    expect(overviewLink?.className).toContain("text-muted-foreground");
+  });
+
+  it("renders back to app link", () => {
+    vi.mocked(usePathname).mockReturnValue("/admin");
+    render(<AdminLayout><div>Content</div></AdminLayout>);
+    expect(screen.getByText("← Back to app")).toBeTruthy();
+  });
+
+  it("displays the current page name in the header", () => {
+    vi.mocked(usePathname).mockReturnValue("/admin/analytics");
+    render(<AdminLayout><div>Content</div></AdminLayout>);
+    // Header and sidebar both show "Analytics" — check it appears at least once
+    expect(screen.getAllByText("Analytics").length).toBe(2);
+  });
+
+  it("renders children content", () => {
+    vi.mocked(usePathname).mockReturnValue("/admin");
+    render(<AdminLayout><div>Child Content</div></AdminLayout>);
+    expect(screen.getByText("Child Content")).toBeTruthy();
+  });
+
+  it("defaults header to 'Admin' when pathname does not match a nav item", () => {
+    vi.mocked(usePathname).mockReturnValue("/admin/unknown");
+    render(<AdminLayout><div>Content</div></AdminLayout>);
+    // The h1 header says "Admin", but sidebar still shows all nav items
+    expect(screen.getByRole("heading", { level: 1, name: "Admin" })).toBeTruthy();
+  });
+
+  it("renders all nav link icons", () => {
+    vi.mocked(usePathname).mockReturnValue("/admin");
+    render(<AdminLayout><div>Content</div></AdminLayout>);
+    expect(screen.getByTestId("icon-shield")).toBeTruthy();
+    expect(screen.getByTestId("icon-dashboard")).toBeTruthy();
+    expect(screen.getByTestId("icon-globe")).toBeTruthy();
+    expect(screen.getByTestId("icon-filetext")).toBeTruthy();
+  });
+});

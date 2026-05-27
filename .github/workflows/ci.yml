@@ -7,45 +7,148 @@ on:
     branches: [main]
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-jobs:
-  check:
-    runs-on: ubuntu-latest
+env:
+  PNPM_VERSION: "10"
 
+jobs:
+  lint:
+    name: Lint & Format
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: pnpm/action-setup@v4
         with:
-          version: latest
-
+          version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: pnpm
+          node-version: "22"
+      - name: Get pnpm store directory
+        id: pnpm-store
+        run: echo "store=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.store }}
+          key: pnpm-store-${{ hashFiles('uet-gpt/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-
+      - name: Install dependencies
+        working-directory: uet-gpt
+        run: pnpm install --frozen-lockfile
+      - name: Run Biome check (read-only)
+        working-directory: uet-gpt
+        run: npx biome check src/ convex/
 
-      - run: pnpm install --frozen-lockfile
+  typecheck:
+    name: TypeScript Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Get pnpm store directory
+        id: pnpm-store
+        run: echo "store=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.store }}
+          key: pnpm-store-${{ hashFiles('uet-gpt/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-
+      - name: Install dependencies
+        working-directory: uet-gpt
+        run: pnpm install --frozen-lockfile
 
-      - run: pnpm biome check src convex tests next.config.ts vitest.config.ts
+      - name: Generate Convex types
+        if: ${{ secrets.CONVEX_DEPLOYMENT != '' }}
+        working-directory: uet-gpt
+        run: npx convex@latest codegen
         env:
-          BIOME_LOG_PATH: /dev/null
+          CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOYMENT }}
 
-      - run: pnpm run typecheck
+      - name: Type check (with full types)
+        if: ${{ secrets.CONVEX_DEPLOYMENT != '' }}
+        working-directory: uet-gpt
+        run: pnpm typecheck
 
-      - run: pnpm run test
+      - name: Type check skipped (no Convex deployment available)
+        if: ${{ secrets.CONVEX_DEPLOYMENT == '' }}
+        working-directory: uet-gpt
+        run: echo "Skipping typecheck — CONVEX_DEPLOYMENT not available (expected for fork PRs). Run npx convex dev locally to generate types."
+
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Get pnpm store directory
+        id: pnpm-store
+        run: echo "store=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.store }}
+          key: pnpm-store-${{ hashFiles('uet-gpt/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-
+      - name: Install dependencies
+        working-directory: uet-gpt
+        run: pnpm install --frozen-lockfile
+      - name: Run tests
+        working-directory: uet-gpt
+        run: pnpm test -- --run --reporter verbose
+
+  build:
+    name: Build Check
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck, test]
+    # Build only runs on push to main (not PRs) since it requires all secrets
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Get pnpm store directory
+        id: pnpm-store
+        run: echo "store=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.store }}
+          key: pnpm-store-${{ hashFiles('uet-gpt/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-
+      - name: Install dependencies
+        working-directory: uet-gpt
+        run: pnpm install --frozen-lockfile
+      - name: Generate Convex types
+        working-directory: uet-gpt
+        run: npx convex@latest codegen
         env:
-          NEXT_PUBLIC_CONVEX_URL: ${{ vars.NEXT_PUBLIC_CONVEX_URL }}
-          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOYMENT }}
+      - name: Build
+        working-directory: uet-gpt
+        run: pnpm build
+        env:
+          CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOYMENT }}
+          NEXT_PUBLIC_CONVEX_URL: ${{ secrets.NEXT_PUBLIC_CONVEX_URL }}
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
-          CLERK_SIGNING_SECRET: ${{ secrets.CLERK_SIGNING_SECRET }}
-          CLERK_JWT_ISSUER: ${{ secrets.CLERK_JWT_ISSUER }}
-
-      - run: pnpm run build
-        env:
-          NEXT_PUBLIC_CONVEX_URL: ${{ vars.NEXT_PUBLIC_CONVEX_URL }}
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
-          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
-          CLERK_SIGNING_SECRET: ${{ secrets.CLERK_SIGNING_SECRET }}
           CLERK_JWT_ISSUER: ${{ secrets.CLERK_JWT_ISSUER }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}

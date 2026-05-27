@@ -1,0 +1,19 @@
+app:
+  host: "0.0.0.0"
+  port: 8020
+  timeout_keep_alive: 300
+
+crawler:
+  memory_threshold_percent: 80.0
+  rate_limiter:
+    base_delay: [2.0, 3.5]
+  timeouts:
+    stream_init: 30.0
+    batch_process: 600.0
+
+rate_limiting:
+  enabled: true
+  default_limit: "100/minute"
+
+security:
+  enabled: false

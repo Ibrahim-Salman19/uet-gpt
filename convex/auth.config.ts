@@ -1,13 +1,10 @@
-const clerkJwtIssuer = process.env.CLERK_JWT_ISSUER;
-if (!clerkJwtIssuer) {
-  throw new Error("CLERK_JWT_ISSUER environment variable is required");
-}
-
-export default {
+const authConfig = {
   providers: [
     {
-      domain: clerkJwtIssuer,
+      domain: process.env.CLERK_JWT_ISSUER || "https://clerk-jwt-issuer-placeholder.com",
       applicationID: "uet-gpt",
     },
   ],
 };
+
+export default authConfig;

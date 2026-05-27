@@ -17,7 +17,7 @@ export function SourceCard({ source, index, className }: SourceCardProps) {
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        "group flex items-start gap-3 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface-card)] p-3 transition-all duration-[var(--duration-fast)]",
+        "group flex items-start gap-3 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface-card)] p-3 transition-[border-color] duration-[var(--duration-fast)]",
         "hover:border-[var(--accent-muted)] hover:shadow-[var(--shadow-sm)]",
         "active:scale-[0.99]",
         className,

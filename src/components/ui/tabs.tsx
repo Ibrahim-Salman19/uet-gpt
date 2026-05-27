@@ -13,7 +13,7 @@ const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      "inline-flex h-10 items-center justify-center rounded-[var(--radius-md)] bg-[var(--surface-muted)] p-1 text-[var(--text-muted)]",
+      "inline-flex h-auto min-h-10 items-center justify-center rounded-[var(--radius-md)] bg-[var(--surface-muted)] p-1 text-[var(--text-muted)]",
       className,
     )}
     {...props}
@@ -28,7 +28,7 @@ const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "inline-flex items-center justify-center whitespace-nowrap rounded-[var(--radius-xs)] px-3 py-1.5 text-sm font-medium text-[var(--text-secondary)] transition-all duration-[var(--duration-fast)] ease-[var(--ease-out-quart)] focus-visible:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-[var(--surface-card)] data-[state=active]:text-[var(--text-primary)] data-[state=active]:shadow-[var(--shadow-sm)]",
+      "inline-flex items-center justify-center whitespace-nowrap rounded-[var(--radius-xs)] px-3 py-1.5 text-sm font-medium text-[var(--text-secondary)] transition-[color,background-color,shadow] duration-[var(--duration-normal)] ease-[var(--ease-out-quart)] focus-visible:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-[var(--surface-card)] data-[state=active]:text-[var(--text-primary)] data-[state=active]:shadow-[var(--shadow-sm)]",
       className,
     )}
     {...props}

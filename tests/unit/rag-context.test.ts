@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildContextAction } from "../../convex/rag/context";
+import { buildContext } from "../../convex/rag/context";
 
 interface MockCtx {
   runQuery: ReturnType<typeof vi.fn>;
@@ -17,13 +17,13 @@ describe("RAG Pipeline - Context Assembly (Sandwich Strategy)", () => {
 
     const mockCtx: MockCtx = { runQuery: vi.fn() };
     const result = (await (
-      buildContextAction as unknown as {
-        handler: (
+      buildContext as unknown as {
+        _handler: (
           ctx: MockCtx,
           args: { chunks: typeof chunks; maxTokens: number },
         ) => Promise<string>;
       }
-    ).handler(mockCtx, {
+    )._handler(mockCtx, {
       chunks,
       maxTokens: 1000,
     })) as string;
@@ -56,13 +56,13 @@ describe("RAG Pipeline - Context Assembly (Sandwich Strategy)", () => {
     const mockCtx: MockCtx = { runQuery: vi.fn() };
 
     const result = (await (
-      buildContextAction as unknown as {
-        handler: (
+      buildContext as unknown as {
+        _handler: (
           ctx: MockCtx,
           args: { chunks: typeof chunks; maxTokens: number },
         ) => Promise<string>;
       }
-    ).handler(mockCtx, {
+    )._handler(mockCtx, {
       chunks,
       maxTokens: 40,
     })) as string;

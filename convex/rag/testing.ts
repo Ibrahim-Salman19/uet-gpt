@@ -1,118 +1,119 @@
 import { v } from "convex/values";
 import { api } from "../_generated/api";
-import type { Id } from "../_generated/dataModel";
-import { action, mutation, query } from "../_generated/server";
-
-interface VectorSearchResult {
-  _id: Id<"chunks">;
-  _score: number;
-}
+import { action, mutation } from "../_generated/server";
+import { rag } from "../rag/instance";
 
 // --- MUTATIONS ---
 export const insertTestChunk = mutation({
   args: {
-    content: v.string(),
-    embedding: v.array(v.float64()),
+    url: v.string(),
+    title: v.string(),
+    category: v.string(),
+    entryId: v.optional(v.string()),
   },
+  returns: v.id("documents"),
   handler: async (ctx, args) => {
-    const documentId = await ctx.db.insert("documents", {
-      title: "Test Document: BS Computer Science Fee Structure",
-      url: "https://web.uettaxila.edu.pk/test-doc",
-      content: args.content,
-      indexedAt: Date.now(),
-    });
-
-    await ctx.db.insert("chunks", {
-      documentId,
-      content: args.content,
-      embedding: args.embedding,
-      chunkIndex: 0,
-      createdAt: Date.now(),
-    });
-
-    return documentId;
-  },
-});
-
-export const getChunkContent = query({
-  args: { chunkId: v.id("chunks") },
-  handler: async (ctx, args) => {
-    return await ctx.db.get(args.chunkId);
+    const now = Date.now();
+    const docData: {
+      url: string;
+      title: string;
+      source: string;
+      category: string;
+      status: "indexed";
+      entryId?: string;
+      crawledAt: number;
+      updatedAt: number;
+    } = {
+      url: args.url,
+      title: args.title,
+      source: new URL(args.url).hostname,
+      category: args.category,
+      status: "indexed",
+      crawledAt: now,
+      updatedAt: now,
+    };
+    if (args.entryId) {
+      docData.entryId = args.entryId;
+    }
+    return await ctx.db.insert("documents", docData);
   },
 });
 
 // --- ACTIONS ---
 export const seed = action({
   args: {},
+  returns: v.object({
+    success: v.boolean(),
+    entryId: v.string(),
+  }),
   handler: async (ctx) => {
-    console.log("Seeding test document...");
+    console.log("Seeding test document via RAG component...");
     const content =
       "The fee structure for BS Computer Science at UET Taxila for the 2024-25 academic year is: Tuition Fee: Rs. 45,000 per semester. Admission Fee: Rs. 15,000 (one-time). Hostel Fee: Rs. 12,000 per semester. Transport Fee: Rs. 8,000 per semester.";
 
-    // 1. Embed the text
-    console.log("Generating Gemini embedding...");
-    const embedding = await ctx.runAction(api.embeddings.generate.generate, { text: content });
+    let entryId: string;
+    try {
+      const result = await rag.add(ctx, {
+        namespace: "uet-global",
+        text: content,
+        filterValues: [
+          { name: "category", value: "academic" },
+          { name: "source", value: "uet" },
+        ],
+      });
+      entryId = result.entryId;
+    } catch (error) {
+      console.error("Failed to add RAG entry:", error);
+      throw error;
+    }
 
-    // 2. Insert into Vector DB
-    console.log("Inserting document into chunks table...");
-    const documentId = await ctx.runMutation(api.rag.testing.insertTestChunk, {
-      content,
-      embedding,
-    });
+    // Insert metadata document linked to the RAG entry
+    // Note: This is a separate transaction from rag.add(). If this fails,
+    // the RAG entry will exist without a metadata document. For production
+    // crawling, use the scheduler pattern (mutation + ctx.scheduler.runAfter)
+    // to ensure atomicity.
+    try {
+      await ctx.runMutation(api.rag.testing.insertTestChunk, {
+        url: "https://web.uettaxila.edu.pk/test-doc",
+        title: "Test Document: BS Computer Science Fee Structure",
+        category: "academic",
+        entryId,
+      });
+    } catch (error) {
+      console.warn("Failed to insert metadata document (RAG entry still exists):", error);
+    }
 
-    console.log("✅ Seed complete! Document ID:", documentId);
-    return { success: true, documentId };
+    console.log("Seed complete! Entry ID:", entryId);
+    return { success: true, entryId };
   },
 });
 
 export const verify = action({
   args: {},
+  returns: v.object({ exists: v.boolean(), content: v.optional(v.string()), count: v.number() }),
   handler: async (ctx) => {
     const queryStr = "What is the fee for BS Computer Science?";
     console.log(`Verifying RAG pipeline with query: "${queryStr}"`);
 
-    // 1. Embed query
-    console.log("Generating query embedding...");
-    const queryEmbedding = await ctx.runAction(api.embeddings.generate.generate, {
-      text: queryStr,
-    });
-
-    // 2. Search vector index
-    console.log("Executing ctx.vectorSearch...");
-    const results = await ctx.vectorSearch("chunks", "by_embedding", {
-      vector: queryEmbedding,
+    const { results, text } = await rag.search(ctx, {
+      namespace: "uet-global",
+      query: queryStr,
       limit: 5,
     });
 
     if (results.length === 0) {
-      console.error("❌ No results found. Vector index might not be ready or empty.");
-      return { success: false, results: [] };
+      console.error("No results found. RAG index might not be ready or empty.");
+      return { exists: false, count: 0 };
     }
 
-    // 3. Output results
     console.log(`Found ${results.length} chunks.`);
-    const formattedResults = await Promise.all(
-      (results as VectorSearchResult[]).map(async (r) => {
-        const chunk = await ctx.runQuery(api.rag.testing.getChunkContent, { chunkId: r._id });
-        return {
-          id: r._id,
-          score: r._score,
-          text: `${chunk?.content?.substring(0, 100)}...`,
-        };
-      }),
-    );
+    console.log("\n--- VERIFICATION RESULT ---");
+    console.log(`Top result score: ${results[0]?.score?.toFixed(4) ?? "N/A"}`);
 
-    console.log("\n--- VECTOR SEARCH RESULTS ---");
-    formattedResults.forEach((res, i) => {
-      console.log(`[${i + 1}] Score: ${res.score.toFixed(4)}`);
-      console.log(`    Text: ${res.text}`);
-      if (res.score > 0.85) {
-        console.log(`    ✅ SUCCESS: High similarity match!`);
-      } else {
-        console.log(`    ⚠️ WARNING: Low similarity match.`);
-      }
-    });
-
-    return formattedResults;
+    return {
+      exists: true,
+      content: text,
+      count: results.length,
+    };
   },
 });

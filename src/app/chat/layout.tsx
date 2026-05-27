@@ -1,3 +1,4 @@
+import { ErrorBoundary } from "@/components/error-boundary";
 import { Header } from "@/components/header";
 import { Sidebar } from "@/components/sidebar";
 
@@ -11,7 +12,9 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
       </div>
       <div className="flex flex-1 flex-col min-w-0">
         <Header />
-        <main className="flex-1 overflow-hidden">{children}</main>
+        <main id="main-content" className="flex-1 overflow-hidden">
+          <ErrorBoundary>{children}</ErrorBoundary>
+        </main>
       </div>
     </div>
   );

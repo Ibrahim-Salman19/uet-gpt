@@ -21,7 +21,9 @@ export function SourceList({ sources, className }: SourceListProps) {
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors duration-[var(--duration-fast)]"
+        aria-expanded={isExpanded}
+        aria-label={isExpanded ? "Hide sources" : "Show sources"}
+        className="flex cursor-pointer items-center gap-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors duration-[var(--duration-normal)]"
       >
         {isExpanded ? (
           <ChevronDown className="h-3.5 w-3.5" />

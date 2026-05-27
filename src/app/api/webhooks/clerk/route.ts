@@ -55,6 +55,7 @@ export async function POST(req: Request) {
         name,
         email,
         imageUrl: imageUrl || undefined,
+        secret,
       },
     );
   }

@@ -1,0 +1,150 @@
+import { describe, expect, it, vi, beforeEach } from "vitest";
+import { crawlWebhook } from "../../convex/crawl/webhook";
+import { createHmac } from "crypto";
+
+const WEBHOOK_SECRET = "700719dfc8d54dbfb6022b5150120149";
+process.env.CRAWL_WEBHOOK_SECRET = WEBHOOK_SECRET;
+
+function generateSignature(timestamp: string, body: string, secret: string): string {
+  return createHmac("sha256", secret).update(`${timestamp}.${body}`).digest("hex");
+}
+
+function createMockCtx() {
+  return {
+    runMutation: vi.fn().mockResolvedValue(null),
+    runQuery: vi.fn().mockResolvedValue(null), // null means not processed
+  };
+}
+
+describe("Crawl Webhook Integration & Load Testing", () => {
+  let ctx: any;
+
+  beforeEach(() => {
+    vi.resetAllMocks();
+    ctx = createMockCtx();
+  });
+
+  it("rejects payloads that exceed 1MB", async () => {
+    const timestamp = Date.now().toString();
+    const signature = generateSignature(timestamp, "x".repeat(1_048_577), WEBHOOK_SECRET);
+    
+    // We can simulate request size by mocking request.text() and request.headers.get
+    const largeBody = "x".repeat(1_048_577);
+    const request = {
+      text: async () => largeBody,
+      headers: {
+        get: (key: string) => {
+          if (key.toLowerCase() === "content-length") return "1048577";
+          if (key === "x-crawl-timestamp") return timestamp;
+          if (key === "x-crawl-signature") return signature;
+          return null;
+        }
+      }
+    };
+
+    const response = await (crawlWebhook as any)._handler(ctx, request as any);
+    expect(response.status).toBe(413);
+  });
+
+  it("rejects invalid HMAC signatures (Timing Attack Resistance)", async () => {
+    const timestamp = Date.now().toString();
+    const body = JSON.stringify({ job_id: "test", data: [] });
+    const signature = generateSignature(timestamp, body, "wrong-secret-123");
+    
+    const request = {
+      text: async () => JSON.stringify({ job_id: "test", data: [] }),
+      headers: {
+        get: (key: string) => {
+          if (key === "x-crawl-timestamp") return timestamp;
+          if (key === "x-crawl-signature") return signature;
+          return null;
+        }
+      }
+    };
+
+    const response = await (crawlWebhook as any)._handler(ctx, request as any);
+    expect(response.status).toBe(401);
+  });
+
+  it("rejects replay attacks via expired timestamps", async () => {
+    const expiredTimestamp = (Date.now() - 5 * 60 * 60 * 1000).toString(); // 5 hours ago
+    const body = JSON.stringify({ job_id: "test", data: [] });
+    const signature = generateSignature(expiredTimestamp, body, WEBHOOK_SECRET);
+    
+    const request = {
+      text: async () => JSON.stringify({ job_id: "test", data: [] }),
+      headers: {
+        get: (key: string) => {
+          if (key === "x-crawl-timestamp") return expiredTimestamp;
+          if (key === "x-crawl-signature") return signature;
+          return null;
+        }
+      }
+    };
+
+    const response = await (crawlWebhook as any)._handler(ctx, request as any);
+    expect(response.status).toBe(400);
+  });
+
+  it("processes large legitimate payloads and queues chunks idempotently", async () => {
+    let massiveMarkdown = "# Massive Page\n\n";
+    for(let i = 0; i < 50; i++) {
+        massiveMarkdown += `## Section ${i}\nThis is paragraph ${i} with a lot of text to force chunking. `.repeat(20) + "\n\n";
+    }
+
+    const payload = {
+        job_id: "massive-job-001",
+        status: "completed",
+        data: [{
+            url: "https://wikipedia.org/wiki/Massive_Page",
+            markdown: massiveMarkdown,
+            metadata: { title: "Massive Page" }
+        }]
+    };
+
+    const timestamp = Date.now().toString();
+    const signature = generateSignature(timestamp, JSON.stringify(payload), WEBHOOK_SECRET);
+
+    const request = {
+      text: async () => JSON.stringify(payload),
+      headers: {
+        get: (key: string) => {
+          if (key.toLowerCase() === "content-length") return "50000";
+          if (key === "x-crawl-timestamp") return timestamp;
+          if (key === "x-crawl-signature") return signature;
+          return null;
+        }
+      }
+    };
+
+    const response = await (crawlWebhook as any)._handler(ctx, request as any);
+    expect(response.status).toBe(200);
+
+    // Verify markWebhookProcessed was called
+    expect(ctx.runMutation).toHaveBeenCalledWith(
+        expect.any(Object), // internal.crawl.mutations.markWebhookProcessed
+        expect.objectContaining({ jobId: "massive-job-001" })
+    );
+
+    // Verify chunks were sent to the workpool
+    // By checking if queueChunksForEmbedding was called
+    expect(ctx.runMutation).toHaveBeenCalledWith(
+        expect.any(Object), // queueChunksForEmbedding
+        expect.objectContaining({ 
+            jobId: "massive-job-001",
+            url: "https://wikipedia.org/wiki/Massive_Page"
+        })
+    );
+
+    // Simulate idempotency deduplication by setting the query to return an existing record
+    ctx.runQuery.mockResolvedValueOnce({ _id: "processed_1" });
+    
+    const dedupResponse = await (crawlWebhook as any)._handler(ctx, request as any);
+    expect(dedupResponse.status).toBe(200);
+    
+    // Convert Response stream to JSON
+    const resText = await dedupResponse.text();
+    const result = JSON.parse(resText);
+    expect(result.deduped).toBe(true);
+  });
+});

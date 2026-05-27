@@ -1,58 +1,114 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
+import { components } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
+import { sourcesValidator, tokenCountValidator } from "./messages/validator";
+
+function toAppSource(s: any): any {
+  return {
+    documentId: s.providerOptions?.documentId ?? s.id,
+    chunkId: s.providerOptions?.chunkId ?? "",
+    url: s.url ?? s.id,
+    title: s.title ?? "",
+    relevanceScore: s.providerOptions?.relevanceScore ?? 0,
+    excerpt: s.providerOptions?.excerpt ?? "",
+  };
+}
+
+function toComponentSource(source: any): any {
+  return {
+    type: "url",
+    id: source.url,
+    url: source.url,
+    title: source.title,
+    providerOptions: {
+      documentId: source.documentId,
+      chunkId: source.chunkId,
+      relevanceScore: source.relevanceScore,
+      excerpt: source.excerpt,
+    },
+  };
+}
 
 export const insert = mutation({
   args: {
-    threadId: v.id("threads"),
+    threadId: v.string(),
     role: v.union(v.literal("user"), v.literal("assistant")),
     content: v.string(),
-    sources: v.optional(
-      v.array(
-        v.object({
-          documentId: v.id("documents"),
-          chunkId: v.id("chunks"),
-          url: v.string(),
-          title: v.string(),
-          relevanceScore: v.number(),
-          excerpt: v.string(),
-        }),
-      ),
-    ),
-    tokenCount: v.optional(
-      v.object({
-        prompt: v.number(),
-        completion: v.number(),
-        total: v.number(),
-      }),
-    ),
+    sources: sourcesValidator,
+    tokenCount: tokenCountValidator,
   },
+  returns: v.string(),
   handler: async (ctx, args) => {
-    // 1. Insert message
-    const messageId = await ctx.db.insert("messages", {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new ConvexError("Authentication required");
+    }
+
+    const result = await ctx.runMutation(components.agent.messages.addMessages, {
+      userId: identity.subject,
       threadId: args.threadId,
-      role: args.role,
-      content: args.content,
-      ...(args.sources && { sources: args.sources }),
-      ...(args.tokenCount && { tokenCount: args.tokenCount }),
-      createdAt: Date.now(),
+      messages: [
+        {
+          message: { role: args.role, content: args.content },
+          text: args.content,
+          ...(args.sources && {
+            sources: args.sources.map(toComponentSource),
+          }),
+          ...(args.tokenCount && {
+            usage: {
+              promptTokens: args.tokenCount.prompt,
+              completionTokens: args.tokenCount.completion,
+              totalTokens: args.tokenCount.total,
+            },
+          }),
+        },
+      ],
     });
 
-    // 2. Update thread's updatedAt
-    await ctx.db.patch(args.threadId, {
-      updatedAt: Date.now(),
-    });
-
-    return messageId;
+    return result.messages[0]?._id as string;
   },
 });
 
 export const list = query({
-  args: { threadId: v.id("threads") },
+  args: { threadId: v.string() },
   handler: async (ctx, args) => {
-    return await ctx.db
-      .query("messages")
-      .withIndex("by_threadId", (q) => q.eq("threadId", args.threadId))
-      .order("asc")
-      .collect();
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new ConvexError("Authentication required");
+    }
+
+    const thread = await ctx.runQuery(components.agent.threads.getThread, {
+      threadId: args.threadId,
+    });
+    if (!thread) {
+      throw new ConvexError("Thread not found");
+    }
+
+    if (thread.userId !== identity.subject) {
+      throw new ConvexError("Not authorized");
+    }
+
+    const result = await ctx.runQuery(components.agent.messages.listMessagesByThreadId, {
+      threadId: args.threadId,
+      paginationOpts: { numItems: 200, cursor: null },
+      order: "asc",
+    });
+
+    return result.page.map((msg: any) => ({
+      _id: msg._id as string,
+      _creationTime: msg._creationTime,
+      threadId: msg.threadId as string,
+      role: msg.message?.role ?? "assistant",
+      content: msg.message?.content ?? msg.text ?? "",
+      sources: msg.sources ? msg.sources.map(toAppSource) : undefined,
+      tokenCount: msg.usage
+        ? {
+            prompt: msg.usage.promptTokens,
+            completion: msg.usage.completionTokens,
+            total: msg.usage.totalTokens,
+          }
+        : undefined,
+      createdAt: msg._creationTime,
+    }));
   },
 });

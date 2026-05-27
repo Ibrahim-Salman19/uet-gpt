@@ -10,15 +10,26 @@ export default defineSchema({
     role: v.union(v.literal("user"), v.literal("admin"), v.literal("superadmin")),
     isActive: v.boolean(),
     lastLoginAt: v.optional(v.number()),
-    preferences: v.optional(v.object({})),
-    metadata: v.optional(v.any()),
+    preferences: v.optional(
+      v.object({
+        theme: v.optional(v.string()),
+        language: v.optional(v.string()),
+      }),
+    ),
+    metadata: v.optional(
+      v.object({
+        signupSource: v.optional(v.string()),
+        lastFeatureUsed: v.optional(v.string()),
+      }),
+    ),
   })
     .index("by_clerkId", ["clerkId"])
     .index("by_email", ["email"])
-    .index("by_role", ["role"]),
+    .index("by_role", ["role"])
+    .index("by_lastLoginAt", ["lastLoginAt"]),
 
   feedback: defineTable({
-    messageId: v.id("messages"),
+    messageId: v.string(),
     userId: v.id("users"),
     rating: v.union(v.literal("thumbsUp"), v.literal("thumbsDown")),
     comment: v.optional(v.string()),
@@ -35,7 +46,8 @@ export default defineSchema({
   })
     .index("by_messageId", ["messageId"])
     .index("by_userId", ["userId"])
-    .index("by_rating", ["rating"]),
+    .index("by_rating", ["rating"])
+    .index("by_createdAt", ["createdAt"]),
 
   crawlJobs: defineTable({
     trigger: v.union(v.literal("manual"), v.literal("scheduled"), v.literal("webhook")),
@@ -47,6 +59,7 @@ export default defineSchema({
       v.literal("failed"),
       v.literal("cancelled"),
     ),
+    providerJobId: v.optional(v.string()),
     config: v.object({
       maxPages: v.number(),
       maxDepth: v.number(),
@@ -78,8 +91,7 @@ export default defineSchema({
     response: v.string(),
     sources: v.array(
       v.object({
-        documentId: v.id("documents"),
-        chunkId: v.id("chunks"),
+        entryId: v.string(),
         url: v.string(),
         title: v.string(),
         relevanceScore: v.number(),
@@ -99,16 +111,38 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_expiresAt", ["expiresAt"])
-    .vectorIndex("by_queryEmbedding", { vectorField: "queryEmbedding", dimensions: 768 }),
+    .vectorIndex("by_queryEmbedding", { vectorField: "queryEmbedding", dimensions: 3072 }),
 
   adminAuditLog: defineTable({
     userId: v.id("users"),
-    action: v.string(),
+    action: v.union(
+      v.literal("user.login"),
+      v.literal("user.logout"),
+      v.literal("user.create"),
+      v.literal("thread.create"),
+      v.literal("thread.delete"),
+      v.literal("document.create"),
+      v.literal("document.delete"),
+      v.literal("crawl.start"),
+      v.literal("crawl.stop"),
+      v.literal("feedback.submit"),
+      v.literal("settings.update"),
+      v.literal("admin.access"),
+    ),
     target: v.optional(v.string()),
-    details: v.optional(v.any()),
+    details: v.optional(
+      v.object({
+        oldValue: v.optional(v.string()),
+        newValue: v.optional(v.string()),
+        reason: v.optional(v.string()),
+      }),
+    ),
     ipAddress: v.optional(v.string()),
     createdAt: v.number(),
-  }).index("by_createdAt", ["createdAt"]),
+  })
+    .index("by_createdAt", ["createdAt"])
+    .index("by_userId", ["userId"])
+    .index("by_action", ["action"]),
 
   notifications: defineTable({
     userId: v.id("users"),
@@ -130,53 +164,89 @@ export default defineSchema({
   documents: defineTable({
     url: v.string(),
     title: v.string(),
-    content: v.string(),
-    indexedAt: v.optional(v.number()),
-    metadata: v.optional(v.any()),
-  }),
-
-  chunks: defineTable({
-    documentId: v.id("documents"),
-    content: v.string(),
-    embedding: v.array(v.float64()),
-    chunkIndex: v.number(),
-    createdAt: v.number(),
-  })
-    .index("by_documentId", ["documentId"])
-    .vectorIndex("by_embedding", { vectorField: "embedding", dimensions: 768 })
-    .searchIndex("search_content", { searchField: "content" }),
-
-  threads: defineTable({
-    userId: v.id("users"),
-    title: v.string(),
-    isArchived: v.boolean(),
-    createdAt: v.number(),
-    updatedAt: v.number(),
-  }).index("by_userId", ["userId"]),
-
-  messages: defineTable({
-    threadId: v.id("threads"),
-    role: v.union(v.literal("user"), v.literal("assistant")),
-    content: v.string(),
-    sources: v.optional(
-      v.array(
-        v.object({
-          documentId: v.id("documents"),
-          chunkId: v.id("chunks"),
-          url: v.string(),
-          title: v.string(),
-          relevanceScore: v.number(),
-          excerpt: v.string(),
-        }),
-      ),
-    ),
-    tokenCount: v.optional(
+    entryId: v.optional(v.string()),
+    contentHash: v.optional(v.string()),
+    crawlSessionId: v.optional(v.string()),
+    source: v.string(),
+    category: v.string(),
+    subcategory: v.optional(v.string()),
+    metadata: v.optional(
       v.object({
-        prompt: v.number(),
-        completion: v.number(),
-        total: v.number(),
+        lastModified: v.optional(v.string()),
+        author: v.optional(v.string()),
+        wordCount: v.optional(v.number()),
+        language: v.optional(v.string()),
+        etag: v.optional(v.string()),
       }),
     ),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("processing"),
+      v.literal("indexed"),
+      v.literal("failed"),
+      v.literal("stale"),
+      v.literal("active"),
+      v.literal("pending_embed"),
+    ),
+    chunkCount: v.optional(v.number()),
+    crawledAt: v.number(),
+    updatedAt: v.number(),
+    error: v.optional(v.string()),
+    freshnessTier: v.optional(v.union(v.literal("high"), v.literal("medium"), v.literal("low"))),
+    isStale: v.optional(v.boolean()),
+  })
+    .index("by_url", ["url"])
+    .index("by_entryId", ["entryId"])
+    .index("by_category", ["category"])
+    .index("by_status", ["status"])
+    .index("by_crawledAt", ["crawledAt"])
+    .index("by_session", ["crawlSessionId"])
+    .index("by_tier_and_crawled", ["freshnessTier", "crawledAt"])
+    .searchIndex("search_title", { searchField: "title" }),
+
+  processedWebhooks: defineTable({
+    jobId: v.string(),
+    processedAt: v.number(),
+  }).index("by_jobId", ["jobId"]),
+
+  crawlDeadLetter: defineTable({
+    url: v.string(),
+    jobId: v.string(),
+    failureReason: v.string(),
+    failureCount: v.number(),
+    lastAttemptAt: v.number(),
+    payload: v.any(),
+    status: v.union(v.literal("pending_retry"), v.literal("abandoned")),
+  }).index("by_status", ["status"]),
+
+  crawledChunks: defineTable({
+    documentId: v.id("documents"),
+    contentHash: v.string(),
+    text: v.string(),
+    ragId: v.string(),
+  })
+    .index("by_documentId", ["documentId"])
+    .index("by_ragId", ["ragId"])
+    .searchIndex("search_text", { searchField: "text" }),
+
+  crawlStats: defineTable({
+    statsId: v.string(), // singleton e.g., 'global'
+    totalDocuments: v.number(),
+    indexedDocuments: v.number(),
+    processingDocuments: v.number(),
+    failedDocuments: v.number(),
+    pendingDocuments: v.number(),
+    lastUpdatedAt: v.number(),
+  }).index("by_statsId", ["statsId"]),
+
+  faqs: defineTable({
+    question: v.string(),
+    answer: v.string(),
+    sourceUrl: v.optional(v.string()),
     createdAt: v.number(),
-  }).index("by_threadId", ["threadId"]),
+  }).searchIndex("search_question", { searchField: "question" }),
+
+  // Note: `threads` and `messages` tables are managed by @convex-dev/agent component.
+  // Do not define them here to avoid table name conflicts with the component's internal tables.
+  // The `feedback.messageId` field uses v.string() to reference agent-managed message IDs.
 });

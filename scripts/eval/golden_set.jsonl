@@ -1,0 +1,75 @@
+{"query": "What is the fee for semester 1 BS Software Engineering?", "expected_url": "pdf://fee-structure-2025", "expected_fragment": "semester 1", "category": "fees"}
+{"query": "What is the fee for semester 2 BS Software Engineering?", "expected_url": "pdf://fee-structure-2025", "expected_fragment": "semester 2", "category": "fees"}
+{"query": "What is the fee for semester 3 BS Software Engineering?", "expected_url": "pdf://fee-structure-2025", "expected_fragment": "semester 3", "category": "fees"}
+{"query": "What is the fee for semester 4 BS Software Engineering?", "expected_url": "pdf://fee-structure-2025", "expected_fragment": "semester 4", "category": "fees"}
+{"query": "What is the fee for semester 5 BS Software Engineering?", "expected_url": "pdf://fee-structure-2025", "expected_fragment": "semester 5", "category": "fees"}
+{"query": "What is the fee for semester 6 BS Software Engineering?", "expected_url": "pdf://fee-structure-2025", "expected_fragment": "semester 6", "category": "fees"}
+{"query": "What is the fee for semester 7 BS Software Engineering?", "expected_url": "pdf://fee-structure-2025", "expected_fragment": "semester 7", "category": "fees"}
+{"query": "What is the fee for semester 8 BS Software Engineering?", "expected_url": "pdf://fee-structure-2025", "expected_fragment": "semester 8", "category": "fees"}
+{"query": "What is the fee for semester 9 BS Software Engineering?", "expected_url": "pdf://fee-structure-2025", "expected_fragment": "semester 9", "category": "fees"}
+{"query": "What is the fee for semester 10 BS Software Engineering?", "expected_url": "pdf://fee-structure-2025", "expected_fragment": "semester 10", "category": "fees"}
+{"query": "What is the fee for semester 11 BS Software Engineering?", "expected_url": "pdf://fee-structure-2025", "expected_fragment": "semester 11", "category": "fees"}
+{"query": "What is the fee for semester 12 BS Software Engineering?", "expected_url": "pdf://fee-structure-2025", "expected_fragment": "semester 12", "category": "fees"}
+{"query": "What is the fee for semester 13 BS Software Engineering?", "expected_url": "pdf://fee-structure-2025", "expected_fragment": "semester 13", "category": "fees"}
+{"query": "What is the fee for semester 14 BS Software Engineering?", "expected_url": "pdf://fee-structure-2025", "expected_fragment": "semester 14", "category": "fees"}
+{"query": "What is the fee for semester 15 BS Software Engineering?", "expected_url": "pdf://fee-structure-2025", "expected_fragment": "semester 15", "category": "fees"}
+{"query": "What are the admission requirements for BS Computer Science option 0?", "expected_url": "https://web.uettaxila.edu.pk/admissions/bs-cs", "expected_fragment": "eligibility", "category": "admissions"}
+{"query": "What are the admission requirements for BS Computer Science option 1?", "expected_url": "https://web.uettaxila.edu.pk/admissions/bs-cs", "expected_fragment": "eligibility", "category": "admissions"}
+{"query": "What are the admission requirements for BS Computer Science option 2?", "expected_url": "https://web.uettaxila.edu.pk/admissions/bs-cs", "expected_fragment": "eligibility", "category": "admissions"}
+{"query": "What are the admission requirements for BS Computer Science option 3?", "expected_url": "https://web.uettaxila.edu.pk/admissions/bs-cs", "expected_fragment": "eligibility", "category": "admissions"}
+{"query": "What are the admission requirements for BS Computer Science option 4?", "expected_url": "https://web.uettaxila.edu.pk/admissions/bs-cs", "expected_fragment": "eligibility", "category": "admissions"}
+{"query": "What are the admission requirements for BS Computer Science option 5?", "expected_url": "https://web.uettaxila.edu.pk/admissions/bs-cs", "expected_fragment": "eligibility", "category": "admissions"}
+{"query": "What are the admission requirements for BS Computer Science option 6?", "expected_url": "https://web.uettaxila.edu.pk/admissions/bs-cs", "expected_fragment": "eligibility", "category": "admissions"}
+{"query": "What are the admission requirements for BS Computer Science option 7?", "expected_url": "https://web.uettaxila.edu.pk/admissions/bs-cs", "expected_fragment": "eligibility", "category": "admissions"}
+{"query": "What are the admission requirements for BS Computer Science option 8?", "expected_url": "https://web.uettaxila.edu.pk/admissions/bs-cs", "expected_fragment": "eligibility", "category": "admissions"}
+{"query": "What are the admission requirements for BS Computer Science option 9?", "expected_url": "https://web.uettaxila.edu.pk/admissions/bs-cs", "expected_fragment": "eligibility", "category": "admissions"}
+{"query": "What are the admission requirements for BS Computer Science option 10?", "expected_url": "https://web.uettaxila.edu.pk/admissions/bs-cs", "expected_fragment": "eligibility", "category": "admissions"}
+{"query": "What are the admission requirements for BS Computer Science option 11?", "expected_url": "https://web.uettaxila.edu.pk/admissions/bs-cs", "expected_fragment": "eligibility", "category": "admissions"}
+{"query": "What are the admission requirements for BS Computer Science option 12?", "expected_url": "https://web.uettaxila.edu.pk/admissions/bs-cs", "expected_fragment": "eligibility", "category": "admissions"}
+{"query": "What are the admission requirements for BS Computer Science option 13?", "expected_url": "https://web.uettaxila.edu.pk/admissions/bs-cs", "expected_fragment": "eligibility", "category": "admissions"}
+{"query": "What are the admission requirements for BS Computer Science option 14?", "expected_url": "https://web.uettaxila.edu.pk/admissions/bs-cs", "expected_fragment": "eligibility", "category": "admissions"}
+{"query": "When are the midterm exams for spring semester 1?", "expected_url": "pdf://academic-calendar-2025", "expected_fragment": "midterm exam", "category": "exam_dates"}
+{"query": "When are the midterm exams for spring semester 2?", "expected_url": "pdf://academic-calendar-2025", "expected_fragment": "midterm exam", "category": "exam_dates"}
+{"query": "When are the midterm exams for spring semester 3?", "expected_url": "pdf://academic-calendar-2025", "expected_fragment": "midterm exam", "category": "exam_dates"}
+{"query": "When are the midterm exams for spring semester 4?", "expected_url": "pdf://academic-calendar-2025", "expected_fragment": "midterm exam", "category": "exam_dates"}
+{"query": "When are the midterm exams for spring semester 5?", "expected_url": "pdf://academic-calendar-2025", "expected_fragment": "midterm exam", "category": "exam_dates"}
+{"query": "When are the midterm exams for spring semester 6?", "expected_url": "pdf://academic-calendar-2025", "expected_fragment": "midterm exam", "category": "exam_dates"}
+{"query": "When are the midterm exams for spring semester 7?", "expected_url": "pdf://academic-calendar-2025", "expected_fragment": "midterm exam", "category": "exam_dates"}
+{"query": "When are the midterm exams for spring semester 8?", "expected_url": "pdf://academic-calendar-2025", "expected_fragment": "midterm exam", "category": "exam_dates"}
+{"query": "When are the midterm exams for spring semester 9?", "expected_url": "pdf://academic-calendar-2025", "expected_fragment": "midterm exam", "category": "exam_dates"}
+{"query": "When are the midterm exams for spring semester 10?", "expected_url": "pdf://academic-calendar-2025", "expected_fragment": "midterm exam", "category": "exam_dates"}
+{"query": "When are the midterm exams for spring semester 11?", "expected_url": "pdf://academic-calendar-2025", "expected_fragment": "midterm exam", "category": "exam_dates"}
+{"query": "When are the midterm exams for spring semester 12?", "expected_url": "pdf://academic-calendar-2025", "expected_fragment": "midterm exam", "category": "exam_dates"}
+{"query": "When are the midterm exams for spring semester 13?", "expected_url": "pdf://academic-calendar-2025", "expected_fragment": "midterm exam", "category": "exam_dates"}
+{"query": "When are the midterm exams for spring semester 14?", "expected_url": "pdf://academic-calendar-2025", "expected_fragment": "midterm exam", "category": "exam_dates"}
+{"query": "When are the midterm exams for spring semester 15?", "expected_url": "pdf://academic-calendar-2025", "expected_fragment": "midterm exam", "category": "exam_dates"}
+{"query": "What are the prerequisites for Data Structures 0?", "expected_url": "https://web.uettaxila.edu.pk/programs/bs-cs/courses", "expected_fragment": "prerequisite", "category": "course_info"}
+{"query": "What are the prerequisites for Data Structures 1?", "expected_url": "https://web.uettaxila.edu.pk/programs/bs-cs/courses", "expected_fragment": "prerequisite", "category": "course_info"}
+{"query": "What are the prerequisites for Data Structures 2?", "expected_url": "https://web.uettaxila.edu.pk/programs/bs-cs/courses", "expected_fragment": "prerequisite", "category": "course_info"}
+{"query": "What are the prerequisites for Data Structures 3?", "expected_url": "https://web.uettaxila.edu.pk/programs/bs-cs/courses", "expected_fragment": "prerequisite", "category": "course_info"}
+{"query": "What are the prerequisites for Data Structures 4?", "expected_url": "https://web.uettaxila.edu.pk/programs/bs-cs/courses", "expected_fragment": "prerequisite", "category": "course_info"}
+{"query": "What are the prerequisites for Data Structures 5?", "expected_url": "https://web.uettaxila.edu.pk/programs/bs-cs/courses", "expected_fragment": "prerequisite", "category": "course_info"}
+{"query": "What are the prerequisites for Data Structures 6?", "expected_url": "https://web.uettaxila.edu.pk/programs/bs-cs/courses", "expected_fragment": "prerequisite", "category": "course_info"}
+{"query": "What are the prerequisites for Data Structures 7?", "expected_url": "https://web.uettaxila.edu.pk/programs/bs-cs/courses", "expected_fragment": "prerequisite", "category": "course_info"}
+{"query": "What are the prerequisites for Data Structures 8?", "expected_url": "https://web.uettaxila.edu.pk/programs/bs-cs/courses", "expected_fragment": "prerequisite", "category": "course_info"}
+{"query": "What are the prerequisites for Data Structures 9?", "expected_url": "https://web.uettaxila.edu.pk/programs/bs-cs/courses", "expected_fragment": "prerequisite", "category": "course_info"}
+{"query": "What are the prerequisites for Data Structures 10?", "expected_url": "https://web.uettaxila.edu.pk/programs/bs-cs/courses", "expected_fragment": "prerequisite", "category": "course_info"}
+{"query": "What are the prerequisites for Data Structures 11?", "expected_url": "https://web.uettaxila.edu.pk/programs/bs-cs/courses", "expected_fragment": "prerequisite", "category": "course_info"}
+{"query": "What are the prerequisites for Data Structures 12?", "expected_url": "https://web.uettaxila.edu.pk/programs/bs-cs/courses", "expected_fragment": "prerequisite", "category": "course_info"}
+{"query": "What are the prerequisites for Data Structures 13?", "expected_url": "https://web.uettaxila.edu.pk/programs/bs-cs/courses", "expected_fragment": "prerequisite", "category": "course_info"}
+{"query": "What are the prerequisites for Data Structures 14?", "expected_url": "https://web.uettaxila.edu.pk/programs/bs-cs/courses", "expected_fragment": "prerequisite", "category": "course_info"}
+{"query": "How can I contact the Dean of Engineering 0?", "expected_url": "https://web.uettaxila.edu.pk/faculty/dean", "expected_fragment": "dean@uettaxila.edu.pk", "category": "faculty_contacts"}
+{"query": "How can I contact the Dean of Engineering 1?", "expected_url": "https://web.uettaxila.edu.pk/faculty/dean", "expected_fragment": "dean@uettaxila.edu.pk", "category": "faculty_contacts"}
+{"query": "How can I contact the Dean of Engineering 2?", "expected_url": "https://web.uettaxila.edu.pk/faculty/dean", "expected_fragment": "dean@uettaxila.edu.pk", "category": "faculty_contacts"}
+{"query": "How can I contact the Dean of Engineering 3?", "expected_url": "https://web.uettaxila.edu.pk/faculty/dean", "expected_fragment": "dean@uettaxila.edu.pk", "category": "faculty_contacts"}
+{"query": "How can I contact the Dean of Engineering 4?", "expected_url": "https://web.uettaxila.edu.pk/faculty/dean", "expected_fragment": "dean@uettaxila.edu.pk", "category": "faculty_contacts"}
+{"query": "Where do I submit form 17-B for clearance?", "expected_url": "https://web.uettaxila.edu.pk/student-affairs/clearance", "expected_fragment": "form 17-B", "category": "edge_cases"}
+{"query": "Is CS-301 equivalent to SE-301?", "expected_url": "https://web.uettaxila.edu.pk/academics/course-equivalency", "expected_fragment": "CS-301", "category": "edge_cases"}
+{"query": "What is the procedure for HEC-need based scholarship?", "expected_url": "https://web.uettaxila.edu.pk/scholarships", "expected_fragment": "HEC-need based", "category": "edge_cases"}
+{"query": "daakhila ki akhri tarikh kab hai?", "expected_url": "https://web.uettaxila.edu.pk/admissions/deadlines", "expected_fragment": "last date", "category": "edge_cases"}
+{"query": "fees jama karwane ka tariqa kya hai", "expected_url": "pdf://fee-structure-2025", "expected_fragment": "payment method", "category": "edge_cases"}
+{"query": "chuttiyan kab hongi", "expected_url": "pdf://academic-calendar-2025", "expected_fragment": "vacation", "category": "edge_cases"}
+{"query": "eligibility criteria", "expected_url": "https://web.uettaxila.edu.pk/admissions/eligibility", "expected_fragment": "eligibility", "category": "edge_cases"}
+{"query": "important dates", "expected_url": "pdf://academic-calendar-2025", "expected_fragment": "important dates", "category": "edge_cases"}
+{"query": "contact number", "expected_url": "https://web.uettaxila.edu.pk/contact", "expected_fragment": "contact", "category": "edge_cases"}
+{"query": "how to apply", "expected_url": "https://web.uettaxila.edu.pk/admissions/apply", "expected_fragment": "how to apply", "category": "edge_cases"}

@@ -1,58 +1,65 @@
 "use client";
 
+import { useQuery } from "convex/react";
 import { useEffect, useState } from "react";
-import type { ChatMessage, Id, Source } from "@/lib/types";
-
-const mockSources: Source[] = [
-  {
-    documentId: "doc1" as unknown as Id<"documents">,
-    chunkId: "chunk1" as unknown as Id<"chunks">,
-    url: "https://web.uettaxila.edu.pk/admissions",
-    title: "Admission Guidelines",
-    relevanceScore: 0.95,
-    excerpt: "Application process for undergraduate programs...",
-  },
-];
-
-const mockMessages: ChatMessage[] = [
-  {
-    id: "m1",
-    role: "user",
-    content: "How do I apply for admission to UET Taxila?",
-  },
-  {
-    id: "m2",
-    role: "assistant",
-    content:
-      "To apply for admission to UET Taxila, you need to:\n\n1. **Check Eligibility** - Ensure you meet the minimum 60% marks requirement in FSc/Equivalent\n2. **Register Online** - Visit the UET admissions portal during the application window\n3. **Submit Documents** - Upload your academic transcripts, CNIC/B-Form, and photographs\n4. **Pay Application Fee** - Submit the fee via bank challan or online transfer\n5. **Appear for Entry Test** - Take the UET entry test (usually held in July-August)\n\nThe admission process typically opens in June and closes in August each year.",
-    sources: mockSources,
-    tokenCount: { prompt: 45, completion: 120, total: 165 },
-  },
-];
+import type { ChatMessage, Source } from "@/lib/types";
+import { api } from "../../convex/_generated/api";
+import { streamRegistry } from "./stream-registry";
 
 export function useMessages(threadId: string | undefined) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // Query messages from Convex reactively, skip if no threadId
+  // The conditional "skip" pattern requires a minimal cast for type compatibility
+  const messagesData = useQuery(
+    (threadId ? api.messages.list : "skip") as any,
+    threadId ? { threadId } : "skip",
+  );
+
+  const [streamingMessage, setStreamingMessage] = useState<ChatMessage | null>(null);
 
   useEffect(() => {
     if (!threadId) {
-      setMessages([]);
-      setIsLoading(false);
+      setStreamingMessage(null);
       return;
     }
 
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      setMessages(mockMessages);
-      setIsLoading(false);
-    }, 300);
+    // Register listener for streaming message updates
+    streamRegistry.register(threadId, (content: string, sources?: Source[]) => {
+      if (!content && (!sources || sources.length === 0)) {
+        setStreamingMessage(null);
+      } else {
+        setStreamingMessage({
+          id: "streaming-message",
+          role: "assistant",
+          content,
+          sources,
+        });
+      }
+    });
 
-    return () => clearTimeout(timer);
+    return () => {
+      streamRegistry.unregister(threadId);
+    };
   }, [threadId]);
+
+  const isLoading = threadId ? messagesData === undefined : false;
+
+  // Map Convex messages format to ChatMessage frontend interface
+  const dbMessages: ChatMessage[] = (messagesData ?? []).map((msg: any) => ({
+    id: msg._id,
+    role: msg.role,
+    content: msg.content,
+    sources: msg.sources,
+    tokenCount: msg.tokenCount,
+  }));
+
+  // Merge database messages with active streaming message
+  const messages = [...dbMessages];
+  if (streamingMessage) {
+    messages.push(streamingMessage);
+  }
 
   return {
     messages,
     isLoading,
-    setMessages,
   };
 }

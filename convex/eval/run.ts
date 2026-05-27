@@ -6,6 +6,12 @@ export const run = action({
     datasetId: v.string(),
     metric: v.optional(v.string()),
   },
+  returns: v.object({
+    id: v.string(),
+    status: v.string(),
+    datasetId: v.string(),
+    metric: v.string(),
+  }),
   handler: async (_ctx, args) => {
     return {
       id: crypto.randomUUID(),

@@ -1,0 +1,34 @@
+import { v } from "convex/values";
+
+export const documentValidator = v.object({
+  _id: v.id("documents"),
+  _creationTime: v.number(),
+  url: v.string(),
+  title: v.string(),
+  entryId: v.optional(v.string()),
+  contentHash: v.optional(v.string()),
+  source: v.string(),
+  category: v.string(),
+  subcategory: v.optional(v.string()),
+  metadata: v.optional(
+    v.object({
+      lastModified: v.optional(v.string()),
+      author: v.optional(v.string()),
+      wordCount: v.optional(v.number()),
+      language: v.optional(v.string()),
+    }),
+  ),
+  status: v.union(
+    v.literal("pending"),
+    v.literal("processing"),
+    v.literal("indexed"),
+    v.literal("failed"),
+    v.literal("stale"),
+  ),
+  chunkCount: v.optional(v.number()),
+  crawledAt: v.number(),
+  updatedAt: v.number(),
+  error: v.optional(v.string()),
+});
+
+export type DocumentValidator = typeof documentValidator.type;

@@ -1,6 +1,8 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useMutation, useQuery } from "convex/react";
+import { useCallback } from "react";
+import { api } from "../../convex/_generated/api";
 
 interface ThreadItem {
   _id: string;
@@ -8,42 +10,59 @@ interface ThreadItem {
   _creationTime: number;
 }
 
-const initialThreads: ThreadItem[] = [
-  { _id: "1", title: "How do I apply for admission?", _creationTime: Date.now() - 3600000 },
-  {
-    _id: "2",
-    title: "What programs are offered at UET Taxila?",
-    _creationTime: Date.now() - 7200000,
-  },
-  { _id: "3", title: "Campus facilities and hostels", _creationTime: Date.now() - 10800000 },
-];
-
 export function useThreads() {
-  const [threads, setThreads] = useState<ThreadItem[]>(initialThreads);
-  const [isLoading, _setIsLoading] = useState(false);
+  const threadsData = useQuery(api.threads.list, {});
+  const createMutation = useMutation(api.threads.create);
+  // rename is not in generated api types, so we use a minimal cast
+  const renameMutation = useMutation((api.threads as any).rename);
+  const deleteMutation = useMutation(api.threads.remove);
 
-  const sortedThreads = [...threads].sort((a, b) => b._creationTime - a._creationTime);
+  const isLoading = threadsData === undefined;
+
+  // Map and sort the Convex threads
+  const threads: ThreadItem[] = (threadsData ?? [])
+    .map((t: any) => ({
+      _id: t._id,
+      title: t.title ?? "New Chat",
+      _creationTime: t._creationTime,
+    }))
+    .sort((a: any, b: any) => b._creationTime - a._creationTime);
 
   const handleCreate = useCallback(async () => {
     try {
-      const newId = crypto.randomUUID();
-      setThreads((prev) => [{ _id: newId, title: "New Chat", _creationTime: Date.now() }, ...prev]);
-      return newId;
-    } catch {
+      const threadId = await createMutation({ title: "New Chat" });
+      return threadId;
+    } catch (error) {
+      console.error("Failed to create thread:", error);
       return null;
     }
-  }, []);
+  }, [createMutation]);
 
-  const handleDelete = useCallback(async (threadId: string) => {
-    setThreads((prev) => prev.filter((t) => t._id !== threadId));
-  }, []);
+  const handleDelete = useCallback(
+    async (threadId: string) => {
+      try {
+        await deleteMutation({ id: threadId });
+      } catch (error) {
+        console.error("Failed to delete thread:", error);
+      }
+    },
+    [deleteMutation],
+  );
 
-  const handleRename = useCallback(async (threadId: string, title: string) => {
-    setThreads((prev) => prev.map((t) => (t._id === threadId ? { ...t, title } : t)));
-  }, []);
+  const handleRename = useCallback(
+    async (threadId: string, title: string) => {
+      if (!title.trim()) return;
+      try {
+        await renameMutation({ id: threadId, title });
+      } catch (error) {
+        console.error("Failed to rename thread:", error);
+      }
+    },
+    [renameMutation],
+  );
 
   return {
-    threads: sortedThreads,
+    threads,
     isLoading,
     createThread: handleCreate,
     deleteThread: handleDelete,

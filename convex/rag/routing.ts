@@ -8,8 +8,29 @@ const groq = createGroq({
   apiKey: process.env.GROQ_API_KEY || "",
 });
 
+const INTENT_ENUM = [
+  "admissions",
+  "academic",
+  "administrative",
+  "campus_life",
+  "general",
+  "off_topic",
+  "simple_fact",
+] as const;
+
+const intentValidator = v.union(
+  v.literal("admissions"),
+  v.literal("academic"),
+  v.literal("administrative"),
+  v.literal("campus_life"),
+  v.literal("general"),
+  v.literal("off_topic"),
+  v.literal("simple_fact"),
+);
+
 export const classifyQueryAction = action({
   args: { query: v.string() },
+  returns: intentValidator,
   handler: async (_ctx, args) => {
     if (!process.env.GROQ_API_KEY) {
       console.warn("GROQ_API_KEY missing, falling back to 'general' category");
@@ -21,20 +42,18 @@ export const classifyQueryAction = action({
         model: groq("llama-3.1-8b-instant"),
         schema: z.object({
           intent: z
-            .enum([
-              "admissions",
-              "academic",
-              "administrative",
-              "campus_life",
-              "general",
-              "off_topic",
-              "simple_fact",
-            ])
+            .enum([...INTENT_ENUM] as [string, ...string[]])
             .describe("The category of the user's query regarding UET Taxila."),
         }),
         prompt: `Classify the following user query about UET Taxila into one of the categories. Query: "${args.query}"`,
+        temperature: 0,
       });
-      return object.intent;
+
+      const intent = object.intent;
+      if (INTENT_ENUM.includes(intent as (typeof INTENT_ENUM)[number])) {
+        return intent as (typeof INTENT_ENUM)[number];
+      }
+      return "general";
     } catch (error) {
       console.error("Failed to classify query:", error);
       return "general";
@@ -44,6 +63,7 @@ export const classifyQueryAction = action({
 
 export const rewriteQueryAction = action({
   args: { query: v.string() },
+  returns: v.string(),
   handler: async (_ctx, args) => {
     if (!process.env.GROQ_API_KEY) return args.query;
 
@@ -53,8 +73,10 @@ export const rewriteQueryAction = action({
         system:
           "You are a search expert. Rewrite the user's query to be a concise keyword-rich search query. Expand abbreviations like 'UET' to 'University of Engineering and Technology'. Output ONLY the rewritten query, nothing else.",
         prompt: args.query,
+        temperature: 0.3,
+        maxOutputTokens: 100,
       });
-      return text.trim();
+      return text.trim() || args.query;
     } catch (error) {
       console.error("Failed to rewrite query:", error);
       return args.query;
@@ -64,6 +86,7 @@ export const rewriteQueryAction = action({
 
 export const hydeQueryAction = action({
   args: { query: v.string() },
+  returns: v.string(),
   handler: async (_ctx, args) => {
     if (!process.env.GROQ_API_KEY) return args.query;
 
@@ -73,8 +96,10 @@ export const hydeQueryAction = action({
         system:
           "You are an expert on UET Taxila. Write a hypothetical, 3-5 sentence factual paragraph that directly answers the user's query. Pretend you are writing an official website excerpt.",
         prompt: args.query,
+        temperature: 0.5,
+        maxOutputTokens: 200,
       });
-      return text.trim();
+      return text.trim() || args.query;
     } catch (error) {
       console.error("Failed to generate HyDE:", error);
       return args.query;

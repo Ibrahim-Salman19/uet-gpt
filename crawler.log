@@ -1,0 +1,495 @@
+05:48:26  INFO     ============================================================
+05:48:26  INFO     UET Taxila RAG Crawler — starting
+05:48:26  INFO     Max pages: 500  |  Max depth: 4  |  Concurrency: 5
+05:48:26  INFO     ============================================================
+05:48:26  INFO     Seeded 52 URLs. Starting 5 workers...
+05:48:35  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+05:48:35  INFO     [save] depth=0 words=  541 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=2
+05:48:35  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+05:48:35  INFO     [save] depth=0 words=  398 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=3
+05:48:35  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+05:48:35  INFO     [save] depth=0 words=  287 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=1
+05:48:35  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+05:48:35  INFO     [save] depth=0 words=  371 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=5
+05:48:35  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+05:48:35  INFO     [save] depth=0 words=  410 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=4
+05:48:39  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+05:48:39  INFO     [save] depth=0 words=  259 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=7
+05:48:39  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+05:48:39  INFO     [save] depth=0 words=  231 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=10
+05:48:39  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+05:48:39  INFO     [save] depth=0 words=  243 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=9
+05:48:39  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+05:48:39  INFO     [save] depth=0 words=  282 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=8
+05:48:39  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+05:48:39  INFO     [save] depth=0 words=  338 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=6
+05:48:42  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+05:48:42  INFO     [save] depth=0 words=  303 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=11
+05:48:42  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+05:48:42  INFO     [save] depth=0 words=  230 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=15
+05:48:42  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+05:48:42  INFO     [save] depth=0 words=  148 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=13
+05:48:42  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+05:48:42  INFO     [save] depth=0 words=  166 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=14
+05:48:42  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+05:48:42  INFO     [save] depth=0 words=  282 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=12
+05:48:43  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=20
+05:48:45  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=21
+05:48:45  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+05:48:45  INFO     [save] depth=0 words=  231 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=16
+05:48:45  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+05:48:45  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+05:48:45  INFO     [save] depth=0 words=  176 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=18
+05:48:45  INFO     [save] depth=0 words=  183 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=19
+05:48:45  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+05:48:45  INFO     [save] depth=0 words=  268 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=17
+05:48:45  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=22
+05:48:46  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=23
+05:48:46  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=24
+05:48:46  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=25
+18:57:47  INFO     ============================================================
+18:57:47  INFO     UET Taxila RAG Crawler — starting
+18:57:47  INFO     Max pages: 500  |  Max depth: 4  |  Concurrency: 5
+18:57:47  INFO     ============================================================
+18:57:47  INFO     Seeded 52 URLs. Starting 5 workers...
+18:57:57  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:57:57  INFO     [save] depth=0 words=  541 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=2
+18:57:58  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:57:58  INFO     [save] depth=0 words=  410 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=4
+18:57:58  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:57:58  INFO     [save] depth=0 words=  287 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=1
+18:57:58  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:57:58  INFO     [save] depth=0 words=  398 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=3
+18:58:02  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:02  INFO     [save] depth=0 words=  371 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=5
+18:58:02  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:02  INFO     [save] depth=0 words=  259 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=7
+18:58:02  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:02  INFO     [save] depth=0 words=  282 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=8
+18:58:02  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:02  INFO     [save] depth=0 words=  338 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=6
+18:58:05  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:05  INFO     [save] depth=0 words=  243 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=9
+18:58:05  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:05  INFO     [save] depth=0 words=  303 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=11
+18:58:05  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:05  INFO     [save] depth=0 words=  282 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=12
+18:58:06  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:06  INFO     [save] depth=0 words=  231 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=10
+18:58:09  WARNING  Error (attempt 1/3): https://web.uettaxila.edu.pk/CMS/AUT2012/etDeptIndex.aspx?id=2 — Failed to perform, curl: (28) Operation timed out after 20583 milliseconds with 0 bytes received. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+18:58:09  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:09  INFO     [save] depth=0 words=  231 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=16
+18:58:09  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:09  INFO     [save] depth=0 words=  166 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=14
+18:58:09  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:09  INFO     [save] depth=0 words=  148 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=13
+18:58:09  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:09  INFO     [save] depth=0 words=  230 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=15
+18:58:10  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=20
+18:58:12  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=21
+18:58:12  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:12  INFO     [save] depth=0 words=  183 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=19
+18:58:12  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:12  INFO     [save] depth=0 words=  268 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=17
+18:58:12  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:12  INFO     [save] depth=0 words=  176 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=18
+18:58:12  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=22
+18:58:13  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=23
+18:58:13  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=24
+18:58:13  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=25
+18:58:15  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:16  INFO     [save] depth=0 words=  282 | https://web.uettaxila.edu.pk/
+18:58:16  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:16  INFO     [save] depth=1 words=  162 | https://web.uettaxila.edu.pk/Alumni/Index
+18:58:16  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:16  INFO     [save] depth=1 words=  290 | https://web.uettaxila.edu.pk/Weather_Data
+18:58:16  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:16  INFO     [save] depth=1 words=  393 | https://web.uettaxila.edu.pk/ITservices
+18:58:19  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:20  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:20  INFO     [save] depth=1 words=  322 | https://web.uettaxila.edu.pk/AboutUs
+18:58:20  INFO     [save] depth=1 words=   87 | https://web.uettaxila.edu.pk/Mission_Vision
+18:58:20  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:20  INFO     [save] depth=1 words=  943 | https://web.uettaxila.edu.pk/Rules
+18:58:22  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:22  INFO     [save] depth=1 words= 1189 | https://web.uettaxila.edu.pk/Syndicate.aspx
+18:58:22  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:22  INFO     [save] depth=1 words=  390 | https://web.uettaxila.edu.pk/CodeofConduct
+18:58:24  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:24  INFO     [save] depth=1 words=  623 | https://web.uettaxila.edu.pk/AcademicCouncil.aspx
+18:58:24  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:24  INFO     [save] depth=1 words=  423 | https://web.uettaxila.edu.pk/SelectionBoard.aspx
+18:58:26  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:26  INFO     [save] depth=1 words=  307 | https://web.uettaxila.edu.pk/BoardofFaculties.aspx
+18:58:26  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:26  INFO     [save] depth=1 words=  410 | https://web.uettaxila.edu.pk/BoardofStudies.aspx
+18:58:27  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:27  INFO     [save] depth=1 words=  390 | https://web.uettaxila.edu.pk/MinutesofMeetings.aspx
+18:58:31  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:31  INFO     [save] depth=1 words=  425 | https://web.uettaxila.edu.pk/RegistrarOffice.aspx
+18:58:33  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:33  INFO     [save] depth=1 words=  407 | https://web.uettaxila.edu.pk/TreasurerOffice.aspx
+18:58:33  WARNING  Error (attempt 1/3): https://uettaxila.edu.pk/ — Failed to perform, curl: (28) Operation timed out after 20005 milliseconds with 0 bytes received. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+18:58:35  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:35  INFO     [save] depth=1 words=  390 | https://web.uettaxila.edu.pk/PDOffice.aspx
+18:58:35  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:35  INFO     [save] depth=1 words=  158 | https://web.uettaxila.edu.pk/UGprogram.aspx
+18:58:35  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:35  INFO     [save] depth=1 words=  398 | https://web.uettaxila.edu.pk/EstateOffice.aspx
+18:58:36  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:36  INFO     [save] depth=1 words=  101 | https://web.uettaxila.edu.pk/PGprogram.aspx
+18:58:40  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:40  INFO     [save] depth=1 words=  222 | https://web.uettaxila.edu.pk/Certifications.aspx
+18:58:40  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:40  INFO     [save] depth=0 words=  282 | https://uettaxila.edu.pk/
+18:58:40  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:40  INFO     [save] depth=1 words=  563 | https://web.uettaxila.edu.pk/MigrationRules.aspx
+18:58:40  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:40  INFO     [save] depth=1 words=  410 | https://web.uettaxila.edu.pk/PhDprogram.aspx
+18:58:43  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:43  INFO     [save] depth=1 words=  173 | https://web.uettaxila.edu.pk/AcademicHeads.aspx
+18:58:44  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:44  INFO     [save] depth=1 words=  101 | https://web.uettaxila.edu.pk/Departments.aspx
+18:58:44  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:44  INFO     [save] depth=1 words=  129 | https://web.uettaxila.edu.pk/Programs.aspx
+18:58:44  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:44  INFO     [save] depth=1 words=  390 | https://web.uettaxila.edu.pk/AcademicSchedule.aspx
+18:58:44  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:44  INFO     [save] depth=1 words=  176 | https://web.uettaxila.edu.pk/iat/index.asp
+18:58:45  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+18:58:45  INFO     [save] depth=1 words=  390 | https://web.uettaxila.edu.pk/Faculty/FBSH.aspx
+20:01:30  INFO     ============================================================
+20:01:30  INFO     UET Taxila RAG Crawler — starting
+20:01:30  INFO     Max pages: 500  |  Max depth: 4  |  Concurrency: 5
+20:01:30  INFO     ============================================================
+20:01:30  INFO     Seeded 52 URLs. Starting 5 workers...
+20:01:42  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:01:42  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:01:42  INFO     [save] depth=0 words=  541 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=2
+20:01:42  INFO     [save] depth=0 words=  410 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=4
+20:01:42  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:01:42  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:01:42  INFO     [save] depth=0 words=  398 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=3
+20:01:42  INFO     [save] depth=0 words=  287 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=1
+20:01:47  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:01:47  INFO     [save] depth=0 words=  282 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=8
+20:01:47  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:01:47  INFO     [save] depth=0 words=  338 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=6
+20:01:47  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:01:47  INFO     [save] depth=0 words=  371 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=5
+20:01:47  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:01:47  INFO     [save] depth=0 words=  259 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=7
+20:01:51  WARNING  Error (attempt 1/3): https://web.uettaxila.edu.pk/CMS/AUT2012/etDeptIndex.aspx?id=5 — Failed to perform, curl: (28) Operation timed out after 20004 milliseconds with 0 bytes received. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+20:01:51  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:01:51  INFO     [save] depth=0 words=  231 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=10
+20:01:51  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:01:51  INFO     [save] depth=0 words=  282 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=12
+20:01:51  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:01:51  INFO     [save] depth=0 words=  243 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=9
+20:01:51  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:01:51  INFO     [save] depth=0 words=  303 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=11
+20:01:55  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:01:55  INFO     [save] depth=0 words=  230 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=15
+20:01:55  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:01:55  INFO     [save] depth=0 words=  148 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=13
+20:01:55  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:01:55  INFO     [save] depth=0 words=  166 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=14
+20:01:55  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:01:56  INFO     [save] depth=0 words=  231 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=16
+20:01:57  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=20
+20:01:57  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:01:57  INFO     [save] depth=0 words=  268 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=17
+20:01:57  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:01:57  INFO     [save] depth=0 words=  176 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=18
+20:01:57  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=21
+20:01:58  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=22
+20:01:58  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=24
+20:01:58  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=23
+20:01:58  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:01:58  INFO     [save] depth=0 words=  183 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=19
+20:01:58  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=25
+20:02:03  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:02:03  INFO     [save] depth=1 words=  290 | https://web.uettaxila.edu.pk/Weather_Data
+20:02:03  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:02:03  INFO     [save] depth=1 words=  393 | https://web.uettaxila.edu.pk/ITservices
+20:02:03  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:02:03  INFO     [save] depth=0 words=  282 | https://uettaxila.edu.pk/
+20:02:03  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:02:03  INFO     [save] depth=1 words=  162 | https://web.uettaxila.edu.pk/Alumni/Index
+20:02:03  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:02:03  INFO     [save] depth=0 words=  282 | https://web.uettaxila.edu.pk/
+20:02:08  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:02:08  INFO     [save] depth=1 words=   87 | https://web.uettaxila.edu.pk/Mission_Vision
+20:02:08  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:02:08  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:02:08  INFO     [save] depth=1 words=  943 | https://web.uettaxila.edu.pk/Rules
+20:02:08  INFO     [save] depth=1 words=  390 | https://web.uettaxila.edu.pk/CodeofConduct
+20:02:08  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:02:08  INFO     [save] depth=1 words=  322 | https://web.uettaxila.edu.pk/AboutUs
+20:02:13  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:02:13  INFO     [save] depth=1 words=  423 | https://web.uettaxila.edu.pk/SelectionBoard.aspx
+20:02:13  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:02:13  INFO     [save] depth=1 words=  410 | https://web.uettaxila.edu.pk/BoardofStudies.aspx
+20:02:13  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:02:13  INFO     [save] depth=1 words=  623 | https://web.uettaxila.edu.pk/AcademicCouncil.aspx
+20:02:13  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:02:13  INFO     [save] depth=1 words= 1189 | https://web.uettaxila.edu.pk/Syndicate.aspx
+20:02:13  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:02:13  INFO     [save] depth=1 words=  307 | https://web.uettaxila.edu.pk/BoardofFaculties.aspx
+20:02:18  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:02:18  INFO     [save] depth=1 words=  390 | https://web.uettaxila.edu.pk/MinutesofMeetings.aspx
+20:02:18  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:02:18  INFO     [save] depth=1 words=  425 | https://web.uettaxila.edu.pk/RegistrarOffice.aspx
+20:02:20  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:02:20  INFO     [save] depth=1 words=  407 | https://web.uettaxila.edu.pk/TreasurerOffice.aspx
+20:02:25  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:02:25  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:02:25  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:02:25  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:02:26  INFO     [save] depth=1 words=  101 | https://web.uettaxila.edu.pk/PGprogram.aspx
+20:02:26  INFO     [save] depth=1 words=  390 | https://web.uettaxila.edu.pk/PDOffice.aspx
+20:02:26  INFO     [save] depth=1 words=  158 | https://web.uettaxila.edu.pk/UGprogram.aspx
+20:02:26  INFO     [save] depth=1 words=  398 | https://web.uettaxila.edu.pk/EstateOffice.aspx
+20:02:26  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:02:26  INFO     [save] depth=1 words=  410 | https://web.uettaxila.edu.pk/PhDprogram.aspx
+20:02:32  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:02:32  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:02:32  INFO     [save] depth=1 words=  101 | https://web.uettaxila.edu.pk/Departments.aspx
+20:02:32  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:02:32  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:02:32  INFO     [save] depth=1 words=  222 | https://web.uettaxila.edu.pk/Certifications.aspx
+20:02:32  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:02:32  INFO     [save] depth=1 words=  173 | https://web.uettaxila.edu.pk/AcademicHeads.aspx
+20:02:32  INFO     [save] depth=1 words=  563 | https://web.uettaxila.edu.pk/MigrationRules.aspx
+20:02:32  INFO     [save] depth=1 words=  129 | https://web.uettaxila.edu.pk/Programs.aspx
+20:22:14  INFO     ============================================================
+20:22:14  INFO     UET Taxila RAG Crawler — starting
+20:22:14  INFO     Max pages: 500  |  Max depth: 4  |  Concurrency: 5
+20:22:14  INFO     ============================================================
+20:22:14  INFO     Seeded 52 URLs. Starting 5 workers...
+20:22:25  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:25  INFO     [save] depth=0 words=  287 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=1
+20:22:25  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:25  INFO     [save] depth=0 words=  541 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=2
+20:22:25  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:25  INFO     [save] depth=0 words=  410 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=4
+20:22:25  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:25  INFO     [save] depth=0 words=  371 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=5
+20:22:25  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:25  INFO     [save] depth=0 words=  398 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=3
+20:22:31  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:31  INFO     [save] depth=0 words=  282 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=8
+20:22:31  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:31  INFO     [save] depth=0 words=  259 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=7
+20:22:31  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:31  INFO     [save] depth=0 words=  231 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=10
+20:22:31  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:31  INFO     [save] depth=0 words=  338 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=6
+20:22:31  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:31  INFO     [save] depth=0 words=  243 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=9
+20:22:36  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:36  INFO     [save] depth=0 words=  282 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=12
+20:22:36  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:36  INFO     [save] depth=0 words=  230 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=15
+20:22:36  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:36  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:36  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:36  INFO     [save] depth=0 words=  148 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=13
+20:22:36  INFO     [save] depth=0 words=  166 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=14
+20:22:36  INFO     [save] depth=0 words=  303 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=11
+20:22:37  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=20
+20:22:40  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=21
+20:22:40  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:40  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:40  INFO     [save] depth=0 words=  268 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=17
+20:22:40  INFO     [save] depth=0 words=  176 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=18
+20:22:40  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:40  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:40  INFO     [save] depth=0 words=  231 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=16
+20:22:40  INFO     [save] depth=0 words=  183 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=19
+20:22:41  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=22
+20:22:41  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=23
+20:22:41  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=24
+20:22:41  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=25
+20:22:43  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:43  INFO     [save] depth=0 words=  282 | https://web.uettaxila.edu.pk/
+20:22:47  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:47  INFO     [save] depth=1 words=  290 | https://web.uettaxila.edu.pk/Weather_Data
+20:22:47  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:47  INFO     [save] depth=0 words=  282 | https://uettaxila.edu.pk/
+20:22:47  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:47  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:47  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:47  INFO     [save] depth=1 words=  322 | https://web.uettaxila.edu.pk/AboutUs
+20:22:47  INFO     [save] depth=1 words=  162 | https://web.uettaxila.edu.pk/Alumni/Index
+20:22:47  INFO     [save] depth=1 words=  393 | https://web.uettaxila.edu.pk/ITservices
+20:22:52  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:52  INFO     [save] depth=1 words=  390 | https://web.uettaxila.edu.pk/CodeofConduct
+20:22:52  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:52  INFO     [save] depth=1 words=   87 | https://web.uettaxila.edu.pk/Mission_Vision
+20:22:52  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:52  INFO     [save] depth=1 words=  943 | https://web.uettaxila.edu.pk/Rules
+20:22:54  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:54  INFO     [save] depth=1 words=  623 | https://web.uettaxila.edu.pk/AcademicCouncil.aspx
+20:22:54  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:54  INFO     [save] depth=1 words= 1189 | https://web.uettaxila.edu.pk/Syndicate.aspx
+20:22:58  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:58  INFO     [save] depth=1 words=  423 | https://web.uettaxila.edu.pk/SelectionBoard.aspx
+20:22:58  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:58  INFO     [save] depth=1 words=  410 | https://web.uettaxila.edu.pk/BoardofStudies.aspx
+20:22:58  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:58  INFO     [save] depth=1 words=  307 | https://web.uettaxila.edu.pk/BoardofFaculties.aspx
+20:22:59  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:22:59  INFO     [save] depth=1 words=  390 | https://web.uettaxila.edu.pk/MinutesofMeetings.aspx
+20:23:04  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:23:04  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:23:04  INFO     [save] depth=1 words=  407 | https://web.uettaxila.edu.pk/TreasurerOffice.aspx
+20:23:04  INFO     [save] depth=1 words=  425 | https://web.uettaxila.edu.pk/RegistrarOffice.aspx
+20:23:05  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:23:05  INFO     [save] depth=1 words=  390 | https://web.uettaxila.edu.pk/PDOffice.aspx
+20:23:09  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:23:09  INFO     [save] depth=1 words=  410 | https://web.uettaxila.edu.pk/PhDprogram.aspx
+20:23:09  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:23:09  INFO     [save] depth=1 words=  398 | https://web.uettaxila.edu.pk/EstateOffice.aspx
+20:23:09  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:23:09  INFO     [save] depth=1 words=  101 | https://web.uettaxila.edu.pk/PGprogram.aspx
+20:23:09  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:23:09  INFO     [save] depth=1 words=  158 | https://web.uettaxila.edu.pk/UGprogram.aspx
+20:23:11  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:23:11  INFO     [save] depth=1 words=  222 | https://web.uettaxila.edu.pk/Certifications.aspx
+20:23:15  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:23:15  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:23:15  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:23:15  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:23:15  INFO     [save] depth=1 words=  563 | https://web.uettaxila.edu.pk/MigrationRules.aspx
+20:23:15  INFO     [save] depth=1 words=  101 | https://web.uettaxila.edu.pk/Departments.aspx
+20:23:15  INFO     [save] depth=1 words=  173 | https://web.uettaxila.edu.pk/AcademicHeads.aspx
+20:23:15  INFO     [save] depth=1 words=  129 | https://web.uettaxila.edu.pk/Programs.aspx
+20:23:16  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:23:16  INFO     [save] depth=1 words=  176 | https://web.uettaxila.edu.pk/iat/index.asp
+20:23:18  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:23:18  INFO     [save] depth=1 words=  390 | https://web.uettaxila.edu.pk/AcademicSchedule.aspx
+20:29:58  INFO     ============================================================
+20:29:58  INFO     UET Taxila RAG Crawler — starting
+20:29:58  INFO     Max pages: 500  |  Max depth: 4  |  Concurrency: 5
+20:29:58  INFO     ============================================================
+20:29:58  INFO     Seeded 52 URLs. Starting 5 workers...
+20:30:10  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:10  INFO     [save] depth=0 words=  398 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=3
+20:30:10  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:10  INFO     [save] depth=0 words=  541 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=2
+20:30:10  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:10  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:10  INFO     [save] depth=0 words=  371 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=5
+20:30:10  INFO     [save] depth=0 words=  287 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=1
+20:30:10  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:10  INFO     [save] depth=0 words=  410 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=4
+20:30:16  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:16  INFO     [save] depth=0 words=  243 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=9
+20:30:16  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:16  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:16  INFO     [save] depth=0 words=  282 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=8
+20:30:16  INFO     [save] depth=0 words=  259 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=7
+20:30:16  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:16  INFO     [save] depth=0 words=  338 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=6
+20:30:16  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:16  INFO     [save] depth=0 words=  231 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=10
+20:30:21  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:21  INFO     [save] depth=0 words=  166 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=14
+20:30:21  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:21  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:21  INFO     [save] depth=0 words=  148 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=13
+20:30:21  INFO     [save] depth=0 words=  282 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=12
+20:30:21  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:21  INFO     [save] depth=0 words=  303 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=11
+20:30:21  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:21  INFO     [save] depth=0 words=  230 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=15
+20:30:22  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=20
+20:30:25  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=21
+20:30:25  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:25  INFO     [save] depth=0 words=  231 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=16
+20:30:25  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:25  INFO     [save] depth=0 words=  183 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=19
+20:30:25  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:25  INFO     [save] depth=0 words=  268 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=17
+20:30:25  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:25  INFO     [save] depth=0 words=  176 | https://web.uettaxila.edu.pk/departmentfaculty?departmentId=18
+20:30:26  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=22
+20:30:26  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=23
+20:30:26  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=25
+20:30:26  WARNING  HTTP 500 on https://web.uettaxila.edu.pk/departmentfaculty?departmentId=24
+20:30:28  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:28  INFO     [save] depth=0 words=  282 | https://web.uettaxila.edu.pk/
+20:30:32  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:32  INFO     [save] depth=1 words=  162 | https://web.uettaxila.edu.pk/Alumni/Index
+20:30:32  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:32  INFO     [save] depth=1 words=  322 | https://web.uettaxila.edu.pk/AboutUs
+20:30:32  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:32  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:32  INFO     [save] depth=1 words=  393 | https://web.uettaxila.edu.pk/ITservices
+20:30:32  INFO     [save] depth=1 words=  290 | https://web.uettaxila.edu.pk/Weather_Data
+20:30:32  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:32  INFO     [save] depth=0 words=  282 | https://uettaxila.edu.pk/
+20:30:36  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:36  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:36  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:36  INFO     [save] depth=1 words=  390 | https://web.uettaxila.edu.pk/CodeofConduct
+20:30:36  INFO     [save] depth=1 words=  943 | https://web.uettaxila.edu.pk/Rules
+20:30:36  INFO     [save] depth=1 words=   87 | https://web.uettaxila.edu.pk/Mission_Vision
+20:30:38  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:38  INFO     [save] depth=1 words= 1189 | https://web.uettaxila.edu.pk/Syndicate.aspx
+20:30:38  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:38  INFO     [save] depth=1 words=  623 | https://web.uettaxila.edu.pk/AcademicCouncil.aspx
+20:30:41  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:41  INFO     [save] depth=1 words=  423 | https://web.uettaxila.edu.pk/SelectionBoard.aspx
+20:30:41  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:41  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:41  INFO     [save] depth=1 words=  410 | https://web.uettaxila.edu.pk/BoardofStudies.aspx
+20:30:41  INFO     [save] depth=1 words=  307 | https://web.uettaxila.edu.pk/BoardofFaculties.aspx
+20:30:43  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:43  INFO     [save] depth=1 words=  390 | https://web.uettaxila.edu.pk/MinutesofMeetings.aspx
+20:30:45  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:45  INFO     [save] depth=1 words=  407 | https://web.uettaxila.edu.pk/TreasurerOffice.aspx
+20:30:45  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:45  INFO     [save] depth=1 words=  425 | https://web.uettaxila.edu.pk/RegistrarOffice.aspx
+20:30:47  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:47  INFO     [save] depth=1 words=  390 | https://web.uettaxila.edu.pk/PDOffice.aspx
+20:30:50  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:50  INFO     [save] depth=1 words=  410 | https://web.uettaxila.edu.pk/PhDprogram.aspx
+20:30:50  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:50  INFO     [save] depth=1 words=  158 | https://web.uettaxila.edu.pk/UGprogram.aspx
+20:30:50  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:50  INFO     [save] depth=1 words=  101 | https://web.uettaxila.edu.pk/PGprogram.aspx
+20:30:50  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:50  INFO     [save] depth=1 words=  398 | https://web.uettaxila.edu.pk/EstateOffice.aspx
+20:30:51  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:51  INFO     [save] depth=1 words=  222 | https://web.uettaxila.edu.pk/Certifications.aspx
+20:30:54  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:54  INFO     [save] depth=1 words=  129 | https://web.uettaxila.edu.pk/Programs.aspx
+20:30:55  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:55  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:55  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:55  INFO     [save] depth=1 words=  173 | https://web.uettaxila.edu.pk/AcademicHeads.aspx
+20:30:55  INFO     [save] depth=1 words=  563 | https://web.uettaxila.edu.pk/MigrationRules.aspx
+20:30:55  INFO     [save] depth=1 words=  101 | https://web.uettaxila.edu.pk/Departments.aspx
+20:30:55  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:55  INFO     [save] depth=1 words=  176 | https://web.uettaxila.edu.pk/iat/index.asp
+20:30:58  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:58  INFO     [save] depth=1 words=  390 | https://web.uettaxila.edu.pk/Faculty/FBSH.aspx
+20:30:58  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:58  INFO     [save] depth=1 words=  390 | https://web.uettaxila.edu.pk/AcademicSchedule.aspx
+20:30:58  INFO     HTTP Request: POST https://adamant-sandpiper-391.convex.site/api/webhook/crawl "HTTP/1.1 200 OK"
+20:30:58  INFO     [save] depth=1 words=  390 | https://web.uettaxila.edu.pk/Faculty/FCEE.aspx
+00:14:25  INFO     ============================================================
+00:14:25  INFO     UET Taxila RAG Crawler — Unified Reliable Edition
+00:14:25  INFO     ============================================================
+00:14:27  ERROR    [fail] https://web.uettaxila.edu.pk/CMS/AUT2012/etDeptIndex.aspx?id=1 — 404 Not Found
+00:14:27  ERROR    [fail] https://web.uettaxila.edu.pk/CMS/AUT2012/etDeptIndex.aspx?id=5 — 404 Not Found
+00:14:27  ERROR    [fail] https://web.uettaxila.edu.pk/CMS/AUT2012/etDeptIndex.aspx?id=3 — 404 Not Found
+00:14:27  ERROR    [fail] https://web.uettaxila.edu.pk/CMS/AUT2012/etDeptIndex.aspx?id=2 — 404 Not Found
+00:14:27  ERROR    [fail] https://web.uettaxila.edu.pk/CMS/AUT2012/etDeptIndex.aspx?id=4 — 404 Not Found
+00:14:27  ERROR    [fail] https://web.uettaxila.edu.pk/CMS/AUT2012/etDeptIndex.aspx?id=6 — 404 Not Found
+00:14:28  ERROR    [fail] https://web.uettaxila.edu.pk/CMS/AUT2012/etDeptIndex.aspx?id=7 — 404 Not Found
+00:14:28  INFO     ============================================================
+00:14:28  INFO     CRAWL COMPLETE  |  Elap 0m02s | Fetch 7 | Save 0 | Skip 0 | Fail 7 | DLQ 0
+00:14:28  INFO     ============================================================

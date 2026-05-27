@@ -64,7 +64,7 @@ function RadioOption<T extends string>({
       type="button"
       onClick={() => onChange(value)}
       className={cn(
-        "flex w-full items-center gap-3 rounded-[var(--radius-md)] border px-4 py-3 text-left transition-all duration-[var(--duration-fast)]",
+        "flex w-full items-center gap-3 rounded-[var(--radius-md)] border px-4 py-3 text-left transition-[border-color,background-color] duration-[var(--duration-fast)]",
         selected === value
           ? "border-[var(--accent)] bg-[var(--accent-muted)]/20"
           : "border-[var(--border)] bg-[var(--surface-card)] hover:border-[var(--accent-muted)]",

@@ -1,7 +1,8 @@
 "use client";
 
-import { ClerkProvider, useAuth } from "@clerk/nextjs";
-import { ConvexReactClient } from "convex/react";
+import { ClerkProvider, useAuth, useUser } from "@clerk/nextjs";
+import { api } from "convex/_generated/api";
+import { ConvexReactClient, useMutation } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import * as React from "react";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -12,6 +13,25 @@ const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
 
 interface ProvidersProps {
   children: React.ReactNode;
+}
+
+function UserSync() {
+  const { user, isLoaded, isSignedIn } = useUser();
+  const createUser = useMutation(api.users.getOrCreate);
+
+  React.useEffect(() => {
+    if (!isLoaded || !isSignedIn || !user) return;
+
+    const primary = user.primaryEmailAddress;
+    createUser({
+      clerkId: user.id,
+      name: user.fullName || user.username || "Unknown",
+      email: primary?.emailAddress ?? "",
+      imageUrl: user.imageUrl || undefined,
+    }).catch((err) => console.error("Failed to sync user:", err));
+  }, [isLoaded, isSignedIn, user, createUser]);
+
+  return null;
 }
 
 export function Providers({ children }: ProvidersProps) {
@@ -54,7 +74,10 @@ export function Providers({ children }: ProvidersProps) {
       }}
     >
       <ConvexProviderWithClerk client={convexClient} useAuth={useAuth}>
-        <ThemeProvider>{content}</ThemeProvider>
+        <ThemeProvider>
+          <UserSync />
+          {content}
+        </ThemeProvider>
       </ConvexProviderWithClerk>
     </ClerkProvider>
   );

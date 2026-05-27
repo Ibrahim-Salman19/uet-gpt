@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 interface ChatMessagesProps {
   messages: ChatMessage[];
   isLoading?: boolean;
-  isSending?: boolean;
+  isAwaitingReply?: boolean;
   error?: string | null;
   onRetry?: () => void;
   onSuggestionSelect?: (suggestion: string) => void;
@@ -41,7 +41,7 @@ function ErrorBanner({ error, onRetry }: { error: string; onRetry?: () => void }
 export function ChatMessages({
   messages,
   isLoading,
-  isSending,
+  isAwaitingReply,
   error,
   onRetry,
   onSuggestionSelect,
@@ -49,20 +49,32 @@ export function ChatMessages({
   className,
 }: ChatMessagesProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const prevLengthRef = useRef(messages.length);
 
   useEffect(() => {
-    if (scrollRef.current) {
+    if (scrollRef.current && messages.length > prevLengthRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, []);
+    prevLengthRef.current = messages.length;
+  }, [messages.length]);
 
-  if (messages.length === 0 && !isLoading && !isSending && !error) {
+  useEffect(() => {
+    if (scrollRef.current && messages.length > 0) {
+      const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+      if (isNearBottom) {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      }
+    }
+  }, [messages.length]);
+
+  if (messages.length === 0 && !isLoading && !isAwaitingReply && !error) {
     return (
       <EmptyState suggestions={suggestions} onSuggestionSelect={(s) => onSuggestionSelect?.(s)} />
     );
   }
 
-  if (isLoading && messages.length === 0) {
+  if ((isLoading || isAwaitingReply) && messages.length === 0) {
     return <LoadingState className={className} />;
   }
 
@@ -80,7 +92,7 @@ export function ChatMessages({
 
         {error && <ErrorBanner error={error} onRetry={onRetry} />}
 
-        {isSending && (
+        {isAwaitingReply && (
           <div className="flex items-start gap-3 px-4 py-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--primary-muted)]">
               <span className="text-xs font-semibold text-[var(--primary)]">AI</span>

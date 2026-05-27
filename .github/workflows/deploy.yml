@@ -3,49 +3,109 @@ name: Deploy
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Deployment environment"
+        default: "production"
+        type: choice
+        options:
+          - production
+          - preview
 
 concurrency:
   group: deploy-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
+
+env:
+  PNPM_VERSION: "10"
 
 jobs:
-  deploy:
+  deploy-convex:
+    name: Deploy Convex Backend
     runs-on: ubuntu-latest
-
+    environment: ${{ inputs.environment || 'production' }}
     steps:
       - uses: actions/checkout@v4
-
       - uses: pnpm/action-setup@v4
         with:
-          version: latest
-
+          version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
-
-      - run: pnpm run build
-        env:
-          NEXT_PUBLIC_CONVEX_URL: ${{ vars.NEXT_PUBLIC_CONVEX_URL }}
-          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
-          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
-          CLERK_SIGNING_SECRET: ${{ secrets.CLERK_SIGNING_SECRET }}
-          CLERK_JWT_ISSUER: ${{ secrets.CLERK_JWT_ISSUER }}
-
+          node-version: "22"
+      - name: Get pnpm store directory
+        id: pnpm-store
+        run: echo "store=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.store }}
+          key: pnpm-store-${{ hashFiles('uet-gpt/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-
+      - name: Install dependencies
+        working-directory: uet-gpt
+        run: pnpm install --frozen-lockfile
       - name: Deploy Convex
-        run: pnpm run convex:deploy
+        working-directory: uet-gpt
+        run: npx convex@latest deploy
         env:
           CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOYMENT }}
-          NEXT_PUBLIC_CONVEX_URL: ${{ vars.NEXT_PUBLIC_CONVEX_URL }}
+          CLERK_JWT_ISSUER: ${{ secrets.CLERK_JWT_ISSUER }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
+  build-and-deploy:
+    name: Build & Deploy Frontend
+    runs-on: ubuntu-latest
+    needs: [deploy-convex]
+    environment: ${{ inputs.environment || 'production' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Get pnpm store directory
+        id: pnpm-store
+        run: echo "store=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.store }}
+          key: pnpm-store-${{ hashFiles('uet-gpt/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-
+      - name: Install dependencies
+        working-directory: uet-gpt
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Convex types
+        working-directory: uet-gpt
+        run: npx convex@latest codegen
+        env:
+          CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOYMENT }}
+
+      - name: Build Next.js
+        working-directory: uet-gpt
+        run: pnpm build
+        env:
+          CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOYMENT }}
+          NEXT_PUBLIC_CONVEX_URL: ${{ secrets.NEXT_PUBLIC_CONVEX_URL }}
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
           CLERK_JWT_ISSUER: ${{ secrets.CLERK_JWT_ISSUER }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
 
       - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
+        uses: vercel/actions/deploy@v2
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: --prod
+          vercel-args: ${{ inputs.environment == 'preview' && '--preview' || '--prod' }}
+          working-directory: uet-gpt

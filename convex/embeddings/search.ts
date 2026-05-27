@@ -1,131 +1,187 @@
 import { v } from "convex/values";
-import { internal } from "../_generated/api";
-import type { Id } from "../_generated/dataModel";
-import { action, internalQuery } from "../_generated/server";
+import { api, internal } from "../_generated/api";
+import { action } from "../_generated/server";
+import { rag } from "../rag/instance";
 
-const K = 60;
+function reciprocalRankFusion(
+  vectorResults: Array<{ id: string; score: number }>,
+  textResults: Array<{ id: string; score: number }>,
+  k = 10,
+  weights = { vector: 1.0, text: 1.0 }
+): Array<{ id: string; score: number }> {
+  const scores = new Map<string, number>();
 
-interface ChunkData {
-  _id: Id<"chunks">;
-  content: string;
-  documentId: Id<"documents">;
-  chunkIndex: number;
+  vectorResults.forEach((res, rank) => {
+    scores.set(res.id, (scores.get(res.id) ?? 0) + weights.vector / (k + rank + 1));
+  });
+
+  textResults.forEach((res, rank) => {
+    scores.set(res.id, (scores.get(res.id) ?? 0) + weights.text / (k + rank + 1));
+  });
+
+  return Array.from(scores.entries())
+    .map(([id, score]) => ({ id, score }))
+    .sort((a, b) => b.score - a.score);
 }
 
-interface DocData {
-  _id: Id<"documents">;
-  url: string;
-  title: string;
+async function generateHyDE(query: string): Promise<string | null> {
+  const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+  // Only enhance short, vague queries (< 15 words)
+  if (!apiKey || query.split(/\s+/).length >= 15) return null;
+
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent?key=${apiKey}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: `Generate a hypothetical 2-sentence factual answer to this query from a student at UET Taxila, to help retrieve relevant documents from a database. Output only the hypothetical answer: "${query}"` }] }]
+      })
+    });
+    if (!res.ok) return null;
+    const data = await res.json() as any;
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    return text ? `${query}\n\n${text.trim()}` : null;
+  } catch (err) {
+    console.error("HyDE generation failed", err);
+    return null;
+  }
 }
 
-interface FusedResult {
-  chunkId: Id<"chunks">;
-  score: number;
-}
-
-interface EnrichedChunk {
-  _id: Id<"chunks">;
-  content: string;
-  documentId: Id<"documents">;
-  url: string;
-  title: string;
-  chunkIndex: number;
-}
-
-export const fullTextSearchQuery = internalQuery({
-  args: { queryText: v.string(), limit: v.number() },
-  handler: async (ctx, args) => {
-    const results = await ctx.db
-      .query("chunks")
-      .withSearchIndex("search_content", (q) => q.search("content", args.queryText))
-      .take(args.limit);
-
-    return results.map((r) => ({
-      _id: r._id,
-    }));
-  },
-});
+const getDocumentRef = internal.embeddings.doc_queries.getDocumentByEntryId;
 
 export const searchDocumentsAction = action({
   args: {
     queryText: v.string(),
-    queryEmbedding: v.array(v.float64()),
+    queryEmbedding: v.optional(v.array(v.float64())),
     limit: v.optional(v.number()),
+    category: v.optional(v.string()),
   },
-  handler: async (ctx, args) => {
-    const limit = args.limit ?? 10;
+  returns: v.array(
+    v.object({
+      entryId: v.string(),
+      content: v.string(),
+      url: v.string(),
+      title: v.string(),
+      relevanceScore: v.number(),
+    }),
+  ),
+  handler: async (ctx, args): Promise<Array<{ entryId: string; content: string; url: string; title: string; relevanceScore: number }>> => {
+    const limit = args.limit ?? 8; // Default to 8
 
-    const vectorResults = await ctx.vectorSearch("chunks", "by_embedding", {
-      vector: args.queryEmbedding,
-      limit: limit * 2,
-    });
+    let finalQueryText = args.queryText;
+    if (!args.queryEmbedding && typeof args.queryText === "string") {
+      const hydeEnhanced = await generateHyDE(args.queryText);
+      if (hydeEnhanced) {
+        finalQueryText = hydeEnhanced;
+      }
+    }
 
-    const textResults = (await ctx.runQuery(internal.embeddings.search.fullTextSearchQuery, {
-      queryText: args.queryText,
-      limit: limit * 2,
-    })) as { _id: Id<"chunks"> }[];
-
-    const rrfScores = new Map<string, number>();
-
-    const addScore = (id: string, rank: number) => {
-      const currentScore = rrfScores.get(id) ?? 0;
-      rrfScores.set(id, currentScore + 1 / (K + rank));
+    const searchArgs: {
+      namespace: string;
+      query: string | Array<number>;
+      limit: number;
+      chunkContext?: { before: number; after: number };
+      filters?: Array<{ name: string; value: string }>;
+    } = {
+      namespace: "uet-global",
+      query: args.queryEmbedding ?? args.queryText,
+      limit: 20, // Fetch more for fusion
+      chunkContext: { before: 2, after: 1 },
     };
 
-    vectorResults.forEach((res) => {
-      addScore(res._id, vectorResults.indexOf(res) + 1);
+    if (args.category) {
+      searchArgs.filters = [{ name: "category", value: args.category }];
+    }
+
+    const vectorSearchP = rag.search(ctx, searchArgs);
+    const textSearchP = ctx.runQuery(internal.crawl.queries.fullTextSearch, {
+      query: finalQueryText,
+      limit: 20,
     });
 
-    textResults.forEach((res) => {
-      addScore(res._id, textResults.indexOf(res) + 1);
-    });
+    const [vectorRes, textResRaw] = await Promise.all([vectorSearchP, textSearchP]);
+    const textRes = textResRaw as Array<{ ragId: string; text: string; url: string; score: number }>;
 
-    const fusedResults: FusedResult[] = Array.from(rrfScores.entries())
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, limit)
-      .map(([id, score]) => ({
-        chunkId: id as Id<"chunks">,
-        score,
-      }));
+    const fused = reciprocalRankFusion(
+      vectorRes.results.map((r: any) => ({ id: r.entryId, score: r.score ?? 0 })),
+      textRes.map((r: any) => ({ id: r.ragId, score: r.score })),
+      10,
+      { vector: 1.0, text: 1.0 }
+    ).slice(0, limit);
 
-    const enrichedResults = (await ctx.runQuery(internal.embeddings.search.fetchEnrichedChunks, {
-      chunkIds: fusedResults.map((r) => r.chunkId),
-    })) as EnrichedChunk[];
-
-    return enrichedResults
-      .map((chunk) => {
-        const rankData = fusedResults.find((f) => f.chunkId === chunk._id);
-        return {
-          ...chunk,
-          relevanceScore: rankData?.score ?? 0,
-        };
-      })
-      .sort((a, b) => b.relevanceScore - a.relevanceScore);
-  },
-});
-
-export const fetchEnrichedChunks = internalQuery({
-  args: { chunkIds: v.array(v.id("chunks")) },
-  handler: async (ctx, args) => {
-    const chunks = await Promise.all(args.chunkIds.map((id) => ctx.db.get(id)));
-    const validChunks = chunks.filter((c): c is NonNullable<typeof c> => c !== null);
-
-    const enriched: EnrichedChunk[] = await Promise.all(
-      validChunks.map(async (chunk) => {
-        const chunkData = chunk as unknown as ChunkData;
-        const doc = await ctx.db.get(chunkData.documentId);
-        const docData = doc as unknown as DocData;
-        return {
-          _id: chunkData._id,
-          content: chunkData.content,
-          documentId: docData._id,
-          url: docData.url,
-          title: docData.title,
-          chunkIndex: chunkData.chunkIndex,
-        };
+    // Batch-fetch document metadata
+    const docLookups = await Promise.all(
+      fused.map(async (item: any) => {
+        const doc = await ctx.runQuery(getDocumentRef, {
+          entryId: item.id,
+        });
+        return { entryId: item.id, doc };
       }),
     );
 
-    return enriched;
+    const docMap = new Map<string, { url: string; title: string; crawledAt: number; freshnessTier: string }>();
+    for (const { entryId, doc } of docLookups) {
+      if (doc) {
+        docMap.set(entryId, { url: doc.url, title: doc.title, crawledAt: doc.crawledAt, freshnessTier: doc.freshnessTier ?? "medium" });
+      }
+    }
+
+    const enrichedResults = fused.map((item: any) => {
+      const docMeta = docMap.get(item.id);
+      let content = "";
+      
+      const vecMatch = vectorRes.results.find((r: any) => r.entryId === item.id);
+      const textMatch = textRes.find((r: any) => r.ragId === item.id);
+      
+      if (vecMatch) {
+        content = vecMatch.content.map((c: any) => c.text).join("\n");
+      } else if (textMatch) {
+        content = textMatch.text;
+      }
+
+      let score = item.score;
+      if (docMeta) {
+        const daysSinceCrawled = (Date.now() - docMeta.crawledAt) / (1000 * 60 * 60 * 24);
+        let lambda = 0.0077; // medium
+        if (docMeta.freshnessTier === "high") lambda = 0.023;
+        if (docMeta.freshnessTier === "low") lambda = 0.0039;
+        const decay = Math.exp(-lambda * daysSinceCrawled);
+        score = score * decay;
+      }
+
+      return {
+        entryId: item.id,
+        content,
+        url: docMeta?.url ?? "",
+        title: docMeta?.title ?? "",
+        relevanceScore: score,
+      };
+    });
+
+    const sortedEnriched = enrichedResults.sort((a: any, b: any) => b.relevanceScore - a.relevanceScore);
+    
+    // Search FAQs (Tier 1 Retriever)
+    const faqs = await ctx.runQuery(api.faq.searchFaqs, { query: args.queryText });
+    const faqResults = faqs.map((faq: any) => ({
+      entryId: faq._id,
+      content: `FAQ: ${faq.question}\nAnswer: ${faq.answer}`,
+      url: faq.sourceUrl || "Verified FAQ Database",
+      title: faq.question,
+      relevanceScore: 2.0, // Guaranteed top retrieval before rerank
+    }));
+    
+    const combinedResults = [...faqResults, ...sortedEnriched];
+    
+    // Lazy load the reranker module since it's a "use node" module with heavy dependencies
+    const { rerankResults } = await import("../crawl/rerank.js");
+    const finalResults = await rerankResults(args.queryText, combinedResults, limit);
+    
+    return finalResults.map((r: any) => ({
+      entryId: r.entryId,
+      content: r.content,
+      url: r.url,
+      title: r.title,
+      relevanceScore: r.rerankScore
+    }));
   },
 });

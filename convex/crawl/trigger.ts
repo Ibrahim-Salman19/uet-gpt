@@ -1,5 +1,7 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
+import { internal } from "../_generated/api";
 import { mutation } from "../_generated/server";
+import { crawlPool } from "./workpools";
 
 export const trigger = mutation({
   args: {
@@ -12,8 +14,20 @@ export const trigger = mutation({
     startedBy: v.optional(v.id("users")),
     trigger: v.optional(v.union(v.literal("manual"), v.literal("scheduled"), v.literal("webhook"))),
   },
+  returns: v.id("crawlJobs"),
   handler: async (ctx, args) => {
-    return await ctx.db.insert("crawlJobs", {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new ConvexError("Authentication required");
+    }
+    const existing = await ctx.db
+      .query("crawlJobs")
+      .withIndex("by_status", (q) => q.eq("status", "pending"))
+      .collect();
+    if (existing.length > 0) {
+      throw new ConvexError("A crawl job is already pending");
+    }
+    const jobId = await ctx.db.insert("crawlJobs", {
       trigger: args.trigger ?? "manual",
       ...(args.startedBy && { startedBy: args.startedBy }),
       status: "pending",
@@ -35,5 +49,9 @@ export const trigger = mutation({
       },
       startedAt: Date.now(),
     });
+
+    await crawlPool.enqueueAction(ctx, internal.crawl.actions.executeCrawlJob, { jobId });
+
+    return jobId;
   },
 });

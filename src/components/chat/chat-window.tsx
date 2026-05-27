@@ -31,7 +31,7 @@ export function ChatWindow({
     <div className="flex h-full flex-col">
       <ChatMessages
         messages={messages}
-        isSending={isSending}
+        isAwaitingReply={isLoading}
         isLoading={isLoading}
         error={error}
         onRetry={onRetry}

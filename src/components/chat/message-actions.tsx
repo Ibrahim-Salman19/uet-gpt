@@ -43,7 +43,7 @@ export function MessageActions({
   return (
     <div
       className={cn(
-        "flex items-center gap-0.5 transition-opacity duration-[var(--duration-fast)]",
+        "flex items-center gap-0.5 transition-opacity duration-[var(--duration-normal)]",
         show ? "opacity-100" : "opacity-0 group-hover:opacity-100",
         className,
       )}
@@ -55,6 +55,8 @@ export function MessageActions({
             size="icon"
             onClick={handleCopy}
             className="h-7 w-7 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            aria-label={copied ? "Copied" : "Copy message"}
+            data-touch-target="true"
           >
             {copied ? (
               <Check className="h-3.5 w-3.5 text-[var(--semantic-success)]" />
@@ -74,6 +76,8 @@ export function MessageActions({
               size="icon"
               onClick={onEdit}
               className="h-7 w-7 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+              aria-label="Edit message"
+              data-touch-target="true"
             >
               <Pencil className="h-3.5 w-3.5" />
             </Button>
@@ -90,6 +94,8 @@ export function MessageActions({
               size="icon"
               onClick={onDelete}
               className="h-7 w-7 text-[var(--text-muted)] hover:text-[var(--destructive)]"
+              aria-label="Delete message"
+              data-touch-target="true"
             >
               <Trash2 className="h-3.5 w-3.5" />
             </Button>
@@ -116,6 +122,8 @@ export function MessageActions({
                     ? "text-[var(--semantic-success)]"
                     : "text-[var(--text-muted)] hover:text-[var(--text-primary)]",
                 )}
+                aria-label={feedback === "thumbsUp" ? "Remove helpful" : "Mark as helpful"}
+                data-touch-target="true"
               >
                 <ThumbsUp className="h-3.5 w-3.5" />
               </Button>
@@ -139,6 +147,10 @@ export function MessageActions({
                     ? "text-[var(--destructive)]"
                     : "text-[var(--text-muted)] hover:text-[var(--text-primary)]",
                 )}
+                aria-label={
+                  feedback === "thumbsDown" ? "Remove not helpful" : "Mark as not helpful"
+                }
+                data-touch-target="true"
               >
                 <ThumbsDown className="h-3.5 w-3.5" />
               </Button>
