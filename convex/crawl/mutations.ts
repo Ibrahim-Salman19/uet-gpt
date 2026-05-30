@@ -133,6 +133,7 @@ export const queueChunksForEmbedding = internalMutation({
           chunkText: chunk.text,
           contentHash: chunk.contentHash,
           jobId: args.jobId,
+          parentText: chunk.parentText,
         },
         {
           onComplete: internal.crawl.mutations.onChunkEmbedded,
@@ -478,6 +479,7 @@ export const enqueueDocumentChunks = internalMutation({
           chunkText: chunk.text,
           contentHash: chunk.contentHash,
           jobId: "ingest-job",
+          parentText: chunk.parentText,
         },
         {
           onComplete: internal.crawl.mutations.onChunkEmbedded,

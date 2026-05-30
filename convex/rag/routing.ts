@@ -71,7 +71,10 @@ export const rewriteQueryAction = action({
       const { text } = await generateText({
         model: groq("llama-3.1-8b-instant"),
         system:
-          "You are a search expert. Rewrite the user's query to be a concise keyword-rich search query. Expand abbreviations like 'UET' to 'University of Engineering and Technology'. Output ONLY the rewritten query, nothing else.",
+          "You are a search expert. Rewrite the user's query to be a concise keyword-rich search query. " +
+          "If the query is written in Roman Urdu (Urdu language written using Latin/English characters, e.g., 'fees kitni hai', 'daakhila kab hoga', 'hostel kahan hai', 'documents kya chahiye'), detect it, translate it to English first, and then rewrite it into keyword-rich English search terms. " +
+          "Expand abbreviations like 'UET' to 'University of Engineering and Technology'. " +
+          "Output ONLY the final rewritten keyword-rich search query in English, and absolutely nothing else.",
         prompt: args.query,
         temperature: 0.3,
         maxOutputTokens: 100,

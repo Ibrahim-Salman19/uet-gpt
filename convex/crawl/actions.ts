@@ -102,6 +102,7 @@ export const embedSingleChunk = internalAction({
     chunkText: v.string(),
     contentHash: v.string(),
     jobId: v.string(),
+    parentText: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const { rag } = await import("../rag/instance.js");
@@ -128,6 +129,7 @@ export const embedSingleChunk = internalAction({
         chunkText: args.chunkText,
         contentHash: args.contentHash,
         ragId: result.entryId,
+        parentText: args.parentText,
       });
 
       return { success: true, ragId: result.entryId };

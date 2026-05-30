@@ -1,10 +1,20 @@
 import { createHmac } from "crypto";
 
-const CONVEX_SITE_URL = process.env.CONVEX_SITE_URL ?? "https://adamant-sandpiper-391.convex.site";
-const WEBHOOK_SECRET = process.env.CRAWL_WEBHOOK_SECRET || "";
-if (!process.env.CRAWL_WEBHOOK_SECRET) {
-  console.error("FATAL: CRAWL_WEBHOOK_SECRET environment variable is required");
-  process.exit(1);
+interface WebhookDataItem {
+  url: string;
+  markdown: string;
+  metadata: { title: string };
+}
+
+interface WebhookPayload {
+  job_id: string;
+  status: string;
+  data: WebhookDataItem[];
+}
+
+interface WebhookResponse {
+  status: number;
+  text: string;
 }
 
 function generateSignature(timestamp: string, secret: string): string {
@@ -20,11 +30,17 @@ function generateMarkdown(paragraphs: number): string {
   return md;
 }
 
-async function sendWebhookRequest(jobId: string, url: string, content: string) {
+async function sendWebhookRequest(
+  jobId: string,
+  url: string,
+  content: string,
+  convexSiteUrl: string,
+  webhookSecret: string,
+): Promise<WebhookResponse> {
   const timestamp = Date.now().toString();
-  const signature = generateSignature(timestamp, WEBHOOK_SECRET);
+  const signature = generateSignature(timestamp, webhookSecret);
 
-  const payload = {
+  const payload: WebhookPayload = {
     job_id: jobId,
     status: "completed",
     data: [
@@ -32,11 +48,11 @@ async function sendWebhookRequest(jobId: string, url: string, content: string) {
         url: url,
         markdown: content,
         metadata: { title: `Stress Test - ${url}` },
-      }
-    ]
+      },
+    ],
   };
 
-  const response = await fetch(`${CONVEX_SITE_URL}/api/webhook/crawl`, {
+  const response = await fetch(`${convexSiteUrl}/api/webhook/crawl`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -46,27 +62,59 @@ async function sendWebhookRequest(jobId: string, url: string, content: string) {
     body: JSON.stringify(payload),
   });
 
-  return response;
+  return { status: response.status, text: await response.text() };
 }
 
-async function runLoadTest() {
+export interface LoadTestConfig {
+  convexSiteUrl: string;
+  webhookSecret: string;
+  safeMode?: boolean;
+}
+
+export async function runLoadTest(config: LoadTestConfig): Promise<void> {
+  const { convexSiteUrl, webhookSecret, safeMode = false } = config;
+
+  if (safeMode) {
+    console.log("Running in SAFE MODE — no real HTTP calls will be made");
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+      console.log(`  [MOCK] ${init?.method ?? "GET"} ${input}`);
+      return new Response(JSON.stringify({ ok: true, mock: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    };
+
+    const after = () => {
+      globalThis.fetch = originalFetch;
+    };
+
+    try {
+      await doLoadTest(convexSiteUrl, webhookSecret);
+    } finally {
+      after();
+    }
+    return;
+  }
+
+  await doLoadTest(convexSiteUrl, webhookSecret);
+}
+
+async function doLoadTest(convexSiteUrl: string, webhookSecret: string): Promise<void> {
   console.log("Starting Load Test...");
-  
-  // 1. Send one moderately large document (approx 50 chunks)
+
   console.log("\n[Test 1] Large Document (50 Paragraphs)");
   const largeDoc = generateMarkdown(50);
   console.log(`Document size: ${(largeDoc.length / 1024).toFixed(2)} KB`);
-  const res1 = await sendWebhookRequest("job-large-1", "https://example.com/large", largeDoc);
-  console.log(`Response: ${res1.status} - await text: ${await res1.text()}`);
+  const res1 = await sendWebhookRequest("job-large-1", "https://example.com/large", largeDoc, convexSiteUrl, webhookSecret);
+  console.log(`Response: ${res1.status} - body: ${res1.text}`);
 
-  // 2. Thundering Herd (5 parallel requests for different URLs)
   console.log("\n[Test 2] Thundering Herd (5 concurrent webhook calls)");
-  const promises = [];
+  const promises: Promise<WebhookResponse>[] = [];
   for (let i = 0; i < 5; i++) {
-    const md = generateMarkdown(5); // smaller docs for thundering herd to avoid insane API usage
+    const md = generateMarkdown(5);
     promises.push(
-      sendWebhookRequest(`job-herd-${i}`, `https://example.com/herd-${i}`, md)
-        .then(async (res) => ({ status: res.status, text: await res.text() }))
+      sendWebhookRequest(`job-herd-${i}`, `https://example.com/herd-${i}`, md, convexSiteUrl, webhookSecret),
     );
   }
 
@@ -75,11 +123,10 @@ async function runLoadTest() {
     console.log(`Request ${i} -> Status: ${res.status}, Text: ${res.text}`);
   });
 
-  // 3. Test Invalid Signature Rejection
   console.log("\n[Test 3] Invalid Signature (Security Verification)");
   const fakeTimestamp = Date.now().toString();
-  const fakeSignature = generateSignature(fakeTimestamp, "wrong-secret-123");
-  const res3 = await fetch(`${CONVEX_SITE_URL}/api/webhook/crawl`, {
+  const fakeSignature = generateSignature(fakeTimestamp, "fake-secret");
+  const res3 = await fetch(`${convexSiteUrl}/api/webhook/crawl`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -88,9 +135,29 @@ async function runLoadTest() {
     },
     body: JSON.stringify({ job_id: "fake", data: [] }),
   });
-  console.log(`Expected rejection (401). Got: ${res3.status} - ${await res3.text()}`);
+  const res3text = await res3.text();
+  console.log(`Expected rejection (401). Got: ${res3.status} - ${res3text}`);
 
-  console.log("\nLoad Test completed. Now check Convex dashboard logs to verify embedding generation behavior (rate limiting, retries, fallbacks).");
+  console.log("\nLoad Test completed.");
 }
 
-runLoadTest().catch(console.error);
+if (require.main === module) {
+  const convexSiteUrl = process.env.CONVEX_SITE_URL;
+  if (!convexSiteUrl) {
+    console.error("FATAL: CONVEX_SITE_URL environment variable is required");
+    process.exit(1);
+  }
+
+  const webhookSecret = process.env.CRAWL_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    console.error("FATAL: CRAWL_WEBHOOK_SECRET environment variable is required");
+    process.exit(1);
+  }
+
+  const safeMode = process.env.CI === "true" || process.env.SAFE_MODE === "true";
+
+  runLoadTest({ convexSiteUrl, webhookSecret, safeMode }).catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}
