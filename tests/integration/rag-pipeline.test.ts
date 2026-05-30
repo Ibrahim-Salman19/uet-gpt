@@ -57,6 +57,10 @@ describe("RAG Pipeline Integration", () => {
             content: "The university offers BS, MS, and PhD programs...",
           },
         ],
+        6: [
+          { text: "UET Taxila offers undergraduate programs in engineering...", score: 0.92, index: 0 },
+          { text: "The university offers BS, MS, and PhD programs...", score: 0.85, index: 1 },
+        ],
       });
 
       const result = await (retrieveContext as any)._handler(ctx as any, {
@@ -135,6 +139,9 @@ describe("RAG Pipeline Integration", () => {
             content: "UET Taxila homepage content",
           },
         ],
+        6: [
+          { text: "UET Taxila homepage content", score: 0.5, index: 0 },
+        ],
       });
 
       const result = await (retrieveContext as any)._handler(ctx as any, {
@@ -161,6 +168,9 @@ describe("RAG Pipeline Integration", () => {
             relevanceScore: 0.7,
             content: "UET Taxila home",
           },
+        ],
+        6: [
+          { text: "UET Taxila home", score: 0.7, index: 0 },
         ],
       });
 

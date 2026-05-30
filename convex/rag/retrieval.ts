@@ -153,6 +153,35 @@ export const retrieveContext = action({
       }
     }
 
+    // TASK-E03: FlashRank reranker (k=8 -> 4).
+    // Reranks the top 8 fused candidates from hybrid search into the top 4 most relevant.
+    if (searchResults.length > 0) {
+      try {
+        const reranked = await ctx.runAction(_api.reranking.rerank.rerank, {
+          query: rewrittenQueryText || safeQuestion,
+          documents: searchResults.map((r) => ({
+            id: r.entryId,
+            text: r.content,
+          })),
+          topK: 4,
+        });
+
+        searchResults = reranked.map((item: { text: string; score: number; index: number }) => {
+          const original = searchResults[item.index];
+          if (!original) {
+            throw new Error(`Reranker index ${item.index} out of search results bounds`);
+          }
+          return {
+            ...original,
+            relevanceScore: item.score,
+          };
+        });
+      } catch (e) {
+        console.warn("Reranking failed, using original search fallback sliced to top 4:", e);
+        searchResults = searchResults.slice(0, 4);
+      }
+    }
+
     const sources = searchResults.map((r) => ({
       entryId: r.entryId,
       url: r.url,

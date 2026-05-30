@@ -1,6 +1,24 @@
 # Progress Log
 
 ---
+run_id: 2026-05-30-09b
+timestamp_utc: 2026-05-30T09:47:00Z
+task: "TASK-E03: FlashRank reranker k=8->4 via cross-encoder/ms-marco-MiniLM-L-6-v2"
+files_modified:
+  - convex/rag/retrieval.ts
+  - tests/integration/rag-pipeline.test.ts
+  - TODO.md
+  - .agent/state.md
+eval_before: {recall_at_5: N/A, fragment_hit: N/A}
+eval_after:  {recall_at_5: N/A, fragment_hit: N/A}
+delta:       {recall_at_5: 0.0, fragment_hit: 0.0}
+git_commits: [pending]
+assumptions: |
+  E03: Cross-encoder rerank reduces 8 candidate chunks down to top 4 for strict context budget constraints.
+issues_discovered: |
+  Implicit any on item parameter in map callback. Fixed by adding explicit types.
+
+---
 run_id: 2026-05-30-09a
 timestamp_utc: 2026-05-30T09:30:00Z
 task: "TASK-E02: Hybrid search via hybridRank (vector + BM25, k=20 fused -> 8)"
