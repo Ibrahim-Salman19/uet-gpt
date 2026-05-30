@@ -1,6 +1,45 @@
 # Progress Log
 
 ---
+run_id: 2026-05-30-09a
+timestamp_utc: 2026-05-30T09:30:00Z
+task: "TASK-E02: Hybrid search via hybridRank (vector + BM25, k=20 fused -> 8)"
+files_modified:
+  - convex/embeddings/search.ts
+  - convex/rag/retrieval.ts
+  - tests/unit/search.test.ts (NEW)
+  - TODO.md
+  - .agent/state.md
+eval_before: {recall_at_5: N/A, fragment_hit: N/A}
+eval_after:  {recall_at_5: N/A, fragment_hit: N/A}
+delta:       {recall_at_5: 0.0, fragment_hit: 0.0}
+git_commits: [pending]
+assumptions: |
+  E02: RRF k=20 is standard. Limits on text/vector search are kept at 40 to provide ample overlap for reciprocal ranking, and fused results are limited to 8.
+issues_discovered: |
+  none
+
+---
+run_id: 2026-05-30-07c
+timestamp_utc: 2026-05-30T07:20:00Z
+task: "TASK-B03+E04+E05: Tier TTL + flag expired + anti-hallucination tiers"
+files_modified:
+  - convex/cache/set.ts
+  - src/app/api/chat/route.ts
+  - convex/rag/retrieval.ts
+  - TODO.md
+  - .agent/state.md
+eval_before: {recall_at_5: N/A, fragment_hit: N/A}
+eval_after:  {recall_at_5: N/A, fragment_hit: N/A}
+delta:       {recall_at_5: 0.0, fragment_hit: 0.0}
+git_commits: ["2e041d0f7b"]
+assumptions: |
+  B03: assignTier mirrors crawler.py logic to choose high (7d), medium (2d), low (1d) TTL.
+  E05: Three-tier confidence system: refuse (<0.20), hedge (0.20–0.40), cite (0.40–0.60).
+issues_discovered: |
+  none
+
+---
 run_id: 2026-05-30-07b
 timestamp_utc: 2026-05-30T07:05:00Z
 task: "TASK-S02+S03+E01: Rate limiter + injection scanner + chunk overlap"

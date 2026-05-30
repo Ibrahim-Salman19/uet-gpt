@@ -3,10 +3,10 @@ import { api, internal } from "../_generated/api";
 import { action } from "../_generated/server";
 import { rag } from "../rag/instance";
 
-function reciprocalRankFusion(
+export function hybridRank(
   vectorResults: Array<{ id: string; score: number }>,
   textResults: Array<{ id: string; score: number }>,
-  k = 10,
+  k = 20,
   weights = { vector: 1.0, text: 1.0 },
 ): Array<{ id: string; score: number }> {
   const scores = new Map<string, number>();
@@ -63,7 +63,7 @@ export const searchDocumentsAction = action({
         });
         finalQueryText = hydeEnhanced;
       } catch (err) {
-        console.warn("HyDE routing action failed:", err);
+         console.warn("HyDE routing action failed:", err);
       }
     }
 
@@ -98,10 +98,10 @@ export const searchDocumentsAction = action({
       score: number;
     }>;
 
-    const fused = reciprocalRankFusion(
+    const fused = hybridRank(
       vectorRes.results.map((r: any) => ({ id: r.entryId, score: r.score ?? 0 })),
       textRes.map((r: any) => ({ id: r.ragId, score: r.score })),
-      60,
+      20, // TASK-E02: k=20 for tighter/more standard RRF fusion
       { vector: 1.0, text: 1.0 },
     ).slice(0, limit);
 

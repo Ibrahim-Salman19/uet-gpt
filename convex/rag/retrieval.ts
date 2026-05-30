@@ -146,7 +146,7 @@ export const retrieveContext = action({
           queryText: rewrittenQueryText || safeQuestion,
           queryEmbedding,
           hydeQuery: hydeQueryText,
-          limit: 10,
+          limit: 8,
         });
       } catch (e) {
         console.error("Search failed:", e);

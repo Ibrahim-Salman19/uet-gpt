@@ -19,7 +19,7 @@
 
 ## P3 — Pipeline enhancements (ordered by impact/effort)
 - [DONE: 2026-05-30] TASK-E01: maxChunkSize confirmed 3000 + raised prose overlap 200→300 chars | P3
-- [ ] TASK-E02: Hybrid search via hybridRank (vector + BM25, k=20 fused → 8) | P3 | Depends: E01
+- [DONE: 2026-05-30] TASK-E02: Hybrid search via hybridRank (vector + BM25, k=20 fused → 8) | P3 | Depends: E01
 - [ ] TASK-E03: FlashRank reranker k=8→4 via cross-encoder/ms-marco-MiniLM-L-6-v2 | P3 | Depends: E02
 - [DONE: 2026-05-30] TASK-E04: flagExpiredDocuments already implemented (high=30d, medium=90d, low=180d) — confirmed | P3
 - [DONE: 2026-05-30] TASK-E05: Anti-hallucination 3-tier confidence system (<0.2 refuse, 0.2-0.4 hedge, 0.4-0.6 cite) | P3
@@ -30,6 +30,6 @@
 - [ ] TASK-E10: HyDE query enhancement for queries < 15 words | P3 | Depends: E02
 
 ## Next Run Priority
-- TASK-E02: Hybrid search BM25 fusion (unlocks E03, E08, E10)
+- TASK-E03: FlashRank reranker (unlocks advanced RAG reranking)
 - TASK-E06: Parent-child chunking (unlocks E09)
 - TASK-E07: Gemini VLM verification pass
