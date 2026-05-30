@@ -7,7 +7,7 @@ export const list = query({
     v.object({
       _id: v.id("feedback"),
       _creationTime: v.number(),
-      messageId: v.id("messages"),
+      messageId: v.string(),
       userId: v.id("users"),
       rating: v.union(v.literal("thumbsUp"), v.literal("thumbsDown")),
       comment: v.optional(v.string()),

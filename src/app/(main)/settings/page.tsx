@@ -1,8 +1,10 @@
 "use client";
 
 import { UserButton, useUser } from "@clerk/nextjs";
+import { useMutation, useQuery } from "convex/react";
+import { api } from "convex/_generated/api";
 import { ChevronRight, Download, Info, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -93,8 +95,39 @@ function RadioOption<T extends string>({
 
 export default function SettingsPage() {
   const { user } = useUser();
+  const userData = useQuery(api.users.getByClerkId, user?.id ? { clerkId: user.id } : "skip");
+  const updatePreferences = useMutation(api.users.updatePreferences);
   const [fontSize, setFontSize] = useState<string>("medium");
   const [model, setModel] = useState<string>("llama-4-scout");
+
+  useEffect(() => {
+    if (userData?.preferences?.fontSize) {
+      setFontSize(userData.preferences.fontSize);
+    }
+    if (userData?.preferences?.model) {
+      setModel(userData.preferences.model);
+    }
+  }, [userData]);
+
+  const handleFontSizeChange = async (value: string) => {
+    setFontSize(value);
+    try {
+      await updatePreferences({ fontSize: value });
+      toast.success("Font size saved successfully");
+    } catch (err) {
+      toast.error("Failed to save font size preference");
+    }
+  };
+
+  const handleModelChange = async (value: string) => {
+    setModel(value);
+    try {
+      await updatePreferences({ model: value });
+      toast.success("Model preference saved successfully");
+    } catch (err) {
+      toast.error("Failed to save model preference");
+    }
+  };
 
   const handleExport = () => {
     toast.success("Chat history exported");
@@ -153,7 +186,7 @@ export default function SettingsPage() {
                   selected={fontSize}
                   label={opt.label}
                   description={opt.desc}
-                  onChange={setFontSize}
+                  onChange={handleFontSizeChange}
                 />
               ))}
             </div>
@@ -170,7 +203,7 @@ export default function SettingsPage() {
                   selected={model}
                   label={opt.label}
                   description={opt.desc}
-                  onChange={setModel}
+                  onChange={handleModelChange}
                 />
               ))}
             </div>

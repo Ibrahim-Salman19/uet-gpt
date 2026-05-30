@@ -14,6 +14,8 @@ export const userValidator = v.object({
     v.object({
       theme: v.optional(v.string()),
       language: v.optional(v.string()),
+      fontSize: v.optional(v.string()),
+      model: v.optional(v.string()),
     }),
   ),
   metadata: v.optional(

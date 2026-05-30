@@ -86,3 +86,34 @@ export const getByClerkId = query({
       .unique()) as unknown as typeof userValidator.type;
   },
 });
+
+export const updatePreferences = mutation({
+  args: {
+    theme: v.optional(v.string()),
+    language: v.optional(v.string()),
+    fontSize: v.optional(v.string()),
+    model: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new ConvexError("Authentication required");
+    }
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+    if (!user) {
+      throw new ConvexError("User not found");
+    }
+
+    const currentPrefs = user.preferences ?? {};
+    await ctx.db.patch(user._id, {
+      preferences: {
+        ...currentPrefs,
+        ...args,
+      },
+    });
+  },
+});
+
