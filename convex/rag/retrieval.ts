@@ -164,12 +164,20 @@ export const retrieveContext = action({
     const buildContextRef = _internal.rag.context.buildContext;
 
     let context = "";
-    let confidenceWarning = false;
+    // TASK-E05: Anti-hallucination confidence tiers based on top retrieval score.
+    // Tier 1 (<0.20): refuse  — score too low to be useful; LLM must decline.
+    // Tier 2 (0.20–0.40): hedge — LLM must caveat heavily and cite sources.
+    // Tier 3 (0.40–0.60): cite  — LLM should explicitly name its sources.
+    // Above 0.60: normal — proceed without additional system instruction.
+    let confidenceTier: "refuse" | "hedge" | "cite" | "normal" = "normal";
+
     if (searchResults.length > 0) {
       const topScore = searchResults[0]?.relevanceScore ?? 1.0;
-      if (topScore < 0.1) {
-        confidenceWarning = true;
-      }
+
+      if      (topScore < 0.20) { confidenceTier = "refuse"; }
+      else if (topScore < 0.40) { confidenceTier = "hedge";  }
+      else if (topScore < 0.60) { confidenceTier = "cite";   }
+      else                      { confidenceTier = "normal"; }
 
       try {
         context = await ctx.runQuery(buildContextRef, {
@@ -186,9 +194,26 @@ export const retrieveContext = action({
         context = searchResults.map((r) => r.content).join("\n\n---\n\n");
       }
 
-      if (confidenceWarning) {
+      // Prepend tier-specific system instruction
+      if (confidenceTier === "refuse") {
         context =
-          "SYSTEM INSTRUCTION TO AI: The retrieved documents have extremely low relevance to the user's query. You MUST respond exactly with: 'I don't have verified information about this — please check uettaxila.edu.pk directly.' Do not attempt to guess or hallucinate an answer.\n\n" +
+          "SYSTEM INSTRUCTION TO AI: The retrieved documents have extremely low relevance " +
+          "(score < 0.20) to the user's query. You MUST respond exactly with: " +
+          "'I don\\'t have verified information about this — please check uettaxila.edu.pk directly.' " +
+          "Do not attempt to guess or hallucinate an answer.\n\n" +
+          context;
+      } else if (confidenceTier === "hedge") {
+        context =
+          "SYSTEM INSTRUCTION TO AI: Retrieved documents have low relevance (score 0.20–0.40). " +
+          "You MUST prefix your answer with: 'Based on limited information available — ' " +
+          "and end with: 'For authoritative details, please verify at uettaxila.edu.pk.' " +
+          "Do not present uncertain information as fact.\n\n" +
+          context;
+      } else if (confidenceTier === "cite") {
+        context =
+          "SYSTEM INSTRUCTION TO AI: Retrieved documents have moderate relevance (score 0.40–0.60). " +
+          "You MUST cite specific sources by name for every factual claim. " +
+          "If a claim cannot be attributed to a source, qualify it with 'approximately' or 'generally'.\n\n" +
           context;
       }
     }

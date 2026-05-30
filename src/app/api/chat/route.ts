@@ -228,6 +228,24 @@ function buildSystemPrompt(context: string | null, intent: string): string {
   return parts.join("\n\n");
 }
 
+// TASK-B03: Mirror of crawler.py assign_tier() — derives freshnessTier from URL.
+// Used to set cache TTL matching content volatility.
+function assignTier(url: string): "high" | "medium" | "low" {
+  const lower = url.toLowerCase();
+  if (
+    lower === "https://web.uettaxila.edu.pk/" ||
+    lower === "https://uettaxila.edu.pk/" ||
+    lower.includes("admission") ||
+    lower.includes("academic")
+  ) {
+    return "high";
+  }
+  if (lower.includes("department") || lower.includes("faculty")) {
+    return "medium";
+  }
+  return "low";
+}
+
 export async function POST(req: NextRequest) {
   try {
     // 1. CSRF Protection - Verify Origin and Referer
@@ -366,12 +384,16 @@ export async function POST(req: NextRequest) {
           // Write the response to the semantic cache asynchronously in the background
           after(async () => {
             try {
+              // TASK-B03: derive freshnessTier from top source URL for TTL matching
+              const topSourceUrl = ragResult.sources[0]?.url ?? "";
+              const freshnessTier = assignTier(topSourceUrl);
               await convex.mutation(api.cache.set.set, {
                 queryText: question,
                 queryEmbedding: ragResult.queryEmbedding,
                 response: text,
                 sources: ragResult.sources,
                 model: modelName,
+                freshnessTier,
               });
             } catch (err) {
               console.error("Failed to write to semantic cache:", err);
