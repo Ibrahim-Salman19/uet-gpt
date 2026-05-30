@@ -157,3 +157,15 @@ assumptions: |
 issues_discovered: |
   9 bugs fixed: A1-A8 in run_agent.sh, B1-B5 in CRONJOB.md, C1-C5 in run_eval.py, D1-D3 in golden_set.jsonl.
   See implementation_plan.md for full audit table.
+
+---
+run_id: 2026-05-30-11
+timestamp_utc: 2026-05-30T11:39:00Z
+task: "TASK-E09 (Skipped)"
+files_modified: []
+eval_before: {recall_at_5: N/A, fragment_hit: N/A}
+eval_after:  {recall_at_5: N/A, fragment_hit: N/A}
+delta:       {recall_at_5: 0.0, fragment_hit: 0.0}
+git_commits: []
+assumptions: "Skipped this run due to eval connectivity error (exit code 1)"
+issues_discovered: "CONVEX_URL environment variable is not set"
