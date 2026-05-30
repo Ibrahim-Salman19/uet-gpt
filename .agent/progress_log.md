@@ -1,6 +1,28 @@
 # Progress Log
 
 ---
+run_id: 2026-05-30-10a
+timestamp_utc: 2026-05-30T10:02:00Z
+task: "TASK-E06: Parent-child chunking (child 200tok embed, parent 1500tok return)"
+files_modified:
+  - convex/schema.ts
+  - convex/embeddings/doc_queries.ts
+  - convex/embeddings/search.ts
+  - convex/crawl/webhook.ts
+  - convex/crawl/mutations.ts
+  - tests/convex/crawl/webhook.test.ts
+  - TODO.md
+  - .agent/state.md
+eval_before: {recall_at_5: N/A, fragment_hit: N/A}
+eval_after:  {recall_at_5: N/A, fragment_hit: N/A}
+delta:       {recall_at_5: 0.0, fragment_hit: 0.0}
+git_commits: [pending]
+assumptions: |
+  E06: Parent chunks of 3000 chars are split into child chunks of 800 chars. Vector/text searches match child chunks and return their parent chunk context for high matching precision and comprehensive LLM responses.
+issues_discovered: |
+  Discovered a hidden bug where doc.crawledAt and doc.freshnessTier in search.ts were resolving to undefined. Fixed by updating the returns schema of getDocumentByEntryId.
+
+---
 run_id: 2026-05-30-09b
 timestamp_utc: 2026-05-30T09:47:00Z
 task: "TASK-E03: FlashRank reranker k=8->4 via cross-encoder/ms-marco-MiniLM-L-6-v2"

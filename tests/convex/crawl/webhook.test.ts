@@ -76,4 +76,31 @@ describe("chunkMarkdown", () => {
     expect(chunk2.startsWith("## Next Header is a Custom Section Header")).toBe(true);
     expect(chunk2).not.toContain("Some normal text here");
   });
+
+  it("parent-child chunking correctly generates parent chunks and child chunks with parent mapping", () => {
+    const title = "UET Guide";
+    const contextPrefix = `Document Title: ${title}\nContext: General info\n\n`;
+    
+    const text = "This is a sentence that goes on and on to fill up the parent and child chunks. ".repeat(50);
+    
+    const parentChunks = chunkMarkdown(text, 3000, 300);
+    expect(parentChunks.length).toBeGreaterThan(1);
+    
+    const chunks: any[] = [];
+    for (const parentText of parentChunks) {
+      const childChunks = chunkMarkdown(parentText, 800, 100);
+      for (const childText of childChunks) {
+        chunks.push({
+          text: contextPrefix + childText,
+          parentText,
+        });
+      }
+    }
+    
+    expect(chunks.length).toBeGreaterThan(parentChunks.length);
+    for (const c of chunks) {
+      expect(c.parentText).toBeDefined();
+      expect(c.parentText.length).toBeGreaterThan(c.text.length - contextPrefix.length);
+    }
+  });
 });

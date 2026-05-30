@@ -34,7 +34,7 @@ export const queueChunksForEmbedding = internalMutation({
     jobId: v.string(),
     etag: v.optional(v.string()),
     lastModified: v.optional(v.string()),
-    chunks: v.array(v.object({ text: v.string(), contentHash: v.string() })),
+    chunks: v.array(v.object({ text: v.string(), contentHash: v.string(), parentText: v.optional(v.string()) })),
   },
   handler: async (ctx, args) => {
     const { url, title, contentHash, etag, lastModified, chunks } = args;
@@ -142,6 +142,7 @@ export const queueChunksForEmbedding = internalMutation({
             chunkText: chunk.text,
             contentHash: chunk.contentHash,
             jobId: args.jobId,
+            parentText: chunk.parentText,
           },
         },
       );
@@ -167,6 +168,7 @@ export const saveEmbedding = internalMutation({
     chunkText: v.string(),
     contentHash: v.string(),
     ragId: v.string(),
+    parentText: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // 0. Deduplicate: skip if chunk already indexed for this document
@@ -187,6 +189,7 @@ export const saveEmbedding = internalMutation({
       text: args.chunkText,
       ragId: args.ragId,
       embeddingModel: "gemini-embedding-2",
+      parentText: args.parentText,
     });
 
     // 2. Check if all chunks for this document are fully indexed in the database
@@ -198,10 +201,12 @@ export const saveEmbedding = internalMutation({
         .collect();
 
       if (doc.chunkCount !== undefined && chunksCount.length >= doc.chunkCount) {
-        await ctx.db.patch(args.documentId, {
-          status: "indexed",
-          updatedAt: Date.now(),
-        });
+        if (doc.status !== "indexed") {
+          await ctx.db.patch(args.documentId, {
+            status: "indexed",
+            updatedAt: Date.now(),
+          });
+        }
       }
     }
   },
@@ -218,10 +223,11 @@ export const onChunkEmbedded = internalMutation({
       chunkText: v.string(),
       contentHash: v.string(),
       jobId: v.string(),
+      parentText: v.optional(v.string()),
     }),
   },
   handler: async (ctx, args) => {
-    const { documentId, url, chunkText, contentHash, jobId } = args.context;
+    const { documentId, url, chunkText, contentHash, jobId, parentText } = args.context;
     const MAX_RETRIES = 5;
 
     const result = args.result;
@@ -245,6 +251,7 @@ export const onChunkEmbedded = internalMutation({
           text: chunkText,
           ragId: result.returnValue.ragId,
           embeddingModel: "gemini-embedding-2",
+          parentText,
         });
       }
 
@@ -455,7 +462,7 @@ export const enqueueDocumentChunks = internalMutation({
   args: {
     documentId: v.id("documents"),
     url: v.string(),
-    chunks: v.array(v.object({ text: v.string(), contentHash: v.string() })),
+    chunks: v.array(v.object({ text: v.string(), contentHash: v.string(), parentText: v.optional(v.string()) })),
   },
   handler: async (ctx, args) => {
     const { documentId, url, chunks } = args;
@@ -480,6 +487,7 @@ export const enqueueDocumentChunks = internalMutation({
             chunkText: chunk.text,
             contentHash: chunk.contentHash,
             jobId: "ingest-job",
+            parentText: chunk.parentText,
           },
         },
       );
@@ -729,15 +737,21 @@ export const flagExpiredDocuments = internalMutation({
       low: 180 * DAY_MS,
     };
 
-    // Since we need to check across tiers, we iterate through active documents
-    const active = await ctx.db
+    // Check both "indexed" (from Crawl4AI pipeline) and "active" (from /ingest pipeline)
+    const indexedDocs = await ctx.db
       .query("documents")
       .withIndex("by_status", (q) => q.eq("status", "indexed"))
       .take(batchSize);
 
+    const activeDocs = await ctx.db
+      .query("documents")
+      .withIndex("by_status", (q) => q.eq("status", "active"))
+      .take(batchSize);
+
+    const candidates = [...indexedDocs, ...activeDocs];
+
     let flagged = 0;
-    for (const doc of active) {
-      // Don't flag if already stale
+    for (const doc of candidates) {
       if (doc.isStale) continue;
 
       const tier = doc.freshnessTier || "low";
@@ -749,6 +763,6 @@ export const flagExpiredDocuments = internalMutation({
       }
     }
 
-    return { flagged, remaining: active.length === batchSize ? "more" : "done" };
+    return { flagged, remaining: candidates.length === batchSize ? "more" : "done" };
   },
 });

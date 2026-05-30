@@ -9,6 +9,9 @@ export const getDocumentByEntryId = internalQuery({
       url: v.string(),
       title: v.string(),
       category: v.string(),
+      crawledAt: v.optional(v.number()),
+      freshnessTier: v.optional(v.string()),
+      parentText: v.optional(v.string()),
     }),
   ),
   handler: async (ctx, args) => {
@@ -21,7 +24,14 @@ export const getDocumentByEntryId = internalQuery({
     if (chunk) {
       const doc = await ctx.db.get(chunk.documentId);
       if (doc) {
-        return { url: doc.url, title: doc.title, category: doc.category } as any;
+        return {
+          url: doc.url,
+          title: doc.title,
+          category: doc.category,
+          crawledAt: doc.crawledAt,
+          freshnessTier: doc.freshnessTier,
+          parentText: chunk.parentText,
+        } as any;
       }
     }
 
@@ -33,6 +43,13 @@ export const getDocumentByEntryId = internalQuery({
 
     if (!doc) return null;
 
-    return { url: doc.url, title: doc.title, category: doc.category } as any;
+    return {
+      url: doc.url,
+      title: doc.title,
+      category: doc.category,
+      crawledAt: doc.crawledAt,
+      freshnessTier: doc.freshnessTier,
+      parentText: undefined,
+    } as any;
   },
 });

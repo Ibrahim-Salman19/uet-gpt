@@ -303,7 +303,6 @@ export const crawlWebhook = httpAction(async (ctx, request) => {
 
       const normalized = normalizeContent(content);
       const contentHash = await sha256(normalized);
-      const rawChunks = chunkMarkdown(normalized);
 
       let contextPrefix = `Document Title: ${title}\n`;
       try {
@@ -322,13 +321,22 @@ export const crawlWebhook = httpAction(async (ctx, request) => {
         contextPrefix += "\n";
       }
 
+      // TASK-E06: Parent-child chunking sequence
+      // Parent chunks: max 3000 chars (approx 750 tokens), overlap 300 chars
+      // Child chunks: max 800 chars (approx 200 tokens), overlap 100 chars
+      const parentChunks = chunkMarkdown(normalized, 3000, 300);
       const chunks = [];
-      for (const text of rawChunks) {
-        const contextualizedText = contextPrefix + text;
-        chunks.push({
-          text: contextualizedText,
-          contentHash: await sha256(contextualizedText),
-        });
+
+      for (const parentText of parentChunks) {
+        const childChunks = chunkMarkdown(parentText, 800, 100);
+        for (const childText of childChunks) {
+          const contextualizedText = contextPrefix + childText;
+          chunks.push({
+            text: contextualizedText,
+            contentHash: await sha256(contextualizedText),
+            parentText, // Propagate parent text block
+          });
+        }
       }
 
       // Queue the payload using the new workpool component with dynamic arguments
@@ -454,7 +462,6 @@ export const ingestWebhook = httpAction(async (ctx, request) => {
 
     // Since content changed or is new, let's chunk and enqueue the new chunks
     const normalized = normalizeContent(markdown);
-    const rawChunks = chunkMarkdown(normalized);
 
     let contextPrefix = `Document Title: ${title || url}\n`;
     try {
@@ -473,13 +480,22 @@ export const ingestWebhook = httpAction(async (ctx, request) => {
       contextPrefix += "\n";
     }
 
+    // TASK-E06: Parent-child chunking sequence
+    // Parent chunks: max 3000 chars (approx 750 tokens), overlap 300 chars
+    // Child chunks: max 800 chars (approx 200 tokens), overlap 100 chars
+    const parentChunks = chunkMarkdown(normalized, 3000, 300);
     const chunks = [];
-    for (const text of rawChunks) {
-      const contextualizedText = contextPrefix + text;
-      chunks.push({
-        text: contextualizedText,
-        contentHash: await sha256(contextualizedText),
-      });
+
+    for (const parentText of parentChunks) {
+      const childChunks = chunkMarkdown(parentText, 800, 100);
+      for (const childText of childChunks) {
+        const contextualizedText = contextPrefix + childText;
+        chunks.push({
+          text: contextualizedText,
+          contentHash: await sha256(contextualizedText),
+          parentText, // Propagate parent text block
+        });
+      }
     }
 
     // Call enqueueDocumentChunks to register chunk count and enqueue each in the workpool

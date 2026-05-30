@@ -238,6 +238,7 @@ export default defineSchema({
     text: v.string(),
     ragId: v.string(),
     embeddingModel: v.optional(v.string()),
+    parentText: v.optional(v.string()), // TASK-E06: Parent-child chunking context
   })
     .index("by_documentId", ["documentId"])
     .index("by_ragId", ["ragId"])

@@ -117,7 +117,7 @@ export const searchDocumentsAction = action({
 
     const docMap = new Map<
       string,
-      { url: string; title: string; crawledAt: number; freshnessTier: string }
+      { url: string; title: string; crawledAt?: number; freshnessTier?: string; parentText?: string }
     >();
     for (const { entryId, doc } of docLookups) {
       if (doc) {
@@ -125,7 +125,8 @@ export const searchDocumentsAction = action({
           url: doc.url,
           title: doc.title,
           crawledAt: doc.crawledAt,
-          freshnessTier: doc.freshnessTier ?? "medium",
+          freshnessTier: doc.freshnessTier,
+          parentText: doc.parentText,
         });
       }
     }
@@ -137,14 +138,18 @@ export const searchDocumentsAction = action({
       const vecMatch = vectorRes.results.find((r: any) => r.entryId === item.id);
       const textMatch = textRes.find((r: any) => r.ragId === item.id);
 
-      if (vecMatch) {
+      // TASK-E06: Parent-child chunking context selection.
+      // If a parent chunk text is present, return it to the LLM. Otherwise fallback to child chunk.
+      if (docMeta?.parentText) {
+        content = docMeta.parentText;
+      } else if (vecMatch) {
         content = vecMatch.content.map((c: any) => c.text).join("\n");
       } else if (textMatch) {
         content = textMatch.text;
       }
 
       let score = item.score;
-      if (docMeta) {
+      if (docMeta && docMeta.crawledAt !== undefined) {
         const daysSinceCrawled = (Date.now() - docMeta.crawledAt) / (1000 * 60 * 60 * 24);
         let lambda = 0.0077; // medium
         if (docMeta.freshnessTier === "high") lambda = 0.023;
