@@ -8,10 +8,4 @@ export default defineConfig({
       "convex/_generated/api": path.resolve(__dirname, "./convex/_generated/api.js"),
     },
   },
-  test: {
-    environment: "jsdom",
-    setupFiles: ["./tests/setup.ts"],
-    globals: true,
-    exclude: ["node_modules", "dist", "tests/e2e/**/*"],
-  },
 });

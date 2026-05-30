@@ -19,7 +19,7 @@ vi.mock("../../convex/_generated/api", () => ({
   },
 }));
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { createHmac } from "node:crypto";
 import {
   chunkMarkdown,
