@@ -8,4 +8,7 @@ export default defineConfig({
       "convex/_generated/api": path.resolve(__dirname, "./convex/_generated/api.js"),
     },
   },
+  test: {
+    environment: "jsdom",
+  },
 });
