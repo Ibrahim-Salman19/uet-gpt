@@ -149,7 +149,8 @@ export const searchDocumentsAction = action({
         let lambda = 0.0077; // medium
         if (docMeta.freshnessTier === "high") lambda = 0.023;
         if (docMeta.freshnessTier === "low") lambda = 0.0039;
-        const decay = Math.exp(-lambda * daysSinceCrawled);
+        // TASK-B04: Floor at 0.20 — old docs stay visible when they are the best match.
+        const decay = Math.max(0.20, Math.exp(-lambda * daysSinceCrawled));
         score = score * decay;
       }
 

@@ -271,12 +271,45 @@ async def download(url: str) -> str:
             pass
         raise
 
+# ── Metadata Sanitization ─────────────────────────────────────────────────────
+
+# TASK-S01: Prompt injection pattern blocklist.
+# These patterns can corrupt the LLM context if they appear in stored chunk metadata.
+_INJECTION_PATTERNS = [
+    r"(?i)ignore\s+previous\s+instructions?",
+    r"(?i)system\s*:",
+    r"(?i)role\s*:",
+    r"(?i)\[INST\]",
+    r"(?i)</s>",
+    r"(?i)<\|im_start\|>",
+    r"(?i)<\|im_end\|>",
+    r"(?i)###\s*instruction",
+]
+_INJECTION_RE = re.compile("|".join(_INJECTION_PATTERNS))
+
+
+def sanitize_metadata(text: str, field: str = "field", max_len: int = 500) -> str:
+    """Strip control chars, enforce max length, and block prompt injection patterns."""
+    if not isinstance(text, str):
+        return ""
+    # Remove null bytes and most control characters (keep tab + newline for display)
+    cleaned = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", text)
+    # Truncate to limit
+    cleaned = cleaned[:max_len]
+    # Block injection patterns
+    if _INJECTION_RE.search(cleaned):
+        print(f"  [SECURITY] Injection pattern detected in {field} — field cleared.")
+        return "[sanitized]"
+    return cleaned.strip()
+
+
 # ── Push to Convex ─────────────────────────────────────────────────────────────
 
 def push(title: str, markdown: str) -> str:
     """Push extracted markdown to Convex /ingest endpoint."""
     import requests
-    virtual_url  = "pdf://" + title.lower().replace(" ", "-").replace("/", "-")
+    safe_title = sanitize_metadata(title, field="title", max_len=300)
+    virtual_url  = "pdf://" + safe_title.lower().replace(" ", "-").replace("/", "-")
     content_hash = hashlib.sha256(markdown.encode("utf-8")).hexdigest()
 
     headers = {"Content-Type": "application/json"}
@@ -290,7 +323,7 @@ def push(title: str, markdown: str) -> str:
             "markdown":       markdown,
             "contentHash":    content_hash,
             "crawlSessionId": "pdf-manual",
-            "title":          title,
+            "title":          safe_title,
         },
         headers=headers,
         timeout=30,
