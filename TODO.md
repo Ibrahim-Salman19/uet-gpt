@@ -24,12 +24,11 @@
 - [DONE: 2026-05-30] TASK-E04: flagExpiredDocuments already implemented (high=30d, medium=90d, low=180d) — confirmed | P3
 - [DONE: 2026-05-30] TASK-E05: Anti-hallucination 3-tier confidence system (<0.2 refuse, 0.2-0.4 hedge, 0.4-0.6 cite) | P3
 - [DONE: 2026-05-30] TASK-E06: Parent-child chunking (child 200tok embed, parent 1500tok return) | P3 | Depends: E01
-- [ ] TASK-E07: Gemini VLM verification pass + retry on table structure failure | P3 | Depends: 000
-- [ ] TASK-E08: Roman Urdu pre-query translation via Gemini 3.5 Flash | P3 | Depends: E02
+- [DONE: 2026-05-30] TASK-E07: Gemini VLM verification pass + retry on table structure failure | P3
+- [DONE: 2026-05-30] TASK-E08: Roman Urdu pre-query translation via Gemini 3.5 Flash | P3
 - [ ] TASK-E09: Contextual embeddings at ingestion time (Gemini context sentence) | P3 | Depends: E06
 - [ ] TASK-E10: HyDE query enhancement for queries < 15 words | P3 | Depends: E02
 
 ## Next Run Priority
-- TASK-E07: Gemini VLM verification pass
-- TASK-E08: Roman Urdu pre-query translation via Gemini 3.5 Flash
 - TASK-E09: Contextual embeddings at ingestion time (Gemini context sentence)
+- TASK-E10: HyDE query enhancement for queries < 15 words
