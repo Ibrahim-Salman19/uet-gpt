@@ -43,7 +43,7 @@ async function verifySignature(
   }
 }
 
-function normalizeContent(text: string): string {
+export function normalizeContent(text: string): string {
   return (
     text
       .replace(/\r\n/g, "\n") // normalize line endings
@@ -58,7 +58,7 @@ function normalizeContent(text: string): string {
   );
 }
 
-function isQualityChunk(text: string): boolean {
+export function isQualityChunk(text: string): boolean {
   // Must have at least 5 meaningful words to drop tiny useless fragments
   const words = text.split(/\s+/).filter((w) => w.trim().length > 1);
   if (words.length < 5) return false;

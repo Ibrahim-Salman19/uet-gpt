@@ -1,0 +1,8 @@
+{
+  "error": "CONVEX_URL environment variable is not set",
+  "recall_at_5": 0.0,
+  "fragment_hit_rate": 0.0,
+  "per_category": {},
+  "failures": [],
+  "eval_error": true
+}

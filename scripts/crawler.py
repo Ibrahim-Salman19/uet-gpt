@@ -8,6 +8,7 @@ Handles Dead Letter Queues locally and manages transient timeouts.
 import asyncio
 import hashlib
 import logging
+import random
 import re
 import sys
 import time
@@ -71,7 +72,6 @@ args, unknown = parser.parse_known_args()
 MAX_PAGES       = args.limit
 MAX_DEPTH       = 4
 CONCURRENCY     = 5
-REQUEST_DELAY   = 0.4
 REQUEST_TIMEOUT = 20
 MAX_RETRIES     = 3
 PUSH_RETRIES    = 3
@@ -186,6 +186,77 @@ def write_to_dlq(url: str, depth: int):
         f.write(json.dumps({"url": url, "depth": depth}) + "\n")
 
 # ═════════════════════════════════════════════════════════════════════════════
+# ADAPTIVE RATE LIMITING
+# ═════════════════════════════════════════════════════════════════════════════
+
+class TokenBucket:
+    """Proactive rate limiter: ensures a maximum request rate per second."""
+    def __init__(self, rate: float = 5.0, capacity: float = 10.0):
+        self.rate = rate
+        self.capacity = capacity
+        self.tokens = capacity
+        self.last_refill = time.monotonic()
+
+    def acquire(self, tokens: float = 1.0) -> float:
+        now = time.monotonic()
+        self.tokens = min(self.capacity, self.tokens + (now - self.last_refill) * self.rate)
+        self.last_refill = now
+        if self.tokens >= tokens:
+            self.tokens -= tokens
+            return 0.0
+        wait = (tokens - self.tokens) / self.rate
+        jitter = wait * random.random() * 0.1
+        return wait + jitter
+
+
+class AIMDRateLimiter:
+    """
+    Adaptive rate limiter using Additive Increase / Multiplicative Decrease.
+    Speeds up after sustained successes, slows aggressively on errors.
+    """
+    def __init__(self, min_delay: float = 0.05, max_delay: float = 5.0,
+                 initial_delay: float = 0.4, ai_step: float = 0.01,
+                 md_factor: float = 2.0, success_threshold: int = 10):
+        self.min_delay = min_delay
+        self.max_delay = max_delay
+        self.current_delay = initial_delay
+        self.ai_step = ai_step
+        self.md_factor = md_factor
+        self.success_threshold = success_threshold
+        self.success_streak = 0
+
+    async def wait(self):
+        full_delay = self.current_delay + self.current_delay * random.random() * 0.1
+        await asyncio.sleep(full_delay)
+
+    def on_success(self):
+        self.success_streak += 1
+        if self.success_streak >= self.success_threshold:
+            self.current_delay = max(self.min_delay, self.current_delay - self.ai_step)
+            self.success_streak = 0
+
+    def on_failure(self, status: int = 0):
+        if status == 429 or status == 503 or status == 0:
+            self.current_delay = min(self.max_delay, self.current_delay * self.md_factor)
+            self.success_streak = 0
+
+    def reset(self):
+        self.current_delay = (self.min_delay + self.max_delay) / 2
+        self.success_streak = 0
+
+
+def retry_delay(attempt: int, base: float = 1.0, max_delay: float = 60.0) -> float:
+    """Exponential backoff with jitter to prevent thundering herd."""
+    delay = base * (2 ** attempt)
+    delay = min(delay, max_delay)
+    jitter = delay * random.random() * 0.5
+    return delay + jitter
+
+# Module-level instances (created after class definitions to avoid NameError)
+rate_limiter = AIMDRateLimiter(min_delay=0.05, max_delay=5.0, initial_delay=0.4)
+token_bucket = TokenBucket(rate=8.0, capacity=15.0)
+
+# ═════════════════════════════════════════════════════════════════════════════
 # FETCH & PUSH LOGIC
 # ═════════════════════════════════════════════════════════════════════════════
 
@@ -275,7 +346,7 @@ async def push_to_convex(url: str, markdown: str, title: str, source_type: str, 
         except Exception as e:
             if attempt == PUSH_RETRIES:
                 raise RuntimeError(f"Failed to push to Convex after {PUSH_RETRIES} tries: {e}")
-            await asyncio.sleep(2 ** attempt)
+            await asyncio.sleep(retry_delay(attempt, base=1.0))
     return "failed"
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -285,7 +356,8 @@ async def push_to_convex(url: str, markdown: str, title: str, source_type: str, 
 async def worker(
     worker_id: int, queue: asyncio.Queue, visited: set, visited_lock: asyncio.Lock,
     stats: CrawlStats, stats_lock: asyncio.Lock, active_workers: list, active_lock: asyncio.Lock,
-    pbar: atqdm, session: AsyncSession, push_session: AsyncSession, session_id: str
+    pbar: atqdm, session: AsyncSession, push_session: AsyncSession, session_id: str,
+    rate_limiter: AIMDRateLimiter, token_bucket: TokenBucket
 ):
     while True:
         async with stats_lock:
@@ -306,7 +378,8 @@ async def worker(
         async with active_lock: active_workers[0] += 1
 
         try:
-            await asyncio.sleep(REQUEST_DELAY)
+            await rate_limiter.wait()
+            await token_bucket.acquire()
 
             markdown, title, links = None, "", []
             error_reason, status_code = None, 0
@@ -315,27 +388,27 @@ async def worker(
                 markdown, title, links, error_reason, status_code = await fetch_and_extract(url, session)
                 
                 if error_reason is None:
+                    rate_limiter.on_success()
                     break
                 
-                # 404, 400, 500 are permanent in this context, don't retry locally
                 if status_code in (404, 400, 500):
                     break
-                    
+                
+                rate_limiter.on_failure(status_code)
                 log.warning(f"Retry {attempt+1}/{MAX_RETRIES} on {url}: {error_reason}")
                 if attempt < MAX_RETRIES - 1:
-                    await asyncio.sleep(2 ** attempt)
+                    await asyncio.sleep(retry_delay(attempt))
             
             async with stats_lock: stats.fetched += 1
 
             if error_reason:
-                # Decide if it's transient and belongs in DLQ
-                # 500s on the main UET site are broken backend pages, not transient overloads, skip DLQ
+                rate_limiter.on_failure(status_code)
                 if status_code not in (404, 500) and status_code != 400:
                     write_to_dlq(url, depth)
                     async with stats_lock: stats.dlq += 1
                     
                 async with stats_lock: stats.failed += 1
-                if status_code != 500: # Dont spam log for known 500s
+                if status_code != 500:
                     log.error(f"[fail] {url} — {error_reason}")
                 continue
 
@@ -413,11 +486,14 @@ async def crawl():
 
     pbar = atqdm(total=MAX_PAGES, desc="Crawling", unit="pg", dynamic_ncols=True, colour="green")
 
-    async with AsyncSession(impersonate="chrome") as session, AsyncSession() as push_session:
+    rate_limiter.reset()
+    async with AsyncSession(impersonate="chrome", connections_limit=10) as session, \
+              AsyncSession(max_clients=10) as push_session:
         worker_tasks = [
             asyncio.create_task(worker(
-                i, queue, visited, visited_lock, stats, stats_lock, 
-                active_workers, active_lock, pbar, session, push_session, session_id
+                i, queue, visited, visited_lock, stats, stats_lock,
+                active_workers, active_lock, pbar, session, push_session, session_id,
+                rate_limiter, token_bucket
             )) for i in range(CONCURRENCY)
         ]
         await asyncio.gather(*worker_tasks, return_exceptions=True)
