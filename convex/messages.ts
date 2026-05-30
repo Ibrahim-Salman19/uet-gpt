@@ -2,6 +2,7 @@ import { ConvexError, v } from "convex/values";
 import { components } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
 import { sourcesValidator, tokenCountValidator } from "./messages/validator";
+import { enforceRateLimit } from "./rateLimit";
 
 function toAppSource(s: any): any {
   return {
@@ -43,6 +44,11 @@ export const insert = mutation({
     if (!identity) {
       throw new ConvexError("Authentication required");
     }
+
+    // TASK-S02: Enforce rate limits before any DB write.
+    // Uses actual token count if the caller provides it, otherwise 1000 token estimate.
+    const tokenEstimate = args.tokenCount?.total ?? 1_000;
+    await enforceRateLimit(ctx, identity.subject, tokenEstimate);
 
     const result = await ctx.runMutation(components.agent.messages.addMessages, {
       userId: identity.subject,

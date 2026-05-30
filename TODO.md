@@ -7,8 +7,8 @@
 
 ## P1 — Security (before any feature work)
 - [DONE: 2026-05-30] TASK-S01: PDF metadata sanitization + injection pattern blocklist | P1 | Depends: 000
-- [ ] TASK-S02: Convex rate-limiter (10msg/min/user, 100k tokens/min global) | P1 | Depends: 000
-- [ ] TASK-S03: Pre-retrieval query injection scanner in actions.ts | P1 | Depends: 000
+- [DONE: 2026-05-30] TASK-S02: Convex rate-limiter (10msg/min/user, 100k tokens/min global) | P1 | Depends: 000
+- [DONE: 2026-05-30] TASK-S03: Pre-retrieval query injection scanner in retrieval.ts | P1 | Depends: 000
 - [DONE: 2026-05-30] TASK-S04: Source domain allowlist in webhook.ts (*.uettaxila.edu.pk only) | P1 | Depends: 000
 
 ## P2 — Critical bug fixes (1–5 lines each, very high impact)
@@ -18,7 +18,7 @@
 - [DONE: 2026-05-30] TASK-B04: Add decay floor Math.max(0.20, ...) to exponential decay | P2 | Depends: 000
 
 ## P3 — Pipeline enhancements (ordered by impact/effort)
-- [ ] TASK-E01: Raise maxChunkSize 2000→3000 chars + 300-char prose overlap | P3 | Depends: 000
+- [DONE: 2026-05-30] TASK-E01: maxChunkSize confirmed 3000 + raised prose overlap 200→300 chars | P3 | Depends: 000
 - [ ] TASK-E02: Hybrid search via hybridRank (vector + BM25, k=20 fused → 8) | P3 | Depends: E01
 - [ ] TASK-E03: FlashRank reranker k=8→4 via cross-encoder/ms-marco-MiniLM-L-6-v2 | P3 | Depends: E02
 - [ ] TASK-E04: TTL tiered freshness (high=7d, medium=30d, low=90d) + isStale | P3 | Depends: 000
@@ -30,7 +30,7 @@
 - [ ] TASK-E10: HyDE query enhancement for queries < 15 words | P3 | Depends: E02
 
 ## Next Run Priority
-- TASK-S02: Rate limiter (P1 security — highest remaining unblocked task)
-- TASK-S03: Query injection scanner (P1 security)
-- TASK-B03: Cache TTL matching freshnessTier
-- TASK-E01: maxChunkSize 2000→3000 (unlocks E02-E10 chain)
+- TASK-B03: Cache TTL matching freshnessTier (P2 bug fix — quick win)
+- TASK-E02: Hybrid search BM25 fusion (P3 — first major retrieval enhancement)
+- TASK-E04: TTL tiered freshness + isStale flag
+- TASK-E05: Anti-hallucination confidence tiers

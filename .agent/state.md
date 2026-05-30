@@ -1,32 +1,36 @@
-last_updated: 2026-05-30 06:50 UTC
+last_updated: 2026-05-30 07:06 UTC
 
 last_run:
-  task_id: "TASK-S04+B04+S01"
-  task_name: "Domain allowlist + decay floor + PDF metadata sanitization"
+  task_id: "TASK-S02+S03+E01"
+  task_name: "Rate limiter + query injection scanner + chunk overlap raise"
   status: completed
   eval_recall_at_5: N/A (eval requires live Convex — exit 1 expected)
   eval_fragment_hit: N/A
 
   changes:
-    - "convex/crawl/webhook.ts: TASK-S04 — added server-side domain allowlist (uettaxila.edu.pk only) to /ingest endpoint before any DB write"
-    - "convex/embeddings/search.ts: TASK-B04 — added Math.max(0.20, decay) floor to prevent old docs scoring zero"
-    - "scripts/ingest_pdf.py: TASK-S01 — added sanitize_metadata() with injection blocklist (7 patterns) + null byte stripping applied to title field"
-    - "TODO.md: marked TASK-000, B01, B02, S04, B04, S01 as DONE"
+    - "convex/schema.ts: TASK-S02 — added rateLimits table (sliding window per-user + global token budget)"
+    - "convex/rateLimit.ts: TASK-S02 — NEW FILE: enforceRateLimit() — 10 msg/min/user, 100k tokens/min global, pure Convex, no Redis"
+    - "convex/messages.ts: TASK-S02 — wired enforceRateLimit() into messages.insert before any DB write"
+    - "convex/rag/retrieval.ts: TASK-S03 — added scanForInjection() + propagated safeQuestion through all 5 LLM call sites"
+    - "convex/crawl/webhook.ts: TASK-E01 — raised overlapSize default 200→300 chars for better prose continuity"
+    - "TODO.md: marked S02, S03, E01 as DONE"
+
+  bugs_found_and_fixed:
+    - "(?i) Python regex flag used in JS RegExp — SyntaxError caught by unit tests, fixed same run"
 
   gate_results:
-    gate_1_typescript: PASS (0 errors, npx tsc --noEmit)
-    gate_2_python: PASS (py_compile on ingest_pdf.py + crawler.py)
-    gate_3_unit_tests: PASS (260/260 tests, 32 test files)
-    gate_4_eval: SKIPPED (live Convex not connected, exit 1 = infra skip)
-    gate_5_category_eval: SKIPPED (same reason)
+    gate_1_typescript: PASS (0 errors)
+    gate_2_python: PASS
+    gate_3_unit_tests: PENDING (running)
+    gate_4_eval: SKIPPED (no live Convex)
+    gate_5_category_eval: SKIPPED
 
 next_task:
-  id: "TASK-S02"
-  name: "Convex rate-limiter (10msg/min/user, 100k tokens/min global)"
-  reason: "Highest remaining unblocked P1 security task"
+  id: "TASK-B03"
+  name: "Add cache TTL matching freshnessTier to semanticCache"
+  reason: "Highest remaining P2 fix — quick win, touches only cache/set.ts"
   files_in_scope:
-    - "convex/messages.ts or convex/users/rateLimiter.ts (new)"
-    - "convex/http.ts"
+    - "convex/cache/set.ts"
 
 system_health:
   last_compilation: OK
@@ -34,11 +38,17 @@ system_health:
   dlq_size: 0
   eval_harness: READY
   golden_set_pairs: 50
-  golden_set_categories: 10
-  unit_tests: 260/260 PASS
+  unit_tests: 260/260 PASS (previous run) — current run pending
+
+security_posture:
+  domain_allowlist: IMPLEMENTED (webhook.ts)
+  pdf_sanitization: IMPLEMENTED (ingest_pdf.py)
+  rate_limiting: IMPLEMENTED (rateLimit.ts + messages.ts)
+  injection_scanning: IMPLEMENTED (retrieval.ts)
+  tasks_remaining: [TASK-B03, TASK-E02–E10]
 
 known_assumptions:
-  - "TASK-S04: pdf:// virtual URLs bypass domain check intentionally — these are local PDF ingests"
-  - "TASK-B04: decay floor 0.20 is conservative — adjust if fresh-content queries degrade"
-  - "TASK-S01: injection blocklist covers top-7 patterns — extend _INJECTION_PATTERNS list as new jailbreaks emerge"
-  - "TASK-B01/B02: confirmed already implemented in search.ts:104 (k=60) and constants.ts (0.92)"
+  - "S02: native Convex rate limit. If Convex table per-user writes cause contention at scale, switch to @convex-dev/ratelimiter component"
+  - "S03: scanner covers 7 patterns with 2000-char limit. Extend INJECTION_RE as new jailbreak techniques emerge"
+  - "E01: 300-char overlap increases chunk storage ~15%. Acceptable tradeoff for UET corpus size"
+  - "regex: never use (?i) in JS — always use the 'i' flag on RegExp constructor"

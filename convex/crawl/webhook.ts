@@ -72,7 +72,7 @@ function isQualityChunk(text: string): boolean {
 export function chunkMarkdown(
   markdown: string,
   maxChunkSize: number = 3000,
-  overlapSize: number = 200,
+  overlapSize: number = 300, // TASK-E01: raised from 200→300 for better prose continuity
 ): string[] {
   const chunks: string[] = [];
 

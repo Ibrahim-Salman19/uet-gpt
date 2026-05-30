@@ -271,6 +271,16 @@ export default defineSchema({
     .index("by_key", ["key"])
     .index("by_section", ["section"]),
 
+  // TASK-S02: Rate limiter state — sliding window per user + global token budget.
+  // Each row is either keyed by clerkUserId (per-user msg limit) or "global" (token budget).
+  // windowStart: epoch ms of the start of the current 1-minute window.
+  // count: number of requests (per-user) or total tokens (global) in this window.
+  rateLimits: defineTable({
+    key: v.string(),        // clerkUserId OR "global"
+    windowStart: v.number(), // epoch ms — start of current 1-minute window
+    count: v.number(),       // requests (per-user) or tokens (global) in window
+  }).index("by_key", ["key"]),
+
   // Note: `threads` and `messages` tables are managed by @convex-dev/agent component.
   // Do not define them here to avoid table name conflicts with the component's internal tables.
   // The `feedback.messageId` field uses v.string() to reference agent-managed message IDs.

@@ -1,6 +1,29 @@
 # Progress Log
 
 ---
+run_id: 2026-05-30-07b
+timestamp_utc: 2026-05-30T07:05:00Z
+task: "TASK-S02+S03+E01: Rate limiter + injection scanner + chunk overlap"
+files_modified:
+  - convex/schema.ts
+  - convex/rateLimit.ts (NEW)
+  - convex/messages.ts
+  - convex/rag/retrieval.ts
+  - convex/crawl/webhook.ts
+  - TODO.md
+eval_before: {recall_at_5: N/A, fragment_hit: N/A}
+eval_after:  {recall_at_5: N/A, fragment_hit: N/A}
+delta:       {recall_at_5: 0.0, fragment_hit: 0.0}
+git_commits: [pending]
+assumptions: |
+  S02: rate limiter uses native Convex table — no Redis required, fully atomic in mutation context.
+  S03: injection scanner uses JS regex with "i" flag (fixed (?i) Python-syntax bug during this run).
+  E01: overlapSize raised from 200 to 300; maxChunkSize already 3000 (confirmed in previous run).
+issues_discovered: |
+  Bug found: (?i) Python regex inline flag used in JS context — SyntaxError at runtime.
+  Fixed immediately; root cause: pattern copy-pasted from Python sanitize_metadata(). Prevention: added to anti-pattern list.
+
+---
 run_id: 2026-05-30-07
 timestamp_utc: 2026-05-30T06:51:00Z
 task: "TASK-S04+B04+S01: Domain allowlist + decay floor + PDF metadata sanitization"

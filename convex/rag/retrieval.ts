@@ -1,6 +1,47 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { api, internal } from "../_generated/api";
 import { action } from "../_generated/server";
+
+// TASK-S03: Pre-retrieval query injection scanner.
+// Detects prompt injection attempts before any LLM call is made.
+// Patterns: same blocklist as PDF metadata sanitizer for consistency.
+const INJECTION_RE = new RegExp(
+  [
+    String.raw`ignore\s+previous\s+instructions?`,
+    String.raw`(?:system|role)\s*:`,
+    String.raw`\[INST\]`,
+    String.raw`<\/s>`,
+    String.raw`<\|im_(?:start|end)\|>`,
+    String.raw`###\s*[Ii]nstruction`,
+    String.raw`<\s*script[\s>]`,  // XSS-in-prompt attempt
+  ].join("|"),
+  "i",
+);
+
+/** Max query length in characters (prevents context-flooding attacks) */
+const MAX_QUERY_LEN = 2_000;
+
+/**
+ * Returns a sanitized version of the query, or throws ConvexError
+ * if the query contains an injection attempt or is too long.
+ */
+function scanForInjection(query: string): string {
+  if (!query || typeof query !== "string") {
+    throw new ConvexError("Invalid query");
+  }
+  if (query.length > MAX_QUERY_LEN) {
+    throw new ConvexError(
+      `Query too long (${query.length} chars). Please limit your question to ${MAX_QUERY_LEN} characters.`,
+    );
+  }
+  if (INJECTION_RE.test(query)) {
+    console.warn("[SECURITY] Injection pattern detected in query — request blocked.");
+    throw new ConvexError(
+      "Your query contains patterns that cannot be processed. Please rephrase your question.",
+    );
+  }
+  return query.trim();
+}
 
 const sourceValidator = v.object({
   entryId: v.string(),
@@ -26,10 +67,13 @@ export const retrieveContext = action({
     queryEmbedding: v.array(v.float64()),
   }),
   handler: async (ctx, args) => {
+    // TASK-S03: Scan for injection attempts before any LLM action.
+    const safeQuestion = scanForInjection(args.question);
+
     let intent: string;
     try {
       intent = await ctx.runAction(_api.rag.routing.classifyQueryAction, {
-        query: args.question,
+        query: safeQuestion,
       });
     } catch (error) {
       console.error("Intent classification failed, defaulting to 'general':", error);
@@ -48,18 +92,18 @@ export const retrieveContext = action({
     }
 
     const [rewrittenQuery, hydeQuery] = await Promise.allSettled([
-      ctx.runAction(_api.rag.routing.rewriteQueryAction, { query: args.question }),
-      ctx.runAction(_api.rag.routing.hydeQueryAction, { query: args.question }),
+      ctx.runAction(_api.rag.routing.rewriteQueryAction, { query: safeQuestion }),
+      ctx.runAction(_api.rag.routing.hydeQueryAction, { query: safeQuestion }),
     ]);
 
     const rewrittenQueryText =
-      rewrittenQuery.status === "fulfilled" ? rewrittenQuery.value : args.question;
-    const hydeQueryText = hydeQuery.status === "fulfilled" ? hydeQuery.value : args.question;
+      rewrittenQuery.status === "fulfilled" ? rewrittenQuery.value : safeQuestion;
+    const hydeQueryText = hydeQuery.status === "fulfilled" ? hydeQuery.value : safeQuestion;
 
     let queryEmbedding: number[];
     try {
       queryEmbedding = await ctx.runAction(_api.embeddings.generate.generate, {
-        text: hydeQueryText || rewrittenQueryText || args.question,
+        text: hydeQueryText || rewrittenQueryText || safeQuestion,
       });
     } catch (e) {
       console.error("Failed to generate embedding, falling back to empty vector", e);
@@ -69,7 +113,7 @@ export const retrieveContext = action({
     if (queryEmbedding.length > 0) {
       try {
         const cached = await ctx.runAction(_api.cache.get.get, {
-          queryText: args.question,
+          queryText: safeQuestion,
           queryEmbedding,
         });
 
@@ -99,7 +143,7 @@ export const retrieveContext = action({
     if (queryEmbedding.length > 0) {
       try {
         searchResults = await ctx.runAction(_api.embeddings.search.searchDocumentsAction, {
-          queryText: rewrittenQueryText || args.question,
+          queryText: rewrittenQueryText || safeQuestion,
           queryEmbedding,
           hydeQuery: hydeQueryText,
           limit: 10,
