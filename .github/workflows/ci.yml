@@ -31,7 +31,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ${{ steps.pnpm-store.outputs.store }}
-          key: pnpm-store-${{ hashFiles('uet-gpt/pnpm-lock.yaml') }}
+          key: pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             pnpm-store-
       - name: Install dependencies
@@ -58,7 +58,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ${{ steps.pnpm-store.outputs.store }}
-          key: pnpm-store-${{ hashFiles('uet-gpt/pnpm-lock.yaml') }}
+          key: pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             pnpm-store-
       - name: Install dependencies
@@ -99,7 +99,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ${{ steps.pnpm-store.outputs.store }}
-          key: pnpm-store-${{ hashFiles('uet-gpt/pnpm-lock.yaml') }}
+          key: pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             pnpm-store-
       - name: Install dependencies
@@ -108,6 +108,36 @@ jobs:
       - name: Run tests
         working-directory: uet-gpt
         run: pnpm test -- --run --reporter verbose
+
+  e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Get pnpm store directory
+        id: pnpm-store
+        run: echo "store=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.store }}
+          key: pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-
+      - name: Install dependencies
+        working-directory: uet-gpt
+        run: pnpm install --frozen-lockfile
+      - name: Install Playwright browsers
+        working-directory: uet-gpt
+        run: npx playwright install --with-deps chromium
+      - name: Run E2E tests
+        working-directory: uet-gpt
+        run: pnpm test:e2e
 
   build:
     name: Build Check
@@ -129,7 +159,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ${{ steps.pnpm-store.outputs.store }}
-          key: pnpm-store-${{ hashFiles('uet-gpt/pnpm-lock.yaml') }}
+          key: pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             pnpm-store-
       - name: Install dependencies
@@ -152,3 +182,4 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
+          WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}

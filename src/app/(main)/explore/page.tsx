@@ -97,7 +97,11 @@ export default function ExplorePage() {
   };
 
   return (
-    <Tabs value={activeCategory} onValueChange={setActiveCategory} className="flex h-full flex-col w-full">
+    <Tabs
+      value={activeCategory}
+      onValueChange={setActiveCategory}
+      className="flex h-full flex-col w-full"
+    >
       <div className="border-b border-border bg-card px-6 py-4">
         <div className="mx-auto flex max-w-5xl flex-col gap-4">
           <div>
@@ -179,7 +183,9 @@ export default function ExplorePage() {
                   <div className="flex items-center justify-between mb-4">
                     <p className="text-xs text-muted-foreground">
                       Showing {currentDocs.length} document{currentDocs.length !== 1 ? "s" : ""}
-                      {documents.length !== currentDocs.length ? ` of ${documents.length} total` : ""}
+                      {documents.length !== currentDocs.length
+                        ? ` of ${documents.length} total`
+                        : ""}
                     </p>
                   </div>
                 )}

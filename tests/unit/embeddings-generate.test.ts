@@ -13,29 +13,21 @@ describe("embeddings:generate", () => {
     process.env = { ...originalEnv };
   });
 
-  it("should call Gemini API via KeyPool with text-embedding-004 and dimensions 3072", async () => {
+  it("should call Gemini API via KeyPool with gemini-embedding-2 and dimensions 3072", async () => {
     process.env.GEMINI_API_KEY_1 = "test_gemini_key";
 
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
       headers: new Headers({ "content-type": "application/json" }),
       text: async () => JSON.stringify({
-        object: "list",
-        data: [{
-          object: "embedding",
-          index: 0,
-          embedding: [0.1, 0.2, 0.3],
-        }],
-        model: "text-embedding-004",
+        embedding: {
+          values: [0.1, 0.2, 0.3],
+        },
       }),
       json: async () => ({
-        object: "list",
-        data: [{
-          object: "embedding",
-          index: 0,
-          embedding: [0.1, 0.2, 0.3],
-        }],
-        model: "text-embedding-004",
+        embedding: {
+          values: [0.1, 0.2, 0.3],
+        },
       }),
     });
     global.fetch = mockFetch;
@@ -51,17 +43,16 @@ describe("embeddings:generate", () => {
     expect(fetchCalls).toHaveLength(1);
     
     const [url, options] = fetchCalls[0]!;
-    expect(url).toBe("https://generativelanguage.googleapis.com/v1beta/openai/embeddings");
+    expect(url).toBe("https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2:embedContent?key=test_gemini_key");
     expect(options!.method).toBe("POST");
-    expect((options!.headers as Headers).get("Content-Type")).toBe("application/json");
-    expect((options!.headers as Headers).get("authorization")).toBe("Bearer test_gemini_key");
+    expect((options!.headers as any)["Content-Type"]).toBe("application/json");
 
     const body = JSON.parse(options!.body as string);
     expect(body).toEqual({
-      model: "text-embedding-004",
-      input: ["Hello world"],
-      dimensions: 3072,
-      encoding_format: "float",
+      content: {
+        parts: [{ text: "task: search result | query: Hello world" }],
+      },
+      outputDimensionality: 3072,
     });
 
     expect(result).toEqual([0.1, 0.2, 0.3]);

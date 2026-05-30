@@ -7,7 +7,7 @@ const resilientEmbeddingModel: EmbeddingModel = {
   specificationVersion: "v3",
   maxEmbeddingsPerCall: 2048,
   supportsParallelCalls: true,
-  modelId: "gemini-embedding-001",
+  modelId: "gemini-embedding-2",
   doEmbed: async (options: { values: string[] }) => {
     // Dynamic import avoids circular dependencies at startup
     const { generateEmbeddingsInternal } = await import("../embeddings/generate.js");

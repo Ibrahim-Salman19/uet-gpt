@@ -1,6 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import { components } from "./_generated/api";
-import { mutation, query } from "./_generated/server";
+import { internalMutation, mutation, query } from "./_generated/server";
 import { threadValidator } from "./threads/validator";
 
 export const create = mutation({
@@ -132,4 +132,32 @@ export const remove = mutation({
 
     return null;
   },
+});
+
+export const purgeOldArchived = internalMutation(async (ctx) => {
+  const cutoff = Date.now() - 180 * 24 * 60 * 60 * 1000; // 6 months
+  const users = await ctx.db.query("users").collect(); // Safe for moderate scale, could paginate if userbase grows
+  let purged = 0;
+
+  for (const user of users) {
+    if (!user.clerkId) continue;
+    let cursor = null;
+    do {
+      const result: any = await ctx.runQuery(components.agent.threads.listThreadsByUserId, {
+        userId: user.clerkId,
+        paginationOpts: { numItems: 100, cursor },
+      });
+      for (const t of result.page) {
+        if (t.status === "archived" && t._creationTime < cutoff) {
+          await ctx.runMutation(components.agent.threads.deleteAllForThreadIdAsync, {
+            threadId: t._id,
+          });
+          purged++;
+        }
+      }
+      cursor = result.isDone ? null : result.continueCursor;
+    } while (cursor !== null);
+  }
+
+  console.log(`Purged ${purged} old archived threads.`);
 });

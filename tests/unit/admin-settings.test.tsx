@@ -1,11 +1,21 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, act, waitFor } from "@testing-library/react";
+
+// Mock convex/react
+vi.mock("convex/react", () => ({
+  useQuery: vi.fn(),
+  useMutation: vi.fn(),
+  useConvex: vi.fn(),
+  useAction: vi.fn(),
+}));
+
 import AdminSettingsPage from "@/app/admin/settings/page";
 
 // Mock sonner toast
 vi.mock("sonner", () => ({
   toast: {
     success: vi.fn(),
+    error: vi.fn(),
   },
 }));
 
@@ -136,10 +146,13 @@ vi.mock("@/components/ui/select", () => {
 });
 
 import { toast } from "sonner";
+import { useQuery, useMutation } from "convex/react";
 
 describe("AdminSettingsPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(useQuery).mockReturnValue([]);
+    vi.mocked(useMutation).mockReturnValue(vi.fn().mockResolvedValue(undefined) as any);
   });
 
   describe("Page Structure", () => {
@@ -328,27 +341,35 @@ describe("AdminSettingsPage", () => {
   });
 
   describe("Save and Reset", () => {
-    it("shows success toast when Save Changes is clicked", () => {
+    it("shows success toast when Save Changes is clicked", async () => {
       render(<AdminSettingsPage />);
 
-      fireEvent.click(screen.getByText("Save Changes"));
+      await act(async () => {
+        fireEvent.click(screen.getByText("Save Changes"));
+      });
 
-      expect(toast.success).toHaveBeenCalledWith("Settings saved", {
-        description: expect.stringContaining("saved successfully"),
+      await waitFor(() => {
+        expect(toast.success).toHaveBeenCalledWith("Settings saved", {
+          description: expect.stringContaining("saved successfully"),
+        });
       });
     });
 
-    it("shows success toast when Reset is clicked", () => {
+    it("shows success toast when Reset is clicked", async () => {
       render(<AdminSettingsPage />);
 
-      fireEvent.click(screen.getByText("Reset"));
+      await act(async () => {
+        fireEvent.click(screen.getByText("Reset"));
+      });
 
-      expect(toast.success).toHaveBeenCalledWith("Settings reset", {
-        description: expect.stringContaining("reset to defaults"),
+      await waitFor(() => {
+        expect(toast.success).toHaveBeenCalledWith("Settings reset", {
+          description: expect.stringContaining("reset to defaults"),
+        });
       });
     });
 
-    it("resets all fields to defaults after changing values", () => {
+    it("resets all fields to defaults after changing values", async () => {
       render(<AdminSettingsPage />);
 
       // Change some values
@@ -357,11 +378,15 @@ describe("AdminSettingsPage", () => {
       expect(autoCrawlSwitch.checked).toBe(false);
 
       // Reset
-      fireEvent.click(screen.getByText("Reset"));
+      await act(async () => {
+        fireEvent.click(screen.getByText("Reset"));
+      });
 
       // Values should be back to defaults
-      const switches = screen.getAllByTestId("switch");
-      expect((switches[0] as HTMLInputElement).checked).toBe(true); // autoCrawl back to true
+      await waitFor(() => {
+        const switches = screen.getAllByTestId("switch");
+        expect((switches[0] as HTMLInputElement).checked).toBe(true); // autoCrawl back to true
+      });
     });
   });
 

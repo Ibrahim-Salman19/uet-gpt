@@ -12,12 +12,11 @@ export interface AnalyticsEvent {
 
 /**
  * Track a page view.
- * Uses Vercel Web Analytics (injected via `<Analytics />` component).
  */
-export function trackPageView(_path: string): void {
-  // Vercel Web Analytics handles page views automatically
-  // via the <Analytics /> component in the root layout.
-  // This function is a no-op placeholder for manual tracking if needed.
+export function trackPageView(path: string): void {
+  if (process.env.NODE_ENV === "development") {
+    console.log(`[Analytics] Page view: ${path}`);
+  }
 }
 
 /**
@@ -28,13 +27,10 @@ export function trackPageView(_path: string): void {
  * trackEvent({ name: "chat_message_sent", properties: { model: "llama-4-scout", latency: 3200 } })
  * ```
  */
-export function trackEvent(_event: AnalyticsEvent): void {
-  // Vercel Web Analytics supports custom events via `useTrack()` hook.
-  // This wrapper is a no-op placeholder for future integration.
-  // Import and use:
-  //   import { useTrack } from "@vercel/analytics/react";
-  //   const { track } = useTrack();
-  //   track(event.name, event.properties);
+export function trackEvent(event: AnalyticsEvent): void {
+  if (process.env.NODE_ENV === "development") {
+    console.log(`[Analytics] Event: ${event.name}`, event.properties ?? "");
+  }
 }
 
 /**

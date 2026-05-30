@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Digital Void | AI Architect</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
+        
+        body {
+            font-family: 'Geist', sans-serif;
+            background-color: #0A0A0A;
+            overflow-x: hidden;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-input {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+        }
+
+        .mesh-gradient {
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background-color: #0A0A0A;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(49, 49, 192, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(161, 78, 240, 0.1) 0px, transparent 50%);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .active-indicator {
+            position: absolute;
+            left: 0;
+            width: 4px;
+            height: 24px;
+            background: #c0c1ff;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-surface-variant": "#c4c7c7",
+                    "surface-container-high": "#2a2a2a",
+                    "tertiary": "#ddb7ff",
+                    "inverse-primary": "#5f5e5e",
+                    "on-secondary": "#1000a9",
+                    "secondary-container": "#3131c0",
+                    "on-tertiary": "#490080",
+                    "secondary": "#c0c1ff",
+                    "secondary-fixed": "#e1e0ff",
+                    "surface-variant": "#353534",
+                    "error-container": "#93000a",
+                    "on-primary-fixed": "#1c1b1b",
+                    "surface-tint": "#c9c6c5",
+                    "background": "#131313",
+                    "on-secondary-fixed": "#07006c",
+                    "surface-dim": "#131313",
+                    "on-primary-container": "#7b7979",
+                    "surface-container-low": "#1c1b1b",
+                    "on-background": "#e5e2e1",
+                    "surface-container-highest": "#353534",
+                    "surface-container-lowest": "#0e0e0e",
+                    "surface-container": "#201f1f",
+                    "primary": "#c9c6c5",
+                    "on-primary": "#313030",
+                    "on-tertiary-container": "#a14ef0",
+                    "tertiary-fixed": "#f0dbff",
+                    "error": "#ffb4ab",
+                    "secondary-fixed-dim": "#c0c1ff",
+                    "inverse-on-surface": "#313030",
+                    "tertiary-container": "#140029",
+                    "on-secondary-fixed-variant": "#2f2ebe",
+                    "primary-container": "#0a0a0a",
+                    "primary-fixed": "#e5e2e1",
+                    "outline-variant": "#444748",
+                    "tertiary-fixed-dim": "#ddb7ff",
+                    "on-tertiary-fixed-variant": "#6900b3",
+                    "on-error": "#690005",
+                    "on-error-container": "#ffdad6",
+                    "outline": "#8e9192",
+                    "on-surface": "#e5e2e1",
+                    "on-secondary-container": "#b0b2ff",
+                    "on-primary-fixed-variant": "#474646",
+                    "surface": "#131313",
+                    "surface-bright": "#393939",
+                    "inverse-surface": "#e5e2e1",
+                    "primary-fixed-dim": "#c9c6c5",
+                    "on-tertiary-fixed": "#2c0051"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "chat-max-width": "800px",
+                    "gutter": "24px",
+                    "margin-mobile": "16px",
+                    "sidebar-width": "280px",
+                    "stack-gap": "12px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Geist"],
+                    "label-md": ["Geist"],
+                    "headline-lg": ["Geist"],
+                    "body-lg": ["Geist"],
+                    "headline-md": ["Geist"],
+                    "body-md": ["Geist"],
+                    "label-sm": ["Geist"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                    "headline-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background text-on-surface">
+<div class="mesh-gradient"></div>
+<!-- SideNavBar -->
+<aside class="w-[280px] h-screen fixed left-0 top-0 bg-surface-container-low/95 backdrop-blur-xl border-r border-white/5 flex flex-col h-full py-6 z-50">
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-8 h-8 bg-gradient-to-br from-secondary to-tertiary rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-on-secondary text-[20px]">blur_on</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface leading-none">AI Architect</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Pro Plan</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<div class="flex items-center gap-3 px-4 py-3 text-secondary bg-secondary-container/10 border-l-4 border-secondary relative">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+<span class="font-label-md text-label-md">New Chat</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-white/5 transition-all duration-300 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="font-label-md text-label-md">Recent Threads</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-white/5 transition-all duration-300 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="auto_stories">auto_stories</span>
+<span class="font-label-md text-label-md">Library</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-white/5 transition-all duration-300 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="smart_toy">smart_toy</span>
+<span class="font-label-md text-label-md">Models</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-white/5 transition-all duration-300 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</div>
+</nav>
+<div class="mt-auto px-6 mb-6">
+<div class="bg-secondary-container/20 rounded-xl p-4 border border-secondary/10">
+<p class="font-label-sm text-label-sm text-secondary mb-2">Upgrade to Plus</p>
+<p class="text-[10px] text-on-surface-variant leading-tight mb-3">Get access to GPT-4, DALL·E, and advanced analysis tools.</p>
+<button class="w-full py-2 bg-secondary text-on-secondary font-label-sm text-label-sm rounded-lg hover:opacity-90 transition-opacity">Upgrade</button>
+</div>
+</div>
+<div class="px-4 space-y-1">
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-white/5 transition-all duration-300 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="font-label-md text-label-md">Help</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-white/5 transition-all duration-300 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-label-md text-label-md">Logout</span>
+</div>
+</div>
+</aside>
+<!-- TopAppBar -->
+<header class="fixed top-0 right-0 left-[280px] z-40 bg-background/40 backdrop-blur-md border-b border-white/5 flex justify-between items-center px-gutter py-4">
+<div class="flex items-center gap-4">
+<h2 class="font-headline-md text-headline-md font-black tracking-tighter text-on-surface">Digital Void</h2>
+<div class="px-2 py-0.5 bg-surface-container-highest rounded text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">v2.4</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 mr-4">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">share</span>
+<span class="material-symbols-outlined text-on-surface-variant">more_vert</span>
+</div>
+<div class="flex items-center gap-3 pl-4 border-l border-white/10">
+<img alt="User Profile" class="w-8 h-8 rounded-full border border-white/20 object-cover" data-alt="A professional close-up portrait of a modern creative professional with a focused expression. The lighting is dramatic and moody, with cool blue highlights reflecting off their skin, fitting a high-tech obsidian-themed digital workspace. The background is a soft-focus architectural studio with minimalist lines and soft atmospheric haze." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2KbyjDhBS3LaQWyN9Co94t3htTyLrB7su0mvxOLnOTF97shxfl2ksVu8_2inm4_hCmL6b2-U3Uju7chY8R4UzD4RA4bfERez90V0jROv5ANu6YsAS6MV4CRCyq2EsxtS01KQeSHdNZOsrNeD4vo40xQWC_5qiGkzBea4AlW1F2SlSXbTO7nNy3HP1W5aIm7zasXH2XvYFvDf327yhG1YiSa1yisyu3BPpjTBSL91aOUXEwDxan6OPsW89x8FBWNQHiO8qTNamj9E"/>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="ml-[280px] pt-24 pb-32 flex flex-col items-center min-h-screen">
+<div class="w-full max-chat-max-width px-gutter flex flex-col gap-stack-gap">
+<!-- Welcome Section -->
+<div class="mb-12 text-center">
+<h3 class="font-headline-lg text-headline-lg text-on-surface mb-2">Hello, Alexander.</h3>
+<p class="font-body-lg text-body-lg text-on-surface-variant">How can we shape the future of space today?</p>
+</div>
+<!-- Chat History -->
+<!-- AI Message -->
+<div class="flex flex-col gap-2 items-start max-w-[85%]">
+<div class="flex items-center gap-2 mb-1">
+<div class="w-6 h-6 rounded-full bg-secondary-container/30 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-[14px]">smart_toy</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">AI Architect</span>
+</div>
+<div class="glass-panel rounded-2xl rounded-tl-none p-5">
+<p class="font-body-md text-body-md leading-relaxed text-on-surface">
+                        I've analyzed the recent trends in **Biophilic Architecture**. Integrating living systems into high-density urban environments isn't just about aesthetics; it's about atmospheric regulation and psychological well-being. Should we explore the modular vertical garden concept for the Neo-Tokyo project?
+                    </p>
+</div>
+</div>
+<!-- User Message -->
+<div class="flex flex-col gap-2 items-end max-w-[85%] self-end">
+<div class="flex items-center gap-2 mb-1 flex-row-reverse">
+<img alt="User" class="w-6 h-6 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8bs6nEfCdK19LvFTYHYxCz2FQWimjrhUfaPsQIXbkxwNSooxog5tTfZ7THIY66ELPahmtwX9qsGBokdrnmT6mdrPDUGTY0D24fTnfL0KaQRuzw8JdauBUhPN0dWkvkIufW-KmdEyfdI667QwmIgOGlxhMrot061oUtHiPbT6wxeW5IeJVXcxBw_qsORLK5iuhU92y5ShUupzA4Fj3xw9tKKjBJLQYAYJKJ7cBjQBEYqkMzRLB6qQn8iXxUFTNAm6Xl4kZ3Xjkc2w"/>
+<span class="font-label-sm text-label-sm text-on-surface-variant">You</span>
+</div>
+<div class="bg-secondary-container/20 border border-secondary/20 rounded-2xl rounded-tr-none p-5">
+<p class="font-body-md text-body-md leading-relaxed text-on-surface">
+                        That sounds promising. I want to focus on the "Void Spaces"—the areas where structure meets nature. Can you generate some visual references for cantilevered concrete structures that incorporate cascading water features and local flora?
+                    </p>
+</div>
+</div>
+<!-- AI Message (Detailed) -->
+<div class="flex flex-col gap-2 items-start max-w-[85%]">
+<div class="flex items-center gap-2 mb-1">
+<div class="w-6 h-6 rounded-full bg-secondary-container/30 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-[14px]">smart_toy</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">AI Architect</span>
+</div>
+<div class="glass-panel rounded-2xl rounded-tl-none p-5 w-full">
+<p class="font-body-md text-body-md leading-relaxed text-on-surface mb-4">
+                        Certainly. Here's a conceptual direction blending Brutalist weight with organic fluidity:
+                    </p>
+<div class="grid grid-cols-2 gap-4 mb-4">
+<div class="aspect-square rounded-xl overflow-hidden border border-white/10 group cursor-pointer relative">
+<img alt="Architecture 1" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A hyper-realistic architectural visualization of a massive cantilevered raw concrete building suspended over a lush tropical valley. Water cascades from the edge of the building into a hidden misty pool below. The lighting is golden hour, casting long shadows and highlighting the texture of the grey concrete against vibrant green ferns and moss. The overall aesthetic is cinematic, futuristic, and deeply atmospheric." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFYo8TTIuZmk9YP5EgrW1XB34YlEyZxMeaYz5BZcB_SORyR6vq1uBdJq0gqkxYb2FGNY1US_aaZWf3VBGVSEbIXT_NZtvikNdOyT_sPfCHvIvvCXsNpF9_bdvS1JJeZQyUNtZsgB_B8Riq29SSQjhLM_LdwgCT3lsJOuzv4QGZXMlrEeIX_YvA3PswTNCRhAE0RQPTFXueCdu-fYmQZWThmDLlkbPK1lrksWEBQpjiVM_A48yMvViCKV-acyj4bs4nv6TBtFc6VM4"/>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<span class="material-symbols-outlined text-white">zoom_in</span>
+</div>
+</div>
+<div class="aspect-square rounded-xl overflow-hidden border border-white/10 group cursor-pointer relative">
+<img alt="Architecture 2" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="An interior shot of a luxury minimalist atrium where glass and white steel meet an indoor vertical rainforest. Soft sunlight filters through a complex geometric skylight, creating intricate shadow patterns on the stone floor. The space feels infinite, calm, and technologically advanced, with a palette of whites, soft greys, and deep organic greens. High-end professional photography style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9dLyk739TLW9gGRGzQZTP0BGG_mLgI6kyNQdpAm4nksm6VEaJEraJ_DGnDTPDvhSKGA2xCAAO52lwnV_TYppoBTT-32_DCiLiVTkq3BOx5KDsyZlEfGDbwyjdqfx_bMt3BrhfxUzIY7J7H4V26xgRYAoBt-FJkY1SBudKTEoU-J-aXmVlHZ4bApfcUjU9ZfpoAmlFJCC2aC2gCkVHjNUk2AdVybg7NgHR94wa3KK-rL0pG3FSywQgXfmW2Po3sQtGWPWP93JTb5I"/>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<span class="material-symbols-outlined text-white">zoom_in</span>
+</div>
+</div>
+</div>
+<p class="font-body-md text-body-md leading-relaxed text-on-surface">
+                        Notice how the cantilever creates a protected micro-climate for the flora. I can begin drafting the structural requirements for the load-bearing elements if this aligns with your vision.
+                    </p>
+</div>
+</div>
+<!-- Suggestions -->
+<div class="flex flex-wrap gap-2 mt-8 justify-center">
+<button class="px-4 py-2 rounded-full glass-panel text-on-surface-variant font-label-sm text-label-sm hover:text-secondary hover:border-secondary/40 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">draw</span>
+                    Draft structural plans
+                </button>
+<button class="px-4 py-2 rounded-full glass-panel text-on-surface-variant font-label-sm text-label-sm hover:text-secondary hover:border-secondary/40 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">matter</span>
+                    List sustainable materials
+                </button>
+<button class="px-4 py-2 rounded-full glass-panel text-on-surface-variant font-label-sm text-label-sm hover:text-secondary hover:border-secondary/40 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">sunny</span>
+                    Analyze solar exposure
+                </button>
+</div>
+</div>
+</main>
+<!-- Floating Input Pill -->
+<div class="fixed bottom-8 left-[280px] right-0 flex justify-center px-gutter z-50">
+<div class="w-full max-w-[700px] relative group">
+<!-- Glow effect on focus (managed by CSS/JS) -->
+<div class="absolute -inset-1 bg-gradient-to-r from-secondary/0 via-secondary/0 to-tertiary/0 rounded-full blur-xl transition-all duration-500 opacity-0 group-within:opacity-40 group-within:from-secondary group-within:to-tertiary" id="input-glow"></div>
+<div class="glass-input rounded-full p-2 flex items-center gap-2 relative">
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all">
+<span class="material-symbols-outlined">attach_file</span>
+</button>
+<input class="flex-1 bg-transparent border-none focus:ring-0 text-on-surface font-body-md placeholder:text-on-surface-variant/50 px-2" id="main-input" placeholder="Describe your architectural vision..." type="text"/>
+<div class="flex items-center gap-1">
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all">
+<span class="material-symbols-outlined">mic</span>
+</button>
+<button class="w-10 h-10 rounded-full bg-secondary text-on-secondary flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-secondary/20">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">send</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<script>
+        // Micro-interaction for input glow and atmospheric response
+        const input = document.getElementById('main-input');
+        const glow = document.getElementById('input-glow');
+
+        input.addEventListener('focus', () => {
+            // Additional interactions can be added here
+        });
+
+        // Simple scroll reveal for message bubbles
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.glass-panel, .bg-secondary-container').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
+            observer.observe(el);
+        });
+    </script>
+</body></html>

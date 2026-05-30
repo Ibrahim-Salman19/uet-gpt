@@ -1,16 +1,10 @@
 import { v } from "convex/values";
+import { UET_CRAWL_CONFIG } from "../../src/lib/constants.js";
 import { internal } from "../_generated/api";
 import { internalMutation } from "../_generated/server";
 import { crawlPool } from "./workpools";
 
-const SEED_URLS = [
-  "https://web.uettaxila.edu.pk/",
-  "https://web.uettaxila.edu.pk/admissions/",
-  "https://web.uettaxila.edu.pk/academics/",
-  "https://web.uettaxila.edu.pk/departments/",
-  "https://web.uettaxila.edu.pk/programs/",
-  "https://web.uettaxila.edu.pk/about/",
-];
+const SEED_URLS = UET_CRAWL_CONFIG.seedUrls;
 
 export const kickoffDailyCrawl = internalMutation({
   args: {},
@@ -86,7 +80,8 @@ export const updateJobState = internalMutation({
 
     const updatePayload: any = {};
     if (args.status && job.status !== args.status) updatePayload.status = args.status;
-    if (args.providerJobId && job.providerJobId !== args.providerJobId) updatePayload.providerJobId = args.providerJobId;
+    if (args.providerJobId && job.providerJobId !== args.providerJobId)
+      updatePayload.providerJobId = args.providerJobId;
     if (args.error && job.error !== args.error) updatePayload.error = args.error;
 
     if (Object.keys(updatePayload).length === 0) return; // Compare-before-write check passed: No changes needed
@@ -107,7 +102,7 @@ export const completeJobByTaskId = internalMutation({
   handler: async (ctx, args) => {
     const job = await ctx.db
       .query("crawlJobs")
-      .filter((q) => q.eq(q.field("providerJobId"), args.taskId))
+      .withIndex("by_providerJobId", (q) => q.eq("providerJobId", args.taskId))
       .first();
 
     if (job && job.status !== args.status) {

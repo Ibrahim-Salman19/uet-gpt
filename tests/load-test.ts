@@ -1,7 +1,11 @@
 import { createHmac } from "crypto";
 
-const CONVEX_SITE_URL = "https://adamant-sandpiper-391.convex.site";
-const WEBHOOK_SECRET = "700719dfc8d54dbfb6022b5150120149";
+const CONVEX_SITE_URL = process.env.CONVEX_SITE_URL ?? "https://adamant-sandpiper-391.convex.site";
+const WEBHOOK_SECRET = process.env.CRAWL_WEBHOOK_SECRET || "";
+if (!process.env.CRAWL_WEBHOOK_SECRET) {
+  console.error("FATAL: CRAWL_WEBHOOK_SECRET environment variable is required");
+  process.exit(1);
+}
 
 function generateSignature(timestamp: string, secret: string): string {
   return createHmac("sha256", secret).update(timestamp).digest("hex");

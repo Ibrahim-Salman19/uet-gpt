@@ -13,6 +13,7 @@ export function useChat(threadId: string | undefined) {
   const lastMessageRef = useRef<string>("");
   const isLoadingRef = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const streamGenerationRef = useRef(0);
 
   const insertMutation = useMutation(api.messages.insert);
 
@@ -24,6 +25,8 @@ export function useChat(threadId: string | undefined) {
       setIsLoading(true);
       setError(null);
       lastMessageRef.current = content.trim();
+      streamGenerationRef.current += 1;
+      const generation = streamGenerationRef.current;
 
       const abortController = new AbortController();
       abortControllerRef.current = abortController;
@@ -116,8 +119,8 @@ export function useChat(threadId: string | undefined) {
           toast.error(message);
         }
       } finally {
-        // Clean up the streaming registry state
-        if (threadId) {
+        // Only clear registry if this generation is still current
+        if (threadId && generation === streamGenerationRef.current) {
           streamRegistry.update(threadId, "", []);
         }
         abortControllerRef.current = null;

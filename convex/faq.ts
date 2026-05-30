@@ -36,7 +36,8 @@ export const listFaqs = query({
 export const searchFaqs = query({
   args: { query: v.string() },
   handler: async (ctx, args) => {
-    return await ctx.db.query("faqs")
+    return await ctx.db
+      .query("faqs")
       .withSearchIndex("search_question", (q) => q.search("question", args.query))
       .take(3);
   },

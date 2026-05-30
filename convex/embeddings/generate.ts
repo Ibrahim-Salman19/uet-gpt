@@ -1,12 +1,40 @@
 "use node";
 import { ConvexError, v } from "convex/values";
-import { KeyPool } from "keymux";
 import { action } from "../_generated/server";
+
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  maxRetries = 3,
+): Promise<Response> {
+  const baseDelayMs = process.env.NODE_ENV === "test" ? 1 : 100;
+  let attempt = 0;
+  while (true) {
+    attempt++;
+    try {
+      const response = await fetch(url, options);
+      if (response.ok) {
+        return response;
+      }
+      const isTransient =
+        response.status === 429 || (response.status >= 500 && response.status < 600);
+      if (!isTransient || attempt >= maxRetries) {
+        return response;
+      }
+    } catch (err) {
+      if (attempt >= maxRetries) {
+        throw err;
+      }
+    }
+    const delay = baseDelayMs * 2 ** (attempt - 1);
+    await new Promise((resolve) => setTimeout(resolve, delay));
+  }
+}
 
 async function embedNativeGemini(texts: string[], apiKey: string): Promise<number[][]> {
   if (texts.length === 1) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2:embedContent?key=${apiKey}`;
-    const response = await fetch(url, {
+    const response = await fetchWithRetry(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -15,20 +43,21 @@ async function embedNativeGemini(texts: string[], apiKey: string): Promise<numbe
         content: {
           parts: [{ text: texts[0] }],
         },
+        outputDimensionality: 3072,
       }),
     });
     if (!response.ok) {
       const errText = await response.text();
       throw new Error(`Gemini embedContent failed (${response.status}): ${errText}`);
     }
-    const data = await response.json() as any;
+    const data = (await response.json()) as any;
     if (!data.embedding?.values) {
       throw new Error("Unexpected shape in Gemini embedContent response");
     }
     return [data.embedding.values];
   } else {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2:batchEmbedContents?key=${apiKey}`;
-    const response = await fetch(url, {
+    const response = await fetchWithRetry(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -39,6 +68,7 @@ async function embedNativeGemini(texts: string[], apiKey: string): Promise<numbe
           content: {
             parts: [{ text }],
           },
+          outputDimensionality: 3072,
         })),
       }),
     });
@@ -46,7 +76,7 @@ async function embedNativeGemini(texts: string[], apiKey: string): Promise<numbe
       const errText = await response.text();
       throw new Error(`Gemini batchEmbedContents failed (${response.status}): ${errText}`);
     }
-    const data = await response.json() as any;
+    const data = (await response.json()) as any;
     if (!data.embeddings || !Array.isArray(data.embeddings)) {
       throw new Error("Unexpected shape in Gemini batchEmbedContents response");
     }
@@ -88,46 +118,7 @@ export async function generateEmbeddingsInternal(texts: string[]): Promise<numbe
     }
   }
 
-  // Fall back to OpenRouter
-  if (openRouterKey) {
-    try {
-      console.log("Attempting embedding generation using OpenRouter Fallback API");
-      const response = await fetch("https://openrouter.ai/api/v1/embeddings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${openRouterKey}`,
-        } as Record<string, string>,
-        body: JSON.stringify({
-          model: "google/gemini-embedding-001",
-          input: texts,
-        }),
-      });
-
-      if (!response.ok) {
-        const status = response.status;
-        const errText = await response.text();
-        throw new ConvexError(`OpenRouter API error (Status ${status}): ${errText}`);
-      }
-
-      const data = (await response.json()) as any;
-      if (!data.data || !Array.isArray(data.data)) {
-        throw new ConvexError("Unexpected OpenRouter API response shape");
-      }
-
-      const sortedData = [...data.data].sort((a: any, b: any) => (a.index ?? 0) - (b.index ?? 0));
-      return sortedData.map((d: any) => {
-        if (!d.embedding) throw new ConvexError("Unexpected OpenRouter API response shape");
-        return d.embedding as number[];
-      });
-    } catch (err: any) {
-      if (err instanceof ConvexError) throw err;
-      const errMsg = err.message || String(err);
-      console.error(`OpenRouter Fallback failed: ${errMsg}`);
-      errors.push(`OpenRouter: ${errMsg}`);
-    }
-  }
-
+  // Fall back removed to prevent vector space incompatibility
   throw new ConvexError(`All embedding providers failed:\n- ${errors.join("\n- ")}`);
 }
 
@@ -138,7 +129,8 @@ export const generate = action({
   returns: v.array(v.float64()),
   handler: async (_ctx, args) => {
     try {
-      const embeddings = await generateEmbeddingsInternal([args.text]);
+      const queryText = `task: search result | query: ${args.text}`;
+      const embeddings = await generateEmbeddingsInternal([queryText]);
       return embeddings[0] as number[];
     } catch (error: any) {
       throw new ConvexError(error.message || String(error));

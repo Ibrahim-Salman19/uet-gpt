@@ -16,6 +16,8 @@ export const documentValidator = v.object({
       author: v.optional(v.string()),
       wordCount: v.optional(v.number()),
       language: v.optional(v.string()),
+      etag: v.optional(v.string()),
+      sourceType: v.optional(v.string()),
     }),
   ),
   status: v.union(
@@ -24,6 +26,8 @@ export const documentValidator = v.object({
     v.literal("indexed"),
     v.literal("failed"),
     v.literal("stale"),
+    v.literal("active"),
+    v.literal("pending_embed"),
   ),
   chunkCount: v.optional(v.number()),
   crawledAt: v.number(),

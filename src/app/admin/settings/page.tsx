@@ -1,7 +1,9 @@
 "use client";
 
-import { Bell, Database, Globe, RotateCcw, Save, Shield } from "lucide-react";
-import { useState } from "react";
+import { api } from "convex/_generated/api";
+import { useMutation, useQuery } from "convex/react";
+import { Bell, Database, Globe, Loader2, RotateCcw, Save, Shield } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,19 +19,40 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 
+interface SettingsField {
+  key: string;
+  label: string;
+  type: "text" | "number" | "boolean" | "select";
+  defaultValue: string | number | boolean;
+  options?: { label: string; value: string }[];
+}
+
 interface SettingsSection {
   key: string;
   label: string;
   description: string;
   icon: React.ReactNode;
-  fields: {
-    key: string;
-    label: string;
-    type: "text" | "number" | "boolean" | "select";
-    defaultValue: string | number | boolean;
-    options?: { label: string; value: string }[];
-  }[];
+  fields: SettingsField[];
 }
+
+const defaultSettings: Record<string, string | number | boolean> = {
+  maxPagesPerCrawl: 500,
+  maxCrawlDepth: 5,
+  crawlIntervalHours: 24,
+  autoCrawlEnabled: true,
+  maxContextChunks: 10,
+  similarityThreshold: 0.7,
+  defaultModel: "llama-3.3-70b-versatile",
+  cacheEnabled: true,
+  cacheTTLHours: 24,
+  crawlCompleted: true,
+  crawlFailed: true,
+  newFeedback: false,
+  errorAlerts: true,
+  requireAuth: true,
+  allowGuestAccess: false,
+  rateLimitPerMinute: 60,
+};
 
 const settingsSections: SettingsSection[] = [
   {
@@ -38,30 +61,15 @@ const settingsSections: SettingsSection[] = [
     description: "Configure crawling behavior and limits",
     icon: <Globe className="h-4 w-4" />,
     fields: [
-      {
-        key: "maxPagesPerCrawl",
-        label: "Max Pages Per Crawl",
-        type: "number",
-        defaultValue: 500,
-      },
-      {
-        key: "maxCrawlDepth",
-        label: "Max Crawl Depth",
-        type: "number",
-        defaultValue: 5,
-      },
+      { key: "maxPagesPerCrawl", label: "Max Pages Per Crawl", type: "number", defaultValue: 500 },
+      { key: "maxCrawlDepth", label: "Max Crawl Depth", type: "number", defaultValue: 5 },
       {
         key: "crawlIntervalHours",
         label: "Crawl Interval (hours)",
         type: "number",
         defaultValue: 24,
       },
-      {
-        key: "autoCrawlEnabled",
-        label: "Auto-crawl enabled",
-        type: "boolean",
-        defaultValue: true,
-      },
+      { key: "autoCrawlEnabled", label: "Auto-crawl enabled", type: "boolean", defaultValue: true },
     ],
   },
   {
@@ -70,12 +78,7 @@ const settingsSections: SettingsSection[] = [
     description: "Control retrieval and generation settings",
     icon: <Database className="h-4 w-4" />,
     fields: [
-      {
-        key: "maxContextChunks",
-        label: "Max Context Chunks",
-        type: "number",
-        defaultValue: 10,
-      },
+      { key: "maxContextChunks", label: "Max Context Chunks", type: "number", defaultValue: 10 },
       {
         key: "similarityThreshold",
         label: "Similarity Threshold",
@@ -93,18 +96,8 @@ const settingsSections: SettingsSection[] = [
           { label: "Mixtral 8x7B", value: "mixtral-8x7b-32768" },
         ],
       },
-      {
-        key: "cacheEnabled",
-        label: "Semantic cache enabled",
-        type: "boolean",
-        defaultValue: true,
-      },
-      {
-        key: "cacheTTLHours",
-        label: "Cache TTL (hours)",
-        type: "number",
-        defaultValue: 24,
-      },
+      { key: "cacheEnabled", label: "Semantic cache enabled", type: "boolean", defaultValue: true },
+      { key: "cacheTTLHours", label: "Cache TTL (hours)", type: "number", defaultValue: 24 },
     ],
   },
   {
@@ -113,30 +106,10 @@ const settingsSections: SettingsSection[] = [
     description: "Manage system notifications and alerts",
     icon: <Bell className="h-4 w-4" />,
     fields: [
-      {
-        key: "crawlCompleted",
-        label: "Crawl completed",
-        type: "boolean",
-        defaultValue: true,
-      },
-      {
-        key: "crawlFailed",
-        label: "Crawl failed",
-        type: "boolean",
-        defaultValue: true,
-      },
-      {
-        key: "newFeedback",
-        label: "New feedback received",
-        type: "boolean",
-        defaultValue: false,
-      },
-      {
-        key: "errorAlerts",
-        label: "Error alerts",
-        type: "boolean",
-        defaultValue: true,
-      },
+      { key: "crawlCompleted", label: "Crawl completed", type: "boolean", defaultValue: true },
+      { key: "crawlFailed", label: "Crawl failed", type: "boolean", defaultValue: true },
+      { key: "newFeedback", label: "New feedback received", type: "boolean", defaultValue: false },
+      { key: "errorAlerts", label: "Error alerts", type: "boolean", defaultValue: true },
     ],
   },
   {
@@ -145,12 +118,7 @@ const settingsSections: SettingsSection[] = [
     description: "Access control and security settings",
     icon: <Shield className="h-4 w-4" />,
     fields: [
-      {
-        key: "requireAuth",
-        label: "Require authentication",
-        type: "boolean",
-        defaultValue: true,
-      },
+      { key: "requireAuth", label: "Require authentication", type: "boolean", defaultValue: true },
       {
         key: "allowGuestAccess",
         label: "Allow guest access",
@@ -168,42 +136,73 @@ const settingsSections: SettingsSection[] = [
 ];
 
 export default function AdminSettingsPage() {
-  const [settings, setSettings] = useState<Record<string, any>>(() => {
-    const initial: Record<string, any> = {};
-    for (const section of settingsSections) {
-      for (const field of section.fields) {
-        initial[field.key] = field.defaultValue;
-      }
-    }
-    return initial;
-  });
+  const dbSettings = useQuery(api.admin.settings.getSettings, {});
+  const upsertSetting = useMutation(api.admin.settings.upsertSetting);
+  const resetSettings = useMutation(api.admin.settings.resetSettings);
 
-  const handleChange = (key: string, value: any) => {
+  const [settings, setSettings] =
+    useState<Record<string, string | number | boolean>>(defaultSettings);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (dbSettings && !loaded) {
+      const merged = { ...defaultSettings };
+      for (const s of dbSettings) {
+        merged[s.key] = s.value as string | number | boolean;
+      }
+      setSettings(merged);
+      setLoaded(true);
+    }
+  }, [dbSettings, loaded]);
+
+  const handleChange = useCallback((key: string, value: string | number | boolean) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
-  };
+  }, []);
 
-  const handleSave = () => {
-    toast.success("Settings saved", {
-      description: "Your changes have been saved successfully.",
-    });
-  };
-
-  const handleReset = () => {
-    const initial: Record<string, any> = {};
-    for (const section of settingsSections) {
-      for (const field of section.fields) {
-        initial[field.key] = field.defaultValue;
+  const handleSave = useCallback(async () => {
+    try {
+      for (const section of settingsSections) {
+        for (const field of section.fields) {
+          const value = settings[field.key];
+          if (value !== undefined) {
+            await upsertSetting({ key: field.key, value, section: section.key });
+          }
+        }
       }
+      toast.success("Settings saved", {
+        description: "Your changes have been saved successfully.",
+      });
+    } catch (error) {
+      toast.error("Failed to save settings", {
+        description: error instanceof Error ? error.message : "Unknown error",
+      });
     }
-    setSettings(initial);
-    toast.success("Settings reset", {
-      description: "All settings have been reset to defaults.",
-    });
-  };
+  }, [settings, upsertSetting]);
+
+  const handleReset = useCallback(async () => {
+    try {
+      await resetSettings();
+      setSettings(defaultSettings);
+      toast.success("Settings reset", {
+        description: "All settings have been reset to defaults.",
+      });
+    } catch (error) {
+      toast.error("Failed to reset settings", {
+        description: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }, [resetSettings]);
+
+  if (dbSettings === undefined) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {/* Header Actions */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold">System Settings</h2>
@@ -225,7 +224,6 @@ export default function AdminSettingsPage() {
 
       <Separator />
 
-      {/* Settings Sections */}
       <div className="space-y-6">
         {settingsSections.map((section) => (
           <Card key={section.key}>

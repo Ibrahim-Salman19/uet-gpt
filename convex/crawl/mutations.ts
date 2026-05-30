@@ -2,8 +2,8 @@ import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import { internalMutation, internalQuery } from "../_generated/server";
-import { embeddingPool } from "./workpools";
 import { rag } from "../rag/instance";
+import { embeddingPool } from "./workpools";
 
 export const getProcessedWebhook = internalQuery({
   args: { jobId: v.string() },
@@ -16,11 +16,12 @@ export const getProcessedWebhook = internalQuery({
 });
 
 export const markWebhookProcessed = internalMutation({
-  args: { jobId: v.string() },
+  args: { jobId: v.string(), expiresAt: v.optional(v.number()) },
   handler: async (ctx, args) => {
     await ctx.db.insert("processedWebhooks", {
       jobId: args.jobId,
       processedAt: Date.now(),
+      expiresAt: args.expiresAt ?? Date.now() + 7 * 24 * 60 * 60 * 1000,
     });
   },
 });
@@ -112,7 +113,7 @@ export const queueChunksForEmbedding = internalMutation({
       try {
         await rag.delete(ctx, { entryId: staleChunk.ragId as any });
       } catch (err) {
-        console.warn(`Failed to delete vector ${staleChunk.ragId} from RAG:`, err);
+        console.warn(`Failed to delete vector ${staleChunk.ragId} from RAG during re-embed:`, err);
       }
       await ctx.db.delete(staleChunk._id);
     }
@@ -168,12 +169,24 @@ export const saveEmbedding = internalMutation({
     ragId: v.string(),
   },
   handler: async (ctx, args) => {
+    // 0. Deduplicate: skip if chunk already indexed for this document
+    const existingChunk = await ctx.db
+      .query("crawledChunks")
+      .withIndex("by_documentId", (q) => q.eq("documentId", args.documentId))
+      .filter((q) => q.eq(q.field("contentHash"), args.contentHash))
+      .first();
+    if (existingChunk) {
+      console.log(`Chunk ${args.contentHash} already indexed, skipping.`);
+      return;
+    }
+
     // 1. Insert chunk metadata record linking to vector index ID
     await ctx.db.insert("crawledChunks", {
       documentId: args.documentId,
       contentHash: args.contentHash,
       text: args.chunkText,
       ragId: args.ragId,
+      embeddingModel: "gemini-embedding-2",
     });
 
     // 2. Check if all chunks for this document are fully indexed in the database
@@ -209,18 +222,42 @@ export const onChunkEmbedded = internalMutation({
   },
   handler: async (ctx, args) => {
     const { documentId, url, chunkText, contentHash, jobId } = args.context;
-    
-    const result = args.result;
-    if (result && result.kind === "success" && result.returnValue && result.returnValue.success && result.returnValue.ragId) {
-      // 1. Save successfully embedded chunk to the database
-      await ctx.db.insert("crawledChunks", {
-        documentId,
-        contentHash,
-        text: chunkText,
-        ragId: result.returnValue.ragId,
-      });
+    const MAX_RETRIES = 5;
 
-      // 2. Check if all chunks for this document are fully indexed in the database
+    const result = args.result;
+    if (
+      result &&
+      result.kind === "success" &&
+      result.returnValue?.success &&
+      result.returnValue.ragId
+    ) {
+      // 0. Deduplicate: skip if chunk already indexed for this document
+      const existingChunk = await ctx.db
+        .query("crawledChunks")
+        .withIndex("by_documentId", (q) => q.eq("documentId", documentId))
+        .filter((q) => q.eq(q.field("contentHash"), contentHash))
+        .first();
+      if (!existingChunk) {
+        // 1. Save successfully embedded chunk to the database
+        await ctx.db.insert("crawledChunks", {
+          documentId,
+          contentHash,
+          text: chunkText,
+          ragId: result.returnValue.ragId,
+          embeddingModel: "gemini-embedding-2",
+        });
+      }
+
+      // 2. Resolve/Clean up DLQ entry since chunk was successfully processed
+      const dlqEntry = await ctx.db
+        .query("crawlDeadLetter")
+        .withIndex("by_jobId_and_url", (q) => q.eq("jobId", jobId).eq("url", url))
+        .first();
+      if (dlqEntry) {
+        await ctx.db.delete(dlqEntry._id);
+      }
+
+      // 3. Check if all chunks for this document are fully indexed in the database
       const doc = await ctx.db.get(documentId);
       if (doc) {
         const chunksCount = await ctx.db
@@ -240,8 +277,8 @@ export const onChunkEmbedded = internalMutation({
     } else {
       // Embedding failed, was skipped, or canceled
       let errorMsg = args.error || "Unknown embedding error";
-      const isSkipped = result && result.kind === "success" && result.returnValue && result.returnValue.skipped;
-      
+      const isSkipped = result && result.kind === "success" && result.returnValue?.skipped;
+
       if (isSkipped) {
         errorMsg = "Skipped malformed content";
       } else if (result && result.kind === "failed") {
@@ -249,20 +286,36 @@ export const onChunkEmbedded = internalMutation({
       } else if (result && result.kind === "canceled") {
         errorMsg = "Job canceled";
       }
-      
+
       console.warn(`Embedding failed/skipped for chunk on URL ${url}: ${errorMsg}`);
-      
-      // Save to Dead Letter Queue
+
+      // Handle DLQ update / retry count tracking
       if (!isSkipped) {
-        await ctx.db.insert("crawlDeadLetter", {
-          url,
-          jobId,
-          failureReason: errorMsg,
-          failureCount: 1,
-          lastAttemptAt: Date.now(),
-          payload: args.context,
-          status: "pending_retry",
-        });
+        const dlqEntry = await ctx.db
+          .query("crawlDeadLetter")
+          .withIndex("by_jobId_and_url", (q) => q.eq("jobId", jobId).eq("url", url))
+          .first();
+
+        if (dlqEntry) {
+          const newFailureCount = (dlqEntry.failureCount ?? 0) + 1;
+          const newStatus = newFailureCount >= MAX_RETRIES ? "abandoned" : "pending_retry";
+          await ctx.db.patch(dlqEntry._id, {
+            status: newStatus,
+            failureCount: newFailureCount,
+            lastAttemptAt: Date.now(),
+            failureReason: errorMsg,
+          });
+        } else {
+          await ctx.db.insert("crawlDeadLetter", {
+            url,
+            jobId,
+            failureReason: errorMsg,
+            failureCount: 1,
+            lastAttemptAt: Date.now(),
+            payload: args.context,
+            status: "pending_retry",
+          });
+        }
       }
 
       // Update document state to failed
@@ -292,6 +345,12 @@ export const retryDeadLetterQueue = internalMutation({
     for (const dlq of pendingDLQ) {
       const payload = dlq.payload;
 
+      // Mark the entry as active "processing" during re-enqueue
+      await ctx.db.patch(dlq._id, {
+        status: "processing",
+        lastAttemptAt: Date.now(),
+      });
+
       // Attempt to re-enqueue chunk into workpool
       await embeddingPool.enqueueAction(
         ctx,
@@ -308,33 +367,29 @@ export const retryDeadLetterQueue = internalMutation({
           context: payload,
         },
       );
-
-      // Update DLQ status to abandoned to avoid double reprocessing
-      await ctx.db.patch(dlq._id, {
-        status: "abandoned",
-        lastAttemptAt: Date.now(),
-        failureCount: dlq.failureCount + 1,
-      });
     }
 
-    return { reprocessed: pendingDLQ.length, remaining: pendingDLQ.length === batchSize ? "more" : "done" };
+    return {
+      reprocessed: pendingDLQ.length,
+      remaining: pendingDLQ.length === batchSize ? "more" : "done",
+    };
   },
 });
 
 export const upsertDocument = internalMutation({
   args: {
-    url:            v.string(),
-    markdown:       v.string(),
-    contentHash:    v.string(),
+    url: v.string(),
+    markdown: v.string(),
+    contentHash: v.string(),
     crawlSessionId: v.string(),
-    title:          v.optional(v.string()),
-    sourceType:     v.string(), // "pdf" or "html"
-    freshnessTier:  v.optional(v.union(v.literal("high"), v.literal("medium"), v.literal("low"))),
+    title: v.optional(v.string()),
+    sourceType: v.string(), // "pdf" or "html"
+    freshnessTier: v.optional(v.union(v.literal("high"), v.literal("medium"), v.literal("low"))),
   },
   handler: async (ctx, args) => {
     const existing = await ctx.db
       .query("documents")
-      .withIndex("by_url", q => q.eq("url", args.url))
+      .withIndex("by_url", (q) => q.eq("url", args.url))
       .first();
 
     if (existing) {
@@ -345,7 +400,7 @@ export const upsertDocument = internalMutation({
           status: "active",
           updatedAt: Date.now(),
           freshnessTier: args.freshnessTier,
-          metadata: { ...existing.metadata, sourceType: args.sourceType } as any,
+          metadata: { ...existing.metadata, sourceType: args.sourceType },
         });
         return { action: "skipped", documentId: existing._id };
       }
@@ -353,41 +408,44 @@ export const upsertDocument = internalMutation({
       // Content changed - delete old chunks and vectors, then re-queue
       const oldChunks = await ctx.db
         .query("crawledChunks")
-        .withIndex("by_documentId", q => q.eq("documentId", existing._id))
+        .withIndex("by_documentId", (q) => q.eq("documentId", existing._id))
         .collect();
       for (const chunk of oldChunks) {
         try {
           await rag.delete(ctx, { entryId: chunk.ragId as any });
         } catch (err) {
-          console.warn(`Failed to delete vector ${chunk.ragId} from RAG:`, err);
+          console.warn(
+            `Failed to delete vector ${chunk.ragId} from RAG during content update:`,
+            err,
+          );
         }
         await ctx.db.delete(chunk._id);
       }
 
       await ctx.db.patch(existing._id, {
-        contentHash:    args.contentHash,
+        contentHash: args.contentHash,
         crawlSessionId: args.crawlSessionId,
-        title:          args.title,
-        status:         "pending_embed",
-        updatedAt:      Date.now(),
-        freshnessTier:  args.freshnessTier,
-        metadata: { ...existing.metadata, sourceType: args.sourceType } as any,
+        title: args.title,
+        status: "pending_embed",
+        updatedAt: Date.now(),
+        freshnessTier: args.freshnessTier,
+        metadata: { ...existing.metadata, sourceType: args.sourceType },
       });
       return { action: "updated", documentId: existing._id };
     }
 
     const id = await ctx.db.insert("documents", {
-      url:            args.url,
-      source:         new URL(args.url).hostname,
-      category:       "crawled",
-      contentHash:    args.contentHash,
+      url: args.url,
+      source: new URL(args.url).hostname,
+      category: "crawled",
+      contentHash: args.contentHash,
       crawlSessionId: args.crawlSessionId,
-      title:          args.title ?? args.url,
-      status:         "pending_embed",
-      crawledAt:      Date.now(),
-      updatedAt:      Date.now(),
-      freshnessTier:  args.freshnessTier,
-      metadata:       { sourceType: args.sourceType } as any,
+      title: args.title ?? args.url,
+      status: "pending_embed",
+      crawledAt: Date.now(),
+      updatedAt: Date.now(),
+      freshnessTier: args.freshnessTier,
+      metadata: { sourceType: args.sourceType },
     });
     return { action: "inserted", documentId: id };
   },
@@ -444,7 +502,7 @@ export const deduplicateDocuments = internalMutation({
     let cursor = null as string | null;
 
     while (true) {
-      const page = await (ctx.db.query("documents") as any).paginate({
+      const page = await ctx.db.query("documents").paginate({
         numItems: 200,
         cursor,
       });
@@ -463,7 +521,7 @@ export const deduplicateDocuments = internalMutation({
             try {
               await rag.delete(ctx, { entryId: chunk.ragId as any });
             } catch (err) {
-              console.warn(`Failed to delete vector ${chunk.ragId} from RAG:`, err);
+              console.warn(`Failed to delete vector ${chunk.ragId} from RAG during dedup:`, err);
             }
             await ctx.db.delete(chunk._id);
           }
@@ -491,7 +549,7 @@ export const markStaleDocuments = internalMutation({
     const batchSize = limit ?? 500;
     const active = await ctx.db
       .query("documents")
-      .withIndex("by_status", q => q.eq("status", "active"))
+      .withIndex("by_status", (q) => q.eq("status", "active"))
       .take(batchSize);
 
     let marked = 0;
@@ -516,20 +574,20 @@ export const purgeStaleDocuments = internalMutation({
     const batchSize = limit ?? 100; // smaller batch — each doc may have many chunks
     const stale = await ctx.db
       .query("documents")
-      .withIndex("by_status", q => q.eq("status", "stale"))
+      .withIndex("by_status", (q) => q.eq("status", "stale"))
       .take(batchSize);
 
     let purged = 0;
     for (const doc of stale) {
       const chunks = await ctx.db
         .query("crawledChunks")
-        .withIndex("by_documentId", q => q.eq("documentId", doc._id))
+        .withIndex("by_documentId", (q) => q.eq("documentId", doc._id))
         .collect();
       for (const chunk of chunks) {
         try {
           await rag.delete(ctx, { entryId: chunk.ragId as any });
         } catch (err) {
-          console.warn(`Failed to delete vector ${chunk.ragId} from RAG:`, err);
+          console.warn(`Failed to delete vector ${chunk.ragId} from RAG during purge:`, err);
         }
         await ctx.db.delete(chunk._id);
       }
@@ -568,19 +626,19 @@ export const resetFailedDocuments = internalMutation({
   handler: async (ctx, { limit }) => {
     const batchSize = limit ?? 200;
     const failedDocs = await ctx.db
-      .query('documents')
-      .withIndex('by_status', (q) => q.eq('status', 'failed'))
+      .query("documents")
+      .withIndex("by_status", (q) => q.eq("status", "failed"))
       .take(batchSize);
 
     let reset = 0;
     for (const doc of failedDocs) {
       await ctx.db.patch(doc._id, {
-        status: 'pending_embed',
+        status: "pending_embed",
         updatedAt: Date.now(),
       });
       reset++;
     }
-    return { reset, remaining: failedDocs.length === batchSize ? 'more' : 'done' };
+    return { reset, remaining: failedDocs.length === batchSize ? "more" : "done" };
   },
 });
 
@@ -594,16 +652,16 @@ export const reembedPendingBatch = internalMutation({
   handler: async (ctx, { limit }) => {
     const batchSize = limit ?? 10;
     const pendingDocs = await ctx.db
-      .query('documents')
-      .withIndex('by_status', (q) => q.eq('status', 'pending_embed'))
+      .query("documents")
+      .withIndex("by_status", (q) => q.eq("status", "pending_embed"))
       .take(batchSize);
 
     let queued = 0;
     for (const doc of pendingDocs) {
       // Get existing stored chunks for this document
       const existingChunks = await ctx.db
-        .query('crawledChunks')
-        .withIndex('by_documentId', (q) => q.eq('documentId', doc._id))
+        .query("crawledChunks")
+        .withIndex("by_documentId", (q) => q.eq("documentId", doc._id))
         .collect();
 
       if (existingChunks.length > 0) {
@@ -617,7 +675,7 @@ export const reembedPendingBatch = internalMutation({
               url: doc.url,
               chunkText: chunk.text,
               contentHash: chunk.contentHash,
-              jobId: 'reembed-job',
+              jobId: "reembed-job",
             },
             {
               onComplete: internal.crawl.mutations.onChunkEmbedded,
@@ -626,7 +684,7 @@ export const reembedPendingBatch = internalMutation({
                 url: doc.url,
                 chunkText: chunk.text,
                 contentHash: chunk.contentHash,
-                jobId: 'reembed-job',
+                jobId: "reembed-job",
               },
             },
           );
@@ -635,13 +693,16 @@ export const reembedPendingBatch = internalMutation({
       } else if (doc.chunkCount && doc.chunkCount > 0) {
         // No stored chunks but doc says it has chunks - the markdown needs re-ingestion
         // Mark as failed so it gets picked up by next crawl run
-        await ctx.db.patch(doc._id, { status: 'failed', error: 'No chunk text available for re-embedding. Re-crawl required.' });
+        await ctx.db.patch(doc._id, {
+          status: "failed",
+          error: "No chunk text available for re-embedding. Re-crawl required.",
+        });
         continue;
       }
 
       // Update document status to processing
       await ctx.db.patch(doc._id, {
-        status: 'processing',
+        status: "processing",
         chunkCount: existingChunks.length,
         updatedAt: Date.now(),
       });
@@ -650,7 +711,7 @@ export const reembedPendingBatch = internalMutation({
     return {
       processed: pendingDocs.length,
       chunksQueued: queued,
-      remaining: pendingDocs.length === batchSize ? 'more' : 'done',
+      remaining: pendingDocs.length === batchSize ? "more" : "done",
     };
   },
 });
@@ -661,7 +722,7 @@ export const flagExpiredDocuments = internalMutation({
     const batchSize = limit ?? 200;
     const now = Date.now();
     const DAY_MS = 24 * 60 * 60 * 1000;
-    
+
     const TTLS = {
       high: 30 * DAY_MS,
       medium: 90 * DAY_MS,
@@ -670,24 +731,24 @@ export const flagExpiredDocuments = internalMutation({
 
     // Since we need to check across tiers, we iterate through active documents
     const active = await ctx.db
-      .query('documents')
-      .withIndex('by_status', (q) => q.eq('status', 'indexed'))
+      .query("documents")
+      .withIndex("by_status", (q) => q.eq("status", "indexed"))
       .take(batchSize);
 
     let flagged = 0;
     for (const doc of active) {
       // Don't flag if already stale
       if (doc.isStale) continue;
-      
-      const tier = doc.freshnessTier || 'low';
+
+      const tier = doc.freshnessTier || "low";
       const ttl = TTLS[tier as keyof typeof TTLS] || TTLS.low;
-      
+
       if (now - doc.crawledAt > ttl) {
         await ctx.db.patch(doc._id, { isStale: true });
         flagged++;
       }
     }
-    
-    return { flagged, remaining: active.length === batchSize ? 'more' : 'done' };
+
+    return { flagged, remaining: active.length === batchSize ? "more" : "done" };
   },
 });

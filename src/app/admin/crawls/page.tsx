@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { api } from "convex/_generated/api";
-import { useMutation, useConvex } from "convex/react";
+import { useConvex, useMutation } from "convex/react";
 import type { FunctionReference } from "convex/server";
 import {
   AlertTriangle,
@@ -14,6 +13,7 @@ import {
   RotateCw,
   XCircle,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -50,7 +50,10 @@ export default function AdminCrawlsPage() {
   const loadCrawls = async () => {
     setLoading(true);
     try {
-      const data = await convex.query(api.crawl.list as unknown as FunctionReference<"query", "public">, {});
+      const data = await convex.query(
+        api.crawl.list as unknown as FunctionReference<"query", "public">,
+        {},
+      );
       setCrawls(data);
     } catch (error) {
       console.error(error);
@@ -59,6 +62,7 @@ export default function AdminCrawlsPage() {
     }
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: run once on mount
   useEffect(() => {
     loadCrawls();
   }, []);
@@ -84,7 +88,7 @@ export default function AdminCrawlsPage() {
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={loadCrawls} disabled={loading}>
-            <RotateCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            <RotateCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
           <Button size="sm" onClick={handleTriggerCrawl} disabled={isTriggering}>

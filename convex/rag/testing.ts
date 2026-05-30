@@ -68,10 +68,7 @@ export const seed = action({
     }
 
     // Insert metadata document linked to the RAG entry
-    // Note: This is a separate transaction from rag.add(). If this fails,
-    // the RAG entry will exist without a metadata document. For production
-    // crawling, use the scheduler pattern (mutation + ctx.scheduler.runAfter)
-    // to ensure atomicity.
+    // If this fails, clean up the RAG entry to avoid orphaned vector data
     try {
       await ctx.runMutation(api.rag.testing.insertTestChunk, {
         url: "https://web.uettaxila.edu.pk/test-doc",
@@ -80,7 +77,13 @@ export const seed = action({
         entryId,
       });
     } catch (error) {
-      console.warn("Failed to insert metadata document (RAG entry still exists):", error);
+      console.warn("Failed to insert metadata document, cleaning up RAG entry:", error);
+      try {
+        await rag.delete(ctx, { entryId: entryId as any });
+      } catch {
+        console.warn("Failed to clean up RAG entry after seed failure:", entryId);
+      }
+      throw error;
     }
 
     console.log("Seed complete! Entry ID:", entryId);

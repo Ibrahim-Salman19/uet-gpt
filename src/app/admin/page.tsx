@@ -1,11 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { api } from "convex/_generated/api";
-import { useConvex } from "convex/react";
-import { Activity, Database, FileText, Globe, RefreshCcw, ThumbsDown, ThumbsUp, Users } from "lucide-react";
+import { useQuery } from "convex/react";
+import { Activity, Database, FileText, Globe, ThumbsDown, ThumbsUp, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -43,27 +41,9 @@ function StatCard({ title, value, description, icon, trend }: StatCardProps) {
 }
 
 export default function AdminOverviewPage() {
-  const convex = useConvex();
-  const [stats, setStats] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const stats = useQuery(api.admin.stats.dashboardStats);
 
-  const loadStats = async () => {
-    setLoading(true);
-    try {
-      const data = await convex.query(api.admin.stats.dashboardStats);
-      setStats(data);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadStats();
-  }, []);
-
-  if (loading || !stats) {
+  if (stats === undefined) {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 8 }).map((_, i) => (
@@ -85,10 +65,6 @@ export default function AdminOverviewPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold tracking-tight">Overview</h2>
-        <Button variant="outline" size="sm" onClick={loadStats} disabled={loading}>
-          <RefreshCcw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-          Refresh Stats
-        </Button>
       </div>
       {/* Primary Stats */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

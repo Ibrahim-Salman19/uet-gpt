@@ -1,16 +1,15 @@
 import { v } from "convex/values";
 import type { Id } from "../_generated/dataModel";
-import { mutation } from "../_generated/server";
+import { internalMutation, mutation } from "../_generated/server";
 
 /**
  * Clean up expired entries from the semantic cache.
  * Called periodically to prevent the cache table from growing indefinitely.
  */
-export const cleanupExpiredCache = mutation({
+export const cleanupExpiredCache = internalMutation({
   args: {
     limit: v.optional(v.number()),
   },
-  returns: v.number(),
   handler: async (ctx, args) => {
     const maxToDelete = args.limit ?? 100;
     const now = Date.now();
@@ -27,6 +26,20 @@ export const cleanupExpiredCache = mutation({
 
     for (const entry of expired) {
       await ctx.db.delete(entry._id as Id<"semanticCache">);
+      deletedCount++;
+    }
+
+    const expiredWebhooks = await ctx.db
+      .query("processedWebhooks")
+      .withIndex(
+        "by_expiresAt",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (q: any) => q.lte("expiresAt", now),
+      )
+      .take(maxToDelete);
+
+    for (const entry of expiredWebhooks) {
+      await ctx.db.delete(entry._id);
       deletedCount++;
     }
 

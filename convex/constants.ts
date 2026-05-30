@@ -1,0 +1,1 @@
+export const CACHE_SIMILARITY_THRESHOLD = 0.92;

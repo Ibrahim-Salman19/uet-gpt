@@ -41,7 +41,7 @@ export const UET_CRAWL_CONFIG = {
   allowExternalLinks: false,
 } as const;
 
-export const CACHE_SIMILARITY_THRESHOLD = 0.95;
+export { CACHE_SIMILARITY_THRESHOLD } from "../../convex/constants";
 
 export const EVAL_ENABLED = false;
 

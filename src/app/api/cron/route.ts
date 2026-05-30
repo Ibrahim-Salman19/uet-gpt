@@ -59,22 +59,6 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    if (task === "cleanup" || task === "all") {
-      // Clean up expired semantic cache entries
-      try {
-        const deletedCount = await convex.mutation(
-          "crawl/tasks:cleanupExpiredCache" as never,
-          { limit: 100 } as never,
-        );
-        results.cacheCleanup = { status: "ok", deletedCount };
-      } catch (error) {
-        results.cacheCleanup = {
-          status: "error",
-          error: error instanceof Error ? error.message : "Unknown error",
-        };
-      }
-    }
-
     return NextResponse.json({
       status: "ok",
       task,

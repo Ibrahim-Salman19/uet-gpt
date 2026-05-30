@@ -2,7 +2,7 @@
 
 import { api } from "convex/_generated/api";
 import type { Doc } from "convex/_generated/dataModel";
-import { useMutation, useConvex } from "convex/react";
+import { useConvex, useMutation } from "convex/react";
 import type { FunctionReference } from "convex/server";
 import {
   AlertCircle,
@@ -60,11 +60,14 @@ export default function AdminDocumentsPage() {
   const loadDocuments = async () => {
     setLoading(true);
     try {
-      const data = await convex.query(api.doc.list as unknown as FunctionReference<"query", "public">, {
-        limit: 100,
-        status: statusFilter !== "all" ? (statusFilter as any) : undefined,
-        category: categoryFilter !== "all" ? categoryFilter : undefined,
-      });
+      const data = await convex.query(
+        api.doc.list as unknown as FunctionReference<"query", "public">,
+        {
+          limit: 100,
+          status: statusFilter !== "all" ? (statusFilter as any) : undefined,
+          category: categoryFilter !== "all" ? categoryFilter : undefined,
+        },
+      );
       setDocuments(data as DocumentDoc[]);
     } catch (error) {
       console.error(error);
@@ -73,6 +76,7 @@ export default function AdminDocumentsPage() {
     }
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: fetch documents on filter change
   useEffect(() => {
     loadDocuments();
   }, [statusFilter, categoryFilter]);
@@ -110,7 +114,7 @@ export default function AdminDocumentsPage() {
           <p className="text-sm text-muted-foreground">Manage and monitor scraped documents</p>
         </div>
         <Button variant="outline" size="sm" onClick={loadDocuments} disabled={loading}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
           Refresh
         </Button>
       </div>

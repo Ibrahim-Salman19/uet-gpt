@@ -3,7 +3,7 @@ import { mutation } from "../_generated/server";
 
 export const submit = mutation({
   args: {
-    messageId: v.id("messages"),
+    messageId: v.string(),
     rating: v.union(v.literal("thumbsUp"), v.literal("thumbsDown")),
     comment: v.optional(v.string()),
     category: v.optional(

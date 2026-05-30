@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { query, internalQuery } from "../_generated/server";
+import { internalQuery, query } from "../_generated/server";
 
 /**
  * fullTextSearch — internal query for BM25 exact match on chunks.
@@ -11,7 +11,7 @@ export const fullTextSearch = internalQuery({
       .query("crawledChunks")
       .withSearchIndex("search_text", (q) => q.search("text", args.query))
       .take(args.limit);
-      
+
     // Return with document URL and text
     const chunksWithDocs = [];
     for (const chunk of results) {

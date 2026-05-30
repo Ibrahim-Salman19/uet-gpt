@@ -44,16 +44,18 @@ async function verifySignature(
 }
 
 function normalizeContent(text: string): string {
-  return text
-    .replace(/\r\n/g, "\n")             // normalize line endings
-    .replace(/[ \t]+\n/g, "\n")         // trailing whitespace on lines
-    .replace(/\n{3,}/g, "\n\n")         // collapse excessive blank lines
-    // Drop pure navigation anchor links: [Text](#anchor)
-    .replace(/^\s*\[[^\]]*\]\(#[^)]*\)\s*$/gm, "")
-    // Drop empty markdown tables
-    .replace(/^(\s*\|\s*)+\|?\s*$/gm, "")
-    .replace(/^(\s*\|?\s*---\s*)+\|?\s*$/gm, "")
-    .trim();
+  return (
+    text
+      .replace(/\r\n/g, "\n") // normalize line endings
+      .replace(/[ \t]+\n/g, "\n") // trailing whitespace on lines
+      .replace(/\n{3,}/g, "\n\n") // collapse excessive blank lines
+      // Drop pure navigation anchor links: [Text](#anchor)
+      .replace(/^\s*\[[^\]]*\]\(#[^)]*\)\s*$/gm, "")
+      // Drop empty markdown tables
+      .replace(/^(\s*\|\s*)+\|?\s*$/gm, "")
+      .replace(/^(\s*\|?\s*---\s*)+\|?\s*$/gm, "")
+      .trim()
+  );
 }
 
 function isQualityChunk(text: string): boolean {
@@ -67,69 +69,146 @@ function isQualityChunk(text: string): boolean {
   return true;
 }
 
-export function chunkMarkdown(markdown: string, maxChunkSize: number = 3000): string[] {
+export function chunkMarkdown(
+  markdown: string,
+  maxChunkSize: number = 3000,
+  overlapSize: number = 200,
+): string[] {
   const chunks: string[] = [];
-  
+
   // 1. Split by double newline (Paragraphs/Sections/Tables)
   const blocks = markdown.split(/\n{2,}/);
-  
+
   let currentChunk = "";
-  
+  let currentHeader = "";
+
+  function getOverlap(text: string): string {
+    if (!text || text.length <= overlapSize) return text;
+    const tail = text.slice(-overlapSize);
+    const splitIndex = tail.indexOf(" ");
+    return splitIndex !== -1 ? tail.slice(splitIndex + 1) : tail;
+  }
+
+  function pushChunk(text: string) {
+    let cleanText = text.trim();
+    if (currentHeader && !cleanText.startsWith(currentHeader)) {
+      cleanText = `${currentHeader}\n\n${cleanText}`;
+    }
+    chunks.push(cleanText);
+  }
+
   for (const block of blocks) {
+    const trimmedBlock = block.trim();
+    const isBlockHeader = trimmedBlock.startsWith("#");
+    if (isBlockHeader) {
+      currentHeader = trimmedBlock;
+    }
+
     if (block.length > maxChunkSize) {
       if (currentChunk) {
-        chunks.push(currentChunk.trim());
-        currentChunk = "";
+        pushChunk(currentChunk);
+        const isHeader = block.trimStart().startsWith("#");
+        currentChunk = isHeader ? "" : getOverlap(currentChunk.trim());
       }
-      
+
       // If it's a markdown table, split by rows but preserve the header
       if (block.trimStart().startsWith("|")) {
         const rows = block.split("\n");
-        let currentTableChunk = "";
-        const header = rows.length > 2 ? rows[0] + "\n" + rows[1] + "\n" : "";
+        let currentTableChunk = currentChunk ? `${currentChunk}\n\n` : "";
+        const header = rows.length > 2 ? `${rows[0]}\n${rows[1]}\n` : "";
         const startIndex = rows.length > 2 ? 2 : 0;
-        
+
         for (let i = startIndex; i < rows.length; i++) {
-          const row = rows[i] + "\n";
-          if ((currentTableChunk.length + row.length) > maxChunkSize) {
-            if (currentTableChunk) chunks.push((header + currentTableChunk).trim());
-            currentTableChunk = row;
+          const row = `${rows[i]}\n`;
+          if (currentTableChunk.length + row.length > maxChunkSize) {
+            if (currentTableChunk) pushChunk(header + currentTableChunk);
+            currentTableChunk = `${getOverlap(currentTableChunk.trim())}\n${row}`;
           } else {
             currentTableChunk += row;
           }
         }
-        if (currentTableChunk) chunks.push((header + currentTableChunk).trim());
+        if (currentTableChunk) {
+          pushChunk(header + currentTableChunk);
+          currentChunk = getOverlap(currentTableChunk.trim());
+        } else {
+          currentChunk = "";
+        }
       } else {
-        // Prose block -> Split by sentence boundary
-        const sentences = block.match(/[^.!?]+[.!?]+/g) || [block];
-        let currentSentenceChunk = "";
-        
-        for (const sentence of sentences) {
+        // Prose block -> Split by sentence boundary safely
+        const sentences: string[] = [];
+        const sentenceRegex = /[^.!?]+[.!?]+/g;
+        let lastIndex = 0;
+        while (true) {
+          const match = sentenceRegex.exec(block);
+          if (match === null) break;
+          sentences.push(match[0]);
+          lastIndex = sentenceRegex.lastIndex;
+        }
+        if (lastIndex < block.length) {
+          const trailing = block.slice(lastIndex);
+          if (trailing.trim()) {
+            sentences.push(trailing);
+          }
+        }
+        if (sentences.length === 0) {
+          sentences.push(block);
+        }
+
+        const finalSentences: string[] = [];
+        for (const s of sentences) {
+          if (s.length > maxChunkSize) {
+            const words = s.split(" ");
+            let currentWordChunk = "";
+            for (const word of words) {
+              if (currentWordChunk.length + word.length + 1 > maxChunkSize) {
+                if (currentWordChunk) finalSentences.push(currentWordChunk);
+                currentWordChunk = word;
+              } else {
+                currentWordChunk += (currentWordChunk ? " " : "") + word;
+              }
+            }
+            if (currentWordChunk) {
+              finalSentences.push(currentWordChunk);
+            }
+          } else {
+            finalSentences.push(s);
+          }
+        }
+
+        let currentSentenceChunk = currentChunk ? `${currentChunk}\n\n` : "";
+
+        for (const sentence of finalSentences) {
           if (currentSentenceChunk.length + sentence.length > maxChunkSize) {
-            if (currentSentenceChunk) chunks.push(currentSentenceChunk.trim());
-            currentSentenceChunk = sentence;
+            if (currentSentenceChunk) pushChunk(currentSentenceChunk);
+            currentSentenceChunk = `${getOverlap(currentSentenceChunk.trim())} ${sentence}`;
           } else {
             currentSentenceChunk += (currentSentenceChunk ? " " : "") + sentence;
           }
         }
-        if (currentSentenceChunk) chunks.push(currentSentenceChunk.trim());
+        if (currentSentenceChunk) {
+          pushChunk(currentSentenceChunk);
+          currentChunk = getOverlap(currentSentenceChunk.trim());
+        } else {
+          currentChunk = "";
+        }
       }
     } else {
       // Normal coherent block
+      const isHeader = block.trimStart().startsWith("#");
       if (currentChunk.length + block.length > maxChunkSize) {
-        chunks.push(currentChunk.trim());
-        currentChunk = block;
+        pushChunk(currentChunk);
+        currentChunk = (isHeader ? "" : `${getOverlap(currentChunk.trim())}\n\n`) + block;
       } else {
         currentChunk += (currentChunk ? "\n\n" : "") + block;
       }
     }
   }
-  
-  if (currentChunk) {
-    chunks.push(currentChunk.trim());
+
+  if (currentChunk && currentChunk.trim().length > overlapSize) {
+    pushChunk(currentChunk);
   }
-  
-  return chunks.filter(c => isQualityChunk(c));
+
+  return chunks.filter((c) => isQualityChunk(c));
 }
 
 export const crawlWebhook = httpAction(async (ctx, request) => {
@@ -151,9 +230,9 @@ export const crawlWebhook = httpAction(async (ctx, request) => {
       return new Response("Missing signature headers", { status: 400 });
     }
 
-    // 2. Validate timestamp window to prevent replay attacks (allow up to 4 hours for crawl jobs)
+    // 2. Validate timestamp window to prevent replay attacks (allow up to 5 minutes)
     const ts = parseInt(timestamp, 10);
-    const MAX_SKEW_MS = 4 * 60 * 60 * 1000; // 4 hours
+    const MAX_SKEW_MS = 5 * 60 * 1000; // 5 minutes
     if (Number.isNaN(ts) || Math.abs(Date.now() - ts) > MAX_SKEW_MS) {
       console.warn(`Webhook rejected: Timestamp expired or invalid: ${timestamp}`);
       return new Response("Request timestamp expired", { status: 400 });
@@ -196,7 +275,10 @@ export const crawlWebhook = httpAction(async (ctx, request) => {
     }
 
     // Mark as processed in the database
-    await ctx.runMutation(internal.crawl.mutations.markWebhookProcessed, { jobId: taskId });
+    await ctx.runMutation(internal.crawl.mutations.markWebhookProcessed, {
+      jobId: taskId,
+      expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days TTL
+    });
 
     // Process pages, normalize, chunk, and queue them for ingestion
     for (const result of results) {
@@ -222,9 +304,9 @@ export const crawlWebhook = httpAction(async (ctx, request) => {
         if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
           const { generateText } = await import("ai");
           const { google } = await import("@ai-sdk/google");
-          
+
           const { text } = await generateText({
-            model: google("gemini-1.5-flash-8b"),
+            model: google("gemini-2.5-flash"),
             prompt: `Write a 1-sentence summary of this document to provide context for vector search chunks. Document text:\n\n${normalized.slice(0, 2000)}`,
           });
           contextPrefix += `Context: ${text.trim()}\n\n`;
@@ -289,17 +371,21 @@ export const ingestWebhook = httpAction(async (ctx, request) => {
 
     const authHeader = request.headers.get("Authorization");
     const token = authHeader?.split(" ")[1];
-    const expectedToken = process.env.CONVEX_AUTH_TOKEN || process.env.CRAWL_WEBHOOK_SECRET;
+    const expectedToken = process.env.CONVEX_AUTH_TOKEN;
 
     if (expectedToken && token !== expectedToken) {
       console.warn("Unauthorized /ingest request");
       return new Response("Unauthorized", { status: 401 });
     }
 
-    const { url, markdown, contentHash, crawlSessionId, title, sourceType, freshnessTier } = payload;
+    const { url, markdown, contentHash, crawlSessionId, title, sourceType, freshnessTier } =
+      payload;
 
     if (!url || !markdown || !contentHash || !crawlSessionId || !sourceType) {
-      return new Response("Missing required fields (url, markdown, contentHash, crawlSessionId, sourceType)", { status: 400 });
+      return new Response(
+        "Missing required fields (url, markdown, contentHash, crawlSessionId, sourceType)",
+        { status: 400 },
+      );
     }
 
     // Call upsertDocument mutation to update the document and delete old chunks/vectors if changed
@@ -329,9 +415,9 @@ export const ingestWebhook = httpAction(async (ctx, request) => {
       if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
         const { generateText } = await import("ai");
         const { google } = await import("@ai-sdk/google");
-        
+
         const { text } = await generateText({
-          model: google("gemini-1.5-flash-8b"),
+          model: google("gemini-2.5-flash"),
           prompt: `Write a 1-sentence summary of this document to provide context for vector search chunks. Document text:\n\n${normalized.slice(0, 2000)}`,
         });
         contextPrefix += `Context: ${text.trim()}\n\n`;

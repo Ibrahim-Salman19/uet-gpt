@@ -47,6 +47,12 @@ export async function POST(req: Request) {
     const email = emailAddresses?.[0]?.email_address ?? "";
     const imageUrl = data.image_url as string | undefined;
 
+    const webhookSecret = process.env.WEBHOOK_SECRET;
+    if (!webhookSecret) {
+      console.warn("Missing WEBHOOK_SECRET, skipping Convex mutation");
+      return new Response("ok", { status: 200 });
+    }
+
     const client = new ConvexHttpClient(convexUrl);
     await (client.mutation as unknown as (name: string, args: object) => Promise<unknown>)(
       "users:getOrCreate",
@@ -55,7 +61,7 @@ export async function POST(req: Request) {
         name,
         email,
         imageUrl: imageUrl || undefined,
-        secret,
+        secret: webhookSecret,
       },
     );
   }

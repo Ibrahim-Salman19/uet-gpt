@@ -13,8 +13,6 @@ interface AuthGuardProps {
   children: React.ReactNode;
   /** Optional admin role requirement */
   requireAdmin?: boolean;
-  /** Optional custom redirect path */
-  redirectTo?: string;
   /** Optional admin check function that uses Convex */
   isAdmin?: boolean;
   /** Whether the admin check is still loading */

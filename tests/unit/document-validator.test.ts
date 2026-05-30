@@ -114,11 +114,11 @@ describe("documentValidator", () => {
       documentValidator = mod.documentValidator;
     });
 
-    it("is a union of 5 status literals", () => {
+    it("is a union of 7 status literals", () => {
       const field = documentValidator.fields.status;
       expect(field.kind).toBe("union");
       expect(field.isOptional).toBe("required");
-      expect(field.members).toHaveLength(5);
+      expect(field.members).toHaveLength(7);
     });
 
     it("includes all expected status values", () => {
@@ -129,6 +129,8 @@ describe("documentValidator", () => {
       expect(values).toContain("indexed");
       expect(values).toContain("failed");
       expect(values).toContain("stale");
+      expect(values).toContain("active");
+      expect(values).toContain("pending_embed");
     });
 
     it("each status member is a literal validator", () => {
@@ -286,7 +288,7 @@ describe("documentValidator", () => {
     it("serializes status union with members array", () => {
       const status = j.value.status;
       expect(status.fieldType.type).toBe("union");
-      expect(status.fieldType.value).toHaveLength(5);
+      expect(status.fieldType.value).toHaveLength(7);
       expect(status.optional).toBe(false);
     });
 
@@ -429,8 +431,8 @@ describe("documentValidator", () => {
       statusField = documentValidator.fields.status;
     });
 
-    it("has exactly 5 members", () => {
-      expect(statusField.members).toHaveLength(5);
+    it("has exactly 7 members", () => {
+      expect(statusField.members).toHaveLength(7);
     });
 
     it("has no duplicate literal values in the union", () => {
@@ -441,7 +443,7 @@ describe("documentValidator", () => {
 
     it("contains the expected values in the exact order", () => {
       const values = statusField.members.map((m: any) => m.value);
-      expect(values).toEqual(["pending", "processing", "indexed", "failed", "stale"]);
+      expect(values).toEqual(["pending", "processing", "indexed", "failed", "stale", "active", "pending_embed"]);
     });
 
     it("does not contain invalid status values", () => {
@@ -553,6 +555,8 @@ describe("documentValidator", () => {
             author?: string;
             wordCount?: number;
             language?: string;
+            etag?: string;
+            sourceType?: string;
           }
         | undefined;
 
@@ -565,7 +569,7 @@ describe("documentValidator", () => {
 
       // Status is exactly the union of literals
       expectTypeOf<Doc["status"]>().toEqualTypeOf<
-        "pending" | "processing" | "indexed" | "failed" | "stale"
+        "pending" | "processing" | "indexed" | "failed" | "stale" | "active" | "pending_embed"
       >();
 
       // A plain string is NOT assignable to status (narrower type check)

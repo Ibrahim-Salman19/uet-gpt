@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { action } from "../_generated/server";
 
-const CACHE_SIMILARITY_THRESHOLD = 0.95;
+import { CACHE_SIMILARITY_THRESHOLD } from "../constants";
 
 function cosineSimilarity(a: number[], b: number[]) {
   if (a.length === 0 || b.length === 0) return 0;

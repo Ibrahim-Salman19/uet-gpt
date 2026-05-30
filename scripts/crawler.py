@@ -43,7 +43,10 @@ CONVEX_SITE_URL = os.environ.get("CONVEX_SITE_URL")
 if not CONVEX_SITE_URL and os.environ.get("NEXT_PUBLIC_CONVEX_URL"):
     CONVEX_SITE_URL = os.environ.get("NEXT_PUBLIC_CONVEX_URL").replace(".convex.cloud", ".convex.site")
 
-CONVEX_AUTH_TOKEN = os.environ.get("CONVEX_AUTH_TOKEN") or os.environ.get("CRAWL_WEBHOOK_SECRET")
+CONVEX_AUTH_TOKEN = os.environ.get("CONVEX_AUTH_TOKEN")
+if not CONVEX_AUTH_TOKEN:
+    print("WARNING: CONVEX_AUTH_TOKEN not set — /ingest endpoint may reject the request")
+    print("  Consider using CRAWL_WEBHOOK_SECRET instead: export CONVEX_AUTH_TOKEN=$CRAWL_WEBHOOK_SECRET")
 
 SITE_ROOTS = [
     "https://web.uettaxila.edu.pk/",

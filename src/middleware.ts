@@ -29,22 +29,46 @@ const isProtectedRoute = createRouteMatcher([
 // ── Middleware ───────────────────────────────────────────────────────────────
 
 export default clerkMiddleware(async (auth, req) => {
-  if (process.env.PLAYWRIGHT_TEST === "true") {
-    return;
+  const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+  const cspHeader = `
+    default-src 'self';
+    script-src 'self' 'nonce-${nonce}' 'strict-dynamic';
+    style-src 'self' 'nonce-${nonce}';
+    img-src 'self' data: https:;
+    connect-src 'self' *.convex.cloud wss://*.convex.cloud;
+    frame-ancestors 'none';
+  `
+    .replace(/\s{2,}/g, " ")
+    .trim();
+
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set("x-nonce", nonce);
+  requestHeaders.set("Content-Security-Policy", cspHeader);
+
+  if (process.env.NODE_ENV !== "production" && process.env.PLAYWRIGHT_TEST === "true") {
+    const res = NextResponse.next({ request: { headers: requestHeaders } });
+    res.headers.set("Content-Security-Policy", cspHeader);
+    return res;
   }
   const { sessionClaims, userId } = await auth();
 
   // 1. Auth routes (sign-in / sign-up) — redirect to /chat if already signed in
   if (isAuthRoute(req)) {
     if (userId) {
-      return NextResponse.redirect(new URL("/chat", req.url));
+      const res = NextResponse.redirect(new URL("/chat", req.url));
+      res.headers.set("Content-Security-Policy", cspHeader);
+      return res;
     }
-    return;
+    const res = NextResponse.next({ request: { headers: requestHeaders } });
+    res.headers.set("Content-Security-Policy", cspHeader);
+    return res;
   }
 
   // 2. Public routes — no auth required
   if (isPublicRoute(req)) {
-    return;
+    const res = NextResponse.next({ request: { headers: requestHeaders } });
+    res.headers.set("Content-Security-Policy", cspHeader);
+    return res;
   }
 
   // 3. Admin routes — require authentication + admin/superadmin role
@@ -59,23 +83,32 @@ export default clerkMiddleware(async (auth, req) => {
 
     if (role && !isAdminRole(role)) {
       // JWT template has a role claim but user is not admin — deny immediately
-      return NextResponse.redirect(new URL("/unauthorized", req.url));
+      const res = NextResponse.redirect(new URL("/unauthorized", req.url));
+      res.headers.set("Content-Security-Policy", cspHeader);
+      return res;
     }
 
     // If no role claim exists (JWT template not configured), protect for auth
     // and let the client-side AuthGuard component enforce the role gate via Convex
     await auth.protect();
-    return;
+    const res = NextResponse.next({ request: { headers: requestHeaders } });
+    res.headers.set("Content-Security-Policy", cspHeader);
+    return res;
   }
 
   // 4. Protected routes — require authentication
   if (isProtectedRoute(req)) {
     await auth.protect();
-    return;
+    const res = NextResponse.next({ request: { headers: requestHeaders } });
+    res.headers.set("Content-Security-Policy", cspHeader);
+    return res;
   }
 
   // 5. Fallback for any unmatched route — require authentication
   await auth.protect();
+  const res = NextResponse.next({ request: { headers: requestHeaders } });
+  res.headers.set("Content-Security-Policy", cspHeader);
+  return res;
 });
 
 // ── Config ──────────────────────────────────────────────────────────────────

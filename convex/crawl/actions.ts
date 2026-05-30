@@ -1,131 +1,12 @@
 "use node";
 
-import { createHash, createHmac } from "node:crypto";
+import { createHmac } from "node:crypto";
 import { ConvexError, v } from "convex/values";
+import { UET_CRAWL_CONFIG } from "../../src/lib/constants";
 import { internal } from "../_generated/api";
-import { action, internalAction } from "../_generated/server";
+import { internalAction } from "../_generated/server";
 
-const SEED_URLS = [
-  "https://web.uettaxila.edu.pk/",
-  "https://web.uettaxila.edu.pk/admissions/",
-  "https://web.uettaxila.edu.pk/academics/",
-  "https://web.uettaxila.edu.pk/departments/",
-  "https://web.uettaxila.edu.pk/programs/",
-  "https://web.uettaxila.edu.pk/about/",
-];
-
-function sha256(text: string): string {
-  return createHash("sha256").update(text).digest("hex");
-}
-
-function normalizeContent(text: string): string {
-  return text
-    .replace(/\r\n/g, "\n") // normalize line endings
-    .replace(/\s+\n/g, "\n") // trailing whitespace
-    .replace(/\n{3,}/g, "\n\n") // collapse excessive blank lines
-    .trim();
-}
-
-function chunkMarkdown(markdown: string, maxChunkSize: number = 3000): string[] {
-  const CHUNK_OVERLAP_CHARS = 300;
-  const lines = markdown.split("\n");
-  const chunks: string[] = [];
-
-  const headers: Record<number, string> = { 1: "", 2: "", 3: "", 4: "", 5: "", 6: "" };
-  let current: string[] = [];
-  let inTable = false;
-
-  const flush = () => {
-    const text = current.join("\n").trim();
-    if (text.length >= 40) {
-      chunks.push(text);
-    }
-    current = [];
-  };
-
-  for (const line of lines) {
-    const headerMatch = line.match(/^(#{1,6})\s+(.*)/);
-    if (headerMatch && headerMatch[1]) {
-      flush();
-      const level = headerMatch[1].length;
-      headers[level] = line.trim();
-      for (let l = level + 1; l <= 6; l++) headers[l] = "";
-      current.push(line);
-      continue;
-    }
-
-    const isTableLine = line.trimStart().startsWith("|");
-    if (isTableLine && !inTable) inTable = true;
-    if (!isTableLine && inTable && line.trim() !== "") inTable = false;
-
-    current.push(line);
-
-    if (!inTable && current.join("\n").length > maxChunkSize) {
-      const textToFlush = current.join("\n").trim();
-      flush();
-      const breadcrumbLines = [
-        headers[1], headers[2], headers[3], 
-        headers[4], headers[5], headers[6]
-      ].filter(Boolean) as string[];
-      
-      if (breadcrumbLines.length > 0) {
-        current = [...breadcrumbLines, ""];
-      }
-      
-      if (textToFlush.length > CHUNK_OVERLAP_CHARS) {
-        let overlap = textToFlush.slice(-CHUNK_OVERLAP_CHARS);
-        const firstSpace = overlap.indexOf(" ");
-        if (firstSpace !== -1 && firstSpace < 50) {
-          overlap = overlap.slice(firstSpace + 1);
-        }
-        current.push(overlap);
-      } else {
-        current.push(textToFlush);
-      }
-    }
-  }
-
-  flush();
-  return chunks;
-}
-
-export const processWebhookResult = action({
-  args: {
-    url: v.string(),
-    title: v.string(),
-    content: v.string(),
-  },
-  returns: v.object({
-    success: v.boolean(),
-    entryId: v.optional(v.string()),
-  }),
-  handler: async (ctx, args) => {
-    if (!args.content || args.content.trim().length === 0) {
-      throw new ConvexError("Content is empty");
-    }
-
-    const normalized = normalizeContent(args.content);
-    const contentHash = sha256(normalized);
-    const rawChunks = chunkMarkdown(normalized);
-    const chunks = rawChunks.map((text) => ({
-      text,
-      contentHash: sha256(text),
-    }));
-
-    await ctx.runMutation(internal.crawl.mutations.queueChunksForEmbedding, {
-      url: args.url,
-      title: args.title,
-      contentHash,
-      jobId: "legacy-job",
-      chunks,
-    });
-
-    return {
-      success: true,
-      entryId: "legacy-compat",
-    };
-  },
-});
+// legacy processWebhookResult removed
 
 export const executeCrawlJob = internalAction({
   args: {
@@ -139,7 +20,13 @@ export const executeCrawlJob = internalAction({
     });
 
     try {
-      const crawlUrl = (process.env.CRAWL4AI_URL || "http://localhost:11235").replace(/\/$/, "");
+      const crawlUrlRaw = process.env.CRAWL4AI_URL;
+      if (!crawlUrlRaw) {
+        throw new ConvexError(
+          "CRAWL4AI_URL environment variable is not configured. Please set CRAWL4AI_URL in your deployment settings.",
+        );
+      }
+      const crawlUrl = crawlUrlRaw.replace(/\/$/, "");
       const webhookUrl = `${process.env.CONVEX_SITE_URL}/api/webhook/crawl`;
 
       const secret = process.env.CRAWL_WEBHOOK_SECRET;
@@ -154,11 +41,11 @@ export const executeCrawlJob = internalAction({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          urls: SEED_URLS,
-          max_pages: 500,
-          max_depth: 5,
-          include_patterns: ["https://web.uettaxila.edu.pk/**"],
-          exclude_patterns: ["*.pdf", "*.jpg", "*.png", "*/edit", "*/delete"],
+          urls: UET_CRAWL_CONFIG.seedUrls,
+          max_pages: UET_CRAWL_CONFIG.maxPages,
+          max_depth: UET_CRAWL_CONFIG.maxDepth,
+          include_patterns: UET_CRAWL_CONFIG.includePaths,
+          exclude_patterns: UET_CRAWL_CONFIG.excludePaths,
           extract_blocks: true,
           word_count_threshold: 50,
           check_robots_txt: true,
@@ -222,9 +109,7 @@ export const embedSingleChunk = internalAction({
       // Safe source extraction — handles both https:// and pdf:// virtual URLs
       let sourceHost: string;
       try {
-        sourceHost = args.url.startsWith("pdf://")
-          ? "pdf"
-          : new URL(args.url).hostname;
+        sourceHost = args.url.startsWith("pdf://") ? "pdf" : new URL(args.url).hostname;
       } catch {
         sourceHost = "unknown";
       }

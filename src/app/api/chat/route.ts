@@ -2,73 +2,12 @@ import { createCerebras } from "@ai-sdk/cerebras";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createGroq } from "@ai-sdk/groq";
 import { auth } from "@clerk/nextjs/server";
-import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
 import { type LanguageModel, streamText } from "ai";
 import { api } from "convex/_generated/api";
 import { ConvexHttpClient } from "convex/browser";
 import { after, type NextRequest, NextResponse } from "next/server";
-
-// Rate limiting setup with Upstash Redis
-// Fallback to in-memory rate limiting if environment variables are not set
-let ratelimit: Ratelimit | null = null;
-const FALLBACK_WINDOW = 60_000;
-const FALLBACK_MAX = 20;
-const fallbackRateLimitMap = new Map<string, { count: number; resetAt: number }>();
-
-const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
-const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
-
-if (redisUrl && redisToken) {
-  try {
-    const redis = new Redis({
-      url: redisUrl,
-      token: redisToken,
-    });
-    ratelimit = new Ratelimit({
-      redis,
-      limiter: Ratelimit.slidingWindow(20, "60 s"),
-      analytics: true,
-      prefix: "uetgpt_ratelimit",
-    });
-  } catch (error) {
-    console.error("Failed to initialize Upstash Redis rate limiter, using fallback:", error);
-  }
-} else {
-  console.warn("Upstash Redis credentials missing. Using local in-memory rate limiter.");
-}
-
-async function isRateLimited(key: string): Promise<boolean> {
-  if (ratelimit) {
-    try {
-      const result = await ratelimit.limit(key);
-      return !result.success;
-    } catch (error) {
-      console.error("Upstash rate limit check failed, using fallback:", error);
-    }
-  }
-
-  // Fallback in-memory rate limiter
-  const now = Date.now();
-  const entry = fallbackRateLimitMap.get(key);
-  if (!entry || now > entry.resetAt) {
-    fallbackRateLimitMap.set(key, { count: 1, resetAt: now + FALLBACK_WINDOW });
-    return false;
-  }
-  if (entry.count >= FALLBACK_MAX) return true;
-  entry.count++;
-  return false;
-}
-
-// Clean up in-memory rate limit map periodically
-if (typeof setInterval !== "undefined") {
-  setInterval(() => {
-    const now = Date.now();
-    for (const [key, entry] of fallbackRateLimitMap) {
-      if (now > entry.resetAt) fallbackRateLimitMap.delete(key);
-    }
-  }, 120_000);
-}
+import { getRoleFromClaims, isAdminRole } from "@/lib/clerk-claims";
+import { checkChatRateLimit } from "@/lib/rate-limit";
 
 function extractText(message: {
   content?: string;
@@ -84,6 +23,8 @@ function extractText(message: {
   return "";
 }
 
+import { LLM_FALLBACK_CHAIN } from "@/lib/llm-models";
+
 function getAvailableModels(): LanguageModel[] {
   const groq = createGroq({ apiKey: process.env.GROQ_API_KEY || "" });
   const google = createGoogleGenerativeAI({
@@ -95,22 +36,21 @@ function getAvailableModels(): LanguageModel[] {
 
   const models: LanguageModel[] = [];
 
-  if (process.env.GROQ_API_KEY) {
-    models.push(groq("meta-llama/llama-4-scout-17b-16e-instruct"));
-  }
-  if (process.env.CEREBRAS_API_KEY) {
-    models.push(cerebras("llama-3.3-70b"));
-  }
-  if (process.env.GROQ_API_KEY) {
-    models.push(groq("llama-3.1-8b-instant"));
-  }
-  if (process.env.GEMINI_API_KEY) {
-    models.push(google("gemini-1.5-flash"));
+  for (const modelConfig of LLM_FALLBACK_CHAIN) {
+    if (modelConfig.provider === "groq" && process.env.GROQ_API_KEY) {
+      models.push(groq(modelConfig.id));
+    } else if (modelConfig.provider === "cerebras" && process.env.CEREBRAS_API_KEY) {
+      models.push(cerebras(modelConfig.id));
+    } else if (modelConfig.provider === "google" && process.env.GEMINI_API_KEY) {
+      models.push(google(modelConfig.id));
+    }
   }
 
   return models;
 }
 
+// Note: This logic is duplicated in convex/rag/ask.ts as robustStreamText
+// to avoid cross-boundary imports between Next.js Edge and Convex Isolates.
 async function tryStreamWithFallback(
   models: LanguageModel[],
   config: {
@@ -124,11 +64,15 @@ async function tryStreamWithFallback(
   let lastError: unknown;
   for (const model of models) {
     try {
+      // Determine model-specific temperature: reasoning models must run at temperature=1.0
+      const isReasoningModel = (model as any).modelId === "gpt-oss-120b";
+      const resolvedTemp = isReasoningModel ? 1.0 : config.temperature;
+
       const result = streamText({
         model,
         system: config.system,
         messages: config.messages,
-        temperature: config.temperature,
+        temperature: resolvedTemp,
         maxOutputTokens: config.maxOutputTokens,
       } as Parameters<typeof streamText>[0]);
 
@@ -136,18 +80,91 @@ async function tryStreamWithFallback(
       const reader = result.textStream.getReader();
       const first = await reader.read();
 
-      // Reconstruct the stream with the first chunk prepended
+      // Reconstruct the stream with the first chunk prepended and thinking tokens stripped
       const textStream = new ReadableStream({
         async start(controller) {
           let accumulatedText = "";
-          if (!first.done && first.value !== undefined) {
-            controller.enqueue(first.value);
-            accumulatedText += first.value;
+          let inThinking = false;
+          let pendingBuffer = "";
+
+          function processChunk(value: string) {
+            let text = pendingBuffer + value;
+            pendingBuffer = "";
+
+            while (text.length > 0) {
+              if (!inThinking) {
+                const index = text.indexOf("<think>");
+                if (index !== -1) {
+                  // Enqueue everything before <think>
+                  if (index > 0) {
+                    const toEnqueue = text.substring(0, index);
+                    controller.enqueue(toEnqueue);
+                    accumulatedText += toEnqueue;
+                  }
+                  inThinking = true;
+                  text = text.substring(index + 7);
+                } else {
+                  // Look for partial "<think>" at the end of the text
+                  let partialIndex = -1;
+                  for (let i = 1; i < 7; i++) {
+                    if (text.endsWith("<think>".substring(0, i))) {
+                      partialIndex = text.length - i;
+                      break;
+                    }
+                  }
+                  if (partialIndex !== -1) {
+                    pendingBuffer = text.substring(partialIndex);
+                    const toEnqueue = text.substring(0, partialIndex);
+                    if (toEnqueue.length > 0) {
+                      controller.enqueue(toEnqueue);
+                      accumulatedText += toEnqueue;
+                    }
+                    text = "";
+                  } else {
+                    controller.enqueue(text);
+                    accumulatedText += text;
+                    text = "";
+                  }
+                }
+              } else {
+                const index = text.indexOf("</think>");
+                if (index !== -1) {
+                  inThinking = false;
+                  text = text.substring(index + 8);
+                } else {
+                  // Look for partial "</think>" at the end of the text
+                  let partialIndex = -1;
+                  for (let i = 1; i < 8; i++) {
+                    if (text.endsWith("</think>".substring(0, i))) {
+                      partialIndex = text.length - i;
+                      break;
+                    }
+                  }
+                  if (partialIndex !== -1) {
+                    pendingBuffer = text.substring(partialIndex);
+                    text = "";
+                  } else {
+                    // Suppress all of it since we are in thinking mode
+                    text = "";
+                  }
+                }
+              }
+            }
           }
+
+          if (!first.done && first.value !== undefined) {
+            processChunk(first.value);
+          }
+
           try {
             while (true) {
               const { done, value } = await reader.read();
               if (done) {
+                // If there's any remaining buffer that was not a full tag, enqueue it
+                if (pendingBuffer.length > 0 && !inThinking && !pendingBuffer.startsWith("<")) {
+                  controller.enqueue(pendingBuffer);
+                  accumulatedText += pendingBuffer;
+                }
                 controller.close();
                 if (config.onFinish) {
                   const m = model as any;
@@ -155,8 +172,7 @@ async function tryStreamWithFallback(
                 }
                 break;
               }
-              controller.enqueue(value);
-              accumulatedText += value;
+              processChunk(value);
             }
           } catch (e) {
             controller.error(e);
@@ -214,8 +230,42 @@ function buildSystemPrompt(context: string | null, intent: string): string {
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Enforce Authentication at the API route level
-    const { userId } = await auth();
+    // 1. CSRF Protection - Verify Origin and Referer
+    const origin = req.headers.get("origin");
+    const referer = req.headers.get("referer");
+    const allowed = [process.env.NEXT_PUBLIC_APP_URL].filter(Boolean);
+
+    // In development mode, allow localhost/127.0.0.1
+    if (process.env.NODE_ENV === "development") {
+      allowed.push("http://localhost:3000");
+    }
+
+    if (origin && !allowed.includes(origin)) {
+      return new Response("Forbidden: CSRF check failed (origin)", { status: 403 });
+    }
+
+    if (referer) {
+      try {
+        const refererUrl = new URL(referer);
+        if (!allowed.includes(refererUrl.origin)) {
+          return new Response("Forbidden: CSRF check failed (referer)", { status: 403 });
+        }
+      } catch {
+        return new Response("Forbidden: Invalid referer", { status: 400 });
+      }
+    }
+
+    // 2. DoS Guard: Enforce strict request body size limit (100KB)
+    const MAX_BODY = 100 * 1024; // 100KB
+    const bodyText = await req.text();
+    if (bodyText.length > MAX_BODY) {
+      return NextResponse.json({ error: "Request body too large" }, { status: 413 });
+    }
+
+    const body = JSON.parse(bodyText);
+
+    // 3. Enforce Authentication at the API route level
+    const { userId, sessionClaims } = await auth();
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -225,20 +275,33 @@ export async function POST(req: NextRequest) {
       req.headers.get("x-real-ip") ||
       "unknown";
 
-    // 2. Perform Rate Limit check using Auth user ID (preferred) or IP address
+    // 4. Perform Rate Limit check using Auth user ID (preferred) or IP address
     const rateLimitKey = userId || ip;
-    if (await isRateLimited(rateLimitKey)) {
+    const role = getRoleFromClaims(sessionClaims as any);
+    const resolvedRole = isAdminRole(role) ? "admin" : "user";
+    const rateLimitResult = await checkChatRateLimit(rateLimitKey, resolvedRole);
+    if (rateLimitResult && !rateLimitResult.success) {
       return NextResponse.json(
         { error: "Too many requests. Please wait before sending another message." },
         { status: 429 },
       );
     }
 
-    const body = await req.json();
     const rawMessages: unknown[] = body.messages;
 
     if (!Array.isArray(rawMessages) || rawMessages.length === 0) {
       return NextResponse.json({ error: "Messages array is required" }, { status: 400 });
+    }
+
+    // 5. DoS Guard: Validate per-message length cap (8000 chars)
+    for (const msg of rawMessages as any[]) {
+      const content = msg.content || "";
+      if (typeof content === "string" && content.length > 8000) {
+        return NextResponse.json(
+          { error: "Message length exceeds the limit of 8000 characters" },
+          { status: 400 },
+        );
+      }
     }
 
     const lastMessage = rawMessages[rawMessages.length - 1] as {
@@ -303,7 +366,7 @@ export async function POST(req: NextRequest) {
           // Write the response to the semantic cache asynchronously in the background
           after(async () => {
             try {
-              await convex.mutation((api as any).cache.set.set, {
+              await convex.mutation(api.cache.set.set, {
                 queryText: question,
                 queryEmbedding: ragResult.queryEmbedding,
                 response: text,

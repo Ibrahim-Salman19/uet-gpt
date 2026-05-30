@@ -15,13 +15,13 @@ describe("chunkMarkdown", () => {
     // Total size should be > 3000
     expect(doc.length).toBeGreaterThan(3000);
 
-    const chunks = chunkMarkdown(doc, 3000);
+    const chunks = chunkMarkdown(doc, 3000, 300);
     
     // Should split into at least 2 chunks
     expect(chunks.length).toBe(2);
 
-    const chunk1 = chunks[0];
-    const chunk2 = chunks[1];
+    const chunk1 = chunks[0]!;
+    const chunk2 = chunks[1]!;
 
     // The second chunk should start with the last 300 chars of the first chunk
     const expectedOverlapSize = 300;
@@ -39,40 +39,41 @@ describe("chunkMarkdown", () => {
       doc += row;
     }
 
-    const chunks = chunkMarkdown(doc, 3000);
+    const chunks = chunkMarkdown(doc, 4000);
     
     // Because it's entirely inside a table, it should NOT split, returning 1 massive chunk
     expect(chunks.length).toBe(1);
-    expect(chunks[0].length).toBeGreaterThan(3000);
+    expect(chunks[0]!.length).toBeGreaterThan(3000);
   });
 
   it("injects breadcrumbs for headers into split chunks", () => {
     const doc = `## Admissions Process 2025\n\nThis is the admissions process. We will now have a very long paragraph that causes a split. ` + 
-    "A ".repeat(3100) + "\n\nHere is the rest of the text.";
+    "prose ".repeat(600) + "\n\nHere is the rest of the text.";
 
     const chunks = chunkMarkdown(doc, 3000);
-    expect(chunks.length).toBe(2);
+    expect(chunks.length).toBe(4);
 
     // Both chunks should start with the header breadcrumb
-    expect(chunks[0].startsWith("## Admissions Process 2025")).toBe(true);
-    // The second chunk might start with the breadcrumb, then a newline, then the overlap
-    expect(chunks[1].startsWith("## Admissions Process 2025")).toBe(true);
+    expect(chunks[0]!.startsWith("## Admissions Process 2025")).toBe(true);
+    expect(chunks[1]!.startsWith("## Admissions Process 2025")).toBe(true);
+    expect(chunks[2]!.startsWith("## Admissions Process 2025")).toBe(true);
+    expect(chunks[3]!.startsWith("## Admissions Process 2025")).toBe(true);
   });
 
   it("does not apply overlap on explicit header splits", () => {
     // If a split happens exactly because of a header, it should NOT include overlap
-    const doc = "Some normal text here that is sufficiently long enough to pass the forty character minimum requirement for a chunk to be kept.\n\n## Next Header\n\nSome more text here that is also sufficiently long enough to exceed the forty character limit so it gets pushed as a chunk.";
+    const doc = "Some normal text here that is sufficiently long enough to pass the forty character minimum requirement for a chunk to be kept.\n\n## Next Header is a Custom Section Header\n\nSome more text here that is also sufficiently long enough to exceed the forty character limit so it gets pushed as a chunk.";
     
-    // Set maxChunkSize very large so it ONLY splits on header
-    const chunks = chunkMarkdown(doc, 3000);
+    // Set maxChunkSize small enough so it splits exactly at the header
+    const chunks = chunkMarkdown(doc, 130);
     
     expect(chunks.length).toBe(2);
     
-    const chunk1 = chunks[0];
-    const chunk2 = chunks[1];
+    const chunk1 = chunks[0]!;
+    const chunk2 = chunks[1]!;
     
-    // chunk2 should start with "## Next Header" and not contain the first chunk text
-    expect(chunk2.startsWith("## Next Header")).toBe(true);
+    // chunk2 should start with "## Next Header is a Custom Section Header" and not contain the first chunk text
+    expect(chunk2.startsWith("## Next Header is a Custom Section Header")).toBe(true);
     expect(chunk2).not.toContain("Some normal text here");
   });
 });

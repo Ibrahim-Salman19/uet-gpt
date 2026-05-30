@@ -1,6 +1,6 @@
 import { v } from "convex/values";
-import { action, internalQuery } from "./_generated/server";
 import { internal } from "./_generated/api";
+import { action, internalQuery } from "./_generated/server";
 
 export const getChunksByRagIds = internalQuery({
   args: {
@@ -13,7 +13,7 @@ export const getChunksByRagIds = internalQuery({
         .query("crawledChunks")
         .withIndex("by_ragId", (q) => q.eq("ragId", ragId))
         .first();
-      
+
       if (chunk) {
         const doc = await ctx.db.get(chunk.documentId);
         if (doc) {
@@ -44,9 +44,9 @@ export const evaluateSearch = action({
 
     const ragIds = vectorResults.results.map((r: any) => r._id as string);
 
-    const chunks = await ctx.runQuery(internal.eval.getChunksByRagIds, {
+    const chunks = (await ctx.runQuery(internal.eval.getChunksByRagIds, {
       ragIds,
-    }) as Array<{ ragId: string; text: string; url: string }>;
+    })) as Array<{ ragId: string; text: string; url: string }>;
 
     return chunks;
   },

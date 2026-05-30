@@ -65,51 +65,51 @@ export function ChatInput({
     >
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-2">
         <div className="flex w-full items-end gap-2 rounded-[var(--radius-xl)] bg-[var(--surface-elevated)] p-1.5 shadow-[var(--shadow-md)] border border-[var(--border)] transition-all duration-[var(--duration-normal)] hover:shadow-[var(--shadow-lg)] focus-within:shadow-[var(--shadow-lg)] focus-within:border-[var(--accent-muted)]">
-        <div className="relative flex-1">
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={handleInput}
-            onKeyDown={handleKeyDown}
-            placeholder={placeholder}
-            rows={1}
-            disabled={isLoading}
-            className="w-full resize-none bg-transparent px-3 py-2.5 pr-10 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-disabled)] outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-            aria-label="Chat input"
-          />
-          {!isLoading && (
-            <Sparkles
-              className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-disabled)] pointer-events-none"
-              aria-hidden="true"
+          <div className="relative flex-1">
+            <textarea
+              ref={inputRef}
+              value={input}
+              onChange={handleInput}
+              onKeyDown={handleKeyDown}
+              placeholder={placeholder}
+              rows={1}
+              disabled={isLoading}
+              className="w-full resize-none bg-transparent px-3 py-2.5 pr-10 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-disabled)] outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Chat input"
             />
-          )}
-        </div>
-
-        {isLoading && onStop ? (
-          <Button
-            variant="destructive"
-            size="icon"
-            onClick={onStop}
-            aria-label="Stop generating"
-            className="shrink-0"
-          >
-            <StopCircle className="h-4 w-4" />
-          </Button>
-        ) : (
-          <Button
-            type="submit"
-            onClick={handleSubmit}
-            disabled={!canSend}
-            size="icon"
-            aria-label="Send message"
-            className={cn(
-              "shrink-0 transition-[opacity,transform] duration-[var(--duration-normal)] mb-0.5 mr-0.5 rounded-full",
-              !canSend && "opacity-50",
+            {!isLoading && (
+              <Sparkles
+                className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-disabled)] pointer-events-none"
+                aria-hidden="true"
+              />
             )}
-          >
-            <Send className="h-4 w-4" />
-          </Button>
-        )}
+          </div>
+
+          {isLoading && onStop ? (
+            <Button
+              variant="destructive"
+              size="icon"
+              onClick={onStop}
+              aria-label="Stop generating"
+              className="shrink-0"
+            >
+              <StopCircle className="h-4 w-4" />
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              onClick={handleSubmit}
+              disabled={!canSend}
+              size="icon"
+              aria-label="Send message"
+              className={cn(
+                "shrink-0 transition-[opacity,transform] duration-[var(--duration-normal)] mb-0.5 mr-0.5 rounded-full",
+                !canSend && "opacity-50",
+              )}
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          )}
         </div>
         <p className="mt-1 text-center text-[11px] text-[var(--text-disabled)]">
           UET GPT may produce inaccurate information. Verify critical details with official sources.

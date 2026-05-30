@@ -55,6 +55,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
 
   build-and-deploy:
     name: Build & Deploy Frontend

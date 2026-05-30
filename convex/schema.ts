@@ -83,7 +83,8 @@ export default defineSchema({
   })
     .index("by_status", ["status"])
     .index("by_trigger", ["trigger"])
-    .index("by_startedAt", ["startedAt"]),
+    .index("by_startedAt", ["startedAt"])
+    .index("by_providerJobId", ["providerJobId"]),
 
   semanticCache: defineTable({
     queryText: v.string(),
@@ -109,6 +110,7 @@ export default defineSchema({
     hits: v.number(),
     expiresAt: v.number(),
     createdAt: v.number(),
+    embeddingModel: v.optional(v.string()),
   })
     .index("by_expiresAt", ["expiresAt"])
     .vectorIndex("by_queryEmbedding", { vectorField: "queryEmbedding", dimensions: 3072 }),
@@ -177,6 +179,7 @@ export default defineSchema({
         wordCount: v.optional(v.number()),
         language: v.optional(v.string()),
         etag: v.optional(v.string()),
+        sourceType: v.optional(v.string()),
       }),
     ),
     status: v.union(
@@ -207,7 +210,10 @@ export default defineSchema({
   processedWebhooks: defineTable({
     jobId: v.string(),
     processedAt: v.number(),
-  }).index("by_jobId", ["jobId"]),
+    expiresAt: v.number(),
+  })
+    .index("by_jobId", ["jobId"])
+    .index("by_expiresAt", ["expiresAt"]),
 
   crawlDeadLetter: defineTable({
     url: v.string(),
@@ -216,14 +222,22 @@ export default defineSchema({
     failureCount: v.number(),
     lastAttemptAt: v.number(),
     payload: v.any(),
-    status: v.union(v.literal("pending_retry"), v.literal("abandoned")),
-  }).index("by_status", ["status"]),
+    status: v.union(
+      v.literal("pending_retry"),
+      v.literal("abandoned"),
+      v.literal("processing"),
+      v.literal("indexed"),
+    ),
+  })
+    .index("by_status", ["status"])
+    .index("by_jobId_and_url", ["jobId", "url"]),
 
   crawledChunks: defineTable({
     documentId: v.id("documents"),
     contentHash: v.string(),
     text: v.string(),
     ragId: v.string(),
+    embeddingModel: v.optional(v.string()),
   })
     .index("by_documentId", ["documentId"])
     .index("by_ragId", ["ragId"])
@@ -244,7 +258,18 @@ export default defineSchema({
     answer: v.string(),
     sourceUrl: v.optional(v.string()),
     createdAt: v.number(),
+    expiresAt: v.optional(v.number()),
   }).searchIndex("search_question", { searchField: "question" }),
+
+  appSettings: defineTable({
+    key: v.string(),
+    value: v.union(v.string(), v.number(), v.boolean()),
+    section: v.string(),
+    updatedAt: v.number(),
+    updatedBy: v.optional(v.id("users")),
+  })
+    .index("by_key", ["key"])
+    .index("by_section", ["section"]),
 
   // Note: `threads` and `messages` tables are managed by @convex-dev/agent component.
   // Do not define them here to avoid table name conflicts with the component's internal tables.

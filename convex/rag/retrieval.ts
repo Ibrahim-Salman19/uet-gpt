@@ -101,6 +101,7 @@ export const retrieveContext = action({
         searchResults = await ctx.runAction(_api.embeddings.search.searchDocumentsAction, {
           queryText: rewrittenQueryText || args.question,
           queryEmbedding,
+          hydeQuery: hydeQueryText,
           limit: 10,
         });
       } catch (e) {
@@ -119,7 +120,13 @@ export const retrieveContext = action({
     const buildContextRef = _internal.rag.context.buildContext;
 
     let context = "";
+    let confidenceWarning = false;
     if (searchResults.length > 0) {
+      const topScore = searchResults[0]?.relevanceScore ?? 1.0;
+      if (topScore < 0.1) {
+        confidenceWarning = true;
+      }
+
       try {
         context = await ctx.runQuery(buildContextRef, {
           chunks: searchResults.map((r) => ({
@@ -133,6 +140,12 @@ export const retrieveContext = action({
       } catch (e) {
         console.error("Context building failed, falling back to raw concatenation:", e);
         context = searchResults.map((r) => r.content).join("\n\n---\n\n");
+      }
+
+      if (confidenceWarning) {
+        context =
+          "SYSTEM INSTRUCTION TO AI: The retrieved documents have extremely low relevance to the user's query. You MUST respond exactly with: 'I don't have verified information about this — please check uettaxila.edu.pk directly.' Do not attempt to guess or hallucinate an answer.\n\n" +
+          context;
       }
     }
 
