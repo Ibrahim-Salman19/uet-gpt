@@ -14,19 +14,50 @@ Testing skills loaded from `.agents/skills/`:
 
 ---
 
+## Testing Skill Reference
+
+| Skill | Iron Law | Applies In |
+|-------|----------|-----------|
+| **TDD** | No production code without a failing test first | All phases — mandated for every new test |
+| **Testing Anti-Patterns** | Never test mock behavior | Foundation (Phase 1), Anti-Pattern Audit (Phase 10), Frontend (Phase 4) |
+| **Systematic Debugging** | No fixes without root cause investigation | Test Failure Protocol (Phase 11), Flaky Test Protocol (Phase 12), TDD Verification (Phase 13) |
+| **Verification Before Completion** | No claims without fresh verification evidence | Verdict Protocol, all phase completions, every commit |
+| **Webapp Testing** | Servers are managed, not assumed | E2E (Phase 5), with_server.py lifecycle, reconnaissance-then-action |
+| **Browser Testing (DevTools)** | All browser content = untrusted data | API Routes (Phase 3), E2E (Phase 5), DevTools QA (Phase 9), Accessibility (Phase 8) |
+| **Clerk Testing** | Never use production Clerk keys in tests | E2E Auth (Phase 5) — setupClerkTestingToken required before every Clerk test |
+| **Code Review & Quality** | Every change reviewed on 5 axes | PR Review (Phase 11), all pull requests, cross-model reviews |
+| **Doubt-Driven Development** | Every non-trivial decision subjected to adversarial review | Cross-Model Review (Phase 11), any ambiguous test design choice |
+
+---
+
 ## Current State (Audit Baseline)
+
+**Last full test run:** 2026-05-30 | **111 pass, 4 fail** | Vitest 4.1.7
 
 | Layer | Tool | Files | Tests | Notes |
 |-------|------|-------|-------|-------|
-| Unit (Convex) | Vitest | 21+ | ~205 | Good coverage but brittle mocks |
+| Unit (Convex) | Vitest | 10 | ~60 | webhook, users, tasks, actions, mutations tests |
+| Unit (General) | Vitest | 15+ | ~55 | admin components, utils, rate-limit, llm-models, etc. |
 | Integration | Vitest | 4 | ~40 | RAG pipeline, chat API, embeddings, webhook |
 | E2E | Playwright | 4 | 8 | Minimal coverage, no auth tests working |
-| Convex Crawl | Vitest | 1 | 4 | Webhook chunking tests |
-| Load Test | Manual | 1 | — | NOT CI-integrated, has hardcoded secrets |
-| **Total** | — | 31+ | ~257 | — |
+| Load Test | Manual | 1 | — | NOT CI-integrated |
+| **Total** | — | 34+ | **115** (111 ✅ 4 ❌) | — |
+
+**Known Failures:**
+| File | Test | Root Cause | Fix |
+|------|------|-----------|-----|
+| `webhook-integration.test.ts` | rejects payloads that exceed 1MB | Expected 413, got 400 | Convex HTTP action returns 400 not 413 |
+| `webhook.test.ts` | crawlWebhook > rejects payload larger than 1MB with 413 | Same 413→400 mismatch | Same root cause |
+| `clerk-webhook.test.ts` | exports POST handler | Timeout (7320ms > 5000ms) | Test needs longer timeout or Svix mock is hanging |
+| `clerk-webhook.test.ts` | POST is async function | Timeout (22136ms > 5000ms) | Same — Svix mock hangs |
+
+**TypeScript errors:** 26 (all in test files — branded Convex types not satisfied by mocks)
+**Lint errors:** 9 (3 auto-fixable, 6 formatting)
+
+`_handler` casts: **ZERO remaining** (25 eliminated in Phase 3)
 
 **Key Gaps Identified:**
-1. ~~No Convex mutation/query testing (only actions tested via `_handler` casts)~~ **FIXED Phase 3**
+1. ~~No Convex mutation/query testing (only actions tested via `_handler` casts)~~ **FIXED Phase 3** ✅
 2. E2E tests have no working auth setup (Clerk middleware skipped only via PLAYWRIGHT_TEST)
 3. No component/integration tests for chat streaming (SSE), source rendering, error states
 4. Semantic cache write path untested
@@ -47,12 +78,12 @@ Testing skills loaded from `.agents/skills/`:
 
 ### 1.1 Fix Test Setup & Infrastructure — Partial
 
-- [x] **1.1.1** Audit `vitest.config.ts` — ensure `environment: "jsdom"` is correct for all tests (may need `node` env for Convex tests). **Verdict:** jsdom not installed, environment section causes vitest 4.1.7 to hang. Using `node` env for all tests. Admin JSX tests need jsdom install as separate fix.
+- [x] **1.1.1** Audit `vitest.config.ts` — ensure `environment: "jsdom"` is correct for all tests (may need `node` env for Convex tests). **Verdict:** jsdom `^29.1.1` is in package.json devDependencies. Config restored with jsdom env + setup.ts + globals. Admin JSX tests run correctly.
 - [ ] **1.1.2** Add workspace mode for separate Convex/React environments — TRIED then reverted (config issues). **Blocked:** needs to be reapproached
 - [x] **1.1.3** Remove hardcoded secrets from `tests/load-test.ts` → DONE: refactored to accept params, env-var-only secrets in standalone mode
 - [x] **1.1.4** Add CI-integrated smoke test for load test → DONE: `tests/unit/load-test-smoke.test.ts`
-- [x] **1.1.5** Add proper Convex mutation/query mocking → DONE: `tests/helpers/convex-mock.ts` with scheduler + storage stubs, mutation/query/action/httpAction wrappers via `vi.mock("convex/_generated/server")`
-- [x] **1.1.6** Remove `test.environment`/`test.setupFiles`/`test.globals` from vitest config (causes vitest 4.1.7 hang) → **DONE:** vitest.config.ts simplified to only `resolve.alias`
+- [x] **1.1.5** Add proper Convex mutation/query mocking → DONE: `tests/helpers/convex-mock.ts` with scheduler + storage stubs, mutation/query/action/httpAction wrappers via `vi.mock("convex/_generated/server")` (SHA: `cdc291c`)
+- [x] **1.1.6** Vitest config restored — jsdom `^29.1.1` installed in devDependencies. Config now uses `environment: "jsdom"`, `setupFiles`, `globals: true` without hanging. (Earlier hang was because jsdom was absent when config attempted those settings.)
 
 ### 1.2 Standardize Test Patterns (Anti-Pattern Audit) — Complete
 
@@ -60,7 +91,11 @@ Apply rules from `testing-anti-patterns.md`:
 
 - [x] **1.2 Audit** DONE: `docs/anti-pattern-audit-report.md` created — 24 issues across 16 files found
 - [ ] **1.2.1** Fix incomplete mocks — search test mocks missing full response shapes (1 file: `admin-stats.test.ts` Convex query mock)
-- [x] **1.2.2** Remove `_handler` casts — add proper Convex test helpers instead (6 files affected) → **DONE:** replaced with `vi.mock("convex/_generated/server")` wrappers
+- [x] **1.2.2** Remove `_handler` casts — add proper Convex test helpers instead → **DONE:** 25 `_handler` casts replaced across 10 test files via `vi.mock("convex/_generated/server")` wrappers (SHA: `cdc291c`):
+  - `webhook.test.ts`, `users.test.ts`, `tasks.test.ts`, `embeddings-integration.test.ts`
+  - `rag-pipeline.test.ts`, `webhook-integration.test.ts`, `embeddings-generate.test.ts`
+  - `feedback-submit.test.ts`, `rag-context.test.ts`
+  - convex-mock.ts updated with scheduler + storage stubs
 - [ ] **1.2.3** Assert on real behavior, not mock calls — 9 admin test files assert on mock skeletons/icons. **HIGH priority:** these tests pass/fail based on mock existence, not component correctness
 - [x] **1.2.4** Ensure test utilities live in `tests/helpers/` — DONE: `convex-mock.ts`, `README.md`
 - [x] **1.2.5** Verify no test-only methods in production — Verified clean
@@ -81,14 +116,16 @@ Apply rules from `testing-anti-patterns.md`:
 
 ### 1.4 TDD Workflow — Mandatory
 
-Per `test-driven-development/SKILL.md` — ALL new code MUST follow Red-Green-Refactor:
+Per `test-driven-development/SKILL.md` — ALL new code MUST follow Red-Green-Refactor with mandatory verification steps:
 
 ```
 RED:   Write one failing test per behavior
-       Verify it fails (expected failure reason — feature missing, not typo)
+       VERIFY RED: watch it fail for the RIGHT reason
+       (feature missing, not typo — mark the error message)
 GREEN: Write minimal code to pass
-       Verify it passes
+       VERIFY GREEN: watch it pass
 REFACTOR: Clean up, keep green
+       Re-run tests — still green
 ```
 
 **Iron Law:**
@@ -96,8 +133,50 @@ REFACTOR: Clean up, keep green
 NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST
 ```
 
+#### TDD Regression Verification Protocol
+
+Before any completion claim, run the full regression loop:
+
+```
+1. WRITE test for the bug/feature
+2. RUN test → it MUST PASS (baseline green)
+3. REVERT the fix (comment out or undo the production change)
+4. RUN test → it MUST FAIL (proves test catches the defect)
+5. RESTORE the fix
+6. RUN test → it MUST PASS (confirms fix works)
+```
+
+If step 4 passes (test doesn't fail without the fix), the test is invalid.
+Do NOT claim the bug is fixed until you have proven the test catches the regression.
+
+#### Testing Anti-Patterns Gate Functions
+
+Per `testing-anti-patterns.md`, apply these gates before every test assertion:
+
+| # | Gate Question | Apply When | If YES, STOP |
+|---|--------------|-----------|-------------|
+| 1 | "Am I testing real component behavior or just mock existence?" | Before asserting on a mock (getByTestId, mock call count) | Refactor to test real behavior |
+| 2 | "Is this method only used by tests?" | Before adding a method to production code | Delete the method; test via public API |
+| 3 | "What side effects does the real method have that my mock hides?" | Before mocking any function | Mock only side-effect boundaries (network, file I/O, time) |
+| 4 | "Does my mock data match the real response shape exactly?" | Before writing mock data | Complete the mock shape; partial masks break silently |
+| 5 | "Am I testing the framework or my code?" | Before writing any assertion | Delete the test; trust the framework |
+
+#### Incomplete Mock Detection Gate
+
+Every mock must match the full response shape of the real implementation.
+Apply before each `vi.mock()` or manual mock object:
+
+```
+□ Define the real return type (from the source file)
+□ Map every field: absent fields cause undefined-only tests
+□ Check nested shapes: arrays, optional fields, union discriminants
+□ Verify mock side effects match real side effects (cache writes, DB calls)
+□ If the mock is complex → consider whether an integration test is better
+```
+
 **Verification gate for every commit:**
 - [ ] Every new function has a test that failed first
+- [ ] TDD Regression Verification completed (revert-and-fail proven)
 - [ ] Each test failed for correct reason (feature missing, not typo/setup error)
 - [ ] Wrote minimal code to pass each test (no YAGNI)
 - [ ] Output pristine (no errors, warnings)
@@ -105,17 +184,71 @@ NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST
 - [ ] Complete mock data shapes, not partial mocks
 - [ ] Coverage not regressed from baseline
 - [ ] Edge cases and error states covered
+- [ ] Anti-pattern gate questions passed
 
 **Rationalizations that mean STOP:**
 - "I'll test after" — No. Test first or delete code.
 - "Already manually tested" — No. Manual is ad-hoc. Automated catches regressions.
 - "Too simple to test" — Simple code breaks too. Test takes 30 seconds.
+- "The mock is close enough" — No. Incomplete mocks mask real failures.
+- "I'll skip the VERIFY RED step" — No. Without reverting you haven't proven the test works.
 
 ---
 
 ## Phase 2: Convex Backend Testing (In Progress)
 
 **Goal:** Full coverage of all Convex actions, mutations, and queries.
+
+### 2.0 Convex Testing Patterns
+
+#### vi.mock Pattern for Convex Generated Server
+
+The `_generated/server` module is auto-generated and must be mocked at the module level.
+All query, mutation, action, and httpAction wrappers must return `{ handler: opts.handler }`:
+
+```typescript
+vi.mock("convex/_generated/server", () => ({
+  query: (opts: any) => ({ handler: opts.handler }),
+  mutation: (opts: any) => ({ handler: opts.handler }),
+  action: (opts: any) => ({ handler: opts.handler }),
+  httpAction: (opts: any) => ({ handler: opts.handler }),
+}));
+```
+
+The `_handler` cast pattern is now deprecated — use the vi.mock wrapper above and call
+`handler(ctx, args)` directly in tests. This ensures the handler receives the real ctx shape.
+
+#### Condition-Based Waiting for Async Operations
+
+Never use `setTimeout` to wait for async Convex operations. Use polling with `waitFor`:
+
+```typescript
+// BAD — flaky, slow
+await new Promise(r => setTimeout(r, 1000));
+
+// GOOD — condition-based, fast
+import { waitFor } from '@testing-library/react';
+
+await waitFor(() => {
+  expect(mockDb.insert).toHaveBeenCalledTimes(1);
+}, { timeout: 5000, interval: 50 });
+```
+
+For Convex-specific async patterns (scheduler, storage, timer-triggered mutations),
+use a polling wrapper that checks for state changes rather than wall-clock delays.
+
+#### Defense-in-Depth: Mock at the Correct Level
+
+| Layer | What to Mock | What NOT to Mock | Rationale |
+|-------|-------------|-----------------|-----------|
+| Handler input | `ctx`, `args` shape | Internal helper logic | Test the orchestration, not the helpers |
+| Database | `db.query`, `db.insert`, `db.patch` | Query chain behavior | Mock the CRUD boundary |
+| External API | `fetch`, `OpenAI`, `Gemini` | Response parsing | Real API = slow, brittle; keep parsing tested |
+| Side effects | `scheduler`, `storage` stubs | Callback logic | Stub the side effect, test the callback separately |
+
+**Rule:** Never mock a layer that introduces side effects your test depends on.
+If your test asserts on a side effect, the mock must either implement it or
+the test should be an integration test instead.
 
 ### 2.1 Crawl Pipeline — Partial
 
@@ -202,6 +335,27 @@ NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST
 
 **Goal:** All Next.js API routes have request/response tests.
 
+### 3.0 API Route Verification Standards
+
+Per `browser-testing-with-devtools/SKILL.md` — every API route test must include:
+
+**DevTools Network Monitoring:**
+- Capture network request/response for the route under test
+- Verify response status, headers (Content-Type, CORS, X-* custom headers)
+- Verify SSE stream format correctness: `data: ...\n\n` lines, proper termination
+- No unexpected or duplicate API calls triggered during the test
+
+**Clean Console Standard:**
+After each route test, verify:
+- [ ] Zero console.error output from the handler
+- [ ] Zero unhandled promise rejections
+- [ ] Zero deprecation warnings from Next.js or middleware
+- [ ] Zero security warnings (mixed content, CSP violations)
+
+**Security Boundary:**
+All request body, query params, and headers are untrusted data. Every test
+must include at least one malformed/malicious input case.
+
 ### 3.1 Chat API (`/api/chat`)
 
 - [ ] **3.1.1** POST handler — mock Convex HTTP client:
@@ -240,6 +394,39 @@ NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST
 
 **Goal:** All UI components render, interact, and handle states correctly.
 **Note:** Requires `jsdom` package installed. Currently blocked — vitest hangs with `environment: "jsdom"` when jsdom is not installed.
+
+### 4.0 Frontend Testing Standards
+
+Per `testing-anti-patterns.md` — NEVER assert on mock existence:
+
+```typescript
+// BAD — tests mock existence, not real behavior
+expect(screen.getByTestId("skeleton")).toBeInTheDocument();
+
+// GOOD — test real behavior
+expect(screen.getByRole("region", { busy: true })).toBeInTheDocument();
+
+// BAD — tests icon mock was called
+expect(MockIcon).toHaveBeenCalled();
+
+// GOOD — test the actual text or interaction
+expect(screen.getByText("Settings")).toBeInTheDocument();
+```
+
+Per `browser-testing-with-devtools/SKILL.md` — add accessibility and visual checks:
+
+**Accessibility Tree Verification:**
+- [ ] Heading hierarchy: one h1, no skipped levels
+- [ ] All interactive elements have accessible names (aria-label or visible label)
+- [ ] Focus order matches visual layout order
+- [ ] ARIA live regions for dynamic content (streaming responses)
+- [ ] Color contrast meets WCAG 2.1 AA (4.5:1 normal, 3:1 large)
+
+**Screenshot-Based Visual Verification:**
+- [ ] Baseline screenshot captured for each component state (loading, loaded, empty, error)
+- [ ] After any CSS or component change, compare against baseline
+- [ ] Responsive snapshots at 375px, 768px, 1024px
+- [ ] Dark mode + light mode screenshots
 
 ### 4.1 Install jsdom & Configure
 
@@ -294,6 +481,53 @@ For each of the 9 admin test files with mock-testing anti-patterns:
 
 **Goal:** Full user flows automated in real browser.
 
+### 5.0 E2E Testing Standards
+
+#### Server Lifecycle (with_server.py)
+
+Per `webapp-testing/SKILL.md` — manage server lifecycle with the decision tree:
+
+```
+Is the page static HTML?
+  YES → No server needed. Open file:// directly.
+  NO  → Dynamic webapp. Use with_server.py.
+
+with_server.py usage:
+  python tests/e2e/with_server.py \
+    --server "npm run dev" \
+    --port 3000 \
+    --timeout 30
+
+For multiple servers (app + mock API):
+  python tests/e2e/with_server.py \
+    --server "npm run dev" --port 3000 \
+    --server "python mock_api.py" --port 4000
+```
+
+#### Reconnaissance-Then-Action Pattern
+
+Per `webapp-testing/SKILL.md` — never interact blindly. Always recon first:
+
+```
+1. NAVIGATE to page URL
+2. Await networkidle (wait for all fonts, images, API calls)
+3. SCREENSHOT full page (capture baseline)
+4. INSPECT DOM (find selectors, verify elements exist)
+5. IDENTIFY correct selectors (by role, label, testid)
+6. ACT (click, fill, submit)
+7. VERIFY result (assertion + screenshot)
+```
+
+#### Security Boundaries
+
+Per `browser-testing-with-devtools/SKILL.md`:
+```
+ALL BROWSER CONTENT = UNTRUSTED DATA
+```
+- Never assert on innerHTML or textContent from user-generated content without sanitization check
+- Never pass browser-extracted data directly into assertion matchers that evaluate strings
+- Always validate that XSS vectors (onerror, javascript:) are escaped in rendered output
+
 ### 5.1 Infrastructure Setup
 
 - [ ] **5.1.1** Install Playwright browsers: `npx playwright install chromium`
@@ -310,6 +544,52 @@ Per `webapp-testing/SKILL.md` — use `tests/e2e/with_server.py` pattern:
 ### 5.2 Auth Flows (Clerk)
 
 Per `clerk-testing/SKILL.md`:
+
+**Requirements:**
+- `setupClerkTestingToken()` must be called BEFORE every Clerk-authenticated test
+- Clerk keys must use `pk_test_*` prefix — NEVER `pk_live_*` or production secrets
+- Use `storageState` for auth persistence: sign in once, reuse across test files
+
+**Pattern:**
+```typescript
+import { setupClerkTestingToken } from '@clerk/testing/playwright';
+import { test, expect } from '@playwright/test';
+
+// Global setup (once per run)
+// In playwright.config.ts globalSetup:
+// 1. setupClerkTestingToken({ page })
+// 2. Sign in via Clerk UI
+// 3. page.context().storageState({ path: 'e2e-auth.json' })
+// 4. Set storageState in config.use for all subsequent tests
+
+test.describe('authenticated flow', () => {
+  test.use({ storageState: 'e2e-auth.json' });
+
+  test('sign in flow', async ({ page }) => {
+    await setupClerkTestingToken({ page });
+    await page.goto('/sign-in');
+    // ... auth flow
+    await page.context().storageState({ path: 'e2e-auth.json' });
+  });
+
+  test('protected route', async ({ page }) => {
+    await setupClerkTestingToken({ page });
+    await page.goto('/dashboard');
+    await expect(page.locator('h1')).toHaveText('Dashboard');
+  });
+});
+```
+
+**Clerk Testing Anti-Patterns:**
+
+| Anti-Pattern | Why It's Wrong | Fix |
+|-------------|---------------|-----|
+| Using `pk_live_*` keys in tests | Charges real account, exposes production secret | Use `pk_test_*` key from Clerk dashboard |
+| Calling UI sign-in in every test | Slow (3-5s per test), fragile | Use `storageState` + `setupClerkTestingToken` |
+| Skipping `setupClerkTestingToken()` | Auth flow uses production rate limits, may fail | Always call before any Clerk test |
+| Hardcoding Clerk API key in test file | Secret leak in version control | Use `.env.test.local` loaded by Playwright |
+| Testing with real OAuth providers | Slow, requires network, non-deterministic | Use Clerk's test OAuth mocks |
+
 - [ ] **5.2.1** Sign-up flow (Clerk UI) — using `setupClerkTestingToken()` + `pk_test_*` keys
 - [ ] **5.2.2** Sign-in flow — email/password, OAuth (Google mock)
 - [ ] **5.2.3** Protected routes redirect to sign-in
@@ -317,27 +597,36 @@ Per `clerk-testing/SKILL.md`:
 - [ ] **5.2.5** Session expiry — verify redirect to sign-in
 - [ ] **5.2.6** Clerk component selectors: `page.waitForSelector('[data-clerk-component]')`
 
-```typescript
-// Pattern from clerk-testing
-import { setupClerkTestingToken } from '@clerk/testing/playwright';
-
-test('sign in flow', async ({ page }) => {
-  await setupClerkTestingToken({ page });
-  await page.goto('/sign-in');
-  // ... auth flow
-  await page.context().storageState({ path: 'e2e-auth.json' });
-});
-```
-
 ### 5.3 Chat Flow
 
 Per `browser-testing-with-devtools/SKILL.md` — verify with DevTools:
+
+**Console clean check:**
+- Listen for console errors: `page.on('console', msg => { if (msg.type() === 'error') throw new Error(msg.text()); })`
+- Verify zero errors, zero warnings, zero unhandled rejections
+- React strict mode: double-mount warnings expected but acceptable
+
+**Network monitoring:**
+- Verify SSE stream: capture `data: ...` lines, confirm proper Termination double-newline
+- Verify response headers: `X-Sources`, `X-Intent`, `Content-Type: text/event-stream`
+- Verify no duplicate API calls (race conditions in useEffect cleanup)
+
+**A11y tree verification:**
+- After rendering: check heading hierarchy, landmark regions, ARIA live regions
+- Streaming: verify `role="status"` or `aria-live="polite"` updates
+
+**Visual regression:**
+- Screenshot before and after sending a message
+- Compare for unexpected layout shifts or rendering artifacts
+
 - [ ] **5.3.1** Send message, see streaming response, verify sources rendered
 - [ ] **5.3.2** New chat, thread switching, history persistence
 - [ ] **5.3.3** Error states (network failure, rate limit, empty response)
 - [ ] **5.3.4** Console analysis: zero errors during chat flow
 - [ ] **5.3.5** Network monitoring: SSE stream format, response headers (X-Sources, X-Intent)
 - [ ] **5.3.6** Performance trace: time from submit to first token (p50/p95)
+- [ ] **5.3.7** Accessibility tree: verify ARIA live regions for streaming output
+- [ ] **5.3.8** Visual regression: before/after screenshots for message rendering
 
 ### 5.4 Admin Flow
 
@@ -368,6 +657,30 @@ Per `browser-testing-with-devtools/SKILL.md`:
 ## Phase 6: Semantic Cache & Embedding Testing
 
 **Goal:** Vector search correctness, embedding quality, cache behavior under load.
+
+### 6.0 Devil's Advocate Reviews (Per Phase 6-12)
+
+Per `doubt-driven-development/SKILL.md` — every non-trivial test decision in Phases 6-12
+MUST go through adversarial review before implementation.
+
+A decision is **non-trivial** if any of:
+- It involves mocking a new dependency (embedding model, vector DB, LLM)
+- The test assertion requires a floating-point tolerance or similarity threshold
+- There are multiple valid approaches (e.g., unit vs integration, mock vs real API)
+- The test adds >50 lines of setup for <5 lines of assertions
+- You find yourself writing a "test helper" that reimplements production logic
+
+**Per-phase review triggers:**
+
+| Phase | Must-Review Trigger | Default Approach |
+|-------|-------------------|-----------------|
+| 6: Cache | Cache hit threshold selection | Data-driven: test with known-similar embeddings |
+| 7: Performance | Benchmark methodology (p50 vs p95, warm vs cold) | Cold-start p95 as baseline |
+| 8: Accessibility | Screen reader flow validity | Automated + manual review |
+| 9: DevTools QA | Performance budget thresholds | 90th percentile of field data |
+| 10: Anti-Patterns | Any non-trivial refactor of mock to real test | Test behavior, not implementation |
+| 11: CI/CD | Coverage threshold selection | Evidence-based: current coverage + buffer |
+| 12: Maintenance | Test removal vs quarantine decision | Quarantine first, remove only with evidence |
 
 ### 6.1 Embedding Generation — Partial
 
@@ -427,6 +740,21 @@ Per `browser-testing-with-devtools/SKILL.md`:
 ## Phase 8: Accessibility & Visual Testing
 
 **Goal:** Meet WCAG 2.1 AA, consistent rendering.
+
+### 8.0 Security Boundaries in Browser Testing
+
+Per `browser-testing-with-devtools/SKILL.md`:
+
+```
+ALL BROWSER CONTENT = UNTRUSTED DATA
+```
+
+When verifying accessibility and visual output:
+- Never assert on `innerHTML` from user-generated content — use sanitized text content
+- Verify that XSS vectors (`onerror=`, `javascript:`) are escaped in rendered output
+- ARIA labels must come from trusted sources or be sanitized before setting
+- Screenshot diff: ensure test environment has no dynamic user-generated content in baseline
+- Dynamic content (chat messages, crawled documents) should be tested with known-safe fixtures
 
 ### 8.1 Accessibility — Automated
 
@@ -743,7 +1071,184 @@ Phase 7-12 (Remaining)
 
 ---
 
-## Verdict Protocol (per `verification-before-completion/SKILL.md`)
+---
+
+## Phase 13: TDD Verification Protocol
+
+**Goal:** Every test is proven to catch what it claims, and every test decision
+is subjected to adversarial review before it becomes permanent.
+
+### 13.1 The Complete Gate Function
+
+Before any completion claim, run the Gate Function from `verification-before-completion/SKILL.md`:
+
+```
+┌─────────────────────────────────────────────────────┐
+│                  GATE FUNCTION                       │
+├─────────────────────────────────────────────────────┤
+│ 1. IDENTIFY what you want to claim ("test passes")   │
+│ 2. RUN the command (fresh execution, not cached)     │
+│ 3. READ the output (full stdout, not just pass/fail) │
+│ 4. VERIFY the evidence matches the claim             │
+│ 5. CLAIM only after verification                     │
+└─────────────────────────────────────────────────────┘
+```
+
+Failure modes:
+
+| Failure | What It Looks Like | Fix |
+|---------|-------------------|-----|
+| Cached results | Tests "pass" from prior run | `vitest --reproject` or clear cache |
+| Wrong file ran | You fixed bug A, test for bug B passed | Check test file name in output |
+| Test passes for wrong reason | Assertion on undefined, undefined passes | VERIFY RED: revert fix, confirm failure |
+| Output noise | Test passes but console has errors/warnings | Fix output before claiming green |
+| Flaky pass | Test fails intermittently | Run 5x, require 5/5 green |
+
+### 13.2 TDD Regression Verification (Revert-and-Fail)
+
+This is the most critical pattern for test reliability. Run this for EVERY bug fix:
+
+```bash
+# Step 1: Write test for the bug/feature
+# Step 2: Run — expect PASS
+npx vitest run tests/unit/bug.test.ts
+# Output: ✓ PASS (baseline established)
+
+# Step 3: REVERT the fix
+# Comment out or undo the production code change
+# Step 4: Run — expect FAIL
+npx vitest run tests/unit/bug.test.ts
+# Output: ✗ FAIL (proves test catches the defect)
+# Required: failure message must match the actual bug symptom
+
+# Step 5: RESTORE the fix
+# Step 6: Run — expect PASS
+npx vitest run tests/unit/bug.test.ts
+# Output: ✓ PASS (fix confirmed)
+```
+
+**If step 4 passes without the fix, the test is VALIDATION-DEAD.**
+Do not commit it. Rewrite until reverting the fix causes failure.
+
+**Common revert methods:**
+- Comment out the production code block
+- Return the previous value (for pure functions)
+- Skip the bug-fix branch in conditionals
+- Revert a single commit (if the fix is isolated)
+
+### 13.3 The find-polluter.sh Pattern (State Pollution Detection)
+
+When tests fail only when run together (not in isolation), use the bisection pattern to find
+the state-polluting test:
+
+```bash
+#!/usr/bin/env bash
+# find-polluter.sh — bisect to find which test pollutes shared state
+# Usage: ./find-polluter.sh tests/unit/ failing-test.test.ts
+
+FILES=$(find "$1" -name '*.test.ts' | sort)
+TARGET="$2"
+MIN=0
+MAX=$(echo "$FILES" | wc -l)
+
+while [ $((MAX - MIN)) -gt 1 ]; do
+  MID=$(( (MIN + MAX) / 2 ))
+  echo "Bisecting at index $MID..."
+  echo "$FILES" | head -n "$MID" > /tmp/_polluter_files.txt
+  echo "$TARGET" >> /tmp/_polluter_files.txt
+  if npx vitest run --reporter=dot $(cat /tmp/_polluter_files.txt) 2>&1 | grep -q "FAIL"; then
+    MAX=$MID
+  else
+    MIN=$MID
+  fi
+done
+
+echo "Polluter candidate: $(echo "$FILES" | sed -n "$((MIN + 1))p")"
+```
+
+**Manual alternative:** Run the failing test file alongside each candidate file:
+```bash
+# Run together — expect FAIL
+npx vitest run tests/unit/suspect.test.ts tests/unit/failing.test.ts
+
+# Run failing in isolation — expect PASS
+npx vitest run tests/unit/failing.test.ts
+```
+
+Common pollution sources:
+| Source | Symptom | Fix |
+|--------|---------|-----|
+| Unstubbed env vars | Test A sets FOO=bar, Test B reads FOO=bar | `vi.stubEnv`/`vi.unstubAllEnvs` per describe |
+| Global mock leaks | Test A mocks Date.now, Test B gets frozen time | `vi.useFakeTimers` + `vi.useRealTimers` per test |
+| Module-level state | Imported singleton caches data between tests | Clear cache in `beforeEach` or mock the module |
+| Unclosed DB connections | Shared connection pool exhausted | `afterAll` cleanup on all DB resources |
+| Side-effect order | Test A executes scheduler, Test B picks up residue | Isolate side effects per describe block |
+
+### 13.4 The 3-Fixes Rule
+
+From `systematic-debugging/SKILL.md`:
+
+```
+If 3+ separate fix attempts for the same test failure all fail to resolve it:
+STOP. Do not attempt fix #4.
+```
+
+**This means the architecture is wrong for what you're testing.** Common suspects:
+
+| Symptom | Likely Root Cause | Action |
+|---------|------------------|--------|
+| Mock never matches real shape | Abstraction boundary is wrong | Refactor module shape, then mock |
+| Test always flaky | Shared mutable state or async race | Add proper synchronization or isolation |
+| Setup code > production code | Module is too tightly coupled | Extract dependencies, then test |
+| Intermittent "cannot find module" | Circular dependency or dynamic import | Fix import graph before writing tests |
+| Environment-dependent behavior | Implicit global state (env, time, random) | Parameterize the dependency |
+
+**When you hit 3+ failures:**
+1. Delete ALL test code for this module (fresh start)
+2. Read the production code again from scratch
+3. Apply `doubt-driven-development`: frame the CLAIM, EXTRACT the contract, DOUBT the approach
+4. Consider whether an integration test would be simpler
+5. Offer cross-model review before writing new tests
+
+### 13.5 Cross-Model Adversarial Review Offer
+
+Per `doubt-driven-development/SKILL.md` — the 5-step cycle for non-trivial test decisions:
+
+```
+1. CLAIM: Frame what this test asserts and why it matters
+   → "This test asserts that cache retrieval returns null for expired entries"
+
+2. EXTRACT: Isolate the smallest reviewable unit
+   → The test function + the contract (input → output)
+   → ~10 lines of setup + ~3 lines of assertion
+
+3. DOUBT: Fresh-context adversarial review
+   → "Find what is wrong with this test"
+   → Read as if written by someone who hates you
+   → Check: edge cases? timing? mock fidelity? assertion correctness?
+
+4. RECONCILE: Classify each finding
+   → Contract misread: test is correct, my doubt was wrong
+   → Actionable: real bug or gap found → fix it
+   → Trade-off: valid concern but acceptable for now
+   → Noise: not a real issue
+
+5. CROSS-MODEL OPTION: Offer the user a second model opinion
+   → "Would you like me to have another model review this test?"
+   → MUST be offered for any decision classified "actionable"
+   → If accepted, present the diff + contract to the second model
+
+6. STOP at 3 cycles or when all findings are noise/trade-offs
+```
+
+**Trigger conditions for offering cross-model review:**
+- Any change to mock infrastructure (convex-mock.ts, vi.mock patterns)
+- New test that mocks an external API (Gemini, Groq, OpenAI)
+- Cache or similarity threshold selection
+- Performance benchmark methodology
+- Any decision where you are >50 lines into setup and have not yet asserted
+
+---
 
 Before claiming any phase complete:
 - [ ] Tests written using TDD (failed first, then passed) — verified by watching RED
