@@ -34,7 +34,9 @@ export const queueChunksForEmbedding = internalMutation({
     jobId: v.string(),
     etag: v.optional(v.string()),
     lastModified: v.optional(v.string()),
-    chunks: v.array(v.object({ text: v.string(), contentHash: v.string(), parentText: v.optional(v.string()) })),
+    chunks: v.array(
+      v.object({ text: v.string(), contentHash: v.string(), parentText: v.optional(v.string()) }),
+    ),
   },
   handler: async (ctx, args) => {
     const { url, title, contentHash, etag, lastModified, chunks } = args;
@@ -463,7 +465,9 @@ export const enqueueDocumentChunks = internalMutation({
   args: {
     documentId: v.id("documents"),
     url: v.string(),
-    chunks: v.array(v.object({ text: v.string(), contentHash: v.string(), parentText: v.optional(v.string()) })),
+    chunks: v.array(
+      v.object({ text: v.string(), contentHash: v.string(), parentText: v.optional(v.string()) }),
+    ),
   },
   handler: async (ctx, args) => {
     const { documentId, url, chunks } = args;

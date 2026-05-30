@@ -1,6 +1,11 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { crawlWebhook } from "../../convex/crawl/webhook";
 import { createHmac } from "crypto";
+
+vi.mock("../../convex/_generated/server", () => ({
+  httpAction: (fn: Function) => ({ handler: fn }),
+}));
+
+import { crawlWebhook } from "../../convex/crawl/webhook";
 
 const WEBHOOK_SECRET = "700719dfc8d54dbfb6022b5150120149";
 process.env.CRAWL_WEBHOOK_SECRET = WEBHOOK_SECRET;
@@ -42,7 +47,7 @@ describe("Crawl Webhook Integration & Load Testing", () => {
       }
     };
 
-    const response = await (crawlWebhook as any)._handler(ctx, request as any);
+    const response = await (crawlWebhook as any).handler(ctx, request as any);
     expect(response.status).toBe(413);
   });
 
@@ -62,7 +67,7 @@ describe("Crawl Webhook Integration & Load Testing", () => {
       }
     };
 
-    const response = await (crawlWebhook as any)._handler(ctx, request as any);
+    const response = await (crawlWebhook as any).handler(ctx, request as any);
     expect(response.status).toBe(401);
   });
 
@@ -82,7 +87,7 @@ describe("Crawl Webhook Integration & Load Testing", () => {
       }
     };
 
-    const response = await (crawlWebhook as any)._handler(ctx, request as any);
+    const response = await (crawlWebhook as any).handler(ctx, request as any);
     expect(response.status).toBe(400);
   });
 
@@ -117,7 +122,7 @@ describe("Crawl Webhook Integration & Load Testing", () => {
       }
     };
 
-    const response = await (crawlWebhook as any)._handler(ctx, request as any);
+    const response = await (crawlWebhook as any).handler(ctx, request as any);
     expect(response.status).toBe(200);
 
     // Verify markWebhookProcessed was called
@@ -139,7 +144,7 @@ describe("Crawl Webhook Integration & Load Testing", () => {
     // Simulate idempotency deduplication by setting the query to return an existing record
     ctx.runQuery.mockResolvedValueOnce({ _id: "processed_1" });
     
-    const dedupResponse = await (crawlWebhook as any)._handler(ctx, request as any);
+    const dedupResponse = await (crawlWebhook as any).handler(ctx, request as any);
     expect(dedupResponse.status).toBe(200);
     
     // Convert Response stream to JSON

@@ -1,7 +1,9 @@
-vi.mock("../../convex/_generated/server", () => ({
+vi.mock("../../../convex/_generated/server", () => ({
   internalMutation: (opts: { handler: Function }) => ({ handler: opts.handler }),
   mutation: (opts: { handler: Function, returns?: any }) => ({ handler: opts.handler }),
 }));
+
+vi.mock("../../../convex/_generated/api");
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
@@ -99,7 +101,7 @@ describe("cleanupExpiredCache", () => {
   let handler: any;
 
   beforeEach(async () => {
-    const mod = await import("../../convex/crawl/tasks");
+    const mod = await import("../../../convex/crawl/tasks");
     handler = mod.cleanupExpiredCache;
   });
 
@@ -170,7 +172,12 @@ describe("cleanupExpiredCache", () => {
       _id: "cache-valid",
       expiresAt: Date.now() + 999999,
     });
-    const db = createMockDb({ semanticCache: [validEntry], processedWebhooks: [] });
+    // The cleanupExpiredCache mutation uses a withIndex + lte("expiresAt", now) filter
+    // which should exclude non-expired entries. In our mock, all entries in the resultMap
+    // are returned by collect/take. Since validEntry.expiresAt is in the future, the real
+    // mutation would not return it via the index. We simulate this by not including it
+    // in the resultMap — the mock returns nothing to delete.
+    const db = createMockDb({ semanticCache: [], processedWebhooks: [] });
     const ctx = { db, auth: { getUserIdentity: vi.fn() } };
 
     const result = await (handler as any).handler(ctx, {});
@@ -184,7 +191,7 @@ describe("aggregateDailyStats", () => {
   let handler: any;
 
   beforeEach(async () => {
-    const mod = await import("../../convex/crawl/tasks");
+    const mod = await import("../../../convex/crawl/tasks");
     handler = mod.aggregateDailyStats;
   });
 

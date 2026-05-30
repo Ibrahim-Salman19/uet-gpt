@@ -13,7 +13,7 @@ const INJECTION_RE = new RegExp(
     String.raw`<\/s>`,
     String.raw`<\|im_(?:start|end)\|>`,
     String.raw`###\s*[Ii]nstruction`,
-    String.raw`<\s*script[\s>]`,  // XSS-in-prompt attempt
+    String.raw`<\s*script[\s>]`, // XSS-in-prompt attempt
   ].join("|"),
   "i",
 );
@@ -203,10 +203,15 @@ export const retrieveContext = action({
     if (searchResults.length > 0) {
       const topScore = searchResults[0]?.relevanceScore ?? 1.0;
 
-      if      (topScore < 0.20) { confidenceTier = "refuse"; }
-      else if (topScore < 0.40) { confidenceTier = "hedge";  }
-      else if (topScore < 0.60) { confidenceTier = "cite";   }
-      else                      { confidenceTier = "normal"; }
+      if (topScore < 0.2) {
+        confidenceTier = "refuse";
+      } else if (topScore < 0.4) {
+        confidenceTier = "hedge";
+      } else if (topScore < 0.6) {
+        confidenceTier = "cite";
+      } else {
+        confidenceTier = "normal";
+      }
 
       try {
         context = await ctx.runQuery(buildContextRef, {

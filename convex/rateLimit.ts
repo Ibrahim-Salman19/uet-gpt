@@ -16,7 +16,7 @@
  */
 
 import { ConvexError } from "convex/values";
-import { MutationCtx } from "./_generated/server";
+import type { MutationCtx } from "./_generated/server";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 

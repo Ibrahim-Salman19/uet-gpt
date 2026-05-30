@@ -1,4 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
+
+vi.mock("../../convex/_generated/server", () => ({
+  internalQuery: (opts: { handler: Function }) => ({ handler: opts.handler }),
+}));
+
 import { buildContext } from "../../convex/rag/context";
 
 interface MockCtx {
@@ -18,12 +23,12 @@ describe("RAG Pipeline - Context Assembly (Sandwich Strategy)", () => {
     const mockCtx: MockCtx = { runQuery: vi.fn() };
     const result = (await (
       buildContext as unknown as {
-        _handler: (
+        handler: (
           ctx: MockCtx,
           args: { chunks: typeof chunks; maxTokens: number },
         ) => Promise<string>;
       }
-    )._handler(mockCtx, {
+    ).handler(mockCtx, {
       chunks,
       maxTokens: 1000,
     })) as string;
@@ -57,12 +62,12 @@ describe("RAG Pipeline - Context Assembly (Sandwich Strategy)", () => {
 
     const result = (await (
       buildContext as unknown as {
-        _handler: (
+        handler: (
           ctx: MockCtx,
           args: { chunks: typeof chunks; maxTokens: number },
         ) => Promise<string>;
       }
-    )._handler(mockCtx, {
+    ).handler(mockCtx, {
       chunks,
       maxTokens: 40,
     })) as string;

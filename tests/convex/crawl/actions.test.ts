@@ -1,8 +1,8 @@
-vi.mock("../../convex/_generated/server", () => ({
+vi.mock("../../../convex/_generated/server", () => ({
   internalAction: (opts: { handler: Function }) => ({ handler: opts.handler }),
 }));
 
-vi.mock("../../convex/_generated/api", () => ({
+vi.mock("../../../convex/_generated/api", () => ({
   internal: {
     crawl: {
       workflow: { updateJobState: "updateJobState" as any },
@@ -12,7 +12,7 @@ vi.mock("../../convex/_generated/api", () => ({
   },
 }));
 
-vi.mock("../../convex/rag/instance", () => ({
+vi.mock("../../../convex/rag/instance", () => ({
   rag: {
     add: vi.fn(),
     delete: vi.fn(),
@@ -31,7 +31,7 @@ describe("executeCrawlJob", () => {
     process.env.CRAWL_WEBHOOK_SECRET = "test-secret";
     process.env.CONVEX_SITE_URL = "https://test-project.convex.cloud";
     globalThis.fetch = vi.fn();
-    const mod = await import("../../convex/crawl/actions");
+    const mod = await import("../../../convex/crawl/actions");
     executeCrawlJob = mod.executeCrawlJob;
     mockCtx = {
       runMutation: vi.fn(),
@@ -215,11 +215,11 @@ describe("embedSingleChunk", () => {
   let ragModule: any;
 
   beforeEach(async () => {
-    ragModule = await import("../../convex/rag/instance");
+    ragModule = await import("../../../convex/rag/instance");
     ragModule.rag.add.mockReset();
     ragModule.rag.delete.mockReset();
 
-    const mod = await import("../../convex/crawl/actions");
+    const mod = await import("../../../convex/crawl/actions");
     embedSingleChunk = mod.embedSingleChunk;
 
     mockCtx = {

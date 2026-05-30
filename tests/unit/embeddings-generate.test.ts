@@ -1,4 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("../../convex/_generated/server", () => ({
+  action: (opts: { handler: Function }) => ({ handler: opts.handler }),
+}));
+
 import { generate } from "../../convex/embeddings/generate";
 
 interface MockCtx {
@@ -35,9 +40,9 @@ describe("embeddings:generate", () => {
     const mockCtx: MockCtx = { runQuery: vi.fn() };
     const result = await (
       generate as unknown as {
-        _handler: (ctx: MockCtx, args: { text: string }) => Promise<number[]>;
+        handler: (ctx: MockCtx, args: { text: string }) => Promise<number[]>;
       }
-    )._handler(mockCtx, { text: "Hello world" });
+    ).handler(mockCtx, { text: "Hello world" });
 
     const fetchCalls = mockFetch.mock.calls;
     expect(fetchCalls).toHaveLength(1);
@@ -67,9 +72,9 @@ describe("embeddings:generate", () => {
     await expect(
       (
         generate as unknown as {
-          _handler: (ctx: MockCtx, args: { text: string }) => Promise<number[]>;
+          handler: (ctx: MockCtx, args: { text: string }) => Promise<number[]>;
         }
-      )._handler(mockCtx, { text: "test" }),
+      ).handler(mockCtx, { text: "test" }),
     ).rejects.toThrow("GEMINI_API_KEY environment variable is not set");
   });
 
@@ -87,9 +92,9 @@ describe("embeddings:generate", () => {
     await expect(
       (
         generate as unknown as {
-          _handler: (ctx: MockCtx, args: { text: string }) => Promise<number[]>;
+          handler: (ctx: MockCtx, args: { text: string }) => Promise<number[]>;
         }
-      )._handler(mockCtx, { text: "test" }),
+      ).handler(mockCtx, { text: "test" }),
     ).rejects.toThrow("Bad Request");
   });
 });

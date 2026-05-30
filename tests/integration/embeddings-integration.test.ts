@@ -1,4 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("../../convex/_generated/server", () => ({
+  action: (opts: { handler: Function }) => ({ handler: opts.handler }),
+}));
+
 import { generate } from "../../convex/embeddings/generate";
 
 function createMockResponse(body: any, status = 200) {
@@ -38,7 +43,7 @@ describe("Embedding Generation Integration", () => {
         });
       });
 
-      const embeddings = await (generate as any)._handler({} as any, {
+      const embeddings = await (generate as any).handler({} as any, {
         text: "Test embedding generation",
       });
 
@@ -57,7 +62,7 @@ describe("Embedding Generation Integration", () => {
         });
       });
 
-      const result = await (generate as any)._handler({} as any, {
+      const result = await (generate as any).handler({} as any, {
         text: "Retry test",
       });
 
@@ -77,7 +82,7 @@ describe("Embedding Generation Integration", () => {
         });
       });
 
-      const result = await (generate as any)._handler({} as any, {
+      const result = await (generate as any).handler({} as any, {
         text: "Rate limit test",
       });
 
@@ -91,7 +96,7 @@ describe("Embedding Generation Integration", () => {
       });
 
       await expect(
-        (generate as any)._handler({} as any, {
+        (generate as any).handler({} as any, {
           text: "Bad request test",
         }),
       ).rejects.toThrow();
@@ -103,7 +108,7 @@ describe("Embedding Generation Integration", () => {
       });
 
       await expect(
-        (generate as any)._handler({} as any, {
+        (generate as any).handler({} as any, {
           text: "Persistent failure test",
         }),
       ).rejects.toThrow(/Gemini/i);
@@ -118,7 +123,7 @@ describe("Embedding Generation Integration", () => {
       vi.stubEnv("OPENROUTER_API_KEY", ""); 
 
       await expect(
-        (generate as any)._handler({} as any, {
+        (generate as any).handler({} as any, {
           text: "No key test",
         }),
       ).rejects.toThrow(/GEMINI_API_KEY/);
@@ -132,7 +137,7 @@ describe("Embedding Generation Integration", () => {
       });
 
       await expect(
-        (generate as any)._handler({} as any, {
+        (generate as any).handler({} as any, {
           text: "Bad response test",
         }),
       ).rejects.toThrow(/Gemini/i);

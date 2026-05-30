@@ -63,7 +63,7 @@ export const searchDocumentsAction = action({
         });
         finalQueryText = hydeEnhanced;
       } catch (err) {
-         console.warn("HyDE routing action failed:", err);
+        console.warn("HyDE routing action failed:", err);
       }
     }
 
@@ -117,7 +117,13 @@ export const searchDocumentsAction = action({
 
     const docMap = new Map<
       string,
-      { url: string; title: string; crawledAt?: number; freshnessTier?: string; parentText?: string }
+      {
+        url: string;
+        title: string;
+        crawledAt?: number;
+        freshnessTier?: string;
+        parentText?: string;
+      }
     >();
     for (const { entryId, doc } of docLookups) {
       if (doc) {
@@ -155,7 +161,7 @@ export const searchDocumentsAction = action({
         if (docMeta.freshnessTier === "high") lambda = 0.023;
         if (docMeta.freshnessTier === "low") lambda = 0.0039;
         // TASK-B04: Floor at 0.20 — old docs stay visible when they are the best match.
-        const decay = Math.max(0.20, Math.exp(-lambda * daysSinceCrawled));
+        const decay = Math.max(0.2, Math.exp(-lambda * daysSinceCrawled));
         score = score * decay;
       }
 

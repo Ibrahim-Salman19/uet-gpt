@@ -46,14 +46,12 @@ async function verifySignature(
 export function normalizeContent(text: string): string {
   return (
     text
-      .replace(/\r\n/g, "\n") // normalize line endings
-      .replace(/[ \t]+\n/g, "\n") // trailing whitespace on lines
-      .replace(/\n{3,}/g, "\n\n") // collapse excessive blank lines
-      // Drop pure navigation anchor links: [Text](#anchor)
-      .replace(/^\s*\[[^\]]*\]\(#[^)]*\)\s*$/gm, "")
-      // Drop empty markdown tables
-      .replace(/^(\s*\|\s*)+\|?\s*$/gm, "")
-      .replace(/^(\s*\|?\s*---\s*)+\|?\s*$/gm, "")
+      .replace(/\r\n/g, "\n")
+      .replace(/[ \t]+\n/g, "\n")
+      .replace(/^[ \t]*\[[^\]]*\]\(#[^)]*\)[ \t]*\n?/gm, "")
+      .replace(/^[ \t]*\|?[ \t]*---[ \t]*\|?[ \t]*\n?/gm, "")
+      .replace(/^[ \t]*\|[ \t]*\|[ \t]*\n?/gm, "")
+      .replace(/\n{3,}/g, "\n\n")
       .trim()
   );
 }
@@ -100,15 +98,14 @@ export function chunkMarkdown(
   for (const block of blocks) {
     const trimmedBlock = block.trim();
     const isBlockHeader = trimmedBlock.startsWith("#");
-    if (isBlockHeader) {
-      currentHeader = trimmedBlock;
-    }
 
     if (block.length > maxChunkSize) {
       if (currentChunk) {
         pushChunk(currentChunk);
-        const isHeader = block.trimStart().startsWith("#");
-        currentChunk = isHeader ? "" : getOverlap(currentChunk.trim());
+        currentChunk = isBlockHeader ? "" : getOverlap(currentChunk.trim());
+      }
+      if (isBlockHeader) {
+        currentHeader = trimmedBlock;
       }
 
       // If it's a markdown table, split by rows but preserve the header
@@ -129,10 +126,8 @@ export function chunkMarkdown(
         }
         if (currentTableChunk) {
           pushChunk(header + currentTableChunk);
-          currentChunk = getOverlap(currentTableChunk.trim());
-        } else {
-          currentChunk = "";
         }
+        currentChunk = "";
       } else {
         // Prose block -> Split by sentence boundary safely
         const sentences: string[] = [];
@@ -194,17 +189,22 @@ export function chunkMarkdown(
       }
     } else {
       // Normal coherent block
-      const isHeader = block.trimStart().startsWith("#");
-      if (currentChunk.length + block.length > maxChunkSize) {
+      // Force split before a new header to preserve section boundaries
+      const forceSplit = isBlockHeader && currentChunk.length > 50;
+      
+      if (currentChunk.length + block.length > maxChunkSize || forceSplit) {
         pushChunk(currentChunk);
-        currentChunk = (isHeader ? "" : `${getOverlap(currentChunk.trim())}\n\n`) + block;
+        currentChunk = (isBlockHeader ? "" : `${getOverlap(currentChunk.trim())}\n\n`) + block;
       } else {
         currentChunk += (currentChunk ? "\n\n" : "") + block;
+      }
+      if (isBlockHeader) {
+        currentHeader = trimmedBlock;
       }
     }
   }
 
-  if (currentChunk && currentChunk.trim().length > overlapSize) {
+  if (currentChunk) {
     pushChunk(currentChunk);
   }
 
@@ -282,7 +282,7 @@ export const crawlWebhook = httpAction(async (ctx, request) => {
 
     // Track stats for this crawl job
     let successfulPages = 0;
-    let failedPages = 0;
+    const failedPages = 0;
     let skippedPages = 0;
 
     // Process pages, normalize, chunk, and queue them for ingestion

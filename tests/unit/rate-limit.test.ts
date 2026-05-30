@@ -1,5 +1,43 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
+vi.mock("@upstash/ratelimit", () => {
+  // slidingWindow must return a non-null, non-undefined value to satisfy the try/catch
+  // in createRatelimit in rate-limit.ts
+  const slidingWindowSpy = vi.fn().mockReturnValue({ kind: "sliding", limit: 50, window: 3600 });
+
+  // Ratelimit must be a proper class (not just vi.fn()) to be safely used with `new`.
+  // Vitest warns and may cause the constructor to return undefined otherwise.
+  class RatelimitMock {
+    private limitValue: number;
+    constructor(config: any) {
+      // Determine limit by prefix for role-based tier testing
+      const prefix: string = config?.prefix ?? "";
+      if (prefix.includes("admin")) {
+        this.limitValue = 200;
+      } else if (prefix.includes("anonymous")) {
+        this.limitValue = 10;
+      } else {
+        this.limitValue = 50;
+      }
+    }
+    async limit(_identifier: string) {
+      return {
+        success: true,
+        limit: this.limitValue,
+        remaining: this.limitValue - 1,
+        reset: Date.now() + 3_600_000,
+        pending: Promise.resolve(),
+      };
+    }
+  }
+  (RatelimitMock as any).slidingWindow = slidingWindowSpy;
+  return { Ratelimit: RatelimitMock };
+});
+
+vi.mock("@upstash/redis", () => ({
+  Redis: class {},
+}));
+
 describe("rate-limit", () => {
   const originalEnv = process.env;
 
@@ -34,20 +72,7 @@ describe("rate-limit", () => {
   it("applies correct role-based tier for admin", async () => {
     process.env.UPSTASH_REDIS_REST_URL = "https://test.upstash.io";
     process.env.UPSTASH_REDIS_REST_TOKEN = "test_token";
-    vi.mock("@upstash/ratelimit", () => ({
-      Ratelimit: vi.fn(() => ({
-        limit: vi.fn().mockResolvedValue({
-          success: true,
-          limit: 200,
-          remaining: 199,
-          reset: Date.now() + 3600000,
-          pending: Promise.resolve(),
-        }),
-      })),
-    }));
-    vi.mock("@upstash/redis", () => ({
-      Redis: vi.fn(() => ({})),
-    }));
+    
     const { checkChatRateLimit } = await import("../../src/lib/rate-limit");
     const result = await checkChatRateLimit("admin_1", "admin");
     expect(result).not.toBeNull();
@@ -57,20 +82,7 @@ describe("rate-limit", () => {
   it("applies correct role-based tier for anonymous", async () => {
     process.env.UPSTASH_REDIS_REST_URL = "https://test.upstash.io";
     process.env.UPSTASH_REDIS_REST_TOKEN = "test_token";
-    vi.mock("@upstash/ratelimit", () => ({
-      Ratelimit: vi.fn(() => ({
-        limit: vi.fn().mockResolvedValue({
-          success: true,
-          limit: 10,
-          remaining: 9,
-          reset: Date.now() + 3600000,
-          pending: Promise.resolve(),
-        }),
-      })),
-    }));
-    vi.mock("@upstash/redis", () => ({
-      Redis: vi.fn(() => ({})),
-    }));
+    
     const { checkChatRateLimit } = await import("../../src/lib/rate-limit");
     const result = await checkChatRateLimit("anon_1", "anonymous");
     expect(result).not.toBeNull();
@@ -80,20 +92,7 @@ describe("rate-limit", () => {
   it("applies default user tier when no role specified", async () => {
     process.env.UPSTASH_REDIS_REST_URL = "https://test.upstash.io";
     process.env.UPSTASH_REDIS_REST_TOKEN = "test_token";
-    vi.mock("@upstash/ratelimit", () => ({
-      Ratelimit: vi.fn(() => ({
-        limit: vi.fn().mockResolvedValue({
-          success: true,
-          limit: 50,
-          remaining: 49,
-          reset: Date.now() + 3600000,
-          pending: Promise.resolve(),
-        }),
-      })),
-    }));
-    vi.mock("@upstash/redis", () => ({
-      Redis: vi.fn(() => ({})),
-    }));
+    
     const { checkChatRateLimit } = await import("../../src/lib/rate-limit");
     const result = await checkChatRateLimit("user_1");
     expect(result).not.toBeNull();

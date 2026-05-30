@@ -1,5 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import type { Id } from "../../convex/_generated/dataModel";
+
+vi.mock("../../convex/_generated/server", () => ({
+  mutation: (opts: { handler: Function }) => ({ handler: opts.handler }),
+}));
+
 import { submit } from "../../convex/feedback/submit";
 
 interface MockMutationCtx {
@@ -49,9 +54,9 @@ describe("feedback:submit", () => {
     };
     await (
       submit as unknown as {
-        _handler: (ctx: MockMutationCtx, args: typeof mockArgs) => Promise<void>;
+        handler: (ctx: MockMutationCtx, args: typeof mockArgs) => Promise<void>;
       }
-    )._handler(mockCtx, mockArgs);
+    ).handler(mockCtx, mockArgs);
 
     expect(mockInsert).toHaveBeenCalled();
     const insertedData = mockInsert.mock.calls[0]?.[1];

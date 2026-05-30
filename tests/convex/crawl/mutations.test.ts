@@ -1,9 +1,9 @@
-vi.mock("../../convex/_generated/server", () => ({
+vi.mock("../../../convex/_generated/server", () => ({
   internalMutation: (opts: { handler: Function }) => ({ handler: opts.handler }),
   internalQuery: (opts: { handler: Function }) => ({ handler: opts.handler }),
 }));
 
-vi.mock("../../convex/_generated/api", () => ({
+vi.mock("../../../convex/_generated/api", () => ({
   internal: {
     crawl: {
       mutations: { onChunkEmbedded: "onChunkEmbedded" as any },
@@ -12,14 +12,14 @@ vi.mock("../../convex/_generated/api", () => ({
   },
 }));
 
-vi.mock("../../convex/rag/instance", () => ({
+vi.mock("../../../convex/rag/instance", () => ({
   rag: {
     add: vi.fn(),
     delete: vi.fn(),
   },
 }));
 
-vi.mock("../../convex/crawl/workpools", () => ({
+vi.mock("../../../convex/crawl/workpools", () => ({
   embeddingPool: {
     enqueueAction: vi.fn(),
   },
@@ -27,30 +27,58 @@ vi.mock("../../convex/crawl/workpools", () => ({
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
+/**
+ * Creates a chainable query result mock.
+ * Supports withIndex status-based filtering: if the query builder receives
+ * a status-equality predicate (via eq("status", X)), the result array will
+ * be filtered to only include documents with that status.
+ */
 function createDbQueryResult(result: any) {
-  const chain: any = {};
-  chain.withIndex = vi.fn(() => chain);
-  chain.filter = vi.fn(() => chain);
-  chain.order = vi.fn(() => chain);
-  chain.first = vi.fn(() => {
-    if (result === null) return null;
-    return Array.isArray(result) ? result[0] ?? null : result;
-  });
-  chain.unique = vi.fn(() => {
-    if (result === null) return null;
-    return Array.isArray(result) ? result[0] ?? null : result;
-  });
-  chain.collect = vi.fn(() => {
-    if (result === null) return [];
-    return Array.isArray(result) ? result : [result];
-  });
-  chain.take = vi.fn((n: number) => {
+  let filterStatus: string | null = null;
+
+  const getFiltered = () => {
     if (result === null) return [];
     const arr = Array.isArray(result) ? result : [result];
-    return arr.slice(0, n);
+    if (filterStatus === null) return arr;
+    return arr.filter((doc: any) => doc.status === filterStatus);
+  };
+
+  const chain: any = {};
+
+  // withIndex may receive a constraint builder function — we call it with a spy
+  // that captures eq("status", X) calls to enable status-based filtering.
+  chain.withIndex = vi.fn((_indexName: string, constraintFn?: Function) => {
+    if (constraintFn) {
+      const constraintSpy = {
+        eq: (field: string, value: any) => {
+          if (field === "status") filterStatus = value;
+          return constraintSpy;
+        },
+        gte: () => constraintSpy,
+        lte: () => constraintSpy,
+        gt: () => constraintSpy,
+        lt: () => constraintSpy,
+      };
+      constraintFn(constraintSpy);
+    }
+    return chain;
   });
+
+  chain.filter = vi.fn(() => chain);
+  chain.order = vi.fn(() => chain);
+
+  chain.first = vi.fn(() => {
+    const arr = getFiltered();
+    return arr[0] ?? null;
+  });
+  chain.unique = vi.fn(() => {
+    const arr = getFiltered();
+    return arr[0] ?? null;
+  });
+  chain.collect = vi.fn(() => getFiltered());
+  chain.take = vi.fn((n: number) => getFiltered().slice(0, n));
   chain.paginate = vi.fn(() => ({
-    page: result === null ? [] : Array.isArray(result) ? result : [result],
+    page: getFiltered(),
     isDone: true,
     continueCursor: null,
   }));
@@ -136,7 +164,7 @@ describe("getProcessedWebhook", () => {
   let handler: any;
 
   beforeEach(async () => {
-    const mod = await import("../../convex/crawl/mutations");
+    const mod = await import("../../../convex/crawl/mutations");
     handler = mod.getProcessedWebhook;
   });
 
@@ -163,7 +191,7 @@ describe("markWebhookProcessed", () => {
   let handler: any;
 
   beforeEach(async () => {
-    const mod = await import("../../convex/crawl/mutations");
+    const mod = await import("../../../convex/crawl/mutations");
     handler = mod.markWebhookProcessed;
   });
 
@@ -212,9 +240,9 @@ describe("queueChunksForEmbedding", () => {
   let embeddingPoolModule: any;
 
   beforeEach(async () => {
-    embeddingPoolModule = await import("../../convex/crawl/workpools");
+    embeddingPoolModule = await import("../../../convex/crawl/workpools");
     embeddingPoolModule.embeddingPool.enqueueAction.mockReset();
-    const mod = await import("../../convex/crawl/mutations");
+    const mod = await import("../../../convex/crawl/mutations");
     handler = mod.queueChunksForEmbedding;
   });
 
@@ -332,7 +360,7 @@ describe("queueChunksForEmbedding", () => {
   });
 
   it("deletes stale chunks that no longer exist", async () => {
-    const ragModule = await import("../../convex/rag/instance");
+    const ragModule = await import("../../../convex/rag/instance");
     ragModule.rag.delete.mockReset();
     const existingDoc = makeDoc({ _id: "doc-existing", contentHash: "old-hash" });
     const staleChunk = makeChunk({ _id: "chunk-stale", documentId: "doc-existing", contentHash: "hash-removed", ragId: "rag-stale" });
@@ -372,7 +400,7 @@ describe("saveEmbedding", () => {
   let handler: any;
 
   beforeEach(async () => {
-    const mod = await import("../../convex/crawl/mutations");
+    const mod = await import("../../../convex/crawl/mutations");
     handler = mod.saveEmbedding;
   });
 
@@ -422,13 +450,23 @@ describe("saveEmbedding", () => {
       makeChunk({ _id: "c2", documentId: "doc-complete", contentHash: "h2" }),
     ];
     const db = createMockDb({
+      // Initialize with null so the dedup check (first crawledChunks query) finds no duplicate
       crawledChunks: null,
       documents: doc,
     });
     db.get.mockResolvedValue(doc);
-    const queryResults: any[] = [];
+
+    // First query("crawledChunks") = dedup check → should return null (no existing duplicate)
+    // Second query("crawledChunks") = post-insert count check → should return all chunks
+    let crawledChunksCallCount = 0;
     db.query.mockImplementation((tableName: string) => {
       if (tableName === "crawledChunks") {
+        crawledChunksCallCount++;
+        if (crawledChunksCallCount === 1) {
+          // Dedup check: no existing chunk with this contentHash
+          return createDbQueryResult(null);
+        }
+        // Count check: all chunks now present after insert
         return createDbQueryResult(insertedChunks);
       }
       return createDbQueryResult(null);
@@ -471,9 +509,9 @@ describe("upsertDocument", () => {
   let ragModule: any;
 
   beforeEach(async () => {
-    ragModule = await import("../../convex/rag/instance");
+    ragModule = await import("../../../convex/rag/instance");
     ragModule.rag.delete.mockReset();
-    const mod = await import("../../convex/crawl/mutations");
+    const mod = await import("../../../convex/crawl/mutations");
     handler = mod.upsertDocument;
   });
 
@@ -605,9 +643,9 @@ describe("enqueueDocumentChunks", () => {
   let embeddingPoolModule: any;
 
   beforeEach(async () => {
-    embeddingPoolModule = await import("../../convex/crawl/workpools");
+    embeddingPoolModule = await import("../../../convex/crawl/workpools");
     embeddingPoolModule.embeddingPool.enqueueAction.mockReset();
-    const mod = await import("../../convex/crawl/mutations");
+    const mod = await import("../../../convex/crawl/mutations");
     handler = mod.enqueueDocumentChunks;
   });
 
@@ -667,7 +705,7 @@ describe("markStaleDocuments", () => {
   let handler: any;
 
   beforeEach(async () => {
-    const mod = await import("../../convex/crawl/mutations");
+    const mod = await import("../../../convex/crawl/mutations");
     handler = mod.markStaleDocuments;
   });
 
@@ -706,8 +744,9 @@ describe("markStaleDocuments", () => {
   });
 
   it("returns remaining=more when batch is full", async () => {
+    // The mutation queries docs with status=active; makeDoc defaults status to 'active'
     const docs = Array.from({ length: 500 }, (_, i) =>
-      makeDoc({ _id: `doc-${i}`, crawlSessionId: "session-old" }),
+      makeDoc({ _id: `doc-${i}`, crawlSessionId: "session-old", status: "active" }),
     );
     const db = createMockDb({ documents: docs });
     const ctx = { db, auth: { getUserIdentity: vi.fn() } };
@@ -738,9 +777,9 @@ describe("purgeStaleDocuments", () => {
   let ragModule: any;
 
   beforeEach(async () => {
-    ragModule = await import("../../convex/rag/instance");
+    ragModule = await import("../../../convex/rag/instance");
     ragModule.rag.delete.mockReset();
-    const mod = await import("../../convex/crawl/mutations");
+    const mod = await import("../../../convex/crawl/mutations");
     handler = mod.purgeStaleDocuments;
   });
 
@@ -803,7 +842,7 @@ describe("flagExpiredDocuments", () => {
   let handler: any;
 
   beforeEach(async () => {
-    const mod = await import("../../convex/crawl/mutations");
+    const mod = await import("../../../convex/crawl/mutations");
     handler = mod.flagExpiredDocuments;
   });
 
@@ -937,7 +976,7 @@ describe("DLQ operations", () => {
     let handler: any;
 
     beforeEach(async () => {
-      const mod = await import("../../convex/crawl/mutations");
+      const mod = await import("../../../convex/crawl/mutations");
       handler = mod.resetAbandonedDLQ;
     });
 
@@ -969,7 +1008,7 @@ describe("DLQ operations", () => {
 
 describe("edge cases", () => {
   it("upsertDocument rejects URLs with invalid hostnames gracefully", async () => {
-    const mod = await import("../../convex/crawl/mutations");
+    const mod = await import("../../../convex/crawl/mutations");
     const handler = mod.upsertDocument;
 
     const db = createMockDb({ documents: null });
@@ -987,9 +1026,9 @@ describe("edge cases", () => {
   });
 
   it("queueChunksForEmbedding handles missing existing document gracefully", async () => {
-    const mod = await import("../../convex/crawl/mutations");
+    const mod = await import("../../../convex/crawl/mutations");
     const handler = mod.queueChunksForEmbedding;
-    const embeddingPoolModule = await import("../../convex/crawl/workpools");
+    const embeddingPoolModule = await import("../../../convex/crawl/workpools");
     embeddingPoolModule.embeddingPool.enqueueAction.mockReset();
 
     const db = createMockDb({ documents: null, crawledChunks: [] });
@@ -1011,7 +1050,7 @@ describe("edge cases", () => {
   });
 
   it("markStaleDocuments handles missing status index gracefully", async () => {
-    const mod = await import("../../convex/crawl/mutations");
+    const mod = await import("../../../convex/crawl/mutations");
     const handler = mod.markStaleDocuments;
 
     const db = createMockDb();
@@ -1026,7 +1065,7 @@ describe("edge cases", () => {
   });
 
   it("purgeStaleDocuments handles empty stale list gracefully", async () => {
-    const mod = await import("../../convex/crawl/mutations");
+    const mod = await import("../../../convex/crawl/mutations");
     const handler = mod.purgeStaleDocuments;
 
     const db = createMockDb();

@@ -1,4 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
+
+vi.mock("../../convex/_generated/server", () => ({
+  action: (opts: { handler: Function }) => ({ handler: opts.handler }),
+}));
+
 import { retrieveContext } from "../../convex/rag/retrieval";
 
 function createMockCtx() {
@@ -63,7 +68,7 @@ describe("RAG Pipeline Integration", () => {
         ],
       });
 
-      const result = await (retrieveContext as any)._handler(ctx as any, {
+      const result = await (retrieveContext as any).handler(ctx as any, {
         question: "What are the admission requirements for UET Taxila?",
       });
 
@@ -80,7 +85,7 @@ describe("RAG Pipeline Integration", () => {
       const ctx = createMockCtx();
       ctx._setResults({ 0: "off_topic" });
 
-      const result = await (retrieveContext as any)._handler(ctx as any, {
+      const result = await (retrieveContext as any).handler(ctx as any, {
         question: "Tell me about quantum physics",
       });
 
@@ -113,7 +118,7 @@ describe("RAG Pipeline Integration", () => {
         },
       });
 
-      const result = await (retrieveContext as any)._handler(ctx as any, {
+      const result = await (retrieveContext as any).handler(ctx as any, {
         question: "What is UET Taxila?",
       });
 
@@ -144,7 +149,7 @@ describe("RAG Pipeline Integration", () => {
         ],
       });
 
-      const result = await (retrieveContext as any)._handler(ctx as any, {
+      const result = await (retrieveContext as any).handler(ctx as any, {
         question: "Tell me about UET",
       });
 
@@ -174,7 +179,7 @@ describe("RAG Pipeline Integration", () => {
         ],
       });
 
-      const result = await (retrieveContext as any)._handler(ctx as any, {
+      const result = await (retrieveContext as any).handler(ctx as any, {
         question: "What is UET?",
       });
 
@@ -192,7 +197,7 @@ describe("RAG Pipeline Integration", () => {
         5: new Error("Search failed"),
       });
 
-      const result = await (retrieveContext as any)._handler(ctx as any, {
+      const result = await (retrieveContext as any).handler(ctx as any, {
         question: "Something about UET",
       });
 
@@ -209,7 +214,7 @@ describe("RAG Pipeline Integration", () => {
         3: new Error("Embedding failed"),
       });
 
-      const result = await (retrieveContext as any)._handler(ctx as any, {
+      const result = await (retrieveContext as any).handler(ctx as any, {
         question: "Test question",
       });
 
