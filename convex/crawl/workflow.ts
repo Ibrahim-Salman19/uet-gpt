@@ -98,6 +98,16 @@ export const completeJobByTaskId = internalMutation({
   args: {
     taskId: v.string(),
     status: v.union(v.literal("completed"), v.literal("failed")),
+    stats: v.optional(
+      v.object({
+        successfulPages: v.number(),
+        failedPages: v.number(),
+        skippedPages: v.number(),
+        totalChunks: v.number(),
+        totalTokens: v.number(),
+        bytesProcessed: v.number(),
+      }),
+    ),
   },
   handler: async (ctx, args) => {
     const job = await ctx.db
@@ -106,10 +116,14 @@ export const completeJobByTaskId = internalMutation({
       .first();
 
     if (job && job.status !== args.status) {
-      await ctx.db.patch(job._id, {
+      const update: any = {
         status: args.status,
         completedAt: Date.now(),
-      });
+      };
+      if (args.stats) {
+        update.stats = args.stats;
+      }
+      await ctx.db.patch(job._id, update);
     }
   },
 });

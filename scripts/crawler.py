@@ -53,6 +53,10 @@ SITE_ROOTS = [
     "https://uettaxila.edu.pk/",
 ]
 
+ALLOWED_DOMAINS = frozenset(
+    urllib.parse.urlparse(root).netloc for root in SITE_ROOTS
+)
+
 SEED_DEPARTMENT_URLS = (
     [f"https://web.uettaxila.edu.pk/CMS/AUT2012/etDeptIndex.aspx?id={i}" for i in range(1, 26)] +
     [f"https://web.uettaxila.edu.pk/departmentfaculty?departmentId={i}" for i in range(1, 26)]

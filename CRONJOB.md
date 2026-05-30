@@ -119,9 +119,27 @@ python -m py_compile scripts/crawler.py scripts/ingest_pdf.py \
 
 # 3. RAG eval harness — the only metric that matters
 EVAL_FILE=".agent/eval_$(date +%Y%m%d_%H%M).json"
+LAST_EVAL=$(ls -t .agent/eval_*.json 2>/dev/null | head -1 || echo "")
+
 python scripts/eval/run_eval.py \
   --golden scripts/eval/golden_set.jsonl \
-  --output "$EVAL_FILE" 2>&1
+  --output "$EVAL_FILE" \
+  --top_k 5 \
+  ${LAST_EVAL:+--baseline "$LAST_EVAL"} 2>&1
+EVAL_EXIT=$?
+
+# Exit code meanings from run_eval.py:
+#   0 = success (stable or improved)
+#   1 = eval itself errored (network/auth failure) → skip this run, NOT a regression
+#   2 = REGRESSION detected (recall_at_5 dropped > 0.5%) → go to Phase 5
+
+if [ "$EVAL_EXIT" -eq 1 ]; then
+  echo "WARN: Eval harness failed to connect to Convex. Skipping this run."
+  echo "This is a transient infrastructure failure, NOT a code regression."
+  # Update state.md with the connectivity failure, then exit cleanly.
+  # Do NOT treat this as a recall regression.
+  exit 0
+fi
 
 # 4. Dead Letter Queue size
 DLQ_SIZE=$(wc -l < scripts/dlq.jsonl 2>/dev/null || echo 0)
@@ -132,17 +150,21 @@ VLM_FAIL=$(wc -l < logs/vlm_failures.jsonl 2>/dev/null || echo 0)
 echo "VLM failures pending audit: $VLM_FAIL"
 ```
 
-Parse eval output and record in `.agent/state.md`:
+Parse the JSON output from `$EVAL_FILE` and record in `.agent/state.md`:
 ```yaml
-last_eval_recall_at_5: X.XX
-last_eval_fragment_hit: X.XX
+# IMPORTANT: the JSON key is "recall_at_5" (not "recall_at_k")
+last_eval_recall_at_5: X.XX       # from eval JSON: .recall_at_5
+last_eval_fragment_hit: X.XX      # from eval JSON: .fragment_hit_rate
 last_eval_timestamp: ISO8601
-failing_categories: [list]
+failing_categories: [list]         # from eval JSON: .per_category keys where recall < 0.5
 ```
 
-**STOP if recall_at_5 REGRESSED vs previous run.**
+**STOP if eval exit code is 2 (REGRESSION detected).**
 Do not start new work. Go directly to Phase 5 (Emergency Protocol).
 A regression means a previous run broke something. Find it. Fix it. Only that.
+
+**If eval exit code is 1 (connectivity error): write a note to state.md and exit cleanly.**
+Do not treat infrastructure failures as code regressions.
 
 ---
 
@@ -261,19 +283,34 @@ No new failures. New features require a new test.
 
 ### Gate 4 — Eval harness (the non-negotiable gate)
 ```bash
+PRE_EVAL=$(ls -t .agent/eval_*.json 2>/dev/null | head -1 || echo "")
+POST_EVAL=".agent/eval_post_$(date +%Y%m%d_%H%M).json"
+
 python scripts/eval/run_eval.py \
   --golden scripts/eval/golden_set.jsonl \
-  --output .agent/eval_post_$(date +%H%M).json
+  --output "$POST_EVAL" \
+  --top_k 5 \
+  ${PRE_EVAL:+--baseline "$PRE_EVAL"}
+GATE4_EXIT=$?
 ```
-`recall_at_5` must be ≥ pre-run baseline. No regression.
+Exit code 0 = pass. Exit code 2 = regression. Either → gate fails.
+`recall_at_5` (JSON key `.recall_at_5`) must be ≥ pre-run baseline. No regression.
 If task was supposed to improve recall, verify it actually improved.
 
 ### Gate 5 — Category-level regression check
 For any task touching retrieval, chunking, or embedding:
 ```bash
-python scripts/eval/run_eval.py --category fees --verbose
-python scripts/eval/run_eval.py --category exam_dates --verbose
-python scripts/eval/run_eval.py --category edge_cases --verbose
+python scripts/eval/run_eval.py \
+  --golden scripts/eval/golden_set.jsonl \
+  --category fees --verbose --top_k 5
+
+python scripts/eval/run_eval.py \
+  --golden scripts/eval/golden_set.jsonl \
+  --category exam_dates --verbose --top_k 5
+
+python scripts/eval/run_eval.py \
+  --golden scripts/eval/golden_set.jsonl \
+  --category edge_cases --verbose --top_k 5
 ```
 
 **If any gate fails:**
@@ -288,21 +325,38 @@ python scripts/eval/run_eval.py --category edge_cases --verbose
 ## PHASE 5 — EMERGENCY PROTOCOL
 ## ════════════════════════════════════════════════════════════
 
-Triggers: recall_at_5 regressed / gate failed / compilation broken
+Triggers: recall_at_5 regressed (eval exit 2) / gate failed / compilation broken
 
 ```bash
-# 1. Find the last known-good commit
-git log --oneline -10
+# 0. ALWAYS stash first — protect working tree before bisect
+git stash push -m "emergency-stash-$(date +%H%M)"
 
-# 2. Find when eval metric was last passing
+# 1. Find the last known-good commit
+git log --oneline -15
+
+# 2. Find when eval metric was last passing (check progress log)
 grep "recall_at_5" .agent/progress_log.md | tail -10
 
-# 3. Bisect: revert one commit at a time, run eval, repeat
-git revert HEAD --no-commit
-python scripts/eval/run_eval.py --golden scripts/eval/golden_set.jsonl
+# 3. Bisect: test each commit, do NOT revert yet — just eval
+# For each candidate commit SHA:
+git checkout <SHA> -- .   # check out only the changed files, not HEAD
+python scripts/eval/run_eval.py \
+  --golden scripts/eval/golden_set.jsonl \
+  --output .agent/bisect_$(date +%H%M).json \
+  --top_k 5
+# If recall improved → that commit was the culprit.
 
-# 4. Clean revert when offending commit identified
-git revert <SHA>
+# 4. Restore working tree after bisect
+git stash pop
+
+# 5. Clean revert when offending commit identified
+git revert <CULPRIT_SHA> --no-edit
+
+# 6. Verify the revert fixed the regression
+python scripts/eval/run_eval.py \
+  --golden scripts/eval/golden_set.jsonl \
+  --output .agent/post_revert_$(date +%H%M).json \
+  --top_k 5
 ```
 
 Append to `.agent/incident_log.md`:
@@ -429,9 +483,12 @@ three times, mark the task `[BLOCKED]` and document it clearly. Trying the
 same broken approach 10 times burns tokens, produces nothing, and masks
 the real problem from the human who needs to diagnose it.
 
-**Context drift is real.** After 50+ minutes, re-read `architecture.md` before
-Phase 6 to re-anchor against the source of truth. Context drift causes agents
-to contradict decisions they made earlier in the same run.
+**Context drift is real.** After 45+ minutes of work (before Phase 6),
+mandatorily re-read `architecture.md` in full before writing documentation.
+Do not rely on memory of what it said at boot time.
+Context drift causes agents to contradict decisions made in the same run.
+Set an internal reminder: "If I have been working for more than 45 minutes,
+I MUST re-read architecture.md before updating it."
 
 **Documentation is not optional.** "It's obvious why I changed k from 10 to 60"
 is not a documentation strategy. Six weeks later, neither you nor the human will

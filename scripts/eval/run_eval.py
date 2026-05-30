@@ -1,113 +1,231 @@
 import os
 import json
+import time
 import argparse
-from convex import ConvexClient
-from dotenv import load_dotenv
+import tempfile
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 
-load_dotenv()
+try:
+    from convex import ConvexClient
+except ImportError:
+    print("ERROR: 'convex' package not installed. Run: pip install convex")
+    raise
 
-def run_eval(golden_path: str, top_k: int = 5) -> dict:
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # dotenv is optional; env var can be set externally
+
+
+PER_QUERY_TIMEOUT_SECONDS = 20  # kill individual queries that stall
+
+
+def _evaluate_single(client: "ConvexClient", item: dict, top_k: int) -> dict:
+    """Run a single eval query. Isolated so it can be run in a thread with timeout."""
+    query = item["query"]
+    expected_url = item["expected_url"]
+    expected_fragment = item["expected_fragment"].lower()
+    category = item["category"]
+
+    results = client.action("eval:evaluateSearch", {"query": query, "topK": top_k})
+
+    url_matched = any(expected_url in r.get("url", "") for r in results)
+    fragment_matched = any(expected_fragment in r.get("text", "").lower() for r in results)
+
+    return {
+        "query": query,
+        "category": category,
+        "expected_url": expected_url,
+        "expected_fragment": expected_fragment,
+        "url_matched": url_matched,
+        "fragment_matched": fragment_matched,
+    }
+
+
+def run_eval(golden_path: str, top_k: int = 5, category_filter: str | None = None) -> dict:
     convex_url = os.getenv("CONVEX_URL")
     if not convex_url:
-        print("Error: CONVEX_URL environment variable is not set in .env")
-        return {}
-        
+        return {
+            "error": "CONVEX_URL environment variable is not set",
+            "recall_at_5": 0.0,
+            "fragment_hit_rate": 0.0,
+            "per_category": {},
+            "failures": [],
+            "eval_error": True,
+        }
+
     client = ConvexClient(convex_url)
-    
+
     with open(golden_path, "r", encoding="utf-8") as f:
-        golden_pairs = [json.loads(line) for line in f]
-        
+        golden_pairs = [json.loads(line) for line in f if line.strip()]
+
+    # Apply category filter if provided
+    if category_filter:
+        golden_pairs = [p for p in golden_pairs if p.get("category") == category_filter]
+
     total = len(golden_pairs)
+    if total == 0:
+        return {
+            "recall_at_5": 0.0,
+            "fragment_hit_rate": 0.0,
+            "per_category": {},
+            "failures": [],
+            "warning": "No golden pairs matched the given category filter.",
+        }
+
     url_hits = 0
     fragment_hits = 0
     failures = []
-    
-    categories = {}
-    
-    print(f"Running evaluation against {total} golden pairs using Convex endpoint...")
-    
+    categories: dict = {}
+
+    print(f"Running evaluation against {total} golden pairs (top_k={top_k})...")
+    start_time = time.time()
+
     for item in golden_pairs:
         query = item["query"]
-        expected_url = item["expected_url"]
-        expected_fragment = item["expected_fragment"].lower()
-        category = item["category"]
-        
-        if category not in categories:
-            categories[category] = {"total": 0, "url_hits": 0, "fragment_hits": 0}
-            
-        categories[category]["total"] += 1
-        
+        cat = item["category"]
+
+        if cat not in categories:
+            categories[cat] = {"total": 0, "url_hits": 0, "fragment_hits": 0}
+        categories[cat]["total"] += 1
+
         try:
-            # Call the convex action
-            results = client.action("eval:evaluateSearch", {"query": query, "topK": top_k})
-            
-            # Check URL match
-            url_matched = any(expected_url in r.get("url", "") for r in results)
-            
-            # Check fragment match
-            fragment_matched = any(expected_fragment in r.get("text", "").lower() for r in results)
-            
-            if url_matched:
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(_evaluate_single, client, item, top_k)
+                result = future.result(timeout=PER_QUERY_TIMEOUT_SECONDS)
+
+            if result["url_matched"]:
                 url_hits += 1
-                categories[category]["url_hits"] += 1
-                
-            if fragment_matched:
+                categories[cat]["url_hits"] += 1
+
+            if result["fragment_matched"]:
                 fragment_hits += 1
-                categories[category]["fragment_hits"] += 1
-                
-            if not url_matched or not fragment_matched:
-                failures.append({
-                    "query": query,
-                    "expected_url": expected_url,
-                    "expected_fragment": expected_fragment,
-                    "url_matched": url_matched,
-                    "fragment_matched": fragment_matched
-                })
-                
+                categories[cat]["fragment_hits"] += 1
+
+            if not result["url_matched"] or not result["fragment_matched"]:
+                failures.append(result)
+
+        except FuturesTimeoutError:
+            print(f"  TIMEOUT ({PER_QUERY_TIMEOUT_SECONDS}s): '{query}'")
+            failures.append({"query": query, "error": "timeout", "category": cat})
+
         except Exception as e:
-            print(f"Error evaluating '{query}': {e}")
-            failures.append({"query": query, "error": str(e)})
-            
+            err_msg = str(e)
+            print(f"  ERROR evaluating '{query}': {err_msg}")
+            failures.append({"query": query, "error": err_msg, "category": cat})
+
+    elapsed = time.time() - start_time
+
+    # Compute per-category recall fractions safely
+    per_cat_summary: dict = {}
+    for cat, stats in categories.items():
+        n = stats["total"] or 1  # avoid div-by-zero
+        per_cat_summary[cat] = {
+            "total": stats["total"],
+            "url_hits": stats["url_hits"],
+            "fragment_hits": stats["fragment_hits"],
+            "recall": round(stats["url_hits"] / n, 4),
+            "fragment_hit_rate": round(stats["fragment_hits"] / n, 4),
+        }
+
     metrics = {
-        "recall_at_k": url_hits / total if total > 0 else 0,
-        "fragment_hit_rate": fragment_hits / total if total > 0 else 0,
-        "per_category": categories,
-        "failures": failures
+        # Primary keys used by CRONJOB.md
+        "recall_at_5": round(url_hits / total, 4) if total > 0 else 0.0,
+        "fragment_hit_rate": round(fragment_hits / total, 4) if total > 0 else 0.0,
+        # Alias for backward compatibility
+        "recall_at_k": round(url_hits / total, 4) if total > 0 else 0.0,
+        # Metadata
+        "top_k": top_k,
+        "total_pairs": total,
+        "elapsed_seconds": round(elapsed, 1),
+        "per_category": per_cat_summary,
+        "failures": failures,
+        "eval_error": False,
     }
-    
-    print(f"\n--- Evaluation Results (Top K={top_k}) ---")
-    print(f"Recall@K: {metrics['recall_at_k']:.2%}")
+
+    # ── Print summary ──────────────────────────────────────────────────────────
+    print(f"\n--- Evaluation Results (Top K={top_k}, {elapsed:.1f}s) ---")
+    print(f"Recall@5:          {metrics['recall_at_5']:.2%}")
     print(f"Fragment Hit Rate: {metrics['fragment_hit_rate']:.2%}")
     print("\nPer Category Breakdown:")
-    for cat, stats in categories.items():
-        print(f"  {cat}: Recall={stats['url_hits']/stats['total']:.2%}, Fragment={stats['fragment_hits']/stats['total']:.2%}")
-        
+    for cat, stats in per_cat_summary.items():
+        print(
+            f"  {cat:20s}: Recall={stats['recall']:.2%}  "
+            f"Fragment={stats['fragment_hit_rate']:.2%}  "
+            f"({stats['url_hits']}/{stats['total']})"
+        )
+
     return metrics
 
+
+def compare_to_baseline(metrics: dict, baseline_path: str) -> dict:
+    """Compare metrics to a stored baseline. Returns a delta dict."""
+    if not os.path.exists(baseline_path):
+        return {"status": "no_baseline", "delta": None}
+
+    try:
+        with open(baseline_path, "r", encoding="utf-8") as f:
+            baseline = json.load(f)
+    except Exception as e:
+        return {"status": "baseline_parse_error", "error": str(e), "delta": None}
+
+    baseline_recall = baseline.get("recall_at_5", 0.0)
+    current_recall = metrics.get("recall_at_5", 0.0)
+    delta = round(current_recall - baseline_recall, 4)
+
+    status = "improved" if delta > 0.005 else ("regressed" if delta < -0.005 else "stable")
+
+    print(f"\nBaseline comparison: {baseline_recall:.2%} → {current_recall:.2%} ({delta:+.2%}) [{status.upper()}]")
+
+    return {
+        "status": status,
+        "baseline_recall_at_5": baseline_recall,
+        "current_recall_at_5": current_recall,
+        "delta": delta,
+    }
+
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="UET Taxila RAG Evaluation Harness")
     parser.add_argument("--golden", required=True, help="Path to golden set JSONL")
-    parser.add_argument("--top_k", type=int, default=5)
-    parser.add_argument("--verbose", action="store_true", help="Print failures")
-    parser.add_argument("--category", type=str, help="Filter to specific category")
+    parser.add_argument("--top_k", type=int, default=5, help="Top-K for recall computation")
+    parser.add_argument("--output", type=str, default=None, help="Write JSON results to this file")
+    parser.add_argument("--baseline", type=str, default=None, help="Previous run JSON for regression detection")
+    parser.add_argument("--verbose", action="store_true", help="Print all failure details")
+    parser.add_argument("--category", type=str, default=None, help="Filter to specific category")
     args = parser.parse_args()
-    
-    # If category is provided, filter the golden set temporarily
-    if args.category:
-        with open(args.golden, "r", encoding="utf-8") as f:
-            pairs = [json.loads(line) for line in f]
-        filtered = [p for p in pairs if p["category"] == args.category]
-        import tempfile
-        with tempfile.NamedTemporaryFile("w", delete=False, suffix=".jsonl") as tmp:
-            for p in filtered:
-                tmp.write(json.dumps(p) + "\n")
-            tmp_path = tmp.name
-        metrics = run_eval(tmp_path, args.top_k)
-        os.unlink(tmp_path)
-    else:
-        metrics = run_eval(args.golden, args.top_k)
-        
+
+    metrics = run_eval(args.golden, args.top_k, category_filter=args.category)
+
+    # Regression check against baseline
+    comparison = {}
+    if args.baseline:
+        comparison = compare_to_baseline(metrics, args.baseline)
+        metrics["comparison"] = comparison
+
+        if comparison.get("status") == "regressed":
+            print("\n⚠️  REGRESSION DETECTED — recall_at_5 dropped by "
+                  f"{abs(comparison['delta']):.2%}")
+            # Exit code 2 = regression signal (distinct from error exit 1)
+            if args.output:
+                with open(args.output, "w", encoding="utf-8") as f:
+                    json.dump(metrics, f, indent=2)
+            raise SystemExit(2)
+
+    # Write output file
+    if args.output:
+        os.makedirs(os.path.dirname(args.output) if os.path.dirname(args.output) else ".", exist_ok=True)
+        with open(args.output, "w", encoding="utf-8") as f:
+            json.dump(metrics, f, indent=2)
+        print(f"\nResults written to: {args.output}")
+
+    # Verbose failures
     if args.verbose and metrics.get("failures"):
         print("\n--- Failures ---")
-        for f in metrics["failures"]:
-            print(f)
+        for failure in metrics["failures"]:
+            print(json.dumps(failure, ensure_ascii=False))
+
+    # Exit 1 if eval itself errored (connection failure etc.)
+    if metrics.get("eval_error"):
+        raise SystemExit(1)
