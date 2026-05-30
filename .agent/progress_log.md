@@ -169,3 +169,16 @@ delta:       {recall_at_5: 0.0, fragment_hit: 0.0}
 git_commits: []
 assumptions: "Skipped this run due to eval connectivity error (exit code 1)"
 issues_discovered: "CONVEX_URL environment variable is not set"
+
+---
+run_id: 2026-05-30-12
+timestamp_utc: 2026-05-30T12:20:00Z
+task: "CRASH-RECOVERY"
+files_modified:
+  - .agent/state.md
+  - .agent/incident_log.md
+  - .agent/progress_log.md
+test_status: FAIL
+commits: []
+assumptions: "Tests are massively failing (218 failures) either due to untracked files corrupting module resolution or fundamentally broken environment setup (jsdom/vitest config). Triggered Emergency Protocol and aborted tasks."
+issues_discovered: "Vitest config is missing jsdom environment, untracked test files from previous partial runs are causing module resolution failures."
