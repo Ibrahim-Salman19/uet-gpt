@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import type { Doc, Id } from "../_generated/dataModel";
 import { internalMutation, internalQuery } from "../_generated/server";
 
 const cacheEntryValidator = v.object({
@@ -33,7 +34,7 @@ export const getCacheEntry = internalQuery({
   args: { id: v.id("semanticCache") },
   returns: v.union(cacheEntryValidator, v.null()),
   handler: async (ctx, args) => {
-    return (await ctx.db.get("semanticCache", args.id)) as any;
+    return (await ctx.db.get(args.id)) as Doc<"semanticCache"> | null;
   },
 });
 
@@ -41,11 +42,30 @@ export const incrementHits = internalMutation({
   args: { id: v.id("semanticCache") },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const entry = await ctx.db.get("semanticCache", args.id);
+    const entry = await ctx.db.get(args.id);
     if (entry) {
       const currentHits = typeof entry.hits === "number" ? entry.hits : 0;
-      await ctx.db.patch("semanticCache", args.id, { hits: currentHits + 1 });
+      await ctx.db.patch(args.id, { hits: currentHits + 1 });
     }
+  },
+});
+
+export const getDocByEntryId = internalQuery({
+  args: { entryId: v.string() },
+  returns: v.union(
+    v.object({
+      updatedAt: v.number(),
+      crawledAt: v.number(),
+    }),
+    v.null(),
+  ),
+  handler: async (ctx, args) => {
+    const doc = await ctx.db
+      .query("documents")
+      .withIndex("by_entryId", (q) => q.eq("entryId", args.entryId))
+      .first();
+    if (!doc) return null;
+    return { updatedAt: doc.updatedAt, crawledAt: doc.crawledAt };
   },
 });
 
@@ -60,11 +80,11 @@ export const cleanupExpired = internalMutation({
 
     const expired = await ctx.db
       .query("semanticCache")
-      .withIndex("by_expiresAt", (q: any) => q.lte("expiresAt", now))
+      .withIndex("by_expiresAt", (q) => q.lte("expiresAt", now))
       .take(maxToDelete);
 
     for (const entry of expired) {
-      await ctx.db.delete(entry._id as any);
+      await ctx.db.delete(entry._id as Id<"semanticCache">);
     }
 
     return expired.length;

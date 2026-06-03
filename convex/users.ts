@@ -83,7 +83,7 @@ export const getByClerkId = query({
     return (await ctx.db
       .query("users")
       .withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
-      .unique()) as unknown as typeof userValidator.type;
+      .unique()) as typeof userValidator.type;
   },
 });
 
@@ -116,4 +116,3 @@ export const updatePreferences = mutation({
     });
   },
 });
-

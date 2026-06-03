@@ -26,6 +26,23 @@ crons.daily(
   { limit: 100 },
 );
 
+// Retry dead letter queue every 4 hours
+crons.interval("retry-dead-letter", { hours: 4 }, internal.crawl.mutations.retryDeadLetterQueue, {
+  limit: 100,
+});
+
+// Every 30 minutes: detect crawl jobs stuck in "running" state for >2 hours
+// Prevents Crawl4AI container crashes from permanently blocking daily crawls.
+crons.interval("fail-stuck-crawl-jobs", { minutes: 30 }, internal.crawl.workflow.failStuckJobs);
+
+// Weekly cleanup of old abandoned DLQ entries and completed/failed/cancelled crawl jobs
+crons.weekly(
+  "cleanup-old-records",
+  { dayOfWeek: "sunday", hourUTC: 2, minuteUTC: 0 },
+  internal.crawl.jobs.cleanupOldRecords,
+  { limit: 100 },
+);
+
 // Run weekly thread cleanup
 crons.weekly(
   "purge-old-archived-threads",

@@ -1,5 +1,14 @@
 import { internal } from "../_generated/api";
+import type { Doc } from "../_generated/dataModel";
 import { httpAction } from "../_generated/server";
+import {
+  assignFreshnessTier,
+  canonicalizeUrl,
+  chunkMarkdown,
+  guardChunkSize,
+  isPdfVirtualUrl,
+  normalizeContent,
+} from "./chunking";
 
 function hexToBuffer(hex: string): ArrayBuffer {
   const bytes = new Uint8Array(hex.length / 2);
@@ -19,9 +28,9 @@ async function sha256(text: string): Promise<string> {
 
 async function verifySignature(
   timestamp: string,
-  rawBody: string,
   signature: string,
   secret: string,
+  body: string,
 ): Promise<boolean> {
   try {
     const encoder = new TextEncoder();
@@ -34,7 +43,7 @@ async function verifySignature(
     );
 
     const sigBuffer = hexToBuffer(signature);
-    const dataBuffer = encoder.encode(`${timestamp}.${rawBody}`);
+    const dataBuffer = encoder.encode(timestamp + "." + body);
 
     return await crypto.subtle.verify("HMAC", key, sigBuffer, dataBuffer);
   } catch (err) {
@@ -43,184 +52,24 @@ async function verifySignature(
   }
 }
 
-export function normalizeContent(text: string): string {
-  return (
-    text
-      .replace(/\r\n/g, "\n")
-      .replace(/[ \t]+\n/g, "\n")
-      .replace(/^[ \t]*\[[^\]]*\]\(#[^)]*\)[ \t]*\n?/gm, "")
-      .replace(/^[ \t]*\|?[ \t]*---[ \t]*\|?[ \t]*\n?/gm, "")
-      .replace(/^[ \t]*\|[ \t]*\|[ \t]*\n?/gm, "")
-      .replace(/\n{3,}/g, "\n\n")
-      .trim()
-  );
-}
-
-export function isQualityChunk(text: string): boolean {
-  // Must have at least 5 meaningful words to drop tiny useless fragments
-  const words = text.split(/\s+/).filter((w) => w.trim().length > 1);
-  if (words.length < 5) return false;
-
-  // We intentionally do NOT use alphanumeric ratio checks here anymore.
-  // Because the Trafilatura crawler now properly extracts real data tables,
-  // we must protect chunks that contain dense markdown tables (which are full of `|` and `-`).
-  return true;
-}
-
-export function chunkMarkdown(
-  markdown: string,
-  maxChunkSize: number = 3000,
-  overlapSize: number = 300, // TASK-E01: raised from 200→300 for better prose continuity
-): string[] {
-  const chunks: string[] = [];
-
-  // 1. Split by double newline (Paragraphs/Sections/Tables)
-  const blocks = markdown.split(/\n{2,}/);
-
-  let currentChunk = "";
-  let currentHeader = "";
-
-  function getOverlap(text: string): string {
-    if (!text || text.length <= overlapSize) return text;
-    const tail = text.slice(-overlapSize);
-    const splitIndex = tail.indexOf(" ");
-    return splitIndex !== -1 ? tail.slice(splitIndex + 1) : tail;
-  }
-
-  function pushChunk(text: string) {
-    let cleanText = text.trim();
-    if (currentHeader && !cleanText.startsWith(currentHeader)) {
-      cleanText = `${currentHeader}\n\n${cleanText}`;
-    }
-    chunks.push(cleanText);
-  }
-
-  for (const block of blocks) {
-    const trimmedBlock = block.trim();
-    const isBlockHeader = trimmedBlock.startsWith("#");
-
-    if (block.length > maxChunkSize) {
-      if (currentChunk) {
-        pushChunk(currentChunk);
-        currentChunk = isBlockHeader ? "" : getOverlap(currentChunk.trim());
-      }
-      if (isBlockHeader) {
-        currentHeader = trimmedBlock;
-      }
-
-      // If it's a markdown table, split by rows but preserve the header
-      if (block.trimStart().startsWith("|")) {
-        const rows = block.split("\n");
-        let currentTableChunk = currentChunk ? `${currentChunk}\n\n` : "";
-        const header = rows.length > 2 ? `${rows[0]}\n${rows[1]}\n` : "";
-        const startIndex = rows.length > 2 ? 2 : 0;
-
-        for (let i = startIndex; i < rows.length; i++) {
-          const row = `${rows[i]}\n`;
-          if (currentTableChunk.length + row.length > maxChunkSize) {
-            if (currentTableChunk) pushChunk(header + currentTableChunk);
-            currentTableChunk = `${getOverlap(currentTableChunk.trim())}\n${row}`;
-          } else {
-            currentTableChunk += row;
-          }
-        }
-        if (currentTableChunk) {
-          pushChunk(header + currentTableChunk);
-        }
-        currentChunk = "";
-      } else {
-        // Prose block -> Split by sentence boundary safely
-        const sentences: string[] = [];
-        const sentenceRegex = /[^.!?]+[.!?]+/g;
-        let lastIndex = 0;
-        while (true) {
-          const match = sentenceRegex.exec(block);
-          if (match === null) break;
-          sentences.push(match[0]);
-          lastIndex = sentenceRegex.lastIndex;
-        }
-        if (lastIndex < block.length) {
-          const trailing = block.slice(lastIndex);
-          if (trailing.trim()) {
-            sentences.push(trailing);
-          }
-        }
-        if (sentences.length === 0) {
-          sentences.push(block);
-        }
-
-        const finalSentences: string[] = [];
-        for (const s of sentences) {
-          if (s.length > maxChunkSize) {
-            const words = s.split(" ");
-            let currentWordChunk = "";
-            for (const word of words) {
-              if (currentWordChunk.length + word.length + 1 > maxChunkSize) {
-                if (currentWordChunk) finalSentences.push(currentWordChunk);
-                currentWordChunk = word;
-              } else {
-                currentWordChunk += (currentWordChunk ? " " : "") + word;
-              }
-            }
-            if (currentWordChunk) {
-              finalSentences.push(currentWordChunk);
-            }
-          } else {
-            finalSentences.push(s);
-          }
-        }
-
-        let currentSentenceChunk = currentChunk ? `${currentChunk}\n\n` : "";
-
-        for (const sentence of finalSentences) {
-          if (currentSentenceChunk.length + sentence.length > maxChunkSize) {
-            if (currentSentenceChunk) pushChunk(currentSentenceChunk);
-            currentSentenceChunk = `${getOverlap(currentSentenceChunk.trim())} ${sentence}`;
-          } else {
-            currentSentenceChunk += (currentSentenceChunk ? " " : "") + sentence;
-          }
-        }
-        if (currentSentenceChunk) {
-          pushChunk(currentSentenceChunk);
-          currentChunk = getOverlap(currentSentenceChunk.trim());
-        } else {
-          currentChunk = "";
-        }
-      }
-    } else {
-      // Normal coherent block
-      // Force split before a new header to preserve section boundaries
-      const forceSplit = isBlockHeader && currentChunk.length > 50;
-      
-      if (currentChunk.length + block.length > maxChunkSize || forceSplit) {
-        pushChunk(currentChunk);
-        currentChunk = (isBlockHeader ? "" : `${getOverlap(currentChunk.trim())}\n\n`) + block;
-      } else {
-        currentChunk += (currentChunk ? "\n\n" : "") + block;
-      }
-      if (isBlockHeader) {
-        currentHeader = trimmedBlock;
-      }
-    }
-  }
-
-  if (currentChunk) {
-    pushChunk(currentChunk);
-  }
-
-  return chunks.filter((c) => isQualityChunk(c));
-}
-
 export const crawlWebhook = httpAction(async (ctx, request) => {
+  let taskId: string | undefined;
   try {
-    const rawBody = await request.text();
-    const contentLength = Number(request.headers.get("content-length") ?? rawBody.length);
+    const isStateChange = new URL(request.url).searchParams.get("type") === "state";
+    if (isStateChange) {
+      console.log("State change notification received — acknowledging without processing.");
+      return new Response(JSON.stringify({ ok: true, state: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
 
-    // 1. Enforce payload size limit (1MB) to prevent memory exhaustion
-    if (contentLength > 1_048_576) {
-      console.warn(`Webhook payload too large: ${contentLength} bytes`);
+    const contentLengthHeader = request.headers.get("content-length");
+    if (contentLengthHeader && Number(contentLengthHeader) > 10_485_760) {
+      console.warn(`Webhook payload too large: ${contentLengthHeader} bytes`);
       return new Response("Payload too large", { status: 413 });
     }
+    const rawBody = await request.text();
 
     const timestamp = request.headers.get("x-crawl-timestamp");
     const signature = request.headers.get("x-crawl-signature");
@@ -230,41 +79,40 @@ export const crawlWebhook = httpAction(async (ctx, request) => {
       return new Response("Missing signature headers", { status: 400 });
     }
 
-    // 2. Validate timestamp window to prevent replay attacks (allow up to 5 minutes)
     const ts = parseInt(timestamp, 10);
-    const MAX_SKEW_MS = 5 * 60 * 1000; // 5 minutes
+    const MAX_SKEW_MS = 5 * 60 * 1000;
     if (Number.isNaN(ts) || Math.abs(Date.now() - ts) > MAX_SKEW_MS) {
       console.warn(`Webhook rejected: Timestamp expired or invalid: ${timestamp}`);
       return new Response("Request timestamp expired", { status: 400 });
     }
 
-    // 3. Verify HMAC-SHA256 signature to prove origin
-    const secret = process.env.CRAWL_WEBHOOK_SECRET;
-    if (!secret) {
+    const primarySecret = process.env.CRAWL_WEBHOOK_SECRET;
+    const secondarySecret = process.env.CRAWL_WEBHOOK_SECRET_NEW;
+    if (!primarySecret) {
       console.error("CRAWL_WEBHOOK_SECRET environment variable is not set");
       return new Response("Server configuration error", { status: 500 });
     }
 
-    const isValid = await verifySignature(timestamp, rawBody, signature, secret);
+    let isValid = await verifySignature(timestamp, signature, primarySecret, rawBody);
+    if (!isValid && secondarySecret) {
+      isValid = await verifySignature(timestamp, signature, secondarySecret, rawBody);
+    }
     if (!isValid) {
       console.warn("Webhook rejected: Invalid signature");
       return new Response("Invalid signature", { status: 401 });
     }
 
     const payload = JSON.parse(rawBody);
-    console.log("Received authenticated Crawl4AI webhook:", payload);
+    console.log(
+      "Webhook received",
+      JSON.stringify({ taskId: payload.task_id, jobId: payload.job_id, url: payload.url }),
+    );
+    taskId = payload.task_id || payload.job_id;
+    const status = payload.status;
+    const results = payload.data?.results || payload.results || (payload.url ? [payload] : []);
 
-    if (!payload || (!payload.task_id && !payload.job_id)) {
-      return new Response("Invalid payload: Missing task_id", { status: 400 });
-    }
-
-    const taskId = payload.task_id || payload.job_id;
-    const status = payload.status; // "completed", "failed", etc.
-    const results = payload.data || payload.results || (payload.url ? [payload] : []);
-
-    // 4. Idempotency Check: prevent duplicate injections if webhook is retried
     const existing = await ctx.runQuery(internal.crawl.mutations.getProcessedWebhook, {
-      jobId: taskId,
+      jobId: taskId!,
     });
     if (existing) {
       console.log(`Webhook already processed (Idempotent): ${taskId}`);
@@ -274,105 +122,156 @@ export const crawlWebhook = httpAction(async (ctx, request) => {
       });
     }
 
-    // Mark as processed in the database
     await ctx.runMutation(internal.crawl.mutations.markWebhookProcessed, {
-      jobId: taskId,
-      expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days TTL
+      jobId: taskId!,
+      expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
     });
 
-    // Track stats for this crawl job
     let successfulPages = 0;
-    const failedPages = 0;
+    let failedPages = 0;
     let skippedPages = 0;
 
-    // Process pages, normalize, chunk, and queue them for ingestion
     for (const result of results) {
-      const url = result.url || payload.url;
-      const content = result.markdown || result.html || result.text;
-      const title = result.metadata?.title || "Untitled";
-      const etag = result.headers?.etag || undefined;
-      const lastModified = result.headers?.["last-modified"] || undefined;
-
-      if (!content || content.trim().length === 0) {
-        console.warn(`Empty content for URL: ${url}`);
-        skippedPages++;
-        continue;
-      }
-
-      console.log(`Processing and normalising crawled page: ${url}`);
-
-      const normalized = normalizeContent(content);
-      const contentHash = await sha256(normalized);
-
-      let contextPrefix = `Document Title: ${title}\n`;
       try {
-        if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-          const { generateText } = await import("ai");
-          const { google } = await import("@ai-sdk/google");
+        const url = result.url || payload.url;
+        const canonicalUrl = canonicalizeUrl(url);
+        const isPdf = url.toLowerCase().endsWith(".pdf") || result.media_type === "pdf";
+        const content = result.markdown || result.html || result.text;
+        const title = result.metadata?.title || "Untitled";
+        const etag = result.headers?.etag || undefined;
+        const lastModified = result.headers?.["last-modified"] || undefined;
 
-          const { text } = await generateText({
-            model: google("gemini-2.5-flash"),
-            prompt: `Write a 1-sentence summary of this document to provide context for vector search chunks. Document text:\n\n${normalized.slice(0, 2000)}`,
-          });
-          contextPrefix += `Context: ${text.trim()}\n\n`;
+        if (isPdf && (!content || content.trim().length === 0)) {
+          console.log(`PDF skipped (no extractable content): ${url}`);
+          skippedPages++;
+          continue;
         }
+
+        if (!content || content.trim().length === 0) {
+          console.warn(`Empty content for URL: ${url}`);
+          skippedPages++;
+          continue;
+        }
+
+        console.log(`Processing and normalising crawled page: ${url}`);
+
+        const normalized = normalizeContent(content);
+        const contentHash = await sha256(normalized);
+
+        let contextPrefix = `Document Title: ${title}\n`;
+        if (!isPdfVirtualUrl(canonicalUrl)) {
+          try {
+            const parsedUrl = new URL(canonicalUrl);
+            if (parsedUrl.pathname && parsedUrl.pathname !== "/") {
+              contextPrefix += `URL Path: ${parsedUrl.pathname}\n`;
+            }
+          } catch {}
+        }
+        try {
+          if (process.env.GOOGLE_GENERATIVE_AI_API_KEY && normalized.split(/\s+/).length > 500) {
+            const { generateText } = await import("ai");
+            const { google } = await import("@ai-sdk/google");
+
+            const { text } = await generateText({
+              model: google("gemini-2.5-flash"),
+              prompt: `Write a 1-sentence summary of this document to provide context for vector search chunks. Document text:\n\n${normalized.slice(0, 2000)}`,
+            });
+            contextPrefix += `Context: ${text.trim()}\n\n`;
+          }
+        } catch (err) {
+          console.warn(`Failed to generate contextual embedding summary for ${url}`, err);
+          contextPrefix += "\n";
+        }
+
+        const parentChunks = chunkMarkdown(normalized, 3000, 300);
+        const chunks = [];
+
+        for (const parentChunk of parentChunks) {
+          const childChunks = chunkMarkdown(parentChunk.text, 800, 100, parentChunk.headingPath);
+          for (const childChunk of childChunks) {
+            const baseText = contextPrefix + childChunk.text;
+            const guardedParts = guardChunkSize(baseText);
+            for (const part of guardedParts) {
+              chunks.push({
+                text: part,
+                contentHash: await sha256(part),
+                parentText: parentChunk.text,
+                headingPath: childChunk.headingPath,
+              });
+            }
+          }
+        }
+
+        const freshnessTier = assignFreshnessTier(canonicalUrl);
+        const args: {
+          url: string;
+          title: string;
+          contentHash: string;
+          freshnessTier: "high" | "medium" | "low";
+          jobId: string;
+          chunks: {
+            text: string;
+            contentHash: string;
+            parentText?: string;
+            headingPath?: string[];
+          }[];
+          etag?: string;
+          lastModified?: string;
+        } = {
+          url: canonicalUrl,
+          title,
+          contentHash,
+          freshnessTier,
+          jobId: taskId!,
+          chunks,
+        };
+        if (etag !== undefined) args.etag = etag;
+        if (lastModified !== undefined) args.lastModified = lastModified;
+
+        await ctx.runMutation(internal.crawl.mutations.queueChunksForEmbedding, args);
+        successfulPages++;
       } catch (err) {
-        console.warn(`Failed to generate contextual embedding summary for ${url}`, err);
-        contextPrefix += "\n";
+        console.error(`Failed to process page ${result.url || "unknown URL"}:`, err);
+        failedPages++;
       }
-
-      // TASK-E06: Parent-child chunking sequence
-      // Parent chunks: max 3000 chars (approx 750 tokens), overlap 300 chars
-      // Child chunks: max 800 chars (approx 200 tokens), overlap 100 chars
-      const parentChunks = chunkMarkdown(normalized, 3000, 300);
-      const chunks = [];
-
-      for (const parentText of parentChunks) {
-        const childChunks = chunkMarkdown(parentText, 800, 100);
-        for (const childText of childChunks) {
-          const contextualizedText = contextPrefix + childText;
-          chunks.push({
-            text: contextualizedText,
-            contentHash: await sha256(contextualizedText),
-            parentText, // Propagate parent text block
-          });
-        }
-      }
-
-      // Queue the payload using the new workpool component with dynamic arguments
-      const args: any = {
-        url,
-        title,
-        contentHash,
-        jobId: taskId,
-        chunks,
-      };
-      if (etag !== undefined) args.etag = etag;
-      if (lastModified !== undefined) args.lastModified = lastModified;
-
-      await ctx.runMutation(internal.crawl.mutations.queueChunksForEmbedding, args);
-      successfulPages++;
     }
 
-    // If the webhook payload indicates the entire task is complete or failed, update the job state
+    if (status === "completed" && failedPages > 0) {
+      const failureRate = failedPages / (successfulPages + failedPages + skippedPages);
+      if (failureRate > 0.05) {
+        console.warn(
+          `[ALERT] Crawl ${taskId} completed with ${failedPages} failed pages ` +
+            `(${(failureRate * 100).toFixed(1)}% failure rate)`,
+        );
+      }
+      if (failedPages > 0) {
+        console.warn(
+          `[ALERT] Crawl ${taskId}: ${failedPages} pages failed, ` +
+            `${skippedPages} skipped, ${successfulPages} successful`,
+        );
+      }
+    }
+
     if (status === "completed" || status === "failed") {
-      const totalChunks = results.reduce((sum: number, r: any) => {
+      type WebhookResult = { markdown?: string; html?: string; text?: string };
+      const totalChunks = results.reduce((sum: number, r: WebhookResult) => {
         const content = r.markdown || r.html || r.text || "";
         return sum + Math.ceil(content.length / 3000);
       }, 0);
-      const totalTokens = results.reduce((sum: number, r: any) => {
+      const totalTokens = results.reduce((sum: number, r: WebhookResult) => {
         const content = r.markdown || r.html || r.text || "";
         return sum + Math.ceil(content.length / 4);
       }, 0);
-      const bytesProcessed = results.reduce((sum: number, r: any) => {
+      const bytesProcessed = results.reduce((sum: number, r: WebhookResult) => {
         const content = r.markdown || r.html || r.text || "";
         return sum + new TextEncoder().encode(content).length;
       }, 0);
 
       await ctx.runMutation(internal.crawl.workflow.completeJobByTaskId, {
-        taskId,
+        taskId: taskId!,
         status,
         stats: {
+          totalPages: successfulPages + failedPages + skippedPages,
           successfulPages,
           failedPages,
           skippedPages,
@@ -388,8 +287,34 @@ export const crawlWebhook = httpAction(async (ctx, request) => {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Webhook processing error:", error);
+    console.error(`Webhook processing error for task ${taskId}:`, error);
     return new Response("Internal Server Error", { status: 500 });
+  }
+});
+
+export const resetWebhook = httpAction(async (ctx, request) => {
+  try {
+    const authHeader = request.headers.get("Authorization");
+    const token = authHeader?.split(" ")[1];
+    const expectedToken = process.env.CONVEX_AUTH_TOKEN;
+    if (!expectedToken) {
+      return new Response("Server configuration error", { status: 500 });
+    }
+    if (token !== expectedToken) {
+      return new Response("Unauthorized", { status: 401 });
+    }
+    await ctx.runAction(internal.crawl.actions.resetPipelineAction);
+    return new Response(JSON.stringify({ ok: true }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (error: unknown) {
+    console.error("Reset error:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 });
 
@@ -397,7 +322,6 @@ export const ingestWebhook = httpAction(async (ctx, request) => {
   try {
     const rawBody = await request.text();
 
-    // Enforce payload size limit on /ingest (4MB max)
     if (rawBody.length > 4_194_304) {
       console.warn(`/ingest payload too large: ${rawBody.length} bytes`);
       return new Response("Payload too large", { status: 413 });
@@ -409,7 +333,12 @@ export const ingestWebhook = httpAction(async (ctx, request) => {
     const token = authHeader?.split(" ")[1];
     const expectedToken = process.env.CONVEX_AUTH_TOKEN;
 
-    if (expectedToken && token !== expectedToken) {
+    if (!expectedToken) {
+      console.error("/ingest misconfigured: CONVEX_AUTH_TOKEN not set — rejecting all requests");
+      return new Response("Server configuration error", { status: 500 });
+    }
+
+    if (token !== expectedToken) {
       console.warn("Unauthorized /ingest request");
       return new Response("Unauthorized", { status: 401 });
     }
@@ -424,11 +353,8 @@ export const ingestWebhook = httpAction(async (ctx, request) => {
       );
     }
 
-    // TASK-S04: Source domain allowlist — reject non-UET URLs before any DB write.
-    // Virtual pdf:// URLs are allowed (generated by ingest_pdf.py for local PDFs).
-    // All real HTTP URLs must be under the uettaxila.edu.pk domain family.
     const ALLOWED_DOMAIN_SUFFIX = "uettaxila.edu.pk";
-    if (!url.startsWith("pdf://")) {
+    if (!isPdfVirtualUrl(url)) {
       let parsedHost: string;
       try {
         parsedHost = new URL(url).hostname.toLowerCase();
@@ -442,7 +368,6 @@ export const ingestWebhook = httpAction(async (ctx, request) => {
       }
     }
 
-    // Call upsertDocument mutation to update the document and delete old chunks/vectors if changed
     const result = await ctx.runMutation(internal.crawl.mutations.upsertDocument, {
       url,
       markdown,
@@ -460,12 +385,19 @@ export const ingestWebhook = httpAction(async (ctx, request) => {
       });
     }
 
-    // Since content changed or is new, let's chunk and enqueue the new chunks
     const normalized = normalizeContent(markdown);
 
     let contextPrefix = `Document Title: ${title || url}\n`;
+    if (!isPdfVirtualUrl(url)) {
+      try {
+        const parsedUrl = new URL(url);
+        if (parsedUrl.pathname && parsedUrl.pathname !== "/") {
+          contextPrefix += `URL Path: ${parsedUrl.pathname}\n`;
+        }
+      } catch {}
+    }
     try {
-      if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+      if (process.env.GOOGLE_GENERATIVE_AI_API_KEY && normalized.split(/\s+/).length > 500) {
         const { generateText } = await import("ai");
         const { google } = await import("@ai-sdk/google");
 
@@ -480,25 +412,25 @@ export const ingestWebhook = httpAction(async (ctx, request) => {
       contextPrefix += "\n";
     }
 
-    // TASK-E06: Parent-child chunking sequence
-    // Parent chunks: max 3000 chars (approx 750 tokens), overlap 300 chars
-    // Child chunks: max 800 chars (approx 200 tokens), overlap 100 chars
     const parentChunks = chunkMarkdown(normalized, 3000, 300);
     const chunks = [];
 
-    for (const parentText of parentChunks) {
-      const childChunks = chunkMarkdown(parentText, 800, 100);
-      for (const childText of childChunks) {
-        const contextualizedText = contextPrefix + childText;
-        chunks.push({
-          text: contextualizedText,
-          contentHash: await sha256(contextualizedText),
-          parentText, // Propagate parent text block
-        });
+    for (const parentChunk of parentChunks) {
+      const childChunks = chunkMarkdown(parentChunk.text, 800, 100, parentChunk.headingPath);
+      for (const childChunk of childChunks) {
+        const baseText = contextPrefix + childChunk.text;
+        const guardedParts = guardChunkSize(baseText);
+        for (const part of guardedParts) {
+          chunks.push({
+            text: part,
+            contentHash: await sha256(part),
+            parentText: parentChunk.text,
+            headingPath: childChunk.headingPath,
+          });
+        }
       }
     }
 
-    // Call enqueueDocumentChunks to register chunk count and enqueue each in the workpool
     await ctx.runMutation(internal.crawl.mutations.enqueueDocumentChunks, {
       documentId: result.documentId,
       url,
@@ -509,11 +441,14 @@ export const ingestWebhook = httpAction(async (ctx, request) => {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Ingest webhook error:", error);
-    return new Response(JSON.stringify({ error: error.message || String(error) }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : String(error) }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   }
 });

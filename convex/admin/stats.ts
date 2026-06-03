@@ -1,5 +1,8 @@
 import { ConvexError, v } from "convex/values";
+import type { Doc } from "../_generated/dataModel";
 import { mutation, query } from "../_generated/server";
+import { requireAdmin } from "../auth";
+import { fastCount } from "../lib/db_helpers";
 
 /**
  * Admin dashboard overview stats.
@@ -7,8 +10,12 @@ import { mutation, query } from "../_generated/server";
  * Note: messages/threads tables are managed by @convex-dev/agent component,
  * so we use the component's API functions instead of querying them directly.
  */
+/**
+ * Accepts a client-provided refTime to enable query caching.
+ * Client should pass Date.now() rounded to nearest minute.
+ */
 export const dashboardStats = query({
-  args: {},
+  args: { refTime: v.optional(v.number()) },
   returns: v.object({
     totalDocuments: v.number(),
     totalFeedback: v.number(),
@@ -55,23 +62,9 @@ export const dashboardStats = query({
       total: v.number(),
     }),
   }),
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new ConvexError("Authentication required");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex(
-        "by_clerkId",
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Convex query builder generic type limitation
-        (q: any) => q.eq("clerkId", identity.subject),
-      )
-      .unique();
-    if (!user || (user.role !== "admin" && user.role !== "superadmin")) {
-      throw new ConvexError("Admin access required");
-    }
-
-    const now = Date.now();
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const now = args.refTime ?? Date.now();
     const twentyFourHoursAgo = now - 24 * 60 * 60 * 1000;
 
     const [
@@ -87,31 +80,31 @@ export const dashboardStats = query({
       recentFeedback,
       recentCrawls,
     ] = await Promise.all([
-      (ctx.db.query("documents") as any).count(),
-      (ctx.db.query("feedback") as any).count(),
-      (ctx.db.query("users") as any).count(),
-      (ctx.db.query("crawlJobs") as any).count(),
-      (ctx.db.query("semanticCache") as any).count(),
-      (
-        ctx.db
-          .query("documents")
-          .withIndex("by_status", (q: any) => q.eq("status", "indexed")) as any
-      ).count(),
-      (
-        ctx.db
-          .query("documents")
-          .withIndex("by_status", (q: any) => q.eq("status", "pending")) as any
-      ).count(),
-      (
-        ctx.db
-          .query("documents")
-          .withIndex("by_status", (q: any) => q.eq("status", "failed")) as any
-      ).count(),
+      fastCount(ctx.db, "documents"),
+      fastCount(ctx.db, "feedback"),
+      fastCount(ctx.db, "users"),
+      fastCount(ctx.db, "crawlJobs"),
+      fastCount(ctx.db, "semanticCache"),
+      ctx.db
+        .query("documents")
+        .withIndex("by_status", (q) => q.eq("status", "indexed"))
+        .take(100000)
+        .then((r) => r.length),
+      ctx.db
+        .query("documents")
+        .withIndex("by_status", (q) => q.eq("status", "pending"))
+        .take(100000)
+        .then((r) => r.length),
+      ctx.db
+        .query("documents")
+        .withIndex("by_status", (q) => q.eq("status", "failed"))
+        .take(100000)
+        .then((r) => r.length),
       ctx.db
         .query("users")
-        .withIndex("by_lastLoginAt", (q: any) => q.gte("lastLoginAt", twentyFourHoursAgo))
-        .collect()
-        .then((items: any[]) => items.length),
+        .withIndex("by_lastLoginAt", (q) => q.gte("lastLoginAt", twentyFourHoursAgo))
+        .take(100000)
+        .then((r) => r.length),
       ctx.db.query("feedback").order("desc").take(10),
       ctx.db.query("crawlJobs").order("desc").take(5),
     ]);
@@ -131,13 +124,13 @@ export const dashboardStats = query({
       indexedDocuments,
       pendingDocuments,
       failedDocuments,
-      recentFeedback: recentFeedback.map((f: any) => ({
+      recentFeedback: recentFeedback.map((f: Doc<"feedback">) => ({
         _id: f._id,
         rating: f.rating,
         createdAt: f.createdAt,
         category: f.category,
       })),
-      recentCrawls: recentCrawls.map((c: any) => ({
+      recentCrawls: recentCrawls.map((c: Doc<"crawlJobs">) => ({
         _id: c._id,
         status: c.status,
         startedAt: c.startedAt,
@@ -160,20 +153,7 @@ export const deleteDocument = mutation({
   args: { documentId: v.id("documents") },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new ConvexError("Authentication required");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex(
-        "by_clerkId",
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Convex query builder generic type limitation
-        (q: any) => q.eq("clerkId", identity.subject),
-      )
-      .unique();
-    if (!user || (user.role !== "admin" && user.role !== "superadmin")) {
-      throw new ConvexError("Admin access required");
-    }
+    const user = await requireAdmin(ctx);
 
     const document = await ctx.db.get(args.documentId);
     if (!document) throw new ConvexError("Document not found");
@@ -189,8 +169,7 @@ export const deleteDocument = mutation({
         reason: "Admin deletion",
       },
       createdAt: Date.now(),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Convex GenericDocument insert doesn't accept nested optional details object
-    } as any);
+    });
   },
 });
 
@@ -201,21 +180,7 @@ export const deleteFeedback = mutation({
   args: { feedbackId: v.id("feedback") },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new ConvexError("Authentication required");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex(
-        "by_clerkId",
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Convex query builder generic type limitation
-        (q: any) => q.eq("clerkId", identity.subject),
-      )
-      .unique();
-    if (!user || (user.role !== "admin" && user.role !== "superadmin")) {
-      throw new ConvexError("Admin access required");
-    }
-
+    await requireAdmin(ctx);
     await ctx.db.delete(args.feedbackId);
   },
 });

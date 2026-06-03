@@ -1,6 +1,7 @@
 import { ConvexError, v } from "convex/values";
 import { internal } from "../_generated/api";
 import { mutation } from "../_generated/server";
+import { requireAdmin } from "../auth";
 import { crawlPool } from "./workpools";
 
 export const trigger = mutation({
@@ -16,15 +17,12 @@ export const trigger = mutation({
   },
   returns: v.id("crawlJobs"),
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new ConvexError("Authentication required");
-    }
+    await requireAdmin(ctx);
     const existing = await ctx.db
       .query("crawlJobs")
       .withIndex("by_status", (q) => q.eq("status", "pending"))
-      .collect();
-    if (existing.length > 0) {
+      .first();
+    if (existing !== null) {
       throw new ConvexError("A crawl job is already pending");
     }
     const jobId = await ctx.db.insert("crawlJobs", {

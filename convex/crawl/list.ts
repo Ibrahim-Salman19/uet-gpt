@@ -1,5 +1,7 @@
-import { ConvexError, v } from "convex/values";
+import { v } from "convex/values";
+import type { Doc } from "../_generated/dataModel";
 import { query } from "../_generated/server";
+import { requireAdmin } from "../auth";
 
 export const list = query({
   args: {},
@@ -39,11 +41,7 @@ export const list = query({
     }),
   ),
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new ConvexError("Authentication required");
-    }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Convex GenericDocument return doesn't match validator type
-    return (await ctx.db.query("crawlJobs").order("desc").take(20)) as any;
+    await requireAdmin(ctx);
+    return (await ctx.db.query("crawlJobs").order("desc").take(20)) as Doc<"crawlJobs">[];
   },
 });

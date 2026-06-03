@@ -2,7 +2,7 @@ import { createGroq } from "@ai-sdk/groq";
 import { generateObject, generateText } from "ai";
 import { v } from "convex/values";
 import { z } from "zod";
-import { action } from "../_generated/server";
+import { action, internalAction } from "../_generated/server";
 
 const groq = createGroq({
   apiKey: process.env.GROQ_API_KEY || "",
@@ -87,7 +87,7 @@ export const rewriteQueryAction = action({
   },
 });
 
-export const hydeQueryAction = action({
+export const hydeQueryAction = internalAction({
   args: { query: v.string() },
   returns: v.string(),
   handler: async (_ctx, args) => {

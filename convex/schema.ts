@@ -113,6 +113,7 @@ export default defineSchema({
     expiresAt: v.number(),
     createdAt: v.number(),
     embeddingModel: v.optional(v.string()),
+    sourceEntryIds: v.optional(v.array(v.string())),
   })
     .index("by_expiresAt", ["expiresAt"])
     .vectorIndex("by_queryEmbedding", { vectorField: "queryEmbedding", dimensions: 3072 }),
@@ -194,6 +195,7 @@ export default defineSchema({
       v.literal("pending_embed"),
     ),
     chunkCount: v.optional(v.number()),
+    chunksEmbedded: v.optional(v.number()),
     crawledAt: v.number(),
     updatedAt: v.number(),
     error: v.optional(v.string()),
@@ -207,7 +209,9 @@ export default defineSchema({
     .index("by_crawledAt", ["crawledAt"])
     .index("by_session", ["crawlSessionId"])
     .index("by_tier_and_crawled", ["freshnessTier", "crawledAt"])
-    .searchIndex("search_title", { searchField: "title" }),
+    .searchIndex("search_title", { searchField: "title" })
+    .index("by_contentHash", ["contentHash"])
+    .index("by_source_category", ["source", "category"]),
 
   processedWebhooks: defineTable({
     jobId: v.string(),
@@ -241,8 +245,10 @@ export default defineSchema({
     ragId: v.string(),
     embeddingModel: v.optional(v.string()),
     parentText: v.optional(v.string()), // TASK-E06: Parent-child chunking context
+    headingPath: v.optional(v.array(v.string())), // R-7: Section heading hierarchy (e.g. ["Admissions", "Fee Structure"])
   })
     .index("by_documentId", ["documentId"])
+    .index("by_documentId_and_contentHash", ["documentId", "contentHash"])
     .index("by_ragId", ["ragId"])
     .searchIndex("search_text", { searchField: "text" }),
 

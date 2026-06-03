@@ -1,4 +1,5 @@
 import { ConvexError, v } from "convex/values";
+import type { Doc } from "../_generated/dataModel";
 import { query } from "../_generated/server";
 
 export const list = query({
@@ -20,7 +21,20 @@ export const list = query({
     if (!identity) {
       throw new ConvexError("Authentication required");
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Convex GenericDocument return doesn't match validator type
-    return (await ctx.db.query("feedback").order("desc").take(50)) as any;
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+    if (!user) throw new ConvexError("User not found");
+
+    if (user.role === "admin" || user.role === "superadmin") {
+      return (await ctx.db.query("feedback").order("desc").take(50)) as Doc<"feedback">[];
+    }
+
+    return (await ctx.db
+      .query("feedback")
+      .withIndex("by_userId", (q) => q.eq("userId", user._id))
+      .order("desc")
+      .take(50)) as Doc<"feedback">[];
   },
 });

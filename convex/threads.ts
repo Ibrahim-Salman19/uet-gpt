@@ -1,6 +1,13 @@
 import { ConvexError, v } from "convex/values";
-import { components } from "./_generated/api";
-import { internalMutation, mutation, query } from "./_generated/server";
+import { components, internal } from "./_generated/api";
+import type { Doc } from "./_generated/dataModel";
+import {
+  internalAction,
+  internalMutation,
+  internalQuery,
+  mutation,
+  query,
+} from "./_generated/server";
 import { threadValidator } from "./threads/validator";
 
 export const create = mutation({
@@ -13,12 +20,22 @@ export const create = mutation({
     if (!identity) {
       throw new ConvexError("Authentication required");
     }
-    const user = await ctx.db
+    let user = await ctx.db
       .query("users")
       .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
       .unique();
+
     if (!user) {
-      throw new ConvexError("User not found");
+      const userId = await ctx.db.insert("users", {
+        clerkId: identity.subject,
+        name: identity.name ?? "Unknown",
+        email: identity.email ?? "",
+        imageUrl: identity.pictureUrl,
+        role: "user",
+        isActive: true,
+        lastLoginAt: Date.now(),
+      });
+      user = await ctx.db.get(userId);
     }
 
     const thread = await ctx.runMutation(components.agent.threads.createThread, {
@@ -26,7 +43,8 @@ export const create = mutation({
       title: args.title,
     });
 
-    return thread._id as string;
+    // Handle both cases: if agent returns just the ID string, or the document object.
+    return (typeof thread === "string" ? thread : thread._id) as string;
   },
 });
 
@@ -51,8 +69,8 @@ export const list = query({
 
     // Transform component format → app format
     return result.page
-      .filter((t: any) => t.status === "active")
-      .map((t: any) => ({
+      .filter((t: { status?: string }) => t.status === "active")
+      .map((t: { _id: string; _creationTime: number; userId?: string; title?: string }) => ({
         _id: t._id as string,
         _creationTime: t._creationTime,
         userId: t.userId ?? "",
@@ -134,30 +152,54 @@ export const remove = mutation({
   },
 });
 
-export const purgeOldArchived = internalMutation(async (ctx) => {
-  const cutoff = Date.now() - 180 * 24 * 60 * 60 * 1000; // 6 months
-  const users = await ctx.db.query("users").collect(); // Safe for moderate scale, could paginate if userbase grows
-  let purged = 0;
+export const getOldArchivedUsersBatch = internalQuery({
+  args: { cursor: v.union(v.string(), v.null()) },
+  handler: async (ctx, { cursor }) => {
+    return await ctx.db.query("users").paginate({ numItems: 100, cursor });
+  },
+});
 
-  for (const user of users) {
-    if (!user.clerkId) continue;
-    let cursor = null;
-    do {
-      const result: any = await ctx.runQuery(components.agent.threads.listThreadsByUserId, {
-        userId: user.clerkId,
-        paginationOpts: { numItems: 100, cursor },
-      });
-      for (const t of result.page) {
-        if (t.status === "archived" && t._creationTime < cutoff) {
-          await ctx.runMutation(components.agent.threads.deleteAllForThreadIdAsync, {
-            threadId: t._id,
+export const purgeOldArchived = internalAction({
+  args: {},
+  returns: v.null(),
+  handler: async (ctx) => {
+    const cutoff = Date.now() - 180 * 24 * 60 * 60 * 1000; // 6 months
+    let userCursor = null as string | null;
+    let userDone = false;
+    let purged = 0;
+
+    while (!userDone) {
+      const userPage = (await ctx.runQuery(internal.threads.getOldArchivedUsersBatch, {
+        cursor: userCursor,
+      })) as { page: Doc<"users">[]; continueCursor: string; isDone: boolean };
+
+      for (const user of userPage.page) {
+        if (!user.clerkId) continue;
+
+        let threadCursor = null as string | null;
+        let threadDone = false;
+        while (!threadDone) {
+          const result = await ctx.runQuery(components.agent.threads.listThreadsByUserId, {
+            userId: user.clerkId,
+            paginationOpts: { numItems: 100, cursor: threadCursor },
           });
-          purged++;
+
+          for (const t of result.page) {
+            if (t.status === "archived" && t._creationTime < cutoff) {
+              await ctx.runMutation(components.agent.threads.deleteAllForThreadIdAsync, {
+                threadId: t._id,
+              });
+              purged++;
+            }
+          }
+          threadDone = result.isDone;
+          threadCursor = result.continueCursor;
         }
       }
-      cursor = result.isDone ? null : result.continueCursor;
-    } while (cursor !== null);
-  }
+      userDone = userPage.isDone;
+      userCursor = userPage.continueCursor;
+    }
 
-  console.log(`Purged ${purged} old archived threads.`);
+    console.log(`Purged ${purged} old archived threads.`);
+  },
 });

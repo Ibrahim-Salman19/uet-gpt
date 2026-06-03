@@ -67,7 +67,7 @@ export const updateStatus = internalMutation({
   handler: async (ctx, args) => {
     const { documentId, status, entryId, chunkCount, error } = args;
     const now = Date.now();
-    await ctx.db.patch("documents", documentId, {
+    await ctx.db.patch(documentId, {
       status,
       updatedAt: now,
       ...(entryId !== undefined && { entryId }),

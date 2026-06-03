@@ -9,6 +9,7 @@ export const sourcesValidator = v.optional(
       title: v.string(),
       relevanceScore: v.number(),
       excerpt: v.string(),
+      headingPath: v.optional(v.array(v.string())),
     }),
   ),
 );

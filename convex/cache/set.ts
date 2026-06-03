@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { mutation } from "../_generated/server";
 
 // TASK-B03: TTL tiers matching freshnessTier from crawler assign_tier().
@@ -42,6 +42,8 @@ export const set = mutation({
     ttlMs: v.optional(v.number()),
     // TASK-B03: freshnessTier from top source URL — overrides ttlMs if provided
     freshnessTier: v.optional(v.union(v.literal("high"), v.literal("medium"), v.literal("low"))),
+    // R-5: Source document entry IDs for cache invalidation on re-index
+    sourceEntryIds: v.optional(v.array(v.string())),
   },
   returns: v.id("semanticCache"),
   handler: async (ctx, args) => {
@@ -57,6 +59,7 @@ export const set = mutation({
       hits: 0,
       expiresAt: Date.now() + ttl,
       createdAt: Date.now(),
+      sourceEntryIds: args.sourceEntryIds,
     });
     return id;
   },

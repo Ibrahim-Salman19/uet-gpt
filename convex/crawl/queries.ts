@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { internalQuery, query } from "../_generated/server";
+import { requireAdmin } from "../auth";
 
 /**
  * fullTextSearch — internal query for BM25 exact match on chunks.
@@ -12,19 +13,24 @@ export const fullTextSearch = internalQuery({
       .withSearchIndex("search_text", (q) => q.search("text", args.query))
       .take(args.limit);
 
-    // Return with document URL and text
-    const chunksWithDocs = [];
-    for (const chunk of results) {
-      const doc = await ctx.db.get(chunk.documentId);
-      if (doc) {
-        chunksWithDocs.push({
+    const docIds = [...new Set(results.map((c) => c.documentId))];
+    const docs = await Promise.all(docIds.map((id) => ctx.db.get(id)));
+    const docMap = new Map(
+      docs.filter((d): d is NonNullable<typeof d> => d !== null).map((d) => [d._id, d]),
+    );
+
+    const chunksWithDocs = results
+      .map((chunk) => {
+        const doc = docMap.get(chunk.documentId);
+        if (!doc) return null;
+        return {
           ragId: chunk.ragId,
           text: chunk.text,
           url: doc.url,
-          score: 1.0, // Base BM25 score, relative to rank
-        });
-      }
-    }
+          score: 1.0,
+        };
+      })
+      .filter((x): x is NonNullable<typeof x> => x !== null);
     return chunksWithDocs;
   },
 });
@@ -36,11 +42,26 @@ export const fullTextSearch = internalQuery({
 export const getDocumentCountByStatus = query({
   args: { status: v.string() },
   handler: async (ctx, { status }) => {
-    const docs = await ctx.db
-      .query("documents")
-      .withIndex("by_status", (q) => q.eq("status", status as any))
-      .take(9999); // bounded, won't OOM
-    return { status, count: docs.length };
+    await requireAdmin(ctx);
+    const count = (
+      await ctx.db
+        .query("documents")
+        .withIndex("by_status", (q) =>
+          q.eq(
+            "status",
+            status as
+              | "pending"
+              | "processing"
+              | "indexed"
+              | "failed"
+              | "stale"
+              | "active"
+              | "pending_embed",
+          ),
+        )
+        .take(100000)
+    ).length;
+    return { status, count };
   },
 });
 
@@ -51,6 +72,7 @@ export const getDocumentCountByStatus = query({
 export const getRecentDocs = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, { limit }) => {
+    await requireAdmin(ctx);
     const docs = await ctx.db
       .query("documents")
       .withIndex("by_crawledAt")
@@ -73,6 +95,7 @@ export const getRecentDocs = query({
 export const getDLQSample = query({
   args: {},
   handler: async (ctx) => {
+    await requireAdmin(ctx);
     return await ctx.db.query("crawlDeadLetter").take(50);
   },
 });
@@ -83,6 +106,7 @@ export const getDLQSample = query({
 export const searchByUrl = query({
   args: { url: v.string() },
   handler: async (ctx, { url }) => {
+    await requireAdmin(ctx);
     const doc = await ctx.db
       .query("documents")
       .withIndex("by_url", (q) => q.eq("url", url))
@@ -107,6 +131,7 @@ export const searchByUrl = query({
       chunkSample: chunks.map((c) => ({
         text: c.text.slice(0, 300) + (c.text.length > 300 ? "..." : ""),
         ragId: c.ragId,
+        headingPath: c.headingPath,
       })),
     };
   },
@@ -118,6 +143,7 @@ export const searchByUrl = query({
 export const getFailedDocs = query({
   args: {},
   handler: async (ctx) => {
+    await requireAdmin(ctx);
     return await ctx.db
       .query("documents")
       .withIndex("by_status", (q) => q.eq("status", "failed"))
@@ -132,6 +158,7 @@ export const getFailedDocs = query({
 export const getPendingEmbedDocs = query({
   args: {},
   handler: async (ctx) => {
+    await requireAdmin(ctx);
     return await ctx.db
       .query("documents")
       .withIndex("by_status", (q) => q.eq("status", "pending_embed"))
@@ -146,12 +173,22 @@ export const getPendingEmbedDocs = query({
 export const getDocsBySource = query({
   args: { source: v.string(), limit: v.optional(v.number()) },
   handler: async (ctx, { source, limit }) => {
+    await requireAdmin(ctx);
     const docs = await ctx.db
       .query("documents")
-      .withIndex("by_category", (q) => q.eq("category", "crawled"))
-      .filter((q) => q.eq(q.field("source"), source))
+      .withIndex("by_source_category", (q) => q.eq("source", source).eq("category", "crawled"))
       .take(limit ?? 100);
     return docs.map((d) => ({ url: d.url, title: d.title, status: d.status }));
+  },
+});
+
+/**
+ * getJobById — returns a crawl job by its internal ID (for crash recovery / resume).
+ */
+export const getJobById = internalQuery({
+  args: { jobId: v.id("crawlJobs") },
+  handler: async (ctx, { jobId }) => {
+    return await ctx.db.get(jobId);
   },
 });
 
@@ -161,6 +198,7 @@ export const getDocsBySource = query({
 export const getChunksForDoc = query({
   args: { documentId: v.id("documents") },
   handler: async (ctx, { documentId }) => {
+    await requireAdmin(ctx);
     const chunks = await ctx.db
       .query("crawledChunks")
       .withIndex("by_documentId", (q) => q.eq("documentId", documentId))
@@ -169,6 +207,23 @@ export const getChunksForDoc = query({
       text: c.text.slice(0, 500),
       contentHash: c.contentHash,
       ragId: c.ragId,
+      headingPath: c.headingPath,
     }));
+  },
+});
+
+export const getChunksWithHeadings = query({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const chunks = await ctx.db.query("crawledChunks").take(100);
+    return chunks
+      .filter((c) => c.headingPath && c.headingPath.length > 0)
+      .slice(0, 10)
+      .map((c) => ({
+        ragId: c.ragId,
+        headingPath: c.headingPath,
+        text: c.text.slice(0, 200),
+      }));
   },
 });

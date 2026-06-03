@@ -42,7 +42,9 @@ export const evaluateSearch = action({
       limit: args.topK,
     });
 
-    const ragIds = vectorResults.results.map((r: any) => r._id as string);
+    const ragIds = vectorResults.results.map(
+      (r: import("@convex-dev/rag").SearchResult) => r.entryId,
+    );
 
     const chunks = (await ctx.runQuery(internal.eval.getChunksByRagIds, {
       ragIds,

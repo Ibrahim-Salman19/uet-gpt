@@ -14,6 +14,11 @@ const INJECTION_RE = new RegExp(
     String.raw`<\|im_(?:start|end)\|>`,
     String.raw`###\s*[Ii]nstruction`,
     String.raw`<\s*script[\s>]`, // XSS-in-prompt attempt
+    String.raw`from\s+now\s+on\s+`,
+    String.raw`you\s+are\s+(?:now|an?)\s+`,
+    String.raw`disregard\s+`,
+    String.raw`override\s+`,
+    String.raw`do\s+not\s+follow\s+`,
   ].join("|"),
   "i",
 );
@@ -51,9 +56,6 @@ const sourceValidator = v.object({
   excerpt: v.string(),
 });
 
-const _api: any = api;
-const _internal: any = internal;
-
 export const retrieveContext = action({
   args: {
     question: v.string(),
@@ -67,16 +69,23 @@ export const retrieveContext = action({
     queryEmbedding: v.array(v.float64()),
   }),
   handler: async (ctx, args) => {
+    // Break circular type chain through api/internal
+    const _a = api as any;
+    const _i = internal as any;
+
     // TASK-S03: Scan for injection attempts before any LLM action.
     const safeQuestion = scanForInjection(args.question);
 
     let intent: string;
     try {
-      intent = await ctx.runAction(_api.rag.routing.classifyQueryAction, {
+      intent = await ctx.runAction(_a.rag.routing.classifyQueryAction, {
         query: safeQuestion,
       });
     } catch (error) {
-      console.error("Intent classification failed, defaulting to 'general':", error);
+      console.error(
+        "Intent classification failed, defaulting to 'general': query text omitted, error:",
+        error,
+      );
       intent = "general";
     }
 
@@ -92,8 +101,8 @@ export const retrieveContext = action({
     }
 
     const [rewrittenQuery, hydeQuery] = await Promise.allSettled([
-      ctx.runAction(_api.rag.routing.rewriteQueryAction, { query: safeQuestion }),
-      ctx.runAction(_api.rag.routing.hydeQueryAction, { query: safeQuestion }),
+      ctx.runAction(_a.rag.routing.rewriteQueryAction, { query: safeQuestion }),
+      ctx.runAction(_a.rag.routing.hydeQueryAction, { query: safeQuestion }),
     ]);
 
     const rewrittenQueryText =
@@ -102,7 +111,7 @@ export const retrieveContext = action({
 
     let queryEmbedding: number[];
     try {
-      queryEmbedding = await ctx.runAction(_api.embeddings.generate.generate, {
+      queryEmbedding = await ctx.runAction(_a.embeddings.generate.generate, {
         text: hydeQueryText || rewrittenQueryText || safeQuestion,
       });
     } catch (e) {
@@ -112,7 +121,17 @@ export const retrieveContext = action({
 
     if (queryEmbedding.length > 0) {
       try {
-        const cached = await ctx.runAction(_api.cache.get.get, {
+        const cached: {
+          response: string;
+          sources: Array<{
+            entryId: string;
+            url: string;
+            title: string;
+            relevanceScore: number;
+            excerpt: string;
+          }>;
+          model: string;
+        } | null = await ctx.runAction(_a.cache.get.get, {
           queryText: safeQuestion,
           queryEmbedding,
         });
@@ -139,17 +158,18 @@ export const retrieveContext = action({
       title: string;
       relevanceScore: number;
       content: string;
+      headingPath?: string[];
     }[] = [];
     if (queryEmbedding.length > 0) {
       try {
-        searchResults = await ctx.runAction(_api.embeddings.search.searchDocumentsAction, {
+        searchResults = await ctx.runAction(_a.embeddings.search.searchDocumentsAction, {
           queryText: rewrittenQueryText || safeQuestion,
           queryEmbedding,
           hydeQuery: hydeQueryText,
           limit: 8,
         });
       } catch (e) {
-        console.error("Search failed:", e);
+        console.error(`Search failed for intent ${intent}: query text omitted`, e);
       }
     }
 
@@ -157,7 +177,7 @@ export const retrieveContext = action({
     // Reranks the top 8 fused candidates from hybrid search into the top 4 most relevant.
     if (searchResults.length > 0) {
       try {
-        const reranked = await ctx.runAction(_api.reranking.rerank.rerank, {
+        const reranked = await ctx.runAction(_a.reranking.rerank.rerank, {
           query: rewrittenQueryText || safeQuestion,
           documents: searchResults.map((r) => ({
             id: r.entryId,
@@ -188,9 +208,10 @@ export const retrieveContext = action({
       title: r.title,
       relevanceScore: r.relevanceScore,
       excerpt: r.content.substring(0, 300),
+      headingPath: r.headingPath,
     }));
 
-    const buildContextRef = _internal.rag.context.buildContext;
+    const buildContextRef = (internal as any).rag.context.buildContext;
 
     let context = "";
     // TASK-E05: Anti-hallucination confidence tiers based on top retrieval score.
@@ -220,6 +241,7 @@ export const retrieveContext = action({
             relevanceScore: r.relevanceScore,
             url: r.url,
             title: r.title,
+            headingPath: r.headingPath,
           })),
           maxTokens: 3000,
         });

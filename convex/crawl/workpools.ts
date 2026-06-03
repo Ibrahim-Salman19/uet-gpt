@@ -1,7 +1,7 @@
 import { Workpool } from "@convex-dev/workpool";
 import { components } from "../_generated/api";
 
-export const embeddingPool = new Workpool((components as any).embeddingWorkpool, {
+export const embeddingPool = new Workpool(components.embeddingWorkpool, {
   // Gemini Free Tier safe limit: 15 RPM = 1 request per 4 seconds
   // Setting parallelism to 3 limits throughput gracefully.
   maxParallelism: 3,
@@ -14,7 +14,7 @@ export const embeddingPool = new Workpool((components as any).embeddingWorkpool,
   logLevel: "INFO",
 });
 
-export const crawlPool = new Workpool((components as any).crawlWorkpool, {
+export const crawlPool = new Workpool(components.crawlWorkpool, {
   // Crawl4AI Docker concurrency throttle
   maxParallelism: 3,
   retryActionsByDefault: true,

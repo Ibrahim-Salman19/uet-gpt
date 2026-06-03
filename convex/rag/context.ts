@@ -15,6 +15,7 @@ export const buildContext = internalQuery({
         relevanceScore: v.number(),
         url: v.string(),
         title: v.string(),
+        headingPath: v.optional(v.array(v.string())),
       }),
     ),
     maxTokens: v.optional(v.number()),
@@ -30,7 +31,10 @@ export const buildContext = internalQuery({
     let currentChars = 0;
 
     for (const chunk of sortedChunks) {
-      const chunkText = `Source: [${chunk.title}](${chunk.url})\n\n${chunk.content}\n\n---\n\n`;
+      const sectionLabel = chunk.headingPath?.length
+        ? `Section: ${chunk.headingPath.join(" > ")}\n`
+        : "";
+      const chunkText = `${sectionLabel}Source: [${chunk.title}](${chunk.url})\n\n${chunk.content}\n\n---\n\n`;
       if (currentChars + chunkText.length > maxChars) {
         break;
       }
@@ -55,9 +59,12 @@ export const buildContext = internalQuery({
     }
 
     // 4. Format context string using array join
-    const contextParts = sandwiched
-      .filter(Boolean)
-      .map((chunk) => `Source: [${chunk.title}](${chunk.url})\n\n${chunk.content}\n\n---\n\n`);
+    const contextParts = sandwiched.filter(Boolean).map((chunk) => {
+      const sectionLabel = chunk.headingPath?.length
+        ? `Section: ${chunk.headingPath.join(" > ")}\n`
+        : "";
+      return `${sectionLabel}Source: [${chunk.title}](${chunk.url})\n\n${chunk.content}\n\n---\n\n`;
+    });
 
     return contextParts.join("").trim();
   },

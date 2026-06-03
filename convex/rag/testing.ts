@@ -79,7 +79,7 @@ export const seed = action({
     } catch (error) {
       console.warn("Failed to insert metadata document, cleaning up RAG entry:", error);
       try {
-        await rag.delete(ctx, { entryId: entryId as any });
+        await rag.delete(ctx, { entryId: entryId as unknown as import("@convex-dev/rag").EntryId });
       } catch {
         console.warn("Failed to clean up RAG entry after seed failure:", entryId);
       }

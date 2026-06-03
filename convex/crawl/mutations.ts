@@ -1,8 +1,10 @@
+import { vOnCompleteArgs } from "@convex-dev/workpool";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
-import type { Id } from "../_generated/dataModel";
+import type { Doc, Id } from "../_generated/dataModel";
 import { internalMutation, internalQuery } from "../_generated/server";
 import { rag } from "../rag/instance";
+import { isPdfVirtualUrl } from "./chunking";
 import { embeddingPool } from "./workpools";
 
 export const getProcessedWebhook = internalQuery({
@@ -21,7 +23,7 @@ export const markWebhookProcessed = internalMutation({
     await ctx.db.insert("processedWebhooks", {
       jobId: args.jobId,
       processedAt: Date.now(),
-      expiresAt: args.expiresAt ?? Date.now() + 7 * 24 * 60 * 60 * 1000,
+      expiresAt: args.expiresAt ?? Date.now() + 30 * 24 * 60 * 60 * 1000,
     });
   },
 });
@@ -31,26 +33,30 @@ export const queueChunksForEmbedding = internalMutation({
     url: v.string(),
     title: v.string(),
     contentHash: v.string(),
+    freshnessTier: v.optional(v.union(v.literal("high"), v.literal("medium"), v.literal("low"))),
     jobId: v.string(),
     etag: v.optional(v.string()),
     lastModified: v.optional(v.string()),
     chunks: v.array(
-      v.object({ text: v.string(), contentHash: v.string(), parentText: v.optional(v.string()) }),
+      v.object({
+        text: v.string(),
+        contentHash: v.string(),
+        parentText: v.optional(v.string()),
+        headingPath: v.optional(v.array(v.string())),
+      }),
     ),
   },
   handler: async (ctx, args) => {
-    const { url, title, contentHash, etag, lastModified, chunks } = args;
+    const { url, title, contentHash, freshnessTier, etag, lastModified, chunks } = args;
 
-    // 1. Look up existing document
     const existing = await ctx.db
       .query("documents")
       .withIndex("by_url", (q) => q.eq("url", url))
       .unique();
 
-    // Layer 1 & 2 Fast Path: Document unchanged
     if (existing && existing.contentHash === contentHash) {
       console.log(`Document unchanged (Fast Path): ${url}`);
-      const patchMetadata: any = {};
+      const patchMetadata: Record<string, string> = {};
       if (lastModified !== undefined) patchMetadata.lastModified = lastModified;
       if (etag !== undefined) patchMetadata.etag = etag;
 
@@ -63,10 +69,9 @@ export const queueChunksForEmbedding = internalMutation({
       return { status: "unchanged", chunksQueued: 0 };
     }
 
-    // 2. Create/update document record
     let docId: Id<"documents">;
     if (existing) {
-      const patchMetadata: any = {};
+      const patchMetadata: Record<string, string> = {};
       if (lastModified !== undefined) patchMetadata.lastModified = lastModified;
       if (etag !== undefined) patchMetadata.etag = etag;
 
@@ -75,34 +80,50 @@ export const queueChunksForEmbedding = internalMutation({
         crawledAt: Date.now(),
         updatedAt: Date.now(),
         status: "processing",
+        chunksEmbedded: 0,
         ...(Object.keys(patchMetadata).length > 0 ? { metadata: patchMetadata } : {}),
       });
       docId = existing._id;
     } else {
-      const docMetadata: any = {};
+      const docMetadata: Record<string, string> = {};
       if (lastModified !== undefined) docMetadata.lastModified = lastModified;
       if (etag !== undefined) docMetadata.etag = etag;
 
+      let sourceHost: string;
+      try {
+        sourceHost = isPdfVirtualUrl(url) ? "pdf" : new URL(url).hostname;
+      } catch {
+        sourceHost = "unknown";
+      }
       docId = await ctx.db.insert("documents", {
         url,
         title,
-        source: new URL(url).hostname,
+        source: sourceHost,
         category: "crawled",
         contentHash,
+        freshnessTier,
         status: "processing",
+        chunksEmbedded: 0,
         crawledAt: Date.now(),
         updatedAt: Date.now(),
         ...(Object.keys(docMetadata).length > 0 ? { metadata: docMetadata } : {}),
       });
     }
 
-    // 3. Diff at the chunk level
-    const existingChunks = existing
-      ? await ctx.db
+    const existingChunks: Doc<"crawledChunks">[] = [];
+    if (existing) {
+      let paginationCursor: string | null = null;
+      let paginationDone = false;
+      while (!paginationDone) {
+        const page = await ctx.db
           .query("crawledChunks")
           .withIndex("by_documentId", (q) => q.eq("documentId", existing._id))
-          .collect()
-      : [];
+          .paginate({ numItems: 500, cursor: paginationCursor });
+        existingChunks.push(...page.page);
+        paginationDone = page.isDone;
+        paginationCursor = page.continueCursor;
+      }
+    }
 
     const existingHashSet = new Set(existingChunks.map((c) => c.contentHash));
     const chunksToEmbed = chunks.filter((nc) => !existingHashSet.has(nc.contentHash));
@@ -110,48 +131,49 @@ export const queueChunksForEmbedding = internalMutation({
       (ec) => !chunks.some((nc) => nc.contentHash === ec.contentHash),
     );
 
-    // 4. Prune stale chunks
     for (const staleChunk of chunksToDelete) {
       try {
-        await rag.delete(ctx, { entryId: staleChunk.ragId as any });
+        await rag.delete(ctx, {
+          entryId: staleChunk.ragId as unknown as import("@convex-dev/rag").EntryId,
+        });
+        await ctx.db.delete(staleChunk._id);
       } catch (err) {
         console.warn(`Failed to delete vector ${staleChunk.ragId} from RAG during re-embed:`, err);
       }
-      await ctx.db.delete(staleChunk._id);
     }
 
     console.log(
       `Chunk Diff for ${url}: ${chunksToEmbed.length} new chunks, ${chunksToDelete.length} deleted chunks`,
     );
 
-    // 5. Enqueue each new/changed chunk
-    for (const chunk of chunksToEmbed) {
-      await embeddingPool.enqueueAction(
+    if (chunksToEmbed.length > 0) {
+      const { namespaceId } = await rag.getOrCreateNamespace(ctx, {
+        namespace: "uet-global",
+      });
+      const namespaceIdStr = namespaceId as unknown as string;
+
+      const argsArray = chunksToEmbed.map((chunk) => ({
+        documentId: docId,
+        url,
+        chunkText: chunk.text,
+        contentHash: chunk.contentHash,
+        jobId: args.jobId,
+        parentText: chunk.parentText,
+        headingPath: chunk.headingPath,
+        namespaceId: namespaceIdStr,
+      }));
+
+      await embeddingPool.enqueueActionBatch(
         ctx,
         internal.crawl.actions.embedSingleChunk,
-        {
-          documentId: docId,
-          url,
-          chunkText: chunk.text,
-          contentHash: chunk.contentHash,
-          jobId: args.jobId,
-          parentText: chunk.parentText,
-        },
+        argsArray,
         {
           onComplete: internal.crawl.mutations.onChunkEmbedded,
-          context: {
-            documentId: docId,
-            url,
-            chunkText: chunk.text,
-            contentHash: chunk.contentHash,
-            jobId: args.jobId,
-            parentText: chunk.parentText,
-          },
+          context: { jobId: args.jobId },
         },
       );
     }
 
-    // Update chunk count on document
     await ctx.db.patch(docId, {
       chunkCount: chunks.length,
       status: chunksToEmbed.length === 0 ? "indexed" : "processing",
@@ -172,20 +194,20 @@ export const saveEmbedding = internalMutation({
     contentHash: v.string(),
     ragId: v.string(),
     parentText: v.optional(v.string()),
+    headingPath: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
-    // 0. Deduplicate: skip if chunk already indexed for this document
     const existingChunk = await ctx.db
       .query("crawledChunks")
-      .withIndex("by_documentId", (q) => q.eq("documentId", args.documentId))
-      .filter((q) => q.eq(q.field("contentHash"), args.contentHash))
+      .withIndex("by_documentId_and_contentHash", (q) =>
+        q.eq("documentId", args.documentId).eq("contentHash", args.contentHash),
+      )
       .first();
     if (existingChunk) {
       console.log(`Chunk ${args.contentHash} already indexed, skipping.`);
       return;
     }
 
-    // 1. Insert chunk metadata record linking to vector index ID
     await ctx.db.insert("crawledChunks", {
       documentId: args.documentId,
       contentHash: args.contentHash,
@@ -193,72 +215,41 @@ export const saveEmbedding = internalMutation({
       ragId: args.ragId,
       embeddingModel: "gemini-embedding-2",
       parentText: args.parentText,
+      headingPath: args.headingPath,
     });
 
-    // 2. Check if all chunks for this document are fully indexed in the database
     const doc = await ctx.db.get(args.documentId);
     if (doc) {
-      const chunksCount = await ctx.db
-        .query("crawledChunks")
-        .withIndex("by_documentId", (q) => q.eq("documentId", args.documentId))
-        .collect();
-
-      if (doc.chunkCount !== undefined && chunksCount.length >= doc.chunkCount) {
+      const newCount = (doc.chunksEmbedded || 0) + 1;
+      const updates: Partial<Doc<"documents">> = { chunksEmbedded: newCount };
+      if (doc.chunkCount !== undefined && newCount >= doc.chunkCount) {
         if (doc.status !== "indexed") {
-          await ctx.db.patch(args.documentId, {
-            status: "indexed",
-            updatedAt: Date.now(),
-          });
+          updates.status = "indexed";
+          updates.updatedAt = Date.now();
         }
       }
+      await ctx.db.patch(args.documentId, updates);
     }
   },
 });
 
 export const onChunkEmbedded = internalMutation({
-  args: {
-    workId: v.string(), // Satisfy Workpool signature
-    result: v.any(), // Flexible to handle success/failed/canceled kinds
-    error: v.optional(v.string()),
-    context: v.object({
-      documentId: v.id("documents"),
-      url: v.string(),
-      chunkText: v.string(),
-      contentHash: v.string(),
+  args: vOnCompleteArgs(
+    v.object({
       jobId: v.string(),
-      parentText: v.optional(v.string()),
     }),
-  },
+  ),
   handler: async (ctx, args) => {
-    const { documentId, url, chunkText, contentHash, jobId, parentText } = args.context;
+    const { jobId } = args.context;
     const MAX_RETRIES = 5;
 
     const result = args.result;
-    if (
-      result &&
-      result.kind === "success" &&
-      result.returnValue?.success &&
-      result.returnValue.ragId
-    ) {
-      // 0. Deduplicate: skip if chunk already indexed for this document
-      const existingChunk = await ctx.db
-        .query("crawledChunks")
-        .withIndex("by_documentId", (q) => q.eq("documentId", documentId))
-        .filter((q) => q.eq(q.field("contentHash"), contentHash))
-        .first();
-      if (!existingChunk) {
-        // 1. Save successfully embedded chunk to the database
-        await ctx.db.insert("crawledChunks", {
-          documentId,
-          contentHash,
-          text: chunkText,
-          ragId: result.returnValue.ragId,
-          embeddingModel: "gemini-embedding-2",
-          parentText,
-        });
-      }
+    const returnValue = result.kind === "success" ? result.returnValue : null;
+    const url = returnValue?.url as string | undefined;
+    const contentHash = returnValue?.contentHash as string | undefined;
+    const documentId = returnValue?.documentId as Id<"documents"> | undefined;
 
-      // 2. Resolve/Clean up DLQ entry since chunk was successfully processed
+    if (result.kind === "success" && returnValue?.success && returnValue.ragId && url) {
       const dlqEntry = await ctx.db
         .query("crawlDeadLetter")
         .withIndex("by_jobId_and_url", (q) => q.eq("jobId", jobId).eq("url", url))
@@ -266,40 +257,20 @@ export const onChunkEmbedded = internalMutation({
       if (dlqEntry) {
         await ctx.db.delete(dlqEntry._id);
       }
-
-      // 3. Check if all chunks for this document are fully indexed in the database
-      const doc = await ctx.db.get(documentId);
-      if (doc) {
-        const chunksCount = await ctx.db
-          .query("crawledChunks")
-          .withIndex("by_documentId", (q) => q.eq("documentId", documentId))
-          .collect();
-
-        if (doc.chunkCount !== undefined && chunksCount.length >= doc.chunkCount) {
-          if (doc.status !== "indexed") {
-            await ctx.db.patch(documentId, {
-              status: "indexed",
-              updatedAt: Date.now(),
-            });
-          }
-        }
-      }
-    } else {
-      // Embedding failed, was skipped, or canceled
-      let errorMsg = args.error || "Unknown embedding error";
-      const isSkipped = result && result.kind === "success" && result.returnValue?.skipped;
+    } else if (url && documentId) {
+      let errorMsg = "Unknown embedding error";
+      const isSkipped = result.kind === "success" && returnValue?.skipped;
 
       if (isSkipped) {
         errorMsg = "Skipped malformed content";
-      } else if (result && result.kind === "failed") {
+      } else if (result.kind === "failed") {
         errorMsg = result.error;
-      } else if (result && result.kind === "canceled") {
+      } else if (result.kind === "canceled") {
         errorMsg = "Job canceled";
       }
 
       console.warn(`Embedding failed/skipped for chunk on URL ${url}: ${errorMsg}`);
 
-      // Handle DLQ update / retry count tracking
       if (!isSkipped) {
         const dlqEntry = await ctx.db
           .query("crawlDeadLetter")
@@ -322,13 +293,12 @@ export const onChunkEmbedded = internalMutation({
             failureReason: errorMsg,
             failureCount: 1,
             lastAttemptAt: Date.now(),
-            payload: args.context,
+            payload: { documentId, url, contentHash, jobId },
             status: "pending_retry",
           });
         }
       }
 
-      // Update document state to failed
       const doc = await ctx.db.get(documentId);
       if (doc && doc.status !== "failed") {
         await ctx.db.patch(documentId, {
@@ -350,31 +320,49 @@ export const retryDeadLetterQueue = internalMutation({
       .withIndex("by_status", (q) => q.eq("status", "pending_retry"))
       .take(batchSize);
 
-    console.log(`Reprocessing ${pendingDLQ.length} Dead Letter Queue entries...`);
+    const validDLQ = pendingDLQ.filter((dlq) => {
+      if (!dlq.payload?.chunkText) {
+        console.warn(`Skipping DLQ entry ${dlq._id} — no chunk text available for retry.`);
+        ctx.db.patch(dlq._id, {
+          status: "abandoned",
+          failureReason:
+            "No chunk text payload for retry (context was minimized to save bandwidth).",
+          lastAttemptAt: Date.now(),
+        });
+        return false;
+      }
+      return true;
+    });
 
-    for (const dlq of pendingDLQ) {
-      const payload = dlq.payload;
+    if (validDLQ.length > 0) {
+      for (const dlq of validDLQ) {
+        await ctx.db.patch(dlq._id, {
+          status: "processing",
+          lastAttemptAt: Date.now(),
+        });
+      }
 
-      // Mark the entry as active "processing" during re-enqueue
-      await ctx.db.patch(dlq._id, {
-        status: "processing",
-        lastAttemptAt: Date.now(),
+      const { namespaceId } = await rag.getOrCreateNamespace(ctx, {
+        namespace: "uet-global",
       });
+      const namespaceIdStr = namespaceId as unknown as string;
 
-      // Attempt to re-enqueue chunk into workpool
-      await embeddingPool.enqueueAction(
+      const argsArray = validDLQ.map((dlq) => ({
+        documentId: dlq.payload.documentId,
+        url: dlq.payload.url,
+        chunkText: dlq.payload.chunkText,
+        contentHash: dlq.payload.contentHash,
+        jobId: dlq.payload.jobId,
+        namespaceId: namespaceIdStr,
+      }));
+
+      await embeddingPool.enqueueActionBatch(
         ctx,
         internal.crawl.actions.embedSingleChunk,
-        {
-          documentId: payload.documentId,
-          url: payload.url,
-          chunkText: payload.chunkText,
-          contentHash: payload.contentHash,
-          jobId: payload.jobId,
-        },
+        argsArray,
         {
           onComplete: internal.crawl.mutations.onChunkEmbedded,
-          context: payload,
+          context: { jobId: validDLQ[0]!.payload.jobId },
         },
       );
     }
@@ -393,7 +381,7 @@ export const upsertDocument = internalMutation({
     contentHash: v.string(),
     crawlSessionId: v.string(),
     title: v.optional(v.string()),
-    sourceType: v.string(), // "pdf" or "html"
+    sourceType: v.string(),
     freshnessTier: v.optional(v.union(v.literal("high"), v.literal("medium"), v.literal("low"))),
   },
   handler: async (ctx, args) => {
@@ -404,7 +392,6 @@ export const upsertDocument = internalMutation({
 
     if (existing) {
       if (existing.contentHash === args.contentHash) {
-        // Content unchanged - just mark it as seen this session
         await ctx.db.patch(existing._id, {
           crawlSessionId: args.crawlSessionId,
           status: "active",
@@ -415,21 +402,30 @@ export const upsertDocument = internalMutation({
         return { action: "skipped", documentId: existing._id };
       }
 
-      // Content changed - delete old chunks and vectors, then re-queue
-      const oldChunks = await ctx.db
-        .query("crawledChunks")
-        .withIndex("by_documentId", (q) => q.eq("documentId", existing._id))
-        .collect();
+      const oldChunks: Doc<"crawledChunks">[] = [];
+      let paginationCursor: string | null = null;
+      let paginationDone = false;
+      while (!paginationDone) {
+        const page = await ctx.db
+          .query("crawledChunks")
+          .withIndex("by_documentId", (q) => q.eq("documentId", existing._id))
+          .paginate({ numItems: 500, cursor: paginationCursor });
+        oldChunks.push(...page.page);
+        paginationDone = page.isDone;
+        paginationCursor = page.continueCursor;
+      }
       for (const chunk of oldChunks) {
         try {
-          await rag.delete(ctx, { entryId: chunk.ragId as any });
+          await rag.delete(ctx, {
+            entryId: chunk.ragId as unknown as import("@convex-dev/rag").EntryId,
+          });
+          await ctx.db.delete(chunk._id);
         } catch (err) {
           console.warn(
             `Failed to delete vector ${chunk.ragId} from RAG during content update:`,
             err,
           );
         }
-        await ctx.db.delete(chunk._id);
       }
 
       await ctx.db.patch(existing._id, {
@@ -446,7 +442,7 @@ export const upsertDocument = internalMutation({
 
     const id = await ctx.db.insert("documents", {
       url: args.url,
-      source: new URL(args.url).hostname,
+      source: isPdfVirtualUrl(args.url) ? "pdf" : new URL(args.url).hostname,
       category: "crawled",
       contentHash: args.contentHash,
       crawlSessionId: args.crawlSessionId,
@@ -466,309 +462,48 @@ export const enqueueDocumentChunks = internalMutation({
     documentId: v.id("documents"),
     url: v.string(),
     chunks: v.array(
-      v.object({ text: v.string(), contentHash: v.string(), parentText: v.optional(v.string()) }),
+      v.object({
+        text: v.string(),
+        contentHash: v.string(),
+        parentText: v.optional(v.string()),
+        headingPath: v.optional(v.array(v.string())),
+      }),
     ),
   },
   handler: async (ctx, args) => {
     const { documentId, url, chunks } = args;
 
-    // Enqueue each chunk in the workpool
-    for (const chunk of chunks) {
-      await embeddingPool.enqueueAction(
+    if (chunks.length > 0) {
+      const { namespaceId } = await rag.getOrCreateNamespace(ctx, {
+        namespace: "uet-global",
+      });
+      const namespaceIdStr = namespaceId as unknown as string;
+
+      const argsArray = chunks.map((chunk) => ({
+        documentId,
+        url,
+        chunkText: chunk.text,
+        contentHash: chunk.contentHash,
+        jobId: "ingest-job",
+        parentText: chunk.parentText,
+        headingPath: chunk.headingPath,
+        namespaceId: namespaceIdStr,
+      }));
+
+      await embeddingPool.enqueueActionBatch(
         ctx,
         internal.crawl.actions.embedSingleChunk,
-        {
-          documentId: documentId,
-          url: url,
-          chunkText: chunk.text,
-          contentHash: chunk.contentHash,
-          jobId: "ingest-job",
-          parentText: chunk.parentText,
-        },
+        argsArray,
         {
           onComplete: internal.crawl.mutations.onChunkEmbedded,
-          context: {
-            documentId: documentId,
-            url: url,
-            chunkText: chunk.text,
-            contentHash: chunk.contentHash,
-            jobId: "ingest-job",
-            parentText: chunk.parentText,
-          },
+          context: { jobId: "ingest-job" },
         },
       );
     }
 
-    // Set chunk count on document
     await ctx.db.patch(documentId, {
       chunkCount: chunks.length,
       status: chunks.length === 0 ? "indexed" : "processing",
     });
-  },
-});
-
-export const deduplicateDocuments = internalMutation({
-  args: {},
-  handler: async (ctx) => {
-    // Process in pages of 200 to stay well under the 16MB read limit
-    const seenUrls = new Map<string, string>(); // url -> keep _id
-    let deleted = 0;
-    let cursor = null as string | null;
-
-    while (true) {
-      const page = await ctx.db.query("documents").paginate({
-        numItems: 200,
-        cursor,
-      });
-
-      for (const doc of page.page) {
-        const existing = seenUrls.get(doc.url);
-        if (!existing) {
-          seenUrls.set(doc.url, doc._id);
-        } else {
-          // Duplicate found - delete this one (keep the first seen which is older)
-          const chunks = await ctx.db
-            .query("crawledChunks")
-            .withIndex("by_documentId", (q) => q.eq("documentId", doc._id))
-            .collect();
-          for (const chunk of chunks) {
-            try {
-              await rag.delete(ctx, { entryId: chunk.ragId as any });
-            } catch (err) {
-              console.warn(`Failed to delete vector ${chunk.ragId} from RAG during dedup:`, err);
-            }
-            await ctx.db.delete(chunk._id);
-          }
-          await ctx.db.delete(doc._id);
-          deleted++;
-        }
-      }
-
-      if (page.isDone) break;
-      cursor = page.continueCursor;
-    }
-
-    return { deleted };
-  },
-});
-
-/**
- * markStaleDocuments — batched, 16MB-safe.
- * Marks up to `limit` active documents whose session doesn't match the current crawl as stale.
- * Call in a loop until { remaining: 'done' } is returned.
- */
-export const markStaleDocuments = internalMutation({
-  args: { crawlSessionId: v.string(), limit: v.optional(v.number()) },
-  handler: async (ctx, { crawlSessionId, limit }) => {
-    const batchSize = limit ?? 500;
-    const active = await ctx.db
-      .query("documents")
-      .withIndex("by_status", (q) => q.eq("status", "active"))
-      .take(batchSize);
-
-    let marked = 0;
-    for (const doc of active) {
-      if (doc.crawlSessionId !== crawlSessionId) {
-        await ctx.db.patch(doc._id, { status: "stale" });
-        marked++;
-      }
-    }
-    return { marked, remaining: active.length === batchSize ? "more" : "done" };
-  },
-});
-
-/**
- * purgeStaleDocuments — batched, 16MB-safe.
- * Deletes up to `limit` stale documents with their chunks and vector entries.
- * Call in a loop until { remaining: 'done' } is returned.
- */
-export const purgeStaleDocuments = internalMutation({
-  args: { limit: v.optional(v.number()) },
-  handler: async (ctx, { limit }) => {
-    const batchSize = limit ?? 100; // smaller batch — each doc may have many chunks
-    const stale = await ctx.db
-      .query("documents")
-      .withIndex("by_status", (q) => q.eq("status", "stale"))
-      .take(batchSize);
-
-    let purged = 0;
-    for (const doc of stale) {
-      const chunks = await ctx.db
-        .query("crawledChunks")
-        .withIndex("by_documentId", (q) => q.eq("documentId", doc._id))
-        .collect();
-      for (const chunk of chunks) {
-        try {
-          await rag.delete(ctx, { entryId: chunk.ragId as any });
-        } catch (err) {
-          console.warn(`Failed to delete vector ${chunk.ragId} from RAG during purge:`, err);
-        }
-        await ctx.db.delete(chunk._id);
-      }
-      await ctx.db.delete(doc._id);
-      purged++;
-    }
-    return { purged, remaining: stale.length === batchSize ? "more" : "done" };
-  },
-});
-
-export const resetAbandonedDLQ = internalMutation({
-  args: { limit: v.optional(v.number()) },
-  handler: async (ctx, { limit }) => {
-    const batchSize = limit ?? 200;
-    const abandoned = await ctx.db
-      .query("crawlDeadLetter")
-      .withIndex("by_status", (q) => q.eq("status", "abandoned"))
-      .take(batchSize);
-
-    let resetCount = 0;
-    for (const dlq of abandoned) {
-      await ctx.db.patch(dlq._id, { status: "pending_retry" });
-      resetCount++;
-    }
-    return { resetCount, remaining: abandoned.length === batchSize ? "more" : "done" };
-  },
-});
-
-/**
- * resetFailedDocuments - resets up to `limit` failed documents back to pending_embed
- * so they get re-queued for embedding on the next retry cycle.
- * Call repeatedly until it returns { remaining: 'done' }.
- */
-export const resetFailedDocuments = internalMutation({
-  args: { limit: v.optional(v.number()) },
-  handler: async (ctx, { limit }) => {
-    const batchSize = limit ?? 200;
-    const failedDocs = await ctx.db
-      .query("documents")
-      .withIndex("by_status", (q) => q.eq("status", "failed"))
-      .take(batchSize);
-
-    let reset = 0;
-    for (const doc of failedDocs) {
-      await ctx.db.patch(doc._id, {
-        status: "pending_embed",
-        updatedAt: Date.now(),
-      });
-      reset++;
-    }
-    return { reset, remaining: failedDocs.length === batchSize ? "more" : "done" };
-  },
-});
-
-/**
- * reembedPendingBatch - re-enqueues chunks for up to `limit` pending_embed documents.
- * For each document, reads existing chunks from crawledChunks table and re-queues them.
- * Call repeatedly until it returns { remaining: 'done' }.
- */
-export const reembedPendingBatch = internalMutation({
-  args: { limit: v.optional(v.number()) },
-  handler: async (ctx, { limit }) => {
-    const batchSize = limit ?? 10;
-    const pendingDocs = await ctx.db
-      .query("documents")
-      .withIndex("by_status", (q) => q.eq("status", "pending_embed"))
-      .take(batchSize);
-
-    let queued = 0;
-    for (const doc of pendingDocs) {
-      // Get existing stored chunks for this document
-      const existingChunks = await ctx.db
-        .query("crawledChunks")
-        .withIndex("by_documentId", (q) => q.eq("documentId", doc._id))
-        .collect();
-
-      if (existingChunks.length > 0) {
-        // Re-enqueue existing chunks for re-embedding
-        for (const chunk of existingChunks) {
-          await embeddingPool.enqueueAction(
-            ctx,
-            internal.crawl.actions.embedSingleChunk,
-            {
-              documentId: doc._id,
-              url: doc.url,
-              chunkText: chunk.text,
-              contentHash: chunk.contentHash,
-              jobId: "reembed-job",
-            },
-            {
-              onComplete: internal.crawl.mutations.onChunkEmbedded,
-              context: {
-                documentId: doc._id,
-                url: doc.url,
-                chunkText: chunk.text,
-                contentHash: chunk.contentHash,
-                jobId: "reembed-job",
-              },
-            },
-          );
-        }
-        queued += existingChunks.length;
-      } else if (doc.chunkCount && doc.chunkCount > 0) {
-        // No stored chunks but doc says it has chunks - the markdown needs re-ingestion
-        // Mark as failed so it gets picked up by next crawl run
-        await ctx.db.patch(doc._id, {
-          status: "failed",
-          error: "No chunk text available for re-embedding. Re-crawl required.",
-        });
-        continue;
-      }
-
-      // Update document status to processing
-      await ctx.db.patch(doc._id, {
-        status: "processing",
-        chunkCount: existingChunks.length,
-        updatedAt: Date.now(),
-      });
-    }
-
-    return {
-      processed: pendingDocs.length,
-      chunksQueued: queued,
-      remaining: pendingDocs.length === batchSize ? "more" : "done",
-    };
-  },
-});
-
-export const flagExpiredDocuments = internalMutation({
-  args: { limit: v.optional(v.number()) },
-  handler: async (ctx, { limit }) => {
-    const batchSize = limit ?? 200;
-    const now = Date.now();
-    const DAY_MS = 24 * 60 * 60 * 1000;
-
-    const TTLS = {
-      high: 30 * DAY_MS,
-      medium: 90 * DAY_MS,
-      low: 180 * DAY_MS,
-    };
-
-    // Check both "indexed" (from Crawl4AI pipeline) and "active" (from /ingest pipeline)
-    const indexedDocs = await ctx.db
-      .query("documents")
-      .withIndex("by_status", (q) => q.eq("status", "indexed"))
-      .take(batchSize);
-
-    const activeDocs = await ctx.db
-      .query("documents")
-      .withIndex("by_status", (q) => q.eq("status", "active"))
-      .take(batchSize);
-
-    const candidates = [...indexedDocs, ...activeDocs];
-
-    let flagged = 0;
-    for (const doc of candidates) {
-      if (doc.isStale) continue;
-
-      const tier = doc.freshnessTier || "low";
-      const ttl = TTLS[tier as keyof typeof TTLS] || TTLS.low;
-
-      if (now - doc.crawledAt > ttl) {
-        await ctx.db.patch(doc._id, { isStale: true });
-        flagged++;
-      }
-    }
-
-    return { flagged, remaining: candidates.length === batchSize ? "more" : "done" };
   },
 });

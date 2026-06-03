@@ -1,5 +1,7 @@
 import { v } from "convex/values";
+import type { Doc } from "../_generated/dataModel";
 import { query } from "../_generated/server";
+import { requireAdmin } from "../auth";
 
 export const status = query({
   args: { jobId: v.id("crawlJobs") },
@@ -40,7 +42,7 @@ export const status = query({
     }),
   ),
   handler: async (ctx, args) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Convex GenericDocument return doesn't match validator type
-    return (await ctx.db.get(args.jobId)) as any;
+    await requireAdmin(ctx);
+    return (await ctx.db.get(args.jobId)) as Doc<"crawlJobs"> | null;
   },
 });

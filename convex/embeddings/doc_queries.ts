@@ -1,6 +1,16 @@
 import { v } from "convex/values";
 import { internalQuery } from "../_generated/server";
 
+type DocQueryResult = {
+  url: string;
+  title: string;
+  category: string;
+  crawledAt?: number;
+  freshnessTier?: string;
+  parentText?: string;
+  headingPath?: string[];
+};
+
 export const getDocumentByEntryId = internalQuery({
   args: { entryId: v.string() },
   returns: v.union(
@@ -12,10 +22,10 @@ export const getDocumentByEntryId = internalQuery({
       crawledAt: v.optional(v.number()),
       freshnessTier: v.optional(v.string()),
       parentText: v.optional(v.string()),
+      headingPath: v.optional(v.array(v.string())),
     }),
   ),
-  handler: async (ctx, args) => {
-    // 1. Try to find the document via crawledChunks mapping (O(1) index query)
+  handler: async (ctx, args): Promise<DocQueryResult | null> => {
     const chunk = await ctx.db
       .query("crawledChunks")
       .withIndex("by_ragId", (q) => q.eq("ragId", args.entryId))
@@ -31,11 +41,11 @@ export const getDocumentByEntryId = internalQuery({
           crawledAt: doc.crawledAt,
           freshnessTier: doc.freshnessTier,
           parentText: chunk.parentText,
-        } as any;
+          headingPath: chunk.headingPath,
+        };
       }
     }
 
-    // 2. Fallback to direct lookup on documents table (e.g. for legacy or manual documents)
     const doc = await ctx.db
       .query("documents")
       .withIndex("by_entryId", (q) => q.eq("entryId", args.entryId))
@@ -50,6 +60,7 @@ export const getDocumentByEntryId = internalQuery({
       crawledAt: doc.crawledAt,
       freshnessTier: doc.freshnessTier,
       parentText: undefined,
-    } as any;
+      headingPath: undefined,
+    };
   },
 });

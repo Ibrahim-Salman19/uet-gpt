@@ -2,6 +2,15 @@
 import { ConvexError, v } from "convex/values";
 import { action } from "../_generated/server";
 
+// gemini-embedding-2 — stable as of May 2026
+// Dimensions: 3072 (MRL supports 768/1536/3072)
+// Context: 8192 tokens
+// Free tier: ~60 RPM, ~1500 RPD (post-Dec 2025 cuts)
+// Paid Tier 1: 3000 RPM, 1M TPM
+// Batch API: 50% discount ($0.10/M vs $0.20/M)
+// Note: taskType parameter has no effect on gemini-embedding-2 (confirmed bug)
+const BATCH_THRESHOLD = 2;
+
 async function fetchWithRetry(
   url: string,
   options: RequestInit,
@@ -33,7 +42,8 @@ async function fetchWithRetry(
 }
 
 async function embedNativeGemini(texts: string[], apiKey: string): Promise<number[][]> {
-  if (texts.length === 1) {
+  // Single endpoint is faster for small batches; batch API for 2+
+  if (texts.length < BATCH_THRESHOLD) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2:embedContent?key=${apiKey}`;
     const response = await fetchWithRetry(url, {
       method: "POST",
@@ -51,7 +61,7 @@ async function embedNativeGemini(texts: string[], apiKey: string): Promise<numbe
       const errText = await response.text();
       throw new Error(`Gemini embedContent failed (${response.status}): ${errText}`);
     }
-    const data = (await response.json()) as any;
+    const data = (await response.json()) as { embedding?: { values: number[] } };
     if (!data.embedding?.values) {
       throw new Error("Unexpected shape in Gemini embedContent response");
     }
@@ -77,11 +87,11 @@ async function embedNativeGemini(texts: string[], apiKey: string): Promise<numbe
       const errText = await response.text();
       throw new Error(`Gemini batchEmbedContents failed (${response.status}): ${errText}`);
     }
-    const data = (await response.json()) as any;
+    const data = (await response.json()) as { embeddings?: Array<{ values: number[] }> };
     if (!data.embeddings || !Array.isArray(data.embeddings)) {
       throw new Error("Unexpected shape in Gemini batchEmbedContents response");
     }
-    return data.embeddings.map((emb: any) => {
+    return data.embeddings.map((emb: { values: number[] }) => {
       if (!emb.values) {
         throw new Error("Unexpected shape in Gemini batchEmbedContents values");
       }
@@ -91,7 +101,7 @@ async function embedNativeGemini(texts: string[], apiKey: string): Promise<numbe
 }
 
 export async function generateEmbeddingsInternal(texts: string[]): Promise<number[][]> {
-  const geminiKeys = [
+  const geminiKeys: string[] = [
     process.env.GEMINI_API_KEY,
     process.env.GEMINI_API_KEY_1,
     process.env.GEMINI_API_KEY_2,
@@ -107,12 +117,16 @@ export async function generateEmbeddingsInternal(texts: string[]): Promise<numbe
   const errors: string[] = [];
 
   if (geminiKeys.length > 0) {
-    for (const key of geminiKeys) {
+    for (let keyIndex = 0; keyIndex < geminiKeys.length; keyIndex++) {
+      const key = geminiKeys[keyIndex]!;
       try {
+        if (keyIndex > 0) {
+          console.warn(`Embedding failover: using key index ${keyIndex}`);
+        }
         const embeddings = await embedNativeGemini(texts, key);
         return embeddings;
-      } catch (err: any) {
-        const errMsg = err.message || String(err);
+      } catch (err: unknown) {
+        const errMsg = err instanceof Error ? err.message : String(err);
         console.warn(`Native Gemini Embeddings failed for key: ${errMsg}`);
         errors.push(`Gemini: ${errMsg}`);
       }
@@ -133,8 +147,8 @@ export const generate = action({
       const queryText = `task: search result | query: ${args.text}`;
       const embeddings = await generateEmbeddingsInternal([queryText]);
       return embeddings[0] as number[];
-    } catch (error: any) {
-      throw new ConvexError(error.message || String(error));
+    } catch (error: unknown) {
+      throw new ConvexError(error instanceof Error ? error.message : String(error));
     }
   },
 });

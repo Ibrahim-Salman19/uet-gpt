@@ -1,12 +1,33 @@
 import { v } from "convex/values";
-import { api, internal } from "../_generated/api";
+import { internal } from "../_generated/api";
+import type { Doc } from "../_generated/dataModel";
 import { action } from "../_generated/server";
 import { rag } from "../rag/instance";
+
+type VectorSearchResult = { entryId: string; score?: number; content?: { text: string }[] };
+type TextSearchResult = { ragId: string; text: string; score: number };
+type FaqResult = {
+  _id: string;
+  _score?: number;
+  question: string;
+  answer: string;
+  sourceUrl?: string;
+  expiresAt?: number;
+};
+type EnrichedResult = {
+  entryId: string;
+  content: string;
+  url: string;
+  title: string;
+  relevanceScore: number;
+  headingPath: string[];
+};
+type FusedItem = { id: string; score: number };
 
 export function hybridRank(
   vectorResults: Array<{ id: string; score: number }>,
   textResults: Array<{ id: string; score: number }>,
-  k = 20,
+  k = 60,
   weights = { vector: 1.0, text: 1.0 },
 ): Array<{ id: string; score: number }> {
   const scores = new Map<string, number>();
@@ -24,7 +45,6 @@ export function hybridRank(
     .sort((a, b) => b.score - a.score);
 }
 
-const _api: any = api;
 const getDocumentRef = internal.embeddings.doc_queries.getDocumentByEntryId;
 
 export const searchDocumentsAction = action({
@@ -42,6 +62,7 @@ export const searchDocumentsAction = action({
       url: v.string(),
       title: v.string(),
       relevanceScore: v.number(),
+      headingPath: v.optional(v.array(v.string())),
     }),
   ),
   handler: async (
@@ -58,7 +79,7 @@ export const searchDocumentsAction = action({
     } else if (!args.queryEmbedding && typeof args.queryText === "string") {
       // Consolidated HyDE: call primary action routing
       try {
-        const hydeEnhanced = await ctx.runAction(_api.rag.routing.hydeQueryAction, {
+        const hydeEnhanced = await ctx.runAction(internal.rag.routing.hydeQueryAction, {
           query: args.queryText,
         });
         finalQueryText = hydeEnhanced;
@@ -99,15 +120,15 @@ export const searchDocumentsAction = action({
     }>;
 
     const fused = hybridRank(
-      vectorRes.results.map((r: any) => ({ id: r.entryId, score: r.score ?? 0 })),
-      textRes.map((r: any) => ({ id: r.ragId, score: r.score })),
-      20, // TASK-E02: k=20 for tighter/more standard RRF fusion
+      vectorRes.results.map((r: VectorSearchResult) => ({ id: r.entryId, score: r.score ?? 0 })),
+      textRes.map((r: TextSearchResult) => ({ id: r.ragId, score: r.score })),
+      60, // TASK-E02: k=60 per original Cormack paper + Elasticsearch default
       { vector: 1.0, text: 1.0 },
     ).slice(0, limit);
 
     // Batch-fetch document metadata
     const docLookups = await Promise.all(
-      fused.map(async (item: any) => {
+      fused.map(async (item: FusedItem) => {
         const doc = await ctx.runQuery(getDocumentRef, {
           entryId: item.id,
         });
@@ -123,6 +144,7 @@ export const searchDocumentsAction = action({
         crawledAt?: number;
         freshnessTier?: string;
         parentText?: string;
+        headingPath?: string[];
       }
     >();
     for (const { entryId, doc } of docLookups) {
@@ -133,23 +155,24 @@ export const searchDocumentsAction = action({
           crawledAt: doc.crawledAt,
           freshnessTier: doc.freshnessTier,
           parentText: doc.parentText,
+          headingPath: doc.headingPath,
         });
       }
     }
 
-    const enrichedResults = fused.map((item: any) => {
+    const enrichedResults = fused.map((item: FusedItem) => {
       const docMeta = docMap.get(item.id);
       let content = "";
 
-      const vecMatch = vectorRes.results.find((r: any) => r.entryId === item.id);
-      const textMatch = textRes.find((r: any) => r.ragId === item.id);
+      const vecMatch = vectorRes.results.find((r: VectorSearchResult) => r.entryId === item.id);
+      const textMatch = textRes.find((r: TextSearchResult) => r.ragId === item.id);
 
       // TASK-E06: Parent-child chunking context selection.
       // If a parent chunk text is present, return it to the LLM. Otherwise fallback to child chunk.
       if (docMeta?.parentText) {
         content = docMeta.parentText;
       } else if (vecMatch) {
-        content = vecMatch.content.map((c: any) => c.text).join("\n");
+        content = vecMatch.content.map((c: { text: string }) => c.text).join("\n");
       } else if (textMatch) {
         content = textMatch.text;
       }
@@ -171,19 +194,20 @@ export const searchDocumentsAction = action({
         url: docMeta?.url ?? "",
         title: docMeta?.title ?? "",
         relevanceScore: score,
+        headingPath: docMeta?.headingPath ?? [],
       };
     });
 
     const sortedEnriched = enrichedResults.sort(
-      (a: any, b: any) => b.relevanceScore - a.relevanceScore,
+      (a: EnrichedResult, b: EnrichedResult) => b.relevanceScore - a.relevanceScore,
     );
 
     // Search FAQs (Tier 1 Retriever)
-    const faqs = await ctx.runQuery(api.faq.searchFaqs, { query: args.queryText });
+    const faqs = await ctx.runQuery(internal.faq.searchFaqs, { query: args.queryText });
     const now = Date.now();
-    const activeFaqs = faqs.filter((f: any) => !f.expiresAt || f.expiresAt > now);
+    const activeFaqs = faqs.filter((f: FaqResult) => !f.expiresAt || f.expiresAt > now);
 
-    const faqResults = activeFaqs.map((faq: any) => ({
+    const faqResults = activeFaqs.map((faq: FaqResult) => ({
       entryId: faq._id,
       content: `FAQ: ${faq.question}\nAnswer: ${faq.answer}`,
       url: faq.sourceUrl || "Verified FAQ Database",
@@ -193,12 +217,13 @@ export const searchDocumentsAction = action({
 
     const combinedResults = [...faqResults, ...sortedEnriched];
 
-    return combinedResults.slice(0, limit).map((r: any) => ({
+    return combinedResults.slice(0, limit).map((r) => ({
       entryId: r.entryId,
       content: r.content,
       url: r.url,
       title: r.title,
       relevanceScore: r.relevanceScore,
+      headingPath: "headingPath" in r ? (r.headingPath ?? []) : [],
     }));
   },
 });

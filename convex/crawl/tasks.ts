@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import type { Id } from "../_generated/dataModel";
+import type { Doc, Id } from "../_generated/dataModel";
 import { internalMutation, mutation } from "../_generated/server";
 
 /**
@@ -17,25 +17,17 @@ export const cleanupExpiredCache = internalMutation({
 
     const expired = await ctx.db
       .query("semanticCache")
-      .withIndex(
-        "by_expiresAt",
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Convex query builder generic type limitation
-        (q: any) => q.lte("expiresAt", now),
-      )
+      .withIndex("by_expiresAt", (q) => q.lte("expiresAt", now))
       .take(maxToDelete);
 
     for (const entry of expired) {
-      await ctx.db.delete(entry._id as Id<"semanticCache">);
+      await ctx.db.delete(entry._id);
       deletedCount++;
     }
 
     const expiredWebhooks = await ctx.db
       .query("processedWebhooks")
-      .withIndex(
-        "by_expiresAt",
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (q: any) => q.lte("expiresAt", now),
-      )
+      .withIndex("by_expiresAt", (q) => q.lte("expiresAt", now))
       .take(maxToDelete);
 
     for (const entry of expiredWebhooks) {
@@ -61,12 +53,8 @@ export const aggregateDailyStats = mutation({
     // Use withIndex on the createdAt field instead of .filter() for efficiency
     const recentFeedback = await ctx.db
       .query("feedback")
-      .withIndex(
-        "by_createdAt",
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Convex query builder generic type limitation
-        (q: any) => q.gte("createdAt", twentyFourHoursAgo),
-      )
-      .collect();
+      .withIndex("by_createdAt", (q) => q.gte("createdAt", twentyFourHoursAgo))
+      .take(10000);
 
     const positiveFeedback = recentFeedback.filter((f) => f.rating === "thumbsUp").length;
 
@@ -77,25 +65,17 @@ export const aggregateDailyStats = mutation({
     // Look up the first admin user to associate with the audit log entry
     const adminUser = await ctx.db
       .query("users")
-      .withIndex(
-        "by_role",
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Convex query builder generic type limitation
-        (q: any) => q.eq("role", "admin"),
-      )
+      .withIndex("by_role", (q) => q.eq("role", "admin"))
       .first();
 
-    const auditUserId: string | undefined =
-      (adminUser?._id as string | undefined) ??
-      ((
+    const auditUserId: Id<"users"> | undefined =
+      adminUser?._id ??
+      (
         await ctx.db
           .query("users")
-          .withIndex(
-            "by_role",
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Convex query builder generic type limitation
-            (q: any) => q.eq("role", "superadmin"),
-          )
+          .withIndex("by_role", (q) => q.eq("role", "superadmin"))
           .first()
-      )?._id as string | undefined);
+      )?._id;
 
     // Log stats to the adminAuditLog for historical tracking
     // If no admin/superadmin user exists, skip the audit log (cron runs before any admin setup)
@@ -118,8 +98,7 @@ export const aggregateDailyStats = mutation({
           }),
         },
         createdAt: now,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Convex GenericDocument doesn't match nested object validator
-      } as any);
+      });
     }
 
     return null;

@@ -1,4 +1,5 @@
 import { ConvexError, v } from "convex/values";
+import type { Id } from "../_generated/dataModel";
 import { mutation } from "../_generated/server";
 
 export const submit = mutation({
@@ -18,6 +19,9 @@ export const submit = mutation({
   },
   returns: v.id("feedback"),
   handler: async (ctx, args) => {
+    if (args.comment && args.comment.length > 2000) {
+      throw new ConvexError("Feedback comment must be under 2000 characters");
+    }
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new ConvexError("Authentication required");
@@ -35,17 +39,15 @@ export const submit = mutation({
       .collect();
     const existingByUser = existing.find((f) => f.userId === user._id);
     if (existingByUser) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Convex GenericDocument _id type doesn't match branded Id<"feedback">
-      return existingByUser._id as any;
+      return existingByUser._id;
     }
     return (await ctx.db.insert("feedback", {
       messageId: args.messageId,
       userId: user._id,
       rating: args.rating,
-      ...(args.comment && { comment: args.comment }),
-      ...(args.category && { category: args.category }),
+      comment: args.comment,
+      category: args.category,
       createdAt: Date.now(),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Convex insert doesn't accept optional spreads in its generic type
-    } as any)) as any;
+    })) as Id<"feedback">;
   },
 });

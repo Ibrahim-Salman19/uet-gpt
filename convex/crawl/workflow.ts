@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { UET_CRAWL_CONFIG } from "../../src/lib/constants.js";
 import { internal } from "../_generated/api";
+import type { Doc } from "../_generated/dataModel";
 import { internalMutation } from "../_generated/server";
 import { crawlPool } from "./workpools";
 
@@ -10,18 +11,29 @@ export const kickoffDailyCrawl = internalMutation({
   args: {},
   handler: async (ctx) => {
     // Idempotency: Prevent running if there's already a pending or running crawl
-    const existingJobs = await ctx.db
+    const existingJob = await ctx.db
       .query("crawlJobs")
       .withIndex("by_status", (q) => q.eq("status", "pending"))
-      .collect();
+      .first();
 
-    const runningJobs = await ctx.db
+    const runningJob = await ctx.db
       .query("crawlJobs")
       .withIndex("by_status", (q) => q.eq("status", "running"))
-      .collect();
+      .first();
 
-    if (existingJobs.length > 0 || runningJobs.length > 0) {
+    if (existingJob !== null || runningJob !== null) {
       console.warn("A crawl job is already active. Skipping daily kick-off.");
+      return null;
+    }
+
+    // Enforce daily cadence: skip if completed crawl exists from < 23 hours ago
+    const lastCompletedJob = await ctx.db
+      .query("crawlJobs")
+      .withIndex("by_status", (q) => q.eq("status", "completed"))
+      .order("desc")
+      .first();
+    if (lastCompletedJob && Date.now() - lastCompletedJob.startedAt < 23 * 60 * 60 * 1000) {
+      console.warn("Last completed crawl was < 23 hours ago. Skipping daily kick-off.");
       return null;
     }
 
@@ -30,15 +42,11 @@ export const kickoffDailyCrawl = internalMutation({
       trigger: "scheduled",
       status: "pending",
       config: {
-        maxPages: 500,
-        maxDepth: 5,
-        includePaths: ["https://web.uettaxila.edu.pk/**"],
-        excludePaths: [
-          "https://web.uettaxila.edu.pk/**/edit",
-          "https://web.uettaxila.edu.pk/**/delete",
-          "https://web.uettaxila.edu.pk/wp-admin/**",
-        ],
-        allowExternalLinks: false,
+        maxPages: UET_CRAWL_CONFIG.maxPages,
+        maxDepth: UET_CRAWL_CONFIG.maxDepth,
+        includePaths: [...UET_CRAWL_CONFIG.includePaths],
+        excludePaths: [...UET_CRAWL_CONFIG.excludePaths],
+        allowExternalLinks: UET_CRAWL_CONFIG.allowExternalLinks,
       },
       stats: {
         totalPages: SEED_URLS.length,
@@ -78,7 +86,7 @@ export const updateJobState = internalMutation({
     const job = await ctx.db.get(args.jobId);
     if (!job) return;
 
-    const updatePayload: any = {};
+    const updatePayload: Partial<Doc<"crawlJobs">> & { completedAt?: number } = {};
     if (args.status && job.status !== args.status) updatePayload.status = args.status;
     if (args.providerJobId && job.providerJobId !== args.providerJobId)
       updatePayload.providerJobId = args.providerJobId;
@@ -100,6 +108,7 @@ export const completeJobByTaskId = internalMutation({
     status: v.union(v.literal("completed"), v.literal("failed")),
     stats: v.optional(
       v.object({
+        totalPages: v.number(),
         successfulPages: v.number(),
         failedPages: v.number(),
         skippedPages: v.number(),
@@ -116,7 +125,7 @@ export const completeJobByTaskId = internalMutation({
       .first();
 
     if (job && job.status !== args.status) {
-      const update: any = {
+      const update: Partial<Doc<"crawlJobs">> = {
         status: args.status,
         completedAt: Date.now(),
       };

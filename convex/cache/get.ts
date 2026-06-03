@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
+import type { Doc } from "../_generated/dataModel";
 import { action } from "../_generated/server";
 
 import { CACHE_SIMILARITY_THRESHOLD } from "../constants";
@@ -48,7 +49,7 @@ export const get = action({
       model: v.string(),
     }),
   ),
-  handler: async (ctx: any, args: any) => {
+  handler: async (ctx, args) => {
     if (args.queryEmbedding.length === 0) return null;
 
     const results = await ctx.vectorSearch("semanticCache", "by_queryEmbedding", {
@@ -70,6 +71,25 @@ export const get = action({
 
     const similarity = cosineSimilarity(args.queryEmbedding, entry.queryEmbedding);
     if (similarity < CACHE_SIMILARITY_THRESHOLD) return null;
+
+    // R-5: Invalidate cache if any source document was re-indexed after cache entry creation
+    const sourceEntryIds = entry.sourceEntryIds;
+    if (sourceEntryIds && sourceEntryIds.length > 0) {
+      let staleFound = false;
+      for (const ragEntryId of sourceEntryIds) {
+        const doc = await ctx.runQuery(_internal.cache.internal_queries.getDocByEntryId, {
+          entryId: ragEntryId,
+        });
+        if (doc && (doc.updatedAt > entry.createdAt || doc.crawledAt > entry.createdAt)) {
+          staleFound = true;
+          break;
+        }
+      }
+      if (staleFound) {
+        console.log("Cache entry invalidated: source document was re-indexed");
+        return null;
+      }
+    }
 
     await ctx.runMutation(_internal.cache.internal_queries.incrementHits, { id: entryId });
 

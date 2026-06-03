@@ -4,29 +4,35 @@ import { mutation, query } from "./_generated/server";
 import { sourcesValidator, tokenCountValidator } from "./messages/validator";
 import { enforceRateLimit } from "./rateLimit";
 
-function toAppSource(s: any): any {
+// Transform component source format to app format
+function toAppSource(s: Record<string, unknown>) {
+  const opts = s.providerOptions as Record<string, unknown> | undefined;
   return {
-    documentId: s.providerOptions?.documentId ?? s.id,
-    chunkId: s.providerOptions?.chunkId ?? "",
-    url: s.url ?? s.id,
-    title: s.title ?? "",
-    relevanceScore: s.providerOptions?.relevanceScore ?? 0,
-    excerpt: s.providerOptions?.excerpt ?? "",
+    documentId: (opts?.documentId as string | undefined) ?? (s.id as string | undefined),
+    chunkId: (opts?.chunkId as string) ?? "",
+    url: (s.url as string) ?? (s.id as string) ?? "",
+    title: (s.title as string) ?? "",
+    relevanceScore: (opts?.relevanceScore as number) ?? 0,
+    excerpt: (opts?.excerpt as string) ?? "",
+    headingPath: opts?.headingPath as string,
   };
 }
 
-function toComponentSource(source: any): any {
+// Transform app source format to component format
+function toComponentSource(source: Record<string, unknown>) {
   return {
-    type: "url",
-    id: source.url,
-    url: source.url,
-    title: source.title,
+    type: "source" as const,
+    sourceType: "url" as const,
+    id: source.url as string,
+    url: source.url as string,
+    title: source.title as string | undefined,
     providerOptions: {
       documentId: source.documentId,
       chunkId: source.chunkId,
       relevanceScore: source.relevanceScore,
       excerpt: source.excerpt,
-    },
+      headingPath: source.headingPath,
+    } as unknown as Record<string, Record<string, unknown>>,
   };
 }
 
@@ -40,6 +46,10 @@ export const insert = mutation({
   },
   returns: v.string(),
   handler: async (ctx, args) => {
+    if (args.content.length > 50000) {
+      throw new ConvexError("Message content must be under 50000 characters");
+    }
+
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new ConvexError("Authentication required");
@@ -100,18 +110,21 @@ export const list = query({
       order: "asc",
     });
 
-    return result.page.map((msg: any) => ({
-      _id: msg._id as string,
+    return result.page.map((msg) => ({
+      _id: msg._id,
       _creationTime: msg._creationTime,
-      threadId: msg.threadId as string,
-      role: msg.message?.role ?? "assistant",
-      content: msg.message?.content ?? msg.text ?? "",
+      threadId: msg.threadId ?? "",
+      role: (msg.message as { role?: string })?.role ?? "assistant",
+      content:
+        typeof (msg.message as { content?: unknown })?.content === "string"
+          ? (msg.message as { content: string }).content
+          : (msg.text ?? ""),
       sources: msg.sources ? msg.sources.map(toAppSource) : undefined,
       tokenCount: msg.usage
         ? {
-            prompt: msg.usage.promptTokens,
-            completion: msg.usage.completionTokens,
-            total: msg.usage.totalTokens,
+            prompt: msg.usage.promptTokens ?? 0,
+            completion: msg.usage.completionTokens ?? 0,
+            total: msg.usage.totalTokens ?? 0,
           }
         : undefined,
       createdAt: msg._creationTime,
