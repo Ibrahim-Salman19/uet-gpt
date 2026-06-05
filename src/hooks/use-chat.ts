@@ -1,10 +1,12 @@
 "use client";
 
 import { useConvex, useMutation } from "convex/react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { api } from "../../convex/_generated/api";
 import { streamRegistry } from "./stream-registry";
+
+const CHAT_TIMEOUT_MS = 45_000; // 45 seconds max per generation
 
 export function useChat(threadId: string | undefined) {
   const convex = useConvex();
@@ -16,6 +18,15 @@ export function useChat(threadId: string | undefined) {
   const streamGenerationRef = useRef(0);
 
   const insertMutation = useMutation(api.messages.insert);
+
+  // Abort any in-flight requests on unmount
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   const handleSend = useCallback(
     async (content: string) => {
@@ -30,6 +41,18 @@ export function useChat(threadId: string | undefined) {
 
       const abortController = new AbortController();
       abortControllerRef.current = abortController;
+
+      // Auto-abort after timeout to prevent infinite "GENERATING…"
+      const timeoutId = setTimeout(() => {
+        if (abortControllerRef.current && !abortController.signal.aborted) {
+          abortController.abort();
+          toast.error("Response took too long. Please try again.");
+        }
+      }, CHAT_TIMEOUT_MS);
+
+      // Hoist these so the AbortError catch can save partial data
+      let accumulatedText = "";
+      let sources: any[] = [];
 
       try {
         // 1. Insert the user's message into Convex
@@ -69,10 +92,15 @@ export function useChat(threadId: string | undefined) {
 
         // 5. Parse sources metadata from response headers
         const sourcesHeader = response.headers.get("X-Sources");
-        let sources = [];
         if (sourcesHeader) {
           try {
-            sources = JSON.parse(sourcesHeader);
+            const binary = atob(sourcesHeader);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+              bytes[i] = binary.charCodeAt(i);
+            }
+            const decoded = new TextDecoder().decode(bytes);
+            sources = JSON.parse(decoded);
           } catch (e) {
             console.error("Failed to parse X-Sources header:", e);
           }
@@ -85,7 +113,6 @@ export function useChat(threadId: string | undefined) {
         }
 
         const decoder = new TextDecoder();
-        let accumulatedText = "";
 
         // Initialize the streaming state in the registry with empty text and sources
         streamRegistry.update(threadId, "", sources);
@@ -112,13 +139,27 @@ export function useChat(threadId: string | undefined) {
         }
       } catch (err: any) {
         if (err.name === "AbortError") {
-          console.log("Chat generation stopped by user.");
+          console.log("Chat generation stopped by user or timeout.");
+          // Save whatever was accumulated before abort so the message isn't lost
+          if (accumulatedText.trim()) {
+            try {
+              await insertMutation({
+                threadId,
+                role: "assistant",
+                content: accumulatedText,
+                sources: sources && sources.length > 0 ? sources : undefined,
+              });
+            } catch (saveErr) {
+              console.error("Failed to save partial generation:", saveErr);
+            }
+          }
         } else {
           const message = err instanceof Error ? err.message : "Failed to send message";
           setError(message);
           toast.error(message);
         }
       } finally {
+        clearTimeout(timeoutId);
         // Only clear registry if this generation is still current
         if (threadId && generation === streamGenerationRef.current) {
           streamRegistry.update(threadId, "", []);

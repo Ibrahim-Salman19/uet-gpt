@@ -5,11 +5,13 @@ import { api } from "convex/_generated/api";
 import { ConvexReactClient, useMutation } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import * as React from "react";
+import { PreferencesProvider } from "@/components/preferences-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
+console.log("Convex URL loaded on client:", convexUrl);
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -22,13 +24,31 @@ function UserSync() {
   React.useEffect(() => {
     if (!isLoaded || !isSignedIn || !user) return;
 
-    const primary = user.primaryEmailAddress;
-    createUser({
-      clerkId: user.id,
-      name: user.fullName || user.username || "Unknown",
-      email: primary?.emailAddress ?? "",
-      imageUrl: user.imageUrl || undefined,
-    }).catch((err) => console.error("Failed to sync user:", err));
+    const syncWithRetry = async () => {
+      const maxRetries = 3;
+      const baseDelay = 1000;
+
+      for (let i = 0; i <= maxRetries; i++) {
+        try {
+          const primary = user.primaryEmailAddress;
+          await createUser({
+            clerkId: user.id,
+            name: user.fullName || user.username || "Unknown",
+            email: primary?.emailAddress ?? "",
+            imageUrl: user.imageUrl || undefined,
+          });
+          return; // Success
+        } catch (err) {
+          if (i === maxRetries) {
+            console.error("Failed to sync user after retries:", err);
+            return;
+          }
+          await new Promise((r) => setTimeout(r, baseDelay * Math.pow(2, i)));
+        }
+      }
+    };
+
+    syncWithRetry();
   }, [isLoaded, isSignedIn, user, createUser]);
 
   return null;
@@ -54,7 +74,11 @@ export function Providers({ children }: ProvidersProps) {
   );
 
   if (!convexClient) {
-    return <ThemeProvider>{content}</ThemeProvider>;
+    return (
+      <ThemeProvider>
+        <PreferencesProvider>{content}</PreferencesProvider>
+      </ThemeProvider>
+    );
   }
 
   return (
@@ -75,8 +99,10 @@ export function Providers({ children }: ProvidersProps) {
     >
       <ConvexProviderWithClerk client={convexClient} useAuth={useAuth}>
         <ThemeProvider>
-          <UserSync />
-          {content}
+          <PreferencesProvider>
+            <UserSync />
+            {content}
+          </PreferencesProvider>
         </ThemeProvider>
       </ConvexProviderWithClerk>
     </ClerkProvider>

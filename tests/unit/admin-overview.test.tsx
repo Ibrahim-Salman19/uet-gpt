@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -148,6 +149,6 @@ describe("AdminOverviewPage", () => {
     const { container } = render(<AdminOverviewPage />);
     // The page is rendered inside the admin layout which adds the header
     // Just verify the stat cards render
-    expect(container.querySelectorAll(".text-2xl").length).toBeGreaterThan(0);
+    expect(container.querySelectorAll(".text-3xl").length).toBeGreaterThan(0);
   });
 });

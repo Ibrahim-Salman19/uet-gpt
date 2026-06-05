@@ -38,7 +38,7 @@ export function LoadingSpinner({ size = "md", label, className, ...props }: Load
           dimensions.container,
         )}
       >
-        <span className="sr-only">{label ?? "Loading..."}</span>
+        <span className="sr-only">{label ?? "Loading…"}</span>
       </div>
       {label && <p className="text-sm text-[var(--text-muted)] animate-pulse">{label}</p>}
     </div>

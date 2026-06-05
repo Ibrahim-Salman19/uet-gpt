@@ -8,13 +8,10 @@ export const run = internalMutation({
     let isDone = false;
 
     while (!isDone) {
-      const page = await ctx.db
-        .query("documents")
-        .withIndex("by_crawledAt")
-        .paginate({
-          cursor,
-          numItems: 100,
-        });
+      const page = await ctx.db.query("documents").withIndex("by_crawledAt").paginate({
+        cursor,
+        numItems: 100,
+      });
 
       for (const doc of page.page) {
         if (doc.chunksEmbedded === undefined) {

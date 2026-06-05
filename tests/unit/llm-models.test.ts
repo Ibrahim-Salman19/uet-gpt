@@ -5,14 +5,14 @@ import { getModelPriorities } from "../integration/helpers";
 describe("LLM Fallback Chain", () => {
   it("exports a static array with all 4 models in priority order", () => {
     expect(LLM_FALLBACK_CHAIN).toHaveLength(4);
-    expect(LLM_FALLBACK_CHAIN[0].id).toBe("meta-llama/llama-4-scout-17b-16e-instruct");
-    expect(LLM_FALLBACK_CHAIN[0].provider).toBe("groq");
-    expect(LLM_FALLBACK_CHAIN[1].id).toBe("gpt-oss-120b");
-    expect(LLM_FALLBACK_CHAIN[1].provider).toBe("cerebras");
-    expect(LLM_FALLBACK_CHAIN[2].id).toBe("llama-3.1-8b-instant");
-    expect(LLM_FALLBACK_CHAIN[2].provider).toBe("groq");
-    expect(LLM_FALLBACK_CHAIN[3].id).toBe("gemini-2.5-flash");
-    expect(LLM_FALLBACK_CHAIN[3].provider).toBe("google");
+    expect(LLM_FALLBACK_CHAIN[0]!.id).toBe("meta-llama/llama-4-scout-17b-16e-instruct");
+    expect(LLM_FALLBACK_CHAIN[0]!.provider).toBe("groq");
+    expect(LLM_FALLBACK_CHAIN[1]!.id).toBe("gpt-oss-120b");
+    expect(LLM_FALLBACK_CHAIN[1]!.provider).toBe("cerebras");
+    expect(LLM_FALLBACK_CHAIN[2]!.id).toBe("llama-3.1-8b-instant");
+    expect(LLM_FALLBACK_CHAIN[2]!.provider).toBe("groq");
+    expect(LLM_FALLBACK_CHAIN[3]!.id).toBe("gemini-2.5-flash");
+    expect(LLM_FALLBACK_CHAIN[3]!.provider).toBe("google");
   });
 
   it("getModelPriorities includes models whose env vars are set", () => {

@@ -105,7 +105,7 @@ describe("users", () => {
         secret: "test-secret",
       });
 
-      const insertCall = ctx.db.insert.mock.calls[0];
+      const insertCall = ctx.db.insert.mock.calls[0]!;
       expect(insertCall[0]).toBe("users");
       expect(insertCall[1]).not.toHaveProperty("imageUrl");
     });

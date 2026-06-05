@@ -1,8 +1,8 @@
-"use client";
-
-import { useMutation, useQuery } from "convex/react";
-import { useCallback } from "react";
+import { useMutation } from "convex/react";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { api } from "../../convex/_generated/api";
+import { useStableQuery } from "@/hooks/use-stable-query";
 
 interface ThreadItem {
   _id: string;
@@ -11,13 +11,23 @@ interface ThreadItem {
 }
 
 export function useThreads() {
-  const threadsData = useQuery(api.threads.list, {});
+  const threadsData = useStableQuery(api.threads.list, {});
   const createMutation = useMutation(api.threads.create);
   // rename is not in generated api types, so we use a minimal cast
   const renameMutation = useMutation((api.threads as any).rename);
   const deleteMutation = useMutation(api.threads.remove);
 
+  const [error, setError] = useState<string | null>(null);
+  const [loadingTimedOut, setLoadingTimedOut] = useState(false);
+
   const isLoading = threadsData === undefined;
+
+  // Timeout: if threads don't load in 8s, show error state
+  useEffect(() => {
+    if (!isLoading) return;
+    const timer = setTimeout(() => setLoadingTimedOut(true), 8000);
+    return () => clearTimeout(timer);
+  }, [isLoading]);
 
   // Map and sort the Convex threads
   const threads: ThreadItem[] = (threadsData ?? [])
@@ -30,10 +40,13 @@ export function useThreads() {
 
   const handleCreate = useCallback(async () => {
     try {
+      setError(null);
       const threadId = await createMutation({ title: "New Chat" });
       return threadId;
-    } catch (error) {
-      console.error("Failed to create thread:", error);
+    } catch (err) {
+      setError("Failed to create conversation");
+      toast.error("Failed to create conversation");
+      console.error("Failed to create thread:", err);
       return null;
     }
   }, [createMutation]);
@@ -42,8 +55,9 @@ export function useThreads() {
     async (threadId: string) => {
       try {
         await deleteMutation({ id: threadId });
-      } catch (error) {
-        console.error("Failed to delete thread:", error);
+      } catch (err) {
+        toast.error("Failed to delete conversation");
+        console.error("Failed to delete thread:", err);
       }
     },
     [deleteMutation],
@@ -54,8 +68,9 @@ export function useThreads() {
       if (!title.trim()) return;
       try {
         await renameMutation({ id: threadId, title });
-      } catch (error) {
-        console.error("Failed to rename thread:", error);
+      } catch (err) {
+        toast.error("Failed to rename conversation");
+        console.error("Failed to rename thread:", err);
       }
     },
     [renameMutation],
@@ -63,7 +78,8 @@ export function useThreads() {
 
   return {
     threads,
-    isLoading,
+    isLoading: isLoading && !loadingTimedOut,
+    error: error || (loadingTimedOut ? "Unable to load conversations" : null),
     createThread: handleCreate,
     deleteThread: handleDelete,
     renameThread: handleRename,

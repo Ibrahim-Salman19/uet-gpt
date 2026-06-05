@@ -12,7 +12,7 @@ describe("hybridRank (Reciprocal Rank Fusion)", () => {
       { id: "doc_c", score: 0.7 },
     ];
 
-    const fused = hybridRank(vectorRes, textRes);
+    const fused = hybridRank(vectorRes, textRes, 20);
 
     // doc_b is in both, so it should have a higher fused score than doc_a and doc_c
     expect(fused[0]!.id).toBe("doc_b");

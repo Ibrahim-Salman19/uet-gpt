@@ -1,12 +1,12 @@
 "use node";
 
 import { createHmac } from "node:crypto";
+import type { NamespaceId } from "@convex-dev/rag";
 import { ConvexError, v } from "convex/values";
 import { UET_CRAWL_CONFIG } from "../../src/lib/constants";
 import { internal } from "../_generated/api";
 import type { Doc, Id } from "../_generated/dataModel";
 import { internalAction } from "../_generated/server";
-import type { NamespaceId } from "@convex-dev/rag";
 import { rag } from "../rag/instance";
 
 // legacy processWebhookResult removed
@@ -291,14 +291,26 @@ export const embedSingleChunk = internalAction({
         headingPath: args.headingPath,
       });
 
-      return { success: true, ragId: result.entryId, contentHash: args.contentHash, documentId: args.documentId, url: args.url };
+      return {
+        success: true,
+        ragId: result.entryId,
+        contentHash: args.contentHash,
+        documentId: args.documentId,
+        url: args.url,
+      };
     } catch (error: unknown) {
       const err = error as { status?: number; message?: string };
       if (err?.status === 400 || err?.message?.includes("400")) {
         console.error(
           `[EMBED] Malformed chunk skipped for URL ${args.url}: ${err.message || error}`,
         );
-        return { success: false, skipped: true, contentHash: args.contentHash, documentId: args.documentId, url: args.url };
+        return {
+          success: false,
+          skipped: true,
+          contentHash: args.contentHash,
+          documentId: args.documentId,
+          url: args.url,
+        };
       }
 
       // Let other rate-limiting or network errors bubble up to workpool retries

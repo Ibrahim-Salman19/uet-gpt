@@ -6,29 +6,37 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: "html",
+  reporter: [
+    ["html", { outputFolder: "test-results/html" }],
+    ["json", { outputFile: "test-results/results.json" }],
+  ],
   use: {
-    baseURL: "http://127.0.0.1:3000",
+    baseURL: "http://localhost:3000",
     trace: "on-first-retry",
+    screenshot: "only-on-failure",
+    video: "retain-on-failure",
   },
   projects: [
+    // Setup project for Clerk authentication
     {
-      name: "chromium",
+      name: "setup",
+      testMatch: /global\.setup\.ts/,
+    },
+    {
+      name: "Desktop Chrome",
       use: { ...devices["Desktop Chrome"] },
+      dependencies: ["setup"],
     },
     {
-      name: "firefox",
-      use: { ...devices["Desktop Firefox"] },
-    },
-    {
-      name: "webkit",
-      use: { ...devices["Desktop Safari"] },
+      name: "Mobile Chrome",
+      use: { ...devices["Pixel 5"] },
+      dependencies: ["setup"],
     },
   ],
   webServer: {
-    command: "npm run dev",
-    url: "http://127.0.0.1:3000",
-    reuseExistingServer: true,
-    timeout: 120_000,
+    command: "pnpm build && pnpm start", // Test against production build per best practice
+    url: "http://localhost:3000",
+    reuseExistingServer: !process.env.CI,
+    timeout: 120 * 1000,
   },
 });

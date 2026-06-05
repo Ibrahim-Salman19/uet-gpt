@@ -1,8 +1,8 @@
 "use client";
 
 import { UserButton, useUser } from "@clerk/nextjs";
-import { useMutation, useQuery } from "convex/react";
 import { api } from "convex/_generated/api";
+import { useMutation, useQuery } from "convex/react";
 import { ChevronRight, Download, Info, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -37,9 +37,9 @@ function SettingsSection({
   return (
     <div className="py-4">
       <div className="mb-3">
-        <h3 className="text-sm font-medium text-[var(--text-primary)]">{title}</h3>
+        <h3 className="text-xs font-semibold text-zinc-200 tracking-wide uppercase font-sans">{title}</h3>
         {description && (
-          <p className="mt-0.5 text-xs text-[var(--text-secondary)]">{description}</p>
+          <p className="mt-1.5 text-[11px] text-zinc-500 leading-relaxed font-sans">{description}</p>
         )}
       </div>
       {children}
@@ -66,28 +66,25 @@ function RadioOption<T extends string>({
       type="button"
       onClick={() => onChange(value)}
       className={cn(
-        "flex w-full items-center gap-3 rounded-[var(--radius-md)] border px-4 py-3 text-left transition-[border-color,background-color] duration-[var(--duration-fast)]",
+        "flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left transition-all duration-300 cursor-pointer active:scale-[0.99]",
         selected === value
-          ? "border-[var(--accent)] bg-[var(--accent-muted)]/20"
-          : "border-[var(--border)] bg-[var(--surface-card)] hover:border-[var(--accent-muted)]",
+          ? "border-[var(--accent)]/40 bg-[var(--accent)]/5 shadow-[0_4px_20px_rgba(0,0,0,0.2)]"
+          : "border-white/5 bg-[#101012]/40 hover:border-white/10 hover:bg-[#101012]/60",
       )}
     >
       <div
         className={cn(
-          "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition-colors duration-[var(--duration-fast)]",
-          selected === value ? "border-[var(--accent)]" : "border-[var(--border)]",
+          "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition-all duration-300",
+          selected === value ? "border-[var(--accent)] bg-[var(--accent)]/10" : "border-zinc-700 bg-transparent",
         )}
       >
-        {selected === value && <div className="h-2 w-2 rounded-full bg-[var(--accent)]" />}
+        {selected === value && <div className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />}
       </div>
-      <div className="flex-1">
-        <Label
-          htmlFor={id}
-          className="text-sm font-medium text-[var(--text-primary)] cursor-pointer"
-        >
+      <div className="flex-1 min-w-0">
+        <span className="text-xs font-semibold text-zinc-200 block font-sans">
           {label}
-        </Label>
-        <p className="text-xs text-[var(--text-muted)]">{description}</p>
+        </span>
+        <p className="text-[10px] text-zinc-500 font-sans mt-0.5">{description}</p>
       </div>
     </button>
   );
@@ -139,35 +136,35 @@ export default function SettingsPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="border-b border-[var(--border)] bg-[var(--surface-card)] px-6 py-4">
-        <h1 className="text-lg font-semibold text-[var(--text-primary)]">Settings</h1>
-        <p className="text-sm text-[var(--text-secondary)]">Manage your preferences</p>
+      <div className="border-b border-[#222226] bg-[#0a0a0c]/60 backdrop-blur-md px-6 py-5">
+        <h1 className="text-base font-semibold text-zinc-100 font-sans tracking-tight">Settings</h1>
+        <p className="text-xs text-zinc-500 mt-1 font-sans">Manage your application preferences</p>
       </div>
 
-      <ScrollArea className="flex-1">
-        <div className="mx-auto max-w-2xl px-6 py-4">
+      <ScrollArea className="flex-1 bg-transparent">
+        <div className="mx-auto max-w-2xl px-6 py-6 space-y-6">
           <SettingsSection title="Account" description="Manage your profile">
-            <div className="flex items-center gap-3 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface-card)] px-4 py-3">
+            <div className="flex items-center gap-3 rounded-xl border border-white/5 bg-[#101012]/40 backdrop-blur-sm px-4 py-3">
               <UserButton
                 appearance={{
                   elements: {
-                    avatarBox: "h-10 w-10 rounded-[var(--radius-sm)]",
+                    avatarBox: "h-10 w-10 rounded-[10px]",
                   },
                 }}
               />
-              <div className="flex-1">
-                <p className="text-sm font-medium text-[var(--text-primary)]">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-zinc-200 font-sans truncate">
                   {user?.fullName ?? "User"}
                 </p>
-                <p className="text-xs text-[var(--text-muted)]">
+                <p className="text-[10px] text-zinc-500 font-sans truncate mt-0.5">
                   {user?.primaryEmailAddress?.emailAddress ?? ""}
                 </p>
               </div>
-              <ChevronRight className="h-4 w-4 text-[var(--text-muted)]" />
+              <ChevronRight className="h-4 w-4 text-zinc-600" />
             </div>
           </SettingsSection>
 
-          <Separator className="bg-[var(--border)]" />
+          <Separator className="bg-white/5" />
 
           <SettingsSection title="Theme" description="Control how UET GPT looks">
             <div className="flex items-center gap-2">
@@ -175,7 +172,7 @@ export default function SettingsPage() {
             </div>
           </SettingsSection>
 
-          <Separator className="bg-[var(--border)]" />
+          <Separator className="bg-white/5" />
 
           <SettingsSection title="Font Size" description="Adjust the text size in chat messages">
             <div className="flex flex-col gap-2">
@@ -192,7 +189,7 @@ export default function SettingsPage() {
             </div>
           </SettingsSection>
 
-          <Separator className="bg-[var(--border)]" />
+          <Separator className="bg-white/5" />
 
           <SettingsSection title="AI Model" description="Choose the language model for responses">
             <div className="flex flex-col gap-2">
@@ -209,33 +206,37 @@ export default function SettingsPage() {
             </div>
           </SettingsSection>
 
-          <Separator className="bg-[var(--border)]" />
+          <Separator className="bg-white/5" />
 
           <SettingsSection title="Data" description="Export or delete your data">
             <div className="flex flex-col gap-2">
-              <Button variant="outline" className="justify-start gap-2" onClick={handleExport}>
-                <Download className="h-4 w-4" />
-                Export chat history
-              </Button>
-              <Button
-                variant="outline"
-                className="justify-start gap-2 text-[var(--destructive)] hover:text-[var(--destructive)]"
-                onClick={handleDeleteData}
+              <button
+                onClick={handleExport}
+                className="flex w-full items-center gap-2.5 rounded-xl border border-white/5 bg-[#101012]/40 px-4 py-3 text-xs font-semibold text-zinc-300 transition-all duration-300 hover:bg-[#101012]/75 hover:border-white/10 active:scale-[0.98] cursor-pointer font-sans"
               >
-                <Trash2 className="h-4 w-4" />
+                <Download className="h-4 w-4 text-zinc-400" />
+                Export chat history
+              </button>
+              <button
+                onClick={handleDeleteData}
+                className="flex w-full items-center gap-2.5 rounded-xl border border-red-500/10 bg-red-950/5 px-4 py-3 text-xs font-semibold text-red-400 transition-all duration-300 hover:bg-red-950/15 hover:border-red-500/20 active:scale-[0.98] cursor-pointer font-sans"
+              >
+                <Trash2 className="h-4 w-4 text-red-400" />
                 Delete all data
-              </Button>
+              </button>
             </div>
           </SettingsSection>
 
-          <Separator className="bg-[var(--border)]" />
+          <Separator className="bg-white/5" />
 
           <SettingsSection title="About" description="Version and legal information">
-            <div className="flex items-center gap-3 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface-card)] px-4 py-3">
-              <Info className="h-5 w-5 text-[var(--primary)]" />
+            <div className="flex items-center gap-3 rounded-xl border border-white/5 bg-[#101012]/40 backdrop-blur-sm px-4 py-3.5">
+              <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-[var(--accent)]/10 border border-[var(--accent)]/20">
+                <Info className="h-4 w-4 text-[var(--accent)]" />
+              </div>
               <div>
-                <p className="text-sm font-medium text-[var(--text-primary)]">UET GPT v0.1.0</p>
-                <p className="text-xs text-[var(--text-muted)]">Your AI Guide to UET Taxila</p>
+                <p className="text-xs font-semibold text-zinc-200 font-sans">UET GPT v0.1.0</p>
+                <p className="text-[10px] text-zinc-500 font-sans mt-0.5">Your AI Guide to UET Taxila</p>
               </div>
             </div>
           </SettingsSection>

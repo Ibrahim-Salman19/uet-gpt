@@ -6,7 +6,7 @@ import { enforceRateLimit } from "./rateLimit";
 
 // Transform component source format to app format
 function toAppSource(s: Record<string, unknown>) {
-  const opts = s.providerOptions as Record<string, unknown> | undefined;
+  const opts = (s.providerOptions as Record<string, Record<string, unknown>> | undefined)?.meta;
   return {
     documentId: (opts?.documentId as string | undefined) ?? (s.id as string | undefined),
     chunkId: (opts?.chunkId as string) ?? "",
@@ -27,11 +27,14 @@ function toComponentSource(source: Record<string, unknown>) {
     url: source.url as string,
     title: source.title as string | undefined,
     providerOptions: {
-      documentId: source.documentId,
-      chunkId: source.chunkId,
-      relevanceScore: source.relevanceScore,
-      excerpt: source.excerpt,
-      headingPath: source.headingPath,
+      meta: {
+        documentId: source.documentId,
+        chunkId: source.chunkId,
+        entryId: source.entryId,
+        relevanceScore: source.relevanceScore,
+        excerpt: source.excerpt,
+        headingPath: source.headingPath,
+      }
     } as unknown as Record<string, Record<string, unknown>>,
   };
 }

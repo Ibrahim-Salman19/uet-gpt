@@ -21,9 +21,13 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "convex/_generated/api": ["./convex/_generated/api"],
+      "convex/_generated/server": ["./convex/_generated/server"],
+      "convex/_generated/dataModel": ["./convex/_generated/dataModel"]
     },
-    "baseUrl": "."
+    "baseUrl": ".",
+    "ignoreDeprecations": "5.0"
   },
   "include": [
     "next-env.d.ts",

@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { render, screen } from "@testing-library/react";
 import { usePathname } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";

@@ -1,15 +1,15 @@
 "use client";
 
-import { useQuery } from "convex/react";
 import { useEffect, useState } from "react";
 import type { ChatMessage, Source } from "@/lib/types";
 import { api } from "../../convex/_generated/api";
 import { streamRegistry } from "./stream-registry";
+import { useStableQuery } from "@/hooks/use-stable-query";
 
 export function useMessages(threadId: string | undefined) {
   // Query messages from Convex reactively, skip if no threadId
   // The conditional "skip" pattern requires a minimal cast for type compatibility
-  const messagesData = useQuery(
+  const messagesData = useStableQuery(
     (threadId ? api.messages.list : "skip") as any,
     threadId ? { threadId } : "skip",
   );

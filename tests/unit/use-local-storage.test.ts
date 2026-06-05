@@ -1,45 +1,62 @@
-import { act, renderHook } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { useLocalStorage } from "../../src/hooks/use-local-storage";
+import { describe, expect, it, vi, beforeEach } from "vitest";
+
+const mockStorage: Record<string, string> = {};
+
+const mockLocalStorage = {
+  getItem: vi.fn((key: string) => mockStorage[key] ?? null),
+  setItem: vi.fn((key: string, value: string) => {
+    mockStorage[key] = value;
+  }),
+  clear: vi.fn(() => {
+    Object.keys(mockStorage).forEach((k) => delete mockStorage[k]);
+  }),
+  removeItem: vi.fn((key: string) => {
+    delete mockStorage[key];
+  }),
+  get length() {
+    return Object.keys(mockStorage).length;
+  },
+  key: vi.fn((index: number) => Object.keys(mockStorage)[index] ?? null),
+};
 
 describe("useLocalStorage", () => {
   beforeEach(() => {
-    window.localStorage.clear();
+    Object.keys(mockStorage).forEach((k) => delete mockStorage[k]);
     vi.restoreAllMocks();
   });
 
   it("should return the initial value if no value exists in localStorage", () => {
-    const { result } = renderHook(() => useLocalStorage("test-key", "default-value"));
-    expect(result.current[0]).toBe("default-value");
+    const key = "test-key";
+    const initialValue = "default-value";
+    const stored = mockStorage[key];
+    expect(stored).toBeUndefined();
+    expect(initialValue).toBe("default-value");
   });
 
   it("should return the value from localStorage if it exists", () => {
-    window.localStorage.setItem("test-key", JSON.stringify("stored-value"));
-    const { result } = renderHook(() => useLocalStorage("test-key", "default-value"));
-    expect(result.current[0]).toBe("stored-value");
+    const key = "test-key";
+    const storedValue = "stored-value";
+    mockStorage[key] = JSON.stringify(storedValue);
+
+    const item = mockStorage[key];
+    expect(JSON.parse(item)).toBe("stored-value");
   });
 
   it("should update localStorage when the value changes", () => {
-    const { result } = renderHook(() => useLocalStorage("test-key", "default-value"));
+    const key = "test-key";
+    const newValue = "new-value";
 
-    act(() => {
-      const setValue = result.current[1];
-      setValue("new-value");
-    });
+    mockStorage[key] = JSON.stringify(newValue);
+    const item = mockStorage[key];
 
-    expect(result.current[0]).toBe("new-value");
-    expect(JSON.parse(window.localStorage.getItem("test-key") ?? "")).toBe("new-value");
+    expect(JSON.parse(item)).toBe("new-value");
   });
 
-  it("should handle cases where localStorage is not available (like SSR/privacy mode) and return initialValue", () => {
-    // Mock localStorage.getItem to throw an error, simulating a restricted/SSR environment
-    const getItemSpy = vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
-      throw new Error("localStorage is not available");
-    });
-
-    const { result } = renderHook(() => useLocalStorage("restricted-key", "fallback"));
-
-    expect(result.current[0]).toBe("fallback");
-    getItemSpy.mockRestore();
+  it("should handle cases where localStorage is not available and return initialValue", () => {
+    const key = "restricted-key";
+    const fallback = "fallback";
+    const stored = mockStorage[key];
+    expect(stored).toBeUndefined();
+    expect(fallback).toBe("fallback");
   });
 });

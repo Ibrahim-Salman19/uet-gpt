@@ -8,6 +8,8 @@ import { ConvexHttpClient } from "convex/browser";
 import { after, type NextRequest, NextResponse } from "next/server";
 import { getRoleFromClaims, isAdminRole } from "@/lib/clerk-claims";
 import { checkChatRateLimit } from "@/lib/rate-limit";
+import { LLM_FALLBACK_CHAIN } from "@/lib/llm-models";
+
 
 function extractText(message: {
   content?: string;
@@ -23,9 +25,13 @@ function extractText(message: {
   return "";
 }
 
-import { LLM_FALLBACK_CHAIN } from "@/lib/llm-models";
+const MODEL_MAPPING: Record<string, { id: string; provider: string }> = {
+  "llama-4-scout": { id: "meta-llama/llama-4-scout-17b-16e-instruct", provider: "groq" },
+  "llama-3.3-70b": { id: "llama-3.3-70b-versatile", provider: "groq" },
+  "llama-3.1-8b": { id: "llama-3.1-8b-instant", provider: "groq" },
+};
 
-function getAvailableModels(): LanguageModel[] {
+function getAvailableModels(preferredModelKey?: string): LanguageModel[] {
   const groq = createGroq({ apiKey: process.env.GROQ_API_KEY || "" });
   const google = createGoogleGenerativeAI({
     apiKey: process.env.GEMINI_API_KEY || "",
@@ -36,7 +42,13 @@ function getAvailableModels(): LanguageModel[] {
 
   const models: LanguageModel[] = [];
 
-  for (const modelConfig of LLM_FALLBACK_CHAIN) {
+  let chain = [...LLM_FALLBACK_CHAIN];
+  if (preferredModelKey && MODEL_MAPPING[preferredModelKey]) {
+    const preferredConfig = MODEL_MAPPING[preferredModelKey];
+    chain = [preferredConfig, ...LLM_FALLBACK_CHAIN.filter((m) => m.id !== preferredConfig.id)];
+  }
+
+  for (const modelConfig of chain) {
     if (modelConfig.provider === "groq" && process.env.GROQ_API_KEY) {
       models.push(groq(modelConfig.id));
     } else if (modelConfig.provider === "cerebras" && process.env.CEREBRAS_API_KEY) {
@@ -361,13 +373,23 @@ export async function POST(req: NextRequest) {
       return new Response(ragResult.cachedResponse, {
         headers: {
           "Content-Type": "text/plain; charset=utf-8",
-          "X-Sources": JSON.stringify(ragResult.sources),
+          "X-Sources": Buffer.from(JSON.stringify(ragResult.sources)).toString("base64"),
           "X-Intent": ragResult.intent,
         },
       });
     }
 
-    const models = getAvailableModels();
+    let preferredModelKey: string | undefined;
+    try {
+      const userDoc = await convex.query(api.users.getByClerkId, { clerkId: userId });
+      if (userDoc?.preferences?.model) {
+        preferredModelKey = userDoc.preferences.model;
+      }
+    } catch (err) {
+      console.error("Failed to query user preferences from Convex:", err);
+    }
+
+    const models = getAvailableModels(preferredModelKey);
     if (models.length === 0) {
       return NextResponse.json({ error: "No AI providers available" }, { status: 500 });
     }
@@ -405,7 +427,7 @@ export async function POST(req: NextRequest) {
 
     return result.toTextStreamResponse({
       headers: {
-        "X-Sources": JSON.stringify(ragResult.sources),
+        "X-Sources": Buffer.from(JSON.stringify(ragResult.sources)).toString("base64"),
         "X-Intent": ragResult.intent,
       },
     });

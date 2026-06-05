@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { fireEvent, render, screen, act, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -73,6 +74,7 @@ describe("AdminDocumentsPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Mock confirm
+    window.confirm = vi.fn();
     vi.spyOn(window, "confirm").mockReturnValue(true);
   });
 

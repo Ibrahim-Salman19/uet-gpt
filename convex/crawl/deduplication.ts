@@ -6,10 +6,7 @@ import { rag } from "../rag/instance";
 export const findDuplicatesBatch = internalQuery({
   args: { cursor: v.union(v.string(), v.null()) },
   handler: async (ctx, { cursor }) => {
-    return await ctx.db
-      .query("documents")
-      .withIndex("by_url")
-      .paginate({ numItems: 500, cursor });
+    return await ctx.db.query("documents").withIndex("by_url").paginate({ numItems: 500, cursor });
   },
 });
 

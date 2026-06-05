@@ -3,8 +3,9 @@ import { v } from "convex/values";
 export const sourcesValidator = v.optional(
   v.array(
     v.object({
-      documentId: v.string(),
-      chunkId: v.string(),
+      documentId: v.optional(v.string()),
+      chunkId: v.optional(v.string()),
+      entryId: v.optional(v.string()),
       url: v.string(),
       title: v.string(),
       relevanceScore: v.number(),

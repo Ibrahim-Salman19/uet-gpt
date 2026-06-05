@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -43,12 +44,12 @@ describe("AdminLayout", () => {
     vi.mocked(usePathname).mockReturnValue("/admin/crawls");
     const { container } = render(<AdminLayout><div>Content</div></AdminLayout>);
 
-    // The active link should have bg-primary/10 class
+    // The active link should have bg-[var(--accent)]/10 class
     const links = container.querySelectorAll("a");
     const crawlsLink = Array.from(links).find((l) => l.textContent?.includes("Crawls"));
-    expect(crawlsLink?.className).toContain("bg-primary/10");
+    expect(crawlsLink?.className).toContain("bg-[var(--accent)]/10");
     const overviewLink = Array.from(links).find((l) => l.textContent?.includes("Overview"));
-    expect(overviewLink?.className).toContain("text-muted-foreground");
+    expect(overviewLink?.className).toContain("text-zinc-400");
   });
 
   it("renders back to app link", () => {

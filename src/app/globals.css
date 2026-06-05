@@ -35,6 +35,20 @@
 }
 
 :root {
+  /* ── Dark Surface Hierarchy (for chat UI) ── */
+  --surface-0: #050506;  /* Page background */
+  --surface-1: #0a0a0c;  /* Sidebar, overlays */
+  --surface-2: #101012;  /* Cards, chat portal */
+  --surface-3: #18181b;  /* Elevated cards, dropdowns */
+  --surface-4: #222226;  /* Borders, dividers */
+  --surface-5: #2d2d34;  /* Inner borders, active states */
+
+  /* ── Glassmorphism tokens ── */
+  --glass-bg: rgba(16, 16, 18, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-blur: 12px;
+  --glass-highlight: inset 0 1px 1px rgba(255, 255, 255, 0.04);
+
   /* ── Primitive tokens ── */
   --uet-navy-raw: oklch(0.35 0.07 265);
   --uet-gold-raw: oklch(0.68 0.14 75);
@@ -364,3 +378,60 @@
     transform: translateY(0);
   }
 }
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes dropdown-open {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes typing-indicator {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
+}
+
+@utility container-query {
+  container-type: inline-size;
+}
+
+@container (max-width: 240px) {
+  .sidebar-item-label {
+    font-size: 11px;
+  }
+}
+
+/* Global micro-animation kill switch */
+.reduce-micro-animations *,
+.reduce-micro-animations *::before,
+.reduce-micro-animations *::after {
+  animation-duration: 0ms !important;
+  animation-delay: 0ms !important;
+  transition-duration: 0ms !important;
+}
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .chat-input-wrapper {
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  }
+
+  .sidebar-footer {
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+  }
+}
+
+@media (pointer: coarse) {
+  button, [role="button"], a, input[type="submit"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+

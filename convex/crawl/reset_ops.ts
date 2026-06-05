@@ -63,7 +63,10 @@ export const resetPipelineBatch = internalMutation({
       return { deleted, remaining: "more" };
     }
 
-    const webhooks = await ctx.db.query("processedWebhooks").withIndex("by_expiresAt").take(batchSize);
+    const webhooks = await ctx.db
+      .query("processedWebhooks")
+      .withIndex("by_expiresAt")
+      .take(batchSize);
     if (webhooks.length > 0) {
       for (const webhook of webhooks) {
         await ctx.db.delete(webhook._id);

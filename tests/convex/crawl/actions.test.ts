@@ -7,6 +7,7 @@ vi.mock("../../../convex/_generated/api", () => ({
     crawl: {
       workflow: { updateJobState: "updateJobState" as any },
       mutations: { saveEmbedding: "saveEmbedding" as any },
+      queries: { getJobById: "getJobById" as any },
       actions: {},
     },
   },
@@ -35,7 +36,7 @@ describe("executeCrawlJob", () => {
     executeCrawlJob = mod.executeCrawlJob;
     mockCtx = {
       runMutation: vi.fn(),
-      runQuery: vi.fn(),
+      runQuery: vi.fn().mockResolvedValue(null), // getJobById returns null (no crash-recovery state)
       runAction: vi.fn(),
       auth: { getUserIdentity: vi.fn() },
     };
@@ -72,9 +73,13 @@ describe("executeCrawlJob", () => {
 
     await (executeCrawlJob as any).handler(mockCtx, { jobId: "job123" });
 
-    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
-    const [url, options] = (globalThis.fetch as any).mock.calls[0];
-    expect(url).toBe("http://crawl4ai:8000/crawl");
+    // fetch is called at least twice: once for sitemap pre-seeding, once for the crawl API
+    const crawlCall = (globalThis.fetch as any).mock.calls.find(
+      (c: any[]) => c[0].includes("/crawl/job")
+    );
+    expect(crawlCall).toBeDefined();
+    const [url, options] = crawlCall;
+    expect(url).toBe("http://crawl4ai:8000/crawl/job");
     expect(options.method).toBe("POST");
     const body = JSON.parse(options.body);
     expect(body.urls).toBeDefined();
@@ -204,8 +209,12 @@ describe("executeCrawlJob", () => {
 
     await (executeCrawlJob as any).handler(mockCtx, { jobId: "job123" });
 
-    const [url] = (globalThis.fetch as any).mock.calls[0];
-    expect(url).toBe("http://crawl4ai:8000/crawl");
+    // Sitemap fetch happens first, then the actual crawl API call
+    const crawlJobCall = (globalThis.fetch as any).mock.calls.find(
+      (c: any[]) => c[0].includes("/crawl/job"),
+    );
+    expect(crawlJobCall).toBeDefined();
+    expect(crawlJobCall[0]).toBe("http://crawl4ai:8000/crawl/job");
   });
 });
 
@@ -241,6 +250,7 @@ describe("embedSingleChunk", () => {
     contentHash: "hash-chunk-1",
     jobId: "job-123",
     parentText: "Parent text block for context.",
+    namespaceId: "mock-namespace-id",
   };
 
   it("calls rag.add with correct parameters on success", async () => {
@@ -249,11 +259,11 @@ describe("embedSingleChunk", () => {
 
     const result = await (embedSingleChunk as any).handler(mockCtx, defaultArgs);
 
-    expect(result).toEqual({ success: true, ragId: "rag-entry-1" });
+    expect(result).toEqual(expect.objectContaining({ success: true, ragId: "rag-entry-1" }));
     expect(ragModule.rag.add).toHaveBeenCalledWith(
       mockCtx,
       expect.objectContaining({
-        namespace: "uet-global",
+        namespaceId: "mock-namespace-id",
         text: defaultArgs.chunkText,
       }),
     );
@@ -284,7 +294,7 @@ describe("embedSingleChunk", () => {
 
     const result = await (embedSingleChunk as any).handler(mockCtx, defaultArgs);
 
-    expect(result).toEqual({ success: false, skipped: true });
+    expect(result).toEqual(expect.objectContaining({ success: false, skipped: true }));
     expect(mockCtx.runMutation).not.toHaveBeenCalled();
   });
 

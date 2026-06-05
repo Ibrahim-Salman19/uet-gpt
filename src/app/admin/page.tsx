@@ -4,9 +4,9 @@ import { api } from "convex/_generated/api";
 import { useQuery } from "convex/react";
 import { Activity, Database, FileText, Globe, ThumbsDown, ThumbsUp, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 interface StatCardProps {
   title: string;
@@ -18,54 +18,54 @@ interface StatCardProps {
 
 function StatCard({ title, value, description, icon, trend }: StatCardProps) {
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-        <div className="h-4 w-4 text-muted-foreground">{icon}</div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-        {(description || trend) && (
-          <div className="flex items-center gap-2 mt-1">
-            {description && <p className="text-xs text-muted-foreground">{description}</p>}
-            {trend && (
-              <span className={trend.positive ? "text-xs text-green-500" : "text-xs text-red-500"}>
-                {trend.value}
-              </span>
-            )}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+    <div className="rounded-xl border border-white/5 bg-[#101012]/40 backdrop-blur-sm p-5 hover:border-[var(--accent)]/30 hover:bg-[#101012]/60 transition-all duration-300">
+      <div className="flex items-center justify-between gap-4">
+        <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider font-sans">{title}</span>
+        <div className="text-zinc-500 shrink-0">{icon}</div>
+      </div>
+      <div className="mt-3 text-3xl font-bold text-zinc-100 tracking-tight font-mono">{value}</div>
+      {(description || trend) && (
+        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+          {description && <span className="text-[10px] text-zinc-500 font-sans">{description}</span>}
+          {trend && (
+            <span className={cn(
+              "text-[10px] font-semibold px-2 py-0.5 rounded-full border font-mono",
+              trend.positive 
+                ? "text-emerald-400 bg-emerald-500/5 border-emerald-500/10" 
+                : "text-red-400 bg-red-500/5 border-red-500/10"
+            )}>
+              {trend.value}
+            </span>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
 export default function AdminOverviewPage() {
-  const stats = useQuery(api.admin.stats.dashboardStats);
+  const stats = useQuery(api.admin.stats.dashboardStats, {});
 
   if (stats === undefined) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 stagger-enter">
         {Array.from({ length: 8 }).map((_, i) => (
           // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton list
-          <Card key={i}>
-            <CardHeader className="pb-2">
-              <Skeleton className="h-4 w-24" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-8 w-16" />
-            </CardContent>
-          </Card>
+          <div key={i} className="rounded-xl border border-white/5 bg-[#101012]/40 backdrop-blur-sm p-5 space-y-3">
+            <Skeleton className="h-4 w-24 rounded-md" />
+            <Skeleton className="h-8 w-16 rounded-md" />
+          </div>
         ))}
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold tracking-tight">Overview</h2>
+    <div className="space-y-6 animate-[slide-up_0.3s_ease-[var(--ease-out-expo)]_both]">
+      <div className="flex items-center justify-between pb-2">
+        <h2 className="text-base font-semibold text-zinc-100 font-sans tracking-tight">Overview</h2>
       </div>
+
       {/* Primary Stats */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
@@ -119,18 +119,18 @@ export default function AdminOverviewPage() {
 
       {/* Document Status Breakdown */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Document Status</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
+        <div className="border border-white/5 rounded-2xl bg-[#101012]/40 backdrop-blur-sm p-6">
+          <div className="mb-4 pb-3 border-b border-white/5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 font-sans">Document Status</h3>
+          </div>
+          <div>
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Indexed</span>
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-32 rounded-full bg-secondary overflow-hidden">
+                <span className="text-xs text-zinc-400 font-sans">Indexed</span>
+                <div className="flex items-center gap-3">
+                  <div className="h-1.5 w-32 rounded-full bg-zinc-900 overflow-hidden border border-white/5">
                     <div
-                      className="h-full rounded-full bg-green-500 transition-all"
+                      className="h-full rounded-full bg-emerald-500 transition-all duration-500"
                       style={{
                         width: `${
                           stats.totalDocuments > 0
@@ -140,17 +140,17 @@ export default function AdminOverviewPage() {
                       }}
                     />
                   </div>
-                  <span className="text-sm font-medium w-8 text-right">
+                  <span className="text-xs font-bold font-mono text-zinc-300 w-8 text-right">
                     {stats.indexedDocuments}
                   </span>
                 </div>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Pending</span>
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-32 rounded-full bg-secondary overflow-hidden">
+                <span className="text-xs text-zinc-400 font-sans">Pending</span>
+                <div className="flex items-center gap-3">
+                  <div className="h-1.5 w-32 rounded-full bg-zinc-900 overflow-hidden border border-white/5">
                     <div
-                      className="h-full rounded-full bg-yellow-500 transition-all"
+                      className="h-full rounded-full bg-amber-500 transition-all duration-500"
                       style={{
                         width: `${
                           stats.totalDocuments > 0
@@ -160,17 +160,17 @@ export default function AdminOverviewPage() {
                       }}
                     />
                   </div>
-                  <span className="text-sm font-medium w-8 text-right">
+                  <span className="text-xs font-bold font-mono text-zinc-300 w-8 text-right">
                     {stats.pendingDocuments}
                   </span>
                 </div>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Failed</span>
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-32 rounded-full bg-secondary overflow-hidden">
+                <span className="text-xs text-zinc-400 font-sans">Failed</span>
+                <div className="flex items-center gap-3">
+                  <div className="h-1.5 w-32 rounded-full bg-zinc-900 overflow-hidden border border-white/5">
                     <div
-                      className="h-full rounded-full bg-red-500 transition-all"
+                      className="h-full rounded-full bg-red-500 transition-all duration-500"
                       style={{
                         width: `${
                           stats.totalDocuments > 0
@@ -180,44 +180,45 @@ export default function AdminOverviewPage() {
                       }}
                     />
                   </div>
-                  <span className="text-sm font-medium w-8 text-right">
+                  <span className="text-xs font-bold font-mono text-zinc-300 w-8 text-right">
                     {stats.failedDocuments}
                   </span>
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Recent Crawls */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Recent Crawl Jobs</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="border border-white/5 rounded-2xl bg-[#101012]/40 backdrop-blur-sm p-6">
+          <div className="mb-4 pb-3 border-b border-white/5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 font-sans">Recent Crawl Jobs</h3>
+          </div>
+          <div>
             {stats.recentCrawls.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No crawl jobs yet</p>
+              <p className="text-xs text-zinc-500 py-6 text-center font-sans">No crawl jobs yet</p>
             ) : (
               <ScrollArea className="h-[140px]">
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {stats.recentCrawls.map((crawl: any) => (
                     <div key={crawl._id} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Badge
-                          variant={
+                          variant="outline"
+                          className={cn(
+                            "text-[9px] font-mono py-0.5 px-2 uppercase rounded-md border",
                             crawl.status === "completed"
-                              ? "default"
+                              ? "text-emerald-400 bg-emerald-500/5 border-emerald-500/10"
                               : crawl.status === "failed"
-                                ? "destructive"
-                                : "secondary"
-                          }
-                          className="text-xs"
+                                ? "text-red-400 bg-red-500/5 border-red-500/10"
+                                : "text-zinc-400 bg-zinc-900/60 border-white/5"
+                          )}
                         >
                           {crawl.status}
                         </Badge>
-                        <span className="text-xs text-muted-foreground">{crawl.trigger}</span>
+                        <span className="text-xs text-zinc-400 font-sans">{crawl.trigger}</span>
                       </div>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-[10px] text-zinc-500 font-sans">
                         {new Date(crawl.startedAt).toLocaleDateString()}
                       </span>
                     </div>
@@ -225,46 +226,46 @@ export default function AdminOverviewPage() {
                 </div>
               </ScrollArea>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       {/* Recent Feedback */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm">Recent Feedback</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className="border border-white/5 rounded-2xl bg-[#101012]/40 backdrop-blur-sm p-6">
+        <div className="mb-4 pb-3 border-b border-white/5">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 font-sans">Recent Feedback</h3>
+        </div>
+        <div>
           {stats.recentFeedback.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No feedback yet</p>
+            <p className="text-xs text-zinc-500 py-6 text-center font-sans">No feedback yet</p>
           ) : (
             <div className="space-y-2">
               {stats.recentFeedback.map((fb: any) => (
                 <div
                   key={fb._id}
-                  className="flex items-center justify-between rounded-lg border p-3"
+                  className="flex items-center justify-between rounded-xl border border-white/5 bg-zinc-950/20 px-4 py-3"
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     {fb.rating === "thumbsUp" ? (
-                      <ThumbsUp className="h-4 w-4 text-green-500" />
+                      <ThumbsUp className="h-3.5 w-3.5 text-emerald-400" />
                     ) : (
-                      <ThumbsDown className="h-4 w-4 text-red-500" />
+                      <ThumbsDown className="h-3.5 w-3.5 text-red-400" />
                     )}
                     {fb.category && (
-                      <Badge variant="outline" className="text-xs">
+                      <Badge variant="outline" className="text-[9px] uppercase tracking-wider bg-zinc-900/60 text-zinc-400 border border-white/5 font-mono py-0.5 px-2">
                         {fb.category}
                       </Badge>
                     )}
                   </div>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-[10px] text-zinc-500 font-sans">
                     {new Date(fb.createdAt).toLocaleString()}
                   </span>
                 </div>
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

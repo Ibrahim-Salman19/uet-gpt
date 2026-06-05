@@ -15,6 +15,7 @@ const cacheEntryValidator = v.object({
       title: v.string(),
       relevanceScore: v.number(),
       excerpt: v.string(),
+      headingPath: v.optional(v.array(v.string())),
     }),
   ),
   model: v.string(),

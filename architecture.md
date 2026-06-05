@@ -19,9 +19,9 @@ UET Taxila GPT is an autonomous RAG pipeline chatbot for UET Taxila. It answers 
 | **Backend** | Convex (cloud-hosted real-time DB + serverless functions) |
 | **Auth** | Clerk (`@clerk/nextjs` v7.3.7) — session management, RBAC (user/admin/superadmin) |
 | **LLM Orchestration** | Vercel AI SDK (`ai` v6, `@ai-sdk/react`, `@ai-sdk/groq`, `@ai-sdk/google`, `@ai-sdk/cerebras`) |
-| **Vector DB** | Convex native `vectorIndex` (3072 dimensions for semantic cache, searched via `ctx.vectorSearch`) |
-| **Caching** | Upstash Redis (`@upstash/ratelimit` + `@upstash/redis`) + Convex `semanticCache` table with cosine similarity |
-| **Crawler** | Crawl4AI local Flask instance → Convex webhooks |
+| **Vector DB** | Convex native `vectorIndex` (3072 dimensions for semantic cache and RAG) |
+| **Caching** | Convex `semanticCache` table with cosine similarity + Upstash Redis (`@upstash/ratelimit`) |
+| **Crawler** | Python async BFS (`curl_cffi`, `trafilatura`) → POST `/ingest` (primary). Also supports external crawl4AI service → POST `/api/webhook/crawl` (secondary). |
 | **RAG** | `@convex-dev/rag` (embedding, indexing, retrieval), `@convex-dev/agent` (agent framework) |
 | **Workflow** | `@convex-dev/workflow` + `@convex-dev/workpool` (async task orchestration) |
 | **Monitoring** | Sentry (`@sentry/nextjs` v10) |
@@ -36,90 +36,116 @@ UET Taxila GPT is an autonomous RAG pipeline chatbot for UET Taxila. It answers 
 ├── convex/                          # Convex backend (serverless functions)
 │   ├── _generated/                  # Auto-generated API bindings
 │   ├── admin/                       # Admin dashboard queries/mutations
+│   │   ├── settings.ts              #   getSettings, upsertSetting, resetSettings
+│   │   └── stats.ts                 #   dashboardStats, deleteDocument, deleteFeedback
 │   ├── cache/                       # Semantic cache
-│   │   ├── get.ts                   #   Cache lookup (vector search + threshold)
-│   │   ├── set.ts                   #   Cache write
-│   │   ├── cache-mutations.ts       #   Write path mutations
-│   │   ├── cache-queries.ts         #   Read path queries
-│   │   ├── internal_mutations.ts    #   Internal cleanup mutations
-│   │   └── internal_queries.ts      #   Internal cleanup queries (expiry, hits)
-│   ├── crawl/                       # Crawl pipeline
-│   │   ├── webhook.ts               #   HTTP action: crawl + ingest endpoints, chunkMarkdown()
-│   │   ├── actions.ts               #   embedSingleChunk + query handler
-│   │   ├── mutations.ts             #   Core data logic (queue, save, mark, purge, DLQ)
-│   │   ├── queries.ts               #   Full-text search queries
-│   │   ├── tasks.ts                 #   Scheduled tasks (cleanupExpiredCache, aggregateDailyStats)
-│   │   └── jobs.ts                  #   Job definitions
-│   ├── doc/                         # Document management
+│   │   ├── get.ts                   #   Cache lookup (vector search + cosine threshold)
+│   │   ├── set.ts                   #   Cache write (TTL tiers, sourceEntryIds)
+│   │   └── internal_queries.ts      #   getCacheEntry, incrementHits, getDocByEntryId, cleanupExpired
+│   ├── crawl/                       # Crawl pipeline (17 files)
+│   │   ├── webhook.ts               #   HTTP actions: crawlWebhook, ingestWebhook, resetWebhook
+│   │   ├── actions.ts               #   executeCrawlJob, embedSingleChunk, resetPipelineAction, runDeduplication
+│   │   ├── mutations.ts             #   queueChunksForEmbedding, saveEmbedding, onChunkEmbedded, retryDLQ, upsert, enqueue
+│   │   ├── queries.ts               #   fullTextSearch, getDocumentCountByStatus, getRecentDocs, searchByUrl, etc.
+│   │   ├── tasks.ts                 #   cleanupExpiredCache, aggregateDailyStats
+│   │   ├── jobs.ts                  #   cleanupOldRecords (abandoned DLQ + old crawl jobs)
+│   │   ├── workflow.ts              #   kickoffDailyCrawl, updateJobState, completeJobByTaskId, failStuckJobs
+│   │   ├── trigger.ts               #   Manual crawl trigger (admin mutation)
+│   │   ├── backfill.ts              #   Backfill chunksEmbedded counter
+│   │   ├── deduplication.ts         #   findDuplicatesBatch, deleteDuplicateDocuments
+│   │   ├── staleness.ts             #   markStaleDocuments, purgeStaleDocuments, flagExpiredDocuments
+│   │   ├── reset.ts                 #   resetDLQ (admin mutation)
+│   │   ├── reset_ops.ts             #   resetPipelineBatch, reembedPendingBatch, resetAbandonedDLQ, resetFailedDocuments
+│   │   ├── chunking.ts              #   chunkMarkdown, guardChunkSize, normalizeContent, assignFreshnessTier, canonicalizeUrl
+│   │   ├── workpools.ts             #   embeddingPool (maxParallelism:3), crawlPool (maxParallelism:3)
+│   │   ├── status.ts                #   Crawl job status query (admin)
+│   │   └── list.ts                  #   Recent crawl jobs list (admin)
+│   ├── doc/                         # Document CRUD (create, get, list, remove, search via index.ts)
+│   │   ├── index.ts                 #   Re-exports all doc operations
+│   │   ├── validator.ts             #   documentValidator type definition
+│   │   ├── create.ts
+│   │   ├── get.ts
+│   │   ├── list.ts
+│   │   ├── remove.ts
+│   │   └── search.ts
 │   ├── embeddings/                  # Embedding generation
 │   │   ├── generate.ts              #   Gemini API embedding (key rotation, retry, batch)
-│   │   └── search.ts                #   Hybrid search (vector + BM25 + RRF)
-│   ├── eval/                        # Evaluation helpers
-│   ├── faq.ts                       # FAQ search/create/expiry
+│   │   ├── search.ts                #   Hybrid search (vector + BM25 + RRF + freshness decay + FAQ boost)
+│   │   └── doc_queries.ts           #   getDocumentByEntryId (internal query for metadata enrichment)
+│   ├── eval.ts                      #   getChunksByRagIds, evaluateSearch
+│   ├── faq.ts                       #   addFaq, removeFaq, listFaqs, searchFaqs
 │   ├── feedback/                    # Feedback submission
+│   │   ├── submit.ts                #   submit mutation (dedup, auth-guarded)
+│   │   └── list.ts                  #   list query (admin sees all, user sees own)
 │   ├── messages/                    # Message handling
+│   │   └── validator.ts             #   messageValidator, sourcesValidator, tokenCountValidator types
+│   ├── messages.ts                  #   insert, list (agent component wrappers)
 │   ├── people/                      # People data
+│   │   └── queries.ts               #   getCount (faculty/admin/staff classification)
 │   ├── rag/                         # RAG pipeline
+│   │   ├── instance.ts              #   rag singleton (3072d, resilient embedding model)
 │   │   ├── retrieval.ts             #   Orchestrator: classify → rewrite → HyDE → embed → cache → search → rerank → context
-│   │   ├── context.ts               #   Sandwich strategy context assembly
-│   │   └── routing.ts               #   Intent classification, query rewriting, HyDE generation
-│   ├── reranking/                   # Reranking logic (FlashRank)
-│   ├── threads/                     # Thread management
+│   │   ├── context.ts               #   Sandwich strategy context assembly (internalQuery)
+│   │   ├── routing.ts               #   Intent classification, query rewriting, HyDE generation (Groq LLM)
+│   │   ├── prompts.ts               #   SYSTEM_PROMPT template + FEW_SHOT_EXAMPLES
+│   │   └── testing.ts               #   insertTestChunk, seed, verify
+│   ├── rateLimit.ts                 #   Native Convex sliding-window rate limiter (10 msg/user/min, 100K tokens/global/min)
+│   ├── reranking/                   # Reranking (external FlashRank endpoint or fallback)
+│   │   └── rerank.ts                #   rerank action (POSTs to RERANKER_URL)
+│   ├── threads.ts                   #   create, list, rename, remove, purgeOldArchived
 │   ├── users/                       # User management
-│   ├── auth.config.ts               # Clerk JWT issuer config for Convex auth
-│   ├── auth.ts                      # Auth helpers (getUserId, isAdmin, isAuthenticated)
-│   ├── constants.ts                 # Shared constants (CACHE_SIMILARITY_THRESHOLD = 0.92)
-│   ├── convex.config.ts             # Convex app config (RAG, agent, workpool, workflow components)
-│   ├── crons.ts                     # 5 scheduled cron jobs
-│   ├── http.ts                      # HTTP router (crawl + ingest webhook endpoints)
-│   ├── messages.ts                  # Message actions
-│   ├── rateLimit.ts                 # Native Convex sliding-window rate limiter
-│   ├── schema.ts                    # DATABASE SCHEMA (11 tables, plus 2 component-managed)
-│   └── threads.ts                   # Thread actions
+│   ├── auth.config.ts               #   Clerk JWT issuer config for Convex auth
+│   ├── auth.ts                      #   Auth helpers: getUserId, isAuthenticated, isAdmin, requireAuth, requireAdmin
+│   ├── constants.ts                 #   CACHE_SIMILARITY_THRESHOLD = 0.92
+│   ├── convex.config.ts             #   Convex app config (RAG, agent, workpool, workflow components)
+│   ├── crons.ts                     #   7 scheduled cron jobs
+│   ├── http.ts                      #   HTTP router (3 routes: crawl, ingest, reset)
+│   ├── lib/db_helpers.ts            #   fastCount (thin wrapper around internal .count() API)
+│   ├── emergencyStop.ts             #   stopAll / stopBatch — drains in-flight processing jobs
+│   ├── schema.ts                    #   DATABASE SCHEMA (15 tables, plus 2 component-managed)
+│   └── threads.ts                   #   Thread actions
 ├── src/
 │   ├── app/                         # Next.js App Router pages
-│   │   ├── admin/                   # Admin dashboard (stats, documents, crawls, settings, feedback)
+│   │   ├── (main)/                  # Main app layout (chat, settings, explore)
+│   │   ├── admin/                   # Admin dashboard (overview, documents, crawls, settings, feedback)
 │   │   ├── api/                     # API routes (chat, health, cron, webhooks)
-│   │   └── auth/                    # Auth pages (login)
+│   │   └── globals.css              # Global Tailwind styles
 │   ├── components/                  # React components
-│   │   ├── chat/                    # ChatWindow, ChatMessageBubble, ChatInput, StreamingMessage, SourceList
-│   │   ├── sidebar/                 # Sidebar, SidebarHistory, NewChatButton
-│   │   ├── admin/                   # Admin UI components
-│   │   └── shared/                  # ThemeProvider, ErrorBoundary, LoadingState, SourceCard, ChatSuggestions
-│   ├── hooks/                       # Custom React hooks
+│   │   ├── chat/                    # ChatWindow, ChatMessageBubble, ChatInput, ChatMessages, ChatSuggestions, SourceList, SourceCard, MessageActions
+│   │   └── markdown.tsx             # Markdown renderer
+│   ├── hooks/                       # Custom React hooks (use-messages)
 │   ├── lib/                         # Shared utilities
-│   │   ├── llm-models.ts            #   LLM fallback chain definition
-│   │   └── rate-limit.ts            #   Upstash Redis rate limit client
-│   ├── providers/                   # React context providers
+│   │   ├── constants.ts             #   UET_CRAWL_CONFIG (seed URLs, paths), design tokens
+│   │   ├── llm-models.ts            #   LLM_FALLBACK_CHAIN definition
+│   │   └── rate-limit.ts            #   Upstash Redis rate limit client (admin=200/hr, user=50/hr, anon=10/hr)
 │   ├── middleware.ts                 # Next.js middleware (Clerk auth, CSP headers, route protection)
 │   └── instrumentation.ts           # Sentry instrumentation
 ├── scripts/                         # Python crawler + admin scripts
-│   ├── crawler.py                   # Async BFS crawler (curl_cffi, trafilatura)
-│   ├── ingest_pdf.py                # PDF ingestion (pymupdf4llm + Gemini VLM fallback)
-│   ├── eval/                        # RAG evaluation harness
-│   │   ├── golden_set.jsonl         #   75 QA pairs across categories
-│   │   └── run_eval.py              #   Evaluation runner (recall_at_k, fragment_hit_rate)
-│   └── admin/                       # Convex admin scripts (stale cleanup, DLQ)
+│   ├── crawler.py                   # Async BFS crawler (curl_cffi, trafilatura, markdownify) — pushes to /ingest
+│   ├── ingest_pdf.py                # PDF ingestion (pymupdf4llm primary, Gemini VLM fallback)
+│   ├── run_agent.sh                 # Cron entry point for Antigravity 2.0 (agy CLI)
+│   ├── boot_lock.ps1                # Windows lock file for boot safety
+│   └── eval/
+│       ├── golden_set.jsonl         #   75 QA pairs across categories
+│       └── run_eval.py              #   Evaluation runner (recall_at_k, fragment_hit_rate)
 ├── tests/
-│   ├── convex/                      # Convex function tests (webhook, users, tasks, mutations)
-│   ├── unit/                        # Unit tests (admin, components, utils, rate-limit, llm-models)
+│   ├── convex/                      # Convex function tests (webhook, users, tasks, mutations, actions)
+│   ├── unit/                        # Unit tests (admin, components, utils, rate-limit, llm-models, etc.)
 │   ├── integration/                 # Integration tests (chat API, RAG pipeline, embeddings, webhook)
-│   ├── e2e/                         # Playwright E2E tests (4 files, minimal coverage)
-│   ├── helpers/                     # Test utilities (convex-mock.ts)
+│   ├── e2e/                         # Playwright E2E tests
+│   ├── helpers/                     # Test utilities (convex-mock.ts, README.md)
 │   ├── load-test.ts                 # Load test (not CI-integrated)
 │   └── setup.ts                     # Test setup (jest-dom, global fetch mock)
 ├── docs/
-│   ├── anti-pattern-audit-report.md # 24 test anti-patterns across 16 files
-│   ├── chunking-strategy.md
+│   ├── anti-pattern-audit-report.md # Test anti-pattern audit
+│   ├── chunking-strategy.md         # Note: dimension 768 listed here is OUTDATED — actual is 3072
 │   ├── crawling-strategy.md
 │   ├── deployment.md
 │   ├── embedding-strategy.md
 │   ├── evaluation.md
 │   ├── rag-pipeline.md
 │   └── security.md
-├── testing.md                       # Master testing plan (12 phases)
-├── vitest.config.ts                 # Vitest config (node env, alias)
-├── playwright.config.ts             # Playwright config (Chromium/Firefox/WebKit)
+├── testing.md                       # Master testing plan
 ├── AGENTS.md                        # Agent instructions (prepended to every prompt)
 ├── CRONJOB.md                       # Hourly autonomous maintenance protocol
 ├── TODO.md                          # Task queue
@@ -152,7 +178,7 @@ The schema is defined in `convex/schema.ts`. Tables `threads` and `messages` are
 
 | Field | Type | Notes |
 |-------|------|-------|
-| `messageId` | `string` | Indexed: `by_messageId` |
+| `messageId` | `string` | Indexed: `by_messageId` (references agent-managed message IDs) |
 | `userId` | `Id<"users">` | Indexed: `by_userId` |
 | `rating` | `"thumbsUp" \| "thumbsDown"` | Indexed: `by_rating` |
 | `comment` | `string?` | |
@@ -166,7 +192,7 @@ The schema is defined in `convex/schema.ts`. Tables `threads` and `messages` are
 | `trigger` | `"manual" \| "scheduled" \| "webhook"` | Indexed: `by_trigger` |
 | `startedBy` | `Id<"users">?` | |
 | `status` | `"pending" \| "running" \| "completed" \| "failed" \| "cancelled"` | Indexed: `by_status` |
-| `providerJobId` | `string?` | Indexed: `by_providerJobId` |
+| `providerJobId` | `string?` | External crawl4AI task ID — Indexed: `by_providerJobId` |
 | `config` | `{ maxPages, maxDepth, includePaths, excludePaths, allowExternalLinks }` | |
 | `stats` | `{ totalPages, successfulPages, failedPages, skippedPages, totalChunks, totalTokens, bytesProcessed }` | |
 | `error` | `string?` | |
@@ -188,6 +214,7 @@ The schema is defined in `convex/schema.ts`. Tables `threads` and `messages` are
 | `expiresAt` | `number` | Indexed: `by_expiresAt` |
 | `createdAt` | `number` | |
 | `embeddingModel` | `string?` | |
+| `sourceEntryIds` | `string[]?` | R-5: Source re-index invalidation |
 
 ### 4.5 `adminAuditLog`
 
@@ -220,15 +247,16 @@ Actions: `user.login`, `user.logout`, `user.create`, `thread.create`, `thread.de
 |-------|------|-------|
 | `url` | `string` | Indexed: `by_url` |
 | `title` | `string` | searchIndex: `search_title` |
-| `entryId` | `string?` | Indexed: `by_entryId` |
-| `contentHash` | `string?` | |
+| `entryId` | `string?` | RAG entry ID — Indexed: `by_entryId` |
+| `contentHash` | `string?` | SHA-256 — Indexed: `by_contentHash` |
 | `crawlSessionId` | `string?` | Indexed: `by_session` |
-| `source` | `string` | |
-| `category` | `string` | Indexed: `by_category` |
+| `source` | `string` | Hostname or `"pdf"` — Indexed: `by_source_category` |
+| `category` | `string` | Typically `"crawled"` — Indexed: `by_category` |
 | `subcategory` | `string?` | |
 | `metadata` | `{ lastModified?, author?, wordCount?, language?, etag?, sourceType? }` | |
 | `status` | `"pending" \| "processing" \| "indexed" \| "failed" \| "stale" \| "active" \| "pending_embed"` | Indexed: `by_status` |
-| `chunkCount` | `number?` | |
+| `chunkCount` | `number?` | Total chunks produced |
+| `chunksEmbedded` | `number?` | Actual count of successfully embedded chunks |
 | `crawledAt` | `number` | Indexed: `by_crawledAt` |
 | `updatedAt` | `number` | |
 | `error` | `string?` | |
@@ -243,7 +271,7 @@ Dedup table for idempotency.
 |-------|------|-------|
 | `jobId` | `string` | Indexed: `by_jobId` |
 | `processedAt` | `number` | |
-| `expiresAt` | `number` | Indexed: `by_expiresAt` |
+| `expiresAt` | `number` | Indexed: `by_expiresAt` (30-day TTL) |
 
 ### 4.9 `crawlDeadLetter`
 
@@ -252,7 +280,7 @@ Dedup table for idempotency.
 | `url` | `string` | |
 | `jobId` | `string` | Indexed: `by_jobId_and_url` |
 | `failureReason` | `string` | |
-| `failureCount` | `number` | |
+| `failureCount` | `number` | Max 5 before `"abandoned"` |
 | `lastAttemptAt` | `number` | |
 | `payload` | `any` | |
 | `status` | `"pending_retry" \| "abandoned" \| "processing" \| "indexed"` | Indexed: `by_status` |
@@ -261,12 +289,13 @@ Dedup table for idempotency.
 
 | Field | Type | Notes |
 |-------|------|-------|
-| `documentId` | `Id<"documents">` | Indexed: `by_documentId` |
+| `documentId` | `Id<"documents">` | Indexed: `by_documentId`, compound: `by_documentId_and_contentHash` |
 | `contentHash` | `string` | |
 | `text` | `string` | searchIndex: `search_text` |
-| `ragId` | `string` | Indexed: `by_ragId` |
-| `embeddingModel` | `string?` | |
+| `ragId` | `string` | RAG component entry ID — Indexed: `by_ragId` |
+| `embeddingModel` | `string?` | e.g. `"gemini-embedding-2"` |
 | `parentText` | `string?` | Parent-child chunking context |
+| `headingPath` | `string[]?` | Section heading hierarchy |
 
 ### 4.11 `crawlStats`
 
@@ -318,22 +347,23 @@ Convex-native sliding window rate limiter state.
 
 ## 5. RAG Pipeline
 
-The RAG pipeline is orchestrated by `convex/rag/retrieval.ts:retrieveContext` (a Convex action).
+The RAG pipeline is orchestrated by `convex/rag/retrieval.ts:retrieveContext` (a Convex action). The RAG component instance is initialized in `convex/rag/instance.ts` with `embeddingDimension: 3072`, custom resilient embedding model wrapping Gemini, and filter names `["category", "source"]`. RAG namespace: `"uet-global"`.
 
 ### 5.1 Pipeline Stages
 
 | # | Stage | File | Description |
 |---|-------|------|-------------|
-| 1 | **Intent Classification** | `rag/routing.ts:classifyQueryAction` | LLM classifies as `admissions`, `academic`, `administrative`, `campus_life`, `general`, `off_topic`, `simple_fact`. Off-topic → short-circuit with refusal. |
-| 2 | **Query Rewriting** | `rag/routing.ts:rewriteQueryAction` | Keyword-rich expansion, Roman Urdu → English translation, abbreviation expansion. |
-| 3 | **HyDE** | `rag/routing.ts:hydeQueryAction` | Hypothetical document generation for queries < 15 words. |
-| 4 | **Embedding** | `embeddings/generate.ts:generate` | Gemini `gemini-embedding-2`, 3072 dimensions. Key rotation across 4 env vars. Batch API for ≥2 texts. 3× retry with exponential backoff. |
-| 5 | **Semantic Cache** | `cache/get.ts:get` | Cosine similarity via manual vector search loop at threshold **0.92** (from `constants.ts`). Hit → return cached response + source list; increment hit counter. |
-| 6 | **Hybrid Search** | `embeddings/search.ts:searchDocumentsAction` | Vector search (`ctx.vectorSearch`) + BM25 full-text (`searchIndex`) → RRF fusion (k=60). Time decay weighting per freshness tier. FAQ interception. |
-| 7 | **Reranking** | `reranking/rerank.ts:rerank` | FlashRank cross-encoder (`cross-encoder/ms-marco-MiniLM-L-6-v2`). k=8 → top 4. Falls back to slice on failure. |
-| 8 | **Context Assembly** | `rag/context.ts:buildContext` | Sandwich strategy: high relevance → medium → low. Anti-hallucination confidence tiers: <0.2 **refuse**, 0.2–0.4 **hedge**, 0.4–0.6 **cite**, >0.6 **normal**. Max 3000 tokens. |
-| 9 | **LLM Generation** | Frontend (Vercel AI SDK) | Stream response via fallback model chain. |
-| 10 | **Cache Update** | `cache/set.ts:set` | Async via `after()`. Write response + sources + model to `semanticCache` with TTL. |
+| 1 | **Pre-Retrieval Security** | `rag/retrieval.ts` | Injection scan. Max 2000 chars. Blocklist: `ignore previous instructions`, `system:`, `role:`, `[INST]`, `</s>`, `<\|im_start\|>`, `<\|im_end\|>`, `### Instruction`, `<script`, XSS variants |
+| 2 | **Intent Classification** | `rag/routing.ts:classifyQueryAction` | Groq Llama 3.1 8B classifies as `admissions`, `academic`, `administrative`, `campus_life`, `general`, `off_topic`, `simple_fact`. Off-topic → short-circuit with refusal. |
+| 3 | **Query Rewriting** | `rag/routing.ts:rewriteQueryAction` | Keyword-rich expansion, Roman Urdu → English translation, abbreviation expansion (UET → University of Engineering and Technology). Temperature 0.3. |
+| 4 | **HyDE** | `rag/routing.ts:hydeQueryAction` | Hypothetical 3-5 sentence document for queries < 15 words. Temperature 0.5. |
+| 5 | **Embedding** | `embeddings/generate.ts:generate` | Gemini `gemini-embedding-2`, 3072 dimensions. Key rotation across 4 env vars. Batch API for ≥2 texts. 3× retry with exponential backoff + jitter. Prefix: `task: search result \| query: ${text}`. |
+| 6 | **Semantic Cache** | `cache/get.ts:get` | Cosine similarity via `ctx.vectorSearch` at threshold **0.92** from `constants.ts`. Hit → return cached response + sources; increment hit counter. Source re-index invalidation (R-5): checks if source doc updated since cache entry. |
+| 7 | **Hybrid Search** | `embeddings/search.ts:searchDocumentsAction` | Vector search (`rag.search`, 40 results) + BM25 full-text (`search_text` searchIndex, 40 results) → RRF fusion (k=60). Time decay weighting per freshness tier (floor at 0.20). FAQ tier-1 retrieval (score * 2.0). |
+| 8 | **Reranking** | `reranking/rerank.ts:rerank` | External FlashRank endpoint via `RERANKER_URL` env var. Falls back to linear decay scoring if unconfigured. topK=4. |
+| 9 | **Context Assembly** | `rag/context.ts:buildContext` (internalQuery) | Sandwich strategy: highest relevance at start AND end of context to mitigate lost-in-the-middle. Anti-hallucination confidence tiers: <0.20 **refuse**, 0.20-0.40 **hedge**, 0.40-0.60 **cite**, >0.60 **normal**. Max 3000 tokens. |
+| 10 | **LLM Generation** | `src/app/api/chat/route.ts` (API route) | Iterates LLM fallback chain. `getAvailableModels()` filters by provider availability. Strips `<think>` tags. Streams via `toTextStreamResponse()` with `X-Sources`/`X-Intent` headers. |
+| 11 | **Cache Update** | `cache/set.ts:set` (async via `after()`) | Writes response + sources + model to `semanticCache`. TTL per freshness tier: high=7d, medium=2d, low=1d. Stores `sourceEntryIds` for invalidation. |
 
 ### 5.2 LLM Fallback Chain
 
@@ -344,46 +374,58 @@ The RAG pipeline is orchestrated by `convex/rag/retrieval.ts:retrieveContext` (a
 | 3 | Groq | Llama 3.1 8B (`llama-3.1-8b-instant`) | `@ai-sdk/groq` | Fast fallback |
 | 4 | Gemini | 1.5 Flash (`gemini-2.5-flash`) | `@ai-sdk/google` | Reliable fallback |
 
-Chain defined in `src/lib/llm-models.ts`. Frontend iterates this array, catching failures and moving to the next provider.
+Chain defined in `src/lib/llm-models.ts`.
 
-### 5.3 Injection Security (Pre-Retrieval)
+### 5.3 System Prompt
 
-Defined in `convex/rag/retrieval.ts`:
-
-| Check | Threshold | Action |
-|-------|-----------|--------|
-| Max query length | 2,000 characters | `ConvexError` with message |
-| Injection patterns | Regex blocklist | `ConvexError` with rephrase instruction |
-
-Blocklist patterns: `ignore previous instructions`, `system:`, `role:`, `[INST]`, `</s>`, `<|im_start|>`, `<|im_end|>`, `### Instruction`, `<script`.
+Defined in `convex/rag/prompts.ts` — template with `{context}` placeholder. Core rules: cite-only-UET-content, source citation via markdown links, language matching (English/Urdu/Roman Urdu), Pakistani English spellings, prompt injection guardrails. Includes 2 few-shot examples (BS CS fee structure, admissions timing).
 
 ---
 
 ## 6. Crawl Pipeline
 
-### 6.1 Architecture
+### 6.1 Dual-Path Architecture
 
+Two independent crawl paths feed into the same ingest pipeline:
+
+**Path A — Python BFS Crawler (Primary)**:
 ```
-Crawl4AI (local Flask) → POST /api/webhook/crawl → webhook.ts (HMAC verify) →
-  chunkMarkdown() (parent: 3000ch, child: 800ch, overlap: 300/100) →
-  mutate queueChunksForEmbedding → workpool embedSingleChunk →
-  RAG component embed + index (3072d) → crawledChunks table
+scripts/crawler.py (curl_cffi + trafilatura)
+  → POST /ingest (Bearer token auth)
+    → ingestWebhook (upsertDocument → enqueueDocumentChunks)
+      → workpool embedSingleChunk
+        → RAG component embed + index (3072d) → crawledChunks table
+```
+
+**Path B — External crawl4AI Service (Secondary)**:
+```
+External crawl4AI instance
+  → POST /api/webhook/crawl (HMAC-SHA256 auth)
+    → crawlWebhook (chunkMarkdown → queueChunksForEmbedding)
+      → workpool embedSingleChunk
+        → RAG component embed + index (3072d) → crawledChunks table
+```
+
+**Path C — Reset Pipeline**:
+```
+Any caller
+  → POST /api/reset (Bearer token auth)
+    → resetWebhook → resetPipelineAction
+      → cascade delete all tables (crawledChunks → documents → DLQ → webhooks → jobs → stats)
 ```
 
 ### 6.2 Webhook Security
 
-Defined in `convex/crawl/webhook.ts`:
-
 | Mechanism | Detail |
 |-----------|--------|
-| HMAC-SHA256 | Timestamp + raw body signed with `CRAWL_WEBHOOK_SECRET` |
+| HMAC-SHA256 | `/api/webhook/crawl`: Timestamp + raw body signed with `CRAWL_WEBHOOK_SECRET` (supports dual-secret rotation via `CRAWL_WEBHOOK_SECRET_NEW`) |
 | Timestamp validation | Max 5-minute skew (replay attack prevention) |
+| Bearer token | `/ingest` and `/api/reset`: `CONVEX_AUTH_TOKEN` Bearer header |
 | Payload size limit | 10MB (`/api/webhook/crawl`), 4MB (`/ingest`) |
 | Domain allowlist | Only `*.uettaxila.edu.pk` (plus `pdf://` virtual URLs for ingest) |
-| Idempotency | `processedWebhooks` table dedup by `jobId` |
-| Auth token | `CONVEX_AUTH_TOKEN` Bearer token for `/ingest` endpoint |
+| Idempotency | `processedWebhooks` table dedup by `jobId` (30-day TTL) |
 
-### 6.3 Chunking Strategy
+### 6.3 Chunking Strategy `(convex/crawl/chunking.ts)`
 
 | Parameter | Parent | Child |
 |-----------|--------|-------|
@@ -392,14 +434,47 @@ Defined in `convex/crawl/webhook.ts`:
 | Table preservation | Row-level split with header re-injection | Inherited from parent |
 | Sentence boundary | Abbreviation-protected regex split | Inherited |
 | Quality filter | ≥5 meaningful words | ≥5 meaningful words |
+| Heading tracking | `headingStack` via markdown heading levels | Inherits `headingPath` |
 
-### 6.4 Freshness Tiers
+Guard: `guardChunkSize()` splits text at sentence boundaries if > 7200 chars.
 
-| Tier | TTL | Purpose |
-|------|-----|---------|
-| High | 7 days | Admissions, fee schedules, academic calendar |
-| Medium | 30 days | Department info, faculty lists |
-| Low | 90 days | Campus history, static reference pages |
+### 6.4 Pipeline Data Flow
+
+```
+webhook.ts (HTTP)                mutations.ts (DB ops)
+├── crawlWebhook                 ├── queueChunksForEmbedding (doc upsert + diff + enqueue)
+│   └── via internal.mutations   ├── saveEmbedding (persist chunk, incr counter)
+│       ├── getProcessedWebhook  ├── onChunkEmbedded (workpool callback → DLQ mgmt)
+│       └── markWebhookProcessed ├── retryDeadLetterQueue (re-enqueue abandoned)
+├── ingestWebhook                ├── upsertDocument (skip/update/insert)
+│   └── via internal.mutations   └── enqueueDocumentChunks (enqueue + status)
+│       ├── upsertDocument
+│       └── enqueueDocumentChunks    actions.ts (node actions)
+└── resetWebhook                 ├── embedSingleChunk (rag.add → saveEmbedding)
+    └── via internal.actions      ├── executeCrawlJob (crawl4AI orchestration)
+        └── resetPipelineAction   ├── resetPipelineAction (cascade delete)
+                                   ├── runDeduplication (find+delete by URL)
+                                   └── internal.rag.routing.hydeQueryAction
+```
+
+### 6.5 Embedding Workpool
+
+| Property | Value |
+|----------|-------|
+| `maxParallelism` | 3 |
+| Retry | 5 attempts, 4s initial backoff, exponential base 2 |
+| Pre-embedding | Resolve `namespaceId` once per batch via `rag.getOrCreateNamespace` |
+
+### 6.6 Document Freshness Tiers
+
+**Assignment** (`chunking.ts:assignFreshnessTier`):
+| Tier | Keyword Match | Document Cache TTL | Document Expiry TTL |
+|------|---------------|---------------------|---------------------|
+| High | root URLs, `admission`, `academic` | 7 days (cache) | 30 days (staleness) |
+| Medium | `department`, `faculty` | 2 days (cache) | 90 days (staleness) |
+| Low | everything else | 1 day (cache) | 180 days (staleness) |
+
+Cache TTLs apply to `semanticCache` entries. Document expiry TTLs apply to `documents` table entries (flagged as `isStale` by `flagExpiredDocuments`).
 
 ---
 
@@ -414,7 +489,9 @@ Defined in `convex/crawl/webhook.ts`:
 | **Convex Auth** | Clerk JWT issuer validated via `auth.config.ts` | `convex/auth.config.ts` |
 | **Clerk Webhooks** | Svix signature verification (events: `user.created`, `user.updated`) | `src/app/api/webhooks/clerk/` |
 | **Crawl Webhooks** | HMAC-SHA256 + timestamp validation | `convex/crawl/webhook.ts` |
-| **Ingest Webhooks** | Bearer token via `CONVEX_AUTH_TOKEN` | `convex/crawl/webhook.ts` |
+| **Ingest/Reset Webhooks** | Bearer token via `CONVEX_AUTH_TOKEN` | `convex/crawl/webhook.ts` |
+
+**Note:** `auth.config.ts` currently uses `applicationID: "uet-gpt"`. If Clerk JWT audience doesn't match, `getUserIdentity()` silently returns null. Change to `"convex"` (Clerk default) or configure custom JWT template in Clerk dashboard.
 
 ### 7.2 Route Protection
 
@@ -427,11 +504,13 @@ Defined in `convex/crawl/webhook.ts`:
 
 ### 7.3 Rate Limiting
 
-| Limit | Scope | Window | File |
-|-------|-------|--------|------|
-| 10 messages/minute | Per-user (Convex native) | Sliding 60s | `convex/rateLimit.ts` |
-| 100,000 tokens/minute | Global (Convex native) | Sliding 60s | `convex/rateLimit.ts` |
-| Upstash Redis rate limit | Client-side complement | Configurable | `src/lib/rate-limit.ts` |
+| Limit | Scope | Window | Implementation |
+|-------|-------|--------|---------------|
+| 10 messages/minute | Per-user | Sliding 60s | `convex/rateLimit.ts` (Convex-native, `rateLimits` table) |
+| 100,000 tokens/minute | Global | Sliding 60s | `convex/rateLimit.ts` (same table, key=`"global"`) |
+| 50 req/hr | Per-user HTTP API | 1 hour | `src/lib/rate-limit.ts` (Upstash Redis, slidingWindow) |
+| 200 req/hr | Admin/superadmin HTTP API | 1 hour | `src/lib/rate-limit.ts` (Upstash Redis, slidingWindow) |
+| 10 req/hr | Anonymous HTTP API | 1 hour | `src/lib/rate-limit.ts` (Upstash Redis, slidingWindow) |
 
 ### 7.4 HTTP Security Headers (next.config.ts)
 
@@ -444,7 +523,15 @@ Defined in `convex/crawl/webhook.ts`:
 | `Permissions-Policy` | `geolocation=(), microphone=(), camera=()` |
 | `Content-Security-Policy` | Dynamic (set in middleware with per-request nonce) |
 
-### 7.5 Forbidden Operations (Never Violate)
+### 7.5 Chat API Security (`src/app/api/chat/route.ts`)
+
+| Check | Detail |
+|-------|--------|
+| CSRF | Origin + Referer check against `NEXT_PUBLIC_APP_URL` (localhost:3000 allowed) |
+| DoS guard | 100KB body limit, 8000 char per-message limit |
+| Auth | Clerk `auth()` returns 401 if no userId |
+
+### 7.6 Forbidden Operations (Never Violate)
 
 1. **schema.ts filter field names on vector indexes** — changing them corrupts the live vector index and requires full re-embed
 2. **HMAC auth guard in webhook.ts** — the timestamp + signature check block must never be removed
@@ -462,10 +549,10 @@ Defined in `convex/crawl/webhook.ts`:
 
 | Component | Platform | Notes |
 |-----------|----------|-------|
-| Frontend | Vercel | Next.js standalone output |
+| Frontend | Next.js (server) | Wherever app is deployed |
 | Backend | Convex Cloud | Auto-deploys on push |
-| Crawler | Local Crawl4AI Flask instance | Manual/scripted trigger |
-| Monitoring | Sentry | Errors + performance + Vercel monitors |
+| Crawler | Local / server | Python script or external crawl4AI |
+| Monitoring | Sentry | Errors + performance |
 
 ### 8.2 Environment Variables
 
@@ -474,6 +561,7 @@ CONVEX_DEPLOYMENT=             # Convex deployment URL
 CLERK_SECRET_KEY=              # Clerk API secret
 CLERK_SIGNING_SECRET=          # Clerk webhook signing secret
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=  # Clerk publishable key (client-side)
+CLERK_JWT_ISSUER=              # Clerk JWT issuer URL for Convex auth
 GROQ_API_KEY=                  # Groq LLM API
 GEMINI_API_KEY=                # Primary Gemini API key
 GEMINI_API_KEY_1=              # Gemini key rotation #1
@@ -481,10 +569,13 @@ GEMINI_API_KEY_2=              # Gemini key rotation #2
 GOOGLE_GENERATIVE_AI_API_KEY=  # Gemini key rotation #3
 CEREBRAS_API_KEY=              # Cerebras LLM API
 CRAWL_WEBHOOK_SECRET=          # HMAC secret for crawl webhooks
-CONVEX_AUTH_TOKEN=             # Bearer token for /ingest webhook
+CRAWL_WEBHOOK_SECRET_NEW=      # Secondary HMAC secret (key rotation)
+CONVEX_AUTH_TOKEN=             # Bearer token for /ingest and /api/reset webhooks
+CONVEX_SITE_URL=               # Convex site URL for webhook callbacks
 SENTRY_ORG=                    # Sentry organization
 SENTRY_PROJECT=                # Sentry project
-OPENROUTER_API_KEY=            # OpenRouter (fallback embedding)
+OPENROUTER_API_KEY=            # OpenRouter (currently unused — removed as embedding fallback)
+RERANKER_URL=                  # External FlashRank reranker endpoint
 CRON_SECRET=                   # API route cron authentication
 ```
 
@@ -500,7 +591,9 @@ Defined in `convex/crons.ts`:
 | `daily-cleanup-expired-cache` | Daily 01:00 UTC | `internal.crawl.tasks.cleanupExpiredCache` | Remove expired cache entries |
 | `daily-cleanup-expired-v2` | Daily 13:00 UTC | `internal.cache.internal_queries.cleanupExpired` | Second cleanup pass (limit: 100) |
 | `retry-dead-letter` | Every 4 hours | `internal.crawl.mutations.retryDeadLetterQueue` | Retry DLQ items (limit: 100) |
-| `purge-old-archived-threads` | Weekly Sun 03:00 UTC | `internal.threads.purgeOldArchived` | Archive cleanup |
+| `fail-stuck-crawl-jobs` | Every 30 min | `internal.crawl.workflow.failStuckJobs` | Timeout running jobs > 2 hours |
+| `cleanup-old-records` | Weekly Sun 02:00 UTC | `internal.crawl.jobs.cleanupOldRecords` | Purge abandoned DLQ (>7d) + old crawl jobs (>30d) |
+| `purge-old-archived-threads` | Weekly Sun 03:00 UTC | `internal.threads.purgeOldArchived` | Archive cleanup (>6 months) |
 
 ---
 
@@ -515,15 +608,19 @@ Defined in `convex/crons.ts`:
 | **Context** | 8192 tokens |
 | **Free tier** | ~60 RPM, ~1500 RPD |
 | **Paid Tier 1** | 3000 RPM, 1M TPM |
-| **Batch API** | 50% discount ($0.10/M vs $0.20/M) |
+| **Batch API** | 50% discount ($0.10/M vs $0.20/M) — used for ≥2 texts |
 
 ### 10.2 Key Rotation
 
 Keys tried in order: `GEMINI_API_KEY` → `GEMINI_API_KEY_1` → `GEMINI_API_KEY_2` → `GOOGLE_GENERATIVE_AI_API_KEY`. First success wins. All fail → `ConvexError`. OpenRouter fallback removed to prevent vector space incompatibility.
 
-### 10.3 Task Prefix
+### 10.3 Resilient Embedding Model
 
-Embed queries are prefixed: `task: search result | query: ${text}`.
+Defined in `rag/instance.ts` — custom `EmbeddingModel` wrapping `generateEmbeddingsInternal`:
+- `maxEmbeddingsPerCall: 2048`
+- `supportsParallelCalls: true`
+- `modelId: "gemini-embedding-2"`
+- Filter names: `["category", "source"]`
 
 ---
 
@@ -535,11 +632,12 @@ Embed queries are prefixed: `task: search result | query: ${text}`.
 |----------|-------|------|
 | **Similarity threshold** | 0.92 (cosine) | `convex/constants.ts` |
 | **Vector index dimensions** | 3072 | `schema.ts` — `vectorIndex("by_queryEmbedding", ...)` |
-| **TTL** | 24 hours (configurable per table) | Default in cache write path |
-| **Search method** | Manual dimension-safe loop via `ctx.vectorSearch` | `cache/get.ts` |
-| **Write trigger** | Async via `after()` after successful LLM generation | `cache/set.ts` |
+| **Search method** | `ctx.vectorSearch` on `semanticCache` table | `cache/get.ts` |
+| **Cache TTL tiers** | High=7d, Medium=2d, Low=1d | `cache/set.ts` |
+| **Write trigger** | Async via `after()` after successful LLM generation | `cache/set.ts`, `chat/route.ts` |
 | **Hit tracking** | Increment counter, returns cached + sources | `cache/get.ts` |
-| **Cleanup** | Cron: daily + second pass, timer-triggered mutation | `crons.ts`, `tasks.ts` |
+| **Source invalidation** | Checks `sourceEntryIds` against `documents.updatedAt` | `cache/get.ts` (R-5) |
+| **Cleanup** | Cron: daily 01:00 + 13:00 UTC | `crons.ts`, `tasks.ts`, `internal_queries.ts` |
 
 ---
 
@@ -557,18 +655,19 @@ Embed queries are prefixed: `task: search result | query: ${text}`.
 
 | Config | Value |
 |--------|-------|
-| `vitest.config.ts` | `node` env (jsdom not installed), `resolve.alias` for `@/` and `convex/` |
+| `vitest.config.ts` | `node` env, `testTimeout: 30000` (WSL needs it — setup can take 30s+), `resolve.alias` for `@/` and `convex/` |
 | `playwright.config.ts` | Chromium, Firefox, WebKit projects |
 
 ### 12.3 Test Distribution
 
-| Layer | Files | Tests | Status |
-|-------|-------|-------|--------|
-| Convex (unit) | 21+ | ~205 | Good coverage, brittle mocks |
-| Integration | 4 | ~40 | RAG, chat API, embeddings, webhook |
-| E2E (Playwright) | 4 | 8 | Minimal, no auth tests working |
-| Load test | 1 | — | Not CI-integrated |
-| **Total** | **31+** | **~257** | |
+Tests under `tests/` organized into:
+- `convex/` — Convex function tests (webhook, mutations, tasks, users, actions)
+- `unit/` — Unit tests (admin components, rate-limit, llm-models, search, feedback, embeddings, RAG context)
+- `integration/` — Integration tests (RAG pipeline, webhook, embeddings, chat API)
+- `e2e/` — Playwright E2E (auth, chat, admin, home flows)
+- `helpers/` — Test utilities (`convex-mock.ts`)
+
+See `testing.md` for detailed test plan (12 phases) and `docs/anti-pattern-audit-report.md` for known issues.
 
 ### 12.4 Quality Gates
 
@@ -577,21 +676,6 @@ Per `AGENTS.md`, every commit must pass:
 2. `python -m py_compile scripts/*.py` → zero syntax errors
 3. `python scripts/eval/run_eval.py` → recall_at_5 not regressed
 4. All relevant unit tests pass
-
-### 12.5 TDD Mandate
-
-Per `test-driven-development/SKILL.md` — Iron Law: **NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST.** All new code must follow Red-Green-Refactor.
-
-### 12.6 Anti-Pattern Remediation
-
-24 test anti-patterns identified across 16 files (see `docs/anti-pattern-audit-report.md`). Key remediation:
-- 25 `_handler` casts replaced with `vi.mock("convex/_generated/server")` wrappers
-- 9 admin test files with mock-testing anti-patterns pending fix
-- Hardcoded secrets removed from load test
-
-### 12.7 Loaded Testing Skills
-
-Testing is governed by 9 loaded skills (see `testing.md`): TDD, anti-patterns, systematic-debugging, verification-before-completion, webapp-testing, browser-testing-with-devtools, clerk-testing, code-review-and-quality, doubt-driven-development.
 
 ---
 
@@ -603,7 +687,7 @@ Testing is governed by 9 loaded skills (see `testing.md`): TDD, anti-patterns, s
 |-----------|----------|-------------|
 | Golden set | `scripts/eval/golden_set.jsonl` | 75 QA pairs across categories (admissions, fees, exams, departments, etc.) |
 | Runner | `scripts/eval/run_eval.py` | Computes `recall_at_5` (primary metric) and `fragment_hit_rate` |
-| Per-category | Per-category breakdown | Flags categories where recall < 0.5 |
+| Convex eval action | `convex/eval.ts:evaluateSearch` | Runs `rag.search()` on "uet-global" namespace and hydrates chunk results |
 
 ### 13.2 Exit Codes
 
@@ -635,13 +719,13 @@ app.use(workflow, { name: "crawlWorkflow" });
 
 ### 14.1 Component Roles
 
-| Component | Purpose |
-|-----------|---------|
-| `@convex-dev/rag` | Embedding, indexing, vector retrieval |
-| `@convex-dev/agent` | Thread/message management agent framework |
-| `@convex-dev/workpool` (embeddingWorkpool) | Async chunk embedding tasks |
-| `@convex-dev/workpool` (crawlWorkpool) | Async crawl processing tasks |
-| `@convex-dev/workflow` (crawlWorkflow) | Daily crawl orchestration |
+| Component | Config | Purpose |
+|-----------|--------|---------|
+| `@convex-dev/rag` | default | Embedding, indexing, vector retrieval on `"uet-global"` namespace |
+| `@convex-dev/agent` | default | Thread/message management agent framework (manages `threads` and `messages` tables) |
+| `@convex-dev/workpool` | `embeddingWorkpool` | Async chunk embedding tasks (maxParallelism:3, 5 retries, 4s→64s backoff) |
+| `@convex-dev/workpool` | `crawlWorkpool` | Async crawl job execution (maxParallelism:3, 3 retries, 5m→45m backoff) |
+| `@convex-dev/workflow` | `crawlWorkflow` | Daily crawl orchestration (kickoff, state tracking, timeout) |
 
 ---
 
@@ -649,10 +733,13 @@ app.use(workflow, { name: "crawlWorkflow" });
 
 Defined in `convex/http.ts`:
 
-| Route | Method | Handler | Purpose |
-|-------|--------|---------|---------|
-| `/api/webhook/crawl` | POST | `crawlWebhook` | Crawl4AI batch webhook |
-| `/ingest` | POST | `ingestWebhook` | Single-page/m anual ingest |
+| Route | Methods | Handler | Auth |
+|-------|---------|---------|------|
+| `/api/webhook/crawl` | POST, OPTIONS | `crawlWebhook` from `./crawl/webhook` | HMAC-SHA256 |
+| `/ingest` | POST, OPTIONS | `ingestWebhook` from `./crawl/webhook` | Bearer `CONVEX_AUTH_TOKEN` |
+| `/api/reset` | POST, OPTIONS | `resetWebhook` from `./crawl/webhook` | Bearer `CONVEX_AUTH_TOKEN` |
+
+All routes include CORS support (`Access-Control-Allow-Origin: *`).
 
 Guard: startup crash if neither `CONVEX_AUTH_TOKEN` nor `CRAWL_WEBHOOK_SECRET` is configured.
 
@@ -664,21 +751,52 @@ The admin interface at `/admin(.*)` provides:
 
 | Page | Purpose |
 |------|---------|
-| Overview | 11 metrics (total docs, indexed, pending, failed, crawl stats, cache hits, users, feedback, etc.) |
+| Overview | 11 metrics (total docs, indexed, pending, failed, crawl stats, cache hits, users, feedback, storage) |
 | Documents | Browse, search, filter, delete documents |
 | Crawls | Trigger crawl, monitor status, cancel running jobs |
 | Feedback | View user feedback with ratings and categories |
 | Settings | Configure app settings (key/value/section) |
-| Analytics | Usage trends and statistics |
 
 Admin accessible only to `admin`/`superadmin` roles, enforced by middleware RBAC + Convex auth helpers.
 
 ---
 
-## 17. Changelog
+## 17. Dual-Environment Protocol (Windows / WSL)
 
-### [2026-05-30] Initial architecture.md creation
-- **Created**: `architecture.md` — comprehensive single source of truth for the UET Taxila GPT project
-- **Sections**: Project Identity, Stack Overview, Directory Structure, Database Schema (14 tables), RAG Pipeline (10 stages), Crawl Pipeline, Security Architecture, Deployment, Cron Jobs, Embedding Strategy, Semantic Cache, Testing Architecture, Evaluation, Convex Component Configuration, HTTP Router, Admin Dashboard
-- **Why**: Mandated by AGENTS.md as the definitive reference; no prior architecture documentation existed at this scope
-- **Reference files**: schema.ts (11 tables + 2 component-managed), retrieval.ts (9-stage orchestration), routing.ts (7 intent categories), webhook.ts (HMAC + chunking), rateLimit.ts (Convex-native sliding window), crons.ts (5 scheduled jobs), convex.config.ts (5 components), constants.ts (0.92 threshold), 8 docs/*.md, testing.md (12-phase plan), AGENTS.md, CRONJOB.md
+**Critical: This project's `node_modules` is owned by Windows.** The frontend agent runs on Windows PowerShell and controls `pnpm install`. WSL must never mutate the shared `node_modules`.
+
+### 17.1 The Problem
+
+`pnpm` creates symlinks inside `node_modules/.pnpm/`. On Windows these are NTFS junctions/symlinks; on WSL (`/mnt/c/` mount) those symlinks are unreadable. Running `pnpm install` from both environments produces an incompatible mix of symlink types, causing `MODULE_NOT_FOUND`, `EACCES`, or vitest hangs at startup.
+
+### 17.2 Ground Rules
+
+| Rule | Detail |
+|------|--------|
+| **Ownership** | Windows owns `node_modules` and all `pnpm install` / `pnpm dev` / `pnpm build` commands |
+| **WSL forbids `pnpm install`** | Never run `pnpm install` from WSL on the shared directory |
+| **WSL test execution** | Run tests via `pnpm exec vitest` from WSL pointing at `/mnt/c/...` path, but only if node_modules is in a consistent (Windows-created) state |
+| **Clean install for WSL only** | If WSL needs its own node_modules, clone into a WSL-native path (e.g. `~/uetgpt-test/`) — never touch the Windows-owned copy |
+| **Config files** | `vitest.config.ts` uses `fileURLToPath(new URL(...))` for cross-platform path resolution. Do not revert to `__dirname` patterns. |
+
+### 17.3 Test Execution Preference
+
+Tests pass reliably on Windows (403 tests, frontend agent confirmed). Use Windows for all test execution unless explicitly testing WSL-specific behavior. The WSL hang symptom (vitest 4.1.7 prints `RUN v4.1.7` then hangs indefinitely) is caused by rolldown native binding file descriptor issues when following broken Windows symlinks on WSL's `/mnt/c/` mount.
+
+### 17.4 If node_modules Must Be Rebuilt
+
+1. Only the **Windows agent** initiates the rebuild: `pnpm install` from Windows PowerShell
+2. After rebuild, WSL may need `@rolldown/binding-linux-x64-gnu` symlink recreated in `node_modules/.pnpm/rolldown@1.0.1/node_modules/@rolldown/` and `node_modules/@rolldown/` — the Windows install does not include the linux binding. Use absolute symlinks (`ln -sf /absolute/path`) — WSL's `/mnt/c/` mount does not reliably follow relative symlinks across file systems.
+
+---
+
+## 18. Key Utility Functions
+
+| Function | File | Purpose |
+|----------|------|---------|
+| `fastCount(db, tableName)` | `convex/lib/db_helpers.ts` | Full-table count via internal `.count()` API (no filter support) |
+| `enforceRateLimit(ctx, userId, tokenEstimate)` | `convex/rateLimit.ts` | Dual-limit: per-user (10/min) + global tokens (100K/min) |
+| `cosineSimilarity(a, b)` | `convex/cache/get.ts` | Cosine similarity calculation (returns 0 on mismatch) |
+| `hybridRank(vectorResults, textResults, k, weights)` | `convex/embeddings/search.ts` | RRF fusion with configurable k and weights |
+| `stopAll` | `convex/emergencyStop.ts` | Drains all in-flight processing jobs (emergency) |
+| `evaluateSearch(query, topK)` | `convex/eval.ts` | RAG search evaluation for test harness |

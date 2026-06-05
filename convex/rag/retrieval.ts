@@ -54,6 +54,7 @@ const sourceValidator = v.object({
   title: v.string(),
   relevanceScore: v.number(),
   excerpt: v.string(),
+  headingPath: v.optional(v.array(v.string())),
 });
 
 export const retrieveContext = action({

@@ -101,12 +101,12 @@ export function Markdown({ content, className }: MarkdownProps) {
           },
           li({ children }) {
             return (
-              <li className="text-sm leading-relaxed text-[var(--text-primary)]">{children}</li>
+              <li className="text-[var(--chat-font-size,0.875rem)] leading-relaxed text-[var(--text-primary)]">{children}</li>
             );
           },
           p({ children }) {
             return (
-              <p className="my-2 text-sm leading-relaxed text-[var(--text-primary)]">{children}</p>
+              <p className="my-2 text-[var(--chat-font-size,0.875rem)] leading-relaxed text-[var(--text-primary)]">{children}</p>
             );
           },
           h1({ children }) {
@@ -132,7 +132,7 @@ export function Markdown({ content, className }: MarkdownProps) {
           },
           blockquote({ children }) {
             return (
-              <blockquote className="my-3 border-l-2 border-[var(--accent-muted)] bg-[var(--surface-muted)] py-1 pl-4 text-sm italic text-[var(--text-secondary)]">
+              <blockquote className="my-3 border-l-2 border-[var(--accent-muted)] bg-[var(--surface-muted)] py-1 pl-4 text-[var(--chat-font-size,0.875rem)] italic text-[var(--text-secondary)]">
                 {children}
               </blockquote>
             );

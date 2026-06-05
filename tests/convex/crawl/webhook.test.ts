@@ -25,7 +25,7 @@ import {
   chunkMarkdown,
   normalizeContent,
   isQualityChunk,
-} from "../../../convex/crawl/webhook";
+} from "../../../convex/crawl/chunking";
 
 function computeSignature(timestamp: string, rawBody: string, secret: string): string {
   return createHmac("sha256", secret).update(`${timestamp}.${rawBody}`).digest("hex");
@@ -103,8 +103,8 @@ describe("chunkMarkdown", () => {
     expect(doc.length).toBeGreaterThan(3000);
     const chunks = chunkMarkdown(doc, 3000, 300);
     expect(chunks.length).toBe(2);
-    const chunk1 = chunks[0]!;
-    const chunk2 = chunks[1]!;
+    const chunk1 = chunks[0]!.text;
+    const chunk2 = chunks[1]!.text;
     const expectedOverlapSize = 300;
     const actualOverlapText = chunk1.slice(-expectedOverlapSize);
     expect(chunk2).toContain(actualOverlapText.split(" ").slice(1).join(" "));
@@ -118,7 +118,7 @@ describe("chunkMarkdown", () => {
     }
     const chunks = chunkMarkdown(doc, 4000);
     expect(chunks.length).toBe(1);
-    expect(chunks[0]!.length).toBeGreaterThan(3000);
+    expect(chunks[0]!.text.length).toBeGreaterThan(3000);
   });
 
   it("injects breadcrumbs for headers into split chunks", () => {
@@ -126,19 +126,20 @@ describe("chunkMarkdown", () => {
       "prose ".repeat(600) + "\n\nHere is the rest of the text.";
     const chunks = chunkMarkdown(doc, 3000);
     expect(chunks.length).toBe(4);
-    expect(chunks[0]!.startsWith("## Admissions Process 2025")).toBe(true);
-    expect(chunks[1]!.startsWith("## Admissions Process 2025")).toBe(true);
-    expect(chunks[2]!.startsWith("## Admissions Process 2025")).toBe(true);
-    expect(chunks[3]!.startsWith("## Admissions Process 2025")).toBe(true);
+    // Breadcrumbs are stored in headingPath, not prepended to text
+    expect(chunks[0]!.headingPath).toContain("Admissions Process 2025");
+    expect(chunks[1]!.headingPath).toContain("Admissions Process 2025");
+    expect(chunks[2]!.headingPath).toContain("Admissions Process 2025");
+    expect(chunks[3]!.headingPath).toContain("Admissions Process 2025");
   });
 
   it("does not apply overlap on explicit header splits", () => {
     const doc = "Some normal text here that is sufficiently long enough to pass the forty character minimum requirement for a chunk to be kept.\n\n## Next Header is a Custom Section Header\n\nSome more text here that is also sufficiently long enough to exceed the forty character limit so it gets pushed as a chunk.";
     const chunks = chunkMarkdown(doc, 200, 20);
     expect(chunks.length).toBe(2);
-    expect(chunks[0]).not.toContain("## Next Header");
-    expect(chunks[1]!.startsWith("## Next Header is a Custom Section Header")).toBe(true);
-    expect(chunks[1]).not.toContain("Some normal text here");
+    expect(chunks[0]!.text).not.toContain("## Next Header");
+    expect(chunks[1]!.text.startsWith("## Next Header is a Custom Section Header")).toBe(true);
+    expect(chunks[1]!.text).not.toContain("Some normal text here");
   });
 
   it("parent-child chunking correctly generates parent chunks and child chunks with parent mapping", () => {
@@ -148,12 +149,12 @@ describe("chunkMarkdown", () => {
     const parentChunks = chunkMarkdown(text, 3000, 300);
     expect(parentChunks.length).toBeGreaterThan(1);
     const chunks: any[] = [];
-    for (const parentText of parentChunks) {
-      const childChunks = chunkMarkdown(parentText, 800, 100);
-      for (const childText of childChunks) {
+    for (const parent of parentChunks) {
+      const childChunks = chunkMarkdown(parent.text, 800, 100);
+      for (const child of childChunks) {
         chunks.push({
-          text: contextPrefix + childText,
-          parentText,
+          text: contextPrefix + child.text,
+          parentText: parent.text,
         });
       }
     }
@@ -177,7 +178,7 @@ describe("chunkMarkdown", () => {
     const text = "This is a short document with enough meaningful content to pass the quality filter.";
     const chunks = chunkMarkdown(text, 3000);
     expect(chunks.length).toBe(1);
-    expect(chunks[0]).toContain("short document");
+    expect(chunks[0]!.text).toContain("short document");
   });
 
   it("splits markdown tables row-by-row when they exceed maxChunkSize", () => {
@@ -187,8 +188,8 @@ describe("chunkMarkdown", () => {
     const chunks = chunkMarkdown(doc, 300, 30);
     expect(chunks.length).toBeGreaterThan(1);
     for (const chunk of chunks) {
-      expect(chunk).toContain("| Name | Department | Grade |");
-      expect(chunk).toContain("| --- | --- | --- |");
+      expect(chunk.text).toContain("| Name | Department | Grade |");
+      expect(chunk.text).toContain("| --- | --- | --- |");
     }
   });
 
@@ -212,7 +213,7 @@ describe("chunkMarkdown", () => {
       "This is English text alongside Urdu content. ".repeat(50);
     const chunks = chunkMarkdown(doc, 2000, 200);
     expect(chunks.length).toBeGreaterThanOrEqual(1);
-    const allText = chunks.join(" ");
+    const allText = chunks.map(c => c.text).join(" ");
     expect(allText).toContain("ٹیکسلا");
     expect(allText).toContain("University of Engineering");
   });
@@ -231,7 +232,7 @@ describe("chunkMarkdown", () => {
     const chunks = chunkMarkdown(doc, maxSize, overlap);
     expect(chunks.length).toBeGreaterThanOrEqual(2);
     for (const chunk of chunks) {
-      expect(chunk.length).toBeLessThanOrEqual(maxSize + 500);
+      expect(chunk.text.length).toBeLessThanOrEqual(maxSize + 500);
     }
   });
 
@@ -240,8 +241,8 @@ describe("chunkMarkdown", () => {
     const chunks = chunkMarkdown(doc, 2000, 300);
     expect(chunks.length).toBeGreaterThan(1);
     if (chunks.length >= 2) {
-      const chunk1Tail = chunks[0]!.slice(-350);
-      const chunk2Head = chunks[1]!.slice(0, 350);
+      const chunk1Tail = chunks[0]!.text.slice(-350);
+      const chunk2Head = chunks[1]!.text.slice(0, 350);
       const overlapWords = chunk1Tail.split(" ").slice(5).join(" ");
       expect(chunk2Head).toContain(overlapWords.slice(0, 50));
     }
@@ -291,8 +292,9 @@ describe("crawlWebhook", () => {
     });
   }
 
-  it("rejects payload larger than 1MB with 413", async () => {
-    const largeBody = { data: "x".repeat(1_050_000) };
+  it("rejects payload larger than 10MB with 413", async () => {
+    // The webhook checks content-length header against 10MB (10_485_760 bytes)
+    const largeBody = { data: "x".repeat(10_500_000) };
     const req = createSignedRequest(largeBody, "test-webhook-secret-12345");
     const res = await crawlWebhook(mockCtx, req);
     expect(res.status).toBe(413);
@@ -406,7 +408,8 @@ describe("crawlWebhook", () => {
     const payload = {
       task_id: "task-multi",
       status: "completed",
-      data: [
+      // Use payload.results — the webhook reads: payload.data?.results || payload.results || ...
+      results: [
         {
           url: "https://web.uettaxila.edu.pk/page1",
           markdown: "Content for page one with enough words to pass the quality filter.",
@@ -567,9 +570,8 @@ describe("ingestWebhook", () => {
     expect(res.status).toBe(401);
   });
 
-  it("accepts request without auth token if CONVEX_AUTH_TOKEN is not set", async () => {
+  it("returns 500 when CONVEX_AUTH_TOKEN is not configured", async () => {
     delete process.env.CONVEX_AUTH_TOKEN;
-    mockCtx.runMutation.mockResolvedValue({ action: "inserted", documentId: "doc123" as any });
     const req = createRequest({
       url: "https://web.uettaxila.edu.pk/page",
       markdown: "some content with enough words for quality filtering purposes here.",
@@ -578,7 +580,8 @@ describe("ingestWebhook", () => {
       sourceType: "html",
     });
     const res = await ingestWebhook(mockCtx, req);
-    expect(res.status).toBe(200);
+    // The ingestWebhook requires auth token to always be configured — returns 500 if missing
+    expect(res.status).toBe(500);
   });
 
   it("happy path: upserts document and enqueues chunks for new document", async () => {

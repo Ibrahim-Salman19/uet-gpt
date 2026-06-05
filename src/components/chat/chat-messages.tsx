@@ -81,12 +81,12 @@ export function ChatMessages({
   return (
     <ScrollArea ref={scrollRef} className={cn("flex-1", className)}>
       <div className="mx-auto flex max-w-3xl flex-col gap-1 py-4">
-        {messages.map((message) => (
+        {messages.map((message, index) => (
           <div
             key={message.id}
             className="animate-[slide-up_0.3s_ease-[var(--ease-out-expo)]_both]"
           >
-            <ChatMessageBubble message={message} />
+            <ChatMessageBubble message={message} isLatest={index === messages.length - 1} />
           </div>
         ))}
 

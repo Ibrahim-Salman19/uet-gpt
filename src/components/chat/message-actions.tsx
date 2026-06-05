@@ -1,8 +1,9 @@
 "use client";
 
-import { Check, Copy, Pencil, ThumbsDown, ThumbsUp, Trash2 } from "lucide-react";
+import { Bookmark, Check, Copy, Pencil, ThumbsDown, ThumbsUp, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { usePreferences } from "@/components/preferences-provider";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
@@ -29,6 +30,9 @@ export function MessageActions({
   const [copied, setCopied] = useState(false);
   const [feedback, setFeedback] = useState<"thumbsUp" | "thumbsDown" | null>(null);
 
+  const { addPin, removePin, isPinned, pinnedHighlights } = usePreferences();
+  const pinned = isPinned(content);
+
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(content);
@@ -37,6 +41,17 @@ export function MessageActions({
       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast.error("Failed to copy");
+    }
+  };
+
+  const handlePin = () => {
+    if (pinned) {
+      const pin = pinnedHighlights.find(
+        (p) => p.query.toLowerCase().trim() === content.toLowerCase().trim(),
+      );
+      if (pin) removePin(pin.id);
+    } else {
+      addPin(content.slice(0, 40) + (content.length > 40 ? "..." : ""), content);
     }
   };
 
@@ -66,6 +81,27 @@ export function MessageActions({
           </Button>
         </TooltipTrigger>
         <TooltipContent side="top">Copy</TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handlePin}
+            className={cn(
+              "h-7 w-7",
+              pinned
+                ? "text-[var(--accent)] hover:text-[var(--accent-hover)]"
+                : "text-[var(--text-muted)] hover:text-[var(--text-primary)]",
+            )}
+            aria-label={pinned ? "Unpin message" : "Pin message"}
+            data-touch-target="true"
+          >
+            <Bookmark className={cn("h-3.5 w-3.5", pinned && "fill-current")} />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="top">{pinned ? "Unpin" : "Pin message"}</TooltipContent>
       </Tooltip>
 
       {role === "user" && onEdit && (

@@ -44,34 +44,34 @@ function ExploreCard({ doc }: { doc: ExploreDoc }) {
       href={doc.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group block rounded-lg border border-border bg-card p-4 transition-all hover:border-primary/30 hover:shadow-md"
+      className="group block rounded-xl border border-white/5 bg-[#101012]/40 backdrop-blur-sm p-4 transition-all duration-300 hover:border-[var(--accent)]/30 hover:bg-[#101012]/80 hover:-translate-y-0.5 active:scale-[0.99] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] relative overflow-hidden"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate">
+          <p className="text-xs font-semibold text-zinc-200 group-hover:text-[var(--accent)] transition-colors truncate font-sans">
             {doc.title || "Untitled Document"}
           </p>
-          <div className="mt-1.5 flex items-center gap-2 flex-wrap">
-            <Badge variant="secondary" className="text-[10px] uppercase tracking-wider">
+          <div className="mt-2 flex items-center gap-2 flex-wrap">
+            <Badge variant="outline" className="text-[9px] uppercase tracking-wider bg-zinc-900/60 text-zinc-400 border border-white/5 font-mono py-0.5 px-1.5 rounded-md">
               {doc.category}
             </Badge>
             {doc.subcategory && (
-              <span className="text-[11px] text-muted-foreground">{doc.subcategory}</span>
+              <span className="text-[10px] text-zinc-500 font-sans">{doc.subcategory}</span>
             )}
-            <span className="text-[11px] text-muted-foreground">
+            <span className="text-[10px] text-zinc-500 font-sans">
               {new Date(doc.crawledAt).toLocaleDateString()}
             </span>
             {doc.chunkCount && (
               <>
-                <span className="text-[11px] text-muted-foreground">·</span>
-                <span className="text-[11px] text-muted-foreground">{doc.chunkCount} chunks</span>
+                <span className="text-[10px] text-zinc-500 font-sans">·</span>
+                <span className="text-[10px] text-zinc-500 font-sans">{doc.chunkCount} chunks</span>
               </>
             )}
           </div>
         </div>
-        <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground/40 opacity-0 transition-opacity group-hover:opacity-60" />
+        <ExternalLink className="h-3.5 w-3.5 shrink-0 text-zinc-500 opacity-0 transition-opacity group-hover:opacity-100" />
       </div>
-      <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{doc.url}</p>
+      <p className="mt-2.5 line-clamp-1 text-[10px] leading-relaxed text-zinc-500 font-mono select-all">{doc.url}</p>
     </a>
   );
 }
@@ -81,7 +81,12 @@ export default function ExplorePage() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  const documents = useQuery(api.doc.list as unknown as FunctionReference<"query", "public">, {});
+  // Pass category to backend when filtered — avoids the 50-doc client-side truncation bug
+  const queryArgs = activeCategory === "all"
+    ? {}
+    : { category: activeCategory };
+
+  const documents = useQuery(api.doc.list as unknown as FunctionReference<"query", "public">, queryArgs);
 
   const getFilteredDocs = (cat: string) => {
     return documents
@@ -90,11 +95,13 @@ export default function ExplorePage() {
             !searchQuery ||
             doc.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             doc.url?.toLowerCase().includes(searchQuery.toLowerCase());
-          const matchesCategory = cat === "all" || doc.category === cat;
+          // When querying a specific category from backend, skip client-side category filter
+          const matchesCategory = cat === "all" || activeCategory !== "all" || doc.category === cat;
           return matchesSearch && matchesCategory;
         })
       : [];
   };
+
 
   return (
     <Tabs
@@ -102,55 +109,64 @@ export default function ExplorePage() {
       onValueChange={setActiveCategory}
       className="flex h-full flex-col w-full"
     >
-      <div className="border-b border-border bg-card px-6 py-4">
+      <div className="border-b border-[#222226] bg-[#0a0a0c]/60 backdrop-blur-md px-6 py-5">
         <div className="mx-auto flex max-w-5xl flex-col gap-4">
           <div>
-            <h1 className="text-lg font-semibold text-foreground">Explore UET Taxila</h1>
-            <p className="text-sm text-muted-foreground">Browse all indexed documents and pages</p>
+            <h1 className="text-base font-semibold text-zinc-100 font-sans tracking-tight">Explore UET Taxila</h1>
+            <p className="text-xs text-zinc-500 mt-1 font-sans">Browse all indexed documents and pages</p>
           </div>
 
           <div className="flex items-center gap-3">
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-500" />
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search documents..."
-                className="pl-9"
+                placeholder="Search documents…"
+                className="pl-9 text-xs bg-zinc-950/60 border border-white/10 rounded-xl text-zinc-200 placeholder:text-zinc-500 focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:outline-none"
               />
             </div>
-            <div className="flex items-center gap-1 rounded-md border border-border p-0.5">
+            <div className="flex items-center gap-1 rounded-xl border border-white/10 bg-zinc-950/60 p-0.5 shrink-0">
               <button
                 type="button"
                 onClick={() => setViewMode("grid")}
                 className={cn(
-                  "rounded-sm p-1.5 transition-colors",
+                  "rounded-lg p-1.5 transition-colors cursor-pointer",
                   viewMode === "grid"
-                    ? "bg-muted text-foreground"
-                    : "text-muted-foreground hover:text-foreground",
+                    ? "bg-white/10 text-white"
+                    : "text-zinc-500 hover:text-zinc-300",
                 )}
               >
-                <Grid3X3 className="h-4 w-4" />
+                <Grid3X3 className="h-3.5 w-3.5" />
               </button>
               <button
                 type="button"
                 onClick={() => setViewMode("list")}
                 className={cn(
-                  "rounded-sm p-1.5 transition-colors",
+                  "rounded-lg p-1.5 transition-colors cursor-pointer",
                   viewMode === "list"
-                    ? "bg-muted text-foreground"
-                    : "text-muted-foreground hover:text-foreground",
+                    ? "bg-white/10 text-white"
+                    : "text-zinc-500 hover:text-zinc-300",
                 )}
               >
-                <List className="h-4 w-4" />
+                <List className="h-3.5 w-3.5" />
               </button>
             </div>
           </div>
 
           <div className="w-full overflow-x-auto pb-2 scrollbar-none -mb-2">
-            <TabsList className="inline-flex w-max justify-start">
+            <TabsList className="inline-flex w-max justify-start bg-transparent border-none p-0 gap-1">
               {CATEGORIES.map((cat) => (
-                <TabsTrigger key={cat} value={cat} className="capitalize">
+                <TabsTrigger
+                  key={cat}
+                  value={cat}
+                  className={cn(
+                    "capitalize text-xs px-3 py-1.5 rounded-lg transition-all cursor-pointer font-sans",
+                    activeCategory === cat
+                      ? "bg-white/10 text-white border border-white/10"
+                      : "text-zinc-500 hover:text-zinc-300",
+                  )}
+                >
                   {cat === "all" ? "All" : cat}
                 </TabsTrigger>
               ))}
@@ -159,7 +175,7 @@ export default function ExplorePage() {
         </div>
       </div>
 
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1 bg-transparent">
         {CATEGORIES.map((cat) => {
           const currentDocs = getFilteredDocs(cat);
           return (
@@ -167,30 +183,33 @@ export default function ExplorePage() {
               <div className="mx-auto max-w-5xl px-6 py-6">
                 {!documents ? (
                   <div className="flex items-center justify-center py-16">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                    <Loader2 className="h-5 w-5 animate-spin text-[var(--accent)]" />
                   </div>
                 ) : currentDocs.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-16 text-center">
-                    <BookOpen className="mb-4 h-12 w-12 text-muted-foreground/40" />
-                    <p className="text-sm text-muted-foreground">No documents found</p>
+                  <div className="flex flex-col items-center justify-center py-20 text-center animate-[slide-up_0.3s_ease-[var(--ease-out-expo)]_both]">
+                    <div className="w-12 h-12 flex items-center justify-center rounded-2xl bg-[var(--accent)]/10 border border-[var(--accent)]/20 mb-4">
+                      <BookOpen className="h-5 w-5 text-[var(--accent)]" />
+                    </div>
+                    <p className="text-sm font-medium text-zinc-300">No documents found</p>
                     {searchQuery && (
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-xs text-zinc-500 mt-1.5 font-sans">
                         Try adjusting your search or filters
                       </p>
                     )}
                   </div>
                 ) : (
-                  <div className="flex items-center justify-between mb-4">
-                    <p className="text-xs text-muted-foreground">
-                      Showing {currentDocs.length} document{currentDocs.length !== 1 ? "s" : ""}
+                  <div className="flex items-center justify-between mb-4 animate-[slide-up_0.3s_ease-[var(--ease-out-expo)]_both]">
+                    <p className="text-[10px] font-mono text-zinc-500">
+                      SHOWING {currentDocs.length} DOCUMENT{currentDocs.length !== 1 ? "S" : ""}
                       {documents.length !== currentDocs.length
-                        ? ` of ${documents.length} total`
+                        ? ` OF ${documents.length} TOTAL`
                         : ""}
                     </p>
                   </div>
                 )}
                 <div
                   className={cn(
+                    "stagger-enter",
                     viewMode === "grid" && documents && currentDocs.length > 0
                       ? "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
                       : documents && currentDocs.length > 0
