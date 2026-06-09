@@ -493,3 +493,6 @@
 00:14:28  INFO     ============================================================
 00:14:28  INFO     CRAWL COMPLETE  |  Elap 0m02s | Fetch 7 | Save 0 | Skip 0 | Fail 7 | DLQ 0
 00:14:28  INFO     ============================================================
+12:30:41  INFO     Loaded robots.txt for web.uettaxila.edu.pk
+12:31:08  INFO     Loaded robots.txt for web.uettaxila.edu.pk
+12:33:52  INFO     Loaded robots.txt for web.uettaxila.edu.pk

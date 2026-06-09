@@ -1,9 +1,11 @@
 vi.mock("../../convex/_generated/server", () => ({
   mutation: (opts: { handler: Function }) => ({ handler: opts.handler }),
   query: (opts: { handler: Function }) => ({ handler: opts.handler }),
+  internalMutation: (opts: { handler: Function }) => ({ handler: opts.handler }),
+  internalQuery: (opts: { handler: Function }) => ({ handler: opts.handler }),
 }));
 
-import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import type { Id } from "../../convex/_generated/dataModel";
 
 interface MockUserCtx {
@@ -41,17 +43,10 @@ describe("users", () => {
   });
 
   describe("getOrCreate", () => {
-    beforeEach(() => {
-      vi.stubEnv("WEBHOOK_SECRET", "test-secret");
-    });
-
-    afterEach(() => {
-      vi.unstubAllEnvs();
-    });
-
-    it("returns existing user id when user already exists (via secret auth)", async () => {
+    it("returns existing user id when user already exists (via Clerk identity)", async () => {
       const fakeUser = { _id: "existing-id" as Id<"users">, clerkId: "clerk_123" };
       ctx.db.query.mockReturnValue(makeUniqueChain(fakeUser));
+      ctx.auth.getUserIdentity.mockResolvedValue({ subject: "clerk_123" });
 
       const { getOrCreate } = await import("../../convex/users");
       const handler = (getOrCreate as unknown as { handler: (ctx: MockUserCtx, args: any) => Promise<Id<"users">> }).handler;
@@ -60,7 +55,6 @@ describe("users", () => {
         clerkId: "clerk_123",
         name: "Test User",
         email: "test@example.com",
-        secret: "test-secret",
       });
 
       expect(result).toBe(fakeUser._id);
@@ -68,8 +62,9 @@ describe("users", () => {
       expect(ctx.db.insert).not.toHaveBeenCalled();
     });
 
-    it("creates new user when user does not exist (via secret auth)", async () => {
+    it("creates new user when user does not exist (via Clerk identity)", async () => {
       ctx.db.query.mockReturnValue(makeUniqueChain(null));
+      ctx.auth.getUserIdentity.mockResolvedValue({ subject: "clerk_new" });
 
       const { getOrCreate } = await import("../../convex/users");
       const handler = (getOrCreate as unknown as { handler: (ctx: MockUserCtx, args: any) => Promise<Id<"users">> }).handler;
@@ -79,7 +74,6 @@ describe("users", () => {
         name: "New User",
         email: "new@example.com",
         imageUrl: "https://example.com/avatar.png",
-        secret: "test-secret",
       });
 
       expect(result).toBe("new-user-id" as Id<"users">);
@@ -94,6 +88,7 @@ describe("users", () => {
 
     it("creates new user without optional imageUrl", async () => {
       ctx.db.query.mockReturnValue(makeUniqueChain(null));
+      ctx.auth.getUserIdentity.mockResolvedValue({ subject: "clerk_noimg" });
 
       const { getOrCreate } = await import("../../convex/users");
       const handler = (getOrCreate as unknown as { handler: (ctx: MockUserCtx, args: any) => Promise<Id<"users">> }).handler;
@@ -102,7 +97,6 @@ describe("users", () => {
         clerkId: "clerk_noimg",
         name: "No Image",
         email: "noimg@example.com",
-        secret: "test-secret",
       });
 
       const insertCall = ctx.db.insert.mock.calls[0]!;
@@ -110,7 +104,7 @@ describe("users", () => {
       expect(insertCall[1]).not.toHaveProperty("imageUrl");
     });
 
-    it("throws when no secret provided and no identity", async () => {
+    it("throws when no identity", async () => {
       ctx.auth.getUserIdentity.mockResolvedValue(null);
 
       const { getOrCreate } = await import("../../convex/users");

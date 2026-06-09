@@ -11,10 +11,62 @@ interface ChatInputNewProps {
   className?: string;
 }
 
+function SendButton({
+  isLoading,
+  onStop,
+  canSend,
+  onSubmit,
+}: {
+  isLoading?: boolean;
+  onStop?: () => void;
+  canSend: boolean;
+  onSubmit: (e?: React.FormEvent) => void;
+}) {
+  if (isLoading && onStop) {
+    return (
+      <button
+        type="button"
+        onClick={onStop}
+        className="shrink-0 w-10 h-10 rounded-[10px] bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 active:scale-95 transition-all duration-300 hover:bg-red-500/20 mb-0.5 mr-0.5 animate-pulse"
+        aria-label="Stop generating"
+      >
+        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <rect x="4" y="4" width="16" height="16" rx="2" />
+        </svg>
+      </button>
+    );
+  }
+  return (
+    <button
+      type="submit"
+      disabled={!canSend}
+      className={cn(
+        "shrink-0 w-10 h-10 rounded-[10px] flex items-center justify-center border active:scale-[0.98] active:translate-y-[1px] transition-all duration-300 ease-[var(--ease-spring)] focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none mb-0.5 mr-0.5",
+        canSend
+          ? "bg-[var(--accent)] border-[var(--accent)]/50 text-[var(--accent-fg)] hover:opacity-90"
+          : "bg-white/5 border-white/10 text-zinc-500",
+      )}
+      aria-label="Send query"
+    >
+      <svg
+        className="h-4 w-4"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        aria-hidden="true"
+      >
+        <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+      </svg>
+    </button>
+  );
+}
+
 export function ChatInputNew({ onSend, onStop, isLoading, className }: ChatInputNewProps) {
   const [input, setInput] = React.useState("");
   const inputRef = React.useRef<HTMLTextAreaElement>(null);
-  const { playTypingSound, playChimeSound, setVoiceTranscriptCallback, setVoiceInputOpen } = usePreferences();
+  const { playTypingSound, playChimeSound, setVoiceTranscriptCallback, setVoiceInputOpen } =
+    usePreferences();
   const lastTypingSoundTime = React.useRef(0);
 
   // Register as the voice transcript receiver
@@ -97,10 +149,16 @@ export function ChatInputNew({ onSend, onStop, isLoading, className }: ChatInput
           <button
             type="button"
             onClick={() => setVoiceInputOpen(true)}
-            className="p-2 text-zinc-500 hover:text-zinc-200 hover:bg-white/5 rounded-xl transition-colors active:scale-95 focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:outline-none"
+            className="p-2 text-zinc-500 hover:text-zinc-200 hover:bg-white/5 rounded-xl transition-all duration-300 ease-[var(--ease-spring)] active:scale-[0.98] active:translate-y-[1px] focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:outline-none"
             aria-label="Voice input"
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              className="w-4 h-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
               <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
               <line x1="12" y1="19" x2="12" y2="23" />
@@ -126,41 +184,26 @@ export function ChatInputNew({ onSend, onStop, isLoading, className }: ChatInput
           />
         </div>
 
-        {/* Submit / Stop button (Right) */}
-        {isLoading && onStop ? (
-          <button
-            type="button"
-            onClick={onStop}
-            className="shrink-0 w-10 h-10 rounded-[10px] bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 active:scale-95 transition-all duration-300 hover:bg-red-500/20 mb-0.5 mr-0.5 animate-pulse"
-            aria-label="Stop generating"
-          >
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <rect x="4" y="4" width="16" height="16" rx="2" />
-            </svg>
-          </button>
-        ) : (
-          <button
-            type="submit"
-            disabled={!canSend}
-            className={cn(
-              "shrink-0 w-10 h-10 rounded-[10px] flex items-center justify-center border active:scale-95 transition-all duration-300 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none mb-0.5 mr-0.5",
-              canSend
-                ? "bg-[var(--accent)] border-[var(--accent)]/50 text-[var(--accent-fg)] hover:opacity-90"
-                : "bg-white/5 border-white/10 text-zinc-500",
-            )}
-            aria-label="Send query"
-          >
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
-              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
-            </svg>
-          </button>
-        )}
+        <SendButton
+          isLoading={isLoading}
+          onStop={onStop}
+          canSend={canSend}
+          onSubmit={handleSubmit}
+        />
       </div>
 
       {/* Telemetry footer */}
-      <div className="flex justify-between items-center px-2 text-[9px] font-mono text-zinc-600 select-none" aria-hidden="true">
+      <div
+        className="flex justify-between items-center px-2 text-[9px] font-mono text-zinc-600 select-none"
+        aria-hidden="true"
+      >
         <span>UET GPT may produce inaccurate information. Verify critical details.</span>
-        <span className={cn("transition-colors", isLoading ? "text-[var(--accent)]/60 animate-pulse" : "text-zinc-700")}>
+        <span
+          className={cn(
+            "transition-colors",
+            isLoading ? "text-[var(--accent)]/60 animate-pulse" : "text-zinc-700",
+          )}
+        >
           {isLoading ? "GENERATING…" : "IDLE"}
         </span>
       </div>

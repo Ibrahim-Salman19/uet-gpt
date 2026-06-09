@@ -15,8 +15,9 @@
  *   await enforceRateLimit(ctx, userId, estimatedTokens);
  */
 
-import { ConvexError } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import type { MutationCtx } from "./_generated/server";
+import { mutation } from "./_generated/server";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -103,3 +104,14 @@ export async function enforceRateLimit(
     );
   }
 }
+
+export const checkRateLimit = mutation({
+  args: {
+    userId: v.string(),
+    tokenEstimate: v.optional(v.number()),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    await enforceRateLimit(ctx, args.userId, args.tokenEstimate ?? 1_000);
+  },
+});

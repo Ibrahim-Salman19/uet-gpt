@@ -66,7 +66,7 @@ describe("Chat API Integration", () => {
     });
 
     it("handles null context gracefully", () => {
-      const result = buildSystemPrompt(null);
+      const result = buildSystemPrompt(null, "general");
       expect(result).toContain("You don't have specific context");
     });
   });
@@ -79,10 +79,10 @@ describe("Chat API Integration", () => {
 
       const models = getModelPriorities();
       expect(models).toHaveLength(4);
-      expect(models[0]).toBe("meta-llama/llama-4-scout");
-      expect(models[1]).toBe("cerebras-llama-3.3-70b");
+      expect(models[0]).toBe("meta-llama/llama-4-scout-17b-16e-instruct");
+      expect(models[1]).toBe("gpt-oss-120b");
       expect(models[2]).toBe("llama-3.1-8b-instant");
-      expect(models[3]).toBe("gemini-1.5-flash");
+      expect(models[3]).toBe("gemini-2.5-flash");
 
       vi.unstubAllEnvs();
     });

@@ -101,12 +101,16 @@ export function Markdown({ content, className }: MarkdownProps) {
           },
           li({ children }) {
             return (
-              <li className="text-[var(--chat-font-size,0.875rem)] leading-relaxed text-[var(--text-primary)]">{children}</li>
+              <li className="text-[var(--chat-font-size,0.875rem)] leading-relaxed text-[var(--text-primary)]">
+                {children}
+              </li>
             );
           },
           p({ children }) {
             return (
-              <p className="my-2 text-[var(--chat-font-size,0.875rem)] leading-relaxed text-[var(--text-primary)]">{children}</p>
+              <p className="my-2 text-[var(--chat-font-size,0.875rem)] leading-relaxed text-[var(--text-primary)]">
+                {children}
+              </p>
             );
           },
           h1({ children }) {

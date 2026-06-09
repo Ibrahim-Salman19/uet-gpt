@@ -24,10 +24,19 @@ export const UET_CRAWL_CONFIG = {
     "https://web.uettaxila.edu.pk/administration/",
     "https://web.uettaxila.edu.pk/dic/",
     "https://web.uettaxila.edu.pk/programs/",
+    ...Array.from(
+      { length: 25 },
+      (_, i) => `https://web.uettaxila.edu.pk/CMS/AUT2012/etDeptIndex.aspx?id=${i + 1}`,
+    ),
+    ...Array.from(
+      { length: 25 },
+      (_, i) => `https://web.uettaxila.edu.pk/departmentfaculty?departmentId=${i + 1}`,
+    ),
   ],
   maxPages: 500,
-  maxDepth: 5,
-  includePaths: ["https://web.uettaxila.edu.pk/**"],
+  // M1: reduced from 5 to 4 for faster crawl completion
+  maxDepth: 4,
+  includePaths: ["https://web.uettaxila.edu.pk/**", "https://uettaxila.edu.pk/**"],
   excludePaths: [
     "https://web.uettaxila.edu.pk/**/edit",
     "https://web.uettaxila.edu.pk/**/delete",
@@ -37,19 +46,20 @@ export const UET_CRAWL_CONFIG = {
     "https://web.uettaxila.edu.pk/*.png",
     "https://web.uettaxila.edu.pk/*.zip",
     "https://web.uettaxila.edu.pk/student-portal/auth/**",
+    "https://web.uettaxila.edu.pk/search*",
+    "https://web.uettaxila.edu.pk/print/**",
+    "https://web.uettaxila.edu.pk/feed/**",
+    "https://web.uettaxila.edu.pk/gallery/**",
   ],
   allowExternalLinks: false,
 } as const;
-
-export { CACHE_SIMILARITY_THRESHOLD } from "../../convex/constants";
-
-export const EVAL_ENABLED = false;
 
 export const APP_NAME = "UET GPT";
 export const APP_TAGLINE = "Your AI Guide to UET Taxila";
 export const APP_DESCRIPTION =
   "An intelligent assistant that answers any question about UET Taxila.";
 
+// fallow-ignore-next-line unused-export
 export const UET_COLORS = {
   navy: "oklch(0.35 0.07 265)",
   navyLight: "oklch(0.55 0.08 265)",
@@ -57,12 +67,14 @@ export const UET_COLORS = {
   goldLight: "oklch(0.75 0.12 75)",
 } as const;
 
+// fallow-ignore-next-line unused-export
 export const TASTE_BASELINE = {
   designVariance: 8,
   motionIntensity: 6,
   visualDensity: 4,
 } as const;
 
+// fallow-ignore-next-line unused-export
 export const SPACING = {
   0: "0px",
   1: "4px",
@@ -79,6 +91,7 @@ export const SPACING = {
   24: "96px",
 } as const;
 
+// fallow-ignore-next-line unused-export
 export const ELEVATION = {
   sm: "0 1px 2px oklch(0 0 0 / 0.04), 0 1px 1px oklch(0 0 0 / 0.02)",
   md: "0 4px 6px oklch(0 0 0 / 0.04), 0 2px 4px oklch(0 0 0 / 0.03)",
@@ -86,6 +99,7 @@ export const ELEVATION = {
   xl: "0 20px 25px oklch(0 0 0 / 0.06), 0 8px 10px oklch(0 0 0 / 0.03)",
 } as const;
 
+// fallow-ignore-next-line unused-export
 export const DURATION = {
   fast: 100,
   normal: 250,

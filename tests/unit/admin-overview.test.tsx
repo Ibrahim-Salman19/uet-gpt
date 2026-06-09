@@ -2,28 +2,26 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// Mock convex/react
-vi.mock("convex/react", () => ({
-  useQuery: vi.fn(),
-  useMutation: vi.fn(() => Object.assign(vi.fn(), { withOptimisticUpdate: vi.fn() })),
-  useConvex: vi.fn(),
-}));
+vi.hoisted(() => {
+  const buildAdminMocks = (globalThis as any).buildAdminMocks;
+  (globalThis as any).currentAdminMocks = buildAdminMocks({
+    pathname: "/admin",
+    withOptimisticUpdate: true,
+    lucideIcons: {
+      FileText: "icon-filetext",
+      Users: "icon-users",
+      Globe: "icon-globe",
+      ThumbsUp: "icon-thumbsup",
+      ThumbsDown: "icon-thumbsdown",
+      Activity: "icon-activity",
+      Database: "icon-database",
+    },
+  });
+});
 
-// Mock next/navigation
-vi.mock("next/navigation", () => ({
-  usePathname: vi.fn(() => "/admin"),
-}));
-
-// Mock lucide-icon components used in StatCard
-vi.mock("lucide-react", () => ({
-  FileText: () => <svg data-testid="icon-filetext" />,
-  Users: () => <svg data-testid="icon-users" />,
-  Globe: () => <svg data-testid="icon-globe" />,
-  ThumbsUp: () => <svg data-testid="icon-thumbsup" />,
-  ThumbsDown: () => <svg data-testid="icon-thumbsdown" />,
-  Activity: () => <svg data-testid="icon-activity" />,
-  Database: () => <svg data-testid="icon-database" />,
-}));
+vi.mock("convex/react", () => (globalThis as any).currentAdminMocks.convexReactMock);
+vi.mock("next/navigation", () => (globalThis as any).currentAdminMocks.navigationMock);
+vi.mock("lucide-react", () => (globalThis as any).currentAdminMocks.lucideMock);
 
 import { useQuery } from "convex/react";
 import AdminOverviewPage from "@/app/admin/page";
@@ -106,16 +104,13 @@ describe("AdminOverviewPage", () => {
   it("renders document status breakdown section", () => {
     vi.mocked(useQuery).mockReturnValue(buildMockStats());
     render(<AdminOverviewPage />);
-    expect(screen.getByText("Document Status")).toBeInTheDocument();
-    expect(screen.getByText("Indexed")).toBeInTheDocument();
-    expect(screen.getByText("Pending")).toBeInTheDocument();
-    expect(screen.getByText("Failed")).toBeInTheDocument();
+    expect(screen.getByText("INDEXED / PENDING / FAILED")).toBeInTheDocument();
   });
 
   it("renders recent crawl jobs section", () => {
     vi.mocked(useQuery).mockReturnValue(buildMockStats());
     render(<AdminOverviewPage />);
-    expect(screen.getByText("Recent Crawl Jobs")).toBeInTheDocument();
+    expect(screen.getByText("[ SYSTEM: RECENT CRAWLS ]")).toBeInTheDocument();
     expect(screen.getByText("completed")).toBeInTheDocument();
     expect(screen.getByText("scheduled")).toBeInTheDocument();
   });
@@ -129,7 +124,7 @@ describe("AdminOverviewPage", () => {
   it("renders recent feedback section", () => {
     vi.mocked(useQuery).mockReturnValue(buildMockStats());
     render(<AdminOverviewPage />);
-    expect(screen.getByText("Recent Feedback")).toBeInTheDocument();
+    expect(screen.getByText("[ CUSTOMER: RECENT FEEDBACK ]")).toBeInTheDocument();
   });
 
   it("shows empty state when no recent feedback", () => {

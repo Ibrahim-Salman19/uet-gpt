@@ -47,12 +47,12 @@ export function PreferencesModal() {
   ) => {
     return (
       <div className="flex items-start justify-between gap-4 py-4 first:pt-0 border-b border-white/5 last:border-none">
-        <div className="flex-1">
+        <label htmlFor={id} className="flex-1 cursor-pointer">
           <div className="text-[13px] font-medium text-zinc-200 font-sans">{label}</div>
           <div className="text-[11px] text-zinc-500 mt-1.5 leading-relaxed pr-4 font-sans">
             {description}
           </div>
-        </div>
+        </label>
         <button
           id={id}
           role="switch"
@@ -65,7 +65,7 @@ export function PreferencesModal() {
         >
           <span
             className={cn(
-              "absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform shadow-sm",
+              "absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform shadow-sm pointer-events-none",
               checked ? "translate-x-5" : "translate-x-0",
             )}
           />

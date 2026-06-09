@@ -47,7 +47,7 @@ describe("ConvexReadyGate", () => {
       </ConvexReadyGate>
     );
 
-    expect(screen.getByText("CONNECTING…")).toBeInTheDocument();
+    expect(screen.getByText("CONNECTION LIVE")).toBeInTheDocument();
     expect(screen.queryByText("Happy Path Content")).not.toBeInTheDocument();
   });
 
@@ -66,7 +66,7 @@ describe("ConvexReadyGate", () => {
       vi.advanceTimersByTime(10000);
     });
 
-    expect(screen.getByText("Taking longer than expected")).toBeInTheDocument();
-    expect(screen.getByText("Reload Page")).toBeInTheDocument();
+    expect(screen.getByText("TIMEOUT // CONNECTION FAILURE")).toBeInTheDocument();
+    expect(screen.getByText("RETRY CONNECTION")).toBeInTheDocument();
   });
 });

@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef } from "react";
 import { useQuery } from "convex/react";
+import { useRef } from "react";
 
 /**
  * Drop-in replacement for Convex useQuery that prevents flicker

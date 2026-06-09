@@ -1,8 +1,8 @@
-vi.mock("../../convex/_generated/server", () => ({
+vi.mock("../../../convex/_generated/server", () => ({
   httpAction: (fn: Function) => fn,
 }));
 
-vi.mock("../../convex/_generated/api", () => ({
+vi.mock("../../../convex/_generated/api", () => ({
   internal: {
     crawl: {
       mutations: {

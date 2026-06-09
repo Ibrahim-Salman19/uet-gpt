@@ -10,10 +10,10 @@ import { api } from "../../convex/_generated/api";
  */
 export function useUserData() {
   const { user, isLoaded: isClerkLoaded } = useUser();
-  const convexUser = useStableQuery(
-    api.users.getByClerkId,
-    user?.id ? { clerkId: user.id } : "skip"
-  );
+  const queryArgs = user?.id ? { clerkId: user.id } : "skip";
+  const convexUser = useStableQuery(api.users.getByClerkId, queryArgs);
+  const modelPreference =
+    (convexUser?.preferences?.model as "llama-3.1-8b" | "llama-4-scout") || "llama-3.1-8b";
 
   return {
     clerkUser: user,
@@ -22,6 +22,6 @@ export function useUserData() {
     isConvexLoaded: convexUser !== undefined,
     isFullyLoaded: isClerkLoaded && convexUser !== undefined,
     preferences: convexUser?.preferences ?? null,
-    modelPreference: (convexUser?.preferences?.model as "llama-3.1-8b" | "llama-4-scout") || "llama-3.1-8b",
+    modelPreference,
   };
 }

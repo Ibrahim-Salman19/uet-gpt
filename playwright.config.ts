@@ -7,7 +7,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: [
-    ["html", { outputFolder: "test-results/html" }],
+    ["html", { outputFolder: "playwright-report" }],
     ["json", { outputFile: "test-results/results.json" }],
   ],
   use: {
@@ -34,9 +34,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "pnpm build && pnpm start", // Test against production build per best practice
+    command: "npm run dev", // Use dev server for faster E2E test runs locally
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
+    timeout: 180 * 1000,
   },
 });

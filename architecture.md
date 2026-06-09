@@ -574,7 +574,7 @@ CONVEX_AUTH_TOKEN=             # Bearer token for /ingest and /api/reset webhook
 CONVEX_SITE_URL=               # Convex site URL for webhook callbacks
 SENTRY_ORG=                    # Sentry organization
 SENTRY_PROJECT=                # Sentry project
-OPENROUTER_API_KEY=            # OpenRouter (currently unused — removed as embedding fallback)
+OPENROUTER_API_KEY=            # OpenRouter (presence guard only — embedding fallback removed to prevent vector space incompatibility)
 RERANKER_URL=                  # External FlashRank reranker endpoint
 CRON_SECRET=                   # API route cron authentication
 ```
@@ -612,7 +612,7 @@ Defined in `convex/crons.ts`:
 
 ### 10.2 Key Rotation
 
-Keys tried in order: `GEMINI_API_KEY` → `GEMINI_API_KEY_1` → `GEMINI_API_KEY_2` → `GOOGLE_GENERATIVE_AI_API_KEY`. First success wins. All fail → `ConvexError`. OpenRouter fallback removed to prevent vector space incompatibility.
+Keys tried in order: `GEMINI_API_KEY` → `GEMINI_API_KEY_1` → `GEMINI_API_KEY_2` → `GOOGLE_GENERATIVE_AI_API_KEY`. First success wins. All fail → `ConvexError`. The `OPENROUTER_API_KEY` is read for a presence guard only (no actual fallback — removed to prevent vector space incompatibility).
 
 ### 10.3 Resilient Embedding Model
 
@@ -685,7 +685,7 @@ Per `AGENTS.md`, every commit must pass:
 
 | Component | Location | Description |
 |-----------|----------|-------------|
-| Golden set | `scripts/eval/golden_set.jsonl` | 75 QA pairs across categories (admissions, fees, exams, departments, etc.) |
+| Golden set | `scripts/eval/golden_set.jsonl` | 50 QA pairs across categories (admissions, fees, exams, departments, etc.) — confirmed by `wc -l` |
 | Runner | `scripts/eval/run_eval.py` | Computes `recall_at_5` (primary metric) and `fragment_hit_rate` |
 | Convex eval action | `convex/eval.ts:evaluateSearch` | Runs `rag.search()` on "uet-global" namespace and hydrates chunk results |
 

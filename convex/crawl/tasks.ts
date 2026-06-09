@@ -1,4 +1,5 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
+import { internal } from "../_generated/api";
 import type { Doc, Id } from "../_generated/dataModel";
 import { internalMutation, mutation } from "../_generated/server";
 
@@ -43,7 +44,7 @@ export const cleanupExpiredCache = internalMutation({
  * Aggregate daily usage stats for the admin analytics dashboard.
  * Creates a snapshot of key metrics in the audit log.
  */
-export const aggregateDailyStats = mutation({
+export const aggregateDailyStats = internalMutation({
   args: {},
   returns: v.null(),
   handler: async (ctx) => {
@@ -102,5 +103,38 @@ export const aggregateDailyStats = mutation({
     }
 
     return null;
+  },
+});
+
+export const runStatsAggregation = mutation({
+  args: { secret: v.optional(v.string()) },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const cronSecret = process.env.CRON_SECRET;
+    const webhookSecret = process.env.WEBHOOK_SECRET;
+
+    if (args.secret && cronSecret && args.secret === cronSecret) {
+      await ctx.runMutation(internal.crawl.tasks.aggregateDailyStats);
+      return null;
+    }
+
+    if (args.secret && webhookSecret && args.secret === webhookSecret) {
+      await ctx.runMutation(internal.crawl.tasks.aggregateDailyStats);
+      return null;
+    }
+
+    const identity = await ctx.auth.getUserIdentity();
+    if (identity) {
+      const caller = await ctx.db
+        .query("users")
+        .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+        .unique();
+      if (caller && (caller.role === "admin" || caller.role === "superadmin")) {
+        await ctx.runMutation(internal.crawl.tasks.aggregateDailyStats);
+        return null;
+      }
+    }
+
+    throw new ConvexError("Unauthorized: admin or valid secret required");
   },
 });

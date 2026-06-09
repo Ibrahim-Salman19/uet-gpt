@@ -156,7 +156,6 @@ assumptions: |
   expected_url uses substring match on uettaxila.edu.pk — will work once data is indexed.
 issues_discovered: |
   9 bugs fixed: A1-A8 in run_agent.sh, B1-B5 in CRONJOB.md, C1-C5 in run_eval.py, D1-D3 in golden_set.jsonl.
-  See implementation_plan.md for full audit table.
 
 ---
 run_id: 2026-05-30-11
@@ -182,3 +181,39 @@ test_status: FAIL
 commits: []
 assumptions: "Tests are massively failing (218 failures) either due to untracked files corrupting module resolution or fundamentally broken environment setup (jsdom/vitest config). Triggered Emergency Protocol and aborted tasks."
 issues_discovered: "Vitest config is missing jsdom environment, untracked test files from previous partial runs are causing module resolution failures."
+
+---
+run_id: 2026-06-06-v15
+timestamp_utc: 2026-06-06T12:00:00Z
+task: "V15.0: Comprehensive Architecture Audit & Bug Fix Session"
+files_modified:
+  - convex/http.ts
+  - convex/clerk/webhook.ts (NEW)
+  - convex/users.ts
+  - convex/embeddings/search.ts
+  - convex/embeddings/generate.ts
+  - src/app/api/webhooks/clerk/route.ts
+  - src/hooks/use-admin.ts
+  - src/hooks/use-messages.ts
+  - src/lib/analytics.ts
+  - .github/workflows/ci.yml
+  - next.config.ts
+  - architecture.md
+  - .agent/state.md
+  - .agent/progress_log.md
+  - .agent/incident_log.md
+  - src/app/api/chat/route.ts
+test_status: NOT_RUN (production code focus only)
+commits: [pending]
+assumptions: |
+  All 45+ architecture.md §21 items reconciled with actual code state.
+  12 items marked [FIXED] (5 were already fixed in code but not documented).
+  6 production-code bugs fixed: webhook secret leak, CI cache key, FAQ score, as any casts, analytics docs, embedding fallback docs.
+  Embedding fallback intentionally NOT added (cross-provider would break vector space).
+  Analytics intentionally NOT wired (no-op pattern for zero-cost future integration).
+issues_discovered: |
+  Many architecture.md §21 items were already fixed in code but marked [BUG] — fixed documentation.
+  163 total as any casts found (most in test files — acceptable).
+  npx tsc --noEmit times out due to monorepo size — scoped verification to convex/ TS compile.
+  WEBHOOK_SECRET now shared via HTTP Authorization header instead of mutation args.
+  Convex HTTP action for user events reuses same auth pattern as crawl webhooks.

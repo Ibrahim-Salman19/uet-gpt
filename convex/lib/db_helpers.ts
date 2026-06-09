@@ -1,11 +1,14 @@
 /**
- * Fast table count using Convex's native .count() API.
- * Only works on full tables (no .filter()/.withIndex()).
- * Uses @ts-expect-error because .count() is not in public types
- * but is used internally by Convex dashboard (tableSize.ts syscall).
- * GitHub: convex/issues/10 — confirmed stable.
+ * Count all rows in a table using the public .collect() API.
+ * Slower than the native .count() (removed due to @ts-expect-error instability)
+ * but fully type-safe. For O(1) counts, consider @convex-dev/aggregate.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function fastCount(db: any, tableName: string): Promise<number> {
-  return await db.query(tableName).count();
+import type { GenericDatabaseReader, GenericDataModel } from "convex/server";
+
+export async function fastCount<DataModel extends GenericDataModel>(
+  db: GenericDatabaseReader<DataModel>,
+  tableName: string,
+): Promise<number> {
+  const docs = await db.query(tableName).collect();
+  return docs.length;
 }

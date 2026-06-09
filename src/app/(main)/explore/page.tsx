@@ -52,7 +52,10 @@ function ExploreCard({ doc }: { doc: ExploreDoc }) {
             {doc.title || "Untitled Document"}
           </p>
           <div className="mt-2 flex items-center gap-2 flex-wrap">
-            <Badge variant="outline" className="text-[9px] uppercase tracking-wider bg-zinc-900/60 text-zinc-400 border border-white/5 font-mono py-0.5 px-1.5 rounded-md">
+            <Badge
+              variant="outline"
+              className="text-[9px] uppercase tracking-wider bg-zinc-900/60 text-zinc-400 border border-white/5 font-mono py-0.5 px-1.5 rounded-md"
+            >
               {doc.category}
             </Badge>
             {doc.subcategory && (
@@ -71,8 +74,73 @@ function ExploreCard({ doc }: { doc: ExploreDoc }) {
         </div>
         <ExternalLink className="h-3.5 w-3.5 shrink-0 text-zinc-500 opacity-0 transition-opacity group-hover:opacity-100" />
       </div>
-      <p className="mt-2.5 line-clamp-1 text-[10px] leading-relaxed text-zinc-500 font-mono select-all">{doc.url}</p>
+      <p className="mt-2.5 line-clamp-1 text-[10px] leading-relaxed text-zinc-500 font-mono select-all">
+        {doc.url}
+      </p>
     </a>
+  );
+}
+
+function ExploreTabContent({
+  cat,
+  documents,
+  currentDocs,
+  searchQuery,
+  viewMode,
+}: {
+  cat: string;
+  documents: ExploreDoc[] | undefined;
+  currentDocs: ExploreDoc[];
+  searchQuery: string;
+  viewMode: "grid" | "list";
+}) {
+  return (
+    <TabsContent key={cat} value={cat} className="m-0 mt-0 outline-none">
+      <div className="mx-auto max-w-5xl px-6 py-6">
+        {!documents ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="h-5 w-5 animate-spin text-[var(--accent)]" />
+          </div>
+        ) : currentDocs.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center animate-[slide-up_0.3s_ease-[var(--ease-out-expo)]_both]">
+            <div className="w-12 h-12 flex items-center justify-center rounded-2xl bg-[var(--accent)]/10 border border-[var(--accent)]/20 mb-4">
+              <BookOpen className="h-5 w-5 text-[var(--accent)]" />
+            </div>
+            <p className="text-sm font-medium text-zinc-300">No documents found</p>
+            {searchQuery && (
+              <p className="text-xs text-zinc-500 mt-1.5 font-sans">
+                Try adjusting your search or filters
+              </p>
+            )}
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center justify-between mb-4 animate-[slide-up_0.3s_ease-[var(--ease-out-expo)]_both]">
+              <p className="text-[10px] font-mono text-zinc-500">
+                SHOWING {currentDocs.length} DOCUMENT{currentDocs.length !== 1 ? "S" : ""}
+                {documents.length !== currentDocs.length
+                  ? ` OF ${documents.length} TOTAL`
+                  : ""}
+              </p>
+            </div>
+            <div
+              className={cn(
+                "stagger-enter",
+                viewMode === "grid" && documents && currentDocs.length > 0
+                  ? "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
+                  : documents && currentDocs.length > 0
+                    ? "flex flex-col gap-2"
+                    : "",
+              )}
+            >
+              {currentDocs.map((doc: ExploreDoc) => (
+                <ExploreCard key={doc._id} doc={doc} />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </TabsContent>
   );
 }
 
@@ -82,11 +150,17 @@ export default function ExplorePage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   // Pass category to backend when filtered — avoids the 50-doc client-side truncation bug
-  const queryArgs = activeCategory === "all"
-    ? {}
-    : { category: activeCategory };
+  const queryArgs = activeCategory === "all" ? {} : { category: activeCategory };
 
-  const documents = useQuery(api.doc.list as unknown as FunctionReference<"query", "public">, queryArgs);
+  // Use search API if query exists, otherwise use list API
+  const queryToUse = searchQuery.trim().length > 0 ? api.doc.search : api.doc.list;
+  const finalArgs =
+    searchQuery.trim().length > 0 ? { query: searchQuery.trim(), ...queryArgs } : queryArgs;
+
+  const documents = useQuery(
+    queryToUse as unknown as FunctionReference<"query", "public">,
+    finalArgs,
+  );
 
   const getFilteredDocs = (cat: string) => {
     return documents
@@ -102,7 +176,6 @@ export default function ExplorePage() {
       : [];
   };
 
-
   return (
     <Tabs
       value={activeCategory}
@@ -112,8 +185,12 @@ export default function ExplorePage() {
       <div className="border-b border-[#222226] bg-[#0a0a0c]/60 backdrop-blur-md px-6 py-5">
         <div className="mx-auto flex max-w-5xl flex-col gap-4">
           <div>
-            <h1 className="text-base font-semibold text-zinc-100 font-sans tracking-tight">Explore UET Taxila</h1>
-            <p className="text-xs text-zinc-500 mt-1 font-sans">Browse all indexed documents and pages</p>
+            <h1 className="text-base font-semibold text-zinc-100 font-sans tracking-tight">
+              Explore UET Taxila
+            </h1>
+            <p className="text-xs text-zinc-500 mt-1 font-sans">
+              Browse all indexed documents and pages
+            </p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -176,55 +253,16 @@ export default function ExplorePage() {
       </div>
 
       <ScrollArea className="flex-1 bg-transparent">
-        {CATEGORIES.map((cat) => {
-          const currentDocs = getFilteredDocs(cat);
-          return (
-            <TabsContent key={cat} value={cat} className="m-0 mt-0 outline-none">
-              <div className="mx-auto max-w-5xl px-6 py-6">
-                {!documents ? (
-                  <div className="flex items-center justify-center py-16">
-                    <Loader2 className="h-5 w-5 animate-spin text-[var(--accent)]" />
-                  </div>
-                ) : currentDocs.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-20 text-center animate-[slide-up_0.3s_ease-[var(--ease-out-expo)]_both]">
-                    <div className="w-12 h-12 flex items-center justify-center rounded-2xl bg-[var(--accent)]/10 border border-[var(--accent)]/20 mb-4">
-                      <BookOpen className="h-5 w-5 text-[var(--accent)]" />
-                    </div>
-                    <p className="text-sm font-medium text-zinc-300">No documents found</p>
-                    {searchQuery && (
-                      <p className="text-xs text-zinc-500 mt-1.5 font-sans">
-                        Try adjusting your search or filters
-                      </p>
-                    )}
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-between mb-4 animate-[slide-up_0.3s_ease-[var(--ease-out-expo)]_both]">
-                    <p className="text-[10px] font-mono text-zinc-500">
-                      SHOWING {currentDocs.length} DOCUMENT{currentDocs.length !== 1 ? "S" : ""}
-                      {documents.length !== currentDocs.length
-                        ? ` OF ${documents.length} TOTAL`
-                        : ""}
-                    </p>
-                  </div>
-                )}
-                <div
-                  className={cn(
-                    "stagger-enter",
-                    viewMode === "grid" && documents && currentDocs.length > 0
-                      ? "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
-                      : documents && currentDocs.length > 0
-                        ? "flex flex-col gap-2"
-                        : "",
-                  )}
-                >
-                  {currentDocs.map((doc: ExploreDoc) => (
-                    <ExploreCard key={doc._id} doc={doc} />
-                  ))}
-                </div>
-              </div>
-            </TabsContent>
-          );
-        })}
+        {CATEGORIES.map((cat) => (
+          <ExploreTabContent
+            key={cat}
+            cat={cat}
+            documents={documents}
+            currentDocs={getFilteredDocs(cat)}
+            searchQuery={searchQuery}
+            viewMode={viewMode}
+          />
+        ))}
       </ScrollArea>
     </Tabs>
   );

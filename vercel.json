@@ -4,15 +4,15 @@
   "installCommand": "pnpm install",
   "outputDirectory": ".next",
   "functions": {
-    "api/**/*.ts": {
+    "src/app/api/**/*.ts": {
       "memory": 1024,
       "maxDuration": 60
     },
-    "api/health/route.ts": {
+    "src/app/api/health/route.ts": {
       "memory": 256,
       "maxDuration": 10
     },
-    "api/webhooks/**/*.ts": {
+    "src/app/api/webhooks/**/*.ts": {
       "memory": 256,
       "maxDuration": 30
     }

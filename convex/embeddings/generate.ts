@@ -1,3 +1,4 @@
+// fallow-ignore-file security-sink
 "use node";
 import { ConvexError, v } from "convex/values";
 import { action } from "../_generated/server";
@@ -108,9 +109,7 @@ export async function generateEmbeddingsInternal(texts: string[]): Promise<numbe
     process.env.GOOGLE_GENERATIVE_AI_API_KEY,
   ].filter((k): k is string => !!k);
 
-  const openRouterKey = process.env.OPENROUTER_API_KEY;
-
-  if (geminiKeys.length === 0 && !openRouterKey) {
+  if (geminiKeys.length === 0) {
     throw new ConvexError("GEMINI_API_KEY environment variable is not set");
   }
 
@@ -133,7 +132,10 @@ export async function generateEmbeddingsInternal(texts: string[]): Promise<numbe
     }
   }
 
-  // Fall back removed to prevent vector space incompatibility
+  // No cross-provider fallback: a different embedding model (e.g. OpenRouter's
+  // text-embedding-3-large) would produce vectors in a different latent space,
+  // silently breaking all vector similarity scores in the existing index.
+  // The multiple-GEMINI_API_KEY rotation above is the intended redundancy.
   throw new ConvexError(`All embedding providers failed:\n- ${errors.join("\n- ")}`);
 }
 

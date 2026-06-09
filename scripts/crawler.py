@@ -6,6 +6,7 @@ Handles Dead Letter Queues locally and manages transient timeouts.
 """
 
 import asyncio
+import fnmatch
 import hashlib
 import logging
 import random
@@ -15,6 +16,7 @@ import time
 import os
 import json
 import urllib.parse
+import urllib.robotparser
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -44,39 +46,54 @@ CONVEX_SITE_URL = os.environ.get("CONVEX_SITE_URL")
 if not CONVEX_SITE_URL and os.environ.get("NEXT_PUBLIC_CONVEX_URL"):
     CONVEX_SITE_URL = os.environ.get("NEXT_PUBLIC_CONVEX_URL").replace(".convex.cloud", ".convex.site")
 
+if not CONVEX_SITE_URL:
+    print("[ERROR] CONVEX_SITE_URL is not configured in .env.local")
+    sys.exit(1)
+
 CONVEX_AUTH_TOKEN = os.environ.get("CONVEX_AUTH_TOKEN")
 if not CONVEX_AUTH_TOKEN:
     print("WARNING: CONVEX_AUTH_TOKEN not set — /ingest endpoint may reject the request")
     print("  Consider using CRAWL_WEBHOOK_SECRET instead: export CONVEX_AUTH_TOKEN=$CRAWL_WEBHOOK_SECRET")
 
-SITE_ROOTS = [
+# Load crawl_config.json
+CRAWL_CONFIG_PATH = project_root / "scripts" / "crawl_config.json"
+if not CRAWL_CONFIG_PATH.exists():
+    print(f"[ERROR] crawl_config.json not found at {CRAWL_CONFIG_PATH}")
+    sys.exit(1)
+
+with open(CRAWL_CONFIG_PATH, encoding="utf-8") as _cf:
+    CONFIG = json.loads(_cf.read())
+
+SITE_ROOTS = CONFIG.get("seedUrls", [
     "https://web.uettaxila.edu.pk/",
     "https://uettaxila.edu.pk/",
-]
+])
 
 ALLOWED_DOMAINS = frozenset(
     urllib.parse.urlparse(root).netloc for root in SITE_ROOTS
 )
 
-SEED_DEPARTMENT_URLS = (
-    [f"https://web.uettaxila.edu.pk/CMS/AUT2012/etDeptIndex.aspx?id={i}" for i in range(1, 26)] +
-    [f"https://web.uettaxila.edu.pk/departmentfaculty?departmentId={i}" for i in range(1, 26)]
-)
+# Auto-generated department faculty URLs (not in config, derived from departmentId 1-25)
+DEPARTMENT_FACULTY_URLS = [
+    f"https://web.uettaxila.edu.pk/departmentfaculty?departmentId={i}" for i in range(1, 26)
+]
 
 import argparse
 
 parser = argparse.ArgumentParser(description="UET Taxila Reliable RAG Crawler")
 parser.add_argument("--limit", type=int, default=500, help="Maximum number of pages to crawl")
+parser.add_argument("--clean", action="store_true", help="Reset pipeline data before crawling")
 args, unknown = parser.parse_known_args()
 
 MAX_PAGES       = args.limit
-MAX_DEPTH       = 4
-CONCURRENCY     = 5
-REQUEST_TIMEOUT = 20
-MAX_RETRIES     = 3
-PUSH_RETRIES    = 3
-MIN_WORD_COUNT  = 80
-QUEUE_MAXSIZE   = 200
+MAX_DEPTH       = CONFIG.get("maxDepth", 4)
+CONCURRENCY     = CONFIG.get("concurrency", 5)
+REQUEST_TIMEOUT = CONFIG.get("requestTimeout", 20)
+MAX_RETRIES     = CONFIG.get("maxRetries", 3)
+PUSH_RETRIES    = CONFIG.get("pushRetries", 3)
+MIN_WORD_COUNT  = CONFIG.get("minWordCount", 80)
+QUEUE_MAXSIZE   = CONFIG.get("queueMaxSize", 500)
+EXCLUDE_PATTERNS = CONFIG.get("excludePatterns", [])
 
 SKIP_EXTENSIONS = frozenset(
     ".doc .docx .ppt .pptx .xls .xlsx .zip .rar .exe "
@@ -89,6 +106,8 @@ STRIP_PARAMS = frozenset(
 )
 
 DLQ_FILE = project_root / "dlq.jsonl"
+DLQ_PROCESSING_SUFFIX = ".processing"
+STATE_FILE = project_root / "crawler_state.json"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -107,6 +126,25 @@ _traf_config.set("DEFAULT", "MIN_EXTRACTED_SIZE", "100")
 _traf_config.set("DEFAULT", "EXTRACTION_TIMEOUT", "0")
 
 # ═════════════════════════════════════════════════════════════════════════════
+# ROBOTS.TXT CACHE
+# ═════════════════════════════════════════════════════════════════════════════
+
+_robot_parsers: dict[str, urllib.robotparser.RobotFileParser | None] = {}
+
+def _get_robot_parser(netloc: str) -> urllib.robotparser.RobotFileParser | None:
+    if netloc not in _robot_parsers:
+        rp = urllib.robotparser.RobotFileParser()
+        rp.set_url(f"https://{netloc}/robots.txt")
+        try:
+            rp.read()
+            _robot_parsers[netloc] = rp
+            log.info(f"Loaded robots.txt for {netloc}")
+        except Exception as e:
+            log.warning(f"Could not fetch robots.txt for {netloc}: {e}")
+            _robot_parsers[netloc] = None
+    return _robot_parsers[netloc]
+
+# ═════════════════════════════════════════════════════════════════════════════
 # DATA STRUCTURES
 # ═════════════════════════════════════════════════════════════════════════════
 
@@ -123,6 +161,56 @@ class CrawlStats:
         s = int(time.monotonic() - self.start_ts)
         el = f"{s // 60}m{s % 60:02d}s"
         return f"Elap {el} | Fetch {self.fetched} | Save {self.saved} | Skip {self.skipped} | Fail {self.failed} | DLQ {self.dlq}"
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# SIMHASH NEAR-DUPLICATE DETECTION (R6 fix)
+# ═════════════════════════════════════════════════════════════════════════════
+
+class SimHash:
+    """64-bit SimHash for near-duplicate content detection (Hamming distance ≤8)."""
+    def __init__(self, bits: int = 64):
+        self.bits = bits
+        self.fingerprints: list[int] = []
+
+    def _hash_token(self, token: str) -> int:
+        h = hashlib.md5(token.encode()).digest()
+        return int.from_bytes(h[:8], "big")
+
+    def _fingerprint(self, text: str) -> int:
+        words = re.findall(r'\w{2,}', text.lower())[:2000]
+        if not words:
+            return 0
+        v = [0] * self.bits
+        for word in set(words):
+            h = self._hash_token(word)
+            for i in range(self.bits):
+                if h & (1 << i):
+                    v[i] += 1
+                else:
+                    v[i] -= 1
+        fp = 0
+        for i in range(self.bits):
+            if v[i] > 0:
+                fp |= (1 << i)
+        return fp
+
+    @staticmethod
+    def _hamming_distance(a: int, b: int) -> int:
+        return (a ^ b).bit_count()
+
+    def is_near_dup(self, text: str, threshold: int = 8) -> bool:
+        if not text:
+            return False
+        fp = self._fingerprint(text[:5000])
+        if fp == 0:
+            return False
+        for existing in self.fingerprints:
+            if self._hamming_distance(fp, existing) <= threshold:
+                return True
+        self.fingerprints.append(fp)
+        return False
+
 
 # ═════════════════════════════════════════════════════════════════════════════
 # UTILITIES
@@ -153,13 +241,33 @@ def canonicalize_url(url: str) -> str:
     path = parsed.path.rstrip("/") or "/"
     return urllib.parse.urlunparse((parsed.scheme, parsed.netloc, path, parsed.params, new_query, ""))
 
+def _matches_exclude(url: str) -> bool:
+    path = urllib.parse.urlparse(url).path
+    for pattern in EXCLUDE_PATTERNS:
+        if pattern.startswith("http"):
+            if fnmatch.fnmatch(url, pattern):
+                return True
+        else:
+            if fnmatch.fnmatch(path, pattern):
+                return True
+    return False
+
 def is_allowed_url(url: str) -> bool:
     try:
         p = urllib.parse.urlparse(url)
-        if p.scheme not in ("http", "https"): return False
-        if p.netloc not in ALLOWED_DOMAINS: return False
-        if any(p.path.lower().endswith(ext) for ext in SKIP_EXTENSIONS): return False
-        if p.path.startswith(("mailto:", "javascript:", "tel:")): return False
+        if p.scheme not in ("http", "https"):
+            return False
+        if p.netloc not in ALLOWED_DOMAINS:
+            return False
+        if any(p.path.lower().endswith(ext) for ext in SKIP_EXTENSIONS):
+            return False
+        if p.path.startswith(("mailto:", "javascript:", "tel:")):
+            return False
+        if _matches_exclude(url):
+            return False
+        rp = _get_robot_parser(p.netloc)
+        if rp is not None and not rp.can_fetch("*", url):
+            return False
         return True
     except Exception:
         return False
@@ -177,7 +285,8 @@ def extract_links(html: str, base_url: str) -> list[str]:
 
 def extract_title(html: str) -> str:
     soup = BeautifulSoup(html, "lxml")
-    if soup.title and soup.title.string: return soup.title.string.strip()
+    if soup.title and soup.title.string:
+        return soup.title.string.strip()
     h1 = soup.find("h1")
     return h1.get_text(strip=True) if h1 else ""
 
@@ -185,13 +294,119 @@ def write_to_dlq(url: str, depth: int):
     with open(DLQ_FILE, "a", encoding="utf-8") as f:
         f.write(json.dumps({"url": url, "depth": depth}) + "\n")
 
+def url_priority(url: str, depth: int) -> float:
+    lower = url.lower()
+    score = 0.0
+    if lower in ("https://web.uettaxila.edu.pk/", "https://uettaxila.edu.pk/"):
+        score += 50
+    if "web.uettaxila.edu.pk" in lower:
+        score += 20
+    if "admission" in lower or "academic" in lower:
+        score += 100
+    if "department" in lower or "faculty" in lower:
+        score += 50
+    path_segments = [s for s in urllib.parse.urlparse(url).path.split("/") if s]
+    score += max(0, 10 - len(path_segments))
+    return score
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# SITEMAP DISCOVERY (Mo1 fix)
+# ═════════════════════════════════════════════════════════════════════════════
+
+async def discover_sitemap(base_url: str) -> list[str]:
+    sitemap_url = base_url.rstrip("/") + "/sitemap.xml"
+    try:
+        async with AsyncSession(impersonate="chrome", timeout=10) as s_session:
+            resp = await s_session.get(sitemap_url)
+            if resp.status_code == 200:
+                soup = BeautifulSoup(resp.text, "xml")
+                urls = [loc.text.strip() for loc in soup.find_all("loc")]
+                log.info(f"Discovered {len(urls)} URLs from sitemap: {sitemap_url}")
+                return urls
+            else:
+                log.debug(f"No sitemap at {sitemap_url} (HTTP {resp.status_code})")
+    except Exception as e:
+        log.debug(f"Sitemap discovery failed for {sitemap_url}: {e}")
+    return []
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# PIPELINE RESET (M11 fix)
+# ═════════════════════════════════════════════════════════════════════════════
+
+async def reset_pipeline():
+    log.info("Resetting pipeline data via /api/reset ...")
+    headers = {"Content-Type": "application/json"}
+    if CONVEX_AUTH_TOKEN:
+        headers["Authorization"] = f"Bearer {CONVEX_AUTH_TOKEN}"
+    try:
+        async with AsyncSession() as reset_session:
+            resp = await reset_session.post(
+                f"{CONVEX_SITE_URL}/api/reset",
+                headers=headers,
+                timeout=30,
+            )
+            if resp.status_code == 200:
+                log.info("Pipeline data reset successfully")
+            else:
+                log.warning(f"Reset returned HTTP {resp.status_code}: {resp.text}")
+    except Exception as e:
+        log.error(f"Reset failed: {e}")
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# CRASH RECOVERY (E8 fix)
+# ═════════════════════════════════════════════════════════════════════════════
+
+def save_crawl_state(queue_items: list, visited: set, stats: CrawlStats):
+    """Save crawl state to disk for crash recovery."""
+    state = {
+        "queue": queue_items[:100],
+        "visited_count": len(visited),
+        "stats": {
+            "fetched": stats.fetched,
+            "saved": stats.saved,
+            "skipped": stats.skipped,
+            "failed": stats.failed,
+            "dlq": stats.dlq,
+        },
+        "timestamp": time.time(),
+    }
+    try:
+        with open(STATE_FILE, "w", encoding="utf-8") as f:
+            json.dump(state, f)
+    except Exception as e:
+        log.debug(f"Failed to save crawl state: {e}")
+
+def load_crawl_state() -> dict | None:
+    """Check for saved crawl state for crash recovery."""
+    if STATE_FILE.exists():
+        try:
+            with open(STATE_FILE, "r", encoding="utf-8") as f:
+                state = json.load(f)
+            log.info(f"Found saved crawl state ({state.get('visited_count', 0)} visited)")
+            return state
+        except Exception as e:
+            log.warning(f"Could not load crawl state: {e}")
+    return None
+
+def remove_crawl_state():
+    """Clean up saved crawl state on clean shutdown."""
+    try:
+        if STATE_FILE.exists():
+            STATE_FILE.unlink()
+    except Exception:
+        pass
+
+
 # ═════════════════════════════════════════════════════════════════════════════
 # ADAPTIVE RATE LIMITING
 # ═════════════════════════════════════════════════════════════════════════════
 
 class TokenBucket:
     """Proactive rate limiter: ensures a maximum request rate per second."""
-    def __init__(self, rate: float = 5.0, capacity: float = 10.0):
+    def __init__(self, rate: float = 8.0, capacity: float = 15.0):
         self.rate = rate
         self.capacity = capacity
         self.tokens = capacity
@@ -252,9 +467,21 @@ def retry_delay(attempt: int, base: float = 1.0, max_delay: float = 60.0) -> flo
     jitter = delay * random.random() * 0.5
     return delay + jitter
 
-# Module-level instances (created after class definitions to avoid NameError)
-rate_limiter = AIMDRateLimiter(min_delay=0.05, max_delay=5.0, initial_delay=0.4)
-token_bucket = TokenBucket(rate=8.0, capacity=15.0)
+# Module-level instances — read from CONFIG for rateLimiter/tokenBucket
+_rl = CONFIG.get("rateLimiter", {})
+_tb = CONFIG.get("tokenBucket", {})
+rate_limiter = AIMDRateLimiter(
+    min_delay=_rl.get("minDelay", 0.05),
+    max_delay=_rl.get("maxDelay", 5.0),
+    initial_delay=_rl.get("initialDelay", 0.4),
+    ai_step=_rl.get("aiStep", 0.01),
+    md_factor=_rl.get("mdFactor", 2.0),
+    success_threshold=_rl.get("successThreshold", 10),
+)
+token_bucket = TokenBucket(
+    rate=_tb.get("rate", 8.0),
+    capacity=_tb.get("capacity", 15.0),
+)
 
 # ═════════════════════════════════════════════════════════════════════════════
 # FETCH & PUSH LOGIC
@@ -354,10 +581,11 @@ async def push_to_convex(url: str, markdown: str, title: str, source_type: str, 
 # ═════════════════════════════════════════════════════════════════════════════
 
 async def worker(
-    worker_id: int, queue: asyncio.Queue, visited: set, visited_lock: asyncio.Lock,
+    worker_id: int, queue: asyncio.PriorityQueue, visited: set, visited_lock: asyncio.Lock,
     stats: CrawlStats, stats_lock: asyncio.Lock, active_workers: list, active_lock: asyncio.Lock,
     pbar: atqdm, session: AsyncSession, push_session: AsyncSession, session_id: str,
-    rate_limiter: AIMDRateLimiter, token_bucket: TokenBucket
+    rate_limiter: AIMDRateLimiter, token_bucket: TokenBucket, simhash: SimHash,
+    state_counter: list,
 ):
     while True:
         async with stats_lock:
@@ -416,6 +644,12 @@ async def worker(
                 async with stats_lock: stats.skipped += 1
                 continue
 
+            # Near-dup check via SimHash
+            if simhash.is_near_dup(markdown):
+                async with stats_lock: stats.skipped += 1
+                log.debug(f"[near-dup] {url}")
+                continue
+
             source_type = "pdf" if url.lower().endswith(".pdf") else "html"
             
             action = await push_to_convex(url, markdown, title or url, source_type, session_id, push_session)
@@ -431,8 +665,20 @@ async def worker(
                     async with visited_lock:
                         if link not in visited:
                             visited.add(link)
-                            await queue.put((link, depth + 1))
-                            new_links += 1
+                            priority = (depth + 1, -url_priority(link, depth + 1))
+                            try:
+                                queue.put_nowait((priority, (link, depth + 1)))
+                                new_links += 1
+                            except asyncio.QueueFull:
+                                log.warning(f"Queue full, dropping link: {link}")
+                                break
+
+            # Crash recovery: save state every 50 pages
+            state_counter[0] += 1
+            if state_counter[0] % 50 == 0:
+                async with visited_lock:
+                    queue_snapshot = [(u, d) for _, (u, d) in list(queue._queue)[:100]]
+                    save_crawl_state(queue_snapshot, visited, stats)
 
         except Exception as exc:
             async with stats_lock: stats.failed += 1
@@ -452,30 +698,98 @@ async def crawl():
     log.info("UET Taxila RAG Crawler — Unified Reliable Edition")
     log.info("=" * 60)
 
-    queue = asyncio.Queue(maxsize=QUEUE_MAXSIZE)
-    visited = set()
-    
-    # 1. Load Dead Letter Queue first
-    if DLQ_FILE.exists():
-        with open(DLQ_FILE, "r", encoding="utf-8") as f:
-            for line in f:
-                try:
-                    data = json.loads(line)
-                    url, depth = data["url"], data["depth"]
-                    if url not in visited:
-                        visited.add(url)
-                        await queue.put((url, depth))
-                except Exception: pass
-        # Clear DLQ so we don't accumulate forever
-        os.remove(DLQ_FILE)
-        log.info(f"Loaded {queue.qsize()} URLs from Dead Letter Queue.")
+    # Handle --clean flag
+    if args.clean:
+        await reset_pipeline()
 
-    # 2. Add normal seeds
-    all_seeds = [canonicalize_url(u) for u in (SEED_DEPARTMENT_URLS + SITE_ROOTS)]
+    # Crash recovery: check for saved state
+    saved_state = load_crawl_state()
+    if saved_state:
+        log.info("Crash recovery mode — resuming from saved state")
+    else:
+        remove_crawl_state()
+
+    queue: asyncio.PriorityQueue = asyncio.PriorityQueue(maxsize=QUEUE_MAXSIZE)
+    visited: set = set()
+    simhash = SimHash()
+
+    # 0. Recover orphaned DLQ processing files
+    for orphan in sorted(project_root.glob(f"dlq*{DLQ_PROCESSING_SUFFIX}*")):
+        log.info(f"Recovering orphaned DLQ file: {orphan.name}")
+        try:
+            with open(orphan, "r", encoding="utf-8") as f:
+                for line in f:
+                    try:
+                        data = json.loads(line)
+                        url, depth = data["url"], data["depth"]
+                        if url not in visited:
+                            visited.add(url)
+                            priority = (depth, -url_priority(url, depth))
+                            try:
+                                queue.put_nowait((priority, (url, depth)))
+                            except asyncio.QueueFull:
+                                log.warning("Queue full during DLQ recovery, dropping entry")
+                                break
+                    except Exception:
+                        pass
+            os.remove(orphan)
+            log.info(f"Recovered {queue.qsize()} entries from orphaned DLQ")
+        except Exception as e:
+            log.error(f"Failed to recover {orphan}: {e}")
+
+    # 1. Load Dead Letter Queue with atomic swap (M6 fix)
+    if DLQ_FILE.exists():
+        ts = int(time.time() * 1000)
+        processing_file = DLQ_FILE.with_name(f"dlq_{DLQ_PROCESSING_SUFFIX}_{ts}.jsonl")
+        try:
+            DLQ_FILE.rename(processing_file)
+            loaded_count = 0
+            with open(processing_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    try:
+                        data = json.loads(line)
+                        url, depth = data["url"], data["depth"]
+                        if url not in visited:
+                            visited.add(url)
+                            priority = (depth, -url_priority(url, depth))
+                            try:
+                                queue.put_nowait((priority, (url, depth)))
+                                loaded_count += 1
+                            except asyncio.QueueFull:
+                                log.warning("Queue full during DLQ load, dropping entry")
+                                break
+                    except Exception:
+                        pass
+            os.remove(processing_file)
+            log.info(f"Loaded {loaded_count} URLs from Dead Letter Queue (atomic swap).")
+        except Exception as e:
+            log.error(f"DLQ atomic swap failed: {e}")
+
+    # 2. Sitemap discovery (Mo1 fix)
+    for root_url in ("https://web.uettaxila.edu.pk/", "https://uettaxila.edu.pk/"):
+        sitemap_urls = await discover_sitemap(root_url)
+        for s_url in sitemap_urls:
+            canonical = canonicalize_url(s_url)
+            if is_allowed_url(canonical) and canonical not in visited:
+                visited.add(canonical)
+                priority = (0, -url_priority(canonical, 0))
+                try:
+                    queue.put_nowait((priority, (canonical, 0)))
+                except asyncio.QueueFull:
+                    break
+
+    # 3. Add seeds from config + auto-generated department faculty URLs
+    all_seeds = [canonicalize_url(u) for u in (SITE_ROOTS + DEPARTMENT_FACULTY_URLS)]
     for seed in all_seeds:
         if seed not in visited:
             visited.add(seed)
-            await queue.put((seed, 0))
+            priority = (0, -url_priority(seed, 0))
+            try:
+                queue.put_nowait((priority, (seed, 0)))
+            except asyncio.QueueFull:
+                log.warning("Queue full during seed loading, dropping seed")
+
+    log.info(f"Queue initialized with {queue.qsize()} URLs ({len(visited)} visited)")
 
     session_id = str(int(time.time() * 1000))
     visited_lock = asyncio.Lock()
@@ -483,6 +797,7 @@ async def crawl():
     stats_lock = asyncio.Lock()
     active_workers = [0]
     active_lock = asyncio.Lock()
+    state_counter = [0]
 
     pbar = atqdm(total=MAX_PAGES, desc="Crawling", unit="pg", dynamic_ncols=True, colour="green")
 
@@ -493,12 +808,16 @@ async def crawl():
             asyncio.create_task(worker(
                 i, queue, visited, visited_lock, stats, stats_lock,
                 active_workers, active_lock, pbar, session, push_session, session_id,
-                rate_limiter, token_bucket
+                rate_limiter, token_bucket, simhash, state_counter
             )) for i in range(CONCURRENCY)
         ]
         await asyncio.gather(*worker_tasks, return_exceptions=True)
 
     pbar.close()
+
+    # Clean up saved state on success
+    remove_crawl_state()
+
     log.info("=" * 60)
     log.info(f"CRAWL COMPLETE  |  {stats.summary()}")
     log.info("=" * 60)

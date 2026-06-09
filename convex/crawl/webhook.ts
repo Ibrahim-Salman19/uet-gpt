@@ -1,13 +1,14 @@
 import { internal } from "../_generated/api";
-import type { Doc } from "../_generated/dataModel";
 import { httpAction } from "../_generated/server";
 import {
   assignFreshnessTier,
+  buildContextPrefix,
   canonicalizeUrl,
-  chunkMarkdown,
-  guardChunkSize,
+  generateChunks,
+  generateContextSummary,
   isPdfVirtualUrl,
   normalizeContent,
+  sha256,
 } from "./chunking";
 
 function hexToBuffer(hex: string): ArrayBuffer {
@@ -16,14 +17,6 @@ function hexToBuffer(hex: string): ArrayBuffer {
     bytes[i] = parseInt(hex.substring(i * 2, i * 2 + 2), 16);
   }
   return bytes.buffer;
-}
-
-async function sha256(text: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(text);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 async function verifySignature(
@@ -52,69 +45,250 @@ async function verifySignature(
   }
 }
 
+type WebhookResult = { markdown?: string; html?: string; text?: string };
+
+function computeStats(results: WebhookResult[]) {
+  let totalChunks = 0;
+  let totalTokens = 0;
+  let bytesProcessed = 0;
+  for (const r of results) {
+    const content = r.markdown || r.html || r.text || "";
+    totalChunks += Math.ceil(content.length / 3000);
+    totalTokens += Math.ceil(content.length / 4);
+    bytesProcessed += new TextEncoder().encode(content).length;
+  }
+  return { totalChunks, totalTokens, bytesProcessed };
+}
+
+function logCompletionAlert(taskId: string, successfulPages: number, failedPages: number, skippedPages: number) {
+  if (failedPages === 0) return;
+  const failureRate = failedPages / (successfulPages + failedPages + skippedPages);
+  if (failureRate > 0.05) {
+    console.warn(
+      `[ALERT] Crawl ${taskId} completed with ${failedPages} failed pages ` +
+        `(${(failureRate * 100).toFixed(1)}% failure rate)`,
+    );
+  }
+  console.warn(
+    `[ALERT] Crawl ${taskId}: ${failedPages} pages failed, ` +
+      `${skippedPages} skipped, ${successfulPages} successful`,
+  );
+}
+
+function handleStateChange(request: Request): Response | null {
+  const isStateChange = new URL(request.url).searchParams.get("type") === "state";
+  if (isStateChange) {
+    console.log("State change notification received — acknowledging without processing.");
+    return new Response(JSON.stringify({ ok: true, state: true }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+  return null;
+}
+
+function checkPayloadSize(request: Request): Response | null {
+  const contentLengthHeader = request.headers.get("content-length");
+  if (contentLengthHeader && Number(contentLengthHeader) > 10_485_760) {
+    console.warn(`Webhook payload too large: ${contentLengthHeader} bytes`);
+    return new Response("Payload too large", { status: 413 });
+  }
+  return null;
+}
+
+function verifyWebhookHeaders(
+  request: Request,
+): { timestamp: string; signature: string } | Response {
+  const timestamp = request.headers.get("x-crawl-timestamp");
+  const signature = request.headers.get("x-crawl-signature");
+
+  if (!timestamp || !signature) {
+    console.warn("Webhook rejected: Missing signature headers");
+    return new Response("Missing signature headers", { status: 400 });
+  }
+
+  const ts = parseInt(timestamp, 10);
+  const MAX_SKEW_MS = 5 * 60 * 1000;
+  if (Number.isNaN(ts) || Math.abs(Date.now() - ts) > MAX_SKEW_MS) {
+    console.warn(`Webhook rejected: Timestamp expired or invalid: ${timestamp}`);
+    return new Response("Request timestamp expired", { status: 400 });
+  }
+
+  return { timestamp, signature };
+}
+
+async function validateWebhookSignature(
+  rawBody: string,
+  timestamp: string,
+  signature: string,
+): Promise<Response | null> {
+  const primarySecret = process.env.CRAWL_WEBHOOK_SECRET;
+  const secondarySecret = process.env.CRAWL_WEBHOOK_SECRET_NEW;
+  if (!primarySecret) {
+    console.error("CRAWL_WEBHOOK_SECRET environment variable is not set");
+    return new Response("Server configuration error", { status: 500 });
+  }
+
+  let isValid = await verifySignature(timestamp, signature, primarySecret, rawBody);
+  if (!isValid && secondarySecret) {
+    isValid = await verifySignature(timestamp, signature, secondarySecret, rawBody);
+  }
+  if (!isValid) {
+    console.warn("Webhook rejected: Invalid signature");
+    return new Response("Invalid signature", { status: 401 });
+  }
+  return null;
+}
+
+function extractWebhookPayload(
+  rawBody: string,
+): { taskId: string; status: string; results: any[]; url: string | undefined } {
+  const payload = JSON.parse(rawBody);
+  console.log(
+    "Webhook received",
+    JSON.stringify({ taskId: payload.task_id, jobId: payload.job_id, url: payload.url }),
+  );
+  const taskId = payload.task_id || payload.job_id;
+  const status = payload.status;
+  const results = payload.data?.results || payload.results || (payload.url ? [payload] : []);
+  return { taskId, status, results, url: payload.url };
+}
+
+async function checkIdempotency(
+  ctx: any,
+  taskId: string,
+): Promise<boolean> {
+  const existing = await ctx.runQuery(internal.crawl.mutations.getProcessedWebhook, {
+    jobId: taskId,
+  });
+  return !!existing;
+}
+
+async function markJobProcessed(ctx: any, taskId: string): Promise<void> {
+  await ctx.runMutation(internal.crawl.mutations.markWebhookProcessed, {
+    jobId: taskId,
+    expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
+  });
+}
+
+function extractPageInfo(
+  result: any,
+  payloadUrl: string | undefined,
+): { url: string; canonicalUrl: string; isPdf: boolean; content: string; title: string; etag: string | undefined; lastModified: string | undefined } {
+  const url = result.url || payloadUrl;
+  const canonicalUrl = canonicalizeUrl(url);
+  const isPdf = url.toLowerCase().endsWith(".pdf") || result.media_type === "pdf";
+  const content = result.markdown || result.html || result.text;
+  const title = result.metadata?.title || "Untitled";
+  const etag = result.headers?.etag || undefined;
+  const lastModified = result.headers?.["last-modified"] || undefined;
+  return { url, canonicalUrl, isPdf, content, title, etag, lastModified };
+}
+
+async function validatePageContent(content: string, url: string, isPdf: boolean): Promise<boolean> {
+  if (isPdf && (!content || content.trim().length === 0)) {
+    console.log(`PDF skipped (no extractable content): ${url}`);
+    return true;
+  }
+
+  if (!content || content.trim().length === 0) {
+    console.warn(`Empty content for URL: ${url}`);
+    return true;
+  }
+
+  return false;
+}
+
+async function processSinglePage(
+  result: any,
+  payloadUrl: string | undefined,
+  taskId: string,
+  ctx: any,
+): Promise<"success" | "skip" | "fail"> {
+  try {
+    const info = extractPageInfo(result, payloadUrl);
+    if (await validatePageContent(info.content, info.url, info.isPdf)) return "skip";
+
+    console.log(`Processing and normalising crawled page: ${info.url}`);
+
+    const normalized = normalizeContent(info.content);
+    const contentHash = await sha256(normalized);
+
+    let contextPrefix = buildContextPrefix(info.title, info.canonicalUrl, isPdfVirtualUrl(info.canonicalUrl));
+    const summary = await generateContextSummary(normalized);
+    if (summary) contextPrefix += `Context: ${summary}\n\n`;
+
+    const chunks = await generateChunks(normalized, contextPrefix);
+
+    const freshnessTier = assignFreshnessTier(info.canonicalUrl);
+    await ctx.runMutation(internal.crawl.mutations.queueChunksForEmbedding, {
+      url: info.canonicalUrl,
+      title: info.title,
+      contentHash,
+      freshnessTier,
+      jobId: taskId,
+      chunks,
+      ...(info.etag !== undefined && { etag: info.etag }),
+      ...(info.lastModified !== undefined && { lastModified: info.lastModified }),
+    });
+    return "success";
+  } catch (err) {
+    console.error(`Failed to process page ${result.url || "unknown URL"}:`, err);
+    return "fail";
+  }
+}
+
+async function finalizeJob(
+  ctx: any,
+  status: string,
+  taskId: string,
+  successfulPages: number,
+  failedPages: number,
+  skippedPages: number,
+  results: any[],
+): Promise<void> {
+  if (status === "completed") {
+    logCompletionAlert(taskId, successfulPages, failedPages, skippedPages);
+  }
+
+  if (status === "completed" || status === "failed") {
+    const stats = computeStats(results);
+    await ctx.runMutation(internal.crawl.workflow.completeJobByTaskId, {
+      taskId,
+      status,
+      stats: {
+        totalPages: successfulPages + failedPages + skippedPages,
+        successfulPages,
+        failedPages,
+        skippedPages,
+        ...stats,
+      },
+    });
+  }
+}
+
 export const crawlWebhook = httpAction(async (ctx, request) => {
   let taskId: string | undefined;
   try {
-    const isStateChange = new URL(request.url).searchParams.get("type") === "state";
-    if (isStateChange) {
-      console.log("State change notification received — acknowledging without processing.");
-      return new Response(JSON.stringify({ ok: true, state: true }), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
+    const stateResp = handleStateChange(request);
+    if (stateResp) return stateResp;
 
-    const contentLengthHeader = request.headers.get("content-length");
-    if (contentLengthHeader && Number(contentLengthHeader) > 10_485_760) {
-      console.warn(`Webhook payload too large: ${contentLengthHeader} bytes`);
-      return new Response("Payload too large", { status: 413 });
-    }
+    const sizeResp = checkPayloadSize(request);
+    if (sizeResp) return sizeResp;
+
     const rawBody = await request.text();
 
-    const timestamp = request.headers.get("x-crawl-timestamp");
-    const signature = request.headers.get("x-crawl-signature");
+    const hmacInfo = verifyWebhookHeaders(request);
+    if (hmacInfo instanceof Response) return hmacInfo;
 
-    if (!timestamp || !signature) {
-      console.warn("Webhook rejected: Missing signature headers");
-      return new Response("Missing signature headers", { status: 400 });
-    }
+    const sigResp = await validateWebhookSignature(rawBody, hmacInfo.timestamp, hmacInfo.signature);
+    if (sigResp) return sigResp;
 
-    const ts = parseInt(timestamp, 10);
-    const MAX_SKEW_MS = 5 * 60 * 1000;
-    if (Number.isNaN(ts) || Math.abs(Date.now() - ts) > MAX_SKEW_MS) {
-      console.warn(`Webhook rejected: Timestamp expired or invalid: ${timestamp}`);
-      return new Response("Request timestamp expired", { status: 400 });
-    }
+    const { taskId: id, status, results, url } = extractWebhookPayload(rawBody);
+    taskId = id;
 
-    const primarySecret = process.env.CRAWL_WEBHOOK_SECRET;
-    const secondarySecret = process.env.CRAWL_WEBHOOK_SECRET_NEW;
-    if (!primarySecret) {
-      console.error("CRAWL_WEBHOOK_SECRET environment variable is not set");
-      return new Response("Server configuration error", { status: 500 });
-    }
-
-    let isValid = await verifySignature(timestamp, signature, primarySecret, rawBody);
-    if (!isValid && secondarySecret) {
-      isValid = await verifySignature(timestamp, signature, secondarySecret, rawBody);
-    }
-    if (!isValid) {
-      console.warn("Webhook rejected: Invalid signature");
-      return new Response("Invalid signature", { status: 401 });
-    }
-
-    const payload = JSON.parse(rawBody);
-    console.log(
-      "Webhook received",
-      JSON.stringify({ taskId: payload.task_id, jobId: payload.job_id, url: payload.url }),
-    );
-    taskId = payload.task_id || payload.job_id;
-    const status = payload.status;
-    const results = payload.data?.results || payload.results || (payload.url ? [payload] : []);
-
-    const existing = await ctx.runQuery(internal.crawl.mutations.getProcessedWebhook, {
-      jobId: taskId!,
-    });
-    if (existing) {
+    const isDuplicate = await checkIdempotency(ctx, taskId);
+    if (isDuplicate) {
       console.log(`Webhook already processed (Idempotent): ${taskId}`);
       return new Response(JSON.stringify({ ok: true, deduped: true }), {
         status: 200,
@@ -122,165 +296,20 @@ export const crawlWebhook = httpAction(async (ctx, request) => {
       });
     }
 
-    await ctx.runMutation(internal.crawl.mutations.markWebhookProcessed, {
-      jobId: taskId!,
-      expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
-    });
+    await markJobProcessed(ctx, taskId);
 
     let successfulPages = 0;
     let failedPages = 0;
     let skippedPages = 0;
 
     for (const result of results) {
-      try {
-        const url = result.url || payload.url;
-        const canonicalUrl = canonicalizeUrl(url);
-        const isPdf = url.toLowerCase().endsWith(".pdf") || result.media_type === "pdf";
-        const content = result.markdown || result.html || result.text;
-        const title = result.metadata?.title || "Untitled";
-        const etag = result.headers?.etag || undefined;
-        const lastModified = result.headers?.["last-modified"] || undefined;
-
-        if (isPdf && (!content || content.trim().length === 0)) {
-          console.log(`PDF skipped (no extractable content): ${url}`);
-          skippedPages++;
-          continue;
-        }
-
-        if (!content || content.trim().length === 0) {
-          console.warn(`Empty content for URL: ${url}`);
-          skippedPages++;
-          continue;
-        }
-
-        console.log(`Processing and normalising crawled page: ${url}`);
-
-        const normalized = normalizeContent(content);
-        const contentHash = await sha256(normalized);
-
-        let contextPrefix = `Document Title: ${title}\n`;
-        if (!isPdfVirtualUrl(canonicalUrl)) {
-          try {
-            const parsedUrl = new URL(canonicalUrl);
-            if (parsedUrl.pathname && parsedUrl.pathname !== "/") {
-              contextPrefix += `URL Path: ${parsedUrl.pathname}\n`;
-            }
-          } catch {}
-        }
-        try {
-          if (process.env.GOOGLE_GENERATIVE_AI_API_KEY && normalized.split(/\s+/).length > 500) {
-            const { generateText } = await import("ai");
-            const { google } = await import("@ai-sdk/google");
-
-            const { text } = await generateText({
-              model: google("gemini-2.5-flash"),
-              prompt: `Write a 1-sentence summary of this document to provide context for vector search chunks. Document text:\n\n${normalized.slice(0, 2000)}`,
-            });
-            contextPrefix += `Context: ${text.trim()}\n\n`;
-          }
-        } catch (err) {
-          console.warn(`Failed to generate contextual embedding summary for ${url}`, err);
-          contextPrefix += "\n";
-        }
-
-        const parentChunks = chunkMarkdown(normalized, 3000, 300);
-        const chunks = [];
-
-        for (const parentChunk of parentChunks) {
-          const childChunks = chunkMarkdown(parentChunk.text, 800, 100, parentChunk.headingPath);
-          for (const childChunk of childChunks) {
-            const baseText = contextPrefix + childChunk.text;
-            const guardedParts = guardChunkSize(baseText);
-            for (const part of guardedParts) {
-              chunks.push({
-                text: part,
-                contentHash: await sha256(part),
-                parentText: parentChunk.text,
-                headingPath: childChunk.headingPath,
-              });
-            }
-          }
-        }
-
-        const freshnessTier = assignFreshnessTier(canonicalUrl);
-        const args: {
-          url: string;
-          title: string;
-          contentHash: string;
-          freshnessTier: "high" | "medium" | "low";
-          jobId: string;
-          chunks: {
-            text: string;
-            contentHash: string;
-            parentText?: string;
-            headingPath?: string[];
-          }[];
-          etag?: string;
-          lastModified?: string;
-        } = {
-          url: canonicalUrl,
-          title,
-          contentHash,
-          freshnessTier,
-          jobId: taskId!,
-          chunks,
-        };
-        if (etag !== undefined) args.etag = etag;
-        if (lastModified !== undefined) args.lastModified = lastModified;
-
-        await ctx.runMutation(internal.crawl.mutations.queueChunksForEmbedding, args);
-        successfulPages++;
-      } catch (err) {
-        console.error(`Failed to process page ${result.url || "unknown URL"}:`, err);
-        failedPages++;
-      }
+      const outcome = await processSinglePage(result, url, taskId, ctx);
+      if (outcome === "success") successfulPages++;
+      else if (outcome === "fail") failedPages++;
+      else skippedPages++;
     }
 
-    if (status === "completed" && failedPages > 0) {
-      const failureRate = failedPages / (successfulPages + failedPages + skippedPages);
-      if (failureRate > 0.05) {
-        console.warn(
-          `[ALERT] Crawl ${taskId} completed with ${failedPages} failed pages ` +
-            `(${(failureRate * 100).toFixed(1)}% failure rate)`,
-        );
-      }
-      if (failedPages > 0) {
-        console.warn(
-          `[ALERT] Crawl ${taskId}: ${failedPages} pages failed, ` +
-            `${skippedPages} skipped, ${successfulPages} successful`,
-        );
-      }
-    }
-
-    if (status === "completed" || status === "failed") {
-      type WebhookResult = { markdown?: string; html?: string; text?: string };
-      const totalChunks = results.reduce((sum: number, r: WebhookResult) => {
-        const content = r.markdown || r.html || r.text || "";
-        return sum + Math.ceil(content.length / 3000);
-      }, 0);
-      const totalTokens = results.reduce((sum: number, r: WebhookResult) => {
-        const content = r.markdown || r.html || r.text || "";
-        return sum + Math.ceil(content.length / 4);
-      }, 0);
-      const bytesProcessed = results.reduce((sum: number, r: WebhookResult) => {
-        const content = r.markdown || r.html || r.text || "";
-        return sum + new TextEncoder().encode(content).length;
-      }, 0);
-
-      await ctx.runMutation(internal.crawl.workflow.completeJobByTaskId, {
-        taskId: taskId!,
-        status,
-        stats: {
-          totalPages: successfulPages + failedPages + skippedPages,
-          successfulPages,
-          failedPages,
-          skippedPages,
-          totalChunks,
-          totalTokens,
-          bytesProcessed,
-        },
-      });
-    }
+    await finalizeJob(ctx, status, taskId, successfulPages, failedPages, skippedPages, results);
 
     return new Response(JSON.stringify({ ok: true }), {
       status: 200,
@@ -318,64 +347,104 @@ export const resetWebhook = httpAction(async (ctx, request) => {
   }
 });
 
+type IngestPayload = {
+  url: string;
+  markdown: string;
+  contentHash: string;
+  crawlSessionId: string;
+  title?: string;
+  sourceType: string;
+  freshnessTier?: string;
+};
+
+async function parseAndValidateIngestRequest(
+  rawBody: string,
+  request: Request,
+): Promise<IngestPayload | Response> {
+  if (rawBody.length > 4_194_304) {
+    console.warn(`/ingest payload too large: ${rawBody.length} bytes`);
+    return new Response("Payload too large", { status: 413 });
+  }
+
+  const payload = JSON.parse(rawBody);
+
+  const authHeader = request.headers.get("Authorization");
+  const token = authHeader?.split(" ")[1];
+  const expectedToken = process.env.CONVEX_AUTH_TOKEN;
+
+  if (!expectedToken) {
+    console.error("/ingest misconfigured: CONVEX_AUTH_TOKEN not set — rejecting all requests");
+    return new Response("Server configuration error", { status: 500 });
+  }
+
+  if (token !== expectedToken) {
+    console.warn("Unauthorized /ingest request");
+    return new Response("Unauthorized", { status: 401 });
+  }
+
+  const { url, markdown, contentHash, crawlSessionId, title, sourceType, freshnessTier } = payload;
+
+  if (!url || !markdown || !contentHash || !crawlSessionId || !sourceType) {
+    return new Response(
+      "Missing required fields (url, markdown, contentHash, crawlSessionId, sourceType)",
+      { status: 400 },
+    );
+  }
+
+  const ALLOWED_DOMAIN_SUFFIX = "uettaxila.edu.pk";
+  if (!isPdfVirtualUrl(url)) {
+    let parsedHost: string;
+    try {
+      parsedHost = new URL(url).hostname.toLowerCase();
+    } catch {
+      console.warn(`Ingest rejected: malformed URL "${url}"`);
+      return new Response("Invalid URL", { status: 400 });
+    }
+    if (!parsedHost.endsWith(ALLOWED_DOMAIN_SUFFIX)) {
+      console.warn(`Ingest rejected: domain not in allowlist "${parsedHost}"`);
+      return new Response("URL domain not permitted", { status: 403 });
+    }
+  }
+
+  return { url, markdown, contentHash, crawlSessionId, title, sourceType, freshnessTier };
+}
+
+async function processIngestContent(
+  ctx: any,
+  result: { action: string; documentId: any },
+  url: string,
+  title: string | undefined,
+  markdown: string,
+): Promise<void> {
+  const normalized = normalizeContent(markdown);
+
+  let contextPrefix = buildContextPrefix(title || url, url, isPdfVirtualUrl(url));
+  const summary = await generateContextSummary(normalized);
+  if (summary) contextPrefix += `Context: ${summary}\n\n`;
+
+  const chunks = await generateChunks(normalized, contextPrefix);
+
+  await ctx.runMutation(internal.crawl.mutations.enqueueDocumentChunks, {
+    documentId: result.documentId,
+    url,
+    chunks,
+  });
+}
+
 export const ingestWebhook = httpAction(async (ctx, request) => {
   try {
     const rawBody = await request.text();
-
-    if (rawBody.length > 4_194_304) {
-      console.warn(`/ingest payload too large: ${rawBody.length} bytes`);
-      return new Response("Payload too large", { status: 413 });
-    }
-
-    const payload = JSON.parse(rawBody);
-
-    const authHeader = request.headers.get("Authorization");
-    const token = authHeader?.split(" ")[1];
-    const expectedToken = process.env.CONVEX_AUTH_TOKEN;
-
-    if (!expectedToken) {
-      console.error("/ingest misconfigured: CONVEX_AUTH_TOKEN not set — rejecting all requests");
-      return new Response("Server configuration error", { status: 500 });
-    }
-
-    if (token !== expectedToken) {
-      console.warn("Unauthorized /ingest request");
-      return new Response("Unauthorized", { status: 401 });
-    }
-
-    const { url, markdown, contentHash, crawlSessionId, title, sourceType, freshnessTier } =
-      payload;
-
-    if (!url || !markdown || !contentHash || !crawlSessionId || !sourceType) {
-      return new Response(
-        "Missing required fields (url, markdown, contentHash, crawlSessionId, sourceType)",
-        { status: 400 },
-      );
-    }
-
-    const ALLOWED_DOMAIN_SUFFIX = "uettaxila.edu.pk";
-    if (!isPdfVirtualUrl(url)) {
-      let parsedHost: string;
-      try {
-        parsedHost = new URL(url).hostname.toLowerCase();
-      } catch {
-        console.warn(`Ingest rejected: malformed URL "${url}"`);
-        return new Response("Invalid URL", { status: 400 });
-      }
-      if (!parsedHost.endsWith(ALLOWED_DOMAIN_SUFFIX)) {
-        console.warn(`Ingest rejected: domain not in allowlist "${parsedHost}"`);
-        return new Response("URL domain not permitted", { status: 403 });
-      }
-    }
+    const payload = await parseAndValidateIngestRequest(rawBody, request);
+    if (payload instanceof Response) return payload;
 
     const result = await ctx.runMutation(internal.crawl.mutations.upsertDocument, {
-      url,
-      markdown,
-      contentHash,
-      crawlSessionId,
-      title: title || undefined,
-      sourceType,
-      freshnessTier,
+      url: payload.url,
+      markdown: payload.markdown,
+      contentHash: payload.contentHash,
+      crawlSessionId: payload.crawlSessionId,
+      title: payload.title || undefined,
+      sourceType: payload.sourceType,
+      freshnessTier: payload.freshnessTier as "high" | "medium" | "low" | undefined,
     });
 
     if (result.action === "skipped") {
@@ -385,57 +454,7 @@ export const ingestWebhook = httpAction(async (ctx, request) => {
       });
     }
 
-    const normalized = normalizeContent(markdown);
-
-    let contextPrefix = `Document Title: ${title || url}\n`;
-    if (!isPdfVirtualUrl(url)) {
-      try {
-        const parsedUrl = new URL(url);
-        if (parsedUrl.pathname && parsedUrl.pathname !== "/") {
-          contextPrefix += `URL Path: ${parsedUrl.pathname}\n`;
-        }
-      } catch {}
-    }
-    try {
-      if (process.env.GOOGLE_GENERATIVE_AI_API_KEY && normalized.split(/\s+/).length > 500) {
-        const { generateText } = await import("ai");
-        const { google } = await import("@ai-sdk/google");
-
-        const { text } = await generateText({
-          model: google("gemini-2.5-flash"),
-          prompt: `Write a 1-sentence summary of this document to provide context for vector search chunks. Document text:\n\n${normalized.slice(0, 2000)}`,
-        });
-        contextPrefix += `Context: ${text.trim()}\n\n`;
-      }
-    } catch (err) {
-      console.warn(`Failed to generate contextual embedding summary for ${url}`, err);
-      contextPrefix += "\n";
-    }
-
-    const parentChunks = chunkMarkdown(normalized, 3000, 300);
-    const chunks = [];
-
-    for (const parentChunk of parentChunks) {
-      const childChunks = chunkMarkdown(parentChunk.text, 800, 100, parentChunk.headingPath);
-      for (const childChunk of childChunks) {
-        const baseText = contextPrefix + childChunk.text;
-        const guardedParts = guardChunkSize(baseText);
-        for (const part of guardedParts) {
-          chunks.push({
-            text: part,
-            contentHash: await sha256(part),
-            parentText: parentChunk.text,
-            headingPath: childChunk.headingPath,
-          });
-        }
-      }
-    }
-
-    await ctx.runMutation(internal.crawl.mutations.enqueueDocumentChunks, {
-      documentId: result.documentId,
-      url,
-      chunks,
-    });
+    await processIngestContent(ctx, result, payload.url, payload.title, payload.markdown);
 
     return new Response(JSON.stringify({ success: true, action: result.action }), {
       status: 200,

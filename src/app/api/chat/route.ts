@@ -5,25 +5,197 @@ import { auth } from "@clerk/nextjs/server";
 import { type LanguageModel, streamText } from "ai";
 import { api } from "convex/_generated/api";
 import { ConvexHttpClient } from "convex/browser";
+import { assignFreshnessTier } from "../../../../convex/crawl/chunking";
 import { after, type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { getRoleFromClaims, isAdminRole } from "@/lib/clerk-claims";
-import { checkChatRateLimit } from "@/lib/rate-limit";
 import { LLM_FALLBACK_CHAIN } from "@/lib/llm-models";
+import { buildSystemPrompt, extractText } from "@/lib/prompt";
+import { checkChatRateLimit } from "@/lib/rate-limit";
 
-
-function extractText(message: {
-  content?: string;
-  parts?: { type: string; text: string }[];
-}): string {
-  if (message.content) return message.content;
-  if (message.parts) {
-    return message.parts
-      .filter((p) => p.type === "text")
-      .map((p) => p.text)
-      .join("");
+function getAllowedOrigins(): string[] {
+  const allowed = [process.env.NEXT_PUBLIC_APP_URL].filter((url): url is string => !!url);
+  if (process.env.NODE_ENV === "development") {
+    allowed.push("http://localhost:3000");
   }
-  return "";
+  return allowed;
 }
+
+function checkOrigin(origin: string | null, allowed: string[]): NextResponse | null {
+  if (origin && !allowed.includes(origin)) {
+    return new NextResponse("Forbidden: CSRF check failed (origin)", { status: 403 });
+  }
+  return null;
+}
+
+function checkReferer(referer: string | null, allowed: string[]): NextResponse | null {
+  if (!referer) return null;
+  try {
+    const refererUrl = new URL(referer);
+    if (!allowed.includes(refererUrl.origin)) {
+      return new NextResponse("Forbidden: CSRF check failed (referer)", { status: 403 });
+    }
+  } catch {
+    return new NextResponse("Forbidden: Invalid referer", { status: 400 });
+  }
+  return null;
+}
+
+function checkCsrf(req: NextRequest): NextResponse | null {
+  const origin = req.headers.get("origin");
+  const referer = req.headers.get("referer");
+  const allowed = getAllowedOrigins();
+  const host = req.headers.get("host");
+  if (host) {
+    allowed.push(`https://${host}`);
+    if (host.includes("localhost")) {
+      allowed.push(`http://${host}`);
+    }
+  }
+  return checkOrigin(origin, allowed) ?? checkReferer(referer, allowed);
+}
+
+const MessageSchema = z.object({
+  role: z.enum(["user", "assistant"]),
+  content: z.string().max(8000).optional(),
+  parts: z.array(z.object({ type: z.string(), text: z.string() })).optional(),
+});
+
+const ChatRequestSchema = z
+  .object({
+    messages: z.array(MessageSchema).min(1),
+  })
+  .refine((data) => data.messages.every((m) => m.content || (m.parts && m.parts.length > 0)), {
+    message: "Each message must have content or parts",
+  });
+
+function parseBodyOrError(
+  bodyText: string,
+): { messages: { role: string; content: string }[]; rawMessages: z.infer<typeof MessageSchema>[] } | NextResponse {
+  const MAX_BODY = 100 * 1024;
+  if (bodyText.length > MAX_BODY) {
+    return NextResponse.json({ error: "Request body too large" }, { status: 413 });
+  }
+
+  let body: unknown;
+  try {
+    body = JSON.parse(bodyText);
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  const parsed = ChatRequestSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Invalid request body", details: parsed.error.issues },
+      { status: 400 },
+    );
+  }
+
+  const messages = parsed.data.messages.map((m) => ({
+    role: m.role,
+    content: extractText(m as { content?: string; parts?: { type: string; text: string }[] }),
+  }));
+
+  return { messages, rawMessages: parsed.data.messages };
+}
+
+function extractClientIp(req: NextRequest): string {
+  return req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    req.headers.get("x-real-ip") ||
+    "unknown";
+}
+
+function resolveClientRole(sessionClaims: Record<string, unknown>): "admin" | "user" {
+  const role = getRoleFromClaims(sessionClaims);
+  return isAdminRole(role) ? "admin" : "user";
+}
+
+async function getAuthAndRole(
+  req: NextRequest,
+): Promise<{ userId: string; role: "admin" | "user"; ip: string } | NextResponse> {
+  const { userId, sessionClaims } = await auth();
+  if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  return { userId, role: resolveClientRole(sessionClaims), ip: extractClientIp(req) };
+}
+
+async function checkAppRateLimit(
+  userId: string,
+  role: "admin" | "user",
+): Promise<NextResponse | null> {
+  const rateLimitResult = await checkChatRateLimit(userId, role);
+  if (rateLimitResult && !rateLimitResult.success) {
+    return NextResponse.json(
+      { error: "Too many requests. Please wait before sending another message." },
+      { status: 429 },
+    );
+  }
+  return null;
+}
+
+function initConvexOrError(): ConvexHttpClient | NextResponse {
+  const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
+  if (!convexUrl) {
+    return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
+  }
+  return new ConvexHttpClient(convexUrl);
+}
+
+async function checkConvexRateLimit(
+  convex: ConvexHttpClient,
+  userId: string,
+): Promise<NextResponse | null> {
+  try {
+    await convex.mutation(api.rateLimit.checkRateLimit, {
+      userId,
+      tokenEstimate: 1_000,
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Rate limit exceeded";
+    return NextResponse.json({ error: msg }, { status: 429 });
+  }
+  return null;
+}
+
+async function fetchRagData(
+  convex: ConvexHttpClient,
+  question: string,
+): Promise<{ context: string | null; sources: any[]; intent: string; queryEmbedding: number[] | null; cachedResponse: string | null } | NextResponse> {
+  try {
+    const ragResult = await convex.action(api.rag.retrieval.retrieveContext, {
+      question,
+    });
+    return ragResult;
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "RAG retrieval failed";
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
+}
+
+async function getPreferredModel(
+  convex: ConvexHttpClient,
+  userId: string,
+): Promise<string | undefined> {
+  try {
+    const userDoc = await convex.query(api.users.getByClerkId, { clerkId: userId });
+    if (userDoc?.preferences?.model) {
+      return userDoc.preferences.model;
+    }
+  } catch (err) {
+    console.error("Failed to query user preferences from Convex:", err);
+  }
+  return undefined;
+}
+
+type ModelFactory = (modelId: string) => LanguageModel;
+
+const PROVIDER_FACTORIES: Record<string, { create: (apiKey: string) => ModelFactory; envKey: string }> = {
+  groq: { create: (key) => createGroq({ apiKey: key }), envKey: "GROQ_API_KEY" },
+  google: { create: (key) => createGoogleGenerativeAI({ apiKey: key }), envKey: "GEMINI_API_KEY" },
+  cerebras: { create: (key) => createCerebras({ apiKey: key }), envKey: "CEREBRAS_API_KEY" },
+};
 
 const MODEL_MAPPING: Record<string, { id: string; provider: string }> = {
   "llama-4-scout": { id: "meta-llama/llama-4-scout-17b-16e-instruct", provider: "groq" },
@@ -31,38 +203,180 @@ const MODEL_MAPPING: Record<string, { id: string; provider: string }> = {
   "llama-3.1-8b": { id: "llama-3.1-8b-instant", provider: "groq" },
 };
 
-function getAvailableModels(preferredModelKey?: string): LanguageModel[] {
-  const groq = createGroq({ apiKey: process.env.GROQ_API_KEY || "" });
-  const google = createGoogleGenerativeAI({
-    apiKey: process.env.GEMINI_API_KEY || "",
-  });
-  const cerebras = createCerebras({
-    apiKey: process.env.CEREBRAS_API_KEY || "",
-  });
-
-  const models: LanguageModel[] = [];
-
-  let chain = [...LLM_FALLBACK_CHAIN];
-  if (preferredModelKey && MODEL_MAPPING[preferredModelKey]) {
-    const preferredConfig = MODEL_MAPPING[preferredModelKey];
-    chain = [preferredConfig, ...LLM_FALLBACK_CHAIN.filter((m) => m.id !== preferredConfig.id)];
+function buildFallbackChain(preferredModelKey?: string): { id: string; provider: string }[] {
+  if (!preferredModelKey || !MODEL_MAPPING[preferredModelKey]) {
+    return [...LLM_FALLBACK_CHAIN];
   }
-
-  for (const modelConfig of chain) {
-    if (modelConfig.provider === "groq" && process.env.GROQ_API_KEY) {
-      models.push(groq(modelConfig.id));
-    } else if (modelConfig.provider === "cerebras" && process.env.CEREBRAS_API_KEY) {
-      models.push(cerebras(modelConfig.id));
-    } else if (modelConfig.provider === "google" && process.env.GEMINI_API_KEY) {
-      models.push(google(modelConfig.id));
-    }
-  }
-
-  return models;
+  const preferredConfig = MODEL_MAPPING[preferredModelKey];
+  return [preferredConfig, ...LLM_FALLBACK_CHAIN.filter((m) => m.id !== preferredConfig.id)];
 }
 
-// Note: This logic is duplicated in convex/rag/ask.ts as robustStreamText
-// to avoid cross-boundary imports between Next.js Edge and Convex Isolates.
+function getAvailableModels(preferredModelKey?: string): LanguageModel[] {
+  const chain = buildFallbackChain(preferredModelKey);
+  return chain.flatMap((modelConfig) => {
+    const factory = PROVIDER_FACTORIES[modelConfig.provider];
+    if (!factory) return [];
+    const apiKey = process.env[factory.envKey];
+    if (!apiKey) return [];
+    return [factory.create(apiKey)(modelConfig.id)];
+  });
+}
+
+type SegmentAction =
+  | { type: "flush"; text: string }
+  | { type: "skip-close"; after: string }
+  | { type: "think"; before: string; content: string };
+
+function findNextThinkSegment(remaining: string): SegmentAction {
+  const openIdx = remaining.indexOf("<think>");
+  const closeIdx = remaining.indexOf("</think>");
+  if (openIdx === -1) {
+    if (closeIdx === -1) return { type: "flush", text: remaining };
+    return { type: "flush", text: remaining.substring(0, closeIdx) + remaining.substring(closeIdx + 8) };
+  }
+  if (closeIdx === -1 || openIdx < closeIdx) {
+    return { type: "think", before: remaining.substring(0, openIdx), content: remaining.substring(openIdx + 7) };
+  }
+  return { type: "skip-close", after: remaining.substring(closeIdx + 8) };
+}
+
+function handleOpenThinkTag(remaining: string): { remaining: string; buffer: string } {
+  const nextEnd = remaining.indexOf("</think>");
+  if (nextEnd !== -1) {
+    return { remaining: remaining.substring(nextEnd + 8), buffer: "" };
+  }
+  const partialEndMatch = remaining.match(/<\/?(?:think|think)$/);
+  if (partialEndMatch) {
+    return { remaining: "", buffer: remaining.substring(partialEndMatch.index!) };
+  }
+  return { remaining: "", buffer: "" };
+}
+
+function flushTextFn(text: string, controller: ReadableStreamDefaultController, accumulated: { current: string }) {
+  if (!text) return;
+  controller.enqueue(text);
+  accumulated.current += text;
+}
+
+function getModelName(model: LanguageModel): string {
+  const m = model as { modelId?: string; provider?: string };
+  return m.modelId || m.provider || "unknown";
+}
+
+function finalizeStream(
+  buffer: string,
+  accumulatedText: string,
+  onFinish: ((text: string, model: string) => void) | undefined,
+  reader: ReadableStreamDefaultReader<string>,
+  controller: ReadableStreamDefaultController,
+  model: LanguageModel,
+) {
+  if (buffer && !buffer.startsWith("<")) {
+    controller.enqueue(buffer);
+  }
+  controller.close();
+  if (onFinish) {
+    onFinish(accumulatedText, getModelName(model));
+  }
+  reader.releaseLock();
+}
+
+function processChunk(value: string, buffer: { current: string }, accumulated: { current: string }, controller: ReadableStreamDefaultController) {
+  const combined = buffer.current + value;
+  buffer.current = "";
+  let remaining = combined;
+  while (remaining.length > 0) {
+    const seg = findNextThinkSegment(remaining);
+    if (seg.type === "flush") {
+      flushTextFn(seg.text, controller, accumulated);
+      return;
+    }
+    if (seg.type === "skip-close") {
+      remaining = seg.after;
+      continue;
+    }
+    flushTextFn(seg.before, controller, accumulated);
+    const result = handleOpenThinkTag(seg.content);
+    remaining = result.remaining;
+    buffer.current = result.buffer;
+    if (buffer.current) return;
+  }
+}
+
+function streamWithStrippedThinking(
+  reader: ReadableStreamDefaultReader<string>,
+  model: LanguageModel,
+  onFinish?: (text: string, model: string) => void,
+): ReadableStream<string> {
+  return new ReadableStream({
+    async start(controller) {
+      const accumulated = { current: "" };
+      const buf = { current: "" };
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) {
+            finalizeStream(buf.current, accumulated.current, onFinish, reader, controller, model);
+            break;
+          }
+          processChunk(value, buf, accumulated, controller);
+        }
+      } catch (e) {
+        controller.error(e);
+      } finally {
+        reader.releaseLock();
+      }
+    },
+    cancel() {
+      reader.cancel();
+      reader.releaseLock();
+    },
+  });
+}
+
+function resolveTemperature(model: LanguageModel, defaultTemp: number): number {
+  const isReasoningModel = (model as { modelId?: string }).modelId === "gpt-oss-120b";
+  return isReasoningModel ? 1.0 : defaultTemp;
+}
+
+async function tryModelWithFallback(
+  model: LanguageModel,
+  config: {
+    system: string;
+    messages: unknown[];
+    temperature: number;
+    maxOutputTokens: number;
+    onFinish?: (text: string, model: string) => void;
+  },
+) {
+  const resolvedTemp = resolveTemperature(model, config.temperature);
+
+  const result = streamText({
+    model,
+    system: config.system,
+    messages: config.messages,
+    temperature: resolvedTemp,
+    maxOutputTokens: config.maxOutputTokens,
+  } as Parameters<typeof streamText>[0]);
+
+  const reader = result.textStream.getReader();
+
+  const textStream = streamWithStrippedThinking(
+    reader,
+    model,
+    config.onFinish,
+  );
+
+  Object.defineProperty(result, "textStream", {
+    value: textStream,
+    writable: true,
+    configurable: true,
+  });
+
+  return result;
+}
+
 async function tryStreamWithFallback(
   models: LanguageModel[],
   config: {
@@ -76,136 +390,7 @@ async function tryStreamWithFallback(
   let lastError: unknown;
   for (const model of models) {
     try {
-      // Determine model-specific temperature: reasoning models must run at temperature=1.0
-      const isReasoningModel = (model as any).modelId === "gpt-oss-120b";
-      const resolvedTemp = isReasoningModel ? 1.0 : config.temperature;
-
-      const result = streamText({
-        model,
-        system: config.system,
-        messages: config.messages,
-        temperature: resolvedTemp,
-        maxOutputTokens: config.maxOutputTokens,
-      } as Parameters<typeof streamText>[0]);
-
-      // Read the first chunk to verify the handshake is successful before returning
-      const reader = result.textStream.getReader();
-      const first = await reader.read();
-
-      // Reconstruct the stream with the first chunk prepended and thinking tokens stripped
-      const textStream = new ReadableStream({
-        async start(controller) {
-          let accumulatedText = "";
-          let inThinking = false;
-          let pendingBuffer = "";
-
-          function processChunk(value: string) {
-            let text = pendingBuffer + value;
-            pendingBuffer = "";
-
-            while (text.length > 0) {
-              if (!inThinking) {
-                const index = text.indexOf("<think>");
-                if (index !== -1) {
-                  // Enqueue everything before <think>
-                  if (index > 0) {
-                    const toEnqueue = text.substring(0, index);
-                    controller.enqueue(toEnqueue);
-                    accumulatedText += toEnqueue;
-                  }
-                  inThinking = true;
-                  text = text.substring(index + 7);
-                } else {
-                  // Look for partial "<think>" at the end of the text
-                  let partialIndex = -1;
-                  for (let i = 1; i < 7; i++) {
-                    if (text.endsWith("<think>".substring(0, i))) {
-                      partialIndex = text.length - i;
-                      break;
-                    }
-                  }
-                  if (partialIndex !== -1) {
-                    pendingBuffer = text.substring(partialIndex);
-                    const toEnqueue = text.substring(0, partialIndex);
-                    if (toEnqueue.length > 0) {
-                      controller.enqueue(toEnqueue);
-                      accumulatedText += toEnqueue;
-                    }
-                    text = "";
-                  } else {
-                    controller.enqueue(text);
-                    accumulatedText += text;
-                    text = "";
-                  }
-                }
-              } else {
-                const index = text.indexOf("</think>");
-                if (index !== -1) {
-                  inThinking = false;
-                  text = text.substring(index + 8);
-                } else {
-                  // Look for partial "</think>" at the end of the text
-                  let partialIndex = -1;
-                  for (let i = 1; i < 8; i++) {
-                    if (text.endsWith("</think>".substring(0, i))) {
-                      partialIndex = text.length - i;
-                      break;
-                    }
-                  }
-                  if (partialIndex !== -1) {
-                    pendingBuffer = text.substring(partialIndex);
-                    text = "";
-                  } else {
-                    // Suppress all of it since we are in thinking mode
-                    text = "";
-                  }
-                }
-              }
-            }
-          }
-
-          if (!first.done && first.value !== undefined) {
-            processChunk(first.value);
-          }
-
-          try {
-            while (true) {
-              const { done, value } = await reader.read();
-              if (done) {
-                // If there's any remaining buffer that was not a full tag, enqueue it
-                if (pendingBuffer.length > 0 && !inThinking && !pendingBuffer.startsWith("<")) {
-                  controller.enqueue(pendingBuffer);
-                  accumulatedText += pendingBuffer;
-                }
-                controller.close();
-                if (config.onFinish) {
-                  const m = model as any;
-                  config.onFinish(accumulatedText, m.modelId || m.provider || "unknown");
-                }
-                break;
-              }
-              processChunk(value);
-            }
-          } catch (e) {
-            controller.error(e);
-          } finally {
-            reader.releaseLock();
-          }
-        },
-        cancel() {
-          reader.cancel();
-          reader.releaseLock();
-        },
-      });
-
-      // Override the textStream property on the result object
-      Object.defineProperty(result, "textStream", {
-        value: textStream,
-        writable: true,
-        configurable: true,
-      });
-
-      return result;
+      return await tryModelWithFallback(model, config);
     } catch (error) {
       console.warn("Model failed, trying fallback:", error);
       lastError = error;
@@ -214,229 +399,135 @@ async function tryStreamWithFallback(
   throw lastError || new Error("All LLM providers failed");
 }
 
-function buildSystemPrompt(context: string | null, intent: string): string {
-  const parts: string[] = ["You are UET GPT, an intelligent assistant for UET Taxila."];
-
-  if (context) {
-    parts.push(
-      `Here is relevant context from UET Taxila's official sources:\n\n${context}\n\nUse this context to answer the user's question. If the context doesn't contain enough information, say so clearly and provide what you know. Always cite sources when possible.`,
-    );
-  } else {
-    parts.push(
-      "You don't have specific context for this question. Answer based on your general knowledge about UET Taxila, but note when you're uncertain.",
-    );
-  }
-
-  if (intent === "off_topic") {
-    parts.push(
-      "The user's query appears to be off-topic. Politely redirect them to UET Taxila topics.",
-    );
-  }
-
-  parts.push(
-    "Guidelines:\n- Be concise and accurate\n- Cite sources when using specific information\n- If unsure, acknowledge uncertainty\n- Respond in the same language as the user's query",
-  );
-
-  return parts.join("\n\n");
+function encodeSourcesHeader(sources: any[]): string {
+  return Buffer.from(JSON.stringify(sources)).toString("base64");
 }
 
-// TASK-B03: Mirror of crawler.py assign_tier() — derives freshnessTier from URL.
-// Used to set cache TTL matching content volatility.
-function assignTier(url: string): "high" | "medium" | "low" {
-  const lower = url.toLowerCase();
-  if (
-    lower === "https://web.uettaxila.edu.pk/" ||
-    lower === "https://uettaxila.edu.pk/" ||
-    lower.includes("admission") ||
-    lower.includes("academic")
-  ) {
-    return "high";
+function buildCacheWriteCallback(
+  question: string,
+  ragResult: any,
+  convex: ConvexHttpClient,
+): (text: string, modelName: string) => void {
+  return (text, modelName) => {
+    if (ragResult.queryEmbedding && ragResult.queryEmbedding.length > 0) {
+      after(async () => {
+        try {
+          const topSourceUrl = ragResult.sources[0]?.url ?? "";
+          const freshnessTier = assignFreshnessTier(topSourceUrl);
+          await convex.mutation(api.cache.set.set, {
+            queryText: question,
+            queryEmbedding: ragResult.queryEmbedding,
+            response: text,
+            sources: ragResult.sources,
+            model: modelName,
+            freshnessTier,
+          });
+        } catch (err) {
+          console.error("Failed to write to semantic cache:", err);
+        }
+      });
+    }
+  };
+}
+
+function errorResponse(error: unknown): NextResponse {
+  console.error("Chat API error:", error);
+  const isDev = process.env.NODE_ENV === "development";
+  return NextResponse.json(
+    { error: isDev && error instanceof Error ? error.message : "An unexpected error occurred" },
+    { status: 500 },
+  );
+}
+
+async function validateRequestPhase(
+  req: NextRequest,
+): Promise<{ messages: { role: string; content: string }[]; question: string } | NextResponse> {
+  const csrfError = checkCsrf(req);
+  if (csrfError) return csrfError;
+  const bodyText = await req.text();
+  const bodyOrError = parseBodyOrError(bodyText);
+  if (bodyOrError instanceof NextResponse) return bodyOrError;
+  const lastMessage = bodyOrError.messages[bodyOrError.messages.length - 1];
+  if (!lastMessage?.content) {
+    return NextResponse.json({ error: "Message content is required" }, { status: 400 });
   }
-  if (lower.includes("department") || lower.includes("faculty")) {
-    return "medium";
+  return { messages: bodyOrError.messages, question: lastMessage.content };
+}
+
+async function authAndRateLimitPhase(
+  req: NextRequest,
+): Promise<{ userId: string; role: "admin" | "user" } | NextResponse> {
+  const authResult = await getAuthAndRole(req);
+  if (authResult instanceof NextResponse) return authResult;
+  const rateLimitError = await checkAppRateLimit(authResult.userId, authResult.role);
+  if (rateLimitError) return rateLimitError;
+  return { userId: authResult.userId, role: authResult.role };
+}
+
+async function convexRagAndModelPhase(
+  userId: string,
+  question: string,
+): Promise<{ convex: ConvexHttpClient; ragResult: any; preferredModelKey: string | undefined } | NextResponse> {
+  const convexOrError = initConvexOrError();
+  if (convexOrError instanceof NextResponse) return convexOrError;
+  const convexRateLimitError = await checkConvexRateLimit(convexOrError, userId);
+  if (convexRateLimitError) return convexRateLimitError;
+  const ragOrError = await fetchRagData(convexOrError, question);
+  if (ragOrError instanceof NextResponse) return ragOrError;
+  const preferredModelKey = await getPreferredModel(convexOrError, userId);
+  return { convex: convexOrError, ragResult: ragOrError, preferredModelKey };
+}
+
+async function buildStreamResponse(
+  messages: { role: string; content: string }[],
+  question: string,
+  convex: ConvexHttpClient,
+  ragResult: any,
+  preferredModelKey: string | undefined,
+): Promise<Response | NextResponse> {
+  if (ragResult.cachedResponse) {
+    return new Response(ragResult.cachedResponse, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "X-Sources": encodeSourcesHeader(ragResult.sources),
+        "X-Intent": ragResult.intent,
+      },
+    });
   }
-  return "low";
+  const models = getAvailableModels(preferredModelKey);
+  if (models.length === 0) {
+    return NextResponse.json({ error: "No AI providers available" }, { status: 500 });
+  }
+  const systemPrompt = buildSystemPrompt(ragResult.context, ragResult.intent);
+  const result = await tryStreamWithFallback(models, {
+    system: systemPrompt,
+    messages,
+    temperature: 0.3,
+    maxOutputTokens: 2000,
+    onFinish: buildCacheWriteCallback(question, ragResult, convex),
+  });
+  return result.toTextStreamResponse({
+    headers: {
+      "X-Sources": encodeSourcesHeader(ragResult.sources),
+      "X-Intent": ragResult.intent,
+    },
+  });
+}
+
+async function handlePost(req: NextRequest): Promise<Response> {
+  const phase1 = await validateRequestPhase(req);
+  if (phase1 instanceof NextResponse) return phase1;
+  const phase2 = await authAndRateLimitPhase(req);
+  if (phase2 instanceof NextResponse) return phase2;
+  const phase3 = await convexRagAndModelPhase(phase2.userId, phase1.question);
+  if (phase3 instanceof NextResponse) return phase3;
+  return buildStreamResponse(phase1.messages, phase1.question, phase3.convex, phase3.ragResult, phase3.preferredModelKey);
 }
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. CSRF Protection - Verify Origin and Referer
-    const origin = req.headers.get("origin");
-    const referer = req.headers.get("referer");
-    const allowed = [process.env.NEXT_PUBLIC_APP_URL].filter(Boolean);
-
-    // In development mode, allow localhost/127.0.0.1
-    if (process.env.NODE_ENV === "development") {
-      allowed.push("http://localhost:3000");
-    }
-
-    if (origin && !allowed.includes(origin)) {
-      return new Response("Forbidden: CSRF check failed (origin)", { status: 403 });
-    }
-
-    if (referer) {
-      try {
-        const refererUrl = new URL(referer);
-        if (!allowed.includes(refererUrl.origin)) {
-          return new Response("Forbidden: CSRF check failed (referer)", { status: 403 });
-        }
-      } catch {
-        return new Response("Forbidden: Invalid referer", { status: 400 });
-      }
-    }
-
-    // 2. DoS Guard: Enforce strict request body size limit (100KB)
-    const MAX_BODY = 100 * 1024; // 100KB
-    const bodyText = await req.text();
-    if (bodyText.length > MAX_BODY) {
-      return NextResponse.json({ error: "Request body too large" }, { status: 413 });
-    }
-
-    const body = JSON.parse(bodyText);
-
-    // 3. Enforce Authentication at the API route level
-    const { userId, sessionClaims } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const ip =
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      req.headers.get("x-real-ip") ||
-      "unknown";
-
-    // 4. Perform Rate Limit check using Auth user ID (preferred) or IP address
-    const rateLimitKey = userId || ip;
-    const role = getRoleFromClaims(sessionClaims as any);
-    const resolvedRole = isAdminRole(role) ? "admin" : "user";
-    const rateLimitResult = await checkChatRateLimit(rateLimitKey, resolvedRole);
-    if (rateLimitResult && !rateLimitResult.success) {
-      return NextResponse.json(
-        { error: "Too many requests. Please wait before sending another message." },
-        { status: 429 },
-      );
-    }
-
-    const rawMessages: unknown[] = body.messages;
-
-    if (!Array.isArray(rawMessages) || rawMessages.length === 0) {
-      return NextResponse.json({ error: "Messages array is required" }, { status: 400 });
-    }
-
-    // 5. DoS Guard: Validate per-message length cap (8000 chars)
-    for (const msg of rawMessages as any[]) {
-      const content = msg.content || "";
-      if (typeof content === "string" && content.length > 8000) {
-        return NextResponse.json(
-          { error: "Message length exceeds the limit of 8000 characters" },
-          { status: 400 },
-        );
-      }
-    }
-
-    const lastMessage = rawMessages[rawMessages.length - 1] as {
-      content?: string;
-      parts?: { type: string; text: string }[];
-    };
-    const question = extractText(lastMessage);
-
-    const messages = rawMessages.map((m: any) => {
-      let textContent = m.content;
-      if (!textContent && m.parts) {
-        textContent = m.parts
-          .filter((p: any) => p.type === "text")
-          .map((p: any) => p.text)
-          .join("");
-      }
-      return {
-        role: m.role,
-        content: textContent || "",
-      };
-    });
-
-    if (!question) {
-      return NextResponse.json({ error: "Message content is required" }, { status: 400 });
-    }
-
-    const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
-    if (!convexUrl) {
-      return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
-    }
-
-    const convex = new ConvexHttpClient(convexUrl);
-
-    const ragResult = await convex.action(api.rag.retrieval.retrieveContext, {
-      question,
-    });
-
-    if (ragResult.cachedResponse) {
-      return new Response(ragResult.cachedResponse, {
-        headers: {
-          "Content-Type": "text/plain; charset=utf-8",
-          "X-Sources": Buffer.from(JSON.stringify(ragResult.sources)).toString("base64"),
-          "X-Intent": ragResult.intent,
-        },
-      });
-    }
-
-    let preferredModelKey: string | undefined;
-    try {
-      const userDoc = await convex.query(api.users.getByClerkId, { clerkId: userId });
-      if (userDoc?.preferences?.model) {
-        preferredModelKey = userDoc.preferences.model;
-      }
-    } catch (err) {
-      console.error("Failed to query user preferences from Convex:", err);
-    }
-
-    const models = getAvailableModels(preferredModelKey);
-    if (models.length === 0) {
-      return NextResponse.json({ error: "No AI providers available" }, { status: 500 });
-    }
-
-    const systemPrompt = buildSystemPrompt(ragResult.context, ragResult.intent);
-
-    const result = await tryStreamWithFallback(models, {
-      system: systemPrompt,
-      messages: messages as any,
-      temperature: 0.3,
-      maxOutputTokens: 2000,
-      onFinish: (text, modelName) => {
-        if (ragResult.queryEmbedding && ragResult.queryEmbedding.length > 0) {
-          // Write the response to the semantic cache asynchronously in the background
-          after(async () => {
-            try {
-              // TASK-B03: derive freshnessTier from top source URL for TTL matching
-              const topSourceUrl = ragResult.sources[0]?.url ?? "";
-              const freshnessTier = assignTier(topSourceUrl);
-              await convex.mutation(api.cache.set.set, {
-                queryText: question,
-                queryEmbedding: ragResult.queryEmbedding,
-                response: text,
-                sources: ragResult.sources,
-                model: modelName,
-                freshnessTier,
-              });
-            } catch (err) {
-              console.error("Failed to write to semantic cache:", err);
-            }
-          });
-        }
-      },
-    });
-
-    return result.toTextStreamResponse({
-      headers: {
-        "X-Sources": Buffer.from(JSON.stringify(ragResult.sources)).toString("base64"),
-        "X-Intent": ragResult.intent,
-      },
-    });
+    return await handlePost(req);
   } catch (error) {
-    console.error("Chat API error:", error);
-    const isDev = process.env.NODE_ENV === "development";
-    return NextResponse.json(
-      { error: isDev && error instanceof Error ? error.message : "An unexpected error occurred" },
-      { status: 500 },
-    );
+    return errorResponse(error);
   }
 }

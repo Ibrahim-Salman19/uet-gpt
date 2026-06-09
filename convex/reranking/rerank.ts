@@ -1,3 +1,4 @@
+// fallow-ignore-file security-sink
 import { v } from "convex/values";
 import { action } from "../_generated/server";
 

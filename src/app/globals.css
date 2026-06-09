@@ -35,67 +35,84 @@
 }
 
 :root {
+  /* ── Impeccable Neo Kinpaku Brand Tokens ── */
+  --ks-kinpaku-gold: oklch(84% 0.19 80.46);
+  --ks-verdigris-patina: oklch(70% 0.12 188);
+  --ks-lacquer-black: oklch(7% 0.006 95);
+  --ks-lacquer-deep: oklch(4% 0.004 95);
+  --ks-raised-lacquer: oklch(11% 0.006 95);
+  --ks-graphite: oklch(15% 0.008 95);
+  --ks-graphite-2: oklch(19% 0.008 95);
+  --ks-champagne: oklch(91% 0 0);
+  --ks-text-warm: oklch(88% 0 0);
+  --ks-text-muted: oklch(72% 0 0);
+  --ks-text-faint: oklch(62% 0 0);
+  --ks-text-mute-deep: oklch(52% 0 0);
+  --ks-rule: oklch(78% 0 0 / 0.16);
+  --ks-rule-strong: oklch(74% 0.09 82 / 0.6);
+
   /* ── Dark Surface Hierarchy (for chat UI) ── */
-  --surface-0: #050506;  /* Page background */
-  --surface-1: #0a0a0c;  /* Sidebar, overlays */
-  --surface-2: #101012;  /* Cards, chat portal */
-  --surface-3: #18181b;  /* Elevated cards, dropdowns */
-  --surface-4: #222226;  /* Borders, dividers */
-  --surface-5: #2d2d34;  /* Inner borders, active states */
+  --surface-0: var(--ks-lacquer-black); /* Page background */
+  --surface-1: var(--ks-lacquer-deep); /* Sidebar, overlays */
+  --surface-2: var(--ks-raised-lacquer); /* Cards, chat portal */
+  --surface-3: var(--ks-graphite); /* Elevated cards, dropdowns */
+  --surface-4: var(--ks-rule); /* Borders, dividers */
+  --surface-5: var(--ks-graphite-2); /* Inner borders, active states */
 
   /* ── Glassmorphism tokens ── */
-  --glass-bg: rgba(16, 16, 18, 0.8);
-  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-bg: rgba(7, 7, 8, 0.85);
+  --glass-border: var(--ks-rule);
   --glass-blur: 12px;
-  --glass-highlight: inset 0 1px 1px rgba(255, 255, 255, 0.04);
+  --glass-highlight:
+    inset 0 1px 1px rgba(255, 255, 255, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
 
   /* ── Primitive tokens ── */
-  --uet-navy-raw: oklch(0.35 0.07 265);
-  --uet-gold-raw: oklch(0.68 0.14 75);
+  --uet-navy-raw: var(--ks-lacquer-black);
+  --uet-gold-raw: var(--ks-kinpaku-gold);
 
   /* ── Semantic color tokens ── */
-  --primary: var(--uet-navy-raw);
-  --primary-hover: oklch(0.3 0.08 265);
-  --primary-active: oklch(0.25 0.09 265);
-  --primary-fg: oklch(0.95 0.005 30);
-  --primary-muted: oklch(0.85 0.02 265);
+  --primary: var(--ks-lacquer-black);
+  --primary-hover: var(--ks-raised-lacquer);
+  --primary-active: var(--ks-graphite);
+  --primary-fg: var(--ks-text-warm);
+  --primary-muted: var(--ks-graphite-2);
 
-  --accent: var(--uet-gold-raw);
-  --accent-hover: oklch(0.72 0.14 75);
-  --accent-active: oklch(0.64 0.13 75);
-  --accent-fg: oklch(0.2 0.02 265);
-  --accent-muted: oklch(0.85 0.04 75);
+  --accent: var(--ks-kinpaku-gold);
+  --accent-hover: oklch(86% 0.07 84); /* kinpaku-pale */
+  --accent-active: oklch(77% 0.13 82); /* kinpaku-rich */
+  --accent-fg: var(--ks-lacquer-deep);
+  --accent-muted: oklch(61% 0.085 78); /* kinpaku-deep */
 
-  --destructive: oklch(0.55 0.2 27);
-  --destructive-hover: oklch(0.5 0.22 27);
-  --destructive-fg: oklch(0.95 0.005 30);
+  --destructive: oklch(58% 0.15 35); /* vermilion-warning */
+  --destructive-hover: oklch(52% 0.14 35);
+  --destructive-fg: var(--ks-text-warm);
 
-  --semantic-success: oklch(0.6 0.15 145);
-  --semantic-warning: oklch(0.7 0.14 75);
-  --semantic-info: oklch(0.55 0.1 235);
+  --semantic-success: var(--ks-verdigris-patina);
+  --semantic-warning: oklch(72% 0.13 75);
+  --semantic-info: oklch(60% 0.1 235);
 
-  --text-primary: oklch(0.15 0.01 265);
-  --text-secondary: oklch(0.35 0.01 265);
-  --text-muted: oklch(0.55 0.01 265);
-  --text-disabled: oklch(0.7 0.005 265);
+  --text-primary: var(--ks-text-warm);
+  --text-secondary: var(--ks-text-muted);
+  --text-muted: var(--ks-text-faint);
+  --text-disabled: var(--ks-text-mute-deep);
 
-  --surface-base: oklch(0.97 0.005 265);
-  --surface-elevated: oklch(0.985 0.003 265);
-  --surface-card: oklch(0.995 0.002 265);
-  --surface-muted: oklch(0.93 0.008 265);
-  --surface-hover: oklch(0.9 0.01 265);
-  --surface-sidebar: oklch(0.12 0.015 265);
-  --text-sidebar: oklch(0.88 0.008 265);
+  --surface-base: var(--ks-lacquer-black);
+  --surface-elevated: var(--ks-raised-lacquer);
+  --surface-card: var(--ks-raised-lacquer);
+  --surface-muted: var(--ks-graphite);
+  --surface-hover: var(--ks-graphite-2);
+  --surface-sidebar: var(--ks-lacquer-deep);
+  --text-sidebar: var(--ks-text-warm);
 
-  --border: oklch(0.88 0.008 265);
-  --border-focus: var(--accent);
+  --border: var(--ks-rule);
+  --border-focus: var(--ks-rule-strong);
 
   /* ── Elevation & shadow tokens ── */
-  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.04), 0 1px 1px oklch(0 0 0 / 0.02);
-  --shadow-md: 0 4px 6px oklch(0 0 0 / 0.04), 0 2px 4px oklch(0 0 0 / 0.03);
-  --shadow-lg: 0 10px 15px oklch(0 0 0 / 0.05), 0 4px 6px oklch(0 0 0 / 0.03);
-  --shadow-xl: 0 20px 25px oklch(0 0 0 / 0.06), 0 8px 10px oklch(0 0 0 / 0.03);
-  --shadow-diffusion: 0 20px 40px -15px oklch(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 2px oklch(2% 0.02 95 / 0.2), 0 1px 1px oklch(2% 0.02 95 / 0.1);
+  --shadow-md: 0 4px 6px oklch(2% 0.02 95 / 0.25), 0 2px 4px oklch(2% 0.02 95 / 0.2);
+  --shadow-lg: 0 10px 15px oklch(2% 0.02 95 / 0.3), 0 4px 6px oklch(2% 0.02 95 / 0.2);
+  --shadow-xl: 0 20px 25px oklch(2% 0.02 95 / 0.35), 0 8px 10px oklch(2% 0.02 95 / 0.25);
+  --shadow-diffusion: 0 20px 40px -15px oklch(2% 0.02 95 / 0.3);
 
   /* ── z-index semantic scale ── */
   --z-dropdown: 100;
@@ -151,47 +168,47 @@
 }
 
 .dark {
-  --primary: oklch(0.55 0.08 265);
-  --primary-hover: oklch(0.6 0.09 265);
-  --primary-active: oklch(0.48 0.07 265);
-  --primary-fg: oklch(0.15 0.01 265);
-  --primary-muted: oklch(0.35 0.04 265);
+  --primary: var(--ks-lacquer-black);
+  --primary-hover: var(--ks-raised-lacquer);
+  --primary-active: var(--ks-graphite);
+  --primary-fg: var(--ks-text-warm);
+  --primary-muted: var(--ks-graphite-2);
 
-  --accent: oklch(0.75 0.12 75);
-  --accent-hover: oklch(0.8 0.11 75);
-  --accent-active: oklch(0.7 0.13 75);
-  --accent-fg: oklch(0.15 0.01 265);
-  --accent-muted: oklch(0.35 0.04 75);
+  --accent: var(--ks-kinpaku-gold);
+  --accent-hover: oklch(86% 0.07 84);
+  --accent-active: oklch(77% 0.13 82);
+  --accent-fg: var(--ks-lacquer-deep);
+  --accent-muted: oklch(61% 0.085 78);
 
-  --destructive: oklch(0.6 0.18 27);
-  --destructive-hover: oklch(0.65 0.17 27);
-  --destructive-fg: oklch(0.15 0.01 265);
+  --destructive: oklch(58% 0.15 35);
+  --destructive-hover: oklch(52% 0.14 35);
+  --destructive-fg: var(--ks-text-warm);
 
-  --semantic-success: oklch(0.65 0.14 145);
-  --semantic-warning: oklch(0.72 0.13 75);
-  --semantic-info: oklch(0.6 0.1 235);
+  --semantic-success: var(--ks-verdigris-patina);
+  --semantic-warning: oklch(72% 0.13 75);
+  --semantic-info: oklch(60% 0.1 235);
 
-  --text-primary: oklch(0.92 0.006 265);
-  --text-secondary: oklch(0.78 0.008 265);
-  --text-muted: oklch(0.6 0.008 265);
-  --text-disabled: oklch(0.4 0.005 265);
+  --text-primary: var(--ks-text-warm);
+  --text-secondary: var(--ks-text-muted);
+  --text-muted: var(--ks-text-faint);
+  --text-disabled: var(--ks-text-mute-deep);
 
-  --surface-base: oklch(0.13 0.01 265);
-  --surface-elevated: oklch(0.16 0.012 265);
-  --surface-card: oklch(0.18 0.014 265);
-  --surface-muted: oklch(0.15 0.01 265);
-  --surface-hover: oklch(0.22 0.015 265);
-  --surface-sidebar: oklch(0.1 0.008 265);
-  --text-sidebar: oklch(0.85 0.006 265);
+  --surface-base: var(--ks-lacquer-black);
+  --surface-elevated: var(--ks-raised-lacquer);
+  --surface-card: var(--ks-raised-lacquer);
+  --surface-muted: var(--ks-graphite);
+  --surface-hover: var(--ks-graphite-2);
+  --surface-sidebar: var(--ks-lacquer-deep);
+  --text-sidebar: var(--ks-text-warm);
 
-  --border: oklch(0.25 0.015 265);
-  --border-focus: var(--accent);
+  --border: var(--ks-rule);
+  --border-focus: var(--ks-rule-strong);
 
-  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.2);
-  --shadow-md: 0 4px 8px oklch(0 0 0 / 0.25);
-  --shadow-lg: 0 10px 20px oklch(0 0 0 / 0.3);
-  --shadow-xl: 0 20px 30px oklch(0 0 0 / 0.35);
-  --shadow-diffusion: 0 20px 40px -15px oklch(0 0 0 / 0.25);
+  --shadow-sm: 0 1px 2px oklch(2% 0.02 95 / 0.3);
+  --shadow-md: 0 4px 8px oklch(2% 0.02 95 / 0.35);
+  --shadow-lg: 0 10px 20px oklch(2% 0.02 95 / 0.4);
+  --shadow-xl: 0 20px 30px oklch(2% 0.02 95 / 0.45);
+  --shadow-diffusion: 0 20px 40px -15px oklch(2% 0.02 95 / 0.35);
 }
 
 @layer base {
@@ -356,6 +373,31 @@
   }
 }
 
+@keyframes loading-progress {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(300%);
+  }
+}
+
+.animate-progress {
+  animation: loading-progress 1.8s infinite cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.95);
+  }
+}
+
 @keyframes pulse-dot {
   0%,
   100% {
@@ -380,23 +422,47 @@
 }
 
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes scale-in {
-  from { opacity: 0; transform: scale(0.96); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes dropdown-open {
-  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 @keyframes typing-indicator {
-  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
-  40% { opacity: 1; transform: scale(1); }
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @utility container-query {
@@ -429,9 +495,11 @@
 }
 
 @media (pointer: coarse) {
-  button, [role="button"], a, input[type="submit"] {
+  button,
+  [role="button"],
+  a,
+  input[type="submit"] {
     min-height: 44px;
     min-width: 44px;
   }
 }
-

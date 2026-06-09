@@ -1,13 +1,13 @@
 "use client";
 
-import { ChatInputNew } from "@/components/chat/chat-input-new";
-import { usePreferences } from "@/components/preferences-provider";
-import { useRouter } from "next/navigation";
-import { useMutation } from "convex/react";
 import { api } from "convex/_generated/api";
+import { useMutation } from "convex/react";
+import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
+import { ChatInputNew } from "@/components/chat/chat-input-new";
 import { GlassPortal } from "@/components/chat/glass-portal";
+import { usePreferences } from "@/components/preferences-provider";
 
 const DEFAULT_SUGGESTIONS = [
   { label: "BS Fee Structure", prompt: "What is the fee structure for BS programs?" },
@@ -51,10 +51,23 @@ export default function ChatPage() {
         {/* Logo mark */}
         <div className="flex flex-col items-center gap-4">
           <div className="w-14 h-14 flex items-center justify-center rounded-2xl bg-[var(--accent)]/10 border border-[var(--accent)]/20">
-            <svg className="w-7 h-7 text-[var(--accent)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <svg
+              className="w-7 h-7 text-[var(--accent)]"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            >
               <path d="M12 2v20M2 12h20" strokeDasharray="2 2" />
               <circle cx="12" cy="12" r="8" strokeDasharray="4 2" />
-              <circle cx="12" cy="12" r="3" fill="currentColor" fillOpacity="0.2" className="animate-[pulse-dot_2s_ease-in-out_infinite]" />
+              <circle
+                cx="12"
+                cy="12"
+                r="3"
+                fill="currentColor"
+                fillOpacity="0.2"
+                className="animate-[pulse-dot_2s_ease-in-out_infinite]"
+              />
             </svg>
           </div>
           <div>
@@ -62,7 +75,8 @@ export default function ChatPage() {
               UETGPT Admissions Advisor
             </h2>
             <p className="text-xs text-zinc-500 mt-1.5 font-sans max-w-xs leading-relaxed">
-              Ask anything about UET Taxila — admissions, fee structures, departments, hostels, and more.
+              Ask anything about UET Taxila — admissions, fee structures, departments, hostels, and
+              more.
             </p>
           </div>
         </div>
@@ -85,7 +99,10 @@ export default function ChatPage() {
                 onClick={() => handleSend(s.prompt)}
                 className="rounded-full border border-white/5 bg-white/5 px-4 py-2 text-[11px] text-zinc-400 transition-all duration-200 hover:border-zinc-300 hover:text-white hover:bg-white/10 active:scale-95 focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:outline-none shadow-sm font-sans cursor-pointer"
               >
-                <span className="opacity-40 font-mono text-[9px] mr-2 select-none" aria-hidden="true">
+                <span
+                  className="opacity-40 font-mono text-[9px] mr-2 select-none"
+                  aria-hidden="true"
+                >
                   [{i + 1}]
                 </span>
                 {s.label}

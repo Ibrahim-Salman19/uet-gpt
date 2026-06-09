@@ -38,6 +38,59 @@ function ErrorBanner({ error, onRetry }: { error: string; onRetry?: () => void }
   );
 }
 
+function useAutoScroll(messages: ChatMessage[], isAwaitingReply?: boolean) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const prevLengthRef = useRef(messages.length);
+
+  useEffect(() => {
+    const viewport = scrollRef.current?.querySelector(
+      "[data-radix-scroll-area-viewport]",
+    ) as HTMLDivElement;
+    if (viewport) {
+      const isNearBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 150;
+      const isNewMessage = messages.length > prevLengthRef.current;
+
+      if (isNearBottom || isNewMessage) {
+        viewport.scrollTop = viewport.scrollHeight;
+      }
+    }
+    prevLengthRef.current = messages.length;
+  }, [messages, isAwaitingReply]);
+
+  return scrollRef;
+}
+
+function EmptyContent({
+  suggestions,
+  onSuggestionSelect,
+}: {
+  suggestions?: string[];
+  onSuggestionSelect?: (suggestion: string) => void;
+}) {
+  return (
+    <EmptyState suggestions={suggestions} onSuggestionSelect={(s) => onSuggestionSelect?.(s)} />
+  );
+}
+
+function LoadingContent({ className }: { className?: string }) {
+  return <LoadingState className={className} />;
+}
+
+function AwaitingReplyIndicator() {
+  return (
+    <div className="flex items-start gap-3 px-4 py-3">
+      <div className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--primary-muted)]">
+        <span className="text-xs font-semibold text-[var(--primary)]">AI</span>
+      </div>
+      <div className="flex items-center gap-1.5 pt-2">
+        <span className="h-2 w-2 animate-[pulse-dot_1.4s_ease-in-out_infinite] rounded-full bg-[var(--primary)]" />
+        <span className="h-2 w-2 animate-[pulse-dot_1.4s_ease-in-out_0.2s_infinite] rounded-full bg-[var(--primary)]" />
+        <span className="h-2 w-2 animate-[pulse-dot_1.4s_ease-in-out_0.4s_infinite] rounded-full bg-[var(--primary)]" />
+      </div>
+    </div>
+  );
+}
+
 export function ChatMessages({
   messages,
   isLoading,
@@ -48,39 +101,19 @@ export function ChatMessages({
   suggestions,
   className,
 }: ChatMessagesProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const prevLengthRef = useRef(messages.length);
-
-  useEffect(() => {
-    if (scrollRef.current && messages.length > prevLengthRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-    prevLengthRef.current = messages.length;
-  }, [messages.length]);
-
-  useEffect(() => {
-    if (scrollRef.current && messages.length > 0) {
-      const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
-      const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
-      if (isNearBottom) {
-        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-      }
-    }
-  }, [messages.length]);
+  const scrollRef = useAutoScroll(messages, isAwaitingReply);
 
   if (messages.length === 0 && !isLoading && !isAwaitingReply && !error) {
-    return (
-      <EmptyState suggestions={suggestions} onSuggestionSelect={(s) => onSuggestionSelect?.(s)} />
-    );
+    return <EmptyContent suggestions={suggestions} onSuggestionSelect={onSuggestionSelect} />;
   }
 
   if ((isLoading || isAwaitingReply) && messages.length === 0) {
-    return <LoadingState className={className} />;
+    return <LoadingContent className={className} />;
   }
 
   return (
-    <ScrollArea ref={scrollRef} className={cn("flex-1", className)}>
-      <div className="mx-auto flex max-w-3xl flex-col gap-1 py-4">
+    <ScrollArea ref={scrollRef} className={cn("h-full w-full", className)}>
+      <div className="mx-auto flex max-w-3xl flex-col gap-1 pt-4 pb-32 md:pb-40">
         {messages.map((message, index) => (
           <div
             key={message.id}
@@ -92,18 +125,7 @@ export function ChatMessages({
 
         {error && <ErrorBanner error={error} onRetry={onRetry} />}
 
-        {isAwaitingReply && (
-          <div className="flex items-start gap-3 px-4 py-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--primary-muted)]">
-              <span className="text-xs font-semibold text-[var(--primary)]">AI</span>
-            </div>
-            <div className="flex items-center gap-1.5 pt-2">
-              <span className="h-2 w-2 animate-[pulse-dot_1.4s_ease-in-out_infinite] rounded-full bg-[var(--primary)]" />
-              <span className="h-2 w-2 animate-[pulse-dot_1.4s_ease-in-out_0.2s_infinite] rounded-full bg-[var(--primary)]" />
-              <span className="h-2 w-2 animate-[pulse-dot_1.4s_ease-in-out_0.4s_infinite] rounded-full bg-[var(--primary)]" />
-            </div>
-          </div>
-        )}
+        {isAwaitingReply && <AwaitingReplyIndicator />}
       </div>
     </ScrollArea>
   );

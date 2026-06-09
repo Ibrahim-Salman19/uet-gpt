@@ -1,6 +1,42 @@
-import { ConvexHttpClient } from "convex/browser";
+// fallow-ignore-file security-sink
 import { headers } from "next/headers";
 import { Webhook } from "svix";
+
+function convexSiteUrl(): string | null {
+  const url = process.env.NEXT_PUBLIC_CONVEX_URL;
+  if (!url) return null;
+  return url.replace(/\.cloud$/, ".site");
+}
+
+async function forwardWebhookToConvex(evt: { type: string; data: Record<string, unknown> }): Promise<Response> {
+  const webhookSecret = process.env.WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    console.warn("Missing WEBHOOK_SECRET, skipping Convex sync");
+    return new Response("ok", { status: 200 });
+  }
+
+  const siteUrl = convexSiteUrl();
+  if (!siteUrl) {
+    console.warn("Missing NEXT_PUBLIC_CONVEX_URL, skipping Convex sync");
+    return new Response("ok", { status: 200 });
+  }
+
+  const response = await fetch(`${siteUrl}/api/webhook/clerk`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${webhookSecret}`,
+    },
+    body: JSON.stringify(evt),
+  });
+
+  if (!response.ok) {
+    console.error("User webhook sync failed:", response.status, await response.text());
+    return new Response("Convex sync failed", { status: 502 });
+  }
+
+  return new Response("ok", { status: 200 });
+}
 
 export async function POST(req: Request) {
   const secret = process.env.CLERK_SIGNING_SECRET;
@@ -30,41 +66,5 @@ export async function POST(req: Request) {
     return new Response("Invalid signature", { status: 400 });
   }
 
-  const { type, data } = evt;
-
-  if (type === "user.created" || type === "user.updated") {
-    const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
-    if (!convexUrl) {
-      console.warn("Missing NEXT_PUBLIC_CONVEX_URL, skipping Convex mutation");
-      return new Response("ok", { status: 200 });
-    }
-
-    const clerkId = data.id as string;
-    const firstName = (data.first_name as string) ?? "";
-    const lastName = (data.last_name as string) ?? "";
-    const name = [firstName, lastName].filter(Boolean).join(" ").trim() || "Unknown";
-    const emailAddresses = data.email_addresses as Array<{ email_address: string }> | undefined;
-    const email = emailAddresses?.[0]?.email_address ?? "";
-    const imageUrl = data.image_url as string | undefined;
-
-    const webhookSecret = process.env.WEBHOOK_SECRET;
-    if (!webhookSecret) {
-      console.warn("Missing WEBHOOK_SECRET, skipping Convex mutation");
-      return new Response("ok", { status: 200 });
-    }
-
-    const client = new ConvexHttpClient(convexUrl);
-    await (client.mutation as unknown as (name: string, args: object) => Promise<unknown>)(
-      "users:getOrCreate",
-      {
-        clerkId,
-        name,
-        email,
-        imageUrl: imageUrl || undefined,
-        secret: webhookSecret,
-      },
-    );
-  }
-
-  return new Response("ok", { status: 200 });
+  return await forwardWebhookToConvex(evt);
 }

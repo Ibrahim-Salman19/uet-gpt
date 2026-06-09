@@ -12,32 +12,246 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+
+function AnalyticsLoadingSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {["skele-1", "skele-2", "skele-3", "skele-4", "skele-5", "skele-6"].map((id) => (
+          <Card
+            key={id}
+            className="rounded-xl border border-white/5 bg-[#101012]/40 p-5 space-y-3"
+          >
+            <CardHeader className="pb-2 p-0">
+              <Skeleton className="h-4 w-24 bg-white/5" />
+            </CardHeader>
+            <CardContent className="p-0">
+              <Skeleton className="h-8 w-16 mb-2 bg-white/10" />
+              <Skeleton className="h-3 w-32 bg-white/5" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SectionHeader({ title, subtitle }: { title: string; subtitle: string }) {
+  return (
+    <div className="pb-2 border-b border-white/[0.04]">
+      <h2 className="text-sm font-semibold text-zinc-300 font-sans tracking-tight flex items-center gap-2">
+        <span>{title}</span>
+        <span className="text-[10px] text-zinc-500 font-mono font-normal">{subtitle}</span>
+      </h2>
+    </div>
+  );
+}
+
+function UsageMetricsSection({
+  activeUsers,
+  totalUsers,
+  satisfactionRate,
+  positiveFeedback,
+  negativeFeedback,
+}: {
+  activeUsers: number;
+  totalUsers: number;
+  satisfactionRate: number;
+  positiveFeedback: number;
+  negativeFeedback: number;
+}) {
+  return (
+    <div className="space-y-4">
+      <SectionHeader title="Usage Metrics" subtitle="[ METRICS: USER UTILITY ]" />
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="md:col-span-2 rounded-xl border border-white/5 bg-[#101012]/40 p-6 hover:border-[var(--accent)]/20 hover:bg-[#101012]/60 transition-all duration-300">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider font-sans flex items-center gap-2">
+              <Users className="h-4 w-4 text-zinc-400" />
+              Active Users Today
+            </span>
+            <span className="text-[9px] font-mono text-zinc-500">REAL_TIME</span>
+          </div>
+          <div className="mt-4 flex items-baseline gap-4">
+            <div className="text-4xl font-bold text-zinc-100 font-mono tracking-tight">
+              {activeUsers}
+            </div>
+            <div className="text-xs text-zinc-500 font-mono">
+              <span className="text-zinc-600 mr-1">/</span>
+              {totalUsers.toLocaleString()} total users
+            </div>
+          </div>
+        </Card>
+
+        <Card className="rounded-xl border border-white/5 bg-[#101012]/40 p-6 hover:border-[var(--accent)]/20 hover:bg-[#101012]/60 transition-all duration-300">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider font-sans flex items-center gap-2">
+              <Activity className="h-4 w-4 text-zinc-400" />
+              Satisfaction Rate
+            </span>
+            <span className="text-[9px] font-mono text-zinc-500">KPI</span>
+          </div>
+          <div className="mt-4 text-4xl font-bold text-zinc-100 font-mono tracking-tight">
+            {satisfactionRate}%
+          </div>
+          <div className="flex items-center gap-3 mt-3 pt-3 border-t border-white/[0.04]">
+            <span className="flex items-center gap-1 text-[10px] font-mono text-emerald-400">
+              <ThumbsUp className="h-3 w-3" /> {positiveFeedback}
+            </span>
+            <span className="flex items-center gap-1 text-[10px] font-mono text-red-400">
+              <ThumbsDown className="h-3 w-3" /> {negativeFeedback}
+            </span>
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+function SystemMetricsSection({
+  storageUsed,
+  totalDocuments,
+  totalCacheEntries,
+}: {
+  storageUsed: { documents: number; cache: number; total: number };
+  totalDocuments: number;
+  totalCacheEntries: number;
+}) {
+  return (
+    <div className="space-y-4">
+      <SectionHeader title="System Metrics" subtitle="[ STORAGE: DATA CORE ]" />
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="rounded-xl border border-white/5 bg-[#101012]/40 p-5 hover:border-[var(--accent)]/20 transition-all duration-300">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider font-sans flex items-center gap-2">
+              <Database className="h-4 w-4 text-zinc-400" />
+              Document Storage
+            </span>
+          </div>
+          <div className="mt-4 text-2xl font-bold text-zinc-100 font-mono tracking-tight">
+            {(storageUsed.documents / 1024).toFixed(1)} KB
+          </div>
+          <div className="mt-1 text-[10px] text-zinc-500 font-mono">
+            {totalDocuments.toLocaleString()} documents
+          </div>
+        </Card>
+
+        <Card className="rounded-xl border border-white/5 bg-[#101012]/40 p-5 hover:border-[var(--accent)]/20 transition-all duration-300">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider font-sans flex items-center gap-2">
+              <Database className="h-4 w-4 text-zinc-400" />
+              Cache Storage
+            </span>
+          </div>
+          <div className="mt-4 text-2xl font-bold text-zinc-100 font-mono tracking-tight">
+            {(storageUsed.cache / 1024).toFixed(1)} KB
+          </div>
+          <div className="mt-1 text-[10px] text-zinc-500 font-mono">
+            {totalCacheEntries.toLocaleString()} cache entries
+          </div>
+        </Card>
+
+        <Card className="rounded-xl border border-white/5 bg-[#101012]/40 p-5 hover:border-[var(--accent)]/20 transition-all duration-300">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider font-sans flex items-center gap-2">
+              <HardDrive className="h-4 w-4 text-zinc-400" />
+              Total Storage
+            </span>
+          </div>
+          <div className="mt-4 text-2xl font-bold text-zinc-100 font-mono tracking-tight">
+            {(storageUsed.total / 1024).toFixed(1)} KB
+          </div>
+          <div className="mt-1 text-[10px] text-zinc-500 font-mono">
+            Combined document + cache storage
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+function DocumentHealthSection({
+  indexedDocuments,
+  pendingDocuments,
+  failedDocuments,
+  totalDocuments,
+}: {
+  indexedDocuments: number;
+  pendingDocuments: number;
+  failedDocuments: number;
+  totalDocuments: number;
+}) {
+  return (
+    <div className="space-y-4">
+      <SectionHeader title="Document Health" subtitle="[ PIPELINE: INDEXER HEALTH ]" />
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="rounded-xl border border-green-500/10 bg-[#101012]/40 p-5 hover:border-green-500/20 transition-all duration-300">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-green-500 uppercase tracking-wider font-sans flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              Indexed
+            </span>
+          </div>
+          <div className="mt-4 text-3xl font-bold text-zinc-100 font-mono">{indexedDocuments}</div>
+          <div className="mt-1 text-[10px] text-zinc-500 font-mono uppercase">
+            {totalDocuments > 0
+              ? `${Math.round((indexedDocuments / totalDocuments) * 100)}% of total`
+              : "No documents"}
+          </div>
+        </Card>
+
+        <Card className="rounded-xl border border-yellow-500/10 bg-[#101012]/40 p-5 hover:border-yellow-500/20 transition-all duration-300">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider font-sans flex items-center gap-2">
+              <Activity className="h-4 w-4" />
+              Pending
+            </span>
+          </div>
+          <div className="mt-4 text-3xl font-bold text-zinc-100 font-mono">{pendingDocuments}</div>
+          <div className="mt-1 text-[10px] text-zinc-500 font-mono">Awaiting processing</div>
+        </Card>
+
+        <Card
+          className={`rounded-xl p-5 transition-all duration-300 border ${
+            failedDocuments > 0
+              ? "border-red-500/20 bg-red-950/5 hover:border-red-500/30"
+              : "border-gray-500/20 bg-[#101012]/40 hover:border-white/10"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span
+              className={`text-xs font-semibold uppercase tracking-wider font-sans flex items-center gap-2 ${
+                failedDocuments > 0 ? "text-red-500" : "text-zinc-500"
+              }`}
+            >
+              <TrendingDown className="h-4 w-4" />
+              Failed
+            </span>
+          </div>
+          <div
+            className={`mt-4 text-3xl font-bold font-mono ${
+              failedDocuments > 0 ? "text-red-400" : "text-zinc-100"
+            }`}
+          >
+            {failedDocuments}
+          </div>
+          <div className="mt-1 text-[10px] text-zinc-500 font-mono">
+            {failedDocuments > 0 ? "Needs investigation" : "No issues detected"}
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminAnalyticsPage() {
   const stats = useQuery(api.admin.stats.dashboardStats, {});
 
   if (!stats) {
-    return (
-      <div className="space-y-6">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton list
-            <Card key={i}>
-              <CardHeader className="pb-2">
-                <Skeleton className="h-4 w-24" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-8 w-16 mb-2" />
-                <Skeleton className="h-3 w-32" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    );
+    return <AnalyticsLoadingSkeleton />;
   }
 
   const positiveFeedback = stats.recentFeedback.filter((f: any) => f.rating === "thumbsUp").length;
@@ -48,163 +262,31 @@ export default function AdminAnalyticsPage() {
   const satisfactionRate = totalRecent > 0 ? Math.round((positiveFeedback / totalRecent) * 100) : 0;
 
   return (
-    <div className="space-y-6">
-      {/* Usage Metrics */}
-      <div>
-        <h2 className="text-lg font-semibold mb-4">Usage Metrics</h2>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Active Users Today
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.activeUsersLast24h}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {stats.totalUsers.toLocaleString()} total users
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Activity className="h-4 w-4" />
-                Satisfaction Rate
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{satisfactionRate}%</div>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="flex items-center gap-1 text-xs text-green-500">
-                  <ThumbsUp className="h-3 w-3" /> {positiveFeedback}
-                </span>
-                <span className="flex items-center gap-1 text-xs text-red-500">
-                  <ThumbsDown className="h-3 w-3" /> {negativeFeedback}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+    <div className="space-y-8 animate-[slide-up_0.3s_ease-[var(--ease-out-expo)]_both]">
+      <UsageMetricsSection
+        activeUsers={stats.activeUsersLast24h}
+        totalUsers={stats.totalUsers}
+        satisfactionRate={satisfactionRate}
+        positiveFeedback={positiveFeedback}
+        negativeFeedback={negativeFeedback}
+      />
 
       <Separator />
 
-      {/* System Metrics */}
-      <div>
-        <h2 className="text-lg font-semibold mb-4">System Metrics</h2>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Database className="h-4 w-4" />
-                Document Storage
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {(stats.storageUsed.documents / 1024).toFixed(1)} KB
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {stats.totalDocuments.toLocaleString()} documents
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Database className="h-4 w-4" />
-                Cache Storage
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {(stats.storageUsed.cache / 1024).toFixed(1)} KB
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {stats.totalCacheEntries.toLocaleString()} cache entries
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <HardDrive className="h-4 w-4" />
-                Total Storage
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {(stats.storageUsed.total / 1024).toFixed(1)} KB
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Combined document + cache storage
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      <SystemMetricsSection
+        storageUsed={stats.storageUsed}
+        totalDocuments={stats.totalDocuments}
+        totalCacheEntries={stats.totalCacheEntries}
+      />
 
       <Separator />
 
-      {/* Document Health */}
-      <div>
-        <h2 className="text-lg font-semibold mb-4">Document Health</h2>
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card className="border-green-500/20">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-green-500 flex items-center gap-2">
-                <TrendingUp className="h-4 w-4" />
-                Indexed
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.indexedDocuments}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {stats.totalDocuments > 0
-                  ? `${Math.round((stats.indexedDocuments / stats.totalDocuments) * 100)}% of total`
-                  : "No documents"}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-yellow-500/20">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-yellow-500 flex items-center gap-2">
-                <Activity className="h-4 w-4" />
-                Pending
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.pendingDocuments}</div>
-              <p className="text-xs text-muted-foreground mt-1">Awaiting processing</p>
-            </CardContent>
-          </Card>
-
-          <Card className={stats.failedDocuments > 0 ? "border-red-500/20" : "border-gray-500/20"}>
-            <CardHeader className="pb-2">
-              <CardTitle
-                className={`text-sm font-medium flex items-center gap-2 ${
-                  stats.failedDocuments > 0 ? "text-red-500" : "text-muted-foreground"
-                }`}
-              >
-                <TrendingDown className="h-4 w-4" />
-                Failed
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.failedDocuments}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {stats.failedDocuments > 0 ? "Needs investigation" : "No issues detected"}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      <DocumentHealthSection
+        indexedDocuments={stats.indexedDocuments}
+        pendingDocuments={stats.pendingDocuments}
+        failedDocuments={stats.failedDocuments}
+        totalDocuments={stats.totalDocuments}
+      />
     </div>
   );
 }

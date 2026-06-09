@@ -28,6 +28,83 @@ export function cosineSimilarity(a: number[], b: number[]) {
 
 const _internal: any = internal;
 
+async function getCachedEntry(
+  ctx: any,
+  queryEmbedding: number[],
+): Promise<{
+  entry: any;
+  entryId: string;
+} | null> {
+  if (queryEmbedding.length === 0) return null;
+
+  const results = await ctx.vectorSearch("semanticCache", "by_queryEmbedding", {
+    vector: queryEmbedding,
+    limit: 1,
+  });
+
+  if (results.length === 0) return null;
+
+  const firstResult = results[0];
+  if (!firstResult) return null;
+
+  const entry = await ctx.runQuery(_internal.cache.internal_queries.getCacheEntry, {
+    id: firstResult._id,
+  });
+
+  if (!entry || entry.expiresAt < Date.now()) return null;
+
+  const similarity = cosineSimilarity(queryEmbedding, entry.queryEmbedding);
+  if (similarity < CACHE_SIMILARITY_THRESHOLD) return null;
+
+  return { entry, entryId: firstResult._id };
+}
+
+async function checkSourceStaleness(ctx: any, entry: any): Promise<boolean> {
+  const sourceEntryIds = entry.sourceEntryIds;
+  if (!sourceEntryIds || sourceEntryIds.length === 0) return false;
+
+  for (const ragEntryId of sourceEntryIds) {
+    const doc = await ctx.runQuery(_internal.cache.internal_queries.getDocByEntryId, {
+      entryId: ragEntryId,
+    });
+    if (doc && (doc.updatedAt > entry.createdAt || doc.crawledAt > entry.createdAt)) {
+      console.log("Cache entry invalidated: source document was re-indexed");
+      return true;
+    }
+  }
+  return false;
+}
+
+async function findMatchingCacheEntry(
+  ctx: any,
+  queryEmbedding: number[],
+): Promise<{
+  response: string;
+  sources: Array<{
+    entryId: string;
+    url: string;
+    title: string;
+    relevanceScore: number;
+    excerpt: string;
+    headingPath?: string[];
+  }>;
+  model: string;
+} | null> {
+  const cached = await getCachedEntry(ctx, queryEmbedding);
+  if (!cached) return null;
+
+  const isStale = await checkSourceStaleness(ctx, cached.entry);
+  if (isStale) return null;
+
+  await ctx.runMutation(_internal.cache.internal_queries.incrementHits, { id: cached.entryId });
+
+  return {
+    response: cached.entry.response,
+    sources: cached.entry.sources,
+    model: cached.entry.model,
+  };
+}
+
 export const get = action({
   args: {
     queryText: v.string(),
@@ -51,53 +128,6 @@ export const get = action({
     }),
   ),
   handler: async (ctx, args) => {
-    if (args.queryEmbedding.length === 0) return null;
-
-    const results = await ctx.vectorSearch("semanticCache", "by_queryEmbedding", {
-      vector: args.queryEmbedding,
-      limit: 1,
-    });
-
-    if (results.length === 0) return null;
-
-    const firstResult = results[0];
-    if (!firstResult) return null;
-    const entryId = firstResult._id;
-
-    const entry = await ctx.runQuery(_internal.cache.internal_queries.getCacheEntry, {
-      id: entryId,
-    });
-
-    if (!entry || entry.expiresAt < Date.now()) return null;
-
-    const similarity = cosineSimilarity(args.queryEmbedding, entry.queryEmbedding);
-    if (similarity < CACHE_SIMILARITY_THRESHOLD) return null;
-
-    // R-5: Invalidate cache if any source document was re-indexed after cache entry creation
-    const sourceEntryIds = entry.sourceEntryIds;
-    if (sourceEntryIds && sourceEntryIds.length > 0) {
-      let staleFound = false;
-      for (const ragEntryId of sourceEntryIds) {
-        const doc = await ctx.runQuery(_internal.cache.internal_queries.getDocByEntryId, {
-          entryId: ragEntryId,
-        });
-        if (doc && (doc.updatedAt > entry.createdAt || doc.crawledAt > entry.createdAt)) {
-          staleFound = true;
-          break;
-        }
-      }
-      if (staleFound) {
-        console.log("Cache entry invalidated: source document was re-indexed");
-        return null;
-      }
-    }
-
-    await ctx.runMutation(_internal.cache.internal_queries.incrementHits, { id: entryId });
-
-    return {
-      response: entry.response,
-      sources: entry.sources,
-      model: entry.model,
-    };
+    return await findMatchingCacheEntry(ctx, args.queryEmbedding);
   },
 });

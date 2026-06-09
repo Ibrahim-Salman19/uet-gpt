@@ -52,6 +52,20 @@ if not CONVEX_SITE_URL:
     print("[ERROR] CONVEX_SITE_URL is not configured in .env.local")
     sys.exit(1)
 
+
+# ── Freshness Tier Inference (H4 fix) ──────────────────────────────────────────
+
+def infer_freshness_tier(url: str) -> str:
+    lower = url.lower()
+    if "admission" in lower or "academic" in lower or lower in (
+        "https://web.uettaxila.edu.pk/", "https://uettaxila.edu.pk/"
+    ):
+        return "high"
+    elif "department" in lower or "faculty" in lower:
+        return "medium"
+    return "low"
+
+
 # ── PDF Extraction ─────────────────────────────────────────────────────────────
 
 def extract_fast(path: str) -> str:
@@ -80,6 +94,7 @@ def extract_fast(path: str) -> str:
     except Exception as e:
         print(f"  [error] pypdf also failed: {e}")
         return ""
+
 
 def extract_vlm(path: str) -> str:
     """
@@ -224,6 +239,7 @@ def extract_vlm(path: str) -> str:
     doc.close()
     return "\n\n---\n\n".join(p for p in pages_md if p.strip())
 
+
 def extract(path: str, force_vlm: bool) -> tuple[str, str]:
     """
     Returns (markdown_text, method_used).
@@ -241,6 +257,7 @@ def extract(path: str, force_vlm: bool) -> tuple[str, str]:
         return extract_vlm(path), "gemini-vlm (auto-fallback)"
 
     return text, "pymupdf4llm"
+
 
 # ── Download ───────────────────────────────────────────────────────────────────
 
@@ -272,21 +289,22 @@ async def download(url: str) -> str:
             pass
         raise
 
+
 # ── Metadata Sanitization ─────────────────────────────────────────────────────
 
 # TASK-S01: Prompt injection pattern blocklist.
 # These patterns can corrupt the LLM context if they appear in stored chunk metadata.
 _INJECTION_PATTERNS = [
-    r"(?i)ignore\s+previous\s+instructions?",
-    r"(?i)system\s*:",
-    r"(?i)role\s*:",
-    r"(?i)\[INST\]",
-    r"(?i)</s>",
-    r"(?i)<\|im_start\|>",
-    r"(?i)<\|im_end\|>",
-    r"(?i)###\s*instruction",
+    r"ignore\s+previous\s+instructions?",
+    r"system\s*:",
+    r"role\s*:",
+    r"\[INST\]",
+    r"</s>",
+    r"<\|im_start\|>",
+    r"<\|im_end\|>",
+    r"###\s*instruction",
 ]
-_INJECTION_RE = re.compile("|".join(_INJECTION_PATTERNS))
+_INJECTION_RE = re.compile("|".join(_INJECTION_PATTERNS), re.IGNORECASE)
 
 
 def sanitize_metadata(text: str, field: str = "field", max_len: int = 500) -> str:
@@ -306,33 +324,58 @@ def sanitize_metadata(text: str, field: str = "field", max_len: int = 500) -> st
 
 # ── Push to Convex ─────────────────────────────────────────────────────────────
 
+def retry_delay(attempt: int, base: float = 2.0, max_delay: float = 60.0) -> float:
+    import random
+    delay = base * (2 ** attempt)
+    delay = min(delay, max_delay)
+    jitter = delay * random.random() * 0.5
+    return delay + jitter
+
+
 def push(title: str, markdown: str) -> str:
-    """Push extracted markdown to Convex /ingest endpoint."""
+    """Push extracted markdown to Convex /ingest endpoint with retry logic (S3 fix)."""
     import requests
     safe_title = sanitize_metadata(title, field="title", max_len=300)
-    virtual_url  = "pdf://" + safe_title.lower().replace(" ", "-").replace("/", "-")
     content_hash = hashlib.sha256(markdown.encode("utf-8")).hexdigest()
+    # Virtual URL using https://uetgpt.local/pdf/{hash} format (L5 fix)
+    virtual_url = f"https://uetgpt.local/pdf/{content_hash[:16]}"
 
     headers = {"Content-Type": "application/json"}
     if CONVEX_AUTH_TOKEN:
         headers["Authorization"] = f"Bearer {CONVEX_AUTH_TOKEN}"
 
-    resp = requests.post(
-        f"{CONVEX_SITE_URL}/ingest",
-        json={
-            "url":            virtual_url,
-            "markdown":       markdown,
-            "contentHash":    content_hash,
-            "crawlSessionId": "pdf-manual",
-            "title":          safe_title,
-        },
-        headers=headers,
-        timeout=30,
-    )
-    resp.raise_for_status()
-    action = resp.json().get("action", "?")
-    print(f"  [convex] {action}  ->  {virtual_url}")
-    return action
+    payload = {
+        "url":            virtual_url,
+        "markdown":       markdown,
+        "contentHash":    content_hash,
+        "crawlSessionId": "pdf-manual",
+        "title":          safe_title,
+        "sourceType":     "pdf",
+        "freshnessTier":  infer_freshness_tier(safe_title),
+    }
+
+    last_exc = None
+    for attempt in range(1, 4):
+        try:
+            resp = requests.post(
+                f"{CONVEX_SITE_URL}/ingest",
+                json=payload,
+                headers=headers,
+                timeout=30,
+            )
+            resp.raise_for_status()
+            action = resp.json().get("action", "?")
+            print(f"  [convex] {action}  ->  {virtual_url}")
+            return action
+        except Exception as e:
+            last_exc = e
+            if attempt < 3:
+                delay = retry_delay(attempt)
+                print(f"  [retry] Push attempt {attempt} failed ({e}), retrying in {delay:.1f}s...")
+                time.sleep(delay)
+
+    raise RuntimeError(f"Failed to push to Convex after 3 attempts: {last_exc}")
+
 
 # ── Main ───────────────────────────────────────────────────────────────────────
 
@@ -371,6 +414,7 @@ async def ingest(source: str, title: str, force_vlm: bool) -> None:
                 os.unlink(tmp_path)
             except OSError:
                 pass
+
 
 if __name__ == "__main__":
     import argparse

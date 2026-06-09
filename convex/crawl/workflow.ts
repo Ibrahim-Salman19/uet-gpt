@@ -67,6 +67,22 @@ export const kickoffDailyCrawl = internalMutation({
   },
 });
 
+function buildUpdatePayload(
+  job: Doc<"crawlJobs">,
+  args: { status?: string; providerJobId?: string; error?: string },
+): Partial<Doc<"crawlJobs">> {
+  const updatePayload: Partial<Doc<"crawlJobs">> = {};
+  if (args.status && job.status !== args.status) updatePayload.status = args.status as any;
+  if (args.providerJobId && job.providerJobId !== args.providerJobId)
+    updatePayload.providerJobId = args.providerJobId;
+  if (args.error && job.error !== args.error) updatePayload.error = args.error;
+  return updatePayload;
+}
+
+function isTerminalStatus(status?: string): boolean {
+  return status === "failed" || status === "completed" || status === "cancelled";
+}
+
 export const updateJobState = internalMutation({
   args: {
     jobId: v.id("crawlJobs"),
@@ -86,19 +102,14 @@ export const updateJobState = internalMutation({
     const job = await ctx.db.get(args.jobId);
     if (!job) return;
 
-    const updatePayload: Partial<Doc<"crawlJobs">> & { completedAt?: number } = {};
-    if (args.status && job.status !== args.status) updatePayload.status = args.status;
-    if (args.providerJobId && job.providerJobId !== args.providerJobId)
-      updatePayload.providerJobId = args.providerJobId;
-    if (args.error && job.error !== args.error) updatePayload.error = args.error;
+    const updatePayload = buildUpdatePayload(job, args);
+    if (Object.keys(updatePayload).length === 0) return;
 
-    if (Object.keys(updatePayload).length === 0) return; // Compare-before-write check passed: No changes needed
-
-    if (args.status === "failed" || args.status === "completed" || args.status === "cancelled") {
-      updatePayload.completedAt = Date.now();
+    if (isTerminalStatus(args.status)) {
+      (updatePayload as any).completedAt = Date.now();
     }
 
-    await ctx.db.patch(args.jobId, updatePayload);
+    await ctx.db.patch(args.jobId, updatePayload as any);
   },
 });
 

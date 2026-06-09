@@ -1,5 +1,17 @@
 import { query } from "../_generated/server";
 
+const FACULTY_PATTERNS = ["faculty", "professor", "dr.", "prof."];
+const STAFF_PATTERNS = ["staff"];
+const ADMIN_PATTERNS = ["admin", "head", "registrar", "chancellor"];
+
+function classifyDocument(url: string, title: string): "faculty" | "staff" | "admin" | null {
+  const text = `${url} ${title}`.toLowerCase();
+  if (FACULTY_PATTERNS.some(p => text.includes(p))) return "faculty";
+  if (STAFF_PATTERNS.some(p => text.includes(p))) return "staff";
+  if (ADMIN_PATTERNS.some(p => text.includes(p))) return "admin";
+  return null;
+}
+
 export const getCount = query({
   args: {},
   handler: async (ctx) => {
@@ -16,25 +28,10 @@ export const getCount = query({
       });
 
       for (const doc of page.page) {
-        const url = doc.url.toLowerCase();
-        const title = doc.title.toLowerCase();
-        if (
-          url.includes("faculty") ||
-          url.includes("professor") ||
-          title.includes("dr.") ||
-          title.includes("prof.")
-        ) {
-          facultyCount++;
-        } else if (url.includes("staff")) {
-          staffCount++;
-        } else if (
-          url.includes("admin") ||
-          url.includes("head") ||
-          url.includes("registrar") ||
-          url.includes("chancellor")
-        ) {
-          adminCount++;
-        }
+        const category = classifyDocument(doc.url.toLowerCase(), doc.title.toLowerCase());
+        if (category === "faculty") facultyCount++;
+        else if (category === "staff") staffCount++;
+        else if (category === "admin") adminCount++;
       }
 
       cursor = page.continueCursor;

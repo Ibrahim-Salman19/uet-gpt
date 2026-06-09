@@ -2,39 +2,33 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mockConvex = {
-  query: vi.fn(),
-};
+vi.hoisted(() => {
+  const buildAdminMocks = (globalThis as any).buildAdminMocks;
+  (globalThis as any).currentAdminMocks = buildAdminMocks({
+    pathname: "/admin/crawls",
+    includeRouter: true,
+    useMockConvexCtx: true,
+    lucideIcons: {
+      Globe: "icon-globe",
+      Play: "icon-play",
+      RotateCw: "icon-rotate",
+      CheckCircle2: "icon-check",
+      XCircle: "icon-xcircle",
+      Clock: "icon-clock",
+      AlertTriangle: "icon-alert",
+      Loader2: "icon-loader",
+    },
+  });
+});
 
-// Mock convex/react
-vi.mock("convex/react", () => ({
-  useQuery: vi.fn(),
-  useMutation: vi.fn(() => Object.assign(vi.fn(), { withOptimisticUpdate: vi.fn() })),
-  useConvex: () => mockConvex,
-}));
+vi.mock("convex/react", () => (globalThis as any).currentAdminMocks.convexReactMock);
+vi.mock("next/navigation", () => (globalThis as any).currentAdminMocks.navigationMock);
+vi.mock("@/components/ui/skeleton", () => (globalThis as any).currentAdminMocks.skeletonMock);
+vi.mock("lucide-react", () => (globalThis as any).currentAdminMocks.lucideMock);
 
-// Mock next/navigation (not directly used but needed by layout)
-vi.mock("next/navigation", () => ({
-  usePathname: vi.fn(() => "/admin/crawls"),
-  useRouter: vi.fn(() => ({ refresh: vi.fn() })),
-}));
+const mockConvex = (globalThis as any).currentAdminMocks.mockConvex;
 
-vi.mock("@/components/ui/skeleton", () => ({
-  Skeleton: (props: any) => <div data-testid="skeleton" {...props} />,
-}));
-
-vi.mock("lucide-react", () => ({
-  Globe: () => <svg data-testid="icon-globe" />,
-  Play: () => <svg data-testid="icon-play" />,
-  RotateCw: () => <svg data-testid="icon-rotate" />,
-  CheckCircle2: () => <svg data-testid="icon-check" />,
-  XCircle: () => <svg data-testid="icon-xcircle" />,
-  Clock: () => <svg data-testid="icon-clock" />,
-  AlertTriangle: () => <svg data-testid="icon-alert" />,
-  Loader2: () => <svg data-testid="icon-loader" />,
-}));
-
-import { useQuery, useMutation } from "convex/react";
+import { useMutation } from "convex/react";
 import AdminCrawlsPage from "@/app/admin/crawls/page";
 
 function buildMockCrawl(overrides: Record<string, unknown> = {}) {
@@ -74,24 +68,24 @@ describe("AdminCrawlsPage", () => {
     mockConvex.query.mockImplementation(() => new Promise(() => {})); // never resolves, keeps loading
     const mockTrigger = vi.fn();
     vi.mocked(useMutation).mockReturnValue(Object.assign(mockTrigger, { withOptimisticUpdate: vi.fn() }));
-    render(<AdminCrawlsPage />);
-    const skeletons = screen.getAllByTestId("skeleton");
+    const { container } = render(<AdminCrawlsPage />);
+    const skeletons = container.querySelectorAll(".animate-pulse");
     expect(skeletons.length).toBeGreaterThan(0);
   });
 
   it("shows empty state when no crawl jobs exist", async () => {
-    mockConvex.query.mockResolvedValue([]);
+    mockConvex.query.mockReturnValue([]);
     const mockTrigger = vi.fn();
     vi.mocked(useMutation).mockReturnValue(Object.assign(mockTrigger, { withOptimisticUpdate: vi.fn() }));
     render(<AdminCrawlsPage />);
     await waitFor(() => {
-      expect(screen.getByText("No crawl jobs yet")).toBeInTheDocument();
-      expect(screen.getByText("Start your first crawl")).toBeInTheDocument();
+      expect(screen.getByText("NO ACTIVE CRAWL RECORDS FOUND")).toBeInTheDocument();
+      expect(screen.getByText("START FIRST CRAWL ENGINE")).toBeInTheDocument();
     });
   });
 
   it("renders crawl jobs list", async () => {
-    mockConvex.query.mockResolvedValue([buildMockCrawl()]);
+    mockConvex.query.mockReturnValue([buildMockCrawl()]);
     const mockTrigger = vi.fn();
     vi.mocked(useMutation).mockReturnValue(Object.assign(mockTrigger, { withOptimisticUpdate: vi.fn() }));
     render(<AdminCrawlsPage />);
@@ -111,7 +105,7 @@ describe("AdminCrawlsPage", () => {
       buildMockCrawl({ _id: "job2", status: "running" }),
       buildMockCrawl({ _id: "job3", status: "failed" }),
     ];
-    mockConvex.query.mockResolvedValue(jobs);
+    mockConvex.query.mockReturnValue(jobs);
     vi.mocked(useMutation).mockReturnValue(Object.assign(vi.fn(), { withOptimisticUpdate: vi.fn() }));
     render(<AdminCrawlsPage />);
 
@@ -123,7 +117,7 @@ describe("AdminCrawlsPage", () => {
   });
 
   it("shows error text when crawl has an error", async () => {
-    mockConvex.query.mockResolvedValue([
+    mockConvex.query.mockReturnValue([
       buildMockCrawl({ error: "Connection timeout" }),
     ]);
     vi.mocked(useMutation).mockReturnValue(Object.assign(vi.fn(), { withOptimisticUpdate: vi.fn() }));
@@ -134,63 +128,63 @@ describe("AdminCrawlsPage", () => {
   });
 
   it("renders header with title and description", async () => {
-    mockConvex.query.mockResolvedValue([]);
+    mockConvex.query.mockReturnValue([]);
     vi.mocked(useMutation).mockReturnValue(Object.assign(vi.fn(), { withOptimisticUpdate: vi.fn() }));
     render(<AdminCrawlsPage />);
     await waitFor(() => {
-      expect(screen.getByText("Crawl Jobs")).toBeInTheDocument();
-      expect(screen.getByText("Manage and monitor website crawling jobs")).toBeInTheDocument();
+      expect(screen.getByText("[ CRITICAL_SYSTEM: CRAWL JOBS ]")).toBeInTheDocument();
+      expect(screen.getByText("Manage and monitor website crawling engines")).toBeInTheDocument();
     });
   });
 
   it("renders Refresh button", async () => {
-    mockConvex.query.mockResolvedValue([]);
+    mockConvex.query.mockReturnValue([]);
     vi.mocked(useMutation).mockReturnValue(Object.assign(vi.fn(), { withOptimisticUpdate: vi.fn() }));
     render(<AdminCrawlsPage />);
     await waitFor(() => {
-      expect(screen.getByText("Refresh")).toBeInTheDocument();
+      expect(screen.getByText("REFRESH")).toBeInTheDocument();
     });
   });
 
   it("renders New Crawl button", async () => {
-    mockConvex.query.mockResolvedValue([]);
+    mockConvex.query.mockReturnValue([]);
     vi.mocked(useMutation).mockReturnValue(Object.assign(vi.fn(), { withOptimisticUpdate: vi.fn() }));
     render(<AdminCrawlsPage />);
     await waitFor(() => {
-      expect(screen.getByText("New Crawl")).toBeInTheDocument();
+      expect(screen.getByText("NEW CRAWL")).toBeInTheDocument();
     });
   });
 
   it("calls trigger mutation when New Crawl is clicked", async () => {
-    mockConvex.query.mockResolvedValue([
+    mockConvex.query.mockReturnValue([
       buildMockCrawl({ _id: "existing", status: "completed" }),
     ]);
     const mockTrigger = vi.fn().mockResolvedValue("new_job_id");
     vi.mocked(useMutation).mockReturnValue(Object.assign(mockTrigger, { withOptimisticUpdate: vi.fn() }));
     render(<AdminCrawlsPage />);
     
-    await screen.findByText("New Crawl");
-    const button = screen.getByText("New Crawl");
+    await screen.findByText("NEW CRAWL");
+    const button = screen.getByText("NEW CRAWL");
     await act(async () => {
       fireEvent.click(button);
     });
     expect(mockTrigger).toHaveBeenCalledWith({
       url: "https://web.uettaxila.edu.pk/",
       maxPages: 500,
-      maxDepth: 5,
+      maxDepth: 4,
     });
   });
 
   it("shows spinner while triggering crawl", async () => {
-    mockConvex.query.mockResolvedValue([buildMockCrawl()]);
+    mockConvex.query.mockReturnValue([buildMockCrawl()]);
     const mockTrigger = vi.fn().mockImplementation(
       () => new Promise((resolve) => setTimeout(resolve, 1000)),
     );
     vi.mocked(useMutation).mockReturnValue(Object.assign(mockTrigger, { withOptimisticUpdate: vi.fn() }));
     render(<AdminCrawlsPage />);
     
-    await screen.findByText("New Crawl");
-    const button = screen.getByText("New Crawl");
+    await screen.findByText("NEW CRAWL");
+    const button = screen.getByText("NEW CRAWL");
     await act(async () => {
       fireEvent.click(button);
     });
@@ -199,7 +193,7 @@ describe("AdminCrawlsPage", () => {
   });
 
   it("displays token count in human-readable format", async () => {
-    mockConvex.query.mockResolvedValue([buildMockCrawl()]);
+    mockConvex.query.mockReturnValue([buildMockCrawl()]);
     vi.mocked(useMutation).mockReturnValue(Object.assign(vi.fn(), { withOptimisticUpdate: vi.fn() }));
     render(<AdminCrawlsPage />);
     // 15000 tokens → "15.0k"

@@ -34,7 +34,7 @@ function toComponentSource(source: Record<string, unknown>) {
         relevanceScore: source.relevanceScore,
         excerpt: source.excerpt,
         headingPath: source.headingPath,
-      }
+      },
     } as unknown as Record<string, Record<string, unknown>>,
   };
 }

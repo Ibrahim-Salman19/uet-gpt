@@ -3,9 +3,157 @@ import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import type { Doc, Id } from "../_generated/dataModel";
 import { internalMutation, internalQuery } from "../_generated/server";
+import type { MutationCtx } from "../_generated/server";
 import { rag } from "../rag/instance";
 import { isPdfVirtualUrl } from "./chunking";
 import { embeddingPool } from "./workpools";
+
+async function getAllChunksByDocumentId(
+  ctx: MutationCtx,
+  documentId: Id<"documents">,
+): Promise<Doc<"crawledChunks">[]> {
+  const chunks: Doc<"crawledChunks">[] = [];
+  let cursor: string | null = null;
+  let done = false;
+  while (!done) {
+    const page = await ctx.db
+      .query("crawledChunks")
+      .withIndex("by_documentId", (q) => q.eq("documentId", documentId))
+      .paginate({ numItems: 500, cursor });
+    chunks.push(...page.page);
+    done = page.isDone;
+    cursor = page.continueCursor;
+  }
+  return chunks;
+}
+
+function buildMetadataPatch(
+  lastModified?: string,
+  etag?: string,
+): Record<string, string> | undefined {
+  const meta: Record<string, string> = {};
+  if (lastModified !== undefined) meta.lastModified = lastModified;
+  if (etag !== undefined) meta.etag = etag;
+  return Object.keys(meta).length > 0 ? meta : undefined;
+}
+
+type ChunkInput = {
+  text: string;
+  contentHash: string;
+  parentText?: string;
+  headingPath?: string[];
+};
+
+async function diffAndDeleteStaleChunks(
+  ctx: MutationCtx,
+  existingChunks: Doc<"crawledChunks">[],
+  chunks: ChunkInput[],
+  url: string,
+): Promise<{ chunksToEmbed: ChunkInput[]; chunksToDelete: Doc<"crawledChunks">[] }> {
+  const existingHashSet = new Set(existingChunks.map((c) => c.contentHash));
+  const chunksToEmbed = chunks.filter((nc) => !existingHashSet.has(nc.contentHash));
+  const chunksToDelete = existingChunks.filter(
+    (ec) => !chunks.some((nc) => nc.contentHash === ec.contentHash),
+  );
+
+  for (const staleChunk of chunksToDelete) {
+    try {
+      await rag.delete(ctx, {
+        entryId: staleChunk.ragId as unknown as import("@convex-dev/rag").EntryId,
+      });
+      await ctx.db.delete(staleChunk._id);
+    } catch (err) {
+      console.warn(`Failed to delete vector ${staleChunk.ragId} from RAG during re-embed:`, err);
+    }
+  }
+
+  console.log(
+    `Chunk Diff for ${url}: ${chunksToEmbed.length} new chunks, ${chunksToDelete.length} deleted chunks`,
+  );
+
+  return { chunksToEmbed, chunksToDelete };
+}
+
+async function enqueueNewChunks(
+  ctx: MutationCtx,
+  docId: Id<"documents">,
+  url: string,
+  chunksToEmbed: ChunkInput[],
+  jobId: string,
+): Promise<void> {
+  if (chunksToEmbed.length === 0) return;
+
+  const { namespaceId } = await rag.getOrCreateNamespace(ctx, {
+    namespace: "uet-global",
+  });
+  const namespaceIdStr = namespaceId as unknown as string;
+
+  const argsArray = chunksToEmbed.map((chunk) => ({
+    documentId: docId,
+    url,
+    chunkText: chunk.text,
+    contentHash: chunk.contentHash,
+    jobId,
+    parentText: chunk.parentText,
+    headingPath: chunk.headingPath,
+    namespaceId: namespaceIdStr,
+  }));
+
+  await embeddingPool.enqueueActionBatch(
+    ctx,
+    internal.crawl.actions.embedSingleChunk,
+    argsArray,
+    {
+      onComplete: internal.crawl.mutations.onChunkEmbedded,
+      context: { jobId },
+    },
+  );
+}
+
+async function upsertDocumentForCrawl(
+  ctx: MutationCtx,
+  url: string,
+  title: string,
+  contentHash: string,
+  freshnessTier: "high" | "medium" | "low" | undefined,
+  lastModified: string | undefined,
+  etag: string | undefined,
+  existing: Doc<"documents"> | null,
+): Promise<Id<"documents">> {
+  if (existing) {
+    const metadata = buildMetadataPatch(lastModified, etag);
+    await ctx.db.patch(existing._id, {
+      contentHash,
+      crawledAt: Date.now(),
+      updatedAt: Date.now(),
+      status: "processing",
+      chunksEmbedded: 0,
+      ...(metadata ? { metadata } : {}),
+    });
+    return existing._id;
+  }
+
+  let sourceHost: string;
+  try {
+    sourceHost = isPdfVirtualUrl(url) ? "pdf" : new URL(url).hostname;
+  } catch {
+    sourceHost = "unknown";
+  }
+  const metadata = buildMetadataPatch(lastModified, etag);
+  return await ctx.db.insert("documents", {
+    url,
+    title,
+    source: sourceHost,
+    category: "crawled",
+    contentHash,
+    freshnessTier,
+    status: "processing",
+    chunksEmbedded: 0,
+    crawledAt: Date.now(),
+    updatedAt: Date.now(),
+    ...(metadata ? { metadata } : {}),
+  });
+}
 
 export const getProcessedWebhook = internalQuery({
   args: { jobId: v.string() },
@@ -56,123 +204,24 @@ export const queueChunksForEmbedding = internalMutation({
 
     if (existing && existing.contentHash === contentHash) {
       console.log(`Document unchanged (Fast Path): ${url}`);
-      const patchMetadata: Record<string, string> = {};
-      if (lastModified !== undefined) patchMetadata.lastModified = lastModified;
-      if (etag !== undefined) patchMetadata.etag = etag;
-
+      const metadata = buildMetadataPatch(lastModified, etag);
       await ctx.db.patch(existing._id, {
         crawledAt: Date.now(),
         updatedAt: Date.now(),
         status: "indexed",
-        ...(Object.keys(patchMetadata).length > 0 ? { metadata: patchMetadata } : {}),
+        ...(metadata ? { metadata } : {}),
       });
       return { status: "unchanged", chunksQueued: 0 };
     }
 
-    let docId: Id<"documents">;
-    if (existing) {
-      const patchMetadata: Record<string, string> = {};
-      if (lastModified !== undefined) patchMetadata.lastModified = lastModified;
-      if (etag !== undefined) patchMetadata.etag = etag;
+    const docId = await upsertDocumentForCrawl(ctx, url, title, contentHash, freshnessTier, lastModified, etag, existing);
 
-      await ctx.db.patch(existing._id, {
-        contentHash,
-        crawledAt: Date.now(),
-        updatedAt: Date.now(),
-        status: "processing",
-        chunksEmbedded: 0,
-        ...(Object.keys(patchMetadata).length > 0 ? { metadata: patchMetadata } : {}),
-      });
-      docId = existing._id;
-    } else {
-      const docMetadata: Record<string, string> = {};
-      if (lastModified !== undefined) docMetadata.lastModified = lastModified;
-      if (etag !== undefined) docMetadata.etag = etag;
-
-      let sourceHost: string;
-      try {
-        sourceHost = isPdfVirtualUrl(url) ? "pdf" : new URL(url).hostname;
-      } catch {
-        sourceHost = "unknown";
-      }
-      docId = await ctx.db.insert("documents", {
-        url,
-        title,
-        source: sourceHost,
-        category: "crawled",
-        contentHash,
-        freshnessTier,
-        status: "processing",
-        chunksEmbedded: 0,
-        crawledAt: Date.now(),
-        updatedAt: Date.now(),
-        ...(Object.keys(docMetadata).length > 0 ? { metadata: docMetadata } : {}),
-      });
-    }
-
-    const existingChunks: Doc<"crawledChunks">[] = [];
-    if (existing) {
-      let paginationCursor: string | null = null;
-      let paginationDone = false;
-      while (!paginationDone) {
-        const page = await ctx.db
-          .query("crawledChunks")
-          .withIndex("by_documentId", (q) => q.eq("documentId", existing._id))
-          .paginate({ numItems: 500, cursor: paginationCursor });
-        existingChunks.push(...page.page);
-        paginationDone = page.isDone;
-        paginationCursor = page.continueCursor;
-      }
-    }
-
-    const existingHashSet = new Set(existingChunks.map((c) => c.contentHash));
-    const chunksToEmbed = chunks.filter((nc) => !existingHashSet.has(nc.contentHash));
-    const chunksToDelete = existingChunks.filter(
-      (ec) => !chunks.some((nc) => nc.contentHash === ec.contentHash),
+    const existingChunks = existing ? await getAllChunksByDocumentId(ctx, existing._id) : [];
+    const { chunksToEmbed, chunksToDelete } = await diffAndDeleteStaleChunks(
+      ctx, existingChunks, chunks, url,
     );
 
-    for (const staleChunk of chunksToDelete) {
-      try {
-        await rag.delete(ctx, {
-          entryId: staleChunk.ragId as unknown as import("@convex-dev/rag").EntryId,
-        });
-        await ctx.db.delete(staleChunk._id);
-      } catch (err) {
-        console.warn(`Failed to delete vector ${staleChunk.ragId} from RAG during re-embed:`, err);
-      }
-    }
-
-    console.log(
-      `Chunk Diff for ${url}: ${chunksToEmbed.length} new chunks, ${chunksToDelete.length} deleted chunks`,
-    );
-
-    if (chunksToEmbed.length > 0) {
-      const { namespaceId } = await rag.getOrCreateNamespace(ctx, {
-        namespace: "uet-global",
-      });
-      const namespaceIdStr = namespaceId as unknown as string;
-
-      const argsArray = chunksToEmbed.map((chunk) => ({
-        documentId: docId,
-        url,
-        chunkText: chunk.text,
-        contentHash: chunk.contentHash,
-        jobId: args.jobId,
-        parentText: chunk.parentText,
-        headingPath: chunk.headingPath,
-        namespaceId: namespaceIdStr,
-      }));
-
-      await embeddingPool.enqueueActionBatch(
-        ctx,
-        internal.crawl.actions.embedSingleChunk,
-        argsArray,
-        {
-          onComplete: internal.crawl.mutations.onChunkEmbedded,
-          context: { jobId: args.jobId },
-        },
-      );
-    }
+    await enqueueNewChunks(ctx, docId, url, chunksToEmbed, args.jobId);
 
     await ctx.db.patch(docId, {
       chunkCount: chunks.length,
@@ -233,6 +282,145 @@ export const saveEmbedding = internalMutation({
   },
 });
 
+async function getDLQEntry(ctx: MutationCtx, jobId: string, url: string) {
+  return await ctx.db
+    .query("crawlDeadLetter")
+    .withIndex("by_jobId_and_url", (q) => q.eq("jobId", jobId).eq("url", url))
+    .first();
+}
+
+async function getDLQEntries(ctx: MutationCtx, jobId: string, url: string) {
+  return await ctx.db
+    .query("crawlDeadLetter")
+    .withIndex("by_jobId_and_url", (q) => q.eq("jobId", jobId).eq("url", url))
+    .collect();
+}
+
+async function clearDLQEntry(ctx: MutationCtx, jobId: string, url: string) {
+  const dlqEntry = await getDLQEntry(ctx, jobId, url);
+  if (dlqEntry) {
+    await ctx.db.delete(dlqEntry._id);
+  }
+}
+
+function getEmbeddingErrorDetails(
+  result: { kind: string; error?: string },
+  returnValue: { skipped?: boolean } | null,
+): { errorMsg: string; isSkipped: boolean } {
+  if (result.kind === "success" && returnValue?.skipped) {
+    return { errorMsg: "Skipped malformed content", isSkipped: true };
+  }
+  if (result.kind === "failed") {
+    return { errorMsg: result.error ?? "Unknown embedding error", isSkipped: false };
+  }
+  if (result.kind === "canceled") {
+    return { errorMsg: "Job canceled", isSkipped: false };
+  }
+  return { errorMsg: "Unknown embedding error", isSkipped: false };
+}
+
+async function updateOrCreateDLQEntry(
+  ctx: MutationCtx,
+  jobId: string,
+  url: string,
+  documentId: Id<"documents">,
+  contentHash: string | undefined,
+  errorMsg: string,
+) {
+  const MAX_RETRIES = 5;
+  const dlqEntry = await getDLQEntry(ctx, jobId, url);
+
+  if (dlqEntry) {
+    const newFailureCount = (dlqEntry.failureCount ?? 0) + 1;
+    const newStatus = newFailureCount >= MAX_RETRIES ? "abandoned" : "pending_retry";
+    await ctx.db.patch(dlqEntry._id, {
+      status: newStatus,
+      failureCount: newFailureCount,
+      lastAttemptAt: Date.now(),
+      failureReason: errorMsg,
+    });
+  } else {
+    await ctx.db.insert("crawlDeadLetter", {
+      url,
+      jobId,
+      failureReason: errorMsg,
+      failureCount: 1,
+      lastAttemptAt: Date.now(),
+      payload: { documentId, url, contentHash, jobId },
+      status: "pending_retry",
+    });
+  }
+}
+
+async function checkDocumentForFailure(
+  ctx: MutationCtx,
+  documentId: Id<"documents">,
+  url: string,
+  jobId: string,
+  errorMsg: string,
+) {
+  const doc = await ctx.db.get(documentId);
+  if (doc && doc.status !== "failed") {
+    const chunkCount = doc.chunkCount ?? 1;
+    if (chunkCount <= 1) {
+      await ctx.db.patch(documentId, {
+        status: "failed",
+        error: errorMsg,
+        updatedAt: Date.now(),
+      });
+    } else {
+      const dlqEntries = await getDLQEntries(ctx, jobId, url);
+      const failedCount = dlqEntries.length;
+      if (failedCount >= chunkCount) {
+        await ctx.db.patch(documentId, {
+          status: "failed",
+          error: `All ${chunkCount} chunks failed. Last error: ${errorMsg}`,
+          updatedAt: Date.now(),
+        });
+      } else {
+        console.warn(
+          `Chunk ${failedCount}/${chunkCount} failed for ${url} — document stays in processing`,
+        );
+      }
+    }
+  }
+}
+
+async function handleEmbeddingFailure(
+  ctx: MutationCtx,
+  jobId: string,
+  url: string,
+  documentId: Id<"documents">,
+  result: { kind: string; error?: string },
+  returnValue: { contentHash?: string; skipped?: boolean } | null,
+) {
+  const { errorMsg, isSkipped } = getEmbeddingErrorDetails(result, returnValue);
+
+  console.warn(`Embedding failed/skipped for chunk on URL ${url}: ${errorMsg}`);
+
+  if (!isSkipped) {
+    await updateOrCreateDLQEntry(ctx, jobId, url, documentId, returnValue?.contentHash, errorMsg);
+  }
+
+  await checkDocumentForFailure(ctx, documentId, url, jobId, errorMsg);
+}
+
+async function routeChunkResult(
+  ctx: MutationCtx,
+  jobId: string,
+  result: { kind: string; returnValue?: Record<string, unknown>; error?: string },
+) {
+  const returnValue = result.kind === "success" ? result.returnValue : null;
+  const url = returnValue?.url as string | undefined;
+  const documentId = returnValue?.documentId as Id<"documents"> | undefined;
+
+  if (result.kind === "success" && returnValue?.success && returnValue.ragId && url) {
+    await clearDLQEntry(ctx, jobId, url);
+  } else if (url && documentId) {
+    await handleEmbeddingFailure(ctx, jobId, url, documentId, result, (returnValue || null) as any);
+  }
+}
+
 export const onChunkEmbedded = internalMutation({
   args: vOnCompleteArgs(
     v.object({
@@ -240,74 +428,7 @@ export const onChunkEmbedded = internalMutation({
     }),
   ),
   handler: async (ctx, args) => {
-    const { jobId } = args.context;
-    const MAX_RETRIES = 5;
-
-    const result = args.result;
-    const returnValue = result.kind === "success" ? result.returnValue : null;
-    const url = returnValue?.url as string | undefined;
-    const contentHash = returnValue?.contentHash as string | undefined;
-    const documentId = returnValue?.documentId as Id<"documents"> | undefined;
-
-    if (result.kind === "success" && returnValue?.success && returnValue.ragId && url) {
-      const dlqEntry = await ctx.db
-        .query("crawlDeadLetter")
-        .withIndex("by_jobId_and_url", (q) => q.eq("jobId", jobId).eq("url", url))
-        .first();
-      if (dlqEntry) {
-        await ctx.db.delete(dlqEntry._id);
-      }
-    } else if (url && documentId) {
-      let errorMsg = "Unknown embedding error";
-      const isSkipped = result.kind === "success" && returnValue?.skipped;
-
-      if (isSkipped) {
-        errorMsg = "Skipped malformed content";
-      } else if (result.kind === "failed") {
-        errorMsg = result.error;
-      } else if (result.kind === "canceled") {
-        errorMsg = "Job canceled";
-      }
-
-      console.warn(`Embedding failed/skipped for chunk on URL ${url}: ${errorMsg}`);
-
-      if (!isSkipped) {
-        const dlqEntry = await ctx.db
-          .query("crawlDeadLetter")
-          .withIndex("by_jobId_and_url", (q) => q.eq("jobId", jobId).eq("url", url))
-          .first();
-
-        if (dlqEntry) {
-          const newFailureCount = (dlqEntry.failureCount ?? 0) + 1;
-          const newStatus = newFailureCount >= MAX_RETRIES ? "abandoned" : "pending_retry";
-          await ctx.db.patch(dlqEntry._id, {
-            status: newStatus,
-            failureCount: newFailureCount,
-            lastAttemptAt: Date.now(),
-            failureReason: errorMsg,
-          });
-        } else {
-          await ctx.db.insert("crawlDeadLetter", {
-            url,
-            jobId,
-            failureReason: errorMsg,
-            failureCount: 1,
-            lastAttemptAt: Date.now(),
-            payload: { documentId, url, contentHash, jobId },
-            status: "pending_retry",
-          });
-        }
-      }
-
-      const doc = await ctx.db.get(documentId);
-      if (doc && doc.status !== "failed") {
-        await ctx.db.patch(documentId, {
-          status: "failed",
-          error: errorMsg,
-          updatedAt: Date.now(),
-        });
-      }
-    }
+    await routeChunkResult(ctx, args.context.jobId, args.result);
   },
 });
 
@@ -402,18 +523,7 @@ export const upsertDocument = internalMutation({
         return { action: "skipped", documentId: existing._id };
       }
 
-      const oldChunks: Doc<"crawledChunks">[] = [];
-      let paginationCursor: string | null = null;
-      let paginationDone = false;
-      while (!paginationDone) {
-        const page = await ctx.db
-          .query("crawledChunks")
-          .withIndex("by_documentId", (q) => q.eq("documentId", existing._id))
-          .paginate({ numItems: 500, cursor: paginationCursor });
-        oldChunks.push(...page.page);
-        paginationDone = page.isDone;
-        paginationCursor = page.continueCursor;
-      }
+      const oldChunks = await getAllChunksByDocumentId(ctx, existing._id);
       for (const chunk of oldChunks) {
         try {
           await rag.delete(ctx, {

@@ -1,6 +1,7 @@
 import { v } from "convex/values";
-import { internalMutation } from "../_generated/server";
+import { internalMutation, type MutationCtx } from "../_generated/server";
 import { rag } from "../rag/instance";
+import type { Id } from "../_generated/dataModel";
 
 export const markStaleDocuments = internalMutation({
   args: { crawlSessionId: v.string(), limit: v.optional(v.number()) },
@@ -26,6 +27,29 @@ export const markStaleDocuments = internalMutation({
   },
 });
 
+async function deleteDocAndChunks(
+  ctx: MutationCtx,
+  doc: { _id: Id<"documents"> },
+): Promise<void> {
+  const chunks = await ctx.db
+    .query("crawledChunks")
+    .withIndex("by_documentId", (q) => q.eq("documentId", doc._id))
+    .take(200);
+  for (const chunk of chunks) {
+    try {
+      if (chunk.ragId) {
+        await rag.delete(ctx, {
+          entryId: chunk.ragId as unknown as import("@convex-dev/rag").EntryId,
+        });
+      }
+      await ctx.db.delete(chunk._id);
+    } catch (err) {
+      console.warn(`Failed to delete vector ${chunk.ragId} from RAG during purge:`, err);
+    }
+  }
+  await ctx.db.delete(doc._id);
+}
+
 export const purgeStaleDocuments = internalMutation({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, { limit }) => {
@@ -38,23 +62,7 @@ export const purgeStaleDocuments = internalMutation({
       .take(batchSize);
 
     for (const doc of staleDocs) {
-      const chunks = await ctx.db
-        .query("crawledChunks")
-        .withIndex("by_documentId", (q) => q.eq("documentId", doc._id))
-        .take(200);
-      for (const chunk of chunks) {
-        try {
-          if (chunk.ragId) {
-            await rag.delete(ctx, {
-              entryId: chunk.ragId as unknown as import("@convex-dev/rag").EntryId,
-            });
-          }
-          await ctx.db.delete(chunk._id);
-        } catch (err) {
-          console.warn(`Failed to delete vector ${chunk.ragId} from RAG during purge:`, err);
-        }
-      }
-      await ctx.db.delete(doc._id);
+      await deleteDocAndChunks(ctx, doc);
       purged++;
     }
 
@@ -67,23 +75,7 @@ export const purgeStaleDocuments = internalMutation({
       for (const doc of isStaleDocs) {
         if (!doc.isStale) continue;
 
-        const chunks = await ctx.db
-          .query("crawledChunks")
-          .withIndex("by_documentId", (q) => q.eq("documentId", doc._id))
-          .take(200);
-        for (const chunk of chunks) {
-          try {
-            if (chunk.ragId) {
-              await rag.delete(ctx, {
-                entryId: chunk.ragId as unknown as import("@convex-dev/rag").EntryId,
-              });
-            }
-            await ctx.db.delete(chunk._id);
-          } catch (err) {
-            console.warn(`Failed to delete vector ${chunk.ragId} from RAG during purge:`, err);
-          }
-        }
-        await ctx.db.delete(doc._id);
+        await deleteDocAndChunks(ctx, doc);
         purged++;
       }
     }

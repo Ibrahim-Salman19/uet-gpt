@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@clerk/nextjs";
 import {
   BarChart3,
   FileText,
@@ -12,7 +13,9 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { AuthGuard } from "@/components/auth/auth-guard";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { getRoleFromClaims, isAdminRole } from "@/lib/clerk-claims";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -48,59 +51,67 @@ function ClientOnly({ children }: { children: React.ReactNode }) {
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { isLoaded, sessionClaims } = useAuth();
+
+  const role = getRoleFromClaims(sessionClaims as Record<string, unknown> | null | undefined);
+  const isAdmin = isAdminRole(role);
 
   return (
-    <div className="flex h-full w-full bg-[#050506] text-zinc-100 overflow-hidden">
-      {/* Admin Sidebar */}
-      <aside className="flex w-56 flex-col border-r border-[#222226] bg-[#0a0a0c]/90 backdrop-blur-md shrink-0">
-        <div className="flex h-14 items-center gap-2 border-b border-[#222226] px-4 shrink-0">
-          <Shield className="h-4 w-4 text-[var(--accent)]" />
-          <span className="font-semibold text-xs tracking-wider uppercase text-zinc-300 font-sans">Admin Panel</span>
-        </div>
-        <ScrollArea className="flex-1 px-2 py-2">
-          <nav className="flex flex-col gap-0.5">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-3 rounded-[var(--radius-sm)] px-3 py-2 text-xs font-semibold font-sans transition-all duration-[var(--duration-fast)]",
-                    isActive
-                      ? "bg-[var(--accent)]/10 text-[var(--accent)]"
-                      : "text-zinc-400 hover:bg-white/5 hover:text-white",
-                  )}
-                >
-                  <Icon className="h-4 w-4 shrink-0 text-zinc-500" />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-        </ScrollArea>
-        <div className="border-t border-[#222226] p-3 shrink-0">
-          <Link
-            href="/"
-            className="flex items-center gap-2 rounded-lg px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300 transition-colors font-sans"
-          >
-            ← Back to app
-          </Link>
-        </div>
-      </aside>
+    <AuthGuard requireAdmin isAdmin={isAdmin} isAdminLoading={!isLoaded}>
+      <div className="flex h-full w-full bg-[#050506] text-zinc-100 overflow-hidden">
+        {/* Admin Sidebar */}
+        <aside className="flex w-56 flex-col border-r border-[#222226] bg-[#0a0a0c]/90 backdrop-blur-md shrink-0">
+          <div className="flex h-14 items-center gap-2 border-b border-[#222226] px-4 shrink-0">
+            <Shield className="h-4 w-4 text-[var(--accent)]" />
+            <span className="font-semibold text-xs tracking-wider uppercase text-zinc-300 font-sans">
+              Admin Panel
+            </span>
+          </div>
+          <ScrollArea className="flex-1 px-2 py-2">
+            <nav className="flex flex-col gap-0.5">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "flex items-center gap-3 rounded-[var(--radius-sm)] px-3 py-2 text-xs font-semibold font-sans transition-all duration-300 ease-[var(--ease-spring)] active:scale-[0.97]",
+                      isActive
+                        ? "bg-[var(--accent)]/10 text-[var(--accent)] border-l-2 border-[var(--accent)] rounded-l-none"
+                        : "text-zinc-400 hover:bg-white/5 hover:text-white",
+                    )}
+                  >
+                    <Icon className="h-4 w-4 shrink-0 text-zinc-500" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </ScrollArea>
+          <div className="border-t border-[#222226] p-3 shrink-0">
+            <Link
+              href="/"
+              className="flex items-center gap-2 rounded-lg px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-300 transition-colors font-sans"
+            >
+              ← Back to app
+            </Link>
+          </div>
+        </aside>
 
-      {/* Main Content — wrapped in ClientOnly to prevent Convex SSR errors */}
-      <div className="flex flex-1 flex-col overflow-hidden min-w-0 bg-[#050506]">
-        <header className="flex h-14 items-center border-b border-[#222226] px-6 shrink-0 bg-[#0a0a0c]/60 backdrop-blur-md">
-          <h1 className="text-sm font-semibold text-zinc-100 font-sans tracking-tight">
-            {navItems.find((i) => i.href === pathname)?.label ?? "Admin"}
-          </h1>
-        </header>
-        <div className="flex-1 overflow-auto p-6 bg-transparent">
-          <ClientOnly>{children}</ClientOnly>
+        {/* Main Content — wrapped in ClientOnly to prevent Convex SSR errors */}
+        <div className="flex flex-1 flex-col overflow-hidden min-w-0 bg-[#050506]">
+          <header className="flex h-14 items-center border-b border-[#222226] px-6 shrink-0 bg-[#0a0a0c]/60 backdrop-blur-md">
+            <h1 className="text-sm font-semibold text-zinc-100 font-sans tracking-tight">
+              {navItems.find((i) => i.href === pathname)?.label ?? "Admin"}
+            </h1>
+          </header>
+          <div className="flex-1 overflow-auto p-6 bg-transparent">
+            <ClientOnly>{children}</ClientOnly>
+          </div>
         </div>
       </div>
-    </div>
+    </AuthGuard>
   );
 }

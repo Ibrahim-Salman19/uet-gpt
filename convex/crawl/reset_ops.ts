@@ -5,6 +5,36 @@ import { internalMutation } from "../_generated/server";
 import { rag } from "../rag/instance";
 import { embeddingPool } from "./workpools";
 
+async function deleteChunksBatch(ctx: any, batchSize: number): Promise<{ deleted: number; remaining: string } | null> {
+  const chunks = await ctx.db.query("crawledChunks").withIndex("by_documentId").take(batchSize);
+  if (chunks.length === 0) return null;
+  let deleted = 0;
+  for (const chunk of chunks) {
+    try {
+      if (chunk.ragId) {
+        await rag.delete(ctx, {
+          entryId: chunk.ragId as unknown as import("@convex-dev/rag").EntryId,
+        });
+      }
+    } catch {}
+    await ctx.db.delete(chunk._id);
+    deleted++;
+  }
+  return { deleted, remaining: "more" };
+}
+
+async function deleteTableBatch(ctx: any, table: string, index: string | null, batchSize: number): Promise<{ deleted: number; remaining: string } | null> {
+  const query = index ? ctx.db.query(table as any).withIndex(index) : ctx.db.query(table as any);
+  const items = await query.take(batchSize);
+  if (items.length === 0) return null;
+  let deleted = 0;
+  for (const item of items) {
+    await ctx.db.delete(item._id);
+    deleted++;
+  }
+  return { deleted, remaining: "more" };
+}
+
 export const resetAbandonedDLQ = internalMutation({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, { limit }) => {
@@ -27,73 +57,16 @@ export const resetPipelineBatch = internalMutation({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, { limit }) => {
     const batchSize = limit ?? 200;
-    let deleted = 0;
 
-    const chunks = await ctx.db.query("crawledChunks").withIndex("by_documentId").take(batchSize);
-    if (chunks.length > 0) {
-      for (const chunk of chunks) {
-        try {
-          if (chunk.ragId) {
-            await rag.delete(ctx, {
-              entryId: chunk.ragId as unknown as import("@convex-dev/rag").EntryId,
-            });
-          }
-        } catch {}
-        await ctx.db.delete(chunk._id);
-        deleted++;
-      }
-      return { deleted, remaining: "more" };
-    }
+    const result =
+      (await deleteChunksBatch(ctx, batchSize)) ??
+      (await deleteTableBatch(ctx, "documents", "by_crawledAt", batchSize)) ??
+      (await deleteTableBatch(ctx, "crawlDeadLetter", "by_status", batchSize)) ??
+      (await deleteTableBatch(ctx, "processedWebhooks", "by_expiresAt", batchSize)) ??
+      (await deleteTableBatch(ctx, "crawlJobs", "by_startedAt", batchSize)) ??
+      (await deleteTableBatch(ctx, "crawlStats", null, batchSize));
 
-    const docs = await ctx.db.query("documents").withIndex("by_crawledAt").take(batchSize);
-    if (docs.length > 0) {
-      for (const doc of docs) {
-        await ctx.db.delete(doc._id);
-        deleted++;
-      }
-      return { deleted, remaining: "more" };
-    }
-
-    const dlq = await ctx.db.query("crawlDeadLetter").withIndex("by_status").take(batchSize);
-    if (dlq.length > 0) {
-      for (const entry of dlq) {
-        await ctx.db.delete(entry._id);
-        deleted++;
-      }
-      return { deleted, remaining: "more" };
-    }
-
-    const webhooks = await ctx.db
-      .query("processedWebhooks")
-      .withIndex("by_expiresAt")
-      .take(batchSize);
-    if (webhooks.length > 0) {
-      for (const webhook of webhooks) {
-        await ctx.db.delete(webhook._id);
-        deleted++;
-      }
-      return { deleted, remaining: "more" };
-    }
-
-    const jobs = await ctx.db.query("crawlJobs").withIndex("by_startedAt").take(batchSize);
-    if (jobs.length > 0) {
-      for (const job of jobs) {
-        await ctx.db.delete(job._id);
-        deleted++;
-      }
-      return { deleted, remaining: "more" };
-    }
-
-    const stats = await ctx.db.query("crawlStats").take(batchSize);
-    if (stats.length > 0) {
-      for (const stat of stats) {
-        await ctx.db.delete(stat._id);
-        deleted++;
-      }
-      return { deleted, remaining: "more" };
-    }
-
-    return { deleted, remaining: "done" };
+    return result ?? { deleted: 0, remaining: "done" };
   },
 });
 

@@ -2,6 +2,36 @@ import { v } from "convex/values";
 import type { Id } from "../_generated/dataModel";
 import { internalMutation } from "../_generated/server";
 
+function buildDocumentFields(args: {
+  url: string;
+  title: string;
+  source?: string;
+  category?: string;
+  entryId?: string;
+  contentHash?: string;
+  subcategory?: string;
+  metadata?: unknown;
+  chunkCount?: number;
+  status: "pending";
+  crawledAt: number;
+  updatedAt: number;
+}): Record<string, unknown> {
+  return {
+    url: args.url,
+    title: args.title,
+    source: args.source ?? new URL(args.url).hostname,
+    category: args.category ?? "general",
+    ...(args.entryId !== undefined && { entryId: args.entryId }),
+    ...(args.contentHash !== undefined && { contentHash: args.contentHash }),
+    ...(args.subcategory !== undefined && { subcategory: args.subcategory }),
+    ...(args.metadata !== undefined && { metadata: args.metadata }),
+    ...(args.chunkCount !== undefined && { chunkCount: args.chunkCount }),
+    status: args.status,
+    crawledAt: args.crawledAt,
+    updatedAt: args.updatedAt,
+  };
+}
+
 export const create = internalMutation({
   args: {
     url: v.string(),
@@ -31,20 +61,23 @@ export const create = internalMutation({
       return existing._id as Id<"documents">;
     }
     const now = Date.now();
-    const documentId = await ctx.db.insert("documents", {
-      url: args.url,
-      title: args.title,
-      source: args.source ?? new URL(args.url).hostname,
-      category: args.category ?? "general",
-      ...(args.entryId !== undefined && { entryId: args.entryId }),
-      ...(args.contentHash !== undefined && { contentHash: args.contentHash }),
-      ...(args.subcategory !== undefined && { subcategory: args.subcategory }),
-      ...(args.metadata !== undefined && { metadata: args.metadata }),
-      ...(args.chunkCount !== undefined && { chunkCount: args.chunkCount }),
-      status: "pending" as const,
-      crawledAt: now,
-      updatedAt: now,
-    });
+    const documentId = await ctx.db.insert(
+      "documents",
+      buildDocumentFields({
+        url: args.url,
+        title: args.title,
+        source: args.source,
+        category: args.category,
+        entryId: args.entryId,
+        contentHash: args.contentHash,
+        subcategory: args.subcategory,
+        metadata: args.metadata,
+        chunkCount: args.chunkCount,
+        status: "pending",
+        crawledAt: now,
+        updatedAt: now,
+      }) as any,
+    );
     return documentId as Id<"documents">;
   },
 });
@@ -58,6 +91,8 @@ export const updateStatus = internalMutation({
       v.literal("indexed"),
       v.literal("failed"),
       v.literal("stale"),
+      v.literal("active"),
+      v.literal("pending_embed"),
     ),
     entryId: v.optional(v.string()),
     chunkCount: v.optional(v.number()),

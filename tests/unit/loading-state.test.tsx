@@ -6,19 +6,19 @@ import { LoadingState } from "@/components/loading-state";
 describe("LoadingState", () => {
   it("renders message skeletons by default", () => {
     const { container } = render(<LoadingState />);
-    const skeletons = container.querySelectorAll(".rounded-\\[var\\(--radius-sm\\)\\]");
+    const skeletons = container.querySelectorAll(".border-\\[var\\(--ks-rule\\)\\]");
     expect(skeletons.length).toBeGreaterThan(0);
   });
 
   it("renders sidebar skeleton with type='sidebar'", () => {
     const { container } = render(<LoadingState type="sidebar" />);
-    const skeletons = container.querySelectorAll(".rounded-\\[var\\(--radius-sm\\)\\]");
+    const skeletons = container.querySelectorAll(".border-\\[var\\(--ks-rule\\)\\]");
     expect(skeletons.length).toBeGreaterThan(0);
   });
 
   it("renders page skeleton with type='page'", () => {
     const { container } = render(<LoadingState type="page" />);
-    const skeletons = container.querySelectorAll(".rounded-\\[var\\(--radius-lg\\)\\]");
+    const skeletons = container.querySelectorAll(".border-\\[var\\(--ks-rule\\)\\]");
     expect(skeletons.length).toBeGreaterThan(0);
   });
 

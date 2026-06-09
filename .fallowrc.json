@@ -1,0 +1,30 @@
+{
+  "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
+  "ignorePatterns": [
+    "scripts/**/*"
+  ],
+  "dynamicallyLoaded": [
+    "src/components/ui/**/*",
+    "src/hooks/**/*",
+    "src/lib/types.ts",
+    "src/components/error-boundary.tsx",
+    "src/components/shared/confirm-dialog.tsx",
+    "src/components/shared/page-header.tsx",
+    "src/components/shared/responsive-container.tsx",
+    "src/components/sidebar/header.tsx",
+    "src/lib/analytics.ts",
+    "src/lib/auth.ts"
+  ],
+  "ignoreDependencies": [
+    "@sentry/nextjs"
+  ],
+  "ignoreExportsUsedInFile": true,
+  "ignoreUnresolvedImports": [
+    "../../../convex/crawl/chunking"
+  ],
+  "rules": {
+    "unused-files": "error",
+    "unused-exports": "warn",
+    "unused-types": "off"
+  }
+}

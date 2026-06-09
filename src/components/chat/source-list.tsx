@@ -38,9 +38,11 @@ export function SourceList({ sources, className }: SourceListProps) {
 
       {isExpanded && (
         <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {sources.map((source, i) => (
-            <SourceCard key={source.chunkId} source={source} index={i} />
-          ))}
+          {sources.map((source, i) => {
+            const key =
+              source.id || source.chunkId || source.providerOptions?.entryId || `source-${i}`;
+            return <SourceCard key={key} source={source} index={i} />;
+          })}
         </div>
       )}
     </div>

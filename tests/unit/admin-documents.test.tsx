@@ -2,23 +2,32 @@
 import { fireEvent, render, screen, act, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mockConvex = {
-  query: vi.fn(),
-};
+vi.hoisted(() => {
+  const buildAdminMocks = (globalThis as any).buildAdminMocks;
+  (globalThis as any).currentAdminMocks = buildAdminMocks({
+    pathname: "/admin/documents",
+    useMockConvexCtx: true,
+    lucideIcons: {
+      FileText: "icon-filetext",
+      Search: "icon-search",
+      Trash2: "icon-trash",
+      ExternalLink: "icon-externallink",
+      CheckCircle2: "icon-check",
+      AlertCircle: "icon-alert",
+      Clock: "icon-clock",
+      RefreshCw: "icon-refresh",
+      XCircle: "icon-xcircle",
+    },
+  });
+});
 
-// Mock convex/react
-vi.mock("convex/react", () => ({
-  useQuery: vi.fn(),
-  useMutation: vi.fn(() => Object.assign(vi.fn(), { withOptimisticUpdate: vi.fn() })),
-  useConvex: () => mockConvex,
-}));
+vi.mock("convex/react", () => (globalThis as any).currentAdminMocks.convexReactMock);
+vi.mock("next/navigation", () => (globalThis as any).currentAdminMocks.navigationMock);
+vi.mock("@/components/ui/skeleton", () => (globalThis as any).currentAdminMocks.skeletonMock);
+vi.mock("lucide-react", () => (globalThis as any).currentAdminMocks.lucideMock);
 
-// Mock next/navigation
-vi.mock("next/navigation", () => ({
-  usePathname: vi.fn(() => "/admin/documents"),
-}));
+const mockConvex = (globalThis as any).currentAdminMocks.mockConvex;
 
-// Mock Radix UI select components
 vi.mock("@/components/ui/select", () => ({
   Select: ({ children, onValueChange, value }: any) => (
     <select
@@ -35,23 +44,7 @@ vi.mock("@/components/ui/select", () => ({
   SelectValue: ({ placeholder }: any) => <span>{placeholder}</span>,
 }));
 
-vi.mock("@/components/ui/skeleton", () => ({
-  Skeleton: (props: any) => <div data-testid="skeleton" {...props} />,
-}));
-
-vi.mock("lucide-react", () => ({
-  FileText: () => <svg data-testid="icon-filetext" />,
-  Search: () => <svg data-testid="icon-search" />,
-  Trash2: () => <svg data-testid="icon-trash" />,
-  ExternalLink: () => <svg data-testid="icon-externallink" />,
-  CheckCircle2: () => <svg data-testid="icon-check" />,
-  AlertCircle: () => <svg data-testid="icon-alert" />,
-  Clock: () => <svg data-testid="icon-clock" />,
-  RefreshCw: () => <svg data-testid="icon-refresh" />,
-  XCircle: () => <svg data-testid="icon-xcircle" />,
-}));
-
-import { useQuery, useMutation } from "convex/react";
+import { useMutation } from "convex/react";
 import AdminDocumentsPage from "@/app/admin/documents/page";
 
 function buildMockDoc(overrides: Record<string, unknown> = {}) {
@@ -81,28 +74,28 @@ describe("AdminDocumentsPage", () => {
   it("shows loading skeletons when documents are undefined", () => {
     mockConvex.query.mockImplementation(() => new Promise(() => {})); // keeps loading
     vi.mocked(useMutation).mockReturnValue(Object.assign(vi.fn(), { withOptimisticUpdate: vi.fn() }));
-    render(<AdminDocumentsPage />);
-    const skeletons = screen.getAllByTestId("skeleton");
+    const { container } = render(<AdminDocumentsPage />);
+    const skeletons = container.querySelectorAll(".animate-pulse");
     expect(skeletons.length).toBeGreaterThan(0);
   });
 
   it("shows empty state when no documents exist", async () => {
-    mockConvex.query.mockResolvedValue([]);
+    mockConvex.query.mockReturnValue([]);
     vi.mocked(useMutation).mockReturnValue(Object.assign(vi.fn(), { withOptimisticUpdate: vi.fn() }));
     render(<AdminDocumentsPage />);
     await waitFor(() => {
-      expect(screen.getByText("No documents yet")).toBeInTheDocument();
+      expect(screen.getByText("NO SYSTEM DOCUMENTS INGESTED")).toBeInTheDocument();
     });
   });
 
   it("shows 'No documents match your filters' when filters are active", async () => {
-    mockConvex.query.mockResolvedValue([]);
+    mockConvex.query.mockReturnValue([]);
     vi.mocked(useMutation).mockReturnValue(Object.assign(vi.fn(), { withOptimisticUpdate: vi.fn() }));
     render(<AdminDocumentsPage />);
 
     // Wait for the empty state
     await waitFor(() => {
-      expect(screen.getByText("No documents yet")).toBeInTheDocument();
+      expect(screen.getByText("NO SYSTEM DOCUMENTS INGESTED")).toBeInTheDocument();
     });
 
     // Set a search query to trigger filtered-empty state
@@ -112,7 +105,7 @@ describe("AdminDocumentsPage", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText("No documents match your filters")).toBeInTheDocument();
+      expect(screen.getByText("NO MATCHING DOCUMENTS FOUND")).toBeInTheDocument();
     });
   });
 
@@ -121,7 +114,7 @@ describe("AdminDocumentsPage", () => {
       buildMockDoc({ title: "Doc 1", url: "https://example.com/1" }),
       buildMockDoc({ title: "Doc 2", url: "https://example.com/2" }),
     ];
-    mockConvex.query.mockResolvedValue(docs);
+    mockConvex.query.mockReturnValue(docs);
     vi.mocked(useMutation).mockReturnValue(Object.assign(vi.fn(), { withOptimisticUpdate: vi.fn() }));
     render(<AdminDocumentsPage />);
 
@@ -136,7 +129,7 @@ describe("AdminDocumentsPage", () => {
       buildMockDoc({ title: "Admissions Guide", url: "https://example.com/admissions" }),
       buildMockDoc({ title: "Fee Structure", url: "https://example.com/fees" }),
     ];
-    mockConvex.query.mockResolvedValue(docs);
+    mockConvex.query.mockReturnValue(docs);
     vi.mocked(useMutation).mockReturnValue(Object.assign(vi.fn(), { withOptimisticUpdate: vi.fn() }));
     render(<AdminDocumentsPage />);
 
@@ -160,7 +153,7 @@ describe("AdminDocumentsPage", () => {
       buildMockDoc({ status: "indexed" }),
       buildMockDoc({ status: "failed" }),
     ];
-    mockConvex.query.mockResolvedValue(docs);
+    mockConvex.query.mockReturnValue(docs);
     vi.mocked(useMutation).mockReturnValue(Object.assign(vi.fn(), { withOptimisticUpdate: vi.fn() }));
     render(<AdminDocumentsPage />);
 
@@ -172,7 +165,7 @@ describe("AdminDocumentsPage", () => {
 
   it("shows category badges", async () => {
     const docs = [buildMockDoc({ category: "admissions" })];
-    mockConvex.query.mockResolvedValue(docs);
+    mockConvex.query.mockReturnValue(docs);
     vi.mocked(useMutation).mockReturnValue(Object.assign(vi.fn(), { withOptimisticUpdate: vi.fn() }));
     render(<AdminDocumentsPage />);
 
@@ -185,7 +178,7 @@ describe("AdminDocumentsPage", () => {
     const docs = [
       buildMockDoc({ status: "failed", error: "404 Not Found" }),
     ];
-    mockConvex.query.mockResolvedValue(docs);
+    mockConvex.query.mockReturnValue(docs);
     vi.mocked(useMutation).mockReturnValue(Object.assign(vi.fn(), { withOptimisticUpdate: vi.fn() }));
     render(<AdminDocumentsPage />);
     await waitFor(() => {
@@ -195,17 +188,17 @@ describe("AdminDocumentsPage", () => {
 
   it("shows chunk count when available", async () => {
     const docs = [buildMockDoc({ chunkCount: 12 })];
-    mockConvex.query.mockResolvedValue(docs);
+    mockConvex.query.mockReturnValue(docs);
     vi.mocked(useMutation).mockReturnValue(Object.assign(vi.fn(), { withOptimisticUpdate: vi.fn() }));
     render(<AdminDocumentsPage />);
     await waitFor(() => {
-      expect(screen.getByText("12 chunks")).toBeInTheDocument();
+      expect(screen.getByText("12 CHUNKS")).toBeInTheDocument();
     });
   });
 
   it("calls delete document mutation on delete button click", async () => {
     const mockDelete = vi.fn().mockResolvedValue(undefined);
-    mockConvex.query.mockResolvedValue([buildMockDoc({ _id: "doc_to_delete" })]);
+    mockConvex.query.mockReturnValue([buildMockDoc({ _id: "doc_to_delete" })]);
     vi.mocked(useMutation).mockReturnValue(Object.assign(mockDelete, { withOptimisticUpdate: vi.fn() }));
     render(<AdminDocumentsPage />);
 
@@ -223,7 +216,7 @@ describe("AdminDocumentsPage", () => {
   it("does not delete when confirm is cancelled", async () => {
     vi.spyOn(window, "confirm").mockReturnValue(false);
     const mockDelete = vi.fn();
-    mockConvex.query.mockResolvedValue([buildMockDoc({ _id: "doc_1" })]);
+    mockConvex.query.mockReturnValue([buildMockDoc({ _id: "doc_1" })]);
     vi.mocked(useMutation).mockReturnValue(Object.assign(mockDelete, { withOptimisticUpdate: vi.fn() }));
     render(<AdminDocumentsPage />);
 
@@ -240,7 +233,7 @@ describe("AdminDocumentsPage", () => {
 
   it("renders external link buttons", async () => {
     const docs = [buildMockDoc({ url: "https://example.com/test" })];
-    mockConvex.query.mockResolvedValue(docs);
+    mockConvex.query.mockReturnValue(docs);
     vi.mocked(useMutation).mockReturnValue(Object.assign(vi.fn(), { withOptimisticUpdate: vi.fn() }));
     render(<AdminDocumentsPage />);
     await waitFor(() => {

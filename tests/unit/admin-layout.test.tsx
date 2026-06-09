@@ -5,6 +5,32 @@ import { describe, expect, it, vi } from "vitest";
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
   usePathname: vi.fn(),
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+  }),
+}));
+
+// Mock @clerk/nextjs
+vi.mock("@clerk/nextjs", () => ({
+  useAuth: () => ({
+    isLoaded: true,
+    sessionClaims: {
+      metadata: {
+        role: "admin",
+      },
+    },
+  }),
+  useUser: () => ({
+    isLoaded: true,
+    isSignedIn: true,
+    user: {
+      id: "clerk_123",
+      fullName: "Admin User",
+    },
+  }),
+  ClerkProvider: ({ children }: any) => <>{children}</>,
 }));
 
 // Mock lucide-react icons

@@ -1,8 +1,8 @@
 import { useMutation } from "convex/react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { api } from "../../convex/_generated/api";
 import { useStableQuery } from "@/hooks/use-stable-query";
+import { api } from "../../convex/_generated/api";
 
 interface ThreadItem {
   _id: string;
@@ -13,8 +13,7 @@ interface ThreadItem {
 export function useThreads() {
   const threadsData = useStableQuery(api.threads.list, {});
   const createMutation = useMutation(api.threads.create);
-  // rename is not in generated api types, so we use a minimal cast
-  const renameMutation = useMutation((api.threads as any).rename);
+  const renameMutation = useMutation(api.threads.rename);
   const deleteMutation = useMutation(api.threads.remove);
 
   const [error, setError] = useState<string | null>(null);

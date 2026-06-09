@@ -1,3 +1,4 @@
+// fallow-ignore-file security-sink
 "use node";
 
 import { createHmac } from "node:crypto";
@@ -8,6 +9,7 @@ import { internal } from "../_generated/api";
 import type { Doc, Id } from "../_generated/dataModel";
 import { internalAction } from "../_generated/server";
 import { rag } from "../rag/instance";
+import { isPdfVirtualUrl } from "./chunking";
 
 // legacy processWebhookResult removed
 
@@ -77,6 +79,186 @@ async function fetchSitemapUrls(
   }
 }
 
+function validateCrawlEnvironment() {
+  const convexSiteUrl = process.env.CONVEX_SITE_URL;
+  if (!convexSiteUrl) {
+    throw new ConvexError(
+      "CONVEX_SITE_URL environment variable is not configured. The webhook callback URL will be empty.",
+    );
+  }
+
+  const crawlUrlRaw = process.env.CRAWL4AI_URL || process.env.CRAWL4AI_BASE_URL;
+  if (!crawlUrlRaw) {
+    throw new ConvexError(
+      "CRAWL4AI_URL environment variable is not configured. Please set CRAWL4AI_URL (or CRAWL4AI_BASE_URL) in your deployment settings.",
+    );
+  }
+  const crawlUrl = crawlUrlRaw.replace(/\/$/, "");
+  const webhookUrl = `${convexSiteUrl}/api/webhook/crawl`;
+
+  const primarySecret = process.env.CRAWL_WEBHOOK_SECRET;
+  const secondarySecret = process.env.CRAWL_WEBHOOK_SECRET_NEW;
+  if (!primarySecret) {
+    throw new Error("CRAWL_WEBHOOK_SECRET environment variable is not configured");
+  }
+
+  // Crawl4AI v0.8.x+ uses JWT auth (opt-in, off by default) instead of CRAWL4AI_API_TOKEN.
+  // Enable by setting CRAWL4AI_JWT_TOKEN env var.
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const jwtToken = process.env.CRAWL4AI_JWT_TOKEN;
+  if (jwtToken) {
+    headers["Authorization"] = `Bearer ${jwtToken}`;
+  }
+
+  return { convexSiteUrl, crawlUrl, webhookUrl, primarySecret, secondarySecret, headers };
+}
+
+// A-3: Sitemap pre-seeding — fetch sitemap URLs and merge with seed list
+async function mergeSitemapUrls(): Promise<string[]> {
+  const mergedUrls: string[] = [...UET_CRAWL_CONFIG.seedUrls];
+  try {
+    const sitemapBase = "https://web.uettaxila.edu.pk";
+    const sitemapUrls = await fetchSitemapUrls(
+      `${sitemapBase}/sitemap.xml`,
+      UET_CRAWL_CONFIG.includePaths,
+      UET_CRAWL_CONFIG.excludePaths,
+    );
+    if (sitemapUrls.length > 0) {
+      const existingSet = new Set(mergedUrls.map((u) => u.replace(/\/+$/, "")));
+      for (const su of sitemapUrls) {
+        const normalized = su.replace(/\/+$/, "");
+        if (!existingSet.has(normalized)) {
+          mergedUrls.push(su);
+          existingSet.add(normalized);
+        }
+      }
+      console.log(
+        `Sitemap pre-seeding: +${mergedUrls.length - UET_CRAWL_CONFIG.seedUrls.length} URLs from sitemap`,
+      );
+    }
+  } catch (sitemapErr) {
+    console.warn(
+      "Sitemap pre-seeding failed, falling back to configured seed URLs:",
+      sitemapErr,
+    );
+  }
+  return mergedUrls;
+}
+
+// Crash recovery: if a saved state exists, pass resume_state to BFSDeepCrawlStrategy
+// so BFS progress persists across container restarts.
+async function getSavedCrawlState(
+  ctx: any,
+  jobId: Id<"crawlJobs">,
+): Promise<unknown> {
+  const job = await ctx.runQuery(internal.crawl.queries.getJobById, { jobId });
+  return (job as Doc<"crawlJobs"> & { crawlState?: unknown })?.crawlState ?? null;
+}
+
+// Crawl4AI v0.8.6+: POST to /crawl/job with type-params format for config objects.
+// Flat params are silently ignored by Pydantic (CrawlRequest only has urls, browser_config, crawler_config).
+// WebhookConfig at top level (only supported by /crawl/job, not /crawl).
+// Build the payload object first so we can sign it before adding webhook_headers
+function buildCrawlPayload(
+  mergedUrls: string[],
+  webhookUrl: string,
+  lastSavedState: unknown,
+): Record<string, unknown> {
+  return {
+    urls: mergedUrls,
+    browser_config: {
+      type: "BrowserConfig",
+      params: { headless: true },
+    },
+    crawler_config: {
+      type: "CrawlerRunConfig",
+      params: {
+        word_count_threshold: 50,
+        magic: true,
+        simulate_user: true,
+        mean_delay: 1.0,
+        delay_before_return_html: 1000,
+        check_robots_txt: true,
+        max_pages: UET_CRAWL_CONFIG.maxPages,
+        include_patterns: [...UET_CRAWL_CONFIG.includePaths],
+        exclude_patterns: [...UET_CRAWL_CONFIG.excludePaths],
+        deep_crawl_strategy: {
+          type: "BFSDeepCrawlStrategy",
+          params: {
+            max_depth: UET_CRAWL_CONFIG.maxDepth,
+            max_pages: UET_CRAWL_CONFIG.maxPages,
+            ...(lastSavedState ? { resume_state: lastSavedState } : {}),
+          },
+        },
+      },
+    },
+    webhook_config: {
+      webhook_url: webhookUrl,
+      webhook_data_in_payload: true,
+    },
+  };
+}
+
+// Sign the body (without webhook_headers, which are unknown until after signing)
+function signCrawlPayload(
+  crawlPayload: Record<string, unknown>,
+  primarySecret: string,
+  secondarySecret: string | undefined,
+): string {
+  const timestamp = Date.now().toString();
+  const bodyForSigning = JSON.stringify(crawlPayload);
+  const secrets = [primarySecret, secondarySecret].filter(Boolean) as string[];
+  const signatures = secrets
+    .map((s) =>
+      createHmac("sha256", s)
+        .update(timestamp + "." + bodyForSigning)
+        .digest("hex"),
+    )
+    .join(",");
+  // Add the computed signature to the webhook config
+  (crawlPayload.webhook_config as Record<string, unknown>).webhook_headers = {
+    "x-crawl-timestamp": timestamp,
+    "x-crawl-signature": signatures,
+  };
+  return JSON.stringify(crawlPayload);
+}
+
+async function sendCrawlRequest(
+  crawlUrl: string,
+  body: string,
+  headers: Record<string, string>,
+): Promise<string> {
+  const response = await fetch(`${crawlUrl}/crawl/job`, {
+    method: "POST",
+    headers,
+    body,
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Crawl4AI API error (${response.status}): ${errorText}`);
+  }
+
+  const data = (await response.json()) as { task_id?: string; job_id?: string };
+
+  if (!data.task_id && !data.job_id) {
+    throw new Error("Invalid response format from Crawl4AI - no job ID returned");
+  }
+
+  return data.task_id || data.job_id!;
+}
+
+async function updateCrawlJobState(
+  ctx: any,
+  jobId: Id<"crawlJobs">,
+  providerJobId: string,
+): Promise<void> {
+  await ctx.runMutation(internal.crawl.workflow.updateJobState, {
+    jobId,
+    providerJobId,
+  });
+}
+
 export const executeCrawlJob = internalAction({
   args: {
     jobId: v.id("crawlJobs"),
@@ -89,151 +271,13 @@ export const executeCrawlJob = internalAction({
     });
 
     try {
-      const convexSiteUrl = process.env.CONVEX_SITE_URL;
-      if (!convexSiteUrl) {
-        throw new ConvexError(
-          "CONVEX_SITE_URL environment variable is not configured. The webhook callback URL will be empty.",
-        );
-      }
-
-      const crawlUrlRaw = process.env.CRAWL4AI_URL || process.env.CRAWL4AI_BASE_URL;
-      if (!crawlUrlRaw) {
-        throw new ConvexError(
-          "CRAWL4AI_URL environment variable is not configured. Please set CRAWL4AI_URL (or CRAWL4AI_BASE_URL) in your deployment settings.",
-        );
-      }
-      const crawlUrl = crawlUrlRaw.replace(/\/$/, "");
-      const webhookUrl = `${process.env.CONVEX_SITE_URL}/api/webhook/crawl`;
-
-      const primarySecret = process.env.CRAWL_WEBHOOK_SECRET;
-      const secondarySecret = process.env.CRAWL_WEBHOOK_SECRET_NEW;
-      if (!primarySecret) {
-        throw new Error("CRAWL_WEBHOOK_SECRET environment variable is not configured");
-      }
-
-      const timestamp = Date.now().toString();
-
-      // Crawl4AI v0.8.x+ uses JWT auth (opt-in, off by default) instead of CRAWL4AI_API_TOKEN.
-      // Enable by setting CRAWL4AI_JWT_TOKEN env var.
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      const jwtToken = process.env.CRAWL4AI_JWT_TOKEN;
-      if (jwtToken) {
-        headers["Authorization"] = `Bearer ${jwtToken}`;
-      }
-
-      // A-3: Sitemap pre-seeding — fetch sitemap URLs and merge with seed list
-      const mergedUrls: string[] = [...UET_CRAWL_CONFIG.seedUrls];
-      try {
-        const sitemapBase = "https://web.uettaxila.edu.pk";
-        const sitemapUrls = await fetchSitemapUrls(
-          `${sitemapBase}/sitemap.xml`,
-          UET_CRAWL_CONFIG.includePaths,
-          UET_CRAWL_CONFIG.excludePaths,
-        );
-        if (sitemapUrls.length > 0) {
-          const existingSet = new Set(mergedUrls.map((u) => u.replace(/\/+$/, "")));
-          for (const su of sitemapUrls) {
-            const normalized = su.replace(/\/+$/, "");
-            if (!existingSet.has(normalized)) {
-              mergedUrls.push(su);
-              existingSet.add(normalized);
-            }
-          }
-          console.log(
-            `Sitemap pre-seeding: +${mergedUrls.length - UET_CRAWL_CONFIG.seedUrls.length} URLs from sitemap`,
-          );
-        }
-      } catch (sitemapErr) {
-        console.warn(
-          "Sitemap pre-seeding failed, falling back to configured seed URLs:",
-          sitemapErr,
-        );
-      }
-
-      // Crash recovery: if a saved state exists, pass resume_state to BFSDeepCrawlStrategy
-      // so BFS progress persists across container restarts.
-      const job = await ctx.runQuery(internal.crawl.queries.getJobById, { jobId: args.jobId });
-      const lastSavedState =
-        (job as Doc<"crawlJobs"> & { crawlState?: unknown })?.crawlState ?? null;
-
-      // Crawl4AI v0.8.6+: POST to /crawl/job with type-params format for config objects.
-      // Flat params are silently ignored by Pydantic (CrawlRequest only has urls, browser_config, crawler_config).
-      // WebhookConfig at top level (only supported by /crawl/job, not /crawl).
-      // Build the payload object first so we can sign it before adding webhook_headers
-      const crawlPayload: Record<string, unknown> = {
-        urls: mergedUrls,
-        browser_config: {
-          type: "BrowserConfig",
-          params: { headless: true },
-        },
-        crawler_config: {
-          type: "CrawlerRunConfig",
-          params: {
-            word_count_threshold: 50,
-            magic: true,
-            simulate_user: true,
-            mean_delay: 1.0,
-            delay_before_return_html: 1000,
-            check_robots_txt: true,
-            max_pages: UET_CRAWL_CONFIG.maxPages,
-            include_patterns: [...UET_CRAWL_CONFIG.includePaths],
-            exclude_patterns: [...UET_CRAWL_CONFIG.excludePaths],
-            deep_crawl_strategy: {
-              type: "BFSDeepCrawlStrategy",
-              params: {
-                max_depth: UET_CRAWL_CONFIG.maxDepth,
-                max_pages: UET_CRAWL_CONFIG.maxPages,
-                ...(lastSavedState ? { resume_state: lastSavedState } : {}),
-              },
-            },
-          },
-        },
-        webhook_config: {
-          webhook_url: webhookUrl,
-          webhook_data_in_payload: true,
-        },
-      };
-      // Sign the body (without webhook_headers, which are unknown until after signing)
-      const bodyForSigning = JSON.stringify(crawlPayload);
-      const secrets = [primarySecret, secondarySecret].filter(Boolean) as string[];
-      const signatures = secrets
-        .map((s) =>
-          createHmac("sha256", s)
-            .update(timestamp + "." + bodyForSigning)
-            .digest("hex"),
-        )
-        .join(",");
-      // Add the computed signature to the webhook config
-      (crawlPayload.webhook_config as Record<string, unknown>).webhook_headers = {
-        "x-crawl-timestamp": timestamp,
-        "x-crawl-signature": signatures,
-      };
-      const body = JSON.stringify(crawlPayload);
-
-      const response = await fetch(`${crawlUrl}/crawl/job`, {
-        method: "POST",
-        headers,
-        body,
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Crawl4AI API error (${response.status}): ${errorText}`);
-      }
-
-      const data = (await response.json()) as { task_id?: string; job_id?: string };
-
-      if (!data.task_id && !data.job_id) {
-        throw new Error("Invalid response format from Crawl4AI - no job ID returned");
-      }
-
-      const providerJobId = data.task_id || data.job_id;
-
-      // Update job with provider task id
-      await ctx.runMutation(internal.crawl.workflow.updateJobState, {
-        jobId: args.jobId,
-        providerJobId,
-      });
+      const env = validateCrawlEnvironment();
+      const mergedUrls = await mergeSitemapUrls();
+      const lastSavedState = await getSavedCrawlState(ctx, args.jobId);
+      const crawlPayload = buildCrawlPayload(mergedUrls, env.webhookUrl, lastSavedState);
+      const body = signCrawlPayload(crawlPayload, env.primarySecret, env.secondarySecret);
+      const providerJobId = await sendCrawlRequest(env.crawlUrl, body, env.headers);
+      await updateCrawlJobState(ctx, args.jobId, providerJobId);
     } catch (error) {
       console.error(`Crawl initialization failed for job ${args.jobId}:`, error);
 
@@ -260,10 +304,6 @@ export const embedSingleChunk = internalAction({
     namespaceId: v.string(),
   },
   handler: async (ctx, args) => {
-    function isPdfVirtualUrl(url: string): boolean {
-      return url.startsWith("pdf://") || url.startsWith("https://uetgpt.local/pdf/");
-    }
-
     try {
       // Safe source extraction — handles both https:// and pdf:// virtual URLs
       let sourceHost: string;

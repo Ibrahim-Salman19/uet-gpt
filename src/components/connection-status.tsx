@@ -38,7 +38,7 @@ export function ConnectionStatus() {
         "fixed top-0 left-0 right-0 z-[999] text-center py-1.5 text-xs font-medium transition-all duration-500",
         isOnline
           ? "bg-green-500/10 text-green-400 border-b border-green-500/20"
-          : "bg-amber-500/10 text-amber-400 border-b border-amber-500/20 animate-pulse"
+          : "bg-amber-500/10 text-amber-400 border-b border-amber-500/20 animate-pulse",
       )}
       role="status"
       aria-live="polite"

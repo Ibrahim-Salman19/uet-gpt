@@ -1,0 +1,57 @@
+{
+  "seedUrls": [
+    "https://web.uettaxila.edu.pk/",
+    "https://uettaxila.edu.pk/",
+    "https://web.uettaxila.edu.pk/admissions/",
+    "https://web.uettaxila.edu.pk/academics/",
+    "https://web.uettaxila.edu.pk/departments/",
+    "https://web.uettaxila.edu.pk/faculty/",
+    "https://web.uettaxila.edu.pk/campus-life/",
+    "https://web.uettaxila.edu.pk/research/",
+    "https://web.uettaxila.edu.pk/oric/",
+    "https://web.uettaxila.edu.pk/qec/",
+    "https://web.uettaxila.edu.pk/quality-enhancement-cell/",
+    "https://web.uettaxila.edu.pk/examinations/",
+    "https://web.uettaxila.edu.pk/careers/",
+    "https://web.uettaxila.edu.pk/student-portal/",
+    "https://web.uettaxila.edu.pk/transport/",
+    "https://web.uettaxila.edu.pk/hostels/",
+    "https://web.uettaxila.edu.pk/library/",
+    "https://web.uettaxila.edu.pk/scholarships/",
+    "https://web.uettaxila.edu.pk/affiliated-colleges/",
+    "https://web.uettaxila.edu.pk/contact/",
+    "https://web.uettaxila.edu.pk/about/",
+    "https://web.uettaxila.edu.pk/administration/",
+    "https://web.uettaxila.edu.pk/dic/",
+    "https://web.uettaxila.edu.pk/programs/"
+  ],
+  "maxDepth": 4,
+  "concurrency": 5,
+  "requestTimeout": 20,
+  "maxRetries": 3,
+  "pushRetries": 3,
+  "minWordCount": 80,
+  "queueMaxSize": 500,
+  "excludePatterns": [
+    "/search*", "/print/**", "/feed/**", "/gallery/**",
+    "*.pdf", "*.doc", "*.docx", "*.ppt", "*.pptx",
+    "*.xls", "*.xlsx", "*.zip", "*.rar", "*.exe",
+    "*.jpg", "*.jpeg", "*.png", "*.gif"
+  ],
+  "includePatterns": [
+    "https://web.uettaxila.edu.pk/**",
+    "https://uettaxila.edu.pk/**"
+  ],
+  "rateLimiter": {
+    "minDelay": 0.05,
+    "maxDelay": 5.0,
+    "initialDelay": 0.4,
+    "aiStep": 0.01,
+    "mdFactor": 2.0,
+    "successThreshold": 10
+  },
+  "tokenBucket": {
+    "rate": 8.0,
+    "capacity": 15.0
+  }
+}

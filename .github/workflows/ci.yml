@@ -31,7 +31,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ${{ steps.pnpm-store.outputs.store }}
-          key: pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          key: pnpm-store-${{ hashFiles('uet-gpt/pnpm-lock.yaml') }}
           restore-keys: |
             pnpm-store-
       - name: Install dependencies
@@ -58,7 +58,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ${{ steps.pnpm-store.outputs.store }}
-          key: pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          key: pnpm-store-${{ hashFiles('uet-gpt/pnpm-lock.yaml') }}
           restore-keys: |
             pnpm-store-
       - name: Install dependencies
@@ -99,7 +99,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ${{ steps.pnpm-store.outputs.store }}
-          key: pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          key: pnpm-store-${{ hashFiles('uet-gpt/pnpm-lock.yaml') }}
           restore-keys: |
             pnpm-store-
       - name: Install dependencies
@@ -126,7 +126,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ${{ steps.pnpm-store.outputs.store }}
-          key: pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          key: pnpm-store-${{ hashFiles('uet-gpt/pnpm-lock.yaml') }}
           restore-keys: |
             pnpm-store-
       - name: Install dependencies
@@ -159,7 +159,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ${{ steps.pnpm-store.outputs.store }}
-          key: pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          key: pnpm-store-${{ hashFiles('uet-gpt/pnpm-lock.yaml') }}
           restore-keys: |
             pnpm-store-
       - name: Install dependencies

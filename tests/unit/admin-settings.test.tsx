@@ -2,60 +2,28 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, act, waitFor } from "@testing-library/react";
 
-// Mock convex/react
-vi.mock("convex/react", () => ({
-  useQuery: vi.fn(),
-  useMutation: vi.fn(),
-  useConvex: vi.fn(),
-  useAction: vi.fn(),
-}));
+vi.hoisted(() => {
+  const buildAdminMocks = (globalThis as any).buildAdminMocks;
+  console.log("HOISTED RUNNING, buildAdminMocks is:", typeof buildAdminMocks);
+  if (buildAdminMocks) {
+    (globalThis as any).currentAdminMocks = buildAdminMocks({
+      pathname: "/admin/settings",
+      mockSonner: true,
+      lucideIcons: ["Settings", "Save", "RotateCcw", "Shield", "Bell", "Database", "RefreshCw", "Globe"],
+    });
+    console.log("HOISTED RUNNING, set currentAdminMocks successfully, keys:", Object.keys((globalThis as any).currentAdminMocks));
+  } else {
+    console.log("HOISTED RUNNING, buildAdminMocks was NOT defined!");
+  }
+});
+
+vi.mock("convex/react", () => (globalThis as any).currentAdminMocks?.convexReactMock);
+vi.mock("lucide-react", () => (globalThis as any).currentAdminMocks.lucideMock);
+vi.mock("@/components/ui/card", () => (globalThis as any).currentAdminMocks.cardMock);
+vi.mock("@/components/ui/button", () => (globalThis as any).currentAdminMocks.buttonMock);
+vi.mock("sonner", () => (globalThis as any).currentAdminMocks.sonnerMock as any);
 
 import AdminSettingsPage from "@/app/admin/settings/page";
-
-// Mock sonner toast
-vi.mock("sonner", () => ({
-  toast: {
-    success: vi.fn(),
-    error: vi.fn(),
-  },
-}));
-
-// Mock lucide-react
-vi.mock("lucide-react", () => ({
-  Settings: () => <div data-testid="icon-settings">Settings</div>,
-  Save: () => <div data-testid="icon-save">Save</div>,
-  RotateCcw: () => <div data-testid="icon-rotate">RotateCcw</div>,
-  Shield: () => <div data-testid="icon-shield">Shield</div>,
-  Bell: () => <div data-testid="icon-bell">Bell</div>,
-  Database: () => <div data-testid="icon-database">Database</div>,
-  RefreshCw: () => <div data-testid="icon-refresh">RefreshCw</div>,
-  Globe: () => <div data-testid="icon-globe">Globe</div>,
-}));
-
-// Mock UI components
-vi.mock("@/components/ui/card", () => ({
-  Card: ({ children, className }: any) => (
-    <div data-testid="card" className={className}>
-      {children}
-    </div>
-  ),
-  CardContent: ({ children }: any) => <div data-testid="card-content">{children}</div>,
-  CardHeader: ({ children }: any) => <div data-testid="card-header">{children}</div>,
-  CardTitle: ({ children }: any) => <div data-testid="card-title">{children}</div>,
-}));
-
-vi.mock("@/components/ui/button", () => ({
-  Button: ({ children, onClick, variant, size }: any) => (
-    <button
-      data-testid="button"
-      data-variant={variant}
-      data-size={size}
-      onClick={onClick}
-    >
-      {children}
-    </button>
-  ),
-}));
 
 vi.mock("@/components/ui/switch", () => ({
   Switch: ({ id, checked, onCheckedChange }: any) => (
@@ -104,7 +72,6 @@ vi.mock("@/components/ui/select", () => {
   SelectContentMock.displayName = "SelectContent";
   return {
     Select: ({ children, value, onValueChange }: any) => {
-      // Flatten children to extract option-like nodes
       const flatten = (nodes: any): any[] => {
         if (!nodes) return [];
         if (!Array.isArray(nodes)) nodes = [nodes];
@@ -160,17 +127,17 @@ describe("AdminSettingsPage", () => {
     it("renders the header with title and description", () => {
       render(<AdminSettingsPage />);
 
-      expect(screen.getByText("System Settings")).toBeDefined();
+      expect(screen.getByText("[ CONTROL_PANEL: SYSTEM SETTINGS ]")).toBeDefined();
       expect(
-        screen.getByText("Configure application behavior and preferences"),
+        screen.getByText("Configure application runtime settings and neural pipeline gates"),
       ).toBeDefined();
     });
 
     it("renders Save Changes and Reset buttons", () => {
       render(<AdminSettingsPage />);
 
-      expect(screen.getByText("Save Changes")).toBeDefined();
-      expect(screen.getByText("Reset")).toBeDefined();
+      expect(screen.getByText("SAVE CHANGES")).toBeDefined();
+      expect(screen.getByText("RESET")).toBeDefined();
     });
 
     it("renders all four settings sections", () => {
@@ -178,24 +145,24 @@ describe("AdminSettingsPage", () => {
 
       expect(screen.getByText("Crawling")).toBeDefined();
       expect(screen.getByText("RAG Pipeline")).toBeDefined();
-      expect(screen.getByText("Notifications")).toBeDefined();
-      expect(screen.getByText("Security")).toBeDefined();
+      expect(screen.getByText("System Alerts")).toBeDefined();
+      expect(screen.getByText("Security Gates")).toBeDefined();
     });
 
     it("renders section descriptions", () => {
       render(<AdminSettingsPage />);
 
       expect(
-        screen.getByText("Configure crawling behavior and limits"),
+        screen.getByText("Configure university web indexers and crawl depths"),
       ).toBeDefined();
       expect(
-        screen.getByText("Control retrieval and generation settings"),
+        screen.getByText("Adjust threshold matching, context count, and models"),
       ).toBeDefined();
       expect(
-        screen.getByText("Manage system notifications and alerts"),
+        screen.getByText("Toggle notifications for indexing and feedback status"),
       ).toBeDefined();
       expect(
-        screen.getByText("Access control and security settings"),
+        screen.getByText("Manage global endpoint rate limiting and authentication"),
       ).toBeDefined();
     });
   });
@@ -346,12 +313,12 @@ describe("AdminSettingsPage", () => {
       render(<AdminSettingsPage />);
 
       await act(async () => {
-        fireEvent.click(screen.getByText("Save Changes"));
+        fireEvent.click(screen.getByText("SAVE CHANGES"));
       });
 
       await waitFor(() => {
-        expect(toast.success).toHaveBeenCalledWith("Settings saved", {
-          description: expect.stringContaining("saved successfully"),
+        expect(toast.success).toHaveBeenCalledWith("Settings saved successfully", {
+          description: "Your system changes are now active.",
         });
       });
     });
@@ -360,12 +327,12 @@ describe("AdminSettingsPage", () => {
       render(<AdminSettingsPage />);
 
       await act(async () => {
-        fireEvent.click(screen.getByText("Reset"));
+        fireEvent.click(screen.getByText("RESET"));
       });
 
       await waitFor(() => {
-        expect(toast.success).toHaveBeenCalledWith("Settings reset", {
-          description: expect.stringContaining("reset to defaults"),
+        expect(toast.success).toHaveBeenCalledWith("Settings reset to default values", {
+          description: "All configuration keys have been restored.",
         });
       });
     });
@@ -380,7 +347,7 @@ describe("AdminSettingsPage", () => {
 
       // Reset
       await act(async () => {
-        fireEvent.click(screen.getByText("Reset"));
+        fireEvent.click(screen.getByText("RESET"));
       });
 
       // Values should be back to defaults

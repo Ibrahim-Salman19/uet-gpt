@@ -1,5 +1,5 @@
 import { ConvexError, v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { internalMutation, mutation, query } from "./_generated/server";
 import { userValidator } from "./users/validator";
 
 export const getOrCreate = mutation({
@@ -8,29 +8,15 @@ export const getOrCreate = mutation({
     name: v.string(),
     email: v.string(),
     imageUrl: v.optional(v.string()),
-    secret: v.optional(v.string()),
   },
   returns: v.id("users"),
   handler: async (ctx, args) => {
-    let isAuthorized = false;
-
-    // 1. Check if called from trusted Clerk Webhook with the correct shared secret
-    if (args.secret && process.env.WEBHOOK_SECRET && args.secret === process.env.WEBHOOK_SECRET) {
-      isAuthorized = true;
-    } else {
-      // 2. Fallback to standard frontend user identity authentication
-      const identity = await ctx.auth.getUserIdentity();
-      if (!identity) {
-        throw new ConvexError("Authentication required");
-      }
-      if (identity.subject !== args.clerkId) {
-        throw new ConvexError("Unauthorized: clerkId mismatch");
-      }
-      isAuthorized = true;
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new ConvexError("Authentication required");
     }
-
-    if (!isAuthorized) {
-      throw new ConvexError("Unauthorized");
+    if (identity.subject !== args.clerkId) {
+      throw new ConvexError("Unauthorized: clerkId mismatch");
     }
 
     const existing = await ctx.db
@@ -87,6 +73,38 @@ export const getByClerkId = query({
   },
 });
 
+export const deactivateUser = mutation({
+  args: {
+    clerkId: v.string(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new ConvexError("Authentication required");
+    }
+    if (identity.subject !== args.clerkId) {
+      throw new ConvexError("Unauthorized: clerkId mismatch");
+    }
+
+    const existing = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
+      .unique();
+
+    if (!existing) {
+      return null;
+    }
+
+    await ctx.db.patch(existing._id, {
+      isActive: false,
+      name: "Deleted User",
+      email: "",
+      imageUrl: undefined,
+    });
+  },
+});
+
 export const updatePreferences = mutation({
   args: {
     theme: v.optional(v.string()),
@@ -114,5 +132,60 @@ export const updatePreferences = mutation({
         ...args,
       },
     });
+  },
+});
+
+export const upsertFromWebhook = internalMutation({
+  args: {
+    clerkId: v.string(),
+    name: v.string(),
+    email: v.string(),
+    imageUrl: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
+      .unique();
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        name: args.name,
+        email: args.email,
+        imageUrl: args.imageUrl ?? existing.imageUrl,
+        lastLoginAt: Date.now(),
+      });
+    } else {
+      await ctx.db.insert("users", {
+        clerkId: args.clerkId,
+        name: args.name,
+        email: args.email,
+        ...(args.imageUrl && { imageUrl: args.imageUrl }),
+        role: "user",
+        isActive: true,
+        lastLoginAt: Date.now(),
+      });
+    }
+  },
+});
+
+export const deleteFromWebhook = internalMutation({
+  args: {
+    clerkId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
+      .unique();
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        isActive: false,
+        name: "Deleted User",
+        email: "",
+        imageUrl: undefined,
+      });
+    }
   },
 });

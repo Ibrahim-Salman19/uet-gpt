@@ -24,9 +24,9 @@ describe("LLM Fallback Chain", () => {
     const chain = getModelPriorities();
 
     expect(chain.length).toBeGreaterThanOrEqual(3);
-    expect(chain).toContain("meta-llama/llama-4-scout");
-    expect(chain).toContain("cerebras-llama-3.3-70b");
-    expect(chain).toContain("gemini-1.5-flash");
+    expect(chain).toContain("meta-llama/llama-4-scout-17b-16e-instruct");
+    expect(chain).toContain("gpt-oss-120b");
+    expect(chain).toContain("gemini-2.5-flash");
 
     Object.assign(process.env, ORIGINAL);
   });

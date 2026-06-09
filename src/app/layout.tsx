@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "@/components/providers";
+import { APP_NAME, APP_TAGLINE, APP_DESCRIPTION } from "@/lib/constants";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,13 +15,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "UET GPT — Intelligent RAG Chatbot",
-  description:
-    "AI-powered chatbot for UET Taxila with RAG-based knowledge retrieval from official sources",
+  title: `${APP_NAME} — ${APP_TAGLINE}`,
+  description: APP_DESCRIPTION,
   keywords: ["UET", "UET Taxila", "chatbot", "RAG", "AI", "university"],
   openGraph: {
-    title: "UET GPT — Intelligent RAG Chatbot",
-    description: "AI-powered chatbot for UET Taxila",
+    title: `${APP_NAME} — ${APP_TAGLINE}`,
+    description: APP_TAGLINE,
     type: "website",
   },
 };

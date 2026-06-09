@@ -1,8 +1,8 @@
 "use client";
 
+import { useUser } from "@clerk/nextjs";
 import { Bot, User } from "lucide-react";
 import * as React from "react";
-import { useUser } from "@clerk/nextjs";
 import { MessageActions } from "@/components/chat/message-actions";
 import { SourceList } from "@/components/chat/source-list";
 import { Markdown } from "@/components/markdown";
@@ -16,24 +16,30 @@ interface ChatMessageProps {
   isLatest?: boolean;
 }
 
-export const ChatMessageBubble = React.memo(function ChatMessageBubble({
-  message,
-  onFeedback,
-  isLatest = false,
-}: ChatMessageProps) {
-  const isUser = message.role === "user";
-  const { user } = useUser();
+function Avatar({ isUser, initials }: { isUser: boolean; initials: string }) {
+  return (
+    <div
+      className={cn(
+        "flex h-8 w-8 items-center justify-center shrink-0 rounded-[10px] transition-all duration-300 shadow-sm select-none border font-semibold text-xs tracking-wider font-sans",
+        isUser
+          ? "bg-[var(--accent)] text-[var(--accent-fg)] border-[var(--accent)]/30"
+          : "bg-zinc-950/80 text-[var(--accent)] border-white/5",
+      )}
+    >
+      {isUser ? (
+        initials
+      ) : (
+        <span className="text-[10px] uppercase font-bold text-[var(--accent)]">UG</span>
+      )}
+    </div>
+  );
+}
+
+function useScrambleText(message: ChatMessage, isLatest: boolean, isUser: boolean): string {
   const { typingAnimEnabled, typingSoundEnabled, playTypingSound } = usePreferences();
-
-  const initials = user
-    ? `${user.firstName?.charAt(0) || ""}${user.lastName?.charAt(0) || ""}`.toUpperCase()
-    : "";
-  const fallbackInitials = initials || "U";
-
   const [scrambleContent, setScrambleContent] = React.useState(message.content);
   const hasScrambledRef = React.useRef(false);
 
-  // Scramble text effect on completed message mount
   React.useEffect(() => {
     if (
       isUser ||
@@ -86,29 +92,39 @@ export const ChatMessageBubble = React.memo(function ChatMessageBubble({
     playTypingSound,
   ]);
 
-  // Audio typing sound trigger on message stream content changes
+  return scrambleContent;
+}
+
+function useTypingSound(message: ChatMessage, typingSoundEnabled: boolean): void {
+  const { playTypingSound } = usePreferences();
+
   React.useEffect(() => {
     if (message.id === "streaming-message" && typingSoundEnabled) {
       playTypingSound();
     }
   }, [message.content, message.id, typingSoundEnabled, playTypingSound]);
+}
+
+export const ChatMessageBubble = React.memo(function ChatMessageBubble({
+  message,
+  onFeedback,
+  isLatest = false,
+}: ChatMessageProps) {
+  const isUser = message.role === "user";
+  const { user } = useUser();
+  const { typingAnimEnabled, typingSoundEnabled } = usePreferences();
+
+  const initials = user
+    ? `${user.firstName?.charAt(0) || ""}${user.lastName?.charAt(0) || ""}`.toUpperCase()
+    : "";
+  const fallbackInitials = initials || "U";
+
+  const scrambleContent = useScrambleText(message, isLatest, isUser);
+  useTypingSound(message, typingSoundEnabled);
 
   return (
     <div className="flex items-start gap-4 px-4 py-4 w-full max-w-4xl mx-auto" id={message.id}>
-      <div
-        className={cn(
-          "flex h-8 w-8 items-center justify-center shrink-0 rounded-[10px] transition-all duration-300 shadow-sm select-none border font-semibold text-xs tracking-wider font-sans",
-          isUser
-            ? "bg-[var(--accent)] text-[var(--accent-fg)] border-[var(--accent)]/30"
-            : "bg-zinc-950/80 text-[var(--accent)] border-white/5",
-        )}
-      >
-        {isUser ? (
-          fallbackInitials
-        ) : (
-          <span className="text-[10px] uppercase font-bold text-[var(--accent)]">UG</span>
-        )}
-      </div>
+      <Avatar isUser={isUser} initials={fallbackInitials} />
 
       <div className="group flex flex-1 flex-col gap-1.5 items-start min-w-0">
         <div
@@ -120,7 +136,9 @@ export const ChatMessageBubble = React.memo(function ChatMessageBubble({
           )}
         >
           {isUser ? (
-            <p className="text-[var(--chat-font-size,0.875rem)] leading-relaxed">{message.content}</p>
+            <p className="text-[var(--chat-font-size,0.875rem)] leading-relaxed text-balance">
+              {message.content}
+            </p>
           ) : (
             <Markdown content={scrambleContent} />
           )}
@@ -136,7 +154,7 @@ export const ChatMessageBubble = React.memo(function ChatMessageBubble({
           />
 
           {message.tokenCount && (
-            <span className="text-[10px] text-[var(--text-disabled)]">
+            <span className="text-[10px] text-[var(--text-disabled)] font-mono tabular-nums tracking-wide">
               {message.tokenCount.total} tokens
             </span>
           )}

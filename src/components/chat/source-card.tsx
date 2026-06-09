@@ -40,18 +40,32 @@ export function SourceCard({ source, index, className }: SourceCardProps) {
             }
           })()}
         </p>
-        {source.excerpt && (
-          <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-[var(--text-secondary)]">
-            {source.excerpt}
-          </p>
-        )}
+        {(() => {
+          const excerpt = source.excerpt || source.providerOptions?.excerpt;
+          if (excerpt) {
+            return (
+              <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-[var(--text-secondary)]">
+                {excerpt}
+              </p>
+            );
+          }
+          return null;
+        })()}
       </div>
 
       <div className="flex shrink-0 flex-col items-end gap-1">
-        <div className="flex items-center gap-1 rounded-full bg-[var(--surface-muted)] px-2 py-0.5 text-[11px] font-medium text-[var(--text-muted)]">
-          <Percent className="h-3 w-3" />
-          {Math.round(source.relevanceScore * 100)}
-        </div>
+        {(() => {
+          const score = source.relevanceScore ?? source.providerOptions?.relevanceScore;
+          if (score !== undefined) {
+            return (
+              <div className="flex items-center gap-1 rounded-full bg-[var(--surface-muted)] px-2 py-0.5 text-[11px] font-medium text-[var(--text-muted)]">
+                <Percent className="h-3 w-3" />
+                {Math.round(score * 100)}
+              </div>
+            );
+          }
+          return null;
+        })()}
         <ExternalLink className="h-3.5 w-3.5 text-[var(--text-disabled)] opacity-0 transition-opacity duration-[var(--duration-fast)] group-hover:opacity-60" />
       </div>
     </a>

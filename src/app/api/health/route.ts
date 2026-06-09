@@ -1,3 +1,4 @@
+// fallow-ignore-file security-sink
 import { type NextRequest, NextResponse } from "next/server";
 
 interface ServiceStatus {

@@ -86,7 +86,7 @@ export async function checkChatRateLimit(
 /**
  * Get remaining requests for a user — used to show in UI.
  */
-export async function getChatRateLimitRemaining(
+async function getChatRateLimitRemaining(
   identifier: string,
   role: "user" | "admin" | "superadmin" | "anonymous" = "user",
 ): Promise<{ remaining: number; limit: number; configured: boolean }> {

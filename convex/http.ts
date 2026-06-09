@@ -1,5 +1,6 @@
 import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
+import { userWebhook } from "./clerk/webhook";
 import { crawlWebhook, ingestWebhook, resetWebhook } from "./crawl/webhook";
 
 const http = httpRouter();
@@ -74,6 +75,28 @@ http.route({
 
 http.route({
   path: "/api/reset",
+  method: "OPTIONS",
+  handler: httpAction(
+    async (_ctx) =>
+      new Response(null, {
+        status: 204,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "POST, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        },
+      }),
+  ),
+});
+
+http.route({
+  path: "/api/webhook/clerk",
+  method: "POST",
+  handler: userWebhook,
+});
+
+http.route({
+  path: "/api/webhook/clerk",
   method: "OPTIONS",
   handler: httpAction(
     async (_ctx) =>

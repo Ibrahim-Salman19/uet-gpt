@@ -37,9 +37,13 @@ function SettingsSection({
   return (
     <div className="py-4">
       <div className="mb-3">
-        <h3 className="text-xs font-semibold text-zinc-200 tracking-wide uppercase font-sans">{title}</h3>
+        <h3 className="text-xs font-semibold text-zinc-200 tracking-wide uppercase font-sans">
+          {title}
+        </h3>
         {description && (
-          <p className="mt-1.5 text-[11px] text-zinc-500 leading-relaxed font-sans">{description}</p>
+          <p className="mt-1.5 text-[11px] text-zinc-500 leading-relaxed font-sans">
+            {description}
+          </p>
         )}
       </div>
       {children}
@@ -75,15 +79,15 @@ function RadioOption<T extends string>({
       <div
         className={cn(
           "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition-all duration-300",
-          selected === value ? "border-[var(--accent)] bg-[var(--accent)]/10" : "border-zinc-700 bg-transparent",
+          selected === value
+            ? "border-[var(--accent)] bg-[var(--accent)]/10"
+            : "border-zinc-700 bg-transparent",
         )}
       >
         {selected === value && <div className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />}
       </div>
       <div className="flex-1 min-w-0">
-        <span className="text-xs font-semibold text-zinc-200 block font-sans">
-          {label}
-        </span>
+        <span className="text-xs font-semibold text-zinc-200 block font-sans">{label}</span>
         <p className="text-[10px] text-zinc-500 font-sans mt-0.5">{description}</p>
       </div>
     </button>
@@ -236,7 +240,9 @@ export default function SettingsPage() {
               </div>
               <div>
                 <p className="text-xs font-semibold text-zinc-200 font-sans">UET GPT v0.1.0</p>
-                <p className="text-[10px] text-zinc-500 font-sans mt-0.5">Your AI Guide to UET Taxila</p>
+                <p className="text-[10px] text-zinc-500 font-sans mt-0.5">
+                  Your AI Guide to UET Taxila
+                </p>
               </div>
             </div>
           </SettingsSection>

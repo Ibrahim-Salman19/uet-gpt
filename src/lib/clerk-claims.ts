@@ -10,7 +10,7 @@
  *
  * @see https://clerk.com/docs/backend-requests/making/custom-session-token
  */
-export interface ClerkSessionClaims {
+interface ClerkSessionClaims {
   /** Standard Clerk claim — user identifier */
   sub?: string;
   /** Standard Clerk claim — session identifier */
@@ -31,7 +31,7 @@ export interface ClerkSessionClaims {
 }
 
 /** Admin roles that have access to protected admin routes */
-export const ADMIN_ROLES = ["admin", "superadmin"] as const;
+const ADMIN_ROLES = ["admin", "superadmin"] as const;
 
 /**
  * Check if a user role is an admin-level role.

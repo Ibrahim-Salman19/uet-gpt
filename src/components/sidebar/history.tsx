@@ -3,9 +3,9 @@
 import { History, MessageSquare, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { memo } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { memo } from "react";
 
 interface ChatItem {
   id: string;
@@ -17,7 +17,10 @@ interface SidebarHistoryProps {
   onDelete: (e: React.MouseEvent, id: string) => void;
 }
 
-export const SidebarHistory = memo(function SidebarHistory({ chats, onDelete }: SidebarHistoryProps) {
+export const SidebarHistory = memo(function SidebarHistory({
+  chats,
+  onDelete,
+}: SidebarHistoryProps) {
   const pathname = usePathname();
 
   return (

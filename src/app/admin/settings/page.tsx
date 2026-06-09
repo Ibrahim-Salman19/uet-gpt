@@ -2,11 +2,11 @@
 
 import { api } from "convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import { Bell, Database, Globe, Loader2, RotateCcw, Save, Shield } from "lucide-react";
+import { Bell, Database, Globe, RotateCcw, Save, Shield } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { LoadingState } from "@/components/loading-state";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -16,7 +16,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 
 interface SettingsField {
@@ -58,7 +57,7 @@ const settingsSections: SettingsSection[] = [
   {
     key: "crawl",
     label: "Crawling",
-    description: "Configure crawling behavior and limits",
+    description: "Configure university web indexers and crawl depths",
     icon: <Globe className="h-4 w-4" />,
     fields: [
       { key: "maxPagesPerCrawl", label: "Max Pages Per Crawl", type: "number", defaultValue: 500 },
@@ -75,7 +74,7 @@ const settingsSections: SettingsSection[] = [
   {
     key: "rag",
     label: "RAG Pipeline",
-    description: "Control retrieval and generation settings",
+    description: "Adjust threshold matching, context count, and models",
     icon: <Database className="h-4 w-4" />,
     fields: [
       { key: "maxContextChunks", label: "Max Context Chunks", type: "number", defaultValue: 10 },
@@ -102,8 +101,8 @@ const settingsSections: SettingsSection[] = [
   },
   {
     key: "notifications",
-    label: "Notifications",
-    description: "Manage system notifications and alerts",
+    label: "System Alerts",
+    description: "Toggle notifications for indexing and feedback status",
     icon: <Bell className="h-4 w-4" />,
     fields: [
       { key: "crawlCompleted", label: "Crawl completed", type: "boolean", defaultValue: true },
@@ -114,8 +113,8 @@ const settingsSections: SettingsSection[] = [
   },
   {
     key: "security",
-    label: "Security",
-    description: "Access control and security settings",
+    label: "Security Gates",
+    description: "Manage global endpoint rate limiting and authentication",
     icon: <Shield className="h-4 w-4" />,
     fields: [
       { key: "requireAuth", label: "Require authentication", type: "boolean", defaultValue: true },
@@ -169,8 +168,8 @@ export default function AdminSettingsPage() {
           }
         }
       }
-      toast.success("Settings saved", {
-        description: "Your changes have been saved successfully.",
+      toast.success("Settings saved successfully", {
+        description: "Your system changes are now active.",
       });
     } catch (error) {
       toast.error("Failed to save settings", {
@@ -183,8 +182,8 @@ export default function AdminSettingsPage() {
     try {
       await resetSettings();
       setSettings(defaultSettings);
-      toast.success("Settings reset", {
-        description: "All settings have been reset to defaults.",
+      toast.success("Settings reset to default values", {
+        description: "All configuration keys have been restored.",
       });
     } catch (error) {
       toast.error("Failed to reset settings", {
@@ -194,97 +193,124 @@ export default function AdminSettingsPage() {
   }, [resetSettings]);
 
   if (dbSettings === undefined) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
-    );
+    return <LoadingState type="admin-settings" />;
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 animate-[slide-up_0.3s_ease-[var(--ease-out-expo)]_both]">
+      {/* Header */}
+      <div className="flex items-center justify-between pb-2 border-b border-white/[0.04]">
         <div>
-          <h2 className="text-lg font-semibold">System Settings</h2>
-          <p className="text-sm text-muted-foreground">
-            Configure application behavior and preferences
+          <h2 className="text-sm font-semibold text-zinc-400 font-mono tracking-tight uppercase">
+            [ CONTROL_PANEL: SYSTEM SETTINGS ]
+          </h2>
+          <p className="text-xs text-zinc-500 font-sans mt-0.5">
+            Configure application runtime settings and neural pipeline gates
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={handleReset}>
-            <RotateCcw className="h-4 w-4 mr-2" />
-            Reset
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleReset}
+            className="h-8 border-white/5 bg-[#101012]/40 text-xs font-mono tracking-wider hover:bg-white/5 hover:text-white transition-all active:scale-[0.98]"
+          >
+            <RotateCcw className="h-3.5 w-3.5 mr-2 text-zinc-400" />
+            RESET
           </Button>
-          <Button size="sm" onClick={handleSave}>
-            <Save className="h-4 w-4 mr-2" />
-            Save Changes
+          <Button
+            size="sm"
+            onClick={handleSave}
+            className="h-8 bg-[var(--accent)] text-[var(--accent-fg)] hover:bg-[var(--accent-hover)] font-mono text-xs font-semibold tracking-wider transition-all active:scale-[0.98]"
+          >
+            <Save className="h-3.5 w-3.5 mr-2" />
+            SAVE CHANGES
           </Button>
         </div>
       </div>
 
-      <Separator />
-
-      <div className="space-y-6">
+      {/* Split Pane Sections */}
+      <div className="border border-white/5 rounded-xl bg-[#101012]/20 px-6 py-2 divide-y divide-white/[0.04]">
         {settingsSections.map((section) => (
-          <Card key={section.key}>
-            <CardHeader>
+          <div
+            key={section.key}
+            className="grid grid-cols-1 lg:grid-cols-3 gap-8 py-6 first:pt-4 last:pb-4"
+          >
+            {/* Left Pane: Info and Meta */}
+            <div className="space-y-1.5 pr-4">
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <div className="h-6 w-6 rounded bg-[var(--accent)]/10 flex items-center justify-center border border-[var(--accent)]/20 text-[var(--accent)]">
                   {section.icon}
                 </div>
-                <div>
-                  <CardTitle className="text-sm">{section.label}</CardTitle>
-                  <p className="text-xs text-muted-foreground">{section.description}</p>
-                </div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-300 font-mono">
+                  {section.label}
+                </h3>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {section.fields.map((field) => (
-                  <div key={field.key} className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <Label htmlFor={field.key} className="text-sm">
-                        {field.label}
-                      </Label>
-                    </div>
-                    <div className="w-[200px]">
-                      {field.type === "boolean" ? (
+              <p className="text-[11px] text-zinc-500 font-sans leading-relaxed">
+                {section.description}
+              </p>
+            </div>
+
+            {/* Right Pane: Controls/Inputs (spans 2) */}
+            <div className="lg:col-span-2 space-y-4">
+              {section.fields.map((field) => (
+                <div
+                  key={field.key}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-2 border-b border-white/[0.02] last:border-0"
+                >
+                  <div className="flex-1">
+                    <Label htmlFor={field.key} className="text-xs font-sans text-zinc-300">
+                      {field.label}
+                    </Label>
+                    <span className="block text-[9px] font-mono text-zinc-600 mt-0.5">
+                      KEY: {field.key.toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="w-full sm:w-[220px] shrink-0">
+                    {field.type === "boolean" ? (
+                      <div className="flex items-center justify-end sm:justify-start h-9">
                         <Switch
                           id={field.key}
                           checked={settings[field.key] as boolean}
                           onCheckedChange={(checked) => handleChange(field.key, checked)}
+                          className="data-[state=checked]:bg-[var(--accent)]"
                         />
-                      ) : field.type === "select" ? (
-                        <Select
-                          value={settings[field.key] as string}
-                          onValueChange={(value) => handleChange(field.key, value)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {field.options?.map((opt) => (
-                              <SelectItem key={opt.value} value={opt.value}>
-                                {opt.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <Input
-                          id={field.key}
-                          type={field.type}
-                          value={settings[field.key] as string}
-                          onChange={(e) => handleChange(field.key, e.target.value)}
-                          className="text-sm"
-                        />
-                      )}
-                    </div>
+                      </div>
+                    ) : field.type === "select" ? (
+                      <Select
+                        value={settings[field.key] as string}
+                        onValueChange={(value) => handleChange(field.key, value)}
+                      >
+                        <SelectTrigger className="h-9 bg-black/40 border-white/5 text-xs font-mono rounded text-zinc-300">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#101012] border-white/10 text-xs font-mono text-zinc-300">
+                          {field.options?.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Input
+                        id={field.key}
+                        type={field.type}
+                        value={settings[field.key] as string}
+                        onChange={(e) =>
+                          handleChange(
+                            field.key,
+                            field.type === "number" ? Number(e.target.value) : e.target.value,
+                          )
+                        }
+                        className="h-9 bg-black/40 border-white/5 text-xs font-mono rounded text-zinc-300 focus-visible:ring-1 focus-visible:ring-[var(--accent)]"
+                      />
+                    )}
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                </div>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
     </div>

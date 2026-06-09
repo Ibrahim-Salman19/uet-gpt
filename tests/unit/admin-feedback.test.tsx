@@ -3,50 +3,25 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import AdminFeedbackPage from "@/app/admin/feedback/page";
 
-// Mock convex/react
-const mockDeleteFeedback = vi.fn();
+const mockDeleteFeedback = vi.hoisted(() => vi.fn());
+
+vi.hoisted(() => {
+  const buildAdminMocks = (globalThis as any).buildAdminMocks;
+  (globalThis as any).currentAdminMocks = buildAdminMocks({
+    pathname: "/admin/feedback",
+    lucideIcons: ["ThumbsUp", "ThumbsDown", "Trash2", "MessageSquare", "Filter"],
+  });
+});
 
 vi.mock("convex/react", () => ({
-  useQuery: vi.fn(),
+  ...(globalThis as any).currentAdminMocks.convexReactMock,
   useMutation: vi.fn(() => mockDeleteFeedback),
-  useConvex: vi.fn(),
-  useAction: vi.fn(),
 }));
 
-// Mock lucide-react
-vi.mock("lucide-react", () => ({
-  ThumbsUp: (props: any) => <div data-testid="icon-thumbs-up" {...props}>ThumbsUp</div>,
-  ThumbsDown: (props: any) => <div data-testid="icon-thumbs-down" {...props}>ThumbsDown</div>,
-  Trash2: (props: any) => <div data-testid="icon-trash" {...props}>Trash2</div>,
-  MessageSquare: (props: any) => <div data-testid="icon-message-square" {...props}>MessageSquare</div>,
-  Filter: (props: any) => <div data-testid="icon-filter" {...props}>Filter</div>,
-}));
-
-// Mock UI components
-vi.mock("@/components/ui/card", () => ({
-  Card: ({ children, className }: any) => (
-    <div data-testid="card" className={className}>
-      {children}
-    </div>
-  ),
-  CardContent: ({ children }: any) => <div data-testid="card-content">{children}</div>,
-  CardHeader: ({ children }: any) => <div data-testid="card-header">{children}</div>,
-  CardTitle: ({ children }: any) => <div data-testid="card-title">{children}</div>,
-}));
-
-vi.mock("@/components/ui/button", () => ({
-  Button: ({ children, onClick, variant, size, className }: any) => (
-    <button
-      data-testid="button"
-      data-variant={variant}
-      data-size={size}
-      className={className}
-      onClick={onClick}
-    >
-      {children}
-    </button>
-  ),
-}));
+vi.mock("lucide-react", () => (globalThis as any).currentAdminMocks.lucideMock);
+vi.mock("@/components/ui/card", () => (globalThis as any).currentAdminMocks.cardMock);
+vi.mock("@/components/ui/button", () => (globalThis as any).currentAdminMocks.buttonMock);
+vi.mock("@/components/ui/skeleton", () => (globalThis as any).currentAdminMocks.skeletonMock);
 
 vi.mock("@/components/ui/badge", () => ({
   Badge: ({ children, className, variant }: any) => (
@@ -54,10 +29,6 @@ vi.mock("@/components/ui/badge", () => ({
       {children}
     </span>
   ),
-}));
-
-vi.mock("@/components/ui/skeleton", () => ({
-  Skeleton: (props: any) => <div data-testid="skeleton" {...props} />,
 }));
 
 vi.mock("@/components/ui/separator", () => ({

@@ -43,6 +43,75 @@ function headingLevel(line: string): number {
   return match ? match[1]!.length : 0;
 }
 
+const ABBREVIATIONS_RE =
+  /\b(Mr|Mrs|Ms|Dr|Prof|Sr|Jr|St|Ave|Dept|Univ|Fig|vs|etc|approx|dept|est|govt|inc|ltd|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\./g;
+const SENTINEL = "\u0000";
+
+function extractSentences(text: string): string[] {
+  const protectedText = text.replace(ABBREVIATIONS_RE, "$1" + SENTINEL);
+  const sentenceRegex = /[^.!?]+[.!?]+/g;
+  const sentences: string[] = [];
+  let lastIndex = 0;
+  while (true) {
+    const match = sentenceRegex.exec(protectedText);
+    if (match === null) break;
+    sentences.push(match[0].replace(/\u0000/g, "."));
+    lastIndex = sentenceRegex.lastIndex;
+  }
+  if (lastIndex < protectedText.length) {
+    const trailing = protectedText.slice(lastIndex).replace(/\u0000/g, ".");
+    if (trailing.trim()) sentences.push(trailing);
+  }
+  return sentences.length > 0 ? sentences : [text];
+}
+
+function wordSplitLongSentence(sentence: string, maxChunkSize: number): string[] {
+  const parts: string[] = [];
+  const words = sentence.split(" ");
+  let current = "";
+  for (const word of words) {
+    if (current.length + word.length + 1 > maxChunkSize) {
+      if (current) parts.push(current);
+      current = word;
+    } else {
+      current += (current ? " " : "") + word;
+    }
+  }
+  if (current) parts.push(current);
+  return parts;
+}
+
+function chunkTableBlock(
+  block: string,
+  maxChunkSize: number,
+  overlapSize: number,
+  pushFn: (text: string) => void,
+): string {
+  const rows = block.split("\n");
+  const header = rows.length > 2 ? `${rows[0]}\n${rows[1]}\n` : "";
+  const startIndex = rows.length > 2 ? 2 : 0;
+  let current = "";
+
+  for (let i = startIndex; i < rows.length; i++) {
+    const row = `${rows[i]}\n`;
+    if (current.length + row.length > maxChunkSize) {
+      if (current) pushFn(header + current);
+      current = `${getOverlapText(current.trim(), overlapSize)}\n${row}`;
+    } else {
+      current += row;
+    }
+  }
+  if (current) pushFn(header + current);
+  return "";
+}
+
+function getOverlapText(text: string, overlapSize: number): string {
+  if (!text || text.length <= overlapSize) return text;
+  const tail = text.slice(-overlapSize);
+  const splitIndex = tail.indexOf(" ");
+  return splitIndex !== -1 ? tail.slice(splitIndex + 1) : tail;
+}
+
 export function chunkMarkdown(
   markdown: string,
   maxChunkSize: number = 3000,
@@ -50,22 +119,12 @@ export function chunkMarkdown(
   initialHeadingPath?: string[],
 ): ChunkResult[] {
   const chunks: ChunkResult[] = [];
-
   const blocks = markdown.split(/\n{2,}/);
-
   let currentChunk = "";
   let headingStack = initialHeadingPath ? [...initialHeadingPath] : [];
 
-  function getOverlap(text: string): string {
-    if (!text || text.length <= overlapSize) return text;
-    const tail = text.slice(-overlapSize);
-    const splitIndex = tail.indexOf(" ");
-    return splitIndex !== -1 ? tail.slice(splitIndex + 1) : tail;
-  }
-
   function pushChunk(text: string) {
-    const cleanText = text.trim();
-    chunks.push({ text: cleanText, headingPath: [...headingStack] });
+    chunks.push({ text: text.trim(), headingPath: [...headingStack] });
   }
 
   function getHeadingBreadcrumb(): string {
@@ -88,109 +147,82 @@ export function chunkMarkdown(
     if (block.length > maxChunkSize) {
       if (currentChunk) {
         pushChunk(currentChunk);
-        currentChunk = isBlockHeader ? "" : getOverlap(currentChunk.trim());
+        currentChunk = isBlockHeader ? "" : getOverlapText(currentChunk.trim(), overlapSize);
       }
 
       if (block.trimStart().startsWith("|")) {
-        const rows = block.split("\n");
-        let currentTableChunk = currentChunk ? `${currentChunk}\n\n` : "";
-        const header = rows.length > 2 ? `${rows[0]}\n${rows[1]}\n` : "";
-        const startIndex = rows.length > 2 ? 2 : 0;
-
-        for (let i = startIndex; i < rows.length; i++) {
-          const row = `${rows[i]}\n`;
-          if (currentTableChunk.length + row.length > maxChunkSize) {
-            if (currentTableChunk) pushChunk(header + currentTableChunk);
-            currentTableChunk = `${getOverlap(currentTableChunk.trim())}\n${row}`;
-          } else {
-            currentTableChunk += row;
-          }
-        }
-        if (currentTableChunk) {
-          pushChunk(header + currentTableChunk);
-        }
-        currentChunk = "";
+        currentChunk = chunkTableBlock(block, maxChunkSize, overlapSize, pushChunk);
       } else {
-        const sentences: string[] = [];
-        const ABBREVIATIONS =
-          /\b(Mr|Mrs|Ms|Dr|Prof|Sr|Jr|St|Ave|Dept|Univ|Fig|vs|etc|approx|dept|est|govt|inc|ltd|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\./g;
-        const SENTINEL = "\u0000";
-        const protectedBlock = block.replace(ABBREVIATIONS, "$1" + SENTINEL);
-        const sentenceRegex = /[^.!?]+[.!?]+/g;
-        let lastIndex = 0;
-        while (true) {
-          const match = sentenceRegex.exec(protectedBlock);
-          if (match === null) break;
-          sentences.push(match[0].replace(/\u0000/g, "."));
-          lastIndex = sentenceRegex.lastIndex;
-        }
-        if (lastIndex < protectedBlock.length) {
-          const trailing = protectedBlock.slice(lastIndex).replace(/\u0000/g, ".");
-          if (trailing.trim()) {
-            sentences.push(trailing);
-          }
-        }
-        if (sentences.length === 0) {
-          sentences.push(block);
-        }
-
-        const finalSentences: string[] = [];
-        for (const s of sentences) {
-          if (s.length > maxChunkSize) {
-            const words = s.split(" ");
-            let currentWordChunk = "";
-            for (const word of words) {
-              if (currentWordChunk.length + word.length + 1 > maxChunkSize) {
-                if (currentWordChunk) finalSentences.push(currentWordChunk);
-                currentWordChunk = word;
-              } else {
-                currentWordChunk += (currentWordChunk ? " " : "") + word;
-              }
-            }
-            if (currentWordChunk) {
-              finalSentences.push(currentWordChunk);
-            }
-          } else {
-            finalSentences.push(s);
-          }
-        }
-
-        let currentSentenceChunk = currentChunk ? `${currentChunk}\n\n` : "";
-        const breadcrumb = getHeadingBreadcrumb();
-        const breadcrumbPrefix = breadcrumb ? `${breadcrumb}\n\n` : "";
-
-        for (const sentence of finalSentences) {
-          if (currentSentenceChunk.length + sentence.length > maxChunkSize) {
-            if (currentSentenceChunk) pushChunk(breadcrumbPrefix + currentSentenceChunk);
-            currentSentenceChunk = `${getOverlap(currentSentenceChunk.trim())} ${sentence}`;
-          } else {
-            currentSentenceChunk += (currentSentenceChunk ? " " : "") + sentence;
-          }
-        }
-        if (currentSentenceChunk) {
-          pushChunk(breadcrumbPrefix + currentSentenceChunk);
-          currentChunk = getOverlap(currentSentenceChunk.trim());
-        } else {
-          currentChunk = "";
-        }
+        currentChunk = processSentencesBlock(
+          block,
+          maxChunkSize,
+          overlapSize,
+          getHeadingBreadcrumb(),
+          currentChunk,
+          pushChunk,
+        );
       }
     } else {
-      const forceSplit = isBlockHeader && currentChunk.length > 50;
-
-      if (currentChunk.length + block.length > maxChunkSize || forceSplit) {
-        pushChunk(currentChunk);
-        currentChunk = (isBlockHeader ? "" : `${getOverlap(currentChunk.trim())}\n\n`) + block;
-      } else {
-        currentChunk += (currentChunk ? "\n\n" : "") + block;
-      }
+      currentChunk = processSmallBlock(
+        currentChunk,
+        block,
+        maxChunkSize,
+        overlapSize,
+        isBlockHeader,
+        pushChunk,
+      );
     }
   }
 
-  if (currentChunk) {
-    pushChunk(currentChunk);
-  }
-
+  if (currentChunk) pushChunk(currentChunk);
   return chunks.filter((c) => isQualityChunk(c.text) && c.text.length > 0);
+}
+
+function processSentencesBlock(
+  block: string,
+  maxChunkSize: number,
+  overlapSize: number,
+  headingBreadcrumb: string,
+  carryOverlap: string,
+  pushChunk: (text: string) => void,
+): string {
+  const sentences = extractSentences(block);
+  const finalSentences = sentences.flatMap((s) =>
+    s.length > maxChunkSize ? wordSplitLongSentence(s, maxChunkSize) : [s],
+  );
+
+  let sentenceChunk = carryOverlap ? `${carryOverlap}\n\n` : "";
+  const prefix = headingBreadcrumb ? `${headingBreadcrumb}\n\n` : "";
+
+  for (const sentence of finalSentences) {
+    if (sentenceChunk.length + sentence.length > maxChunkSize) {
+      if (sentenceChunk) pushChunk(prefix + sentenceChunk);
+      sentenceChunk = `${getOverlapText(sentenceChunk.trim(), overlapSize)} ${sentence}`;
+    } else {
+      sentenceChunk += (sentenceChunk ? " " : "") + sentence;
+    }
+  }
+  if (sentenceChunk) {
+    pushChunk(prefix + sentenceChunk);
+    return getOverlapText(sentenceChunk.trim(), overlapSize);
+  }
+  return "";
+}
+
+function processSmallBlock(
+  currentChunk: string,
+  block: string,
+  maxChunkSize: number,
+  overlapSize: number,
+  isBlockHeader: boolean,
+  pushChunk: (text: string) => void,
+): string {
+  const forceSplit = isBlockHeader && currentChunk.length > 50;
+  if (currentChunk.length + block.length > maxChunkSize || forceSplit) {
+    pushChunk(currentChunk);
+    return (isBlockHeader ? "" : `${getOverlapText(currentChunk.trim(), overlapSize)}\n\n`) + block;
+  }
+  return currentChunk + (currentChunk ? "\n\n" : "") + block;
 }
 
 export function normalizeContent(text: string): string {
@@ -234,4 +266,80 @@ export function canonicalizeUrl(url: string): string {
   } catch {
     return url;
   }
+}
+
+export function buildContextPrefix(title: string, url: string, isPdf: boolean): string {
+  let prefix = `Document Title: ${title}\n`;
+  if (!isPdf) {
+    try {
+      const parsedUrl = new URL(url);
+      if (parsedUrl.pathname && parsedUrl.pathname !== "/") {
+        prefix += `URL Path: ${parsedUrl.pathname}\n`;
+      }
+    } catch {}
+  }
+  return prefix;
+}
+
+export async function sha256(text: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(text);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+export async function generateContextSummary(
+  text: string,
+): Promise<string | null> {
+  try {
+    if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) return null;
+    if (text.split(/\s+/).length <= 500) return null;
+    const { generateText } = await import("ai");
+    const { google } = await import("@ai-sdk/google");
+    const { text: summary } = await generateText({
+      model: google("gemini-2.5-flash"),
+      prompt: `Write a 1-sentence summary of this document to provide context for vector search chunks. Document text:\n\n${text.slice(0, 2000)}`,
+    });
+    return summary.trim();
+  } catch {
+    return null;
+  }
+}
+
+export async function generateChunks(
+  normalized: string,
+  contextPrefix: string,
+): Promise<
+  {
+    text: string;
+    contentHash: string;
+    parentText: string;
+    headingPath?: string[];
+  }[]
+> {
+  const parentChunks = chunkMarkdown(normalized, 3000, 300);
+  const chunks: {
+    text: string;
+    contentHash: string;
+    parentText: string;
+    headingPath?: string[];
+  }[] = [];
+
+  for (const parentChunk of parentChunks) {
+    const childChunks = chunkMarkdown(parentChunk.text, 800, 100, parentChunk.headingPath);
+    for (const childChunk of childChunks) {
+      const baseText = contextPrefix + childChunk.text;
+      const guardedParts = guardChunkSize(baseText);
+      for (const part of guardedParts) {
+        chunks.push({
+          text: part,
+          contentHash: await sha256(part),
+          parentText: parentChunk.text,
+          headingPath: childChunk.headingPath,
+        });
+      }
+    }
+  }
+  return chunks;
 }

@@ -18,12 +18,30 @@ async function verifyCronSecret(request: NextRequest): Promise<boolean> {
 
   if (authHeader === `Bearer ${cronSecret}`) return true;
 
-  // Also check query param for Vercel Cron
-  const url = new URL(request.url);
-  const cronKey = url.searchParams.get("cron_secret");
-  if (cronKey === cronSecret) return true;
-
   return false;
+}
+
+async function executeCronTask(convex: ConvexHttpClient, task: string): Promise<Record<string, unknown>> {
+  const results: Record<string, unknown> = {};
+
+  if (task === "daily" || task === "all") {
+    try {
+      await convex.mutation(
+        "crawl/tasks:runStatsAggregation" as never,
+        {
+          secret: process.env.CRON_SECRET,
+        } as never,
+      );
+      results.dailyStats = { status: "ok" };
+    } catch (error) {
+      results.dailyStats = {
+        status: "error",
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  }
+
+  return results;
 }
 
 export async function GET(request: NextRequest) {
@@ -40,24 +58,10 @@ export async function GET(request: NextRequest) {
 
     const convex = new ConvexHttpClient(convexUrl);
 
-    // Determine which cron task to run based on the query param
     const url = new URL(request.url);
     const task = url.searchParams.get("task") || "daily";
 
-    const results: Record<string, unknown> = {};
-
-    if (task === "daily" || task === "all") {
-      // Aggregate daily usage stats
-      try {
-        await convex.mutation("crawl/tasks:aggregateDailyStats" as never, {} as never);
-        results.dailyStats = { status: "ok" };
-      } catch (error) {
-        results.dailyStats = {
-          status: "error",
-          error: error instanceof Error ? error.message : "Unknown error",
-        };
-      }
-    }
+    const results = await executeCronTask(convex, task);
 
     return NextResponse.json({
       status: "ok",
