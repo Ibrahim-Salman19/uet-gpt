@@ -31,10 +31,10 @@ export const FAITHFULNESS_CONFIG = {
 } as const;
 
 export const CASCADE_CONFIG = {
-  minWordOverlap: 0.2,
+  minWordOverlap: 0.1,
   overlapWeight: 0.6,
   positionWeight: 0.4,
-  tier2CandidateCount: 8,
+  tier2CandidateCount: 15,
   cohereModel: "rerank-english-v3.0",
   cohereEndpoint: "https://api.cohere.ai/v1/rerank",
 } as const;

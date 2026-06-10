@@ -206,46 +206,77 @@ export const searchDocumentsAction = action({
       }
     }
 
+    // Bandwidth optimization: query expansion for short queries (≤5 words)
+    // Generates 3 variations to improve recall
+    const shouldExpandQuery = !args.queryEmbedding && wordCount <= 5 && wordCount > 0;
+
+    let expandedQueries: string[] = [finalQueryText];
+    if (shouldExpandQuery) {
+      try {
+        const expansions = await ctx.runAction(internal.rag.queryExpansion.expandQueryAction, {
+          query: finalQueryText,
+        });
+        expandedQueries = expansions.slice(0, 4); // original + up to 3 expansions
+      } catch {
+        console.warn("Query expansion failed, using original");
+      }
+    }
+
     // Bandwidth optimization: reduce search limit from 40 to 20
     const searchLimit = 20;
 
-    const searchArgs: {
-      namespace: string;
-      query: string | Array<number>;
-      limit: number;
-      chunkContext?: { before: number; after: number };
-      filters?: Array<{ name: string; value: string }>;
-    } = {
-      namespace: "uet-global",
-      query: args.queryEmbedding ?? args.queryText,
-      limit: searchLimit,
-      chunkContext: { before: 2, after: 1 },
-    };
+    // Run searches for all expanded queries and fuse results
+    const allSearchPromises = expandedQueries.map((q) => {
+      const searchArgs: {
+        namespace: string;
+        query: string | Array<number>;
+        limit: number;
+        chunkContext?: { before: number; after: number };
+        filters?: Array<{ name: string; value: string }>;
+      } = {
+        namespace: "uet-global",
+        query: args.queryEmbedding ?? q,
+        limit: searchLimit,
+        chunkContext: { before: 2, after: 1 },
+      };
 
-    if (args.category) {
-      searchArgs.filters = [{ name: "category", value: args.category }];
-    }
+      if (args.category) {
+        searchArgs.filters = [{ name: "category", value: args.category }];
+      }
 
-    const adaptiveWeights = estimateIdf(args.queryText).weights;
-    const useThreeWayFusion = false;
-
-    const vectorSearchP = rag.search(ctx, searchArgs);
-    const textSearchP = ctx.runQuery(internal.crawl.queries.fullTextSearch, {
-      query: finalQueryText,
-      limit: searchLimit,
+      return rag.search(ctx, searchArgs);
     });
-    const chunkSearchP = useThreeWayFusion
-      ? ctx.runQuery(internal.embeddings.chunkTextSearch.run, {
-          query: finalQueryText,
-          limit: 10,
-        })
-      : Promise.resolve([]);
 
-    const [vectorRes, textResRaw, chunkTextResRaw] = await Promise.all([
-      vectorSearchP,
-      textSearchP,
-      chunkSearchP,
+    // Fuse all vector results from expanded queries
+    const fusedVectorResults = allVectorResults.reduce(
+      (acc, res) => {
+        res.results.forEach((r: VectorSearchResult) => {
+          const existing = acc.find((e) => e.id === r.entryId);
+          if (existing) {
+            existing.score = Math.max(existing.score, r.score ?? 0);
+          } else {
+            acc.push({ id: r.entryId, score: r.score ?? 0 });
+          }
+        });
+        return acc;
+      },
+      [] as Array<{ id: string; score: number }>
+    ).sort((a, b) => b.score - a.score);
+
+    // Also run text search and chunk search on the original query
+    const [textResRaw, chunkTextResRaw] = await Promise.all([
+      ctx.runQuery(internal.crawl.queries.fullTextSearch, {
+        query: finalQueryText,
+        limit: searchLimit,
+      }),
+      useThreeWayFusion
+        ? ctx.runQuery(internal.embeddings.chunkTextSearch.run, {
+            query: finalQueryText,
+            limit: 10,
+          })
+        : Promise.resolve([]),
     ]);
+
     const textRes = textResRaw as Array<{
       ragId: string;
       text: string;
@@ -259,11 +290,13 @@ export const searchDocumentsAction = action({
       score: number;
     }>;
 
-    const vectorRanked = vectorRes.results.map((r: VectorSearchResult) => ({
-      id: r.entryId,
-      score: r.score ?? 0,
-    }));
-    const textRanked = textRes.map((r: TextSearchResult) => ({ id: r.ragId, score: r.score }));
+    const vectorRanked = fusedVectorResults;
+    const textRanked = (textResRaw as Array<{
+      ragId: string;
+      text: string;
+      url: string;
+      score: number;
+    }>).map((r) => ({ id: r.ragId, score: r.score }));
 
     const fused = hybridRank(
       vectorRanked,

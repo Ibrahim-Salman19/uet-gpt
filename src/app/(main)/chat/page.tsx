@@ -28,8 +28,6 @@ export default function ChatPage() {
       try {
         const threadId = await createThread({ title: "New Chat" });
         if (threadId) {
-          // Brief delay to allow Convex mutation to propagate
-          // This prevents the thread page from loading with undefined data
           await new Promise((resolve) => setTimeout(resolve, 150));
           router.push(`/chat/${threadId}?q=${encodeURIComponent(message)}`);
         } else {
@@ -46,13 +44,13 @@ export default function ChatPage() {
 
   return (
     <GlassPortal>
-      {/* ── Welcome content ── */}
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-center gap-6 px-6 py-10 text-center">
-        {/* Logo mark */}
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-[var(--accent)]/10 border border-[var(--accent)]/20">
+      {/* ── Welcome content: left-aligned, asymmetric (Rule 3: Anti-Center Bias) ── */}
+      <div className="relative z-10 flex-1 flex flex-col items-start justify-center gap-4 px-6 py-10 max-w-4xl mx-auto w-full">
+        {/* Logo mark - left aligned, compact */}
+        <div className="flex items-center gap-3 w-full">
+          <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-[var(--accent)]/10 border border-[var(--accent)]/20 shrink-0">
             <svg
-              className="w-6 h-6 text-[var(--accent)]"
+              className="w-5 h-5 text-[var(--accent)]"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -63,57 +61,53 @@ export default function ChatPage() {
               <circle
                 cx="12"
                 cy="12"
-                r="2.5"
+                r="2"
                 fill="currentColor"
                 fillOpacity="0.2"
                 className="animate-[pulse-dot_2s_ease-in-out_infinite]"
               />
             </svg>
           </div>
-          <div>
-            <h2 className="text-sm font-semibold text-zinc-100 font-sans tracking-tight">
+          <div className="min-w-0">
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tighter leading-none text-[var(--text-primary)] font-sans">
               UETGPT Admissions Advisor
-            </h2>
-            <p className="text-xs text-zinc-400 mt-1 font-sans max-w-xs leading-relaxed">
+            </h1>
+            <p className="text-base text-[var(--text-muted)] mt-2 font-sans leading-relaxed max-w-[65ch]">
               Ask anything about UET Taxila — admissions, fees, departments, hostels, and more.
             </p>
           </div>
         </div>
 
         {isCreating && (
-          <div className="flex items-center gap-2 text-xs text-zinc-500 font-sans animate-pulse">
+          <div className="flex items-center gap-2 text-sm text-[var(--text-muted)] font-sans animate-pulse">
             <div className="w-3 h-3 rounded-full border-2 border-[var(--accent)]/30 border-t-[var(--accent)] animate-spin" />
             Starting your conversation…
           </div>
         )}
-      </div>
 
-      {/* ── Suggestion Chips ── */}
-      {!isCreating && (
-        <div className="relative z-10 px-4 md:px-6 py-3 border-t border-white/5 bg-zinc-950/50 backdrop-blur-md">
-          <div className="flex flex-wrap gap-2" aria-label="Quick suggestions">
+        {/* ── Suggestion Chips ── */}
+        {!isCreating && (
+          <div className="w-full pt-4 border-t border-[var(--border)] flex flex-wrap gap-2" aria-label="Quick suggestions">
             {DEFAULT_SUGGESTIONS.map((s, i) => (
               <button
                 key={s.label}
                 onClick={() => handleSend(s.prompt)}
-                className="rounded-[var(--radius-md)] border border-white/5 bg-white/5 px-4 py-2 text-[11px] text-zinc-400 transition-all duration-200 hover:border-zinc-300 hover:text-white hover:bg-white/10 active:scale-95 focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:outline-none shadow-sm font-sans cursor-pointer"
+                className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface-card)] px-4 py-2.5 text-sm font-medium text-[var(--text-muted)] transition-all duration-200 ease-[var(--ease-spring)] hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--surface-hover)] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:outline-none shadow-[var(--shadow-sm)] font-sans cursor-pointer min-h-[44px] min-w-[44px]"
+                aria-label={`Suggestion: ${s.label}`}
               >
-                <span
-                  className="opacity-40 font-mono text-[9px] mr-2 select-none"
-                  aria-hidden="true"
-                >
+                <span className="opacity-40 font-mono text-[10px] mr-2 select-none" aria-hidden="true">
                   [{i + 1}]
                 </span>
                 {s.label}
               </button>
             ))}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* ── Chat Input ── */}
-      <div className="relative z-20">
-        <ChatInputNew onSend={handleSend} isLoading={isCreating} />
+        {/* ── Chat Input ── */}
+        <div className="relative z-20 w-full pt-4 border-t border-[var(--border)]">
+          <ChatInputNew onSend={handleSend} isLoading={isCreating} />
+        </div>
       </div>
     </GlassPortal>
   );

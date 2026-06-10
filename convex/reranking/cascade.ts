@@ -1,7 +1,10 @@
 // fallow-ignore-file security-sink
 import { v } from "convex/values";
+import { internal } from "../_generated/api";
 import { action } from "../_generated/server";
 import { CASCADE_CONFIG } from "../rag/constants";
+
+const _internal: any = internal;
 
 function computeWordOverlap(query: string, chunk: string): number {
   const queryWords = new Set(
@@ -90,6 +93,18 @@ export const cascadeRerank = action({
       } catch (error) {
         console.warn("RERANKER_URL request failed:", error);
       }
+    }
+
+    // ── Tier 2b: Groq lightweight reranker (free, no extra infra) ──
+    try {
+      const groqResult = await _ctx.runAction(_internal.reranking.groqRerank.groqRerank, {
+        query: args.query,
+        documents: tier2Candidates.map((d) => ({ text: d.text, id: d.id })),
+        topK: Math.min(topK, tier2Candidates.length),
+      });
+      if (groqResult.length > 0) return groqResult;
+    } catch (error) {
+      console.warn("Groq rerank failed:", error);
     }
 
     // ── Tier 3: Cohere free rerank fallback ──

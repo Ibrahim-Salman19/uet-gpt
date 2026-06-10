@@ -27,7 +27,7 @@ function SendButton({
       <button
         type="button"
         onClick={onStop}
-        className="shrink-0 w-10 h-10 rounded-[10px] bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 active:scale-95 transition-all duration-300 hover:bg-red-500/20 mb-0.5 mr-0.5 animate-pulse"
+        className="shrink-0 w-11 h-11 rounded-[10px] bg-[var(--destructive)]/10 border border-[var(--destructive)]/30 flex items-center justify-center text-[var(--destructive)] active:scale-[0.98] transition-all duration-300 ease-[var(--ease-spring)] hover:bg-[var(--destructive)]/20 mb-0.5 mr-0.5 animate-pulse"
         aria-label="Stop generating"
       >
         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -41,10 +41,10 @@ function SendButton({
       type="submit"
       disabled={!canSend}
       className={cn(
-        "shrink-0 w-10 h-10 rounded-[10px] flex items-center justify-center border active:scale-[0.98] active:translate-y-[1px] transition-all duration-300 ease-[var(--ease-spring)] focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none mb-0.5 mr-0.5",
+        "shrink-0 w-11 h-11 rounded-[10px] flex items-center justify-center border active:scale-[0.98] active:translate-y-[1px] transition-all duration-300 ease-[var(--ease-spring)] focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:outline-none mb-0.5 mr-0.5 min-h-[44px] min-w-[44px]",
         canSend
           ? "bg-[var(--accent)] border-[var(--accent)]/50 text-[var(--accent-fg)] hover:opacity-90"
-          : "bg-white/5 border-white/10 text-zinc-500",
+          : "bg-[var(--surface-hover)] border-[var(--border)] text-[var(--text-muted)]",
       )}
       aria-label="Send query"
     >
@@ -135,21 +135,21 @@ export function ChatInputNew({ onSend, onStop, isLoading, className }: ChatInput
     <form
       onSubmit={handleSubmit}
       className={cn(
-        "bg-[#070708] border-t border-white/[0.03] p-4 md:p-5 relative z-20 flex flex-col gap-3",
+        "bg-[var(--surface-base)] border-t border-[var(--border)] p-4 md:p-5 relative z-20 flex flex-col gap-3",
         className,
       )}
     >
       <label htmlFor="chat-input-field" className="sr-only">
-        Ask a question about UET Taxila admissions, fees, or departments
+        Ask anything about UET Taxila
       </label>
 
-      <div className="flex w-full items-end gap-2 rounded-xl bg-[#0c0c0e] p-2 border border-white/5 focus-within:border-[var(--accent)]/30 focus-within:bg-[#09090b] transition-all duration-300 shadow-[inset_0_1px_3px_rgba(0,0,0,0.6)]">
+      <div className="flex w-full items-end gap-2 rounded-xl bg-[var(--surface-card)] p-2 border border-[var(--border)] focus-within:border-[var(--accent)]/30 focus-within:bg-[var(--surface-hover)] transition-all duration-300 ease-[var(--ease-spring)] shadow-[var(--shadow-sm)]">
         {/* Multimodal Actions (Left) */}
         <div className="flex items-center gap-1 mb-0.5 ml-1 shrink-0">
           <button
             type="button"
             onClick={() => setVoiceInputOpen(true)}
-            className="p-2 text-zinc-500 hover:text-zinc-200 hover:bg-white/5 rounded-xl transition-all duration-300 ease-[var(--ease-spring)] active:scale-[0.98] active:translate-y-[1px] focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:outline-none"
+            className="p-3 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] rounded-xl transition-all duration-300 ease-[var(--ease-spring)] active:scale-[0.98] active:translate-y-[1px] focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:outline-none min-h-[44px] min-w-[44px]"
             aria-label="Voice input"
           >
             <svg
@@ -169,19 +169,19 @@ export function ChatInputNew({ onSend, onStop, isLoading, className }: ChatInput
 
         {/* Textarea (Center) */}
         <div className="flex-1 flex flex-col min-w-0">
-            <textarea
-              id="chat-input-field"
-              ref={inputRef}
-              value={input}
-              onChange={handleInput}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask anything about UET Taxila…"
-              rows={1}
-              disabled={isLoading && !onStop}
-              className="w-full resize-none bg-transparent px-3 py-3 text-[13px] text-zinc-100 placeholder:text-zinc-400 outline-none max-h-36 custom-scroll font-sans leading-relaxed disabled:opacity-50"
-              spellCheck={false}
-              autoComplete="off"
-            />
+          <textarea
+            id="chat-input-field"
+            ref={inputRef}
+            value={input}
+            onChange={handleInput}
+            onKeyDown={handleKeyDown}
+            placeholder="Ask anything about UET Taxila…"
+            rows={1}
+            disabled={isLoading && !onStop}
+            className="w-full resize-none bg-transparent px-3 py-3 text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none max-h-36 custom-scroll font-sans leading-relaxed disabled:opacity-50"
+            spellCheck={false}
+            autoComplete="off"
+          />
         </div>
 
         <SendButton
@@ -194,14 +194,14 @@ export function ChatInputNew({ onSend, onStop, isLoading, className }: ChatInput
 
       {/* Telemetry footer */}
       <div
-        className="flex justify-between items-center px-2 text-[9px] font-mono text-zinc-600 select-none"
+        className="flex justify-between items-center px-2 text-[10px] font-mono text-[var(--text-muted)] select-none"
         aria-hidden="true"
       >
         <span>UET GPT may produce inaccurate information. Verify critical details.</span>
         <span
           className={cn(
             "transition-colors",
-            isLoading ? "text-[var(--accent)]/60 animate-pulse" : "text-zinc-700",
+            isLoading ? "text-[var(--accent)]/60 animate-pulse" : "text-[var(--text-muted)]/50",
           )}
         >
           {isLoading ? "GENERATING…" : "IDLE"}

@@ -39,7 +39,7 @@ export function ChatWindow({
   const showSuggestions = !hasMessages && !isSending;
 
   return (
-    <GlassPortal className="pointer-events-none">
+    <GlassPortal>
       {/* ── Message feed ── */}
       <div className="relative z-10 flex-1 overflow-hidden">
         <ChatMessages
@@ -53,30 +53,25 @@ export function ChatWindow({
 
       {/* ── Suggestion Chips ── */}
       {showSuggestions && (
-        <div className="relative z-10 px-4 md:px-6 py-3 border-t border-white/5 bg-zinc-950/50 backdrop-blur-md">
-          <div className="flex flex-wrap gap-2 stagger-enter" aria-label="Quick suggestions">
-            {DEFAULT_SUGGESTIONS.map((s, i) => (
-              <button
-                key={s.label}
-                onClick={() => onSuggestionSelect?.(s.prompt)}
-                className="rounded-[var(--radius-md)] border border-white/5 bg-white/5 px-4 py-2 text-[11px] tracking-wide text-zinc-400 transition-all duration-200 hover:border-zinc-300 hover:text-white hover:bg-white/10 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:outline-none shadow-[var(--shadow-sm)] font-sans cursor-pointer"
-                aria-label={`Suggestion: ${s.label}`}
-              >
-                <span
-                  className="opacity-40 font-mono tabular-nums text-[9px] mr-2 select-none"
-                  aria-hidden="true"
-                >
-                  [{i + 1}]
-                </span>
-                {s.label}
-              </button>
-            ))}
-          </div>
+        <div className="relative z-10 px-4 md:px-6 py-3 border-t border-[var(--border)] flex flex-wrap gap-2 stagger-enter" aria-label="Quick suggestions">
+          {DEFAULT_SUGGESTIONS.map((s, i) => (
+            <button
+              key={s.label}
+              onClick={() => onSuggestionSelect?.(s.prompt)}
+              className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface-card)] px-4 py-2.5 text-sm font-medium text-[var(--text-muted)] transition-all duration-200 ease-[var(--ease-spring)] hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--surface-hover)] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:outline-none shadow-[var(--shadow-sm)] font-sans cursor-pointer min-h-[44px] min-w-[44px]"
+              aria-label={`Suggestion: ${s.label}`}
+            >
+              <span className="opacity-40 font-mono text-[10px] mr-2 select-none" aria-hidden="true">
+                [{i + 1}]
+              </span>
+              {s.label}
+            </button>
+          ))}
         </div>
       )}
 
       {/* ── Chat Input ── */}
-      <div className="relative z-20">
+      <div className="relative z-20 pt-4 border-t border-[var(--border)]">
         <ChatInputNew onSend={onSend} onStop={onStop} isLoading={isSending} />
       </div>
     </GlassPortal>
