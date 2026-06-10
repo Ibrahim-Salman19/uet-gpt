@@ -44,36 +44,23 @@ export default function ChatPage() {
 
   return (
     <GlassPortal>
-      {/* ── Welcome content: left-aligned, asymmetric (Rule 3: Anti-Center Bias) ── */}
-      <div className="relative z-10 flex-1 flex flex-col items-start justify-center gap-4 px-6 py-10 max-w-4xl mx-auto w-full">
-        {/* Logo mark - left aligned, compact */}
-        <div className="flex items-center gap-3 w-full">
-          <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-[var(--accent)]/10 border border-[var(--accent)]/20 shrink-0">
-            <svg
-              className="w-5 h-5 text-[var(--accent)]"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-            >
+      {/* ── Welcome content ── */}
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center gap-8 px-6 py-12 text-center">
+        {/* Logo mark */}
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-14 h-14 flex items-center justify-center rounded-2xl bg-[var(--accent)]/10 border border-[var(--accent)]/20">
+            <svg className="w-7 h-7 text-[var(--accent)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M12 2v20M2 12h20" strokeDasharray="2 2" />
               <circle cx="12" cy="12" r="8" strokeDasharray="4 2" />
-              <circle
-                cx="12"
-                cy="12"
-                r="2"
-                fill="currentColor"
-                fillOpacity="0.2"
-                className="animate-[pulse-dot_2s_ease-in-out_infinite]"
-              />
+              <circle cx="12" cy="12" r="3" fill="currentColor" fillOpacity="0.2" className="animate-[pulse-dot_2s_ease-in-out_infinite]" />
             </svg>
           </div>
-          <div className="min-w-0">
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tighter leading-none text-[var(--text-primary)] font-sans">
-              UETGPT Admissions Advisor
+          <div>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tighter leading-none text-[var(--text-primary)] font-sans">
+              Ask me anything about UET Taxila
             </h1>
-            <p className="text-base text-[var(--text-muted)] mt-2 font-sans leading-relaxed max-w-[65ch]">
-              Ask anything about UET Taxila — admissions, fees, departments, hostels, and more.
+            <p className="text-base text-[var(--text-muted)] mt-3 font-sans leading-relaxed max-w-[65ch]">
+              I can help with admissions, programs, campus life, faculty, departments, and more.
             </p>
           </div>
         </div>
@@ -87,12 +74,12 @@ export default function ChatPage() {
 
         {/* ── Suggestion Chips ── */}
         {!isCreating && (
-          <div className="w-full pt-4 border-t border-[var(--border)] flex flex-wrap gap-2" aria-label="Quick suggestions">
+          <div className="w-full max-w-2xl flex flex-wrap justify-center gap-3" aria-label="Quick suggestions">
             {DEFAULT_SUGGESTIONS.map((s, i) => (
               <button
                 key={s.label}
                 onClick={() => handleSend(s.prompt)}
-                className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface-card)] px-4 py-2.5 text-sm font-medium text-[var(--text-muted)] transition-all duration-200 ease-[var(--ease-spring)] hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--surface-hover)] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:outline-none shadow-[var(--shadow-sm)] font-sans cursor-pointer min-h-[44px] min-w-[44px]"
+                className="rounded-full border border-[var(--border)] bg-[var(--surface-card)] px-5 py-3 text-sm font-medium text-[var(--text-muted)] transition-all duration-200 ease-[var(--ease-spring)] hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--surface-hover)] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:outline-none shadow-[var(--shadow-sm)] font-sans cursor-pointer min-h-[44px] min-w-[44px]"
                 aria-label={`Suggestion: ${s.label}`}
               >
                 <span className="opacity-40 font-mono text-[10px] mr-2 select-none" aria-hidden="true">
@@ -105,7 +92,7 @@ export default function ChatPage() {
         )}
 
         {/* ── Chat Input ── */}
-        <div className="relative z-20 w-full pt-4 border-t border-[var(--border)]">
+        <div className="relative z-20 w-full max-w-2xl pt-4">
           <ChatInputNew onSend={handleSend} isLoading={isCreating} />
         </div>
       </div>
