@@ -9,40 +9,33 @@ interface LoadingStateProps {
 
 function MessageSkeleton({ isUser }: { isUser: boolean }) {
   return (
-    <div
-      className={cn(
-        "flex items-start gap-4 px-4 py-4 border-b border-[var(--ks-rule)]",
-        isUser ? "flex-row-reverse" : "flex-row",
-      )}
-    >
-      {/* Small mono-spaced avatar frame */}
-      <div className="h-7 w-7 shrink-0 border border-[var(--ks-rule-strong)] bg-[var(--surface-1)] flex items-center justify-center rounded-[2px] select-none">
-        <span className="font-mono text-[9px] text-[var(--ks-text-muted)]">
-          {isUser ? "USR" : "AI"}
-        </span>
+    <div className="flex items-start gap-5 px-6 py-6 w-full max-w-5xl mx-auto border-b border-white/[0.02]">
+      {/* Avatar Outline */}
+      <div className="h-8 w-8 shrink-0 border border-white/10 rounded-xl bg-zinc-950 flex items-center justify-center select-none font-mono text-[9px] text-zinc-500">
+        {isUser ? "USR" : "SYS"}
       </div>
 
-      {/* Content box */}
-      <div
-        className={cn("flex flex-col gap-2 max-w-xl w-full", isUser ? "items-end" : "items-start")}
-      >
-        <div className="w-full border border-[var(--ks-rule)] bg-[var(--surface-0)] p-3 rounded-[2px] relative overflow-hidden">
-          {/* Subtle running loading trace */}
-          <div className="absolute top-0 left-0 right-0 h-[1px] bg-[var(--ks-rule)] overflow-hidden">
-            <div className="h-full w-24 bg-[var(--ks-kinpaku-gold)] animate-progress" />
-          </div>
-          <div className="font-mono text-[10px] text-[var(--ks-text-muted)] mt-1.5 flex items-center gap-2 select-none">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--ks-verdigris-patina)] opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[var(--ks-verdigris-patina)]"></span>
-            </span>
-            {isUser ? "TRANSMITTING DATA..." : "PROCESSING RAG CONTEXT..."}
-          </div>
+      <div className="flex-1 flex flex-col gap-3.5 items-start min-w-0">
+        {/* Monospace Metadata Tag */}
+        <div className="flex items-center gap-2 font-mono text-[9px] tracking-widest text-zinc-500 uppercase select-none">
+          <span>{isUser ? "USER" : "UETGPT"}</span>
+          <span className="opacity-40">//</span>
+          <span className="animate-pulse text-[var(--accent)] font-semibold">
+            {isUser ? "TRANSMITTING..." : "PROCESSING_RAG..."}
+          </span>
         </div>
 
-        {/* Timestamp placeholder */}
-        <div className="font-mono text-[8px] text-[var(--ks-text-faint)] tracking-widest select-none">
-          {"SYS // SYNC_PENDING"}
+        {/* Hairline geometric pulse lines */}
+        <div className="w-full space-y-2.5">
+          <div className="h-[1px] bg-white/10 w-[90%] relative overflow-hidden">
+            <div className="absolute top-0 bottom-0 left-0 w-1/3 bg-[var(--ks-kinpaku-gold)] animate-progress" />
+          </div>
+          <div className="h-[1px] bg-white/10 w-[75%] relative overflow-hidden">
+            <div className="absolute top-0 bottom-0 left-0 w-1/3 bg-[var(--ks-kinpaku-gold)] animate-progress" style={{ animationDelay: "150ms" }} />
+          </div>
+          <div className="h-[1px] bg-white/10 w-[50%] relative overflow-hidden">
+            <div className="absolute top-0 bottom-0 left-0 w-1/3 bg-[var(--ks-kinpaku-gold)] animate-progress" style={{ animationDelay: "300ms" }} />
+          </div>
         </div>
       </div>
     </div>

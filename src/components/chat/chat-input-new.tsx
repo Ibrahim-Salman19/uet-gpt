@@ -135,7 +135,7 @@ export function ChatInputNew({ onSend, onStop, isLoading, className }: ChatInput
     <form
       onSubmit={handleSubmit}
       className={cn(
-        "bg-zinc-950/80 backdrop-blur-xl border-t border-[#1d1d21] p-4 md:p-5 relative z-20 flex flex-col gap-3",
+        "bg-[#070708] border-t border-white/[0.03] p-4 md:p-5 relative z-20 flex flex-col gap-3",
         className,
       )}
     >
@@ -143,7 +143,7 @@ export function ChatInputNew({ onSend, onStop, isLoading, className }: ChatInput
         Ask a question about UET Taxila admissions, fees, or departments
       </label>
 
-      <div className="flex w-full items-end gap-2 rounded-2xl bg-[#0a0a0c]/80 p-1.5 border border-white/10 hover:border-white/20 focus-within:border-zinc-500 focus-within:ring-2 focus-within:ring-zinc-500/20 focus-within:bg-[#0a0a0c] transition-all duration-300 shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]">
+      <div className="flex w-full items-end gap-2 rounded-xl bg-[#0c0c0e] p-2 border border-white/5 focus-within:border-[var(--accent)]/30 focus-within:bg-[#09090b] transition-all duration-300 shadow-[inset_0_1px_3px_rgba(0,0,0,0.6)]">
         {/* Multimodal Actions (Left) */}
         <div className="flex items-center gap-1 mb-0.5 ml-1 shrink-0">
           <button

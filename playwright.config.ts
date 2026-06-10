@@ -24,19 +24,25 @@ export default defineConfig({
     },
     {
       name: "Desktop Chrome",
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: "playwright/.clerk/state.json",
+      },
       dependencies: ["setup"],
     },
     {
       name: "Mobile Chrome",
-      use: { ...devices["Pixel 5"] },
+      use: {
+        ...devices["Pixel 5"],
+        storageState: "playwright/.clerk/state.json",
+      },
       dependencies: ["setup"],
     },
   ],
-  webServer: {
+  /* webServer: {
     command: "npm run dev", // Use dev server for faster E2E test runs locally
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 180 * 1000,
-  },
+  }, */
 });

@@ -123,22 +123,28 @@ export const ChatMessageBubble = React.memo(function ChatMessageBubble({
   useTypingSound(message, typingSoundEnabled);
 
   return (
-    <div className="flex items-start gap-4 px-4 py-4 w-full max-w-4xl mx-auto" id={message.id}>
+    <div className="flex items-start gap-5 px-6 py-6 w-full max-w-5xl mx-auto border-b border-white/[0.02] last:border-b-0" id={message.id}>
       <Avatar isUser={isUser} initials={fallbackInitials} />
 
-      <div className="group flex flex-1 flex-col gap-1.5 items-start min-w-0">
+      <div className="group flex flex-1 flex-col gap-1 items-start min-w-0">
+        <div className="flex items-center gap-2 font-mono text-[9px] tracking-widest text-zinc-500 uppercase select-none mb-1">
+          <span className={cn(isUser ? "text-zinc-400" : "text-[var(--accent)] font-semibold")}>
+            {isUser ? "USER" : "UETGPT // RESPONSE"}
+          </span>
+          <span className="opacity-40">//</span>
+          <span>{isUser ? "SYNC_OK" : "STREAM_LIVE"}</span>
+        </div>
+
         <div
           className={cn(
-            "rounded-[var(--radius-lg)] px-4 py-2.5 transition-all duration-300 shadow-md",
+            "w-full text-zinc-100 leading-relaxed font-sans text-[var(--chat-font-size,0.925rem)]",
             isUser
-              ? "bg-[var(--accent)]/15 border border-[var(--accent)]/25 text-zinc-100 backdrop-blur-md"
-              : "bg-zinc-900/40 border border-white/5 text-zinc-100 backdrop-blur-md",
+              ? "bg-[#101012] border border-white/[0.04] rounded-xl px-5 py-3.5 shadow-sm"
+              : "px-0 py-1"
           )}
         >
           {isUser ? (
-            <p className="text-[var(--chat-font-size,0.875rem)] leading-relaxed text-balance">
-              {message.content}
-            </p>
+            <p className="whitespace-pre-wrap">{message.content}</p>
           ) : (
             <Markdown content={scrambleContent} />
           )}
@@ -146,7 +152,7 @@ export const ChatMessageBubble = React.memo(function ChatMessageBubble({
 
         {message.sources && message.sources.length > 0 && <SourceList sources={message.sources} />}
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3 mt-2">
           <MessageActions
             content={message.content}
             role={message.role}
@@ -154,8 +160,8 @@ export const ChatMessageBubble = React.memo(function ChatMessageBubble({
           />
 
           {message.tokenCount && (
-            <span className="text-[10px] text-[var(--text-disabled)] font-mono tabular-nums tracking-wide">
-              {message.tokenCount.total} tokens
+            <span className="text-[9px] text-[var(--text-disabled)] font-mono opacity-50 tracking-wider">
+              [{message.tokenCount.total} TOKENS]
             </span>
           )}
         </div>

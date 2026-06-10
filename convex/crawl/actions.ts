@@ -331,6 +331,13 @@ export const embedSingleChunk = internalAction({
         headingPath: args.headingPath,
       });
 
+      ctx.runAction(internal.embeddings.contextualize.contextualizeNewChunk, {
+        documentId: args.documentId,
+        contentHash: args.contentHash,
+      }).catch((err: unknown) => {
+        console.warn("Immediate contextualization failed:", err);
+      });
+
       return {
         success: true,
         ragId: result.entryId,

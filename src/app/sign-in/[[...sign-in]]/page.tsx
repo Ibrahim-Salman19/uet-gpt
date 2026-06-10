@@ -3,7 +3,7 @@ import { uetClerkAppearance } from "@/lib/clerk-theme";
 
 export default function SignInPage() {
   return (
-    <div className="flex min-h-[100dvh] items-center justify-center bg-gradient-to-br from-[var(--primary)] to-[oklch(0.25_0.09_265)] px-4">
+    <div className="flex min-h-[100dvh] items-center justify-center bg-[var(--surface-base)] px-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-[var(--radius-xl)] bg-[var(--accent)]">
@@ -22,10 +22,10 @@ export default function SignInPage() {
               <path d="M6 12v5c3 3 9 3 12 0v-5" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white text-balance">
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)] text-balance">
             Welcome to UET GPT
           </h1>
-          <p className="mt-2 text-sm text-white/70">Sign in to your account to continue</p>
+          <p className="mt-2 text-sm text-[var(--text-muted)]">Sign in to your account to continue</p>
         </div>
         <SignIn appearance={uetClerkAppearance} signUpUrl="/sign-up" />
       </div>

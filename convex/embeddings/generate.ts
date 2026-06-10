@@ -2,6 +2,7 @@
 "use node";
 import { ConvexError, v } from "convex/values";
 import { action } from "../_generated/server";
+import { recordTiming } from "../observability/metrics";
 
 // gemini-embedding-2 — stable as of May 2026
 // Dimensions: 3072 (MRL supports 768/1536/3072)
@@ -145,11 +146,23 @@ export const generate = action({
   },
   returns: v.array(v.float64()),
   handler: async (_ctx, args) => {
+    const timer = recordTiming();
     try {
       const queryText = `task: search result | query: ${args.text}`;
       const embeddings = await generateEmbeddingsInternal([queryText]);
+      const latencyMs = timer.end();
+      console.log("[EMBEDDING] Generated embedding", {
+        latencyMs,
+        textLength: args.text.length,
+      });
       return embeddings[0] as number[];
     } catch (error: unknown) {
+      const latencyMs = timer.end();
+      console.error("[EMBEDDING] Failed to generate embedding", {
+        latencyMs,
+        textLength: args.text.length,
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw new ConvexError(error instanceof Error ? error.message : String(error));
     }
   },

@@ -412,6 +412,20 @@ function buildCacheWriteCallback(
     if (ragResult.queryEmbedding && ragResult.queryEmbedding.length > 0) {
       after(async () => {
         try {
+          const [altResult] = await Promise.allSettled([
+            convex.action(api.cache.multiVector.generateAlternates, {
+              queryText: question,
+            }),
+          ]);
+
+          const alternates =
+            altResult.status === "fulfilled" && altResult.value
+              ? {
+                  alternateQueryTexts: altResult.value.alternateQueryTexts,
+                  alternateEmbeddings: altResult.value.alternateEmbeddings,
+                }
+              : {};
+
           const topSourceUrl = ragResult.sources[0]?.url ?? "";
           const freshnessTier = assignFreshnessTier(topSourceUrl);
           await convex.mutation(api.cache.set.set, {
@@ -421,6 +435,7 @@ function buildCacheWriteCallback(
             sources: ragResult.sources,
             model: modelName,
             freshnessTier,
+            ...alternates,
           });
         } catch (err) {
           console.error("Failed to write to semantic cache:", err);

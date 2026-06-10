@@ -1,6 +1,7 @@
 // fallow-ignore-file security-sink
 import { v } from "convex/values";
 import { action } from "../_generated/server";
+import { CASCADE_CONFIG } from "../rag/constants";
 
 export const rerank = action({
   args: {
@@ -13,6 +14,7 @@ export const rerank = action({
     const docs = args.documents;
     const topK = args.topK ?? docs.length;
 
+    // Tier 1: RERANKER_URL (primary precision reranker)
     const rerankerUrl = process.env.RERANKER_URL;
     if (rerankerUrl) {
       try {
@@ -40,11 +42,46 @@ export const rerank = action({
         }
         console.warn(`Reranker API returned error: ${response.status}`);
       } catch (error) {
-        console.warn("External reranking request failed, using fallback:", error);
+        console.warn("External reranking request failed, trying Cohere fallback:", error);
       }
     }
 
-    // Graceful fallback to original query order
+    // Tier 2: Cohere free rerank fallback (100 calls/day limit)
+    const cohereKey = process.env.COHERE_API_KEY;
+    if (cohereKey && docs.length > 0) {
+      try {
+        const response = await fetch(CASCADE_CONFIG.cohereEndpoint, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${cohereKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: CASCADE_CONFIG.cohereModel,
+            query: args.query,
+            documents: docs.map((d) => d.text),
+            top_n: topK,
+          }),
+        });
+
+        if (response.ok) {
+          type CohereResult = { index: number; relevance_score: number };
+          const body = (await response.json()) as { results: CohereResult[] };
+          return body.results
+            .filter((r) => r.index >= 0 && r.index < docs.length)
+            .map((r) => ({
+              text: docs[r.index].text,
+              score: r.relevance_score,
+              index: r.index,
+            }));
+        }
+        console.warn(`Cohere rerank returned status ${response.status}`);
+      } catch (error) {
+        console.warn("Cohere rerank failed:", error);
+      }
+    }
+
+    // Tier 3: Graceful fallback to positional ordering
     return docs.slice(0, topK).map((d, i) => ({
       text: d.text,
       score: 1 - i / docs.length,

@@ -1,25 +1,34 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
 
 export function ConnectionStatus() {
   const [isOnline, setIsOnline] = useState(true);
   const [wasOffline, setWasOffline] = useState(false);
+  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wasOfflineRef = useRef(false);
+
+  const handleOnline = useCallback(() => {
+    setIsOnline(true);
+    if (wasOfflineRef.current) {
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+      reconnectTimeoutRef.current = setTimeout(() => {
+        setWasOffline(false);
+        wasOfflineRef.current = false;
+      }, 3000);
+    }
+  }, []);
+
+  const handleOffline = useCallback(() => {
+    setIsOnline(false);
+    setWasOffline(true);
+    wasOfflineRef.current = true;
+  }, []);
 
   useEffect(() => {
-    const handleOnline = () => {
-      setIsOnline(true);
-      if (wasOffline) {
-        // Show "reconnected" briefly
-        setTimeout(() => setWasOffline(false), 3000);
-      }
-    };
-    const handleOffline = () => {
-      setIsOnline(false);
-      setWasOffline(true);
-    };
-
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
     setIsOnline(navigator.onLine);
@@ -27,8 +36,11 @@ export function ConnectionStatus() {
     return () => {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
     };
-  }, [wasOffline]);
+  }, [handleOnline, handleOffline]);
 
   if (isOnline && !wasOffline) return null;
 

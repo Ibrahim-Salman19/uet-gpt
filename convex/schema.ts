@@ -115,6 +115,8 @@ export default defineSchema({
     createdAt: v.number(),
     embeddingModel: v.optional(v.string()),
     sourceEntryIds: v.optional(v.array(v.string())),
+    alternateQueryTexts: v.optional(v.array(v.string())),
+    alternateEmbeddings: v.optional(v.array(v.array(v.float64()))),
   })
     .index("by_expiresAt", ["expiresAt"])
     .vectorIndex("by_queryEmbedding", { vectorField: "queryEmbedding", dimensions: 3072 }),
@@ -134,6 +136,10 @@ export default defineSchema({
       v.literal("feedback.submit"),
       v.literal("settings.update"),
       v.literal("admin.access"),
+      v.literal("metrics.summary"),
+      v.literal("metrics.errors"),
+      v.literal("metrics.performance"),
+      v.literal("staleness.check"),
     ),
     target: v.optional(v.string()),
     details: v.optional(
@@ -247,6 +253,7 @@ export default defineSchema({
     embeddingModel: v.optional(v.string()),
     parentText: v.optional(v.string()), // TASK-E06: Parent-child chunking context
     headingPath: v.optional(v.array(v.string())), // R-7: Section heading hierarchy (e.g. ["Admissions", "Fee Structure"])
+    contextualizedText: v.optional(v.string()), // R-9: Gemini-contextualized version of chunk text
   })
     .index("by_documentId", ["documentId"])
     .index("by_documentId_and_contentHash", ["documentId", "contentHash"])
@@ -290,6 +297,23 @@ export default defineSchema({
     windowStart: v.number(), // epoch ms — start of current 1-minute window
     count: v.number(), // requests (per-user) or tokens (global) in window
   }).index("by_key", ["key"]),
+
+  evalResults: defineTable({
+    evalName: v.string(),
+    model: v.optional(v.string()),
+    datasetSize: v.number(),
+    timestamp: v.number(),
+    metrics: v.object({
+      recallAtK: v.number(),
+      precisionAtK: v.number(),
+      mrr: v.number(),
+      avgLatency: v.number(),
+      totalTokens: v.number(),
+    }),
+    metadata: v.optional(v.string()),
+  })
+    .index("by_timestamp", ["timestamp"])
+    .index("by_evalName", ["evalName"]),
 
   // Note: `threads` and `messages` tables are managed by @convex-dev/agent component.
   // Do not define them here to avoid table name conflicts with the component's internal tables.

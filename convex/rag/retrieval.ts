@@ -1,35 +1,14 @@
 import { ConvexError, v, Infer } from "convex/values";
 import { api, internal } from "../_generated/api";
 import { action } from "../_generated/server";
+import { truncateQuery, recordTiming } from "../observability/metrics";
+import {
+  type ConfidenceTier,
+  INJECTION_RE,
+  MAX_QUERY_LEN,
+  CRAG_CONFIG,
+} from "./constants";
 
-// TASK-S03: Pre-retrieval query injection scanner.
-// Detects prompt injection attempts before any LLM call is made.
-// Patterns: same blocklist as PDF metadata sanitizer for consistency.
-const INJECTION_RE = new RegExp(
-  [
-    String.raw`ignore\s+previous\s+instructions?`,
-    String.raw`(?:system|role)\s*:`,
-    String.raw`\[INST\]`,
-    String.raw`<\/s>`,
-    String.raw`<\|im_(?:start|end)\|>`,
-    String.raw`###\s*[Ii]nstruction`,
-    String.raw`<\s*script[\s>]`, // XSS-in-prompt attempt
-    String.raw`from\s+now\s+on\s+`,
-    String.raw`you\s+are\s+(?:now|an?)\s+`,
-    String.raw`disregard\s+`,
-    String.raw`override\s+`,
-    String.raw`do\s+not\s+follow\s+`,
-  ].join("|"),
-  "i",
-);
-
-/** Max query length in characters (prevents context-flooding attacks) */
-const MAX_QUERY_LEN = 2_000;
-
-/**
- * Returns a sanitized version of the query, or throws ConvexError
- * if the query contains an injection attempt or is too long.
- */
 function scanForInjection(query: string): string {
   if (!query || typeof query !== "string") {
     throw new ConvexError("Invalid query");
@@ -47,8 +26,6 @@ function scanForInjection(query: string): string {
   }
   return query.trim();
 }
-
-type ConfidenceTier = "refuse" | "hedge" | "cite" | "normal";
 
 function determineConfidenceTier(results: { relevanceScore: number }[]): {
   tier: ConfidenceTier;
@@ -98,9 +75,6 @@ const sourceValidator = v.object({
   headingPath: v.optional(v.array(v.string())),
 });
 
-// ── Helper functions (phases of retrieveContext) ──────────────────────────
-
-/** Classify user intent; defaults to "general" on failure. */
 async function classifyUserIntent(
   ctx: any,
   actions: any,
@@ -119,7 +93,6 @@ async function classifyUserIntent(
   }
 }
 
-/** Enrich query via parallel rewrite + HyDE, falling back to original on failure. */
 async function enrichQuery(
   ctx: any,
   actions: any,
@@ -137,7 +110,6 @@ async function enrichQuery(
   };
 }
 
-/** Generate query embedding from HyDE (fallback: rewrite, fallback: original). */
 async function generateQueryEmbedding(
   ctx: any,
   actions: any,
@@ -155,7 +127,6 @@ async function generateQueryEmbedding(
   }
 }
 
-/** Check semantic cache; returns cached result or null. */
 async function checkSemanticCache(
   ctx: any,
   actions: any,
@@ -197,7 +168,6 @@ type SearchResult = {
   headingPath?: string[];
 };
 
-/** Search vector DB. */
 async function searchVectorDB(
   ctx: any,
   actions: any,
@@ -222,7 +192,6 @@ async function searchVectorDB(
   }
 }
 
-/** Rerank search results via FlashRank (k=8 -> 4). */
 async function rerankSearchResults(
   ctx: any,
   actions: any,
@@ -233,7 +202,7 @@ async function rerankSearchResults(
   if (results.length === 0) return [];
 
   try {
-    const reranked = await ctx.runAction(actions.reranking.rerank.rerank, {
+    const reranked = await ctx.runAction(actions.reranking.cascade.cascadeRerank, {
       query: rewrittenQuery || safeQuestion,
       documents: results.map((r) => ({
         id: r.entryId,
@@ -250,14 +219,13 @@ async function rerankSearchResults(
     );
   } catch (e) {
     console.warn(
-      "Reranking failed, using original search fallback sliced to top 4:",
+      "Cascade reranking failed, using original search fallback sliced to top 4:",
       e,
     );
     return results.slice(0, 4);
   }
 }
 
-/** Build sources array from search results (truncate excerpts to 300 chars). */
 function buildSourcesFromResults(results: SearchResult[]): SourceEntry[] {
   return results.map((r) => ({
     entryId: r.entryId,
@@ -269,7 +237,78 @@ function buildSourcesFromResults(results: SearchResult[]): SourceEntry[] {
   }));
 }
 
-/** Search vector DB, rerank, and build sources. */
+type CragEval = { index: number; relevant: boolean; confidence: number };
+
+/** CRAG evaluation: uses Groq to judge chunk relevance, adjusts tier. */
+async function evaluateWithCrag(
+  ctx: any,
+  actions: any,
+  safeQuestion: string,
+  results: SearchResult[],
+): Promise<{
+  finalResults: SearchResult[];
+  finalSources: SourceEntry[];
+  tier: ConfidenceTier | null;
+}> {
+  if (results.length === 0) {
+    return { finalResults: results, finalSources: [], tier: null };
+  }
+
+  const cragEval = await ctx
+    .runAction(actions.rag.crag.evaluateChunks, {
+      query: safeQuestion,
+      chunks: results.map((r, i) => ({ text: r.content, index: i })),
+    })
+    .catch((e: Error) => {
+      console.warn("CRAG evaluation failed, continuing without:", e);
+      return null;
+    });
+
+  if (!cragEval) {
+    return {
+      finalResults: results,
+      finalSources: buildSourcesFromResults(results),
+      tier: null,
+    };
+  }
+
+  const allIrrelevant = cragEval.every(
+    (e: CragEval) => !e.relevant && e.confidence > CRAG_CONFIG.highConfidenceThreshold,
+  );
+  const someIrrelevant = cragEval.some((e: CragEval) => !e.relevant);
+
+  if (allIrrelevant) {
+    return { finalResults: [], finalSources: [], tier: "refuse" };
+  }
+
+  if (someIrrelevant) {
+    const relevantChunks = results.filter((_, i) => {
+      const eval_ = cragEval.find((e: CragEval) => e.index === i);
+      return eval_ ? eval_.relevant : true;
+    });
+
+    if (relevantChunks.length <= 2) {
+      return {
+        finalResults: relevantChunks,
+        finalSources: buildSourcesFromResults(relevantChunks),
+        tier: "hedge",
+      };
+    }
+
+    return {
+      finalResults: relevantChunks,
+      finalSources: buildSourcesFromResults(relevantChunks),
+      tier: null,
+    };
+  }
+
+  return {
+    finalResults: results,
+    finalSources: buildSourcesFromResults(results),
+    tier: null,
+  };
+}
+
 async function searchAndRerank(
   ctx: any,
   actions: any,
@@ -301,36 +340,47 @@ async function searchAndRerank(
 
 type SourceEntry = Infer<typeof sourceValidator>;
 
-/** Build context string with confidence-tier instruction prefix. */
 async function buildResponseContext(
   ctx: any,
   internalActions: any,
   searchResults: SearchResult[],
+  overrideTier?: ConfidenceTier | null,
 ): Promise<string> {
-  if (searchResults.length === 0) return "";
-
   let context: string;
-  try {
-    context = await ctx.runQuery(internalActions.rag.context.buildContext, {
-      chunks: searchResults.map((r) => ({
-        content: r.content,
-        relevanceScore: r.relevanceScore,
-        url: r.url,
-        title: r.title,
-        headingPath: r.headingPath,
-      })),
-      maxTokens: 3000,
-    });
-  } catch (e) {
-    console.error(
-      "Context building failed, falling back to raw concatenation:",
-      e,
-    );
-    context = searchResults.map((r) => r.content).join("\n\n---\n\n");
+
+  if (searchResults.length === 0) {
+    context = "";
+  } else {
+    try {
+      context = await ctx.runQuery(internalActions.rag.context.buildContext, {
+        chunks: searchResults.map((r) => ({
+          content: r.content,
+          relevanceScore: r.relevanceScore,
+          url: r.url,
+          title: r.title,
+          headingPath: r.headingPath,
+        })),
+        maxTokens: 3000,
+      });
+    } catch (e) {
+      console.error(
+        "Context building failed, falling back to raw concatenation:",
+        e,
+      );
+      context = searchResults.map((r) => r.content).join("\n\n---\n\n");
+    }
   }
 
-  const { instruction } = determineConfidenceTier(searchResults);
-  if (instruction) context = instruction + context;
+  if (overrideTier === "refuse") {
+    const { instruction } = determineConfidenceTier([{ relevanceScore: 0.1 }]);
+    if (instruction) context = instruction + context;
+  } else if (overrideTier === "hedge") {
+    const { instruction } = determineConfidenceTier([{ relevanceScore: 0.3 }]);
+    if (instruction) context = instruction + context;
+  } else {
+    const { instruction } = determineConfidenceTier(searchResults);
+    if (instruction) context = instruction + context;
+  }
 
   return context;
 }
@@ -356,7 +406,13 @@ export const retrieveContext = action({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const _i: any = internal;
 
+    const timer = recordTiming();
     const safeQuestion = scanForInjection(args.question);
+
+    console.log("[RETRIEVAL] Query start", {
+      query: truncateQuery(safeQuestion),
+      timestamp: Date.now(),
+    });
 
     const intent = await classifyUserIntent(ctx, _a, safeQuestion);
     if (intent === "off_topic") {
@@ -381,6 +437,11 @@ export const retrieveContext = action({
 
     const cached = await checkSemanticCache(ctx, _a, safeQuestion, queryEmbedding);
     if (cached) {
+      console.log("[RETRIEVAL] Cache hit", {
+        query: truncateQuery(safeQuestion),
+        latencyMs: timer.lap("cache_hit"),
+        model: cached.model,
+      });
       return {
         intent,
         context: "",
@@ -390,6 +451,12 @@ export const retrieveContext = action({
         queryEmbedding,
       };
     }
+
+    console.log("[RETRIEVAL] Cache miss, searching", {
+      query: truncateQuery(safeQuestion),
+      latencyMs: timer.lap("cache_miss"),
+      intent,
+    });
 
     const { results, sources } = await searchAndRerank(
       ctx,
@@ -401,12 +468,32 @@ export const retrieveContext = action({
       intent,
     );
 
-    const context = await buildResponseContext(ctx, _i, results);
+    const retrievalLatency = timer.lap("retrieval");
+
+    console.log("[RETRIEVAL] Search complete", {
+      query: truncateQuery(safeQuestion),
+      resultCount: results.length,
+      retrievalLatencyMs: retrievalLatency,
+    });
+
+    const { finalResults, finalSources, tier: cragTier } =
+      await evaluateWithCrag(ctx, _a, safeQuestion, results);
+
+    const context = await buildResponseContext(ctx, _i, finalResults, cragTier);
+
+    const totalLatency = timer.end();
+    console.log("[RETRIEVAL] Query complete", {
+      query: truncateQuery(safeQuestion),
+      totalLatencyMs: totalLatency,
+      resultCount: finalResults.length,
+      sourceCount: finalSources.length,
+      cragTier,
+    });
 
     return {
       intent,
       context,
-      sources,
+      sources: finalSources,
       cachedResponse: null,
       queryEmbedding,
     };

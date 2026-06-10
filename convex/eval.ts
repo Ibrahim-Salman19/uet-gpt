@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
-import { action, internalQuery } from "./_generated/server";
+import { action, internalMutation, internalQuery } from "./_generated/server";
 
 export const getChunksByRagIds = internalQuery({
   args: {
@@ -51,5 +51,31 @@ export const evaluateSearch = action({
     })) as Array<{ ragId: string; text: string; url: string }>;
 
     return chunks;
+  },
+});
+
+export const storeEvalResult = internalMutation({
+  args: {
+    evalName: v.string(),
+    model: v.optional(v.string()),
+    datasetSize: v.number(),
+    metrics: v.object({
+      recallAtK: v.number(),
+      precisionAtK: v.number(),
+      mrr: v.number(),
+      avgLatency: v.number(),
+      totalTokens: v.number(),
+    }),
+    metadata: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.insert("evalResults", {
+      evalName: args.evalName,
+      model: args.model,
+      datasetSize: args.datasetSize,
+      timestamp: Date.now(),
+      metrics: args.metrics,
+      metadata: args.metadata,
+    });
   },
 });

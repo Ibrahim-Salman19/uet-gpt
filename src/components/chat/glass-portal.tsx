@@ -23,16 +23,12 @@ export function GlassPortal({ children, className }: GlassPortalProps) {
   return (
     <div
       className={cn(
-        "flex h-full flex-col items-center justify-end px-4 pb-4 md:px-8 md:pb-8",
+        "flex h-full w-full flex-col bg-zinc-950/20 relative overflow-hidden",
         className,
       )}
     >
-      <div className="w-full max-w-4xl h-full max-h-[90dvh] bg-[#101012]/80 backdrop-blur-md border border-[#222226] rounded-2xl md:rounded-3xl p-2.5 shadow-2xl relative overflow-hidden flex flex-col pointer-events-auto">
-        <div className="w-full h-full flex flex-col rounded-[calc(1.5rem-3px)] border border-[#2d2d34] shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] relative overflow-hidden bg-zinc-950/70">
-          <GridOverlay />
-          {children}
-        </div>
-      </div>
+      <GridOverlay />
+      {children}
     </div>
   );
 }

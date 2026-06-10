@@ -166,7 +166,7 @@ function CommandItem({
     <button
       onClick={() => onSelect(cmd)}
       className={cn(
-        "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-all duration-150 group active:scale-99 border border-transparent cursor-pointer",
+        "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-all duration-150 group active:scale-[0.99] border border-transparent cursor-pointer",
         isSelected
           ? "bg-white/10 text-white border-white/10"
           : "hover:bg-white/5 hover:text-white",

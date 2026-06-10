@@ -12,8 +12,8 @@ test.describe("Error Recovery", () => {
     await page.goto("/chat");
 
     // After ConvexReadyGate timeout (10s), should show retry UI
-    await expect(page.getByText("Taking longer than expected")).toBeVisible({ timeout: 15000 });
-    await expect(page.getByText("Reload Page")).toBeVisible();
+    await expect(page.getByText("TIMEOUT // CONNECTION FAILURE")).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText("RETRY CONNECTION")).toBeVisible();
   });
 
   test("shows offline banner when network drops", async ({ page }) => {

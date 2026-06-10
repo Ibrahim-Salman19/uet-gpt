@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import type { Doc } from "../_generated/dataModel";
 import { action } from "../_generated/server";
+import { truncateQuery } from "../observability/metrics";
 
 import { CACHE_SIMILARITY_THRESHOLD } from "../constants";
 
@@ -54,9 +55,19 @@ async function getCachedEntry(
   if (!entry || entry.expiresAt < Date.now()) return null;
 
   const similarity = cosineSimilarity(queryEmbedding, entry.queryEmbedding);
-  if (similarity < CACHE_SIMILARITY_THRESHOLD) return null;
+  if (similarity >= CACHE_SIMILARITY_THRESHOLD) {
+    return { entry, entryId: firstResult._id };
+  }
 
-  return { entry, entryId: firstResult._id };
+  if (entry.alternateEmbeddings && entry.alternateEmbeddings.length > 0) {
+    for (const altEmbedding of entry.alternateEmbeddings) {
+      if (cosineSimilarity(queryEmbedding, altEmbedding) >= CACHE_SIMILARITY_THRESHOLD) {
+        return { entry, entryId: firstResult._id };
+      }
+    }
+  }
+
+  return null;
 }
 
 async function checkSourceStaleness(ctx: any, entry: any): Promise<boolean> {
@@ -128,6 +139,22 @@ export const get = action({
     }),
   ),
   handler: async (ctx, args) => {
-    return await findMatchingCacheEntry(ctx, args.queryEmbedding);
+    const start = Date.now();
+    const result = await findMatchingCacheEntry(ctx, args.queryEmbedding);
+    const latency = Date.now() - start;
+
+    if (result) {
+      console.log("[CACHE] Hit", {
+        query: truncateQuery(args.queryText),
+        latencyMs: latency,
+      });
+    } else {
+      console.log("[CACHE] Miss", {
+        query: truncateQuery(args.queryText),
+        latencyMs: latency,
+      });
+    }
+
+    return result;
   },
 });

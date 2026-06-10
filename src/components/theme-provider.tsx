@@ -18,25 +18,23 @@ function getInitialTheme(): Theme {
     if (stored === "dark" || stored === "light") return stored;
     if (window.matchMedia("(prefers-color-scheme: dark)").matches) return "dark";
   }
-  return "light";
+  return "dark";
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = React.useState<Theme>("light");
+  const [theme, setThemeState] = React.useState<Theme>(getInitialTheme);
   const [mounted, setMounted] = React.useState(false);
 
-  React.useEffect(() => {
-    setThemeState(getInitialTheme());
-    setMounted(true);
-  }, []);
-
-  React.useEffect(() => {
-    if (!mounted) return;
+  React.useLayoutEffect(() => {
     const root = document.documentElement;
     root.classList.remove("light", "dark");
     root.classList.add(theme);
     localStorage.setItem("theme", theme);
-  }, [theme, mounted]);
+  }, [theme]);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const toggleTheme = React.useCallback(() => {
     setThemeState((prev) => (prev === "light" ? "dark" : "light"));
@@ -48,9 +46,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
-      <div style={{ display: "contents", visibility: mounted ? "visible" : "hidden" }}>
-        {children}
-      </div>
+      {mounted ? children : null}
     </ThemeContext.Provider>
   );
 }

@@ -9,6 +9,7 @@ type DocQueryResult = {
   freshnessTier?: string;
   parentText?: string;
   headingPath?: string[];
+  contextualizedText?: string;
 };
 
 export const getDocumentByEntryId = internalQuery({
@@ -23,6 +24,7 @@ export const getDocumentByEntryId = internalQuery({
       freshnessTier: v.optional(v.string()),
       parentText: v.optional(v.string()),
       headingPath: v.optional(v.array(v.string())),
+      contextualizedText: v.optional(v.string()),
     }),
   ),
   handler: async (ctx, args): Promise<DocQueryResult | null> => {
@@ -42,6 +44,7 @@ export const getDocumentByEntryId = internalQuery({
           freshnessTier: doc.freshnessTier,
           parentText: chunk.parentText,
           headingPath: chunk.headingPath,
+          contextualizedText: chunk.contextualizedText,
         };
       }
     }
@@ -61,6 +64,7 @@ export const getDocumentByEntryId = internalQuery({
       freshnessTier: doc.freshnessTier,
       parentText: undefined,
       headingPath: undefined,
+      contextualizedText: undefined,
     };
   },
 });

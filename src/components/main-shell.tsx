@@ -274,9 +274,19 @@ export function MainShell({ children }: MainShellProps) {
     useModelDropdown();
 
   React.useEffect(() => {
-    if (typeof window !== "undefined" && window.innerWidth < 1024) {
-      setSidebarOpen(false);
-    }
+    const handleResize = () => {
+      if (window.innerWidth < 1024) {
+        setSidebarOpen(false);
+      } else {
+        setSidebarOpen(true);
+      }
+    };
+
+    // Run once on mount
+    handleResize();
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const toggleSidebar = React.useCallback(() => setSidebarOpen((p) => !p), []);

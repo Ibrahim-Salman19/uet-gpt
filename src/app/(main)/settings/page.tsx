@@ -20,9 +20,8 @@ const FONT_SIZES = [
 ] as const;
 
 const MODELS = [
-  { value: "llama-4-scout", label: "Llama 4 Scout", desc: "Best quality" },
-  { value: "llama-3.3-70b", label: "Llama 3.3 70B", desc: "Balanced" },
-  { value: "llama-3.1-8b", label: "Llama 3.1 8B", desc: "Fastest" },
+  { value: "llama-4-scout", label: "UET-Pro", desc: "Best quality (Deep)" },
+  { value: "llama-3.1-8b", label: "UET-Fast", desc: "Fastest (Default)" },
 ] as const;
 
 function SettingsSection({
@@ -99,7 +98,7 @@ export default function SettingsPage() {
   const userData = useQuery(api.users.getByClerkId, user?.id ? { clerkId: user.id } : "skip");
   const updatePreferences = useMutation(api.users.updatePreferences);
   const [fontSize, setFontSize] = useState<string>("medium");
-  const [model, setModel] = useState<string>("llama-4-scout");
+  const [model, setModel] = useState<string>("llama-3.1-8b");
 
   useEffect(() => {
     if (userData?.preferences?.fontSize) {

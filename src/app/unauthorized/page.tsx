@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 
 export default function UnauthorizedPage() {
   return (
-    <div className="flex min-h-[100dvh] items-center justify-center bg-gradient-to-br from-[var(--primary)] to-[oklch(0.25_0.09_265)] px-4">
+    <div className="flex min-h-[100dvh] items-center justify-center bg-[var(--surface-base)] px-4">
       <div className="w-full max-w-md text-center">
         <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-500/20">
           <svg
@@ -23,15 +23,15 @@ export default function UnauthorizedPage() {
             <line x1="12" y1="16" x2="12.01" y2="16" />
           </svg>
         </div>
-        <h1 className="text-3xl font-bold tracking-tight text-white">Access Denied</h1>
-        <p className="mt-3 text-base text-white/70 leading-relaxed">
+        <h1 className="text-3xl font-bold tracking-tight text-[var(--text-primary)]">Access Denied</h1>
+        <p className="mt-3 text-base text-[var(--text-muted)] leading-relaxed">
           You don&apos;t have the required permissions to access this area. If you believe this is a
           mistake, please contact the site administrator.
         </p>
         <div className="mt-8 flex items-center justify-center gap-4">
           <Link
             href="/chat"
-            className="inline-flex items-center gap-2 rounded-[var(--radius-md)] bg-white px-5 py-2.5 text-sm font-medium text-[var(--primary)] shadow-sm transition-all hover:bg-white/90 hover:shadow-md active:scale-[0.98]"
+            className="inline-flex items-center gap-2 rounded-[var(--radius-md)] bg-[var(--accent)] px-5 py-2.5 text-sm font-medium text-[var(--accent-fg)] shadow-sm transition-all hover:bg-[var(--accent-hover)] hover:shadow-md active:scale-[0.98]"
           >
             <svg
               className="h-4 w-4"
@@ -50,7 +50,7 @@ export default function UnauthorizedPage() {
           </Link>
           <Link
             href="/"
-            className="inline-flex items-center gap-2 rounded-[var(--radius-md)] border border-white/30 px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-white/10 active:scale-[0.98]"
+            className="inline-flex items-center gap-2 rounded-[var(--radius-md)] border border-[var(--border)] px-5 py-2.5 text-sm font-medium text-[var(--text-primary)] transition-all hover:bg-[var(--surface-hover)] active:scale-[0.98]"
           >
             <svg
               className="h-4 w-4"

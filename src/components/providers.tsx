@@ -10,6 +10,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { retryWithBackoff } from "@/lib/retry";
+import { ConvexConnectionMonitor } from "@/components/ConvexConnectionMonitor";
 
 const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
 
@@ -84,6 +85,7 @@ export function Providers({ children }: ProvidersProps) {
           <ThemeProvider>
             <PreferencesProvider>
               <UserSync />
+              <ConvexConnectionMonitor />
               {content}
             </PreferencesProvider>
           </ThemeProvider>
