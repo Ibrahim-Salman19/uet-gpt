@@ -169,19 +169,19 @@ export function ChatInputNew({ onSend, onStop, isLoading, className }: ChatInput
 
         {/* Textarea (Center) */}
         <div className="flex-1 flex flex-col min-w-0">
-          <textarea
-            id="chat-input-field"
-            ref={inputRef}
-            value={input}
-            onChange={handleInput}
-            onKeyDown={handleKeyDown}
-            placeholder="Ask a question about UET Taxila…"
-            rows={1}
-            disabled={isLoading && !onStop}
-            className="w-full resize-none bg-transparent px-3 py-3 text-[13px] text-zinc-100 placeholder:text-zinc-500 outline-none max-h-36 custom-scroll font-sans leading-relaxed disabled:opacity-50"
-            spellCheck={false}
-            autoComplete="off"
-          />
+            <textarea
+              id="chat-input-field"
+              ref={inputRef}
+              value={input}
+              onChange={handleInput}
+              onKeyDown={handleKeyDown}
+              placeholder="Ask anything about UET Taxila…"
+              rows={1}
+              disabled={isLoading && !onStop}
+              className="w-full resize-none bg-transparent px-3 py-3 text-[13px] text-zinc-100 placeholder:text-zinc-400 outline-none max-h-36 custom-scroll font-sans leading-relaxed disabled:opacity-50"
+              spellCheck={false}
+              autoComplete="off"
+            />
         </div>
 
         <SendButton

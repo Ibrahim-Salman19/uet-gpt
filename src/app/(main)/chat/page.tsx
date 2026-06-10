@@ -47,12 +47,12 @@ export default function ChatPage() {
   return (
     <GlassPortal>
       {/* ── Welcome content ── */}
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-center gap-8 px-6 py-12 text-center">
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center gap-6 px-6 py-10 text-center">
         {/* Logo mark */}
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-14 h-14 flex items-center justify-center rounded-2xl bg-[var(--accent)]/10 border border-[var(--accent)]/20">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-[var(--accent)]/10 border border-[var(--accent)]/20">
             <svg
-              className="w-7 h-7 text-[var(--accent)]"
+              className="w-6 h-6 text-[var(--accent)]"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -63,7 +63,7 @@ export default function ChatPage() {
               <circle
                 cx="12"
                 cy="12"
-                r="3"
+                r="2.5"
                 fill="currentColor"
                 fillOpacity="0.2"
                 className="animate-[pulse-dot_2s_ease-in-out_infinite]"
@@ -71,19 +71,18 @@ export default function ChatPage() {
             </svg>
           </div>
           <div>
-            <h2 className="text-base font-semibold text-zinc-100 font-sans tracking-tight">
+            <h2 className="text-sm font-semibold text-zinc-100 font-sans tracking-tight">
               UETGPT Admissions Advisor
             </h2>
-            <p className="text-xs text-zinc-500 mt-1.5 font-sans max-w-xs leading-relaxed">
-              Ask anything about UET Taxila — admissions, fee structures, departments, hostels, and
-              more.
+            <p className="text-xs text-zinc-400 mt-1 font-sans max-w-xs leading-relaxed">
+              Ask anything about UET Taxila — admissions, fees, departments, hostels, and more.
             </p>
           </div>
         </div>
 
         {isCreating && (
-          <div className="flex items-center gap-3 text-xs text-zinc-500 font-sans animate-pulse">
-            <div className="w-4 h-4 rounded-full border-2 border-[var(--accent)]/30 border-t-[var(--accent)] animate-spin" />
+          <div className="flex items-center gap-2 text-xs text-zinc-500 font-sans animate-pulse">
+            <div className="w-3 h-3 rounded-full border-2 border-[var(--accent)]/30 border-t-[var(--accent)] animate-spin" />
             Starting your conversation…
           </div>
         )}
@@ -97,7 +96,7 @@ export default function ChatPage() {
               <button
                 key={s.label}
                 onClick={() => handleSend(s.prompt)}
-                className="rounded-full border border-white/5 bg-white/5 px-4 py-2 text-[11px] text-zinc-400 transition-all duration-200 hover:border-zinc-300 hover:text-white hover:bg-white/10 active:scale-95 focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:outline-none shadow-sm font-sans cursor-pointer"
+                className="rounded-[var(--radius-md)] border border-white/5 bg-white/5 px-4 py-2 text-[11px] text-zinc-400 transition-all duration-200 hover:border-zinc-300 hover:text-white hover:bg-white/10 active:scale-95 focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:outline-none shadow-sm font-sans cursor-pointer"
               >
                 <span
                   className="opacity-40 font-mono text-[9px] mr-2 select-none"
