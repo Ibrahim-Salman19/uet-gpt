@@ -104,7 +104,7 @@ export async function getChatRateLimitRemaining(
   }
 
   try {
-    const result = await limiter.limit(identifier);
+    const result = await limiter.getRemaining(identifier);
     return {
       remaining: result.remaining,
       limit: result.limit,

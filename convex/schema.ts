@@ -251,7 +251,8 @@ export default defineSchema({
     ),
   })
     .index("by_status", ["status"])
-    .index("by_jobId_and_url", ["jobId", "url"]),
+    .index("by_jobId_and_url", ["jobId", "url"])
+    .index("by_url", ["url"]),
 
   crawledChunks: defineTable({
     documentId: v.id("documents"),

@@ -157,7 +157,7 @@ export const failStuckJobs = internalMutation({
       .take(100);
 
     const now = Date.now();
-    const TIMEOUT_MS = 2 * 60 * 60 * 1000; // 2 hours
+    const TIMEOUT_MS = 3 * 60 * 60 * 1000; // 3 hours (must exceed 2h cron interval to avoid race)
 
     for (const job of runningJobs) {
       if (now - job.startedAt > TIMEOUT_MS) {

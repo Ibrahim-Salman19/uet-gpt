@@ -29,7 +29,13 @@ async function executeCronTask(
 
   if (task === "daily" || task === "all") {
     try {
-      await convex.mutation("crawl/tasks:runStatsAggregation" as never, {} as never);
+      const cronSecret = process.env.CRON_SECRET || "";
+      await convex.mutation(
+        "crawl/tasks:runStatsAggregation" as never,
+        {
+          secret: cronSecret,
+        } as never,
+      );
       results.dailyStats = { status: "ok" };
     } catch (error) {
       results.dailyStats = {

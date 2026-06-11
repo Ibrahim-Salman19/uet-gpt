@@ -10,6 +10,11 @@ vi.mock("../../../convex/_generated/api", () => ({
       queries: { getJobById: "getJobById" as any },
       actions: {},
     },
+    embeddings: {
+      contextualize: {
+        contextualizeNewChunk: "contextualizeNewChunk" as any,
+      },
+    },
   },
 }));
 
@@ -37,7 +42,7 @@ describe("executeCrawlJob", () => {
     mockCtx = {
       runMutation: vi.fn(),
       runQuery: vi.fn().mockResolvedValue(null), // getJobById returns null (no crash-recovery state)
-      runAction: vi.fn(),
+      runAction: vi.fn().mockResolvedValue(undefined),
       auth: { getUserIdentity: vi.fn() },
     };
   });
@@ -234,7 +239,7 @@ describe("embedSingleChunk", () => {
     mockCtx = {
       runMutation: vi.fn(),
       runQuery: vi.fn(),
-      runAction: vi.fn(),
+      runAction: vi.fn().mockResolvedValue(undefined),
       auth: { getUserIdentity: vi.fn() },
     };
   });

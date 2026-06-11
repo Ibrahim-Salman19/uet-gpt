@@ -26,7 +26,16 @@ function determineConfidenceTier(results: { relevanceScore: number }[]): {
   tier: ConfidenceTier;
   instruction: string;
 } {
-  if (results.length === 0) return { tier: "normal", instruction: "" };
+  if (results.length === 0) {
+    return {
+      tier: "refuse",
+      instruction:
+        "SYSTEM INSTRUCTION TO AI: No relevant information was found for this query. " +
+        "You MUST respond exactly with: " +
+        "'I don't have verified information about this — please check uettaxila.edu.pk directly.' " +
+        "Do not attempt to guess or hallucinate an answer.\n\n",
+    };
+  }
   const topScore = results[0]!.relevanceScore;
 
   if (topScore < 0.2) {
@@ -349,7 +358,17 @@ async function buildResponseContext(
       });
     } catch (e) {
       console.error("Context building failed, falling back to raw concatenation:", e);
-      context = searchResults.map((r) => r.content).join("\n\n---\n\n");
+      const BUDGET = 3000;
+      let total = 0;
+      const parts: string[] = [];
+      for (const r of searchResults) {
+        if (total >= BUDGET) break;
+        const remaining = BUDGET - total;
+        const truncated = r.content.substring(0, remaining);
+        parts.push(truncated);
+        total += truncated.length;
+      }
+      context = parts.join("\n\n---\n\n");
     }
   }
 

@@ -2,12 +2,12 @@ import { createGroq } from "@ai-sdk/groq";
 import { generateText } from "ai";
 import { v } from "convex/values";
 import { api, internal } from "../_generated/api";
-import { action } from "../_generated/server";
+import { internalAction } from "../_generated/server";
 import { EVAL_BATCH_SIZE, EVAL_MAX_QUERIES, EVAL_MODEL, EVAL_TOP_K } from "./constants";
 
-const groq = createGroq({
-  apiKey: process.env.GROQ_API_KEY || "",
-});
+function getGroq() {
+  return createGroq({ apiKey: process.env.GROQ_API_KEY || "" });
+}
 
 type EvalQuery = {
   query: string;
@@ -60,7 +60,7 @@ async function judgeRelevanceBatch(
 
   try {
     const { text } = await generateText({
-      model: groq(EVAL_MODEL),
+      model: getGroq()(EVAL_MODEL),
       system:
         "You are a strict relevance judge. Given a query and a list of text chunks, " +
         "determine which chunks contain information that helps answer the query. " +
@@ -87,7 +87,7 @@ async function judgeRelevanceBatch(
   }
 }
 
-export const runEval = action({
+export const runEval = internalAction({
   args: {
     queries: v.array(
       v.object({
@@ -273,7 +273,7 @@ export const runEval = action({
   },
 });
 
-export const runEvalWithDataset = action({
+export const runEvalWithDataset = internalAction({
   args: {
     topK: v.optional(v.number()),
   },
@@ -314,7 +314,7 @@ export const runEvalWithDataset = action({
       };
     }
 
-    return await ctx.runAction(api.eval.runEval.runEval, {
+    return await ctx.runAction(internal.eval.runEval.runEval, {
       queries,
       topK,
     });

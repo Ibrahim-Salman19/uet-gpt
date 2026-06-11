@@ -75,9 +75,9 @@ export const evaluateChunks = action({
 
         results.push(...object.evaluations);
       } catch (error) {
-        console.warn(`CRAG batch ${i} failed, marking as relevant with low confidence:`, error);
+        console.warn(`CRAG batch ${i} failed, marking as NOT relevant (conservative):`, error);
         for (const chunk of batch) {
-          results.push({ index: chunk.index, relevant: true, confidence: 0.5 });
+          results.push({ index: chunk.index, relevant: false, confidence: 0.3 });
         }
       }
     }

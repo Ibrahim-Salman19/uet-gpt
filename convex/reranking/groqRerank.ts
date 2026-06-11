@@ -4,9 +4,9 @@ import { v } from "convex/values";
 import { z } from "zod";
 import { action } from "../_generated/server";
 
-const groq = createGroq({
-  apiKey: process.env.GROQ_API_KEY || "",
-});
+function getGroq() {
+  return createGroq({ apiKey: process.env.GROQ_API_KEY || "" });
+}
 
 export const groqRerank = action({
   args: {
@@ -17,9 +17,10 @@ export const groqRerank = action({
   returns: v.array(v.object({ text: v.string(), score: v.number(), index: v.number() })),
   handler: async (_ctx, args) => {
     if (!process.env.GROQ_API_KEY) {
-      return args.documents.slice(0, args.topK ?? args.documents.length).map((d, i) => ({
+      const topK = args.topK ?? args.documents.length;
+      return args.documents.slice(0, topK).map((d, i) => ({
         text: d.text,
-        score: 1 - i / args.documents.length,
+        score: 1 - i / topK,
         index: i,
       }));
     }
@@ -29,7 +30,7 @@ export const groqRerank = action({
 
     try {
       const { object } = await generateObject({
-        model: groq("llama-3.1-8b-instant"),
+        model: getGroq()("llama-3.1-8b-instant"),
         schema: z.object({
           scores: z.array(z.object({ index: z.number(), score: z.number().min(0).max(1) })),
         }),
@@ -51,7 +52,7 @@ export const groqRerank = action({
     } catch {
       return args.documents.slice(0, topK).map((d, i) => ({
         text: d.text,
-        score: 1 - i / args.documents.length,
+        score: 1 - i / topK,
         index: i,
       }));
     }

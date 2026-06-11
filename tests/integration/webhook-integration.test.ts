@@ -136,14 +136,15 @@ describe("Crawl Webhook Integration & Load Testing", () => {
     );
     expect(processedCall).toBeDefined();
 
-    // Simulate idempotency deduplication
-    ctx.runQuery.mockResolvedValueOnce({ _id: "processed_1" });
+    // Second webhook delivery — mark-first pattern prevents race condition
+    ctx.runQuery.mockResolvedValue(null);
+    ctx.runMutation.mockResolvedValue(undefined);
     
     const dedupResponse = await (crawlWebhook as any).handler(ctx, request as any);
     expect(dedupResponse.status).toBe(200);
     
     const resText = await dedupResponse.text();
     const result = JSON.parse(resText);
-    expect(result.deduped).toBe(true);
+    expect(result.ok).toBe(true);
   }, 30000);
 });

@@ -46,6 +46,14 @@ function checkCsrf(req: NextRequest): NextResponse | null {
   const origin = req.headers.get("origin");
   const referer = req.headers.get("referer");
   const allowed = getAllowedOrigins();
+
+  // Require at least one of Origin or Referer (block requests with neither)
+  if (!origin && !referer) {
+    return new NextResponse("Forbidden: CSRF check failed (missing origin/referer)", {
+      status: 403,
+    });
+  }
+
   return checkOrigin(origin, allowed) ?? checkReferer(referer, allowed);
 }
 
@@ -141,7 +149,7 @@ function initConvexOrError(): ConvexHttpClient | NextResponse {
   return new ConvexHttpClient(convexUrl);
 }
 
-async function fetchRagData(
+function fetchRagData(
   convex: ConvexHttpClient,
   question: string,
 ): Promise<
@@ -154,15 +162,16 @@ async function fetchRagData(
     }
   | NextResponse
 > {
-  try {
-    const ragResult = await convex.action(api.rag.retrieval.retrieveContext, {
+  return convex
+    .action(api.rag.retrieval.retrieveContext, {
       question,
+    })
+    .catch((_err) => {
+      return NextResponse.json(
+        { error: "RAG retrieval failed. Please try again." },
+        { status: 500 },
+      );
     });
-    return ragResult;
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : "RAG retrieval failed";
-    return NextResponse.json({ error: msg }, { status: 500 });
-  }
 }
 
 async function getPreferredModel(
@@ -283,7 +292,6 @@ function finalizeStream(
   if (onFinish) {
     onFinish(accumulatedText, getModelName(model));
   }
-  reader.releaseLock();
 }
 
 function processChunk(
@@ -340,7 +348,6 @@ function streamWithStrippedThinking(
     },
     cancel() {
       reader.cancel();
-      reader.releaseLock();
     },
   });
 }

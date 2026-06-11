@@ -296,13 +296,6 @@ async function getDLQEntry(ctx: MutationCtx, jobId: string, url: string) {
     .first();
 }
 
-async function getDLQEntries(ctx: MutationCtx, jobId: string, url: string) {
-  return await ctx.db
-    .query("crawlDeadLetter")
-    .withIndex("by_jobId_and_url", (q) => q.eq("jobId", jobId).eq("url", url))
-    .collect();
-}
-
 async function clearDLQEntry(ctx: MutationCtx, jobId: string, url: string) {
   const dlqEntry = await getDLQEntry(ctx, jobId, url);
   if (dlqEntry) {
@@ -364,7 +357,7 @@ async function checkDocumentForFailure(
   ctx: MutationCtx,
   documentId: Id<"documents">,
   url: string,
-  jobId: string,
+  _jobId: string,
   errorMsg: string,
 ) {
   const doc = await ctx.db.get(documentId);
@@ -377,8 +370,12 @@ async function checkDocumentForFailure(
         updatedAt: Date.now(),
       });
     } else {
-      const dlqEntries = await getDLQEntries(ctx, jobId, url);
-      const failedCount = dlqEntries.length;
+      // Query ALL DLQ entries for this URL (across all batches), not just this jobId
+      const allDlqEntries = await ctx.db
+        .query("crawlDeadLetter")
+        .withIndex("by_url", (q) => q.eq("url", url))
+        .collect();
+      const failedCount = allDlqEntries.length;
       if (failedCount >= chunkCount) {
         await ctx.db.patch(documentId, {
           status: "failed",
@@ -470,8 +467,7 @@ export const retryDeadLetterQueue = internalMutation({
     for (const dlq of invalidDLQ) {
       await ctx.db.patch(dlq._id, {
         status: "abandoned",
-        failureReason:
-          "No chunk text payload for retry (context was minimized to save bandwidth).",
+        failureReason: "No chunk text payload for retry (context was minimized to save bandwidth).",
         lastAttemptAt: Date.now(),
       });
     }

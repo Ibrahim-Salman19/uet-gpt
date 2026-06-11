@@ -11,7 +11,7 @@ export default defineConfig({
     ["json", { outputFile: "test-results/results.json" }],
   ],
   use: {
-    baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || "http://localhost:3000",
+    baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || "http://127.0.0.1:3000",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
@@ -41,7 +41,7 @@ export default defineConfig({
   ],
   webServer: {
     command: "pnpm run dev", // Use dev server for faster E2E test runs locally
-    url: "http://localhost:3000",
+    url: "http://127.0.0.1:3000/api/health/heartbeat",
     reuseExistingServer: !process.env.CI,
     timeout: 180 * 1000,
   },

@@ -100,7 +100,7 @@ function HistorySection({
 }) {
   return (
     <>
-      <div className="text-[9px] font-mono text-zinc-500 tracking-wider mb-3 mt-1 px-3 uppercase select-none">
+      <div className="text-[9px] font-mono text-zinc-400 tracking-wider mb-3 mt-1 px-3 uppercase select-none">
         Recent
       </div>
       <SidebarHistory chats={chats} onDelete={onDelete} />
@@ -177,7 +177,7 @@ function UserProfileFooter({
           <div className="text-[13px] font-medium text-zinc-200 truncate select-none">
             {user?.fullName || user?.primaryEmailAddress?.emailAddress || "Guest User"}
           </div>
-          <div className="text-[10px] text-zinc-500 font-mono truncate hover:text-zinc-300 select-none">
+          <div className="text-[10px] text-zinc-400 font-mono truncate hover:text-zinc-300 select-none">
             Preferences
           </div>
         </button>

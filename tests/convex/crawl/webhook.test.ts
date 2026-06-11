@@ -387,8 +387,9 @@ describe("crawlWebhook", () => {
     expect(json.ok).toBe(true);
   });
 
-  it("returns deduped response for duplicate webhooks (idempotency)", async () => {
-    mockCtx.runQuery.mockResolvedValue({ jobId: "task-123", processedAt: Date.now() });
+  it("marks processed before processing (race-condition safe idempotency)", async () => {
+    mockCtx.runQuery.mockResolvedValue(null);
+    mockCtx.runMutation.mockResolvedValue(undefined);
     const payload = {
       task_id: "task-123",
       url: "https://web.uettaxila.edu.pk/page",
@@ -398,8 +399,10 @@ describe("crawlWebhook", () => {
     const res = await crawlWebhook(mockCtx, req);
     expect(res.status).toBe(200);
     const json = await res.json();
-    expect(json.deduped).toBe(true);
-    expect(mockCtx.runMutation).not.toHaveBeenCalled();
+    expect(json.ok).toBe(true);
+    // Verify markWebhookProcessed was called BEFORE processing
+    const firstCall = mockCtx.runMutation.mock.calls[0];
+    expect(firstCall[0]).toContain("markWebhookProcessed");
   });
 
   it("handles multiple pages in one webhook", async () => {

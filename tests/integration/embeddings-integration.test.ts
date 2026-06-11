@@ -2,6 +2,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("../../convex/_generated/server", () => ({
   action: (opts: { handler: Function }) => ({ handler: opts.handler }),
+  internalAction: (opts: { handler: Function }) => ({ handler: opts.handler }),
+  query: (opts: { handler: Function }) => ({ handler: opts.handler }),
+  internalQuery: (opts: { handler: Function }) => ({ handler: opts.handler }),
+  mutation: (opts: { handler: Function }) => ({ handler: opts.handler }),
+  internalMutation: (opts: { handler: Function }) => ({ handler: opts.handler }),
 }));
 
 import { generate } from "../../convex/embeddings/generate";

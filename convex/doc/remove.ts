@@ -20,6 +20,21 @@ export const remove = mutation({
       }
     }
 
+    // Clean up orphaned crawledChunks before deleting document
+    let cursor: string | null = null;
+    let isDone = false;
+    while (!isDone) {
+      const page = await ctx.db
+        .query("crawledChunks")
+        .withIndex("by_documentId", (q) => q.eq("documentId", args.documentId))
+        .paginate({ numItems: 200, cursor });
+      for (const chunk of page.page) {
+        await ctx.db.delete(chunk._id);
+      }
+      cursor = page.continueCursor;
+      isDone = page.isDone;
+    }
+
     await ctx.db.delete(args.documentId);
     return null;
   },

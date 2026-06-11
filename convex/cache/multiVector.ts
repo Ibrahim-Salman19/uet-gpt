@@ -2,12 +2,12 @@
 import { createGroq } from "@ai-sdk/groq";
 import { generateText } from "ai";
 import { v } from "convex/values";
-import { action } from "../_generated/server";
+import { internalAction } from "../_generated/server";
 import { generateEmbeddingsInternal } from "../embeddings/generate";
 
-const groq = createGroq({
-  apiKey: process.env.GROQ_API_KEY || "",
-});
+function getGroq() {
+  return createGroq({ apiKey: process.env.GROQ_API_KEY || "" });
+}
 
 export async function generateAlternatePhrasingsInternal(
   queryText: string,
@@ -16,7 +16,7 @@ export async function generateAlternatePhrasingsInternal(
 
   try {
     const { text } = await generateText({
-      model: groq("llama-3.1-8b-instant"),
+      model: getGroq()("llama-3.1-8b-instant"),
       system:
         "Generate 2 alternate phrasings of the given search query about UET Taxila. " +
         "Each should use different keywords but preserve the same search intent. " +
@@ -39,7 +39,7 @@ export async function generateAlternatePhrasingsInternal(
   }
 }
 
-export const generateAlternates = action({
+export const generateAlternates = internalAction({
   args: { queryText: v.string() },
   returns: v.union(
     v.null(),

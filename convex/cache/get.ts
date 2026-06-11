@@ -72,16 +72,16 @@ async function checkSourceStaleness(ctx: any, entry: any): Promise<boolean> {
   const sourceEntryIds = entry.sourceEntryIds;
   if (!sourceEntryIds || sourceEntryIds.length === 0) return false;
 
-  for (const ragEntryId of sourceEntryIds) {
-    const doc = await ctx.runQuery(_internal.cache.internal_queries.getDocByEntryId, {
-      entryId: ragEntryId,
-    });
-    if (doc && (doc.updatedAt > entry.createdAt || doc.crawledAt > entry.createdAt)) {
-      console.log("Cache entry invalidated: source document was re-indexed");
-      return true;
-    }
-  }
-  return false;
+  const results = await Promise.allSettled(
+    sourceEntryIds.map(async (ragEntryId: string) => {
+      const doc = await ctx.runQuery(_internal.cache.internal_queries.getDocByEntryId, {
+        entryId: ragEntryId,
+      });
+      return doc && (doc.updatedAt > entry.createdAt || doc.crawledAt > entry.createdAt);
+    }),
+  );
+
+  return results.some((r) => r.status === "fulfilled" && r.value === true);
 }
 
 async function findMatchingCacheEntry(

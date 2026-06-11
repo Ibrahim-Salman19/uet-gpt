@@ -16,7 +16,17 @@ function checkWebhookMethod(request: Request): Response | null {
 }
 
 function getExpectedWebhookToken(): string {
-  return process.env.CRAWL_WEBHOOK_SECRET || process.env.CONVEX_AUTH_TOKEN || "";
+  // Use a dedicated Clerk webhook secret instead of falling back to CRAWL_WEBHOOK_SECRET
+  return process.env.CLERK_WEBHOOK_SECRET || process.env.CONVEX_AUTH_TOKEN || "";
+}
+
+function constantTimeCompare(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
 }
 
 function authenticateWebhook(request: Request): Response | null {
@@ -26,7 +36,7 @@ function authenticateWebhook(request: Request): Response | null {
     console.error("No auth token configured for user webhook");
     return new Response("Server configuration error", { status: 500 });
   }
-  if (!token || token !== expected) {
+  if (!token || !constantTimeCompare(token, expected)) {
     return new Response("Unauthorized", { status: 401 });
   }
   return null;

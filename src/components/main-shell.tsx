@@ -203,7 +203,7 @@ function Header({
         <button
           type="button"
           onClick={() => onCommandPaletteOpen(true)}
-          className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-zinc-950/60 border border-white/5 rounded-lg text-[10px] text-zinc-500 hover:text-zinc-300 hover:border-white/10 transition-all duration-300 ease-[var(--ease-spring)] select-none active:scale-[0.98] active:translate-y-[1px]"
+          className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-zinc-950/60 border border-white/5 rounded-lg text-[10px] text-zinc-400 hover:text-white hover:border-white/10 transition-all duration-300 ease-[var(--ease-spring)] select-none active:scale-[0.98] active:translate-y-[1px]"
         >
           <span>Search</span>
           <kbd className="font-mono text-[9px] opacity-60 bg-zinc-900 border border-white/10 px-1.5 py-0.5 rounded">

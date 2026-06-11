@@ -222,24 +222,38 @@ async function sendCrawlRequest(
   body: string,
   headers: Record<string, string>,
 ): Promise<string> {
-  const response = await fetch(`${crawlUrl}/crawl/job`, {
-    method: "POST",
-    headers,
-    body,
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30_000); // 30s timeout
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Crawl4AI API error (${response.status}): ${errorText}`);
+  try {
+    const response = await fetch(`${crawlUrl}/crawl/job`, {
+      method: "POST",
+      headers,
+      body,
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Crawl4AI API error (${response.status}): ${errorText}`);
+    }
+
+    const data = (await response.json()) as { task_id?: string; job_id?: string };
+
+    if (!data.task_id && !data.job_id) {
+      throw new Error("Invalid response format from Crawl4AI - no job ID returned");
+    }
+
+    return data.task_id || data.job_id!;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new Error("Crawl4AI API request timed out after 30 seconds");
+    }
+    throw error;
   }
-
-  const data = (await response.json()) as { task_id?: string; job_id?: string };
-
-  if (!data.task_id && !data.job_id) {
-    throw new Error("Invalid response format from Crawl4AI - no job ID returned");
-  }
-
-  return data.task_id || data.job_id!;
 }
 
 async function updateCrawlJobState(

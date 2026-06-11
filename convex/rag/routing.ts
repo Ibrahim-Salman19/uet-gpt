@@ -4,9 +4,9 @@ import { v } from "convex/values";
 import { z } from "zod";
 import { action, internalAction } from "../_generated/server";
 
-const groq = createGroq({
-  apiKey: process.env.GROQ_API_KEY || "",
-});
+function getGroq() {
+  return createGroq({ apiKey: process.env.GROQ_API_KEY || "" });
+}
 
 const INTENT_ENUM = [
   "admissions",
@@ -39,7 +39,7 @@ export const classifyQueryAction = action({
 
     try {
       const { object } = await generateObject({
-        model: groq("llama-3.1-8b-instant"),
+        model: getGroq()("llama-3.1-8b-instant"),
         schema: z.object({
           intent: z
             .enum([...INTENT_ENUM] as [string, ...string[]])
@@ -69,7 +69,7 @@ export const rewriteQueryAction = action({
 
     try {
       const { text } = await generateText({
-        model: groq("llama-3.1-8b-instant"),
+        model: getGroq()("llama-3.1-8b-instant"),
         system:
           "You are a search expert. Rewrite the user's query to be a concise keyword-rich search query. " +
           "If the query is written in Roman Urdu (Urdu language written using Latin/English characters, e.g., 'fees kitni hai', 'daakhila kab hoga', 'hostel kahan hai', 'documents kya chahiye'), detect it, translate it to English first, and then rewrite it into keyword-rich English search terms. " +
@@ -95,7 +95,7 @@ export const hydeQueryAction = internalAction({
 
     try {
       const { text } = await generateText({
-        model: groq("llama-3.1-8b-instant"),
+        model: getGroq()("llama-3.1-8b-instant"),
         system:
           "You are an expert on UET Taxila. Write a hypothetical, 3-5 sentence factual paragraph that directly answers the user's query. Pretend you are writing an official website excerpt.",
         prompt: args.query,

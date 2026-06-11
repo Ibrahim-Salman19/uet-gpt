@@ -1,4 +1,5 @@
 import { query } from "../_generated/server";
+import { requireAdmin } from "../auth";
 
 const FACULTY_PATTERNS = ["faculty", "professor", "dr.", "prof."];
 const STAFF_PATTERNS = ["staff"];
@@ -15,6 +16,7 @@ function classifyDocument(url: string, title: string): "faculty" | "staff" | "ad
 export const getCount = query({
   args: {},
   handler: async (ctx) => {
+    await requireAdmin(ctx);
     let facultyCount = 0;
     let staffCount = 0;
     let adminCount = 0;

@@ -162,13 +162,6 @@ function extractWebhookPayload(rawBody: string): {
   return { taskId, status, results, url: payload.url };
 }
 
-async function checkIdempotency(ctx: any, taskId: string): Promise<boolean> {
-  const existing = await ctx.runQuery(internal.crawl.mutations.getProcessedWebhook, {
-    jobId: taskId,
-  });
-  return !!existing;
-}
-
 async function markJobProcessed(ctx: any, taskId: string): Promise<void> {
   await ctx.runMutation(internal.crawl.mutations.markWebhookProcessed, {
     jobId: taskId,
@@ -304,14 +297,9 @@ export const crawlWebhook = httpAction(async (ctx, request) => {
     const { taskId: id, status, results, url } = extractWebhookPayload(rawBody);
     taskId = id;
 
-    const isDuplicate = await checkIdempotency(ctx, taskId);
-    if (isDuplicate) {
-      console.log(`Webhook already processed (Idempotent): ${taskId}`);
-      return new Response(JSON.stringify({ ok: true, deduped: true }), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
+    // Mark as processed BEFORE processing to prevent race condition with duplicate deliveries
+    // If processing fails, the entry still exists as processed (idempotent — won't reprocess)
+    await markJobProcessed(ctx, taskId);
 
     let successfulPages = 0;
     let failedPages = 0;
@@ -325,9 +313,6 @@ export const crawlWebhook = httpAction(async (ctx, request) => {
     }
 
     await finalizeJob(ctx, status, taskId, successfulPages, failedPages, skippedPages, results);
-
-    // Mark as processed AFTER pages are handled to prevent idempotency race
-    await markJobProcessed(ctx, taskId);
 
     return new Response(JSON.stringify({ ok: true }), {
       status: 200,

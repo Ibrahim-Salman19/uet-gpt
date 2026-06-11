@@ -2,6 +2,11 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("../../convex/_generated/server", () => ({
   action: (opts: { handler: Function }) => ({ handler: opts.handler }),
+  internalAction: (opts: { handler: Function }) => ({ handler: opts.handler }),
+  query: (opts: { handler: Function }) => ({ handler: opts.handler }),
+  internalQuery: (opts: { handler: Function }) => ({ handler: opts.handler }),
+  mutation: (opts: { handler: Function }) => ({ handler: opts.handler }),
+  internalMutation: (opts: { handler: Function }) => ({ handler: opts.handler }),
 }));
 
 import { retrieveContext } from "../../convex/rag/retrieval";
@@ -202,7 +207,7 @@ describe("RAG Pipeline Integration", () => {
       });
 
       expect(result.sources).toHaveLength(0);
-      expect(result.context).toBe("");
+      expect(result.context).toContain("uettaxila.edu.pk directly");
     });
 
     it("handles embedding generation failure gracefully", async () => {
@@ -220,7 +225,7 @@ describe("RAG Pipeline Integration", () => {
 
       expect(result.queryEmbedding).toHaveLength(0);
       expect(result.sources).toHaveLength(0);
-      expect(result.context).toBe("");
+      expect(result.context).toContain("uettaxila.edu.pk directly");
     });
   });
 });

@@ -62,10 +62,29 @@ function makeChain(resolvedValue: unknown) {
     first: vi.fn(),
     filter: vi.fn(),
     count: vi.fn(),
+    paginate: vi.fn(),
   };
 
   chain.order.mockReturnValue(chain);
   chain.filter.mockReturnValue(chain);
+
+  chain.paginate.mockImplementation(async (opts) => {
+    const numItems = opts?.numItems ?? 1000;
+    const cursor = opts?.cursor ?? null;
+    const items = Array.isArray(data) ? data : (data ? [data] : []);
+    if (!cursor) {
+      return {
+        page: items.slice(0, numItems),
+        isDone: items.length <= numItems,
+        continueCursor: items.length > numItems ? "next_cursor" : "",
+      };
+    }
+    return {
+      page: [],
+      isDone: true,
+      continueCursor: "",
+    };
+  });
 
   chain.take.mockImplementation(async (n) => {
     return Array.isArray(data) ? data.slice(0, n) : (data ?? []);
@@ -388,7 +407,10 @@ describe("admin:stats / deleteDocument", () => {
 
     const userChain = makeChain(adminUser);
     userChain.unique.mockResolvedValue(adminUser);
-    const query = vi.fn().mockReturnValue(userChain);
+    const query = vi.fn((tableName: string) => {
+      if (tableName === "users") return userChain;
+      return makeChain([]);
+    });
     const get = vi.fn().mockResolvedValue(document);
 
     const ctx = makeMutationCtx({ db: { insert, delete: deleteFn, get, query } });

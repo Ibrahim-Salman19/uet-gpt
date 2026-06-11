@@ -20,19 +20,20 @@ test.describe("Sidebar", () => {
     const hamburger = page.getByLabel("Toggle navigation");
     const sidebar = page.locator("aside[aria-label='Navigation sidebar']");
 
-    // Close
-    await hamburger.click();
-    await expect(sidebar).toHaveCSS("width", "0px", { timeout: 1000 });
+    // Close using keyboard shortcut (since hamburger is hidden when sidebar is open on desktop)
+    await page.keyboard.press("Control+/");
+    await expect(sidebar).toHaveCSS("width", "0px", { timeout: 2000 });
 
-    // Open
+    // Open using hamburger (since hamburger is now visible when sidebar is closed)
     await hamburger.click();
-    await expect(sidebar).not.toHaveCSS("width", "0px", { timeout: 1000 });
+    await expect(sidebar).not.toHaveCSS("width", "0px", { timeout: 2000 });
   });
 
   test("mobile: sidebar hidden by default", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
-    const sidebar = page.locator("aside");
-    // Should be offscreen (translated)
-    await expect(sidebar).toHaveCSS("transform", /matrix.*-/);
+    const sidebar = page.locator("aside[aria-label='Navigation sidebar']");
+    const box = await sidebar.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.x + box!.width).toBeLessThanOrEqual(0);
   });
 });
