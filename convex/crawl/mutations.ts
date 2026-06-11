@@ -2,8 +2,8 @@ import { vOnCompleteArgs } from "@convex-dev/workpool";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import type { Doc, Id } from "../_generated/dataModel";
-import { internalMutation, internalQuery } from "../_generated/server";
 import type { MutationCtx } from "../_generated/server";
+import { internalMutation, internalQuery } from "../_generated/server";
 import { rag } from "../rag/instance";
 import { isPdfVirtualUrl } from "./chunking";
 import { embeddingPool } from "./workpools";
@@ -99,15 +99,10 @@ async function enqueueNewChunks(
     namespaceId: namespaceIdStr,
   }));
 
-  await embeddingPool.enqueueActionBatch(
-    ctx,
-    internal.crawl.actions.embedSingleChunk,
-    argsArray,
-    {
-      onComplete: internal.crawl.mutations.onChunkEmbedded,
-      context: { jobId },
-    },
-  );
+  await embeddingPool.enqueueActionBatch(ctx, internal.crawl.actions.embedSingleChunk, argsArray, {
+    onComplete: internal.crawl.mutations.onChunkEmbedded,
+    context: { jobId },
+  });
 }
 
 async function upsertDocumentForCrawl(
@@ -214,11 +209,23 @@ export const queueChunksForEmbedding = internalMutation({
       return { status: "unchanged", chunksQueued: 0 };
     }
 
-    const docId = await upsertDocumentForCrawl(ctx, url, title, contentHash, freshnessTier, lastModified, etag, existing);
+    const docId = await upsertDocumentForCrawl(
+      ctx,
+      url,
+      title,
+      contentHash,
+      freshnessTier,
+      lastModified,
+      etag,
+      existing,
+    );
 
     const existingChunks = existing ? await getAllChunksByDocumentId(ctx, existing._id) : [];
     const { chunksToEmbed, chunksToDelete } = await diffAndDeleteStaleChunks(
-      ctx, existingChunks, chunks, url,
+      ctx,
+      existingChunks,
+      chunks,
+      url,
     );
 
     await enqueueNewChunks(ctx, docId, url, chunksToEmbed, args.jobId);
@@ -326,6 +333,7 @@ async function updateOrCreateDLQEntry(
   documentId: Id<"documents">,
   contentHash: string | undefined,
   errorMsg: string,
+  chunkText?: string,
 ) {
   const MAX_RETRIES = 5;
   const dlqEntry = await getDLQEntry(ctx, jobId, url);
@@ -346,7 +354,7 @@ async function updateOrCreateDLQEntry(
       failureReason: errorMsg,
       failureCount: 1,
       lastAttemptAt: Date.now(),
-      payload: { documentId, url, contentHash, jobId },
+      payload: { documentId, url, contentHash, jobId, chunkText },
       status: "pending_retry",
     });
   }
@@ -392,14 +400,22 @@ async function handleEmbeddingFailure(
   url: string,
   documentId: Id<"documents">,
   result: { kind: string; error?: string },
-  returnValue: { contentHash?: string; skipped?: boolean } | null,
+  returnValue: { contentHash?: string; skipped?: boolean; chunkText?: string } | null,
 ) {
   const { errorMsg, isSkipped } = getEmbeddingErrorDetails(result, returnValue);
 
   console.warn(`Embedding failed/skipped for chunk on URL ${url}: ${errorMsg}`);
 
   if (!isSkipped) {
-    await updateOrCreateDLQEntry(ctx, jobId, url, documentId, returnValue?.contentHash, errorMsg);
+    await updateOrCreateDLQEntry(
+      ctx,
+      jobId,
+      url,
+      documentId,
+      returnValue?.contentHash,
+      errorMsg,
+      returnValue?.chunkText,
+    );
   }
 
   await checkDocumentForFailure(ctx, documentId, url, jobId, errorMsg);
@@ -441,19 +457,24 @@ export const retryDeadLetterQueue = internalMutation({
       .withIndex("by_status", (q) => q.eq("status", "pending_retry"))
       .take(batchSize);
 
+    const invalidDLQ: (typeof pendingDLQ)[number][] = [];
     const validDLQ = pendingDLQ.filter((dlq) => {
       if (!dlq.payload?.chunkText) {
         console.warn(`Skipping DLQ entry ${dlq._id} — no chunk text available for retry.`);
-        ctx.db.patch(dlq._id, {
-          status: "abandoned",
-          failureReason:
-            "No chunk text payload for retry (context was minimized to save bandwidth).",
-          lastAttemptAt: Date.now(),
-        });
+        invalidDLQ.push(dlq);
         return false;
       }
       return true;
     });
+
+    for (const dlq of invalidDLQ) {
+      await ctx.db.patch(dlq._id, {
+        status: "abandoned",
+        failureReason:
+          "No chunk text payload for retry (context was minimized to save bandwidth).",
+        lastAttemptAt: Date.now(),
+      });
+    }
 
     if (validDLQ.length > 0) {
       for (const dlq of validDLQ) {

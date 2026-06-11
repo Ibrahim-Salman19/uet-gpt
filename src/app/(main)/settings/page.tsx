@@ -114,7 +114,7 @@ export default function SettingsPage() {
     try {
       await updatePreferences({ fontSize: value });
       toast.success("Font size saved successfully");
-    } catch (err) {
+    } catch {
       toast.error("Failed to save font size preference");
     }
   };
@@ -124,7 +124,7 @@ export default function SettingsPage() {
     try {
       await updatePreferences({ model: value });
       toast.success("Model preference saved successfully");
-    } catch (err) {
+    } catch {
       toast.error("Failed to save model preference");
     }
   };
@@ -139,13 +139,15 @@ export default function SettingsPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="border-b border-[#222226] bg-[#0a0a0c]/60 backdrop-blur-md px-6 py-5">
+      <div className="border-b border-[#222226] bg-[#0a0a0c]/60 backdrop-blur-md px-3 py-3 md:px-6 md:py-5 sticky top-0 z-10">
         <h1 className="text-base font-semibold text-zinc-100 font-sans tracking-tight">Settings</h1>
-        <p className="text-xs text-zinc-500 mt-1 font-sans">Manage your application preferences</p>
+        <p className="text-xs text-zinc-500 mt-0.5 font-sans">
+          Manage your application preferences
+        </p>
       </div>
 
       <ScrollArea className="flex-1 bg-transparent">
-        <div className="mx-auto max-w-2xl px-6 py-6 space-y-6">
+        <div className="mx-auto max-w-2xl px-3 py-4 md:px-6 md:py-6 space-y-6 pb-20 md:pb-8">
           <SettingsSection title="Account" description="Manage your profile">
             <div className="flex items-center gap-3 rounded-xl border border-white/5 bg-[#101012]/40 backdrop-blur-sm px-4 py-3">
               <UserButton
@@ -214,6 +216,7 @@ export default function SettingsPage() {
           <SettingsSection title="Data" description="Export or delete your data">
             <div className="flex flex-col gap-2">
               <button
+                type="button"
                 onClick={handleExport}
                 className="flex w-full items-center gap-2.5 rounded-xl border border-white/5 bg-[#101012]/40 px-4 py-3 text-xs font-semibold text-zinc-300 transition-all duration-300 hover:bg-[#101012]/75 hover:border-white/10 active:scale-[0.98] cursor-pointer font-sans"
               >
@@ -221,6 +224,7 @@ export default function SettingsPage() {
                 Export chat history
               </button>
               <button
+                type="button"
                 onClick={handleDeleteData}
                 className="flex w-full items-center gap-2.5 rounded-xl border border-red-500/10 bg-red-950/5 px-4 py-3 text-xs font-semibold text-red-400 transition-all duration-300 hover:bg-red-950/15 hover:border-red-500/20 active:scale-[0.98] cursor-pointer font-sans"
               >

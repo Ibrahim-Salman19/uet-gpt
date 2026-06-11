@@ -2,7 +2,7 @@
 import { createGroq } from "@ai-sdk/groq";
 import { generateText } from "ai";
 import { v } from "convex/values";
-import { internalAction } from "../_generated/server";
+import { action } from "../_generated/server";
 import { generateEmbeddingsInternal } from "../embeddings/generate";
 
 const groq = createGroq({
@@ -39,7 +39,7 @@ export async function generateAlternatePhrasingsInternal(
   }
 }
 
-export const generateAlternates = internalAction({
+export const generateAlternates = action({
   args: { queryText: v.string() },
   returns: v.union(
     v.null(),

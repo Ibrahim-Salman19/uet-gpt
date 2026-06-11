@@ -47,10 +47,7 @@ function extractWebhookEmail(data: Record<string, unknown>): string {
   return addresses?.[0]?.email_address ?? "";
 }
 
-async function handleUserCreatedOrUpdated(
-  ctx: any,
-  data: Record<string, unknown>,
-): Promise<void> {
+async function handleUserCreatedOrUpdated(ctx: any, data: Record<string, unknown>): Promise<void> {
   const clerkId = data.id as string;
   const name = [data.first_name, data.last_name].filter(Boolean).join(" ").trim() || "Unknown";
   const email = extractWebhookEmail(data);
@@ -64,10 +61,7 @@ async function handleUserCreatedOrUpdated(
   });
 }
 
-async function handleUserDeleted(
-  ctx: any,
-  data: Record<string, unknown>,
-): Promise<void> {
+async function handleUserDeleted(ctx: any, data: Record<string, unknown>): Promise<void> {
   const clerkId = data.id as string;
   await ctx.runMutation(internal.users.deleteFromWebhook, {
     clerkId,

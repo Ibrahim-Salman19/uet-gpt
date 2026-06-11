@@ -123,7 +123,10 @@ export const ChatMessageBubble = React.memo(function ChatMessageBubble({
   useTypingSound(message, typingSoundEnabled);
 
   return (
-    <div className="flex items-start gap-5 px-6 py-6 w-full max-w-5xl mx-auto border-b border-white/[0.02] last:border-b-0" id={message.id}>
+    <div
+      className="flex items-start gap-3 lg:gap-5 px-3 py-3.5 md:px-5 md:py-4 lg:px-8 lg:py-5 xl:px-10 w-full border-b border-white/[0.02] last:border-b-0"
+      id={message.id}
+    >
       <Avatar isUser={isUser} initials={fallbackInitials} />
 
       <div className="group flex flex-1 flex-col gap-1 items-start min-w-0">
@@ -137,10 +140,10 @@ export const ChatMessageBubble = React.memo(function ChatMessageBubble({
 
         <div
           className={cn(
-            "w-full text-zinc-100 leading-relaxed font-sans text-[var(--chat-font-size,0.925rem)]",
+            "w-full text-zinc-100 leading-relaxed font-sans text-[var(--chat-font-size,0.925rem)] md:text-[var(--chat-font-size,0.875rem)]",
             isUser
-              ? "bg-[#101012] border border-white/[0.04] rounded-xl px-5 py-3.5 shadow-sm"
-              : "px-0 py-1"
+              ? "bg-[#101012] border border-white/[0.04] rounded-xl px-4 py-3 md:px-5 md:py-3.5 shadow-sm"
+              : "px-0 py-1",
           )}
         >
           {isUser ? (

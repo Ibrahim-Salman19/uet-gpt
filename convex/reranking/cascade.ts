@@ -1,10 +1,8 @@
 // fallow-ignore-file security-sink
 import { v } from "convex/values";
-import { internal } from "../_generated/api";
+import { api, internal } from "../_generated/api";
 import { action } from "../_generated/server";
 import { CASCADE_CONFIG } from "../rag/constants";
-
-const _internal: any = internal;
 
 function computeWordOverlap(query: string, chunk: string): number {
   const queryWords = new Set(
@@ -40,6 +38,7 @@ export const cascadeRerank = action({
   },
   returns: v.array(v.object({ text: v.string(), score: v.number(), index: v.number() })),
   handler: async (_ctx, args) => {
+    const _api: any = api;
     const docs = args.documents;
     const topK = args.topK ?? docs.length;
     if (docs.length === 0) return [];
@@ -48,7 +47,8 @@ export const cascadeRerank = action({
     const tier1Scored = docs.map((doc, i) => {
       const overlap = computeWordOverlap(args.query, doc.text);
       const positionScore = 1 - i / docs.length;
-      const combined = CASCADE_CONFIG.overlapWeight * overlap + CASCADE_CONFIG.positionWeight * positionScore;
+      const combined =
+        CASCADE_CONFIG.overlapWeight * overlap + CASCADE_CONFIG.positionWeight * positionScore;
       return { ...doc, overlap, combined, originalIndex: i };
     });
 
@@ -83,11 +83,17 @@ export const cascadeRerank = action({
         if (response.ok) {
           type RerankerResult = { index: number; score: number; text: string };
           const results = (await response.json()) as RerankerResult[];
-          return results.map((r) => ({
-            text: r.text,
-            score: r.score,
-            index: tier2Candidates[r.index].originalIndex,
-          }));
+          return results.map((r) => {
+            const candidate =
+              r.index >= 0 && r.index < tier2Candidates.length
+                ? tier2Candidates[r.index]
+                : undefined;
+            return {
+              text: r.text,
+              score: r.score,
+              index: candidate?.originalIndex ?? r.index,
+            };
+          });
         }
         console.warn(`RERANKER_URL returned status ${response.status}`);
       } catch (error) {
@@ -97,7 +103,7 @@ export const cascadeRerank = action({
 
     // ── Tier 2b: Groq lightweight reranker (free, no extra infra) ──
     try {
-      const groqResult = await _ctx.runAction(_internal.reranking.groqRerank.groqRerank, {
+      const groqResult = await _ctx.runAction(_api.reranking.groqRerank.groqRerank, {
         query: args.query,
         documents: tier2Candidates.map((d) => ({ text: d.text, id: d.id })),
         topK: Math.min(topK, tier2Candidates.length),
@@ -128,11 +134,17 @@ export const cascadeRerank = action({
         if (response.ok) {
           type CohereResult = { index: number; relevance_score: number };
           const body = (await response.json()) as { results: CohereResult[] };
-          return body.results.map((r) => ({
-            text: tier2Candidates[r.index].text,
-            score: r.relevance_score,
-            index: tier2Candidates[r.index].originalIndex,
-          }));
+          return body.results.map((r) => {
+            const candidate =
+              r.index >= 0 && r.index < tier2Candidates.length
+                ? tier2Candidates[r.index]
+                : undefined;
+            return {
+              text: candidate?.text ?? "",
+              score: r.relevance_score,
+              index: candidate?.originalIndex ?? r.index,
+            };
+          });
         }
         console.warn(`Cohere rerank returned status ${response.status}`);
       } catch (error) {
@@ -140,8 +152,9 @@ export const cascadeRerank = action({
       }
     }
 
-    // ── Final fallback: Tier 1 combined scores ──
-    return filtered.slice(0, topK).map((d) => ({
+    // ── Final fallback: Tier 1 combined scores (use all scored docs if filtered is empty) ──
+    const fallbackDocs = filtered.length > 0 ? filtered : tier1Scored;
+    return fallbackDocs.slice(0, topK).map((d) => ({
       text: d.text,
       score: d.combined,
       index: d.originalIndex,

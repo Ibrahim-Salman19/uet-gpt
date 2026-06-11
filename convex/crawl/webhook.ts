@@ -60,7 +60,12 @@ function computeStats(results: WebhookResult[]) {
   return { totalChunks, totalTokens, bytesProcessed };
 }
 
-function logCompletionAlert(taskId: string, successfulPages: number, failedPages: number, skippedPages: number) {
+function logCompletionAlert(
+  taskId: string,
+  successfulPages: number,
+  failedPages: number,
+  skippedPages: number,
+) {
   if (failedPages === 0) return;
   const failureRate = failedPages / (successfulPages + failedPages + skippedPages);
   if (failureRate > 0.05) {
@@ -140,9 +145,12 @@ async function validateWebhookSignature(
   return null;
 }
 
-function extractWebhookPayload(
-  rawBody: string,
-): { taskId: string; status: string; results: any[]; url: string | undefined } {
+function extractWebhookPayload(rawBody: string): {
+  taskId: string;
+  status: string;
+  results: any[];
+  url: string | undefined;
+} {
   const payload = JSON.parse(rawBody);
   console.log(
     "Webhook received",
@@ -154,10 +162,7 @@ function extractWebhookPayload(
   return { taskId, status, results, url: payload.url };
 }
 
-async function checkIdempotency(
-  ctx: any,
-  taskId: string,
-): Promise<boolean> {
+async function checkIdempotency(ctx: any, taskId: string): Promise<boolean> {
   const existing = await ctx.runQuery(internal.crawl.mutations.getProcessedWebhook, {
     jobId: taskId,
   });
@@ -174,7 +179,15 @@ async function markJobProcessed(ctx: any, taskId: string): Promise<void> {
 function extractPageInfo(
   result: any,
   payloadUrl: string | undefined,
-): { url: string; canonicalUrl: string; isPdf: boolean; content: string; title: string; etag: string | undefined; lastModified: string | undefined } {
+): {
+  url: string;
+  canonicalUrl: string;
+  isPdf: boolean;
+  content: string;
+  title: string;
+  etag: string | undefined;
+  lastModified: string | undefined;
+} {
   const url = result.url || payloadUrl;
   const canonicalUrl = canonicalizeUrl(url);
   const isPdf = url.toLowerCase().endsWith(".pdf") || result.media_type === "pdf";
@@ -214,7 +227,11 @@ async function processSinglePage(
     const normalized = normalizeContent(info.content);
     const contentHash = await sha256(normalized);
 
-    let contextPrefix = buildContextPrefix(info.title, info.canonicalUrl, isPdfVirtualUrl(info.canonicalUrl));
+    let contextPrefix = buildContextPrefix(
+      info.title,
+      info.canonicalUrl,
+      isPdfVirtualUrl(info.canonicalUrl),
+    );
     const summary = await generateContextSummary(normalized);
     if (summary) contextPrefix += `Context: ${summary}\n\n`;
 
@@ -296,8 +313,6 @@ export const crawlWebhook = httpAction(async (ctx, request) => {
       });
     }
 
-    await markJobProcessed(ctx, taskId);
-
     let successfulPages = 0;
     let failedPages = 0;
     let skippedPages = 0;
@@ -310,6 +325,9 @@ export const crawlWebhook = httpAction(async (ctx, request) => {
     }
 
     await finalizeJob(ctx, status, taskId, successfulPages, failedPages, skippedPages, results);
+
+    // Mark as processed AFTER pages are handled to prevent idempotency race
+    await markJobProcessed(ctx, taskId);
 
     return new Response(JSON.stringify({ ok: true }), {
       status: 200,
@@ -400,7 +418,7 @@ async function parseAndValidateIngestRequest(
       console.warn(`Ingest rejected: malformed URL "${url}"`);
       return new Response("Invalid URL", { status: 400 });
     }
-    if (!parsedHost.endsWith(ALLOWED_DOMAIN_SUFFIX)) {
+    if (parsedHost !== ALLOWED_DOMAIN_SUFFIX && !parsedHost.endsWith(`.${ALLOWED_DOMAIN_SUFFIX}`)) {
       console.warn(`Ingest rejected: domain not in allowlist "${parsedHost}"`);
       return new Response("URL domain not permitted", { status: 403 });
     }

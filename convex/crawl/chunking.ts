@@ -289,9 +289,7 @@ export async function sha256(text: string): Promise<string> {
   return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-export async function generateContextSummary(
-  text: string,
-): Promise<string | null> {
+export async function generateContextSummary(text: string): Promise<string | null> {
   try {
     if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) return null;
     if (text.split(/\s+/).length <= 500) return null;

@@ -49,10 +49,23 @@ export default function ChatPage() {
         {/* Logo mark */}
         <div className="flex flex-col items-center gap-3">
           <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-[var(--accent)]/8 border border-[var(--accent)]/15">
-            <svg className="w-6 h-6 text-[var(--accent)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <svg
+              className="w-6 h-6 text-[var(--accent)]"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            >
               <path d="M12 2v20M2 12h20" strokeDasharray="2 2" />
               <circle cx="12" cy="12" r="8" strokeDasharray="4 2" />
-              <circle cx="12" cy="12" r="3" fill="currentColor" fillOpacity="0.2" className="animate-[pulse-dot_2s_ease-in-out_infinite]" />
+              <circle
+                cx="12"
+                cy="12"
+                r="3"
+                fill="currentColor"
+                fillOpacity="0.2"
+                className="animate-[pulse-dot_2s_ease-in-out_infinite]"
+              />
             </svg>
           </div>
           <div>
@@ -74,7 +87,10 @@ export default function ChatPage() {
 
         {/* ── Suggestion Chips ── */}
         {!isCreating && (
-          <div className="w-full max-w-xl flex flex-wrap justify-center gap-2" aria-label="Quick suggestions">
+          <div
+            className="w-full max-w-xl flex flex-wrap justify-center gap-2"
+            aria-label="Quick suggestions"
+          >
             {DEFAULT_SUGGESTIONS.map((s) => (
               <button
                 key={s.label}

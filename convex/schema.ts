@@ -156,6 +156,8 @@ export default defineSchema({
     .index("by_userId", ["userId"])
     .index("by_action", ["action"]),
 
+  // DEPRECATED: notifications table is unused — no code reads or writes to it.
+  // Kept for schema backward compatibility; can be removed in a future migration.
   notifications: defineTable({
     userId: v.id("users"),
     title: v.string(),
@@ -234,7 +236,13 @@ export default defineSchema({
     failureReason: v.string(),
     failureCount: v.number(),
     lastAttemptAt: v.number(),
-    payload: v.any(),
+    payload: v.object({
+      documentId: v.string(),
+      url: v.string(),
+      contentHash: v.optional(v.string()),
+      jobId: v.string(),
+      chunkText: v.optional(v.string()),
+    }),
     status: v.union(
       v.literal("pending_retry"),
       v.literal("abandoned"),

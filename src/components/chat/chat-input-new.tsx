@@ -135,7 +135,7 @@ export function ChatInputNew({ onSend, onStop, isLoading, className }: ChatInput
     <form
       onSubmit={handleSubmit}
       className={cn(
-        "bg-[var(--surface-base)]/80 backdrop-blur-xl border-t border-[var(--border)] p-4 md:p-5 relative z-20 flex flex-col gap-3",
+        "bg-[var(--surface-base)]/80 backdrop-blur-xl border-t border-[var(--border)] p-3 pb-safe md:p-4 lg:p-5 relative z-20 flex flex-col gap-2",
         className,
       )}
     >
@@ -158,6 +158,7 @@ export function ChatInputNew({ onSend, onStop, isLoading, className }: ChatInput
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
+              aria-hidden="true"
             >
               <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
               <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
@@ -175,10 +176,10 @@ export function ChatInputNew({ onSend, onStop, isLoading, className }: ChatInput
             value={input}
             onChange={handleInput}
             onKeyDown={handleKeyDown}
-            placeholder="Ask a question about UET Taxila…"
+            placeholder="Ask about UET Taxila…"
             rows={1}
             disabled={isLoading && !onStop}
-            className="w-full resize-none bg-transparent px-3 py-3 text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none max-h-36 custom-scroll font-sans leading-relaxed disabled:opacity-50"
+            className="chat-textarea w-full resize-none bg-transparent px-2 py-2.5 md:px-3 md:py-2 text-[16px] md:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none max-h-36 custom-scroll font-sans leading-relaxed disabled:opacity-50"
             spellCheck={false}
             autoComplete="off"
           />
@@ -194,7 +195,7 @@ export function ChatInputNew({ onSend, onStop, isLoading, className }: ChatInput
 
       {/* Telemetry footer */}
       <div
-        className="flex justify-between items-center px-2 text-[9px] font-mono text-[var(--text-muted)] select-none"
+        className="hidden md:flex justify-between items-center px-2 text-[9px] font-mono text-[var(--text-muted)] select-none"
         aria-hidden="true"
       >
         <span>UET GPT may produce inaccurate information. Verify critical details.</span>

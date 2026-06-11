@@ -1,6 +1,6 @@
 import { v } from "convex/values";
-import { internalAction } from "../_generated/server";
 import { internal } from "../_generated/api";
+import { internalAction } from "../_generated/server";
 
 function percentile(sorted: number[], p: number): number {
   if (sorted.length === 0) return 0;
@@ -14,10 +14,9 @@ export const aggregateMetrics = internalAction({
   handler: async (ctx) => {
     const start = Date.now();
 
-    const settings = await ctx.runQuery(
-      internal.observability.internal.getSettingsBySection,
-      { section: "observability" },
-    );
+    const settings = await ctx.runQuery(internal.observability.internal.getSettingsBySection, {
+      section: "observability",
+    });
 
     const settingsMap = new Map<string, unknown>();
     for (const s of settings) {

@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
-import { internalAction } from "../_generated/server";
 import type { Id } from "../_generated/dataModel";
+import { internalAction } from "../_generated/server";
 
 const BATCH_SIZE = 5;
 const DAILY_LIMIT = 10;
@@ -25,10 +25,9 @@ export const contextualizeCron = internalAction({
 
     for (let i = 0; i < pendingChunkIds.length; i += BATCH_SIZE) {
       const batch = pendingChunkIds.slice(i, i + BATCH_SIZE);
-      const result = (await ctx.runAction(
-        internal.embeddings.contextualize.contextualizeChunks,
-        { chunkIds: batch },
-      )) as { processed: number; successes: number; failures: number };
+      const result = (await ctx.runAction(internal.embeddings.contextualize.contextualizeChunks, {
+        chunkIds: batch,
+      })) as { processed: number; successes: number; failures: number };
 
       totalProcessed += result.successes ?? 0;
       totalFailures += result.failures ?? 0;

@@ -1,10 +1,8 @@
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
-import type { Doc } from "../_generated/dataModel";
 import { action } from "../_generated/server";
-import { truncateQuery } from "../observability/metrics";
-
 import { CACHE_SIMILARITY_THRESHOLD } from "../constants";
+import { truncateQuery } from "../observability/metrics";
 
 export function cosineSimilarity(a: number[], b: number[]) {
   if (a.length === 0 || b.length === 0) return 0;
@@ -148,10 +146,18 @@ export const get = action({
         query: truncateQuery(args.queryText),
         latencyMs: latency,
       });
+      await ctx.runMutation(internal.observability.metrics.incrementCounter, {
+        key: "observability_cache_hits_total",
+        incrementBy: 1,
+      });
     } else {
       console.log("[CACHE] Miss", {
         query: truncateQuery(args.queryText),
         latencyMs: latency,
+      });
+      await ctx.runMutation(internal.observability.metrics.incrementCounter, {
+        key: "observability_cache_misses_total",
+        incrementBy: 1,
       });
     }
 

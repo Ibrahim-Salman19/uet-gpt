@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import * as React from "react";
 import { toast } from "sonner";
 import { DiagnosticsPanel } from "@/components/diagnostics-panel";
@@ -48,8 +50,9 @@ function ModelSelector({
   return (
     <div className="relative" ref={ref}>
       <button
+        type="button"
         onClick={onToggle}
-        className="flex items-center gap-2 px-4 py-2 bg-zinc-950/60 backdrop-blur-md rounded-lg border border-white/5 text-xs text-zinc-300 hover:text-white transition-all duration-300 ease-[var(--ease-spring)] group focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:outline-none active:scale-[0.98] active:translate-y-[1px]"
+        className="flex items-center gap-2 px-3 py-2 md:px-4 bg-zinc-950/60 backdrop-blur-md rounded-lg border border-white/5 text-xs text-zinc-300 hover:text-white transition-all duration-300 ease-[var(--ease-spring)] group focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:outline-none active:scale-[0.98] active:translate-y-[1px] min-h-[36px]"
         aria-label="Select AI Model"
       >
         <span className="font-medium">{activeModelLabel}</span>
@@ -60,12 +63,14 @@ function ModelSelector({
           stroke="currentColor"
           strokeWidth="2"
         >
+          <title>Dropdown arrow</title>
           <path d="M6 9l6 6 6-6" />
         </svg>
       </button>
       {isOpen && (
         <div className="absolute left-0 mt-2 w-48 rounded-xl bg-[#101012] border border-[#2d2d34] shadow-[0_16px_32px_rgba(0,0,0,0.8)] py-1.5 z-50 pointer-events-auto animate-[dropdown-open_200ms_ease-out]">
           <button
+            type="button"
             onClick={() => onSelect("llama-3.1-8b")}
             className="w-full text-left px-4 py-2.5 hover:bg-white/5 text-xs text-zinc-200 hover:text-white transition-colors flex items-center justify-between"
           >
@@ -75,6 +80,7 @@ function ModelSelector({
             </span>
           </button>
           <button
+            type="button"
             onClick={() => onSelect("llama-4-scout")}
             className="w-full text-left px-4 py-2.5 hover:bg-white/5 text-xs text-zinc-200 hover:text-white transition-colors flex items-center justify-between"
           >
@@ -119,7 +125,7 @@ function SidebarPanel({
             ? "translate-x-0 pointer-events-auto opacity-100"
             : "-translate-x-full lg:translate-x-0 pointer-events-none",
           open
-            ? "w-72 border-r border-[#222226] lg:opacity-100 lg:pointer-events-auto"
+            ? "w-72 xl:w-80 border-r border-[#222226] lg:opacity-100 lg:pointer-events-auto"
             : "lg:w-0 lg:opacity-0 lg:border-r-transparent lg:pointer-events-none",
         )}
         style={{
@@ -150,13 +156,14 @@ function Header({
   onCommandPaletteOpen: (open: boolean) => void;
 }) {
   return (
-    <header className="w-full px-6 py-5 flex justify-between items-center pointer-events-auto shrink-0 border-b border-white/[0.04] bg-[#0a0a0c]/20 backdrop-blur-sm">
-      <div className="flex items-center gap-4">
+    <header className="w-full px-3 py-2.5 md:px-5 md:py-4 lg:px-6 lg:py-5 flex justify-between items-center pointer-events-auto shrink-0 border-b border-white/[0.04] bg-[#0a0a0c]/20 backdrop-blur-sm">
+      <div className="flex items-center gap-3">
         <button
+          type="button"
           onClick={onToggleSidebar}
           aria-label="Toggle navigation"
           className={cn(
-            "text-zinc-400 hover:text-white transition-all duration-300 ease-[var(--ease-spring)] p-2 rounded-xl bg-zinc-950/60 border border-white/5 backdrop-blur-md hover:bg-white/5 active:scale-[0.98] active:translate-y-[1px] flex items-center justify-center shrink-0",
+            "text-zinc-400 hover:text-white transition-all duration-300 ease-[var(--ease-spring)] p-2 rounded-xl bg-zinc-950/60 border border-white/5 backdrop-blur-md hover:bg-white/5 active:scale-[0.98] active:translate-y-[1px] flex items-center justify-center shrink-0 min-h-[40px] min-w-[40px]",
             sidebarOpen && "lg:hidden lg:opacity-0 lg:pointer-events-none",
           )}
         >
@@ -167,6 +174,7 @@ function Header({
             stroke="currentColor"
             strokeWidth="2"
           >
+            <title>Toggle Sidebar</title>
             <line x1="3" y1="12" x2="21" y2="12" />
             <line x1="3" y1="6" x2="21" y2="6" />
             <line x1="3" y1="18" x2="21" y2="18" />
@@ -176,8 +184,9 @@ function Header({
       </div>
       <div className="flex items-center gap-2">
         <button
+          type="button"
           onClick={onShareClick}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-950/60 border border-white/5 rounded-lg text-[10px] text-zinc-400 hover:text-white transition-all duration-300 ease-[var(--ease-spring)] group focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:outline-none select-none active:scale-[0.98] active:translate-y-[1px]"
+          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-zinc-950/60 border border-white/5 rounded-lg text-[10px] text-zinc-400 hover:text-white transition-all duration-300 ease-[var(--ease-spring)] group focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:outline-none select-none active:scale-[0.98] active:translate-y-[1px]"
         >
           <svg
             className="w-3.5 h-3.5 text-zinc-500 group-hover:text-white transition-colors shrink-0"
@@ -186,15 +195,17 @@ function Header({
             stroke="currentColor"
             strokeWidth="2"
           >
+            <title>Share icon</title>
             <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13" />
           </svg>
-          <span>Share Chat</span>
+          <span>Share</span>
         </button>
         <button
+          type="button"
           onClick={() => onCommandPaletteOpen(true)}
           className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-zinc-950/60 border border-white/5 rounded-lg text-[10px] text-zinc-500 hover:text-zinc-300 hover:border-white/10 transition-all duration-300 ease-[var(--ease-spring)] select-none active:scale-[0.98] active:translate-y-[1px]"
         >
-          <span>Search Commands</span>
+          <span>Search</span>
           <kbd className="font-mono text-[9px] opacity-60 bg-zinc-900 border border-white/10 px-1.5 py-0.5 rounded">
             Ctrl+K
           </kbd>
@@ -221,15 +232,139 @@ function SidebarHeader({ onClose }: { onClose: () => void }) {
         </span>
       </div>
       <button
+        type="button"
         onClick={onClose}
-        className="text-zinc-500 hover:text-zinc-300 transition-colors p-1 rounded hover:bg-white/5"
+        className="text-zinc-500 hover:text-zinc-300 transition-colors p-2 rounded-lg hover:bg-white/5 min-h-[36px] min-w-[36px] flex items-center justify-center lg:hidden"
         aria-label="Close sidebar"
       >
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg
+          className="w-4 h-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <title>Close sidebar</title>
           <path d="M19 12H5M12 19l-7-7 7-7" />
         </svg>
       </button>
     </div>
+  );
+}
+
+// ── Mobile Bottom Navigation ──
+
+const MOBILE_NAV_ITEMS = [
+  {
+    href: "/chat",
+    label: "Chat",
+    icon: (active: boolean) => (
+      <svg
+        className={cn(
+          "w-5 h-5 transition-all duration-200",
+          active ? "stroke-[var(--accent)]" : "stroke-zinc-500",
+        )}
+        viewBox="0 0 24 24"
+        fill={active ? "rgba(var(--accent-rgb,212,168,74),0.08)" : "none"}
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <title>Chat</title>
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+      </svg>
+    ),
+  },
+  {
+    href: "/explore",
+    label: "Explore",
+    icon: (active: boolean) => (
+      <svg
+        className={cn(
+          "w-5 h-5 transition-all duration-200",
+          active ? "stroke-[var(--accent)]" : "stroke-zinc-500",
+        )}
+        viewBox="0 0 24 24"
+        fill={active ? "rgba(var(--accent-rgb,212,168,74),0.08)" : "none"}
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <title>Explore</title>
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+      </svg>
+    ),
+  },
+  {
+    href: "/settings",
+    label: "Settings",
+    icon: (active: boolean) => (
+      <svg
+        className={cn(
+          "w-5 h-5 transition-all duration-200",
+          active ? "stroke-[var(--accent)]" : "stroke-zinc-500",
+        )}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <title>Settings</title>
+        <circle cx="12" cy="12" r="3" />
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+      </svg>
+    ),
+  },
+];
+
+function MobileBottomNav() {
+  const pathname = usePathname();
+
+  return (
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-[70] lg:hidden glass-nav mobile-bottom-nav"
+      aria-label="Mobile navigation"
+    >
+      <div className="flex items-center justify-around px-2 h-16">
+        {MOBILE_NAV_ITEMS.map((item, idx) => {
+          const isActive = pathname.startsWith(item.href);
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "mobile-nav-item flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-xl transition-all duration-200 min-h-[52px] min-w-[64px] relative overflow-hidden",
+                isActive
+                  ? "text-[var(--accent)]"
+                  : "text-zinc-500 hover:text-zinc-300 active:scale-95",
+              )}
+              style={{ animationDelay: `${idx * 40}ms` }}
+              aria-current={isActive ? "page" : undefined}
+              aria-label={item.label}
+            >
+              {isActive && <div className="absolute inset-0 bg-[var(--accent)]/5 rounded-xl" />}
+              <span className="relative z-10">{item.icon(isActive)}</span>
+              <span
+                className={cn(
+                  "relative z-10 text-[10px] font-medium tracking-wide transition-all duration-200",
+                  isActive ? "text-[var(--accent)]" : "text-zinc-600",
+                )}
+              >
+                {item.label}
+              </span>
+              {isActive && (
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 rounded-full bg-[var(--accent)]" />
+              )}
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
   );
 }
 
@@ -265,13 +400,17 @@ function useShareHandler() {
  * Client-side shell that manages:
  * - Slide-in/out sidebar with mobile overlay
  * - Top header with hamburger, model selector, Ctrl+K pill
+ * - Mobile bottom navigation bar (hidden on lg+)
  * - Accessibility skip-link target
  */
 export function MainShell({ children }: MainShellProps) {
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
   const { setCommandPaletteOpen, modelPreference, updateModelPreference } = usePreferences();
-  const { open: modelDropdownOpen, setOpen: setModelDropdownOpen, ref: dropdownRef } =
-    useModelDropdown();
+  const {
+    open: modelDropdownOpen,
+    setOpen: setModelDropdownOpen,
+    ref: dropdownRef,
+  } = useModelDropdown();
 
   React.useEffect(() => {
     const handleResize = () => {
@@ -328,11 +467,15 @@ export function MainShell({ children }: MainShellProps) {
           onCommandPaletteOpen={setCommandPaletteOpen}
         />
 
-        <main id="main-content" className="flex-1 overflow-hidden relative">
+        {/* Main content with bottom padding on mobile for nav bar */}
+        <main id="main-content" className="flex-1 overflow-hidden relative pb-0 lg:pb-0">
           {children}
           <DiagnosticsPanel />
         </main>
       </div>
+
+      {/* Mobile bottom navigation — hidden on lg+ screens */}
+      <MobileBottomNav />
     </div>
   );
 }

@@ -1,8 +1,7 @@
 "use client";
 
-import { useConvex } from "convex/react";
-import { useQuery } from "convex/react";
 import { api } from "convex/_generated/api";
+import { useConvex, useQuery } from "convex/react";
 import { useEffect, useRef } from "react";
 
 const HEARTBEAT_INTERVAL_MS = 25_000;
@@ -12,7 +11,7 @@ export function ConvexConnectionMonitor() {
   const convex = useConvex();
   const lastHeartbeatRef = useRef<number>(0);
   const missedHeartbeatsRef = useRef<number>(0);
-  const sendHeartbeatRef = useRef<() => void>();
+  const sendHeartbeatRef = useRef<() => void>(() => {});
 
   const heartbeat = useQuery(api.health.heartbeat, {});
 

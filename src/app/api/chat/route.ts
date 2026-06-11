@@ -5,13 +5,14 @@ import { auth } from "@clerk/nextjs/server";
 import { type LanguageModel, streamText } from "ai";
 import { api } from "convex/_generated/api";
 import { ConvexHttpClient } from "convex/browser";
-import { assignFreshnessTier } from "../../../../convex/crawl/chunking";
 import { after, type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getRoleFromClaims, isAdminRole } from "@/lib/clerk-claims";
 import { LLM_FALLBACK_CHAIN } from "@/lib/llm-models";
 import { buildSystemPrompt, extractText } from "@/lib/prompt";
 import { checkChatRateLimit } from "@/lib/rate-limit";
+// Rate limiting is enforced server-side in convex/messages.ts via enforceRateLimit
+import { assignFreshnessTier } from "../../../../convex/crawl/chunking";
 
 function getAllowedOrigins(): string[] {
   const allowed = [process.env.NEXT_PUBLIC_APP_URL].filter((url): url is string => !!url);
@@ -45,13 +46,6 @@ function checkCsrf(req: NextRequest): NextResponse | null {
   const origin = req.headers.get("origin");
   const referer = req.headers.get("referer");
   const allowed = getAllowedOrigins();
-  const host = req.headers.get("host");
-  if (host) {
-    allowed.push(`https://${host}`);
-    if (host.includes("localhost")) {
-      allowed.push(`http://${host}`);
-    }
-  }
   return checkOrigin(origin, allowed) ?? checkReferer(referer, allowed);
 }
 
@@ -71,7 +65,9 @@ const ChatRequestSchema = z
 
 function parseBodyOrError(
   bodyText: string,
-): { messages: { role: string; content: string }[]; rawMessages: z.infer<typeof MessageSchema>[] } | NextResponse {
+):
+  | { messages: { role: string; content: string }[]; rawMessages: z.infer<typeof MessageSchema>[] }
+  | NextResponse {
   const MAX_BODY = 100 * 1024;
   if (bodyText.length > MAX_BODY) {
     return NextResponse.json({ error: "Request body too large" }, { status: 413 });
@@ -101,9 +97,11 @@ function parseBodyOrError(
 }
 
 function extractClientIp(req: NextRequest): string {
-  return req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+  return (
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     req.headers.get("x-real-ip") ||
-    "unknown";
+    "unknown"
+  );
 }
 
 function resolveClientRole(sessionClaims: Record<string, unknown>): "admin" | "user" {
@@ -143,26 +141,19 @@ function initConvexOrError(): ConvexHttpClient | NextResponse {
   return new ConvexHttpClient(convexUrl);
 }
 
-async function checkConvexRateLimit(
-  convex: ConvexHttpClient,
-  userId: string,
-): Promise<NextResponse | null> {
-  try {
-    await convex.mutation(api.rateLimit.checkRateLimit, {
-      userId,
-      tokenEstimate: 1_000,
-    });
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : "Rate limit exceeded";
-    return NextResponse.json({ error: msg }, { status: 429 });
-  }
-  return null;
-}
-
 async function fetchRagData(
   convex: ConvexHttpClient,
   question: string,
-): Promise<{ context: string | null; sources: any[]; intent: string; queryEmbedding: number[] | null; cachedResponse: string | null } | NextResponse> {
+): Promise<
+  | {
+      context: string | null;
+      sources: any[];
+      intent: string;
+      queryEmbedding: number[] | null;
+      cachedResponse: string | null;
+    }
+  | NextResponse
+> {
   try {
     const ragResult = await convex.action(api.rag.retrieval.retrieveContext, {
       question,
@@ -191,7 +182,10 @@ async function getPreferredModel(
 
 type ModelFactory = (modelId: string) => LanguageModel;
 
-const PROVIDER_FACTORIES: Record<string, { create: (apiKey: string) => ModelFactory; envKey: string }> = {
+const PROVIDER_FACTORIES: Record<
+  string,
+  { create: (apiKey: string) => ModelFactory; envKey: string }
+> = {
   groq: { create: (key) => createGroq({ apiKey: key }), envKey: "GROQ_API_KEY" },
   google: { create: (key) => createGoogleGenerativeAI({ apiKey: key }), envKey: "GEMINI_API_KEY" },
   cerebras: { create: (key) => createCerebras({ apiKey: key }), envKey: "CEREBRAS_API_KEY" },
@@ -232,10 +226,17 @@ function findNextThinkSegment(remaining: string): SegmentAction {
   const closeIdx = remaining.indexOf("</think>");
   if (openIdx === -1) {
     if (closeIdx === -1) return { type: "flush", text: remaining };
-    return { type: "flush", text: remaining.substring(0, closeIdx) + remaining.substring(closeIdx + 8) };
+    return {
+      type: "flush",
+      text: remaining.substring(0, closeIdx) + remaining.substring(closeIdx + 8),
+    };
   }
   if (closeIdx === -1 || openIdx < closeIdx) {
-    return { type: "think", before: remaining.substring(0, openIdx), content: remaining.substring(openIdx + 7) };
+    return {
+      type: "think",
+      before: remaining.substring(0, openIdx),
+      content: remaining.substring(openIdx + 7),
+    };
   }
   return { type: "skip-close", after: remaining.substring(closeIdx + 8) };
 }
@@ -252,7 +253,11 @@ function handleOpenThinkTag(remaining: string): { remaining: string; buffer: str
   return { remaining: "", buffer: "" };
 }
 
-function flushTextFn(text: string, controller: ReadableStreamDefaultController, accumulated: { current: string }) {
+function flushTextFn(
+  text: string,
+  controller: ReadableStreamDefaultController,
+  accumulated: { current: string },
+) {
   if (!text) return;
   controller.enqueue(text);
   accumulated.current += text;
@@ -281,7 +286,12 @@ function finalizeStream(
   reader.releaseLock();
 }
 
-function processChunk(value: string, buffer: { current: string }, accumulated: { current: string }, controller: ReadableStreamDefaultController) {
+function processChunk(
+  value: string,
+  buffer: { current: string },
+  accumulated: { current: string },
+  controller: ReadableStreamDefaultController,
+) {
   const combined = buffer.current + value;
   buffer.current = "";
   let remaining = combined;
@@ -362,11 +372,7 @@ async function tryModelWithFallback(
 
   const reader = result.textStream.getReader();
 
-  const textStream = streamWithStrippedThinking(
-    reader,
-    model,
-    config.onFinish,
-  );
+  const textStream = streamWithStrippedThinking(reader, model, config.onFinish);
 
   Object.defineProperty(result, "textStream", {
     value: textStream,
@@ -413,7 +419,7 @@ function buildCacheWriteCallback(
       after(async () => {
         try {
           const [altResult] = await Promise.allSettled([
-            convex.action(api.cache.multiVector.generateAlternates, {
+            convex.action((api as any)["cache/multiVector"].generateAlternates, {
               queryText: question,
             }),
           ]);
@@ -428,7 +434,7 @@ function buildCacheWriteCallback(
 
           const topSourceUrl = ragResult.sources[0]?.url ?? "";
           const freshnessTier = assignFreshnessTier(topSourceUrl);
-          await convex.mutation(api.cache.set.set, {
+          await convex.action(api.cache.set.setFromServer, {
             queryText: question,
             queryEmbedding: ragResult.queryEmbedding,
             response: text,
@@ -482,11 +488,11 @@ async function authAndRateLimitPhase(
 async function convexRagAndModelPhase(
   userId: string,
   question: string,
-): Promise<{ convex: ConvexHttpClient; ragResult: any; preferredModelKey: string | undefined } | NextResponse> {
+): Promise<
+  { convex: ConvexHttpClient; ragResult: any; preferredModelKey: string | undefined } | NextResponse
+> {
   const convexOrError = initConvexOrError();
   if (convexOrError instanceof NextResponse) return convexOrError;
-  const convexRateLimitError = await checkConvexRateLimit(convexOrError, userId);
-  if (convexRateLimitError) return convexRateLimitError;
   const ragOrError = await fetchRagData(convexOrError, question);
   if (ragOrError instanceof NextResponse) return ragOrError;
   const preferredModelKey = await getPreferredModel(convexOrError, userId);
@@ -536,7 +542,13 @@ async function handlePost(req: NextRequest): Promise<Response> {
   if (phase2 instanceof NextResponse) return phase2;
   const phase3 = await convexRagAndModelPhase(phase2.userId, phase1.question);
   if (phase3 instanceof NextResponse) return phase3;
-  return buildStreamResponse(phase1.messages, phase1.question, phase3.convex, phase3.ragResult, phase3.preferredModelKey);
+  return buildStreamResponse(
+    phase1.messages,
+    phase1.question,
+    phase3.convex,
+    phase3.ragResult,
+    phase3.preferredModelKey,
+  );
 }
 
 export async function POST(req: NextRequest) {

@@ -5,7 +5,10 @@ import { internalMutation } from "../_generated/server";
 import { rag } from "../rag/instance";
 import { embeddingPool } from "./workpools";
 
-async function deleteChunksBatch(ctx: any, batchSize: number): Promise<{ deleted: number; remaining: string } | null> {
+async function deleteChunksBatch(
+  ctx: any,
+  batchSize: number,
+): Promise<{ deleted: number; remaining: string } | null> {
   const chunks = await ctx.db.query("crawledChunks").withIndex("by_documentId").take(batchSize);
   if (chunks.length === 0) return null;
   let deleted = 0;
@@ -23,7 +26,12 @@ async function deleteChunksBatch(ctx: any, batchSize: number): Promise<{ deleted
   return { deleted, remaining: "more" };
 }
 
-async function deleteTableBatch(ctx: any, table: string, index: string | null, batchSize: number): Promise<{ deleted: number; remaining: string } | null> {
+async function deleteTableBatch(
+  ctx: any,
+  table: string,
+  index: string | null,
+  batchSize: number,
+): Promise<{ deleted: number; remaining: string } | null> {
   const query = index ? ctx.db.query(table as any).withIndex(index) : ctx.db.query(table as any);
   const items = await query.take(batchSize);
   if (items.length === 0) return null;

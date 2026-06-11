@@ -96,7 +96,7 @@ function ExploreTabContent({
 }) {
   return (
     <TabsContent key={cat} value={cat} className="m-0 mt-0 outline-none">
-      <div className="mx-auto max-w-5xl px-6 py-6">
+      <div className="mx-auto max-w-5xl 2xl:max-w-6xl px-3 py-4 md:px-6 md:py-6 pb-20 md:pb-6">
         {!documents ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-5 w-5 animate-spin text-[var(--accent)]" />
@@ -118,16 +118,14 @@ function ExploreTabContent({
             <div className="flex items-center justify-between mb-4 animate-[slide-up_0.3s_ease-[var(--ease-out-expo)]_both]">
               <p className="text-[10px] font-mono text-zinc-500">
                 SHOWING {currentDocs.length} DOCUMENT{currentDocs.length !== 1 ? "S" : ""}
-                {documents.length !== currentDocs.length
-                  ? ` OF ${documents.length} TOTAL`
-                  : ""}
+                {documents.length !== currentDocs.length ? ` OF ${documents.length} TOTAL` : ""}
               </p>
             </div>
             <div
               className={cn(
                 "stagger-enter",
                 viewMode === "grid" && documents && currentDocs.length > 0
-                  ? "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
+                  ? "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
                   : documents && currentDocs.length > 0
                     ? "flex flex-col gap-2"
                     : "",
@@ -182,8 +180,8 @@ export default function ExplorePage() {
       onValueChange={setActiveCategory}
       className="flex h-full flex-col w-full"
     >
-      <div className="border-b border-[#222226] bg-[#0a0a0c]/60 backdrop-blur-md px-6 py-5">
-        <div className="mx-auto flex max-w-5xl flex-col gap-4">
+      <div className="border-b border-[#222226] bg-[#0a0a0c]/60 backdrop-blur-md px-3 py-3 md:px-6 md:py-5 sticky top-0 z-10">
+        <div className="mx-auto flex max-w-5xl 2xl:max-w-6xl flex-col gap-3 md:gap-4">
           <div>
             <h1 className="text-base font-semibold text-zinc-100 font-sans tracking-tight">
               Explore UET Taxila
@@ -200,7 +198,7 @@ export default function ExplorePage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search documents…"
-                className="pl-9 text-xs bg-zinc-950/60 border border-white/10 rounded-xl text-zinc-200 placeholder:text-zinc-500 focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:outline-none"
+                className="pl-9 text-base md:text-xs bg-zinc-950/60 border border-white/10 rounded-xl text-zinc-200 placeholder:text-zinc-500 focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:outline-none"
               />
             </div>
             <div className="flex items-center gap-1 rounded-xl border border-white/10 bg-zinc-950/60 p-0.5 shrink-0">

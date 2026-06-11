@@ -1,9 +1,9 @@
 "use client";
 
-import type { Source } from "@/lib/types";
 import { useConvex, useMutation } from "convex/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import type { Source } from "@/lib/types";
 import { api } from "../../convex/_generated/api";
 import { streamRegistry } from "./stream-registry";
 
@@ -178,7 +178,13 @@ export function useChat(threadId: string | undefined) {
       const abortController = new AbortController();
       abortControllerRef.current = abortController;
 
-      const result = await executeStreamPhase(threadId, content, insertMutation, convex, abortController);
+      const result = await executeStreamPhase(
+        threadId,
+        content,
+        insertMutation,
+        convex,
+        abortController,
+      );
 
       if (!result.ok && result.error !== "aborted") {
         setError(result.error);

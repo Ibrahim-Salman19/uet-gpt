@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { internal } from "./_generated/api";
 import { action, internalMutation, internalQuery } from "./_generated/server";
 
@@ -35,6 +35,11 @@ export const evaluateSearch = action({
     topK: v.number(),
   },
   handler: async (ctx, args): Promise<Array<{ ragId: string; text: string; url: string }>> => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new ConvexError("Authentication required");
+    }
+
     const { rag } = await import("./rag/instance.js");
     const vectorResults = await rag.search(ctx, {
       namespace: "uet-global",

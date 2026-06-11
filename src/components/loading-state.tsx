@@ -31,10 +31,16 @@ function MessageSkeleton({ isUser }: { isUser: boolean }) {
             <div className="absolute top-0 bottom-0 left-0 w-1/3 bg-[var(--ks-kinpaku-gold)] animate-progress" />
           </div>
           <div className="h-[1px] bg-white/10 w-[75%] relative overflow-hidden">
-            <div className="absolute top-0 bottom-0 left-0 w-1/3 bg-[var(--ks-kinpaku-gold)] animate-progress" style={{ animationDelay: "150ms" }} />
+            <div
+              className="absolute top-0 bottom-0 left-0 w-1/3 bg-[var(--ks-kinpaku-gold)] animate-progress"
+              style={{ animationDelay: "150ms" }}
+            />
           </div>
           <div className="h-[1px] bg-white/10 w-[50%] relative overflow-hidden">
-            <div className="absolute top-0 bottom-0 left-0 w-1/3 bg-[var(--ks-kinpaku-gold)] animate-progress" style={{ animationDelay: "300ms" }} />
+            <div
+              className="absolute top-0 bottom-0 left-0 w-1/3 bg-[var(--ks-kinpaku-gold)] animate-progress"
+              style={{ animationDelay: "300ms" }}
+            />
           </div>
         </div>
       </div>

@@ -70,7 +70,7 @@ export const rerank = action({
           return body.results
             .filter((r) => r.index >= 0 && r.index < docs.length)
             .map((r) => ({
-              text: docs[r.index].text,
+              text: docs[r.index]?.text ?? "",
               score: r.relevance_score,
               index: r.index,
             }));

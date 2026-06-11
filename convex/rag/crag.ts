@@ -5,10 +5,7 @@ import { z } from "zod";
 import { action } from "../_generated/server";
 import { CRAG_CONFIG } from "./constants";
 
-function buildCragPrompt(
-  query: string,
-  batch: Array<{ text: string; index: number }>,
-): string {
+function buildCragPrompt(query: string, batch: Array<{ text: string; index: number }>): string {
   const chunksText = batch
     .map(
       (c, i) => `[Chunk ${i}]

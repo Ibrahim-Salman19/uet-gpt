@@ -11,7 +11,7 @@ export default defineConfig({
     ["json", { outputFile: "test-results/results.json" }],
   ],
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || "http://localhost:3000",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
@@ -39,10 +39,10 @@ export default defineConfig({
       dependencies: ["setup"],
     },
   ],
-  /* webServer: {
-    command: "npm run dev", // Use dev server for faster E2E test runs locally
+  webServer: {
+    command: "pnpm run dev", // Use dev server for faster E2E test runs locally
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 180 * 1000,
-  }, */
+  },
 });

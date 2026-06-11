@@ -73,20 +73,22 @@ export async function checkChatRateLimit(
         : userLimiter;
 
   if (!limiter) {
-    return null; // Rate limiting not configured — allow through
+    console.warn("[RATE-LIMIT] Rate limiting not configured — allowing through");
+    return null;
   }
 
   try {
     return await limiter.limit(identifier);
-  } catch {
-    return null; // Redis down — allow through gracefully
+  } catch (error) {
+    console.error("[RATE-LIMIT] Redis error — allowing through:", error);
+    return null;
   }
 }
 
 /**
  * Get remaining requests for a user — used to show in UI.
  */
-async function getChatRateLimitRemaining(
+export async function getChatRateLimitRemaining(
   identifier: string,
   role: "user" | "admin" | "superadmin" | "anonymous" = "user",
 ): Promise<{ remaining: number; limit: number; configured: boolean }> {

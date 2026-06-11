@@ -112,8 +112,8 @@ export function ChatMessages({
   }
 
   return (
-    <ScrollArea ref={scrollRef} className={cn("h-full w-full", className)}>
-      <div className="mx-auto flex max-w-5xl w-full flex-col gap-1 pt-4 pb-32 md:pb-40">
+    <ScrollArea ref={scrollRef} className={cn("h-full w-full scroll-momentum", className)}>
+      <div className="mx-auto flex w-full flex-col gap-1 pt-4 pb-36 md:pb-32 lg:pb-36 max-w-none xl:max-w-5xl 2xl:max-w-6xl px-0">
         {messages.map((message, index) => (
           <div
             key={message.id}

@@ -56,9 +56,7 @@ async function judgeRelevanceBatch(
     return chunks.map((_, i) => ({ index: i, relevant: false }));
   }
 
-  const chunkList = chunks
-    .map((c, i) => `[${i}] ${c.text.substring(0, 500)}`)
-    .join("\n---\n");
+  const chunkList = chunks.map((c, i) => `[${i}] ${c.text.substring(0, 500)}`).join("\n---\n");
 
   try {
     const { text } = await generateText({
@@ -67,13 +65,16 @@ async function judgeRelevanceBatch(
         "You are a strict relevance judge. Given a query and a list of text chunks, " +
         "determine which chunks contain information that helps answer the query. " +
         "Output a JSON array of objects with 'index' (number) and 'relevant' (boolean). " +
-        "Example: [{\"index\":0,\"relevant\":true},{\"index\":1,\"relevant\":false}]",
+        'Example: [{"index":0,"relevant":true},{"index":1,"relevant":false}]',
       prompt: `Query: "${query}"\n\nChunks:\n${chunkList}\n\nWhich chunks are relevant?`,
       temperature: 0,
       maxOutputTokens: 500,
     });
 
-    const cleaned = text.replace(/```json?/gi, "").replace(/```/g, "").trim();
+    const cleaned = text
+      .replace(/```json?/gi, "")
+      .replace(/```/g, "")
+      .trim();
     const parsed = JSON.parse(cleaned) as RelevanceJudgment[];
 
     if (Array.isArray(parsed) && parsed.length === chunks.length) {
@@ -165,15 +166,12 @@ export const runEval = action({
 
             const judgments = await judgeRelevanceBatch(item.query, retrievedChunks);
 
-            const relevantSet = new Set(
-              judgments.filter((j) => j.relevant).map((j) => j.index),
-            );
+            const relevantSet = new Set(judgments.filter((j) => j.relevant).map((j) => j.index));
 
             const relevantCount = relevantSet.size;
 
             const firstRelevantRank = judgments.findIndex((j) => j.relevant);
-            const reciprocalRank =
-              firstRelevantRank >= 0 ? 1 / (firstRelevantRank + 1) : 0;
+            const reciprocalRank = firstRelevantRank >= 0 ? 1 / (firstRelevantRank + 1) : 0;
 
             retrievedChunks = retrievedChunks.map((c, idx) => ({
               ...c,
@@ -236,26 +234,25 @@ export const runEval = action({
 
     const recallAtK =
       completedQueries.length > 0
-        ? completedQueries.filter((q) => q.relevantCount > 0).length /
-          completedQueries.length
+        ? completedQueries.filter((q) => q.relevantCount > 0).length / completedQueries.length
         : 0;
 
     const precisionAtK =
       completedQueries.length > 0
-        ? completedQueries.reduce((sum, q) => sum + q.relevantCount / Math.max(q.retrievedCount, 1), 0) /
-          completedQueries.length
+        ? completedQueries.reduce(
+            (sum, q) => sum + q.relevantCount / Math.max(q.retrievedCount, 1),
+            0,
+          ) / completedQueries.length
         : 0;
 
     const mrr =
       completedQueries.length > 0
-        ? completedQueries.reduce((sum, q) => sum + q.reciprocalRank, 0) /
-          completedQueries.length
+        ? completedQueries.reduce((sum, q) => sum + q.reciprocalRank, 0) / completedQueries.length
         : 0;
 
     const avgLatency =
       completedQueries.length > 0
-        ? completedQueries.reduce((sum, q) => sum + q.latency, 0) /
-          completedQueries.length
+        ? completedQueries.reduce((sum, q) => sum + q.latency, 0) / completedQueries.length
         : 0;
 
     const metrics: EvalMetrics = {
@@ -287,12 +284,19 @@ export const runEvalWithDataset = action({
       maxFeedbackEntries: EVAL_MAX_QUERIES,
     });
 
-    const queries: EvalQuery[] = exportResult.entries.map((e: { query: string; expectedAnswer: string; rating: string; category: string | undefined }) => ({
-      query: e.query,
-      expectedAnswer: e.expectedAnswer,
-      rating: e.rating,
-      category: e.category,
-    }));
+    const queries: EvalQuery[] = exportResult.entries.map(
+      (e: {
+        query: string;
+        expectedAnswer: string;
+        rating: string;
+        category: string | undefined;
+      }) => ({
+        query: e.query,
+        expectedAnswer: e.expectedAnswer,
+        rating: e.rating,
+        category: e.category,
+      }),
+    );
 
     if (queries.length === 0) {
       return {

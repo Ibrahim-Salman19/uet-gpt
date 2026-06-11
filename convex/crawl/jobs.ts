@@ -1,7 +1,12 @@
 import { v } from "convex/values";
 import { internalMutation } from "../_generated/server";
 
-async function deleteAbandonedDLQ(ctx: any, batchSize: number, now: number, cutoff: number): Promise<number> {
+async function deleteAbandonedDLQ(
+  ctx: any,
+  batchSize: number,
+  now: number,
+  cutoff: number,
+): Promise<number> {
   const abandonedDLQ = await ctx.db
     .query("crawlDeadLetter")
     .withIndex("by_status", (q: any) => q.eq("status", "abandoned"))
@@ -17,7 +22,12 @@ async function deleteAbandonedDLQ(ctx: any, batchSize: number, now: number, cuto
   return totalDeleted;
 }
 
-async function deleteOldJobsByStatus(ctx: any, batchSize: number, now: number, cutoff: number): Promise<number> {
+async function deleteOldJobsByStatus(
+  ctx: any,
+  batchSize: number,
+  now: number,
+  cutoff: number,
+): Promise<number> {
   const jobStatuses = ["completed", "failed", "cancelled"] as const;
   let totalDeleted = 0;
   for (const status of jobStatuses) {

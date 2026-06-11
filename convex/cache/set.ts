@@ -1,5 +1,7 @@
-import { v } from "convex/values";
-import { mutation } from "../_generated/server";
+import { ConvexError, v } from "convex/values";
+import { internal } from "../_generated/api";
+import type { Id } from "../_generated/dataModel";
+import { action, internalMutation } from "../_generated/server";
 
 const DAY = 24 * 60 * 60 * 1000;
 const TTL_HIGH = 5 * DAY;
@@ -13,7 +15,7 @@ function tierToTtl(tier: "high" | "medium" | "low" | undefined, fallback: number
   return fallback;
 }
 
-export const set = mutation({
+export const set = internalMutation({
   args: {
     queryText: v.string(),
     queryEmbedding: v.array(v.float64()),
@@ -61,5 +63,48 @@ export const set = mutation({
       ...(args.alternateEmbeddings ? { alternateEmbeddings: args.alternateEmbeddings } : {}),
     });
     return id;
+  },
+});
+
+/**
+ * Public action wrapper for cache set — validates caller is server-side.
+ * Only callable from trusted server contexts (Next.js API routes, cron jobs).
+ */
+export const setFromServer = action({
+  args: {
+    queryText: v.string(),
+    queryEmbedding: v.array(v.float64()),
+    response: v.string(),
+    sources: v.array(
+      v.object({
+        entryId: v.string(),
+        url: v.string(),
+        title: v.string(),
+        relevanceScore: v.number(),
+        excerpt: v.string(),
+        headingPath: v.optional(v.array(v.string())),
+      }),
+    ),
+    model: v.string(),
+    tokenCount: v.optional(
+      v.object({
+        prompt: v.number(),
+        completion: v.number(),
+        total: v.number(),
+      }),
+    ),
+    ttlMs: v.optional(v.number()),
+    freshnessTier: v.optional(v.union(v.literal("high"), v.literal("medium"), v.literal("low"))),
+    sourceEntryIds: v.optional(v.array(v.string())),
+    alternateQueryTexts: v.optional(v.array(v.string())),
+    alternateEmbeddings: v.optional(v.array(v.array(v.float64()))),
+  },
+  returns: v.id("semanticCache"),
+  handler: async (ctx, args): Promise<Id<"semanticCache">> => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new ConvexError("Authentication required");
+    }
+    return await ctx.runMutation(internal.cache.set.set, args);
   },
 });

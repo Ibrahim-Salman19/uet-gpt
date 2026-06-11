@@ -194,9 +194,7 @@ function FeedbackButtons({
                 ? "text-[var(--destructive)]"
                 : "text-[var(--text-muted)] hover:text-[var(--text-primary)]",
             )}
-            aria-label={
-              feedback === "thumbsDown" ? "Remove not helpful" : "Mark as not helpful"
-            }
+            aria-label={feedback === "thumbsDown" ? "Remove not helpful" : "Mark as not helpful"}
             data-touch-target="true"
           >
             <ThumbsDown className="h-3.5 w-3.5" />
@@ -230,7 +228,7 @@ export function MessageActions({
     <div
       className={cn(
         "flex items-center gap-0.5 transition-opacity duration-[var(--duration-normal)]",
-        show ? "opacity-100" : "opacity-0 group-hover:opacity-100",
+        show ? "opacity-100" : "opacity-75 lg:opacity-0 lg:group-hover:opacity-100",
         className,
       )}
     >
@@ -241,7 +239,13 @@ export function MessageActions({
 
       <DeleteButton onDelete={onDelete} />
 
-      {role === "assistant" && <FeedbackButtons feedback={feedback} onFeedback={onFeedback} onFeedbackChange={setFeedback} />}
+      {role === "assistant" && (
+        <FeedbackButtons
+          feedback={feedback}
+          onFeedback={onFeedback}
+          onFeedbackChange={setFeedback}
+        />
+      )}
     </div>
   );
 }

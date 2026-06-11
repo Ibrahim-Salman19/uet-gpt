@@ -1,13 +1,8 @@
-import { ConvexError, v, Infer } from "convex/values";
+import { ConvexError, type Infer, v } from "convex/values";
 import { api, internal } from "../_generated/api";
 import { action } from "../_generated/server";
-import { truncateQuery, recordTiming } from "../observability/metrics";
-import {
-  type ConfidenceTier,
-  INJECTION_RE,
-  MAX_QUERY_LEN,
-  CRAG_CONFIG,
-} from "./constants";
+import { recordTiming, truncateQuery } from "../observability/metrics";
+import { type ConfidenceTier, CRAG_CONFIG, INJECTION_RE, MAX_QUERY_LEN } from "./constants";
 
 function scanForInjection(query: string): string {
   if (!query || typeof query !== "string") {
@@ -75,11 +70,7 @@ const sourceValidator = v.object({
   headingPath: v.optional(v.array(v.string())),
 });
 
-async function classifyUserIntent(
-  ctx: any,
-  actions: any,
-  safeQuestion: string,
-): Promise<string> {
+async function classifyUserIntent(ctx: any, actions: any, safeQuestion: string): Promise<string> {
   try {
     return await ctx.runAction(actions.rag.routing.classifyQueryAction, {
       query: safeQuestion,
@@ -96,16 +87,16 @@ async function classifyUserIntent(
 async function enrichQuery(
   ctx: any,
   actions: any,
+  internals: any,
   safeQuestion: string,
 ): Promise<{ rewrittenQuery: string; hydeQuery: string }> {
   const [rewrittenQuery, hydeQuery] = await Promise.allSettled([
     ctx.runAction(actions.rag.routing.rewriteQueryAction, { query: safeQuestion }),
-    ctx.runAction(actions.rag.routing.hydeQueryAction, { query: safeQuestion }),
+    ctx.runAction(internals.rag.routing.hydeQueryAction, { query: safeQuestion }),
   ]);
 
   return {
-    rewrittenQuery:
-      rewrittenQuery.status === "fulfilled" ? rewrittenQuery.value : safeQuestion,
+    rewrittenQuery: rewrittenQuery.status === "fulfilled" ? rewrittenQuery.value : safeQuestion,
     hydeQuery: hydeQuery.status === "fulfilled" ? hydeQuery.value : safeQuestion,
   };
 }
@@ -211,17 +202,17 @@ async function rerankSearchResults(
       topK: 4,
     });
 
-    return reranked.map(
-      (item: { text: string; score: number; index: number }) => {
+    return reranked
+      .filter(
+        (item: { text: string; score: number; index: number }) =>
+          item.index >= 0 && item.index < results.length,
+      )
+      .map((item: { text: string; score: number; index: number }) => {
         const original = results[item.index];
         return { ...original, relevanceScore: item.score };
-      },
-    );
+      });
   } catch (e) {
-    console.warn(
-      "Cascade reranking failed, using original search fallback sliced to top 4:",
-      e,
-    );
+    console.warn("Cascade reranking failed, using original search fallback sliced to top 4:", e);
     return results.slice(0, 4);
   }
 }
@@ -327,13 +318,7 @@ async function searchAndRerank(
     hydeQuery,
     intent,
   );
-  const reranked = await rerankSearchResults(
-    ctx,
-    actions,
-    rewrittenQuery,
-    safeQuestion,
-    results,
-  );
+  const reranked = await rerankSearchResults(ctx, actions, rewrittenQuery, safeQuestion, results);
   const sources = buildSourcesFromResults(reranked);
   return { results: reranked, sources };
 }
@@ -363,10 +348,7 @@ async function buildResponseContext(
         maxTokens: 3000,
       });
     } catch (e) {
-      console.error(
-        "Context building failed, falling back to raw concatenation:",
-        e,
-      );
+      console.error("Context building failed, falling back to raw concatenation:", e);
       context = searchResults.map((r) => r.content).join("\n\n---\n\n");
     }
   }
@@ -426,7 +408,7 @@ export const retrieveContext = action({
       };
     }
 
-    const { rewrittenQuery, hydeQuery } = await enrichQuery(ctx, _a, safeQuestion);
+    const { rewrittenQuery, hydeQuery } = await enrichQuery(ctx, _a, _i, safeQuestion);
     const queryEmbedding = await generateQueryEmbedding(
       ctx,
       _a,
@@ -476,8 +458,11 @@ export const retrieveContext = action({
       retrievalLatencyMs: retrievalLatency,
     });
 
-    const { finalResults, finalSources, tier: cragTier } =
-      await evaluateWithCrag(ctx, _a, safeQuestion, results);
+    const {
+      finalResults,
+      finalSources,
+      tier: cragTier,
+    } = await evaluateWithCrag(ctx, _a, safeQuestion, results);
 
     const context = await buildResponseContext(ctx, _i, finalResults, cragTier);
 

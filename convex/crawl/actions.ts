@@ -137,20 +137,14 @@ async function mergeSitemapUrls(): Promise<string[]> {
       );
     }
   } catch (sitemapErr) {
-    console.warn(
-      "Sitemap pre-seeding failed, falling back to configured seed URLs:",
-      sitemapErr,
-    );
+    console.warn("Sitemap pre-seeding failed, falling back to configured seed URLs:", sitemapErr);
   }
   return mergedUrls;
 }
 
 // Crash recovery: if a saved state exists, pass resume_state to BFSDeepCrawlStrategy
 // so BFS progress persists across container restarts.
-async function getSavedCrawlState(
-  ctx: any,
-  jobId: Id<"crawlJobs">,
-): Promise<unknown> {
+async function getSavedCrawlState(ctx: any, jobId: Id<"crawlJobs">): Promise<unknown> {
   const job = await ctx.runQuery(internal.crawl.queries.getJobById, { jobId });
   return (job as Doc<"crawlJobs"> & { crawlState?: unknown })?.crawlState ?? null;
 }
@@ -331,12 +325,14 @@ export const embedSingleChunk = internalAction({
         headingPath: args.headingPath,
       });
 
-      ctx.runAction(internal.embeddings.contextualize.contextualizeNewChunk, {
-        documentId: args.documentId,
-        contentHash: args.contentHash,
-      }).catch((err: unknown) => {
-        console.warn("Immediate contextualization failed:", err);
-      });
+      ctx
+        .runAction(internal.embeddings.contextualize.contextualizeNewChunk, {
+          documentId: args.documentId,
+          contentHash: args.contentHash,
+        })
+        .catch((err: unknown) => {
+          console.warn("Immediate contextualization failed:", err);
+        });
 
       return {
         success: true,
@@ -357,6 +353,7 @@ export const embedSingleChunk = internalAction({
           contentHash: args.contentHash,
           documentId: args.documentId,
           url: args.url,
+          chunkText: args.chunkText,
         };
       }
 

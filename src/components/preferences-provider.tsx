@@ -175,41 +175,73 @@ function loadFontSizeInitial(): "small" | "medium" | "large" {
 }
 
 function usePreferencesState() {
-  const [fontSize, setFontSizeState] = React.useState<"small" | "medium" | "large">(loadFontSizeInitial);
+  const [fontSize, setFontSizeState] = React.useState<"small" | "medium" | "large">(
+    loadFontSizeInitial,
+  );
   const [accentTheme, setAccentThemeState] = React.useState<AccentTheme>(loadAccentThemeInitial);
-  const [webglEnabled, setWebglEnabled] = React.useState(() => loadBooleanInitial("pref-webgl", true));
+  const [webglEnabled, setWebglEnabled] = React.useState(() =>
+    loadBooleanInitial("pref-webgl", true),
+  );
   const [glowEnabled, setGlowEnabled] = React.useState(() => loadBooleanInitial("pref-glow", true));
-  const [animsEnabled, setAnimsEnabled] = React.useState(() => loadBooleanInitial("pref-anims", true));
-  const [soundsEnabled, setSoundsEnabled] = React.useState(() => loadBooleanInitial("pref-sounds", true));
-  const [typingAnimEnabled, setTypingAnimEnabled] = React.useState(() => loadBooleanInitial("pref-typing-anim", true));
-  const [typingSoundEnabled, setTypingSoundEnabled] = React.useState(() => loadBooleanInitial("pref-typing-sound", true));
-  const [pinnedHighlights, setPinnedHighlights] = React.useState<PinnedHighlight[]>(loadPinsInitial);
+  const [animsEnabled, setAnimsEnabled] = React.useState(() =>
+    loadBooleanInitial("pref-anims", true),
+  );
+  const [soundsEnabled, setSoundsEnabled] = React.useState(() =>
+    loadBooleanInitial("pref-sounds", true),
+  );
+  const [typingAnimEnabled, setTypingAnimEnabled] = React.useState(() =>
+    loadBooleanInitial("pref-typing-anim", true),
+  );
+  const [typingSoundEnabled, setTypingSoundEnabled] = React.useState(() =>
+    loadBooleanInitial("pref-typing-sound", true),
+  );
+  const [pinnedHighlights, setPinnedHighlights] =
+    React.useState<PinnedHighlight[]>(loadPinsInitial);
   const [commandPaletteOpen, setCommandPaletteOpen] = React.useState(false);
   const [diagnosticsOpen, setDiagnosticsOpen] = React.useState(false);
   const [voiceInputOpen, setVoiceInputOpen] = React.useState(false);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
 
   return {
-    fontSize, setFontSizeState,
-    accentTheme, setAccentThemeState,
-    webglEnabled, setWebglEnabled,
-    glowEnabled, setGlowEnabled,
-    animsEnabled, setAnimsEnabled,
-    soundsEnabled, setSoundsEnabled,
-    typingAnimEnabled, setTypingAnimEnabled,
-    typingSoundEnabled, setTypingSoundEnabled,
-    pinnedHighlights, setPinnedHighlights,
-    commandPaletteOpen, setCommandPaletteOpen,
-    diagnosticsOpen, setDiagnosticsOpen,
-    voiceInputOpen, setVoiceInputOpen,
-    settingsOpen, setSettingsOpen,
+    fontSize,
+    setFontSizeState,
+    accentTheme,
+    setAccentThemeState,
+    webglEnabled,
+    setWebglEnabled,
+    glowEnabled,
+    setGlowEnabled,
+    animsEnabled,
+    setAnimsEnabled,
+    soundsEnabled,
+    setSoundsEnabled,
+    typingAnimEnabled,
+    setTypingAnimEnabled,
+    typingSoundEnabled,
+    setTypingSoundEnabled,
+    pinnedHighlights,
+    setPinnedHighlights,
+    commandPaletteOpen,
+    setCommandPaletteOpen,
+    diagnosticsOpen,
+    setDiagnosticsOpen,
+    voiceInputOpen,
+    setVoiceInputOpen,
+    settingsOpen,
+    setSettingsOpen,
   };
 }
 
-function syncPrefFromConvex<T>(val: T | undefined, setter: (v: T) => void, storageKey: string): void {
+function syncPrefFromConvex<T>(
+  val: T | undefined,
+  setter: (v: T) => void,
+  storageKey: string,
+): void {
   if (val == null) return;
   setter(val);
-  try { localStorage.setItem(storageKey, String(val)); } catch {}
+  try {
+    localStorage.setItem(storageKey, String(val));
+  } catch {}
 }
 
 function useConvexPreferenceSync(
@@ -220,8 +252,16 @@ function useConvexPreferenceSync(
   React.useEffect(() => {
     const prefs = userData?.preferences;
     if (!prefs) return;
-    syncPrefFromConvex(prefs.fontSize as "small" | "medium" | "large" | undefined, setFontSizeState, "pref-font-size");
-    syncPrefFromConvex(prefs.theme as AccentTheme | undefined, setAccentThemeState, "pref-accent-theme");
+    syncPrefFromConvex(
+      prefs.fontSize as "small" | "medium" | "large" | undefined,
+      setFontSizeState,
+      "pref-font-size",
+    );
+    syncPrefFromConvex(
+      prefs.theme as AccentTheme | undefined,
+      setAccentThemeState,
+      "pref-accent-theme",
+    );
   }, [userData]);
 }
 
@@ -247,10 +287,19 @@ function useThemeEffect(accentTheme: AccentTheme) {
 }
 
 function usePreferencePersistence({
-  webglEnabled, glowEnabled, animsEnabled, soundsEnabled, typingAnimEnabled, typingSoundEnabled,
+  webglEnabled,
+  glowEnabled,
+  animsEnabled,
+  soundsEnabled,
+  typingAnimEnabled,
+  typingSoundEnabled,
 }: {
-  webglEnabled: boolean; glowEnabled: boolean; animsEnabled: boolean;
-  soundsEnabled: boolean; typingAnimEnabled: boolean; typingSoundEnabled: boolean;
+  webglEnabled: boolean;
+  glowEnabled: boolean;
+  animsEnabled: boolean;
+  soundsEnabled: boolean;
+  typingAnimEnabled: boolean;
+  typingSoundEnabled: boolean;
 }) {
   React.useEffect(() => {
     const body = document.body;
@@ -265,7 +314,14 @@ function usePreferencePersistence({
     localStorage.setItem("pref-typing-anim", String(typingAnimEnabled));
     localStorage.setItem("pref-typing-sound", String(typingSoundEnabled));
     localStorage.setItem("pref-anims", String(animsEnabled));
-  }, [webglEnabled, glowEnabled, soundsEnabled, typingAnimEnabled, typingSoundEnabled, animsEnabled]);
+  }, [
+    webglEnabled,
+    glowEnabled,
+    soundsEnabled,
+    typingAnimEnabled,
+    typingSoundEnabled,
+    animsEnabled,
+  ]);
 }
 
 function useGlobalClickSound(soundsEnabled: boolean, playTapSound: () => void) {
@@ -304,7 +360,9 @@ function usePreferenceActions(
     setSoundsEnabled: (v: boolean | ((p: boolean) => boolean)) => void;
     setTypingAnimEnabled: (v: boolean | ((p: boolean) => boolean)) => void;
     setTypingSoundEnabled: (v: boolean | ((p: boolean) => boolean)) => void;
-    setPinnedHighlights: (v: PinnedHighlight[] | ((p: PinnedHighlight[]) => PinnedHighlight[])) => void;
+    setPinnedHighlights: (
+      v: PinnedHighlight[] | ((p: PinnedHighlight[]) => PinnedHighlight[]),
+    ) => void;
   },
   pinnedHighlights: PinnedHighlight[],
 ) {
@@ -395,61 +453,125 @@ function usePreferenceActions(
     [pinnedHighlights],
   );
 
-  return { setAccentTheme, toggleSetting, updateModelPreference, resetPreferences, addPin, removePin, isPinned };
+  return {
+    setAccentTheme,
+    toggleSetting,
+    updateModelPreference,
+    resetPreferences,
+    addPin,
+    removePin,
+    isPinned,
+  };
 }
 
 export function PreferencesProvider({ children }: { children: React.ReactNode }) {
   const { convexUser: userData, modelPreference } = useUserData();
   const updatePreferences = useMutation(api.users.updatePreferences);
   const {
-    fontSize, setFontSizeState,
-    accentTheme, setAccentThemeState,
-    webglEnabled, setWebglEnabled,
-    glowEnabled, setGlowEnabled,
-    animsEnabled, setAnimsEnabled,
-    soundsEnabled, setSoundsEnabled,
-    typingAnimEnabled, setTypingAnimEnabled,
-    typingSoundEnabled, setTypingSoundEnabled,
-    pinnedHighlights, setPinnedHighlights,
-    commandPaletteOpen, setCommandPaletteOpen,
-    diagnosticsOpen, setDiagnosticsOpen,
-    voiceInputOpen, setVoiceInputOpen,
-    settingsOpen, setSettingsOpen,
+    fontSize,
+    setFontSizeState,
+    accentTheme,
+    setAccentThemeState,
+    webglEnabled,
+    setWebglEnabled,
+    glowEnabled,
+    setGlowEnabled,
+    animsEnabled,
+    setAnimsEnabled,
+    soundsEnabled,
+    setSoundsEnabled,
+    typingAnimEnabled,
+    setTypingAnimEnabled,
+    typingSoundEnabled,
+    setTypingSoundEnabled,
+    pinnedHighlights,
+    setPinnedHighlights,
+    commandPaletteOpen,
+    setCommandPaletteOpen,
+    diagnosticsOpen,
+    setDiagnosticsOpen,
+    voiceInputOpen,
+    setVoiceInputOpen,
+    settingsOpen,
+    setSettingsOpen,
   } = usePreferencesState();
   const { voiceTranscriptCallback, setVoiceTranscriptCallback } = useVoiceTranscriptCallback();
   useConvexPreferenceSync(userData, setFontSizeState, setAccentThemeState);
   useFontSizeEffect(fontSize);
   useThemeEffect(accentTheme);
-  usePreferencePersistence({ webglEnabled, glowEnabled, animsEnabled, soundsEnabled, typingAnimEnabled, typingSoundEnabled });
+  usePreferencePersistence({
+    webglEnabled,
+    glowEnabled,
+    animsEnabled,
+    soundsEnabled,
+    typingAnimEnabled,
+    typingSoundEnabled,
+  });
 
   const {
-    setAccentTheme, toggleSetting, updateModelPreference,
-    resetPreferences, addPin, removePin, isPinned,
-  } = usePreferenceActions(updatePreferences, {
-    setAccentThemeState, setWebglEnabled, setGlowEnabled, setAnimsEnabled,
-    setSoundsEnabled, setTypingAnimEnabled, setTypingSoundEnabled, setPinnedHighlights,
-  }, pinnedHighlights);
+    setAccentTheme,
+    toggleSetting,
+    updateModelPreference,
+    resetPreferences,
+    addPin,
+    removePin,
+    isPinned,
+  } = usePreferenceActions(
+    updatePreferences,
+    {
+      setAccentThemeState,
+      setWebglEnabled,
+      setGlowEnabled,
+      setAnimsEnabled,
+      setSoundsEnabled,
+      setTypingAnimEnabled,
+      setTypingSoundEnabled,
+      setPinnedHighlights,
+    },
+    pinnedHighlights,
+  );
 
-  const {
-    playTypingSound, playTapSound, playSweepSound, playChimeSound,
-  } = useAudioSynth(soundsEnabled, typingSoundEnabled);
+  const { playTypingSound, playTapSound, playSweepSound, playChimeSound } = useAudioSynth(
+    soundsEnabled,
+    typingSoundEnabled,
+  );
 
   useGlobalClickSound(soundsEnabled, playTapSound);
 
   return (
     <PreferencesContext.Provider
       value={{
-        accentTheme, webglEnabled, glowEnabled, animsEnabled,
-        soundsEnabled, typingAnimEnabled, typingSoundEnabled,
-        pinnedHighlights, fontSize, modelPreference, updateModelPreference,
-        commandPaletteOpen, setCommandPaletteOpen,
-        diagnosticsOpen, setDiagnosticsOpen,
-        voiceInputOpen, setVoiceInputOpen,
-        settingsOpen, setSettingsOpen,
-        voiceTranscriptCallback, setVoiceTranscriptCallback,
-        setAccentTheme, toggleSetting, resetPreferences,
-        addPin, removePin, isPinned,
-        playTypingSound, playTapSound, playSweepSound, playChimeSound,
+        accentTheme,
+        webglEnabled,
+        glowEnabled,
+        animsEnabled,
+        soundsEnabled,
+        typingAnimEnabled,
+        typingSoundEnabled,
+        pinnedHighlights,
+        fontSize,
+        modelPreference,
+        updateModelPreference,
+        commandPaletteOpen,
+        setCommandPaletteOpen,
+        diagnosticsOpen,
+        setDiagnosticsOpen,
+        voiceInputOpen,
+        setVoiceInputOpen,
+        settingsOpen,
+        setSettingsOpen,
+        voiceTranscriptCallback,
+        setVoiceTranscriptCallback,
+        setAccentTheme,
+        toggleSetting,
+        resetPreferences,
+        addPin,
+        removePin,
+        isPinned,
+        playTypingSound,
+        playTapSound,
+        playSweepSound,
+        playChimeSound,
       }}
     >
       {children}

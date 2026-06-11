@@ -1,13 +1,9 @@
-export function enrichHeadingPath(
-  headingPath: string[] | undefined,
-): string {
+export function enrichHeadingPath(headingPath: string[] | undefined): string {
   if (!headingPath || headingPath.length === 0) return "";
   return `Section: ${headingPath.join(" > ")}`;
 }
 
-export function buildHeadingContextLabel(
-  headingPath: string[] | undefined,
-): string | undefined {
+export function buildHeadingContextLabel(headingPath: string[] | undefined): string | undefined {
   if (!headingPath || headingPath.length === 0) return undefined;
   return headingPath.join(" > ");
 }

@@ -27,12 +27,8 @@ interface CommandItemData {
 }
 
 function useCommandPalette() {
-  const {
-    setSettingsOpen,
-    setDiagnosticsOpen,
-    setAccentTheme,
-    setCommandPaletteOpen,
-  } = usePreferences();
+  const { setSettingsOpen, setDiagnosticsOpen, setAccentTheme, setCommandPaletteOpen } =
+    usePreferences();
 
   const router = useRouter();
   const createThread = useMutation(api.threads.create);
@@ -116,7 +112,10 @@ function useCommandPalette() {
   return { commands };
 }
 
-function useCommandQuery(commands: CommandItemData[], onSelectItem: (cmd: CommandItemData) => void) {
+function useCommandQuery(
+  commands: CommandItemData[],
+  onSelectItem: (cmd: CommandItemData) => void,
+) {
   const [query, setQuery] = React.useState("");
   const [selectedIndex, setSelectedIndex] = React.useState(0);
 
@@ -167,9 +166,7 @@ function CommandItem({
       onClick={() => onSelect(cmd)}
       className={cn(
         "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-all duration-150 group active:scale-[0.99] border border-transparent cursor-pointer",
-        isSelected
-          ? "bg-white/10 text-white border-white/10"
-          : "hover:bg-white/5 hover:text-white",
+        isSelected ? "bg-white/10 text-white border-white/10" : "hover:bg-white/5 hover:text-white",
       )}
     >
       <div className="flex items-center gap-3">
@@ -187,7 +184,11 @@ function CommandItem({
 }
 
 function CommandPaletteContent({
-  query, setQuery, filteredCommands, selectedIndex, handleSelect,
+  query,
+  setQuery,
+  filteredCommands,
+  selectedIndex,
+  handleSelect,
 }: {
   query: string;
   setQuery: (q: string) => void;
@@ -210,16 +211,30 @@ function CommandPaletteContent({
           autoFocus
         />
         <div className="flex items-center gap-1 shrink-0 select-none">
-          <kbd className="px-1.5 py-0.5 rounded bg-zinc-900 border border-white/10 text-[9px] font-mono text-zinc-500 shadow-sm">ESC</kbd>
+          <kbd className="px-1.5 py-0.5 rounded bg-zinc-900 border border-white/10 text-[9px] font-mono text-zinc-500 shadow-sm">
+            ESC
+          </kbd>
         </div>
       </div>
-      <div id="cmd-list" className="max-h-[320px] overflow-y-auto custom-scroll p-2 space-y-0.5 text-zinc-300">
-        <div className="text-[9px] font-mono text-zinc-500 uppercase tracking-wider px-3 py-2 select-none">Quick Actions</div>
+      <div
+        id="cmd-list"
+        className="max-h-[320px] overflow-y-auto custom-scroll p-2 space-y-0.5 text-zinc-300"
+      >
+        <div className="text-[9px] font-mono text-zinc-500 uppercase tracking-wider px-3 py-2 select-none">
+          Quick Actions
+        </div>
         {filteredCommands.length === 0 ? (
-          <div className="text-xs text-zinc-500 py-6 text-center font-sans">No commands found matching &quot;{query}&quot;</div>
+          <div className="text-xs text-zinc-500 py-6 text-center font-sans">
+            No commands found matching &quot;{query}&quot;
+          </div>
         ) : (
           filteredCommands.map((cmd, idx) => (
-            <CommandItem key={cmd.id} cmd={cmd} isSelected={idx === selectedIndex} onSelect={handleSelect} />
+            <CommandItem
+              key={cmd.id}
+              cmd={cmd}
+              isSelected={idx === selectedIndex}
+              onSelect={handleSelect}
+            />
           ))
         )}
       </div>
@@ -244,29 +259,52 @@ export function CommandPalette() {
   const { commandPaletteOpen, setCommandPaletteOpen, playTapSound } = usePreferences();
   const dialogRef = React.useRef<HTMLDialogElement | null>(null);
 
-  const handleClose = React.useCallback(() => setCommandPaletteOpen(false), [setCommandPaletteOpen]);
+  const handleClose = React.useCallback(
+    () => setCommandPaletteOpen(false),
+    [setCommandPaletteOpen],
+  );
   const handleSelect = React.useCallback(
-    (cmd: CommandItemData) => { playTapSound(); cmd.action(); setCommandPaletteOpen(false); },
+    (cmd: CommandItemData) => {
+      playTapSound();
+      cmd.action();
+      setCommandPaletteOpen(false);
+    },
     [playTapSound, setCommandPaletteOpen],
   );
 
   const { commands } = useCommandPalette();
-  const { query, setQuery, selectedIndex, setSelectedIndex, filteredCommands, handleKeyDown } = useCommandQuery(commands, handleSelect);
+  const { query, setQuery, selectedIndex, setSelectedIndex, filteredCommands, handleKeyDown } =
+    useCommandQuery(commands, handleSelect);
 
   useCommandPaletteHotkey(setCommandPaletteOpen);
 
   React.useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
-    if (commandPaletteOpen) { dialog.showModal(); setQuery(""); setSelectedIndex(0); }
-    else { dialog.close(); }
+    if (commandPaletteOpen) {
+      dialog.showModal();
+      setQuery("");
+      setSelectedIndex(0);
+    } else {
+      dialog.close();
+    }
   }, [commandPaletteOpen, setQuery, setSelectedIndex]);
 
   return (
-    <dialog ref={dialogRef} id="command-palette" onClose={handleClose} onKeyDown={handleKeyDown}
-      className="fixed inset-0 z-[100] m-auto bg-transparent p-0 w-full max-w-[500px] border-none outline-none">
-      <CommandPaletteContent query={query} setQuery={setQuery} filteredCommands={filteredCommands}
-        selectedIndex={selectedIndex} handleSelect={handleSelect} />
+    <dialog
+      ref={dialogRef}
+      id="command-palette"
+      onClose={handleClose}
+      onKeyDown={handleKeyDown}
+      className="fixed inset-0 z-[100] m-auto bg-transparent p-0 w-full max-w-[500px] border-none outline-none"
+    >
+      <CommandPaletteContent
+        query={query}
+        setQuery={setQuery}
+        filteredCommands={filteredCommands}
+        selectedIndex={selectedIndex}
+        handleSelect={handleSelect}
+      />
     </dialog>
   );
 }

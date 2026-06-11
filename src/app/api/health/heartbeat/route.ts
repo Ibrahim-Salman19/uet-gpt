@@ -1,20 +1,20 @@
-import { ConvexHttpClient } from "convex/browser";
 import { api } from "convex/_generated/api";
+import { ConvexHttpClient } from "convex/browser";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 /**
  * Lightweight HTTP heartbeat endpoint.
- * 
+ *
  * Called by ConvexConnectionMonitor every 25s as backup to useQuery subscription.
  * Bypasses React query cache to force WebSocket activity on the Convex connection.
- * 
+ *
  * Returns minimal JSON payload to minimize bandwidth.
  */
 export async function GET() {
   try {
     const result = await convex.query(api.health.heartbeat, {});
-    
+
     return new Response(JSON.stringify(result), {
       status: 200,
       headers: {
@@ -25,18 +25,21 @@ export async function GET() {
     });
   } catch (error) {
     console.error("[Heartbeat] Query failed:", error);
-    
-    return new Response(JSON.stringify({ 
-      ok: false, 
-      error: "Heartbeat failed",
-      timestamp: Date.now(),
-    }), {
-      status: 503,
-      headers: {
-        "Content-Type": "application/json",
-        "Cache-Control": "no-store, no-cache, must-revalidate",
+
+    return new Response(
+      JSON.stringify({
+        ok: false,
+        error: "Heartbeat failed",
+        timestamp: Date.now(),
+      }),
+      {
+        status: 503,
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+        },
       },
-    });
+    );
   }
 }
 

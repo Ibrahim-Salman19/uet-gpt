@@ -32,14 +32,14 @@ function CodeBlock({ language, children }: { language?: string; children: string
         </div>
       )}
       <div className="relative">
-        <pre className="overflow-x-auto bg-[var(--surface-base)] p-4 text-sm leading-relaxed">
+        <pre className="overflow-x-auto bg-[var(--surface-base)] p-3 md:p-4 text-xs md:text-sm leading-relaxed scrollbar-thin">
           <code>{children}</code>
         </pre>
         <Button
           variant="ghost"
           size="icon"
           onClick={handleCopy}
-          className="absolute right-2 top-2 h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100"
+          className="absolute right-2 top-2 h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100 pointer-coarse:opacity-100"
           aria-label="Copy code"
         >
           {copied ? (

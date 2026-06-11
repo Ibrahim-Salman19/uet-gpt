@@ -39,7 +39,8 @@ export function AmbientGlow() {
       id="ambient-glow"
       className="pointer-events-none fixed inset-0 z-0 transition-opacity duration-1000 opacity-0"
       style={{
-        background: "radial-gradient(circle 600px at 50% 50%, var(--accent) / 0.04, transparent 70%)",
+        background:
+          "radial-gradient(circle 600px at 50% 50%, var(--accent) / 0.04, transparent 70%)",
       }}
       aria-hidden="true"
     />

@@ -5,12 +5,12 @@ import { api } from "convex/_generated/api";
 import { ConvexReactClient, useMutation } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import * as React from "react";
+import { ConvexConnectionMonitor } from "@/components/ConvexConnectionMonitor";
 import { PreferencesProvider } from "@/components/preferences-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { retryWithBackoff } from "@/lib/retry";
-import { ConvexConnectionMonitor } from "@/components/ConvexConnectionMonitor";
 
 const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
 

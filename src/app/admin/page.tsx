@@ -72,7 +72,9 @@ function DocumentsStatusBar({
     <div className="mt-4 pt-3 border-t border-white/[0.04] space-y-2">
       <div className="flex items-center justify-between text-[9px] text-zinc-500 font-mono">
         <span>INDEXED / PENDING / FAILED</span>
-        <span>{indexed} / {pending} / {failed}</span>
+        <span>
+          {indexed} / {pending} / {failed}
+        </span>
       </div>
       <div className="h-1.5 w-full rounded-full bg-zinc-950 overflow-hidden border border-white/5 flex">
         <div

@@ -1,10 +1,9 @@
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
-import type { Doc } from "../_generated/dataModel";
-import { action, type ActionCtx } from "../_generated/server";
-import { rag } from "../rag/instance";
+import { type ActionCtx, action } from "../_generated/server";
 import { recordTiming } from "../observability/metrics";
-import { estimateIdf, type AdaptiveWeights } from "./idf";
+import { rag } from "../rag/instance";
+import { type AdaptiveWeights, estimateIdf } from "./idf";
 
 const FAQ_BOOST_FACTOR = 2.0;
 
@@ -57,15 +56,9 @@ export function hybridRank(
     return 1 / (k + rank);
   };
 
-  const addSet = (
-    results: Array<{ id: string; score: number }>,
-    weight: number,
-  ): void => {
+  const addSet = (results: Array<{ id: string; score: number }>, weight: number): void => {
     results.forEach((res, rank) => {
-      scores.set(
-        res.id,
-        (scores.get(res.id) ?? 0) + weight * decay(rank, results.length),
-      );
+      scores.set(res.id, (scores.get(res.id) ?? 0) + weight * decay(rank, results.length));
     });
   };
 
@@ -186,16 +179,14 @@ export const searchDocumentsAction = action({
   > => {
     const timer = recordTiming();
     const limit = args.limit ?? 8;
-
-    // Bandwidth optimization: only run HyDE for queries > 15 words
-    // Short queries don't benefit from HyDE and it saves Groq call + embedding
     const wordCount = args.queryText.split(/\s+/).filter(Boolean).length;
-    const shouldUseHyde = !args.queryEmbedding && typeof args.queryText === "string" && wordCount > 15;
+    const adaptiveWeights = estimateIdf(args.queryText).weights;
 
+    // HyDE: only for long queries (>15 words)
     let finalQueryText = args.queryText;
     if (args.hydeQuery) {
       finalQueryText = args.hydeQuery;
-    } else if (shouldUseHyde) {
+    } else if (!args.queryEmbedding && wordCount > 15) {
       try {
         const hydeEnhanced = await ctx.runAction(internal.rag.routing.hydeQueryAction, {
           query: args.queryText,
@@ -206,124 +197,56 @@ export const searchDocumentsAction = action({
       }
     }
 
-    // Bandwidth optimization: query expansion for short queries (≤5 words)
-    // Generates 3 variations to improve recall
-    const shouldExpandQuery = !args.queryEmbedding && wordCount <= 5 && wordCount > 0;
-
-    let expandedQueries: string[] = [finalQueryText];
-    if (shouldExpandQuery) {
-      try {
-        const expansions = await ctx.runAction(internal.rag.queryExpansion.expandQueryAction, {
-          query: finalQueryText,
-        });
-        expandedQueries = expansions.slice(0, 4); // original + up to 3 expansions
-      } catch {
-        console.warn("Query expansion failed, using original");
-      }
-    }
-
-    // Bandwidth optimization: reduce search limit from 40 to 20
     const searchLimit = 20;
 
-    // Run searches for all expanded queries and fuse results
-    const allSearchPromises = expandedQueries.map((q) => {
-      const searchArgs: {
-        namespace: string;
-        query: string | Array<number>;
-        limit: number;
-        chunkContext?: { before: number; after: number };
-        filters?: Array<{ name: string; value: string }>;
-      } = {
-        namespace: "uet-global",
-        query: args.queryEmbedding ?? q,
-        limit: searchLimit,
-        chunkContext: { before: 2, after: 1 },
-      };
-
-      if (args.category) {
-        searchArgs.filters = [{ name: "category", value: args.category }];
-      }
-
-      return rag.search(ctx, searchArgs);
+    // Run vector search
+    const vectorRes = await rag.search(ctx, {
+      namespace: "uet-global",
+      query: args.queryEmbedding ?? finalQueryText,
+      limit: searchLimit,
+      chunkContext: { before: 2, after: 1 },
+      ...(args.category ? { filters: [{ name: "category", value: args.category }] } : {}),
     });
 
-    // Fuse all vector results from expanded queries
-    const fusedVectorResults = allVectorResults.reduce(
-      (acc, res) => {
-        res.results.forEach((r: VectorSearchResult) => {
-          const existing = acc.find((e) => e.id === r.entryId);
-          if (existing) {
-            existing.score = Math.max(existing.score, r.score ?? 0);
-          } else {
-            acc.push({ id: r.entryId, score: r.score ?? 0 });
-          }
-        });
-        return acc;
-      },
-      [] as Array<{ id: string; score: number }>
-    ).sort((a, b) => b.score - a.score);
+    const vectorRanked: Array<{ id: string; score: number }> = vectorRes.results.map(
+      (r: VectorSearchResult) => ({ id: r.entryId, score: r.score ?? 0 }),
+    );
 
-    // Also run text search and chunk search on the original query
+    // Text search and chunk-level full-text search in parallel
     const [textResRaw, chunkTextResRaw] = await Promise.all([
       ctx.runQuery(internal.crawl.queries.fullTextSearch, {
         query: finalQueryText,
         limit: searchLimit,
       }),
-      useThreeWayFusion
-        ? ctx.runQuery(internal.embeddings.chunkTextSearch.run, {
-            query: finalQueryText,
-            limit: 10,
-          })
-        : Promise.resolve([]),
+      ctx.runQuery(internal.embeddings.chunkTextSearch.run, {
+        query: finalQueryText,
+        limit: 10,
+      }),
     ]);
 
-    const textRes = textResRaw as Array<{
-      ragId: string;
-      text: string;
-      url: string;
-      score: number;
-    }>;
-    const chunkTextRes = chunkTextResRaw as Array<{
-      ragId: string;
-      text: string;
-      url: string;
-      score: number;
-    }>;
+    const textRes = textResRaw as TextSearchResult[];
+    const chunkTextRes = chunkTextResRaw as TextSearchResult[];
 
-    const vectorRanked = fusedVectorResults;
-    const textRanked = (textResRaw as Array<{
-      ragId: string;
-      text: string;
-      url: string;
-      score: number;
-    }>).map((r) => ({ id: r.ragId, score: r.score }));
+    const textRanked = textRes.map((r) => ({ id: r.ragId, score: r.score }));
+    const chunkRanked = chunkTextRes.map((r) => ({ id: r.ragId, score: r.score }));
 
-    const fused = hybridRank(
-      vectorRanked,
-      textRanked,
-      60,
-      adaptiveWeights,
-      "reciprocal",
-      useThreeWayFusion
-        ? [
-            {
-              results: chunkTextRes.map((r: TextSearchResult) => ({
-                id: r.ragId,
-                score: r.score,
-              })),
-              weight: adaptiveWeights.text * 0.5,
-            },
-          ]
-        : undefined,
-    ).slice(0, limit);
+    // 3-way RRF fusion: vector + text + chunk text search
+    const fused = hybridRank(vectorRanked, textRanked, 60, adaptiveWeights, "reciprocal", [
+      { results: chunkRanked, weight: adaptiveWeights.text * 0.5 },
+    ]).slice(0, limit);
 
-    const vectorResults = vectorRes.results as VectorSearchResult[];
     const docMap = await batchFetchDocMeta(ctx, fused);
 
     const enrichedResults = fused.map((item: FusedItem) => {
       const docMeta = docMap.get(item.id);
       const score = computeDecayedScore(item.score, docMeta);
-      const content = pickBestContent(docMeta, vectorResults, textRes, chunkTextRes, item.id);
+      const content = pickBestContent(
+        docMeta,
+        vectorRes.results as VectorSearchResult[],
+        textRes,
+        chunkTextRes,
+        item.id,
+      );
       return {
         entryId: item.id,
         content,
@@ -353,7 +276,7 @@ export const searchDocumentsAction = action({
     const searchLatency = timer.end();
     console.log("[SEARCH] Hybrid search complete", {
       latencyMs: searchLatency,
-      vectorResults: vectorRes.results.length,
+      vectorResults: vectorRanked.length,
       textResults: textRes.length,
       fusedResults: fused.length,
       faqResults: faqResults.length,

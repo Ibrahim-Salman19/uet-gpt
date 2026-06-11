@@ -26,8 +26,6 @@ export interface TokenCount {
   total: number;
 }
 
-
-
 export interface ChatMessage {
   id: string;
   role: MessageRole;

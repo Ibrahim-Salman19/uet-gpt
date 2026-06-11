@@ -2,7 +2,7 @@ import { ConvexError, v } from "convex/values";
 import type { Doc } from "../_generated/dataModel";
 import { mutation, query } from "../_generated/server";
 import { requireAdmin } from "../auth";
-import { fastCount } from "../lib/db_helpers";
+import { fastCount, fastFilteredCount } from "../lib/db_helpers";
 
 /**
  * Admin dashboard overview stats.
@@ -85,26 +85,20 @@ export const dashboardStats = query({
       fastCount(ctx.db, "users"),
       fastCount(ctx.db, "crawlJobs"),
       fastCount(ctx.db, "semanticCache"),
-      ctx.db
-        .query("documents")
-        .withIndex("by_status", (q) => q.eq("status", "indexed"))
-        .take(100000)
-        .then((r) => r.length),
-      ctx.db
-        .query("documents")
-        .withIndex("by_status", (q) => q.eq("status", "pending"))
-        .take(100000)
-        .then((r) => r.length),
-      ctx.db
-        .query("documents")
-        .withIndex("by_status", (q) => q.eq("status", "failed"))
-        .take(100000)
-        .then((r) => r.length),
-      ctx.db
-        .query("users")
-        .withIndex("by_lastLoginAt", (q) => q.gte("lastLoginAt", twentyFourHoursAgo))
-        .take(100000)
-        .then((r) => r.length),
+      fastFilteredCount(() =>
+        ctx.db.query("documents").withIndex("by_status", (q) => q.eq("status", "indexed")),
+      ),
+      fastFilteredCount(() =>
+        ctx.db.query("documents").withIndex("by_status", (q) => q.eq("status", "pending")),
+      ),
+      fastFilteredCount(() =>
+        ctx.db.query("documents").withIndex("by_status", (q) => q.eq("status", "failed")),
+      ),
+      fastFilteredCount(() =>
+        ctx.db
+          .query("users")
+          .withIndex("by_lastLoginAt", (q) => q.gte("lastLoginAt", twentyFourHoursAgo)),
+      ),
       ctx.db.query("feedback").order("desc").take(10),
       ctx.db.query("crawlJobs").order("desc").take(5),
     ]);
@@ -157,6 +151,15 @@ export const deleteDocument = mutation({
 
     const document = await ctx.db.get(args.documentId);
     if (!document) throw new ConvexError("Document not found");
+
+    const chunks = await ctx.db
+      .query("crawledChunks")
+      .withIndex("by_documentId", (q) => q.eq("documentId", args.documentId))
+      .collect();
+
+    for (const chunk of chunks) {
+      await ctx.db.delete(chunk._id);
+    }
 
     await ctx.db.delete(args.documentId);
 

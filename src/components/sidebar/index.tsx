@@ -135,7 +135,11 @@ function UserProfileFooter({
   user,
   onOpenSettings,
 }: {
-  user: { imageUrl?: string | null; fullName?: string | null; primaryEmailAddress?: { emailAddress: string } | null } | null;
+  user: {
+    imageUrl?: string | null;
+    fullName?: string | null;
+    primaryEmailAddress?: { emailAddress: string } | null;
+  } | null;
   onOpenSettings: () => void;
 }) {
   return (

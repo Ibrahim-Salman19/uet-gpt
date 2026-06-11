@@ -119,12 +119,23 @@ function useWebGLScene(
     container.appendChild(canvas);
 
     const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true, powerPreference: "high-performance", precision: "mediump" });
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: false,
+      alpha: true,
+      powerPreference: "high-performance",
+      precision: "mediump",
+    });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.0 : 1.2));
     renderer.setSize(window.innerWidth, window.innerHeight);
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+    const camera = new THREE.PerspectiveCamera(
+      45,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      100,
+    );
     camera.position.z = 10;
     scene.add(new THREE.AmbientLight(0xffffff, 0.05));
 
@@ -132,7 +143,11 @@ function useWebGLScene(
     scene.add(points);
 
     let frameId: number;
-    let mouseX = 0, mouseY = 0, targetX = 0, targetY = 0, slowFrameCount = 0;
+    let mouseX = 0,
+      mouseY = 0,
+      targetX = 0,
+      targetY = 0,
+      slowFrameCount = 0;
     const TARGET_FRAME_MS = 1000 / 30;
 
     const handleMouseMove = (event: MouseEvent) => {
@@ -142,7 +157,10 @@ function useWebGLScene(
     window.addEventListener("mousemove", handleMouseMove);
 
     const animate = () => {
-      if (!webglEnabled) { renderer.render(scene, camera); return; }
+      if (!webglEnabled) {
+        renderer.render(scene, camera);
+        return;
+      }
       const frameStart = performance.now();
       const elapsed = performance.now() * 0.001;
       const positionAttr = geometry.getAttribute("position") as THREE.BufferAttribute;
@@ -157,8 +175,16 @@ function useWebGLScene(
       points.rotation.x = elapsed * 0.005 - targetY * 0.15;
       renderer.render(scene, camera);
 
-      const perfResult = shouldDegradeAnimation(performance.now() - frameStart, TARGET_FRAME_MS, slowFrameCount);
-      if (perfResult.degraded) { console.warn("WebGL backdrop performance degraded, halting render loop"); cancelAnimationFrame(frameId); return; }
+      const perfResult = shouldDegradeAnimation(
+        performance.now() - frameStart,
+        TARGET_FRAME_MS,
+        slowFrameCount,
+      );
+      if (perfResult.degraded) {
+        console.warn("WebGL backdrop performance degraded, halting render loop");
+        cancelAnimationFrame(frameId);
+        return;
+      }
       slowFrameCount = perfResult.newCount;
       frameId = requestAnimationFrame(animate);
     };
@@ -179,7 +205,9 @@ function useWebGLScene(
       geometry.dispose();
       material.dispose();
       renderer.dispose();
-      try { renderer.forceContextLoss(); } catch (e) {}
+      try {
+        renderer.forceContextLoss();
+      } catch (e) {}
       if (container.contains(canvas)) container.removeChild(canvas);
     };
   }, [webglEnabled]);

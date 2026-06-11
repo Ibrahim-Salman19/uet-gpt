@@ -6,9 +6,9 @@ const ADMIN_PATTERNS = ["admin", "head", "registrar", "chancellor"];
 
 function classifyDocument(url: string, title: string): "faculty" | "staff" | "admin" | null {
   const text = `${url} ${title}`.toLowerCase();
-  if (FACULTY_PATTERNS.some(p => text.includes(p))) return "faculty";
-  if (STAFF_PATTERNS.some(p => text.includes(p))) return "staff";
-  if (ADMIN_PATTERNS.some(p => text.includes(p))) return "admin";
+  if (FACULTY_PATTERNS.some((p) => text.includes(p))) return "faculty";
+  if (STAFF_PATTERNS.some((p) => text.includes(p))) return "staff";
+  if (ADMIN_PATTERNS.some((p) => text.includes(p))) return "admin";
   return null;
 }
 

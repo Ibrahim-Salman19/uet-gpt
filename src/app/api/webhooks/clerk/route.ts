@@ -8,17 +8,20 @@ function convexSiteUrl(): string | null {
   return url.replace(/\.cloud$/, ".site");
 }
 
-async function forwardWebhookToConvex(evt: { type: string; data: Record<string, unknown> }): Promise<Response> {
+async function forwardWebhookToConvex(evt: {
+  type: string;
+  data: Record<string, unknown>;
+}): Promise<Response> {
   const webhookSecret = process.env.WEBHOOK_SECRET;
   if (!webhookSecret) {
-    console.warn("Missing WEBHOOK_SECRET, skipping Convex sync");
-    return new Response("ok", { status: 200 });
+    console.error("Missing WEBHOOK_SECRET — server misconfigured");
+    return new Response("Server configuration error", { status: 500 });
   }
 
   const siteUrl = convexSiteUrl();
   if (!siteUrl) {
-    console.warn("Missing NEXT_PUBLIC_CONVEX_URL, skipping Convex sync");
-    return new Response("ok", { status: 200 });
+    console.error("Missing NEXT_PUBLIC_CONVEX_URL — server misconfigured");
+    return new Response("Server configuration error", { status: 500 });
   }
 
   const response = await fetch(`${siteUrl}/api/webhook/clerk`, {

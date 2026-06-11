@@ -22,6 +22,25 @@ export const stopBatch = internalMutation({
       await ctx.db.patch(j._id, { status: "cancelled" });
     }
 
+    // Audit log for emergency stop
+    if (docs.length > 0 || jobs.length > 0) {
+      const adminUser = await ctx.db
+        .query("users")
+        .withIndex("by_role", (q) => q.eq("role", "superadmin"))
+        .first();
+      if (adminUser) {
+        await ctx.db.insert("adminAuditLog", {
+          userId: adminUser._id,
+          action: "crawl.stop",
+          target: "emergency_stop",
+          details: {
+            reason: `Emergency stop: ${docs.length} documents failed, ${jobs.length} jobs cancelled`,
+          },
+          createdAt: Date.now(),
+        });
+      }
+    }
+
     return docs.length === 500 || jobs.length === 500;
   },
 });

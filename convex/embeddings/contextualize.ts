@@ -108,10 +108,7 @@ async function callGeminiContextualize(
 
     return result.text;
   } catch (err) {
-    console.warn(
-      `Gemini contextualization failed for chunk in '${title}':`,
-      err,
-    );
+    console.warn(`Gemini contextualization failed for chunk in '${title}':`, err);
     return null;
   }
 }

@@ -25,7 +25,9 @@ export default function SignInPage() {
           <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)] text-balance">
             Welcome to UET GPT
           </h1>
-          <p className="mt-2 text-sm text-[var(--text-muted)]">Sign in to your account to continue</p>
+          <p className="mt-2 text-sm text-[var(--text-muted)]">
+            Sign in to your account to continue
+          </p>
         </div>
         <SignIn appearance={uetClerkAppearance} signUpUrl="/sign-up" />
       </div>

@@ -32,9 +32,7 @@ export function ErrorView({ label, heading, message, error, reset }: ErrorViewPr
       </div>
       <div>
         <h2 className="text-lg font-semibold text-zinc-100">{heading}</h2>
-        <p className="text-sm text-zinc-400 mt-2 max-w-md">
-          {error.message || message}
-        </p>
+        <p className="text-sm text-zinc-400 mt-2 max-w-md">{error.message || message}</p>
         {error.digest && (
           <p className="text-xs text-zinc-600 mt-1 font-mono">Error ID: {error.digest}</p>
         )}

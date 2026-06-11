@@ -29,6 +29,10 @@ const cacheEntryValidator = v.object({
   hits: v.number(),
   expiresAt: v.number(),
   createdAt: v.number(),
+  embeddingModel: v.optional(v.string()),
+  sourceEntryIds: v.optional(v.array(v.string())),
+  alternateQueryTexts: v.optional(v.array(v.string())),
+  alternateEmbeddings: v.optional(v.array(v.array(v.float64()))),
 });
 
 export const getCacheEntry = internalQuery({

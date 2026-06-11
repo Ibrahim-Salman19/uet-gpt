@@ -213,9 +213,7 @@ function VoiceDialogContent({
   return (
     <div className="bg-[#101012] border border-[#2d2d34] rounded-[1.5rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.9)] p-6 flex flex-col items-center text-center gap-4">
       <div>
-        <h3 className="text-sm font-semibold text-zinc-100 tracking-wide font-sans">
-          Voice Input
-        </h3>
+        <h3 className="text-sm font-semibold text-zinc-100 tracking-wide font-sans">Voice Input</h3>
         <p className="text-xs text-zinc-500 mt-1 font-sans">
           {isListening
             ? "Listening… speak your question"
@@ -255,8 +253,14 @@ export function VoiceModal({ onTranscript }: VoiceModalProps) {
   const { voiceInputOpen, setVoiceInputOpen } = usePreferences();
   const dialogRef = React.useRef<HTMLDialogElement | null>(null);
   const {
-    transcript, isListening, error, isSupported,
-    setTranscript, setError, startListening, stopListening,
+    transcript,
+    isListening,
+    error,
+    isSupported,
+    setTranscript,
+    setError,
+    startListening,
+    stopListening,
   } = useSpeechRecognition();
 
   const handleConfirm = React.useCallback(() => {
@@ -275,16 +279,34 @@ export function VoiceModal({ onTranscript }: VoiceModalProps) {
   React.useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
-    if (voiceInputOpen) { dialog.showModal(); setTranscript(""); setError(null); setTimeout(startListening, 200); }
-    else { stopListening(); dialog.close(); }
+    if (voiceInputOpen) {
+      dialog.showModal();
+      setTranscript("");
+      setError(null);
+      setTimeout(startListening, 200);
+    } else {
+      stopListening();
+      dialog.close();
+    }
   }, [voiceInputOpen, startListening, stopListening]);
 
   return (
-    <dialog ref={dialogRef} id="voice-modal" onClose={handleClose}
-      className="fixed inset-0 z-[100] m-auto bg-transparent p-0 w-full max-w-[360px] border-none outline-none">
-      <VoiceDialogContent isListening={isListening} transcript={transcript} error={error}
-        isSupported={isSupported} onCancel={handleClose} onConfirm={handleConfirm}
-        onStop={stopListening} onStart={startListening} />
+    <dialog
+      ref={dialogRef}
+      id="voice-modal"
+      onClose={handleClose}
+      className="fixed inset-0 z-[100] m-auto bg-transparent p-0 w-full max-w-[360px] border-none outline-none"
+    >
+      <VoiceDialogContent
+        isListening={isListening}
+        transcript={transcript}
+        error={error}
+        isSupported={isSupported}
+        onCancel={handleClose}
+        onConfirm={handleConfirm}
+        onStop={stopListening}
+        onStart={startListening}
+      />
     </dialog>
   );
 }

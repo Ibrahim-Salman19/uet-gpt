@@ -19,10 +19,7 @@ export const exportGoldenDataset = internalQuery({
     const maxFeedback = args.maxFeedbackEntries ?? 100;
     const maxUsers = args.maxUsers ?? 50;
 
-    const feedbackEntries = await ctx.db
-      .query("feedback")
-      .order("desc")
-      .take(maxFeedback);
+    const feedbackEntries = await ctx.db.query("feedback").order("desc").take(maxFeedback);
 
     if (feedbackEntries.length === 0) {
       return { entries: [] };
@@ -40,9 +37,7 @@ export const exportGoldenDataset = internalQuery({
     let usersChecked = 0;
 
     while (!usersDone && usersChecked < maxUsers) {
-      const usersPage = await ctx.db
-        .query("users")
-        .paginate({ numItems: 20, cursor: userCursor });
+      const usersPage = await ctx.db.query("users").paginate({ numItems: 20, cursor: userCursor });
 
       for (const user of usersPage.page) {
         if (usersChecked >= maxUsers) break;
@@ -53,13 +48,10 @@ export const exportGoldenDataset = internalQuery({
         let threadsDone = false;
 
         while (!threadsDone) {
-          const threadsResult = await ctx.runQuery(
-            components.agent.threads.listThreadsByUserId,
-            {
-              userId: user.clerkId,
-              paginationOpts: { numItems: 20, cursor: threadCursor },
-            },
-          );
+          const threadsResult = await ctx.runQuery(components.agent.threads.listThreadsByUserId, {
+            userId: user.clerkId,
+            paginationOpts: { numItems: 20, cursor: threadCursor },
+          });
 
           for (const thread of threadsResult.page) {
             if (thread.status !== "active") continue;
@@ -78,13 +70,11 @@ export const exportGoldenDataset = internalQuery({
                 const text =
                   typeof msg.text === "string"
                     ? msg.text
-                    : msg.message &&
-                          typeof msg.message === "object" &&
-                          "content" in msg.message
-                        ? typeof msg.message.content === "string"
-                          ? msg.message.content
-                          : ""
-                        : "";
+                    : msg.message && typeof msg.message === "object" && "content" in msg.message
+                      ? typeof msg.message.content === "string"
+                        ? msg.message.content
+                        : ""
+                      : "";
 
                 const role =
                   msg.message && typeof msg.message === "object" && "role" in msg.message
@@ -121,14 +111,11 @@ export const exportGoldenDataset = internalQuery({
       currentRole: string,
     ): Promise<{ query: string; answer: string }> {
       if (!threadMessagesCache.has(threadId)) {
-        const msgsResult = await ctx.runQuery(
-          components.agent.messages.listMessagesByThreadId,
-          {
-            threadId,
-            order: "asc",
-            paginationOpts: { numItems: 100, cursor: null },
-          },
-        );
+        const msgsResult = await ctx.runQuery(components.agent.messages.listMessagesByThreadId, {
+          threadId,
+          order: "asc",
+          paginationOpts: { numItems: 100, cursor: null },
+        });
 
         const userMessages = msgsResult.page.filter(
           (m) =>

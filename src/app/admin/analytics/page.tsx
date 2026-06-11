@@ -21,10 +21,7 @@ function AnalyticsLoadingSkeleton() {
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {["skele-1", "skele-2", "skele-3", "skele-4", "skele-5", "skele-6"].map((id) => (
-          <Card
-            key={id}
-            className="rounded-xl border border-white/5 bg-[#101012]/40 p-5 space-y-3"
-          >
+          <Card key={id} className="rounded-xl border border-white/5 bg-[#101012]/40 p-5 space-y-3">
             <CardHeader className="pb-2 p-0">
               <Skeleton className="h-4 w-24 bg-white/5" />
             </CardHeader>

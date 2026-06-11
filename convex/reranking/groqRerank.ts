@@ -1,8 +1,8 @@
-import { v } from "convex/values";
-import { action } from "../_generated/server";
 import { createGroq } from "@ai-sdk/groq";
 import { generateObject } from "ai";
+import { v } from "convex/values";
 import { z } from "zod";
+import { action } from "../_generated/server";
 
 const groq = createGroq({
   apiKey: process.env.GROQ_API_KEY || "",
@@ -47,7 +47,7 @@ export const groqRerank = action({
         .filter((s) => s.index >= 0 && s.index < docs.length)
         .sort((a, b) => b.score - a.score)
         .slice(0, topK)
-        .map((s) => ({ text: docs[s.index].text, score: s.score, index: s.index }));
+        .map((s) => ({ text: docs[s.index]?.text ?? "", score: s.score, index: s.index }));
     } catch {
       return args.documents.slice(0, topK).map((d, i) => ({
         text: d.text,

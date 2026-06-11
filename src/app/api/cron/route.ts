@@ -21,17 +21,15 @@ async function verifyCronSecret(request: NextRequest): Promise<boolean> {
   return false;
 }
 
-async function executeCronTask(convex: ConvexHttpClient, task: string): Promise<Record<string, unknown>> {
+async function executeCronTask(
+  convex: ConvexHttpClient,
+  task: string,
+): Promise<Record<string, unknown>> {
   const results: Record<string, unknown> = {};
 
   if (task === "daily" || task === "all") {
     try {
-      await convex.mutation(
-        "crawl/tasks:runStatsAggregation" as never,
-        {
-          secret: process.env.CRON_SECRET,
-        } as never,
-      );
+      await convex.mutation("crawl/tasks:runStatsAggregation" as never, {} as never);
       results.dailyStats = { status: "ok" };
     } catch (error) {
       results.dailyStats = {

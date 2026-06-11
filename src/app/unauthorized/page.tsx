@@ -23,7 +23,9 @@ export default function UnauthorizedPage() {
             <line x1="12" y1="16" x2="12.01" y2="16" />
           </svg>
         </div>
-        <h1 className="text-3xl font-bold tracking-tight text-[var(--text-primary)]">Access Denied</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-[var(--text-primary)]">
+          Access Denied
+        </h1>
         <p className="mt-3 text-base text-[var(--text-muted)] leading-relaxed">
           You don&apos;t have the required permissions to access this area. If you believe this is a
           mistake, please contact the site administrator.

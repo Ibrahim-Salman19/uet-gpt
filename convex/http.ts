@@ -11,11 +11,23 @@ if (!process.env.CONVEX_AUTH_TOKEN && !process.env.CRAWL_WEBHOOK_SECRET) {
   );
 }
 
-export function withCORS(response: Response): Response {
+function getAllowedOrigins(): string {
+  const origins = [process.env.NEXT_PUBLIC_APP_URL].filter(Boolean);
+  if (process.env.NODE_ENV === "development") {
+    origins.push("http://localhost:3000");
+  }
+  return origins.length > 0 ? origins.join(", ") : "*";
+}
+
+export function withCORS(response: Response, restricted = false): Response {
   const headers = new Headers(response.headers);
-  headers.set("Access-Control-Allow-Origin", "*");
   headers.set("Access-Control-Allow-Methods", "POST, OPTIONS");
   headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if (restricted) {
+    headers.set("Access-Control-Allow-Origin", getAllowedOrigins());
+  } else {
+    headers.set("Access-Control-Allow-Origin", "*");
+  }
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
@@ -81,7 +93,7 @@ http.route({
       new Response(null, {
         status: 204,
         headers: {
-          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Origin": getAllowedOrigins(),
           "Access-Control-Allow-Methods": "POST, OPTIONS",
           "Access-Control-Allow-Headers": "Content-Type, Authorization",
         },
@@ -103,7 +115,7 @@ http.route({
       new Response(null, {
         status: 204,
         headers: {
-          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Origin": getAllowedOrigins(),
           "Access-Control-Allow-Methods": "POST, OPTIONS",
           "Access-Control-Allow-Headers": "Content-Type, Authorization",
         },

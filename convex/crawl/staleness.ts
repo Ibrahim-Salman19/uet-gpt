@@ -1,7 +1,7 @@
 import { v } from "convex/values";
+import type { Id } from "../_generated/dataModel";
 import { internalMutation, type MutationCtx } from "../_generated/server";
 import { rag } from "../rag/instance";
-import type { Id } from "../_generated/dataModel";
 
 export const markStaleDocuments = internalMutation({
   args: { crawlSessionId: v.string(), limit: v.optional(v.number()) },
@@ -27,10 +27,7 @@ export const markStaleDocuments = internalMutation({
   },
 });
 
-async function deleteDocAndChunks(
-  ctx: MutationCtx,
-  doc: { _id: Id<"documents"> },
-): Promise<void> {
+async function deleteDocAndChunks(ctx: MutationCtx, doc: { _id: Id<"documents"> }): Promise<void> {
   const chunks = await ctx.db
     .query("crawledChunks")
     .withIndex("by_documentId", (q) => q.eq("documentId", doc._id))
