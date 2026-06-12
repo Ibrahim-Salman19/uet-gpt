@@ -3,12 +3,13 @@ import { internal } from "./_generated/api";
 
 const crons = cronJobs();
 
-// Run the weekly web crawl on Sunday at midnight UTC (reduced from daily to save bandwidth)
-crons.weekly(
-  "weekly-uet-webcrawl",
-  { dayOfWeek: "sunday", hourUTC: 0, minuteUTC: 0 },
-  internal.crawl.workflow.kickoffDailyCrawl,
-);
+// DISABLED: Crawl4AI Docker not deployed — localhost:11235 unreachable from Convex cloud.
+// Re-enable when CRAWL4AI_URL is set to a publicly accessible endpoint.
+// crons.weekly(
+//   "weekly-uet-webcrawl",
+//   { dayOfWeek: "sunday", hourUTC: 0, minuteUTC: 0 },
+//   internal.crawl.workflow.kickoffDailyCrawl,
+// );
 
 // Daily cleanup for expired cache items (semantic queries/webhook logs)
 crons.daily(

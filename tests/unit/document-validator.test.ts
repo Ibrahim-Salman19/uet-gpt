@@ -188,9 +188,9 @@ describe("documentValidator", () => {
       documentValidator = mod.documentValidator;
     });
 
-    it("has exactly 15 fields", () => {
+    it("has exactly 19 fields", () => {
       const keys = Object.keys(documentValidator.fields);
-      expect(keys).toHaveLength(15);
+      expect(keys).toHaveLength(19);
     });
 
     it("contains all expected field names in order", () => {
@@ -208,6 +208,10 @@ describe("documentValidator", () => {
         "metadata",
         "status",
         "chunkCount",
+        "chunksEmbedded",
+        "crawlSessionId",
+        "freshnessTier",
+        "isStale",
         "crawledAt",
         "updatedAt",
         "error",
@@ -318,8 +322,8 @@ describe("documentValidator", () => {
       });
     });
 
-    it("has all 15 fields in the serialized value", () => {
-      expect(Object.keys(j.value)).toHaveLength(15);
+    it("has all 19 fields in the serialized value", () => {
+      expect(Object.keys(j.value)).toHaveLength(19);
     });
   });
 
@@ -372,7 +376,7 @@ describe("documentValidator", () => {
 
     it("omit() with no fields returns identical validator", () => {
       const omitted = documentValidator.omit();
-      expect(Object.keys(omitted.fields)).toHaveLength(15);
+      expect(Object.keys(omitted.fields)).toHaveLength(19);
     });
 
     it("omit() removes all fields when all named", () => {
@@ -384,7 +388,7 @@ describe("documentValidator", () => {
     it("partial() marks all fields as optional", () => {
       const partial = documentValidator.partial();
       expect(partial.kind).toBe("object");
-      expect(Object.keys(partial.fields)).toHaveLength(15);
+      expect(Object.keys(partial.fields)).toHaveLength(19);
       for (const key of Object.keys(partial.fields)) {
         expect(partial.fields[key].isOptional).toBe("optional");
       }
@@ -419,7 +423,7 @@ describe("documentValidator", () => {
     });
 
     it("extend() does not mutate the original validator", () => {
-      expect(Object.keys(documentValidator.fields)).toHaveLength(15);
+      expect(Object.keys(documentValidator.fields)).toHaveLength(19);
     });
   });
 

@@ -34,12 +34,17 @@ export const getOrCreate = mutation({
       return existing._id;
     }
 
+    // First-admin bootstrap: auto-promote user matching ADMIN_BOOTSTRAP_EMAIL
+    const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL;
+    const finalRole =
+      bootstrapEmail && args.email === bootstrapEmail ? "admin" : "user";
+
     const id = await ctx.db.insert("users", {
       clerkId: args.clerkId,
       name: args.name,
       email: args.email,
       ...(args.imageUrl && { imageUrl: args.imageUrl }),
-      role: "user",
+      role: finalRole,
       isActive: true,
       lastLoginAt: Date.now(),
     });
@@ -141,27 +146,60 @@ export const upsertFromWebhook = internalMutation({
     name: v.string(),
     email: v.string(),
     imageUrl: v.optional(v.string()),
+    role: v.optional(v.union(v.literal("user"), v.literal("admin"), v.literal("superadmin"))),
   },
   handler: async (ctx, args) => {
+    const validRoles = ["user", "admin", "superadmin"] as const;
+    const role = args.role && validRoles.includes(args.role) ? args.role : "user";
+
     const existing = await ctx.db
       .query("users")
       .withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
       .unique();
 
     if (existing) {
-      await ctx.db.patch(existing._id, {
+      const patch: Partial<{ name: string; email: string; imageUrl: string; role: typeof role; lastLoginAt: number }> = {
         name: args.name,
         email: args.email,
         imageUrl: args.imageUrl ?? existing.imageUrl,
         lastLoginAt: Date.now(),
-      });
+      };
+
+      const oldRole = existing.role;
+      // Only update role if explicitly provided (prevents overwriting with default)
+      if (args.role && validRoles.includes(args.role)) {
+        patch.role = args.role;
+      }
+
+      await ctx.db.patch(existing._id, patch);
+
+      // Audit log for role changes
+      const newRole = patch.role ?? oldRole;
+      if (newRole !== oldRole) {
+        await ctx.db.insert("adminAuditLog", {
+          userId: existing._id,
+          action: "role.change",
+          target: existing.clerkId,
+          details: {
+            oldValue: oldRole,
+            newValue: newRole,
+          },
+          createdAt: Date.now(),
+        });
+      }
     } else {
+      // First-admin bootstrap: applied only on creation, not on subsequent webhook events.
+      // Bootstrap users who are deliberately demoted to "user" stay demoted.
+      const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL;
+      const finalRole =
+        bootstrapEmail && args.email === bootstrapEmail ? "admin" : role;
+
       await ctx.db.insert("users", {
         clerkId: args.clerkId,
         name: args.name,
         email: args.email,
         ...(args.imageUrl && { imageUrl: args.imageUrl }),
-        role: "user",
+        role: finalRole,
         isActive: true,
         lastLoginAt: Date.now(),
       });

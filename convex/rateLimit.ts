@@ -16,8 +16,8 @@
  */
 
 import { ConvexError, v } from "convex/values";
-import type { MutationCtx } from "./_generated/server";
-import { mutation } from "./_generated/server";
+import type { MutationCtx, QueryCtx } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -104,3 +104,46 @@ export async function enforceRateLimit(
     );
   }
 }
+
+/**
+ * Check current rate limit status for a user (read-only, no side effects).
+ * Returns the current window count and limit for both user and global windows.
+ */
+export const checkRateLimit = query({
+  args: {},
+  returns: v.object({
+    user: v.object({ current: v.number(), limit: v.number() }),
+    global: v.object({ current: v.number(), limit: v.number() }),
+  }),
+  handler: async (ctx: QueryCtx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return {
+        user: { current: 0, limit: PER_USER_MSG_LIMIT },
+        global: { current: 0, limit: GLOBAL_TOKEN_LIMIT },
+      };
+    }
+
+    const now = Date.now();
+    const windowStart = now - WINDOW_MS;
+
+    const userRow = await ctx.db
+      .query("rateLimits")
+      .withIndex("by_key", (q) => q.eq("key", identity.subject))
+      .first();
+    const globalRow = await ctx.db
+      .query("rateLimits")
+      .withIndex("by_key", (q) => q.eq("key", "global"))
+      .first();
+
+    const userCount =
+      userRow && userRow.windowStart >= windowStart ? userRow.count : 0;
+    const globalCount =
+      globalRow && globalRow.windowStart >= windowStart ? globalRow.count : 0;
+
+    return {
+      user: { current: userCount, limit: PER_USER_MSG_LIMIT },
+      global: { current: globalCount, limit: GLOBAL_TOKEN_LIMIT },
+    };
+  },
+});

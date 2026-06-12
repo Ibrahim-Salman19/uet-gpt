@@ -245,24 +245,37 @@ function DocumentHealthSection({
 }
 
 export default function AdminAnalyticsPage() {
-  const stats = useQuery(api.admin.stats.dashboardStats, {});
+  const docs = useQuery(api.admin.stats.documentStats, {});
+  const users = useQuery(api.admin.stats.userStats, {});
+  const feedbackCount = useQuery(api.admin.stats.feedbackCount, {});
+  const feedbackRecent = useQuery(api.admin.stats.feedbackStats, {});
+  const cache = useQuery(api.admin.stats.cacheStats, {});
 
-  if (!stats) {
+  const loading = docs === undefined || users === undefined || feedbackCount === undefined ||
+    feedbackRecent === undefined || cache === undefined;
+
+  if (loading) {
     return <AnalyticsLoadingSkeleton />;
   }
 
-  const positiveFeedback = stats.recentFeedback.filter((f: any) => f.rating === "thumbsUp").length;
-  const negativeFeedback = stats.recentFeedback.filter(
-    (f: any) => f.rating === "thumbsDown",
-  ).length;
+  const positiveFeedback = feedbackRecent.recent.filter((f: any) => f.rating === "thumbsUp").length;
+  const negativeFeedback = feedbackRecent.recent.filter((f: any) => f.rating === "thumbsDown").length;
   const totalRecent = positiveFeedback + negativeFeedback;
   const satisfactionRate = totalRecent > 0 ? Math.round((positiveFeedback / totalRecent) * 100) : 0;
+
+  const avgDocSize = 250;
+  const avgCacheSize = 1000;
+  const storageUsed = {
+    documents: docs.total * avgDocSize,
+    cache: cache.total * avgCacheSize,
+    total: docs.total * avgDocSize + cache.total * avgCacheSize,
+  };
 
   return (
     <div className="space-y-8 animate-[slide-up_0.3s_ease-[var(--ease-out-expo)]_both]">
       <UsageMetricsSection
-        activeUsers={stats.activeUsersLast24h}
-        totalUsers={stats.totalUsers}
+        activeUsers={users.activeLast24h}
+        totalUsers={users.total}
         satisfactionRate={satisfactionRate}
         positiveFeedback={positiveFeedback}
         negativeFeedback={negativeFeedback}
@@ -271,18 +284,18 @@ export default function AdminAnalyticsPage() {
       <Separator />
 
       <SystemMetricsSection
-        storageUsed={stats.storageUsed}
-        totalDocuments={stats.totalDocuments}
-        totalCacheEntries={stats.totalCacheEntries}
+        storageUsed={storageUsed}
+        totalDocuments={docs.total}
+        totalCacheEntries={cache.total}
       />
 
       <Separator />
 
       <DocumentHealthSection
-        indexedDocuments={stats.indexedDocuments}
-        pendingDocuments={stats.pendingDocuments}
-        failedDocuments={stats.failedDocuments}
-        totalDocuments={stats.totalDocuments}
+        indexedDocuments={docs.indexed}
+        pendingDocuments={docs.pending}
+        failedDocuments={docs.failed}
+        totalDocuments={docs.total}
       />
     </div>
   );
