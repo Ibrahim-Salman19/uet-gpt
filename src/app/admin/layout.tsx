@@ -9,6 +9,7 @@ import {
   MessageSquare,
   Settings,
   Shield,
+  Users,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -22,12 +23,19 @@ const navItems = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
   { href: "/admin/crawls", label: "Crawls", icon: Globe },
   { href: "/admin/documents", label: "Documents", icon: FileText },
+  { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/admin/feedback", label: "Feedback", icon: MessageSquare },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
-export const dynamic = "force-dynamic";
+/**
+ * Note: force-dynamic is intentionally NOT set here.
+ * This is a "use client" component — Next.js ignores Route Segment Config exports
+ * in client components. All admin pages are client components that fetch data via
+ * server actions, so static rendering of the shell is fine.
+ * If adding server-component admin pages, use a separate server layout wrapper.
+ */
 
 /**
  * Wrapper component that only renders children after client-side hydration.

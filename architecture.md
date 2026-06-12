@@ -37,7 +37,7 @@ UET Taxila GPT is an autonomous RAG pipeline chatbot for UET Taxila. It answers 
 │   ├── _generated/                  # Auto-generated API bindings
 │   ├── admin/                       # Admin dashboard queries/mutations
 │   │   ├── settings.ts              #   getSettings, upsertSetting, resetSettings
-│   │   └── stats.ts                 #   dashboardStats, deleteDocument, deleteFeedback
+│   │   └── stats.ts                 #   Split queries (1 paginated each): documentStats, userStats, feedbackStats, feedbackCount, crawlStats, crawlCount, cacheStats, deleteDocument, deleteFeedback
 │   ├── cache/                       # Semantic cache
 │   │   ├── get.ts                   #   Cache lookup (vector search + cosine threshold)
 │   │   ├── set.ts                   #   Cache write (TTL tiers, sourceEntryIds)
@@ -62,7 +62,7 @@ UET Taxila GPT is an autonomous RAG pipeline chatbot for UET Taxila. It answers 
 │   │   └── list.ts                  #   Recent crawl jobs list (admin)
 │   ├── doc/                         # Document CRUD (create, get, list, remove, search via index.ts)
 │   │   ├── index.ts                 #   Re-exports all doc operations
-│   │   ├── validator.ts             #   documentValidator type definition
+│   │   ├── validator.ts             #   documentValidator type (19 fields: _id, _creationTime, url, title, entryId, contentHash, source, category, subcategory, metadata, status, chunkCount, chunksEmbedded, crawlSessionId, freshnessTier, isStale, crawledAt, updatedAt, error)
 │   │   ├── create.ts
 │   │   ├── get.ts
 │   │   ├── list.ts
@@ -89,7 +89,7 @@ UET Taxila GPT is an autonomous RAG pipeline chatbot for UET Taxila. It answers 
 │   │   ├── routing.ts               #   Intent classification, query rewriting, HyDE generation (Groq LLM)
 │   │   ├── prompts.ts               #   SYSTEM_PROMPT template + FEW_SHOT_EXAMPLES
 │   │   └── testing.ts               #   insertTestChunk, seed, verify
-│   ├── rateLimit.ts                 #   Native Convex sliding-window rate limiter (10 msg/user/min, 100K tokens/global/min)
+│   ├── rateLimit.ts                 #   Native Convex sliding-window rate limiter (10 msg/user/min, 100K tokens/global/min) + checkRateLimit query
 │   ├── reranking/                   # Reranking (external FlashRank endpoint or fallback)
 │   │   └── rerank.ts                #   rerank action (POSTs to RERANKER_URL)
 │   ├── threads.ts                   #   create, list, rename, remove, purgeOldArchived
@@ -98,7 +98,7 @@ UET Taxila GPT is an autonomous RAG pipeline chatbot for UET Taxila. It answers 
 │   ├── auth.ts                      #   Auth helpers: getUserId, isAuthenticated, isAdmin, requireAuth, requireAdmin
 │   ├── constants.ts                 #   CACHE_SIMILARITY_THRESHOLD = 0.92
 │   ├── convex.config.ts             #   Convex app config (RAG, agent, workpool, workflow components)
-│   ├── crons.ts                     #   7 scheduled cron jobs
+│   ├── crons.ts                     #   6 active cron jobs (crawl cron disabled — Crawl4AI unreachable)
 │   ├── http.ts                      #   HTTP router (3 routes: crawl, ingest, reset)
 │   ├── lib/db_helpers.ts            #   fastCount (thin wrapper around internal .count() API)
 │   ├── emergencyStop.ts             #   stopAll / stopBatch — drains in-flight processing jobs
@@ -107,7 +107,7 @@ UET Taxila GPT is an autonomous RAG pipeline chatbot for UET Taxila. It answers 
 ├── src/
 │   ├── app/                         # Next.js App Router pages
 │   │   ├── (main)/                  # Main app layout (chat, settings, explore)
-│   │   ├── admin/                   # Admin dashboard (overview, documents, crawls, settings, feedback)
+│   │   ├── admin/                   # Admin dashboard (overview, documents, crawls, settings, feedback, users, analytics)
 │   │   ├── api/                     # API routes (chat, health, cron, webhooks)
 │   │   └── globals.css              # Global Tailwind styles
 │   ├── components/                  # React components
@@ -157,7 +157,7 @@ UET Taxila GPT is an autonomous RAG pipeline chatbot for UET Taxila. It answers 
 
 ## 4. Convex Database Schema
 
-The schema is defined in `convex/schema.ts`. Tables `threads` and `messages` are managed by `@convex-dev/agent` and NOT defined in schema.ts.
+The schema is defined in `convex/schema.ts`. Tables `threads` and `messages` are managed by `@convex-dev/agent` and NOT defined in schema.ts. Table `evalResults` is managed by the evaluation harness. **16 tables defined in schema.ts** (plus 2 component-managed).
 
 ### 4.1 `users`
 
@@ -273,7 +273,20 @@ Dedup table for idempotency.
 | `processedAt` | `number` | |
 | `expiresAt` | `number` | Indexed: `by_expiresAt` (30-day TTL) |
 
-### 4.9 `crawlDeadLetter`
+### 4.9 `evalResults`
+
+Stores evaluation run results for regression tracking.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `evalName` | `string` | Indexed: `by_evalName` |
+| `model` | `string?` | |
+| `datasetSize` | `number` | |
+| `timestamp` | `number` | Indexed: `by_timestamp` |
+| `metrics` | `{ recallAtK, precisionAtK, mrr, avgLatency, totalTokens }` | |
+| `metadata` | `string?` | |
+
+### 4.10 `crawlDeadLetter`
 
 | Field | Type | Notes |
 |-------|------|-------|
@@ -285,7 +298,7 @@ Dedup table for idempotency.
 | `payload` | `any` | |
 | `status` | `"pending_retry" \| "abandoned" \| "processing" \| "indexed"` | Indexed: `by_status` |
 
-### 4.10 `crawledChunks`
+### 4.11 `crawledChunks`
 
 | Field | Type | Notes |
 |-------|------|-------|
@@ -297,7 +310,7 @@ Dedup table for idempotency.
 | `parentText` | `string?` | Parent-child chunking context |
 | `headingPath` | `string[]?` | Section heading hierarchy |
 
-### 4.11 `crawlStats`
+### 4.12 `crawlStats`
 
 Singleton stats counter.
 
@@ -311,7 +324,7 @@ Singleton stats counter.
 | `pendingDocuments` | `number` | |
 | `lastUpdatedAt` | `number` | |
 
-### 4.12 `faqs`
+### 4.13 `faqs`
 
 | Field | Type | Notes |
 |-------|------|-------|
@@ -321,7 +334,7 @@ Singleton stats counter.
 | `createdAt` | `number` | |
 | `expiresAt` | `number?` | |
 
-### 4.13 `appSettings`
+### 4.14 `appSettings`
 
 Key/value/section config store.
 
@@ -333,7 +346,7 @@ Key/value/section config store.
 | `updatedAt` | `number` | |
 | `updatedBy` | `Id<"users">?` | |
 
-### 4.14 `rateLimits`
+### 4.15 `rateLimits`
 
 Convex-native sliding window rate limiter state.
 
@@ -558,6 +571,7 @@ Cache TTLs apply to `semanticCache` entries. Document expiry TTLs apply to `docu
 
 ```
 CONVEX_DEPLOYMENT=             # Convex deployment URL
+NEXT_PUBLIC_CONVEX_URL=        # Convex client URL (used by frontend)
 CLERK_SECRET_KEY=              # Clerk API secret
 CLERK_SIGNING_SECRET=          # Clerk webhook signing secret
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=  # Clerk publishable key (client-side)
@@ -569,14 +583,20 @@ GEMINI_API_KEY_2=              # Gemini key rotation #2
 GOOGLE_GENERATIVE_AI_API_KEY=  # Gemini key rotation #3
 CEREBRAS_API_KEY=              # Cerebras LLM API
 CRAWL_WEBHOOK_SECRET=          # HMAC secret for crawl webhooks
-CRAWL_WEBHOOK_SECRET_NEW=      # Secondary HMAC secret (key rotation)
+CRAWL_WEBHOOK_SECRET_NEW=      # Secondary HMAC secret (key rotation) — NOT YET CONFIGURED
 CONVEX_AUTH_TOKEN=             # Bearer token for /ingest and /api/reset webhooks
 CONVEX_SITE_URL=               # Convex site URL for webhook callbacks
-SENTRY_ORG=                    # Sentry organization
-SENTRY_PROJECT=                # Sentry project
-OPENROUTER_API_KEY=            # OpenRouter (presence guard only — embedding fallback removed to prevent vector space incompatibility)
-RERANKER_URL=                  # External FlashRank reranker endpoint
+SENTRY_DSN=                    # Sentry DSN (replaces SENTRY_ORG/SENTRY_PROJECT)
+CRAWL4AI_BASE_URL=             # Crawl4AI service URL (default: http://localhost:11235)
+NEXT_PUBLIC_APP_URL=           # Frontend app URL for CSRF checks
 CRON_SECRET=                   # API route cron authentication
+OPENROUTER_API_KEY=            # OpenRouter (presence guard only — embedding fallback removed to prevent vector space incompatibility)
+RERANKER_URL=                  # External FlashRank reranker endpoint — OPTIONAL
+UPSTASH_REDIS_REST_URL=        # Upstash Redis REST URL for rate limiting
+UPSTASH_REDIS_REST_TOKEN=      # Upstash Redis REST token for rate limiting
+WEBHOOK_SECRET=                # Clerk webhook secret (legacy — use CLERK_SIGNING_SECRET)
+ADMIN_BOOTSTRAP_EMAIL=         # Auto-promote first user with this email to admin
+CONVEX_DEPLOY_KEY=             # Convex deploy key for CI
 ```
 
 ---
@@ -587,11 +607,12 @@ Defined in `convex/crons.ts`:
 
 | Name | Schedule | Handler | Purpose |
 |------|----------|---------|---------|
-| `daily-uet-webcrawl` | Daily 00:00 UTC | `internal.crawl.workflow.kickoffDailyCrawl` | Trigger daily UET website crawl |
+| `weekly-uet-webcrawl` | **DISABLED** (was Sun 00:00 UTC) | `internal.crawl.workflow.kickoffDailyCrawl` | Trigger UET website crawl — disabled because Crawl4AI Docker unreachable from Convex cloud |
 | `daily-cleanup-expired-cache` | Daily 01:00 UTC | `internal.crawl.tasks.cleanupExpiredCache` | Remove expired cache entries |
-| `daily-cleanup-expired-v2` | Daily 13:00 UTC | `internal.cache.internal_queries.cleanupExpired` | Second cleanup pass (limit: 100) |
+| `daily-contextualize-chunks` | Daily 03:00 UTC | `internal.embeddings.contextualizeCron.contextualizeCron` | Backfill raw chunks via Gemini Flash free tier |
+| `staleness-check` | Daily 04:00 UTC | `internal.observability.staleness.checkStaleness` | Check document staleness |
 | `retry-dead-letter` | Every 4 hours | `internal.crawl.mutations.retryDeadLetterQueue` | Retry DLQ items (limit: 100) |
-| `fail-stuck-crawl-jobs` | Every 30 min | `internal.crawl.workflow.failStuckJobs` | Timeout running jobs > 2 hours |
+| `fail-stuck-crawl-jobs` | Every 2 hours | `internal.crawl.workflow.failStuckJobs` | Timeout running jobs > 2 hours |
 | `cleanup-old-records` | Weekly Sun 02:00 UTC | `internal.crawl.jobs.cleanupOldRecords` | Purge abandoned DLQ (>7d) + old crawl jobs (>30d) |
 | `purge-old-archived-threads` | Weekly Sun 03:00 UTC | `internal.threads.purgeOldArchived` | Archive cleanup (>6 months) |
 
@@ -637,7 +658,7 @@ Defined in `rag/instance.ts` — custom `EmbeddingModel` wrapping `generateEmbed
 | **Write trigger** | Async via `after()` after successful LLM generation | `cache/set.ts`, `chat/route.ts` |
 | **Hit tracking** | Increment counter, returns cached + sources | `cache/get.ts` |
 | **Source invalidation** | Checks `sourceEntryIds` against `documents.updatedAt` | `cache/get.ts` (R-5) |
-| **Cleanup** | Cron: daily 01:00 + 13:00 UTC | `crons.ts`, `tasks.ts`, `internal_queries.ts` |
+| **Cleanup** | Cron: daily 01:00 UTC | `crons.ts`, `tasks.ts`, `internal_queries.ts` |
 
 ---
 
@@ -656,7 +677,7 @@ Defined in `rag/instance.ts` — custom `EmbeddingModel` wrapping `generateEmbed
 | Config | Value |
 |--------|-------|
 | `vitest.config.ts` | `node` env, `testTimeout: 30000` (WSL needs it — setup can take 30s+), `resolve.alias` for `@/` and `convex/` |
-| `playwright.config.ts` | Chromium, Firefox, WebKit projects |
+| `playwright.config.ts` | Chrome desktop + mobile (Pixel 5) — Firefox and WebKit not configured |
 
 ### 12.3 Test Distribution
 
@@ -738,8 +759,9 @@ Defined in `convex/http.ts`:
 | `/api/webhook/crawl` | POST, OPTIONS | `crawlWebhook` from `./crawl/webhook` | HMAC-SHA256 |
 | `/ingest` | POST, OPTIONS | `ingestWebhook` from `./crawl/webhook` | Bearer `CONVEX_AUTH_TOKEN` |
 | `/api/reset` | POST, OPTIONS | `resetWebhook` from `./crawl/webhook` | Bearer `CONVEX_AUTH_TOKEN` |
+| `/api/webhook/clerk` | POST, OPTIONS | `userWebhook` from `./clerk/webhook` | Svix signature verification |
 
-All routes include CORS support (`Access-Control-Allow-Origin: *`).
+CORS: `/api/webhook/crawl`, `/ingest` use `Access-Control-Allow-Origin: *`. `/api/reset`, `/api/webhook/clerk` use restricted origins via `getAllowedOrigins()`.
 
 Guard: startup crash if neither `CONVEX_AUTH_TOKEN` nor `CRAWL_WEBHOOK_SECRET` is configured.
 
@@ -751,13 +773,63 @@ The admin interface at `/admin(.*)` provides:
 
 | Page | Purpose |
 |------|---------|
-| Overview | 11 metrics (total docs, indexed, pending, failed, crawl stats, cache hits, users, feedback, storage) |
+| Overview | Metrics from 7 split queries: documentStats, userStats, feedbackCount, feedbackStats, crawlCount, crawlStats, cacheStats |
 | Documents | Browse, search, filter, delete documents |
 | Crawls | Trigger crawl, monitor status, cancel running jobs |
+| Users | Search users, manage roles (admin/superadmin/user) via Clerk Backend API |
 | Feedback | View user feedback with ratings and categories |
 | Settings | Configure app settings (key/value/section) |
 
-Admin accessible only to `admin`/`superadmin` roles, enforced by middleware RBAC + Convex auth helpers.
+### 16.0 Admin Stats Queries (Convex v1.40+ Compliance)
+
+**Constraint:** Convex v1.40+ enforces ONE paginated query (`.paginate()`, `.collect()`, `.take()`) per function. Sequential queries in the same function still count.
+
+**Solution:** Split monolithic `dashboardStats` into 7 independent queries, each with exactly ONE paginated call. Client uses `useQuery()` hooks to fetch all in parallel.
+
+| Query | Paginated Call | Returns |
+|-------|---------------|---------|
+| `documentStats` | `.paginate()` with cursor loop | `{ total, indexed, pending, failed }` |
+| `userStats` | `.paginate()` with cursor loop | `{ total, activeLast24h }` |
+| `feedbackStats` | `.take(10)` | `{ total (placeholder), recent[] }` |
+| `feedbackCount` | `.paginate()` with cursor loop | `number` |
+| `crawlStats` | `.take(5)` | `{ total (placeholder), recent[] }` |
+| `crawlCount` | `.paginate()` with cursor loop | `number` |
+| `cacheStats` | `.paginate()` with cursor loop | `{ total }` |
+
+**Note:** `feedbackStats` and `crawlStats` return `recent.length` as `total` (placeholder). Actual counts are in `feedbackCount` and `crawlCount`.
+
+### 16.1 Role Management System
+
+**Source of truth:** Clerk `publicMetadata.role` (edge/client) + Convex `users.role` (server).
+
+| Component | File | Role check |
+|-----------|------|------------|
+| Edge middleware | `src/middleware.ts` | `sessionClaims.metadata.role` — redirects non-admins from `/admin(.*)` |
+| Admin layout | `src/app/admin/layout.tsx` | `AuthGuard` with `isAdmin` from Clerk session claims |
+| Server-side | `convex/auth.ts` | `isAdmin()`, `requireAdmin()`, `requirePermission()` — queries `users.role` from Convex DB |
+| Client-side | `src/lib/clerk-claims.ts` | `isAdminRole()`, `getRoleFromClaims()` — reads JWT claims |
+| Permissions | `src/lib/permissions.ts` | Centralized `ROLE_PERMISSIONS` matrix, `hasPermission()` |
+
+**Roles:** `user` → `admin` → `superadmin` (hierarchical, higher includes lower permissions).
+
+**Role sync flow:** Clerk Dashboard or Admin UI → Clerk `publicMetadata.role` → `user.updated` webhook → `convex/clerk/webhook.ts` → `convex/users.upsertFromWebhook` → Convex `users.role`.
+
+**First-admin bootstrap:** Set `ADMIN_BOOTSTRAP_EMAIL` env var to auto-promote the first user with that email to admin on login or webhook sync.
+
+**JWT template (one-time setup):** Configure Clerk JWT template mapping `user.publicMetadata` → `metadata` claim. This makes `sessionClaims.metadata.role` available at the edge without a Convex round-trip.
+
+### 16.2 Permission Matrix
+
+| Permission | user | admin | superadmin |
+|------------|------|-------|------------|
+| `chat:send` | yes | yes | yes |
+| `doc:read` | yes | yes | yes |
+| `crawl:trigger` | no | yes | yes |
+| `crawl:list` | no | yes | yes |
+| `doc:delete` | no | yes | yes |
+| `settings:manage` | no | yes | yes |
+| `users:manage` | no | yes | yes |
+| `emergency:stop` | no | no | yes |
 
 ---
 

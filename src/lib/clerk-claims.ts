@@ -30,15 +30,13 @@ interface ClerkSessionClaims {
   [key: string]: unknown;
 }
 
-/** Admin roles that have access to protected admin routes */
-const ADMIN_ROLES = ["admin", "superadmin"] as const;
+import { isAdminRole as canonicalIsAdminRole } from "@/lib/permissions";
 
 /**
  * Check if a user role is an admin-level role.
+ * Re-exported from src/lib/permissions.ts (canonical source).
  */
-export function isAdminRole(role: string | undefined | null): boolean {
-  return ADMIN_ROLES.includes(role as (typeof ADMIN_ROLES)[number]);
-}
+export const isAdminRole = canonicalIsAdminRole;
 
 /**
  * Extract the user role from Clerk session claims.

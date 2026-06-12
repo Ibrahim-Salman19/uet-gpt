@@ -140,6 +140,7 @@ export default defineSchema({
       v.literal("metrics.errors"),
       v.literal("metrics.performance"),
       v.literal("staleness.check"),
+      v.literal("role.change"),
     ),
     target: v.optional(v.string()),
     details: v.optional(

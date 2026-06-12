@@ -63,11 +63,22 @@ async function handleUserCreatedOrUpdated(ctx: any, data: Record<string, unknown
   const email = extractWebhookEmail(data);
   const imageUrl = data.image_url as string | undefined;
 
+  // Sync publicMetadata.role from Clerk → Convex users.role
+  const publicMetadata = data.public_metadata as Record<string, unknown> | undefined;
+  const validRoles = ["user", "admin", "superadmin"] as const;
+  const roleFromMetadata = publicMetadata?.role;
+  const role =
+    typeof roleFromMetadata === "string" &&
+    validRoles.includes(roleFromMetadata.toLowerCase().trim() as (typeof validRoles)[number])
+      ? (roleFromMetadata.toLowerCase().trim() as (typeof validRoles)[number])
+      : "user";
+
   await ctx.runMutation(internal.users.upsertFromWebhook, {
     clerkId,
     name,
     email,
     imageUrl,
+    role,
   });
 }
 

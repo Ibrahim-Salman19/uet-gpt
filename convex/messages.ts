@@ -41,7 +41,7 @@ function toComponentSource(source: Record<string, unknown>) {
 
 export const insert = mutation({
   args: {
-    threadId: v.id("threads"),
+    threadId: v.string(),
     role: v.union(v.literal("user"), v.literal("assistant")),
     content: v.string(),
     sources: sourcesValidator,
@@ -89,7 +89,7 @@ export const insert = mutation({
 });
 
 export const list = query({
-  args: { threadId: v.id("threads") },
+  args: { threadId: v.string() },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
