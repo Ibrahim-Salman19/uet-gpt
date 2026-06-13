@@ -1,7 +1,18 @@
 import { api } from "convex/_generated/api";
 import { ConvexHttpClient } from "convex/browser";
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+let convex: ConvexHttpClient | null = null;
+
+function getConvexClient() {
+  if (!convex) {
+    const url = process.env.NEXT_PUBLIC_CONVEX_URL;
+    if (!url) {
+      throw new Error("NEXT_PUBLIC_CONVEX_URL is not set");
+    }
+    convex = new ConvexHttpClient(url);
+  }
+  return convex;
+}
 
 /**
  * Lightweight HTTP heartbeat endpoint.
@@ -13,7 +24,8 @@ const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
  */
 export async function GET() {
   try {
-    const result = await convex.query(api.health.heartbeat, {});
+    const client = getConvexClient();
+    const result = await client.query(api.health.heartbeat, {});
 
     return new Response(JSON.stringify(result), {
       status: 200,
