@@ -3,6 +3,7 @@ import { components } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
 import { sourcesValidator, tokenCountValidator } from "./messages/validator";
 import { enforceRateLimit } from "./rateLimit";
+import { requireAuth } from "./auth";
 
 // Transform component source format to app format
 function toAppSource(s: Record<string, unknown>) {
@@ -53,18 +54,15 @@ export const insert = mutation({
       throw new ConvexError("Message content must be under 50000 characters");
     }
 
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new ConvexError("Authentication required");
-    }
+    const user = await requireAuth(ctx);
 
     // TASK-S02: Enforce rate limits before any DB write.
     // Uses actual token count if the caller provides it, otherwise 1000 token estimate.
     const tokenEstimate = args.tokenCount?.total ?? 1_000;
-    await enforceRateLimit(ctx, identity.subject, tokenEstimate);
+    await enforceRateLimit(ctx, user.clerkId, tokenEstimate);
 
     const result = await ctx.runMutation(components.agent.messages.addMessages, {
-      userId: identity.subject,
+      userId: user.clerkId,
       threadId: args.threadId,
       messages: [
         {
@@ -91,10 +89,7 @@ export const insert = mutation({
 export const list = query({
   args: { threadId: v.string() },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new ConvexError("Authentication required");
-    }
+    const user = await requireAuth(ctx);
 
     const thread = await ctx.runQuery(components.agent.threads.getThread, {
       threadId: args.threadId,
@@ -103,7 +98,7 @@ export const list = query({
       throw new ConvexError("Thread not found");
     }
 
-    if (thread.userId !== identity.subject) {
+    if (thread.userId !== user.clerkId) {
       throw new ConvexError("Not authorized");
     }
 

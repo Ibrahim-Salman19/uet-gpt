@@ -15,7 +15,7 @@ type Permission =
 // CANONICAL permission matrix — server-side source of truth.
 // Client-side mirror at src/lib/permissions.ts must be kept in sync.
 // When adding permissions, update both files.
-const ROLE_PERMISSIONS: Record<string, readonly Permission[]> = {
+const ROLE_PERMISSIONS: Record<"user" | "admin" | "superadmin", readonly Permission[]> = {
   user: ["chat:send", "doc:read"],
   admin: [
     "chat:send",
@@ -55,29 +55,28 @@ export async function getUserId(ctx: QueryCtx | MutationCtx): Promise<Id<"users"
   return user ? (user._id as Id<"users">) : null;
 }
 
-export async function isAuthenticated(ctx: {
-  auth: { getUserIdentity: () => Promise<{ subject: string } | null> };
-}): Promise<boolean> {
-  const identity = await ctx.auth.getUserIdentity();
-  return identity !== null;
+export async function isAuthenticated(ctx: QueryCtx | MutationCtx): Promise<boolean> {
+  const { identity, user } = await findUser(ctx);
+  return identity !== null && user?.isActive === true;
 }
 
 export async function isAdmin(ctx: QueryCtx | MutationCtx): Promise<boolean> {
   const { user } = await findUser(ctx);
-  return user?.role === "admin" || user?.role === "superadmin";
+  return Boolean(user?.isActive) && (user?.role === "admin" || user?.role === "superadmin");
 }
 
 export async function requireAuth(ctx: QueryCtx | MutationCtx): Promise<Doc<"users">> {
   const { identity, user } = await findUser(ctx);
   if (!identity) throw new ConvexError("Authentication required");
   if (!user) throw new ConvexError("User not found");
+  if (!user.isActive) throw new ConvexError("User account is deactivated");
   return user;
 }
 
 export async function requireAdmin(ctx: QueryCtx | MutationCtx): Promise<Doc<"users">> {
   const { identity, user } = await findUser(ctx);
   if (!identity) throw new ConvexError("Authentication required");
-  if (!user || (user.role !== "admin" && user.role !== "superadmin")) {
+  if (!user || !user.isActive || (user.role !== "admin" && user.role !== "superadmin")) {
     throw new ConvexError("Admin access required");
   }
   return user;
@@ -90,6 +89,7 @@ export async function requirePermission(
   const { identity, user } = await findUser(ctx);
   if (!identity) throw new ConvexError("Authentication required");
   if (!user) throw new ConvexError("User not found");
+  if (!user.isActive) throw new ConvexError("User account is deactivated");
 
   const userPerms = ROLE_PERMISSIONS[user.role] ?? [];
   if (!userPerms.includes(permission)) {

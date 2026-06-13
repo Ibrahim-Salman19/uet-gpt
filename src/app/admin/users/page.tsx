@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { searchUsers, setUserRole, removeUserRole, type UserResult } from "./actions";
 
 const ROLE_BADGES: Record<
-  string,
+  "user" | "admin" | "superadmin",
   { label: string; className: string; icon: React.ReactNode }
 > = {
   user: {
@@ -151,7 +151,8 @@ export default function AdminUsersPage() {
           {/* User Rows */}
           <div className="divide-y divide-white/[0.03]">
             {users.map((user) => {
-              const badge = ROLE_BADGES[user.role] ?? ROLE_BADGES.user;
+              const roleKey = user.role as keyof typeof ROLE_BADGES;
+              const badge = ROLE_BADGES[roleKey] ?? ROLE_BADGES.user;
               return (
                 <div
                   key={user.id}

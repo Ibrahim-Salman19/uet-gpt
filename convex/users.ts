@@ -18,6 +18,10 @@ export const getOrCreate = mutation({
     if (identity.subject !== args.clerkId) {
       throw new ConvexError("Unauthorized: clerkId mismatch");
     }
+    const email = identity.email;
+    if (!email) {
+      throw new ConvexError("Email is required in Clerk identity");
+    }
 
     const existing = await ctx.db
       .query("users")
@@ -25,9 +29,12 @@ export const getOrCreate = mutation({
       .unique();
 
     if (existing) {
+      if (!existing.isActive) {
+        throw new ConvexError("Your account has been deactivated.");
+      }
       await ctx.db.patch(existing._id, {
         name: args.name,
-        email: args.email,
+        email: email,
         imageUrl: args.imageUrl ?? existing.imageUrl,
         lastLoginAt: Date.now(),
       });
@@ -37,12 +44,12 @@ export const getOrCreate = mutation({
     // First-admin bootstrap: auto-promote user matching ADMIN_BOOTSTRAP_EMAIL
     const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL;
     const finalRole =
-      bootstrapEmail && args.email === bootstrapEmail ? "admin" : "user";
+      bootstrapEmail && email === bootstrapEmail ? "admin" : "user";
 
     const id = await ctx.db.insert("users", {
       clerkId: args.clerkId,
       name: args.name,
-      email: args.email,
+      email: email,
       ...(args.imageUrl && { imageUrl: args.imageUrl }),
       role: finalRole,
       isActive: true,

@@ -160,15 +160,30 @@ export const getOldArchivedUsersBatch = internalQuery({
 });
 
 export const purgeOldArchived = internalAction({
-  args: {},
+  args: {
+    userCursor: v.optional(v.union(v.string(), v.null())),
+    purgedSoFar: v.optional(v.number()),
+  },
   returns: v.null(),
-  handler: async (ctx) => {
+  handler: async (ctx, args) => {
     const cutoff = Date.now() - 180 * 24 * 60 * 60 * 1000; // 6 months
-    let userCursor = null as string | null;
+    let userCursor = args.userCursor !== undefined ? args.userCursor : null;
     let userDone = false;
-    let purged = 0;
+    let purged = args.purgedSoFar ?? 0;
+    
+    const startTime = Date.now();
+    const MAX_EXECUTION_TIME_MS = 8 * 60 * 1000; // 8 minutes
 
     while (!userDone) {
+      if (Date.now() - startTime > MAX_EXECUTION_TIME_MS) {
+        console.log(`Execution time limit reached. Scheduling continuation. Purged so far: ${purged}`);
+        await ctx.scheduler.runAfter(0, internal.threads.purgeOldArchived, {
+          userCursor,
+          purgedSoFar: purged,
+        });
+        return;
+      }
+
       const userPage = (await ctx.runQuery(internal.threads.getOldArchivedUsersBatch, {
         cursor: userCursor,
       })) as { page: Doc<"users">[]; continueCursor: string; isDone: boolean };

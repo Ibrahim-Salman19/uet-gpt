@@ -1,7 +1,12 @@
+const issuer = process.env.CLERK_JWT_ISSUER;
+if (!issuer) {
+  throw new Error("CLERK_JWT_ISSUER environment variable is missing.");
+}
+
 const authConfig = {
   providers: [
     {
-      domain: process.env.CLERK_JWT_ISSUER || "https://clerk-jwt-issuer-placeholder.com",
+      domain: issuer,
       applicationID: "uet-gpt",
     },
   ],
