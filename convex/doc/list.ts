@@ -21,7 +21,7 @@ export const list = query({
   returns: v.array(documentValidator),
   handler: async (ctx, args) => {
     await requireAuth(ctx);
-    const limit = args.limit ?? 50;
+    const limit = Math.min(args.limit ?? 50, 100);
     const status = args.status;
     const category = args.category;
 

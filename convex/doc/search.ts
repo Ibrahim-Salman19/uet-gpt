@@ -12,7 +12,7 @@ export const search = query({
   returns: v.array(documentValidator),
   handler: async (ctx, args) => {
     await requireAuth(ctx);
-    const limit = args.limit ?? 10;
+    const limit = Math.min(args.limit ?? 10, 50);
     const q = args.query.toLowerCase();
     const category = args.category;
 
