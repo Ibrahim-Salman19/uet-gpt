@@ -14,10 +14,21 @@ import { checkChatRateLimit } from "@/lib/rate-limit";
 // Rate limiting is enforced server-side in convex/messages.ts via enforceRateLimit
 import { assignFreshnessTier } from "../../../../convex/crawl/chunking";
 
-function getAllowedOrigins(): string[] {
+function getAllowedOrigins(req: NextRequest): string[] {
   const allowed = [process.env.NEXT_PUBLIC_APP_URL].filter((url): url is string => !!url);
   if (process.env.NODE_ENV === "development") {
     allowed.push("http://localhost:3000");
+  }
+  // Derive the app's own origin from the Host header as a safe fallback.
+  // This prevents a total outage when NEXT_PUBLIC_APP_URL is not set in env vars.
+  // Same-host requests cannot be CSRF by definition.
+  const host = req.headers.get("host");
+  if (host) {
+    const proto = req.headers.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+    const selfOrigin = `${proto}://${host}`;
+    if (!allowed.includes(selfOrigin)) {
+      allowed.push(selfOrigin);
+    }
   }
   return allowed;
 }
@@ -45,7 +56,7 @@ function checkReferer(referer: string | null, allowed: string[]): NextResponse |
 function checkCsrf(req: NextRequest): NextResponse | null {
   const origin = req.headers.get("origin");
   const referer = req.headers.get("referer");
-  const allowed = getAllowedOrigins();
+  const allowed = getAllowedOrigins(req);
 
   // Require at least one of Origin or Referer (block requests with neither)
   if (!origin && !referer) {
