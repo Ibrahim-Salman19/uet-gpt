@@ -21,11 +21,18 @@ import { internalMutation, mutation, query } from "./_generated/server";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
-/** Per-user message rate limit: max messages per window */
-const PER_USER_MSG_LIMIT = 10;
+/**
+ * Per-user message rate limit.
+ * NOTE: each Q&A exchange inserts 2 messages (user + assistant),
+ * so this counts both. 30 = ~15 real exchanges per minute.
+ */
+const PER_USER_MSG_LIMIT = 30;
+
+/** Admins get a higher cap since they do bulk testing / moderation. */
+const PER_ADMIN_MSG_LIMIT = 100;
 
 /** Global token rate limit: max tokens across all users per window */
-const GLOBAL_TOKEN_LIMIT = 100_000;
+const GLOBAL_TOKEN_LIMIT = 200_000;
 
 /** Sliding window duration in milliseconds (1 minute) */
 const WINDOW_MS = 60 * 1000;
@@ -130,18 +137,22 @@ async function checkWindow(
  * @param ctx          Mutation context (must be inside a Convex mutation)
  * @param userId       Clerk user subject ID (from ctx.auth.getUserIdentity())
  * @param tokenEstimate Estimated tokens for this request (default 1000 if unknown)
+ * @param isAdmin      Whether the caller is an admin (higher limit applies)
  */
 export async function enforceRateLimit(
   ctx: MutationCtx,
   userId: string,
   tokenEstimate = 1_000,
+  isAdmin = false,
 ): Promise<void> {
+  const msgLimit = isAdmin ? PER_ADMIN_MSG_LIMIT : PER_USER_MSG_LIMIT;
+
   // 1. Per-user message rate limit (count = 1 message per call)
-  const userCheck = await checkWindow(ctx, userId, 1, PER_USER_MSG_LIMIT);
+  const userCheck = await checkWindow(ctx, userId, 1, msgLimit);
   if (userCheck.exceeded) {
     throw new ConvexError(
-      `Rate limit exceeded: You can send at most ${PER_USER_MSG_LIMIT} messages per minute. ` +
-        `Current window: ${userCheck.current}/${PER_USER_MSG_LIMIT}. Please wait a moment.`,
+      `Rate limit exceeded: You can send at most ${msgLimit} messages per minute. ` +
+        `Current window: ${userCheck.current}/${msgLimit}. Please wait a moment.`,
     );
   }
 
@@ -175,6 +186,9 @@ export const checkRateLimit = mutation({
         global: { current: 0, limit: GLOBAL_TOKEN_LIMIT },
       };
     }
+    const role = (identity.publicMetadata as Record<string, unknown>)?.role as string | undefined;
+    const isAdmin = role === "admin" || role === "superadmin";
+    const msgLimit = isAdmin ? PER_ADMIN_MSG_LIMIT : PER_USER_MSG_LIMIT;
 
     const now = Date.now();
     const windowStart = now - WINDOW_MS;
@@ -203,7 +217,7 @@ export const checkRateLimit = mutation({
     }
 
     return {
-      user: { current: userCount, limit: PER_USER_MSG_LIMIT },
+      user: { current: userCount, limit: msgLimit },
       global: { current: globalCount, limit: GLOBAL_TOKEN_LIMIT },
     };
   },

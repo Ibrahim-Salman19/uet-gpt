@@ -60,7 +60,10 @@ export const insert = mutation({
     // TASK-S02: Enforce rate limits before any DB write.
     // Uses actual token count if the caller provides it, otherwise 1000 token estimate.
     const tokenEstimate = args.tokenCount?.total ?? 1_000;
-    await enforceRateLimit(ctx, user.clerkId, tokenEstimate);
+    const identity = await ctx.auth.getUserIdentity();
+    const role = (identity?.publicMetadata as Record<string, unknown> | undefined)?.role as string | undefined;
+    const isAdmin = role === "admin" || role === "superadmin";
+    await enforceRateLimit(ctx, user.clerkId, tokenEstimate, isAdmin);
 
     const thread = await ctx.runQuery(components.agent.threads.getThread, {
       threadId: args.threadId,
