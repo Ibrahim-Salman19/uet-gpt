@@ -151,7 +151,10 @@ export async function enforceRateLimit(
  * Returns the current window count and limit for both user and global windows.
  */
 export const checkRateLimit = mutation({
-  args: {},
+  args: {
+    userId: v.optional(v.string()),
+    tokenEstimate: v.optional(v.number()),
+  },
   returns: v.object({
     user: v.object({ current: v.number(), limit: v.number() }),
     global: v.object({ current: v.number(), limit: v.number() }),
