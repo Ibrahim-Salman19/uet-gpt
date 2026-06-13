@@ -3,7 +3,10 @@ import type { Doc } from "../_generated/dataModel";
 import { query } from "../_generated/server";
 
 export const list = query({
-  args: {},
+  args: {
+    limit: v.optional(v.number()),
+    cursor: v.optional(v.string()),
+  },
   returns: v.array(
     v.object({
       _id: v.id("feedback"),
@@ -16,7 +19,7 @@ export const list = query({
       createdAt: v.number(),
     }),
   ),
-  handler: async (ctx) => {
+  handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new ConvexError("Authentication required");
@@ -27,14 +30,19 @@ export const list = query({
       .unique();
     if (!user) throw new ConvexError("User not found");
 
+    const limit = args.limit ?? 50;
+    const cursor = args.cursor;
+
     if (user.role === "admin" || user.role === "superadmin") {
-      return (await ctx.db.query("feedback").order("desc").take(50)) as Doc<"feedback">[];
+      const page = await ctx.db.query("feedback").order("desc").paginate({ numItems: limit, cursor: cursor ?? null });
+      return page.page as Doc<"feedback">[];
     }
 
-    return (await ctx.db
+    const page = await ctx.db
       .query("feedback")
       .withIndex("by_userId", (q) => q.eq("userId", user._id))
       .order("desc")
-      .take(50)) as Doc<"feedback">[];
+      .paginate({ numItems: limit, cursor: cursor ?? null });
+    return page.page as Doc<"feedback">[];
   },
 });

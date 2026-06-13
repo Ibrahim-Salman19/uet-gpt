@@ -24,21 +24,46 @@ export const list = query({
     const limit = Math.min(args.limit ?? 50, 100);
     const status = args.status;
     const category = args.category;
+    const cursor = args.cursor;
+
+    if (status && category) {
+      const results: (typeof documentValidator.type)[] = [];
+      let currentCursor = cursor ?? null;
+      while (results.length < limit) {
+        const page = await ctx.db
+          .query("documents")
+          .withIndex("by_status", (q) => q.eq("status", status))
+          .paginate({ numItems: limit, cursor: currentCursor });
+
+        for (const doc of page.page) {
+          if (doc.category === category) {
+            results.push(doc as typeof documentValidator.type);
+            if (results.length >= limit) break;
+          }
+        }
+        if (page.isDone) break;
+        currentCursor = page.continueCursor;
+      }
+      return results;
+    }
 
     if (status) {
-      return (await ctx.db
+      const page = await ctx.db
         .query("documents")
         .withIndex("by_status", (q) => q.eq("status", status))
-        .take(limit)) as (typeof documentValidator.type)[];
+        .paginate({ numItems: limit, cursor: cursor ?? null });
+      return page.page as (typeof documentValidator.type)[];
     }
 
     if (category) {
-      return (await ctx.db
+      const page = await ctx.db
         .query("documents")
         .withIndex("by_category", (q) => q.eq("category", category))
-        .take(limit)) as (typeof documentValidator.type)[];
+        .paginate({ numItems: limit, cursor: cursor ?? null });
+      return page.page as (typeof documentValidator.type)[];
     }
 
-    return (await ctx.db.query("documents").take(limit)) as (typeof documentValidator.type)[];
+    const page = await ctx.db.query("documents").paginate({ numItems: limit, cursor: cursor ?? null });
+    return page.page as (typeof documentValidator.type)[];
   },
 });

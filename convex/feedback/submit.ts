@@ -33,6 +33,9 @@ export const submit = mutation({
     if (!user) {
       throw new ConvexError("User not found");
     }
+    if (!user.isActive) {
+      throw new ConvexError("User account is inactive");
+    }
     const existing = await ctx.db
       .query("feedback")
       .withIndex("by_messageId", (q) => q.eq("messageId", args.messageId))

@@ -1,6 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import type { Doc } from "../_generated/dataModel";
-import { mutation, query } from "../_generated/server";
+import { internalMutation, mutation, query } from "../_generated/server";
 import { requireAdmin } from "../auth";
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -38,8 +38,7 @@ const crawlValidator = v.object({
 });
 
 /**
- * Document stats — uses ONE .paginate() to scan all docs and derive counts.
- * Avoids loading all rows into memory.
+ * Document stats — reads from precomputed dashboardStats table.
  */
 export const documentStats = query({
   args: {},
@@ -51,30 +50,16 @@ export const documentStats = query({
   }),
   handler: async (ctx) => {
     await requireAdmin(ctx);
-    let total = 0;
-    let indexed = 0;
-    let pending = 0;
-    let failed = 0;
-    let cursor: string | null = null;
-    // Paginate through ALL documents in batches of 1000
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      const page = await ctx.db.query("documents").paginate({ numItems: 1000, cursor });
-      for (const doc of page.page) {
-        total++;
-        if (doc.status === "indexed") indexed++;
-        else if (doc.status === "pending") pending++;
-        else if (doc.status === "failed") failed++;
-      }
-      if (page.isDone) break;
-      cursor = page.continueCursor;
-    }
-    return { total, indexed, pending, failed };
+    const stats = await ctx.db
+      .query("dashboardStats")
+      .withIndex("by_statsId", (q) => q.eq("statsId", "global"))
+      .unique();
+    return stats?.documentStats ?? { total: 0, indexed: 0, pending: 0, failed: 0 };
   },
 });
 
 /**
- * User stats — uses ONE .paginate() to count all users and active-in-24h.
+ * User stats — reads from precomputed dashboardStats table.
  */
 export const userStats = query({
   args: { refTime: v.optional(v.number()) },
@@ -82,29 +67,18 @@ export const userStats = query({
     total: v.number(),
     activeLast24h: v.number(),
   }),
-  handler: async (ctx, args) => {
+  handler: async (ctx) => {
     await requireAdmin(ctx);
-    const now = args.refTime ?? Date.now();
-    const cutoff = now - 24 * 60 * 60 * 1000;
-    let total = 0;
-    let active = 0;
-    let cursor: string | null = null;
-    while (true) {
-      const page = await ctx.db.query("users").paginate({ numItems: 1000, cursor });
-      for (const u of page.page) {
-        total++;
-        if (u.lastLoginAt && u.lastLoginAt >= cutoff) active++;
-      }
-      if (page.isDone) break;
-      cursor = page.continueCursor;
-    }
-    return { total, activeLast24h: active };
+    const stats = await ctx.db
+      .query("dashboardStats")
+      .withIndex("by_statsId", (q) => q.eq("statsId", "global"))
+      .unique();
+    return stats?.userStats ?? { total: 0, activeLast24h: 0 };
   },
 });
 
 /**
- * Feedback stats — uses ONE .paginate() to get total + recent 10.
- * Paginates backwards from the most recent.
+ * Feedback stats — uses ONE .take() for recent 10 feedback items.
  */
 export const feedbackStats = query({
   args: {},
@@ -114,15 +88,9 @@ export const feedbackStats = query({
   }),
   handler: async (ctx) => {
     await requireAdmin(ctx);
-    // Get recent 10 via take (which internally uses paginate)
     const recent = await ctx.db.query("feedback").order("desc").take(10);
-
-    // Count total via the same paginated stream... can't — already used take.
-    // So we return recent only and compute total separately.
-    // Actually take() IS a paginated query. We can't also paginate for total.
-    // Workaround: return recent.length as proxy. Total needs a separate query.
     return {
-      total: recent.length, // placeholder — client should not rely on this for large sets
+      total: recent.length, // placeholder
       recent: recent.map((f: Doc<"feedback">) => ({
         _id: f._id,
         rating: f.rating,
@@ -134,22 +102,18 @@ export const feedbackStats = query({
 });
 
 /**
- * Feedback count — separate query because feedbackStats already uses .take().
+ * Feedback count — reads from precomputed dashboardStats table.
  */
 export const feedbackCount = query({
   args: {},
   returns: v.number(),
   handler: async (ctx) => {
     await requireAdmin(ctx);
-    let count = 0;
-    let cursor: string | null = null;
-    while (true) {
-      const page = await ctx.db.query("feedback").paginate({ numItems: 1000, cursor });
-      count += page.page.length;
-      if (page.isDone) break;
-      cursor = page.continueCursor;
-    }
-    return count;
+    const stats = await ctx.db
+      .query("dashboardStats")
+      .withIndex("by_statsId", (q) => q.eq("statsId", "global"))
+      .unique();
+    return stats?.feedbackCount ?? 0;
   },
 });
 
@@ -179,42 +143,137 @@ export const crawlStats = query({
 });
 
 /**
- * Crawl count — separate query.
+ * Crawl count — reads from precomputed dashboardStats table.
  */
 export const crawlCount = query({
   args: {},
   returns: v.number(),
   handler: async (ctx) => {
     await requireAdmin(ctx);
-    let count = 0;
-    let cursor: string | null = null;
-    while (true) {
-      const page = await ctx.db.query("crawlJobs").paginate({ numItems: 1000, cursor });
-      count += page.page.length;
-      if (page.isDone) break;
-      cursor = page.continueCursor;
-    }
-    return count;
+    const stats = await ctx.db
+      .query("dashboardStats")
+      .withIndex("by_statsId", (q) => q.eq("statsId", "global"))
+      .unique();
+    return stats?.crawlCount ?? 0;
   },
 });
 
 /**
- * Cache stats — uses ONE .paginate() to count entries.
+ * Cache stats — reads from precomputed dashboardStats.
  */
 export const cacheStats = query({
   args: {},
   returns: v.object({ total: v.number() }),
   handler: async (ctx) => {
     await requireAdmin(ctx);
-    let count = 0;
-    let cursor: string | null = null;
+    const stats = await ctx.db
+      .query("dashboardStats")
+      .withIndex("by_statsId", (q) => q.eq("statsId", "global"))
+      .unique();
+    return stats?.cacheStats ?? { total: 0 };
+  },
+});
+
+/**
+ * Background mutation run by cron to compute and store dashboard statistics.
+ */
+export const computeDashboardStats = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    // 1. Compute documentStats
+    let docTotal = 0;
+    let docIndexed = 0;
+    let docPending = 0;
+    let docFailed = 0;
+    let docCursor: string | null = null;
     while (true) {
-      const page = await ctx.db.query("semanticCache").paginate({ numItems: 1000, cursor });
-      count += page.page.length;
+      const page = await ctx.db.query("documents").paginate({ numItems: 1000, cursor: docCursor });
+      for (const doc of page.page) {
+        docTotal++;
+        if (doc.status === "indexed") docIndexed++;
+        else if (doc.status === "pending") docPending++;
+        else if (doc.status === "failed") docFailed++;
+      }
       if (page.isDone) break;
-      cursor = page.continueCursor;
+      docCursor = page.continueCursor;
     }
-    return { total: count };
+
+    // 2. Compute userStats
+    const now = Date.now();
+    const userCutoff = now - 24 * 60 * 60 * 1000;
+    let userTotal = 0;
+    let userActive = 0;
+    let userCursor: string | null = null;
+    while (true) {
+      const page = await ctx.db.query("users").paginate({ numItems: 1000, cursor: userCursor });
+      for (const u of page.page) {
+        userTotal++;
+        if (u.lastLoginAt && u.lastLoginAt >= userCutoff) userActive++;
+      }
+      if (page.isDone) break;
+      userCursor = page.continueCursor;
+    }
+
+    // 3. Compute feedbackCount
+    let feedbackTotal = 0;
+    let feedbackCursor: string | null = null;
+    while (true) {
+      const page = await ctx.db.query("feedback").paginate({ numItems: 1000, cursor: feedbackCursor });
+      feedbackTotal += page.page.length;
+      if (page.isDone) break;
+      feedbackCursor = page.continueCursor;
+    }
+
+    // 4. Compute crawlCount
+    let crawlTotal = 0;
+    let crawlCursor: string | null = null;
+    while (true) {
+      const page = await ctx.db.query("crawlJobs").paginate({ numItems: 1000, cursor: crawlCursor });
+      crawlTotal += page.page.length;
+      if (page.isDone) break;
+      crawlCursor = page.continueCursor;
+    }
+
+    // 5. Compute cacheStats
+    let cacheTotal = 0;
+    let cacheCursor: string | null = null;
+    while (true) {
+      const page = await ctx.db.query("semanticCache").paginate({ numItems: 1000, cursor: cacheCursor });
+      cacheTotal += page.page.length;
+      if (page.isDone) break;
+      cacheCursor = page.continueCursor;
+    }
+
+    const statsData = {
+      statsId: "global",
+      documentStats: {
+        total: docTotal,
+        indexed: docIndexed,
+        pending: docPending,
+        failed: docFailed,
+      },
+      userStats: {
+        total: userTotal,
+        activeLast24h: userActive,
+      },
+      feedbackCount: feedbackTotal,
+      crawlCount: crawlTotal,
+      cacheStats: {
+        total: cacheTotal,
+      },
+      lastUpdatedAt: now,
+    };
+
+    const existing = await ctx.db
+      .query("dashboardStats")
+      .withIndex("by_statsId", (q) => q.eq("statsId", "global"))
+      .unique();
+
+    if (existing) {
+      await ctx.db.patch(existing._id, statsData);
+    } else {
+      await ctx.db.insert("dashboardStats", statsData);
+    }
   },
 });
 

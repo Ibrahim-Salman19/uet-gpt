@@ -1,7 +1,8 @@
 import { v } from "convex/values";
-import { mutation } from "../_generated/server";
+import { internalAction, mutation } from "../_generated/server";
 import { requireAdmin } from "../auth";
 import { rag } from "../rag/instance";
+import { internal } from "../_generated/api";
 
 export const remove = mutation({
   args: { documentId: v.id("documents") },
@@ -11,13 +12,9 @@ export const remove = mutation({
 
     const doc = await ctx.db.get(args.documentId);
     if (doc?.entryId) {
-      try {
-        await rag.deleteAsync(ctx, {
-          entryId: doc.entryId as unknown as import("@convex-dev/rag").EntryId,
-        });
-      } catch (error) {
-        console.error(`Failed to delete associated RAG entry ${doc.entryId}:`, error);
-      }
+      await ctx.scheduler.runAfter(0, internal.doc.remove.ragCleanupAction, {
+        entryId: doc.entryId,
+      });
     }
 
     // Clean up orphaned crawledChunks before deleting document
@@ -37,5 +34,18 @@ export const remove = mutation({
 
     await ctx.db.delete(args.documentId);
     return null;
+  },
+});
+
+export const ragCleanupAction = internalAction({
+  args: { entryId: v.string() },
+  handler: async (ctx, args) => {
+    try {
+      await rag.deleteAsync(ctx as any, {
+        entryId: args.entryId as unknown as import("@convex-dev/rag").EntryId,
+      });
+    } catch (error) {
+      console.error(`Failed to delete associated RAG entry ${args.entryId}:`, error);
+    }
   },
 });

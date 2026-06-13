@@ -314,16 +314,36 @@ export default defineSchema({
     datasetSize: v.number(),
     timestamp: v.number(),
     metrics: v.object({
-      recallAtK: v.number(),
-      precisionAtK: v.number(),
-      mrr: v.number(),
-      avgLatency: v.number(),
-      totalTokens: v.number(),
+      recallAtK: v.optional(v.number()),
+      precisionAtK: v.optional(v.number()),
+      mrr: v.optional(v.number()),
+      avgLatency: v.optional(v.number()),
+      totalTokens: v.optional(v.number()),
     }),
     metadata: v.optional(v.string()),
   })
     .index("by_timestamp", ["timestamp"])
     .index("by_evalName", ["evalName"]),
+
+  dashboardStats: defineTable({
+    statsId: v.string(), // singleton e.g., 'global'
+    documentStats: v.object({
+      total: v.number(),
+      indexed: v.number(),
+      pending: v.number(),
+      failed: v.number(),
+    }),
+    userStats: v.object({
+      total: v.number(),
+      activeLast24h: v.number(),
+    }),
+    feedbackCount: v.number(),
+    crawlCount: v.number(),
+    cacheStats: v.object({
+      total: v.number(),
+    }),
+    lastUpdatedAt: v.number(),
+  }).index("by_statsId", ["statsId"]),
 
   // Note: `threads` and `messages` tables are managed by @convex-dev/agent component.
   // Do not define them here to avoid table name conflicts with the component's internal tables.

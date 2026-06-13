@@ -62,4 +62,11 @@ crons.daily(
   internal.observability.staleness.checkStaleness,
 );
 
+// STATS-001: Pre-compute dashboard statistics every 5 minutes
+crons.interval(
+  "compute-dashboard-stats",
+  { minutes: 5 },
+  internal.admin.stats.computeDashboardStats,
+);
+
 export default crons;

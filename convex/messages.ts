@@ -7,7 +7,8 @@ import { enforceRateLimit } from "./rateLimit";
 
 // Transform component source format to app format
 function toAppSource(s: Record<string, unknown>) {
-  const opts = (s.providerOptions as Record<string, Record<string, unknown>> | undefined)?.meta;
+  const providerOpts = s.providerOptions && typeof s.providerOptions === "object" ? (s.providerOptions as Record<string, unknown>) : undefined;
+  const opts = providerOpts?.meta && typeof providerOpts.meta === "object" ? (providerOpts.meta as Record<string, unknown>) : undefined;
   return {
     documentId: (opts?.documentId as string | undefined) ?? (s.id as string | undefined),
     chunkId: (opts?.chunkId as string) ?? "",

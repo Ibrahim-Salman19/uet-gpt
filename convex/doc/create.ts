@@ -2,6 +2,14 @@ import { v } from "convex/values";
 import type { Id } from "../_generated/dataModel";
 import { internalMutation } from "../_generated/server";
 
+function safeGetHostname(urlStr: string): string {
+  try {
+    return new URL(urlStr).hostname;
+  } catch {
+    return "unknown";
+  }
+}
+
 function buildDocumentFields(args: {
   url: string;
   title: string;
@@ -19,7 +27,7 @@ function buildDocumentFields(args: {
   return {
     url: args.url,
     title: args.title,
-    source: args.source ?? new URL(args.url).hostname,
+    source: args.source ?? safeGetHostname(args.url),
     category: args.category ?? "general",
     ...(args.entryId !== undefined && { entryId: args.entryId }),
     ...(args.contentHash !== undefined && { contentHash: args.contentHash }),

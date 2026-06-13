@@ -1,4 +1,4 @@
-﻿import { v } from "convex/values";
+import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { internalAction, internalMutation } from "./_generated/server";
 // Note: Internal-only functions — no auth check needed.
@@ -12,7 +12,7 @@ export const stopBatch = internalMutation({
     const docs = await ctx.db
       .query("documents")
       .withIndex("by_status", (q) => q.eq("status", "processing"))
-      .take(500);
+      .take(100);
     for (const d of docs) {
       await ctx.db.patch(d._id, { status: "failed" });
     }
@@ -20,17 +20,23 @@ export const stopBatch = internalMutation({
     const jobs = await ctx.db
       .query("crawlJobs")
       .withIndex("by_status", (q) => q.eq("status", "running"))
-      .take(500);
+      .take(100);
     for (const j of jobs) {
       await ctx.db.patch(j._id, { status: "cancelled" });
     }
 
     // Audit log for emergency stop
     if (docs.length > 0 || jobs.length > 0) {
-      const adminUser = await ctx.db
+      let adminUser = await ctx.db
         .query("users")
         .withIndex("by_role", (q) => q.eq("role", "superadmin"))
         .first();
+      if (!adminUser) {
+        adminUser = await ctx.db
+          .query("users")
+          .withIndex("by_role", (q) => q.eq("role", "admin"))
+          .first();
+      }
       if (adminUser) {
         await ctx.db.insert("adminAuditLog", {
           userId: adminUser._id,
@@ -44,7 +50,7 @@ export const stopBatch = internalMutation({
       }
     }
 
-    return docs.length === 500 || jobs.length === 500;
+    return docs.length === 100 || jobs.length === 100;
   },
 });
 

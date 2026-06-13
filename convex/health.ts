@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query } from "./_generated/server";
+import { requireAdmin } from "./auth";
 
 /**
  * Lightweight heartbeat query for WebSocket keepalive.
@@ -31,9 +32,12 @@ export const healthCheck = query({
     timestamp: v.number(),
     uptime: v.number(),
   }),
-  handler: async (ctx) => ({
-    status: "healthy",
-    timestamp: Date.now(),
-    uptime: process.uptime ? process.uptime() * 1000 : 0,
-  }),
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    return {
+      status: "healthy",
+      timestamp: Date.now(),
+      uptime: (typeof process !== "undefined" && process.uptime) ? process.uptime() * 1000 : 0,
+    };
+  },
 });

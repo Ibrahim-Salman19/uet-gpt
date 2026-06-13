@@ -11,22 +11,27 @@ if (!process.env.CONVEX_AUTH_TOKEN && !process.env.CRAWL_WEBHOOK_SECRET) {
   );
 }
 
-function getAllowedOrigins(): string {
-  const origins = [process.env.NEXT_PUBLIC_APP_URL].filter(Boolean);
+function getCorsOrigin(request: Request): string {
+  const reqOrigin = request.headers.get("Origin");
+  const origins = [process.env.NEXT_PUBLIC_APP_URL].filter(Boolean) as string[];
   if (process.env.NODE_ENV === "development") {
     origins.push("http://localhost:3000");
   }
-  return origins.length > 0 ? origins.join(", ") : "*";
+  if (reqOrigin && origins.includes(reqOrigin)) {
+    return reqOrigin;
+  }
+  return origins[0] || "*";
 }
 
-export function withCORS(response: Response, restricted = false): Response {
+export function withCORS(request: Request, response: Response, restricted = false): Response {
   const headers = new Headers(response.headers);
   headers.set("Access-Control-Allow-Methods", "POST, OPTIONS");
   headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
   if (restricted) {
-    headers.set("Access-Control-Allow-Origin", getAllowedOrigins());
+    headers.set("Access-Control-Allow-Origin", getCorsOrigin(request));
+    headers.set("Vary", "Origin");
   } else {
-    headers.set("Access-Control-Allow-Origin", "*");
+    headers.set("Access-Control-Allow-Origin", request.headers.get("Origin") || "*");
   }
   return new Response(response.body, {
     status: response.status,
@@ -45,11 +50,11 @@ http.route({
   path: "/api/webhook/crawl",
   method: "OPTIONS",
   handler: httpAction(
-    async (_ctx) =>
+    async (_ctx, request) =>
       new Response(null, {
         status: 204,
         headers: {
-          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Origin": request.headers.get("Origin") || "*",
           "Access-Control-Allow-Methods": "POST, OPTIONS",
           "Access-Control-Allow-Headers": "Content-Type, Authorization",
         },
@@ -67,11 +72,11 @@ http.route({
   path: "/ingest",
   method: "OPTIONS",
   handler: httpAction(
-    async (_ctx) =>
+    async (_ctx, request) =>
       new Response(null, {
         status: 204,
         headers: {
-          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Origin": request.headers.get("Origin") || "*",
           "Access-Control-Allow-Methods": "POST, OPTIONS",
           "Access-Control-Allow-Headers": "Content-Type, Authorization",
         },
@@ -89,13 +94,14 @@ http.route({
   path: "/api/reset",
   method: "OPTIONS",
   handler: httpAction(
-    async (_ctx) =>
+    async (_ctx, request) =>
       new Response(null, {
         status: 204,
         headers: {
-          "Access-Control-Allow-Origin": getAllowedOrigins(),
+          "Access-Control-Allow-Origin": getCorsOrigin(request),
           "Access-Control-Allow-Methods": "POST, OPTIONS",
           "Access-Control-Allow-Headers": "Content-Type, Authorization",
+          "Vary": "Origin",
         },
       }),
   ),
@@ -111,13 +117,14 @@ http.route({
   path: "/api/webhook/clerk",
   method: "OPTIONS",
   handler: httpAction(
-    async (_ctx) =>
+    async (_ctx, request) =>
       new Response(null, {
         status: 204,
         headers: {
-          "Access-Control-Allow-Origin": getAllowedOrigins(),
+          "Access-Control-Allow-Origin": getCorsOrigin(request),
           "Access-Control-Allow-Methods": "POST, OPTIONS",
           "Access-Control-Allow-Headers": "Content-Type, Authorization",
+          "Vary": "Origin",
         },
       }),
   ),

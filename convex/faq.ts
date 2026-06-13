@@ -32,16 +32,23 @@ export const removeFaq = mutation({
 export const listFaqs = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db.query("faqs").order("desc").take(100);
+    const now = Date.now();
+    return await ctx.db
+      .query("faqs")
+      .filter((q) => q.or(q.eq(q.field("expiresAt"), undefined), q.gt(q.field("expiresAt"), now)))
+      .order("desc")
+      .take(100);
   },
 });
 
 export const searchFaqs = internalQuery({
   args: { query: v.string() },
   handler: async (ctx, args) => {
+    const now = Date.now();
     return await ctx.db
       .query("faqs")
       .withSearchIndex("search_question", (q) => q.search("question", args.query))
+      .filter((q) => q.or(q.eq(q.field("expiresAt"), undefined), q.gt(q.field("expiresAt"), now)))
       .take(3);
   },
 });
