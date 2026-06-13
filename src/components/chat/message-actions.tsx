@@ -34,7 +34,7 @@ function handleCopyAction(content: string, setCopied: (v: boolean) => void) {
 function handlePinAction(
   content: string,
   pinned: boolean,
-  pinnedHighlights: { id: string; query: string }[],
+  pinnedHighlights: { id: string; query: string; content: string }[],
   addPin: (query: string, highlight: string) => void,
   removePin: (id: string) => void,
 ) {

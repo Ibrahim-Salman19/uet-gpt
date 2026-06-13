@@ -309,6 +309,7 @@ export const embedSingleChunk = internalAction({
     headingPath: v.optional(v.array(v.string())),
     namespaceId: v.string(),
   },
+  returns: v.any(),
   handler: async (ctx, args) => {
     try {
       // Safe source extraction — handles both https:// and pdf:// virtual URLs
@@ -320,7 +321,7 @@ export const embedSingleChunk = internalAction({
       }
 
       // Check for existing chunk to prevent orphaned vectors on retries
-      const existing = await ctx.runQuery(internal.crawl.queries.getChunkByHash, {
+      const existing: any = await ctx.runQuery(internal.crawl.queries.getChunkByHash, {
         documentId: args.documentId,
         contentHash: args.contentHash,
       });
