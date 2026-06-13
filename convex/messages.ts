@@ -1,9 +1,9 @@
 import { ConvexError, v } from "convex/values";
 import { components } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
+import { requireAuth } from "./auth";
 import { sourcesValidator, tokenCountValidator } from "./messages/validator";
 import { enforceRateLimit } from "./rateLimit";
-import { requireAuth } from "./auth";
 
 // Transform component source format to app format
 function toAppSource(s: Record<string, unknown>) {
@@ -60,6 +60,13 @@ export const insert = mutation({
     // Uses actual token count if the caller provides it, otherwise 1000 token estimate.
     const tokenEstimate = args.tokenCount?.total ?? 1_000;
     await enforceRateLimit(ctx, user.clerkId, tokenEstimate);
+
+    const thread = await ctx.runQuery(components.agent.threads.getThread, {
+      threadId: args.threadId,
+    });
+    if (!thread || thread.userId !== user.clerkId) {
+      throw new ConvexError("Not authorized to write to this thread");
+    }
 
     const result = await ctx.runMutation(components.agent.messages.addMessages, {
       userId: user.clerkId,

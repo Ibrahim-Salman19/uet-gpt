@@ -86,9 +86,7 @@ export async function checkChatRateLimit(
 }
 
 // Admin action rate limiter — 30 actions/minute
-const adminActionLimiter = redis
-  ? createRatelimit(redis, 30, 60000, "admin/action")
-  : null;
+const adminActionLimiter = redis ? createRatelimit(redis, 30, 60000, "admin/action") : null;
 
 /**
  * Check rate limit for admin actions (role changes, etc.).

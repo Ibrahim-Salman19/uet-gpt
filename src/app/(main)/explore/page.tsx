@@ -41,7 +41,7 @@ const CATEGORIES = [
 function ExploreCard({ doc }: { doc: ExploreDoc }) {
   return (
     <a
-      href={doc.url}
+      href={doc.url?.startsWith("http") ? doc.url : "#"}
       target="_blank"
       rel="noopener noreferrer"
       className="group block rounded-xl border border-white/5 bg-[#101012]/40 backdrop-blur-sm p-4 transition-all duration-300 hover:border-[var(--accent)]/30 hover:bg-[#101012]/80 hover:-translate-y-0.5 active:scale-[0.99] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] relative overflow-hidden"
@@ -167,8 +167,8 @@ export default function ExplorePage() {
             !searchQuery ||
             doc.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             doc.url?.toLowerCase().includes(searchQuery.toLowerCase());
-          // When querying a specific category from backend, skip client-side category filter
-          const matchesCategory = cat === "all" || activeCategory !== "all" || doc.category === cat;
+          // Strictly filter by category to prevent bleeding when switching tabs
+          const matchesCategory = cat === "all" || doc.category === cat;
           return matchesSearch && matchesCategory;
         })
       : [];

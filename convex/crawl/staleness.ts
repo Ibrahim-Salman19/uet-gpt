@@ -67,6 +67,7 @@ export const purgeStaleDocuments = internalMutation({
       const isStaleDocs = await ctx.db
         .query("documents")
         .withIndex("by_status", (q) => q.eq("status", "indexed"))
+        .filter((q) => q.eq(q.field("isStale"), true))
         .take(batchSize);
 
       for (const doc of isStaleDocs) {
@@ -97,11 +98,13 @@ export const flagExpiredDocuments = internalMutation({
     const indexedDocs = await ctx.db
       .query("documents")
       .withIndex("by_status", (q) => q.eq("status", "indexed"))
+      .filter((q) => q.neq(q.field("isStale"), true))
       .take(batchSize);
 
     const activeDocs = await ctx.db
       .query("documents")
       .withIndex("by_status", (q) => q.eq("status", "active"))
+      .filter((q) => q.neq(q.field("isStale"), true))
       .take(batchSize);
 
     const candidates = [...indexedDocs, ...activeDocs];

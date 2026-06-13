@@ -37,6 +37,9 @@ export default function ChatPage() {
       } catch {
         setIsCreating(false);
         toast.error("Failed to start conversation. Please try again.");
+      } finally {
+        // Resetting after a small delay allows navigation to start before enabling the button
+        setTimeout(() => setIsCreating(false), 500);
       }
     },
     [createThread, isCreating, router],

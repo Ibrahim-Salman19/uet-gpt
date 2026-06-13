@@ -170,13 +170,15 @@ export const purgeOldArchived = internalAction({
     let userCursor = args.userCursor !== undefined ? args.userCursor : null;
     let userDone = false;
     let purged = args.purgedSoFar ?? 0;
-    
+
     const startTime = Date.now();
     const MAX_EXECUTION_TIME_MS = 8 * 60 * 1000; // 8 minutes
 
     while (!userDone) {
       if (Date.now() - startTime > MAX_EXECUTION_TIME_MS) {
-        console.log(`Execution time limit reached. Scheduling continuation. Purged so far: ${purged}`);
+        console.log(
+          `Execution time limit reached. Scheduling continuation. Purged so far: ${purged}`,
+        );
         await ctx.scheduler.runAfter(0, internal.threads.purgeOldArchived, {
           userCursor,
           purgedSoFar: purged,

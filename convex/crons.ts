@@ -40,15 +40,11 @@ crons.weekly(
   "purge-old-archived-threads",
   { dayOfWeek: "sunday", hourUTC: 3, minuteUTC: 0 },
   internal.threads.purgeOldArchived,
-  {}
+  {},
 );
 
 // Hourly cleanup for stale rate limit tracking
-crons.interval(
-  "clear-stale-rate-limits",
-  { hours: 1 },
-  internal.rateLimit.clearStaleRateLimits,
-);
+crons.interval("clear-stale-rate-limits", { hours: 1 }, internal.rateLimit.clearStaleRateLimits);
 
 // Phase 2: Contextual retrieval — daily backfill of raw chunks via Gemini Flash free tier
 // Runs at 3:00 UTC, after daily crawl completes at 0:00 UTC, before staleness check at 4:00 UTC

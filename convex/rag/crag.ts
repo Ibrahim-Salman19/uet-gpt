@@ -16,7 +16,7 @@ Text: "${c.text.substring(0, 1000)}"
 
   return `You are evaluating whether retrieved document chunks are relevant to answering a user query.
 
-User query: "${query}"
+User query: ${JSON.stringify(query)}
 
 ${chunksText}
 

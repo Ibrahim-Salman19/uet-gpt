@@ -165,6 +165,7 @@ function fetchRagData(
   return convex
     .action(api.rag.retrieval.retrieveContext, {
       question,
+      secret: process.env.INTERNAL_API_SECRET,
     })
     .catch((_err) => {
       return NextResponse.json(
@@ -341,7 +342,9 @@ function streamWithStrippedThinking(
           processChunk(value, buf, accumulated, controller);
         }
       } catch (e) {
-        controller.error(e);
+        console.error("Stream interrupted:", e);
+        controller.enqueue("\n\n[Error: Connection to AI provider lost mid-stream]");
+        controller.close();
       } finally {
         reader.releaseLock();
       }
@@ -413,7 +416,10 @@ async function tryStreamWithFallback(
 }
 
 function encodeSourcesHeader(sources: any[]): string {
-  return Buffer.from(JSON.stringify(sources)).toString("base64");
+  const jsonString = JSON.stringify(sources);
+  const bytes = new TextEncoder().encode(jsonString);
+  const binString = Array.from(bytes, (byte) => String.fromCodePoint(byte)).join("");
+  return btoa(binString);
 }
 
 function buildCacheWriteCallback(
@@ -441,6 +447,8 @@ function buildCacheWriteCallback(
 
           const topSourceUrl = ragResult.sources[0]?.url ?? "";
           const freshnessTier = assignFreshnessTier(topSourceUrl);
+          const sourceEntryIds = ragResult.sources.map((s: any) => s.entryId).filter(Boolean);
+
           await convex.action(api.cache.set.setFromServer, {
             queryText: question,
             queryEmbedding: ragResult.queryEmbedding,
@@ -448,6 +456,7 @@ function buildCacheWriteCallback(
             sources: ragResult.sources,
             model: modelName,
             freshnessTier,
+            sourceEntryIds,
             ...alternates,
           });
         } catch (err) {

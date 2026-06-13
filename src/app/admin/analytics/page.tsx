@@ -251,15 +251,21 @@ export default function AdminAnalyticsPage() {
   const feedbackRecent = useQuery(api.admin.stats.feedbackStats, {});
   const cache = useQuery(api.admin.stats.cacheStats, {});
 
-  const loading = docs === undefined || users === undefined || feedbackCount === undefined ||
-    feedbackRecent === undefined || cache === undefined;
+  const loading =
+    docs === undefined ||
+    users === undefined ||
+    feedbackCount === undefined ||
+    feedbackRecent === undefined ||
+    cache === undefined;
 
   if (loading) {
     return <AnalyticsLoadingSkeleton />;
   }
 
   const positiveFeedback = feedbackRecent.recent.filter((f: any) => f.rating === "thumbsUp").length;
-  const negativeFeedback = feedbackRecent.recent.filter((f: any) => f.rating === "thumbsDown").length;
+  const negativeFeedback = feedbackRecent.recent.filter(
+    (f: any) => f.rating === "thumbsDown",
+  ).length;
   const totalRecent = positiveFeedback + negativeFeedback;
   const satisfactionRate = totalRecent > 0 ? Math.round((positiveFeedback / totalRecent) * 100) : 0;
 

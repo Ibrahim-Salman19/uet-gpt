@@ -122,8 +122,8 @@ async function generateQueryEmbedding(
       text: hydeQuery || rewrittenQuery || safeQuestion,
     });
   } catch (e) {
-    console.error("Failed to generate embedding, falling back to empty vector", e);
-    return [];
+    console.error("Failed to generate embedding", e);
+    throw new Error("Failed to generate embedding for the query. Cannot proceed with retrieval.");
   }
 }
 
@@ -272,9 +272,11 @@ async function evaluateWithCrag(
     };
   }
 
-  const allIrrelevant = cragEval.every(
-    (e: CragEval) => !e.relevant && e.confidence > CRAG_CONFIG.highConfidenceThreshold,
-  );
+  const allIrrelevant =
+    cragEval.length > 0 &&
+    cragEval.every(
+      (e: CragEval) => !e.relevant && e.confidence > CRAG_CONFIG.highConfidenceThreshold,
+    );
   const someIrrelevant = cragEval.some((e: CragEval) => !e.relevant);
 
   if (allIrrelevant) {
@@ -286,6 +288,14 @@ async function evaluateWithCrag(
       const eval_ = cragEval.find((e: CragEval) => e.index === i);
       return eval_ ? eval_.relevant : true;
     });
+
+    if (relevantChunks.length === 0) {
+      return {
+        finalResults: [],
+        finalSources: [],
+        tier: "refuse",
+      };
+    }
 
     if (relevantChunks.length <= 2) {
       return {
@@ -364,7 +374,13 @@ async function buildResponseContext(
       for (const r of searchResults) {
         if (total >= BUDGET) break;
         const remaining = BUDGET - total;
-        const truncated = r.content.substring(0, remaining);
+        let truncated = r.content.substring(0, remaining);
+        if (truncated.length < r.content.length) {
+          const lastSpace = truncated.lastIndexOf(" ");
+          if (lastSpace > 0) {
+            truncated = truncated.substring(0, lastSpace) + "...";
+          }
+        }
         parts.push(truncated);
         total += truncated.length;
       }
@@ -391,6 +407,7 @@ async function buildResponseContext(
 export const retrieveContext = action({
   args: {
     question: v.string(),
+    secret: v.optional(v.string()),
   },
   returns: v.object({
     intent: v.string(),
@@ -401,6 +418,10 @@ export const retrieveContext = action({
     queryEmbedding: v.array(v.float64()),
   }),
   handler: async (ctx, args) => {
+    if (args.secret !== process.env.INTERNAL_API_SECRET) {
+      throw new ConvexError("Unauthorized access to RAG retrieval pipeline");
+    }
+
     // Break circular type chain through api/internal (Convex known pattern)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const _a: any = api;
@@ -428,15 +449,11 @@ export const retrieveContext = action({
     }
 
     const { rewrittenQuery, hydeQuery } = await enrichQuery(ctx, _a, _i, safeQuestion);
-    const queryEmbedding = await generateQueryEmbedding(
-      ctx,
-      _a,
-      hydeQuery,
-      rewrittenQuery,
-      safeQuestion,
-    );
 
-    const cached = await checkSemanticCache(ctx, _a, safeQuestion, queryEmbedding);
+    // Generate cache embedding deterministically (ignoring HyDE)
+    const cacheEmbedding = await generateQueryEmbedding(ctx, _a, "", rewrittenQuery, safeQuestion);
+
+    const cached = await checkSemanticCache(ctx, _a, safeQuestion, cacheEmbedding);
     if (cached) {
       console.log("[RETRIEVAL] Cache hit", {
         query: truncateQuery(safeQuestion),
@@ -449,9 +466,18 @@ export const retrieveContext = action({
         sources: cached.sources,
         cachedResponse: cached.response,
         model: cached.model,
-        queryEmbedding,
+        queryEmbedding: cacheEmbedding,
       };
     }
+
+    // Cache miss, now generate full query embedding with HyDE
+    const queryEmbedding = await generateQueryEmbedding(
+      ctx,
+      _a,
+      hydeQuery,
+      rewrittenQuery,
+      safeQuestion,
+    );
 
     console.log("[RETRIEVAL] Cache miss, searching", {
       query: truncateQuery(safeQuestion),

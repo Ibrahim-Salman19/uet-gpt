@@ -95,7 +95,9 @@ export async function setUserRole(
   }
 }
 
-export async function removeUserRole(userId: string): Promise<{ success: boolean; error?: string }> {
+export async function removeUserRole(
+  userId: string,
+): Promise<{ success: boolean; error?: string }> {
   const admin = await getAuthenticatedAdmin();
   if (!admin) {
     return { success: false, error: "Not authorized" };

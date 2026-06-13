@@ -1,11 +1,11 @@
 "use client";
 
-import { Shield, ShieldCheck, ShieldOff, Search, UserPlus, Crown } from "lucide-react";
+import { Crown, Search, Shield, ShieldCheck, ShieldOff, UserPlus } from "lucide-react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { searchUsers, setUserRole, removeUserRole, type UserResult } from "./actions";
+import { removeUserRole, searchUsers, setUserRole, type UserResult } from "./actions";
 
 const ROLE_BADGES: Record<
   "user" | "admin" | "superadmin",
@@ -52,30 +52,23 @@ export default function AdminUsersPage() {
     setLoading(false);
   }, [query]);
 
-  const handleSetRole = useCallback(
-    async (userId: string, role: string) => {
-      setUpdatingId(userId);
-      const result = await setUserRole(userId, role);
-      if (result.success) {
-        setUsers((prev) =>
-          prev.map((u) => (u.id === userId ? { ...u, role } : u)),
-        );
-        toast.success(`Role updated to ${role}`);
-      } else {
-        toast.error(result.error ?? "Failed to update role");
-      }
-      setUpdatingId(null);
-    },
-    [],
-  );
+  const handleSetRole = useCallback(async (userId: string, role: string) => {
+    setUpdatingId(userId);
+    const result = await setUserRole(userId, role);
+    if (result.success) {
+      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, role } : u)));
+      toast.success(`Role updated to ${role}`);
+    } else {
+      toast.error(result.error ?? "Failed to update role");
+    }
+    setUpdatingId(null);
+  }, []);
 
   const handleRemoveRole = useCallback(async (userId: string) => {
     setUpdatingId(userId);
     const result = await removeUserRole(userId);
     if (result.success) {
-      setUsers((prev) =>
-        prev.map((u) => (u.id === userId ? { ...u, role: "user" } : u)),
-      );
+      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, role: "user" } : u)));
       toast.success("Role removed — user downgraded to regular user");
     } else {
       toast.error(result.error ?? "Failed to remove role");
@@ -177,9 +170,7 @@ export default function AdminUsersPage() {
                   </div>
 
                   {/* Email */}
-                  <span className="text-[11px] text-zinc-500 font-mono truncate">
-                    {user.email}
-                  </span>
+                  <span className="text-[11px] text-zinc-500 font-mono truncate">{user.email}</span>
 
                   {/* Role Badge */}
                   <span

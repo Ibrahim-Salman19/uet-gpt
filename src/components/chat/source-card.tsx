@@ -13,7 +13,7 @@ interface SourceCardProps {
 export function SourceCard({ source, index, className }: SourceCardProps) {
   return (
     <a
-      href={source.url}
+      href={source.url?.startsWith("http") ? source.url : "#"}
       target="_blank"
       rel="noopener noreferrer"
       className={cn(

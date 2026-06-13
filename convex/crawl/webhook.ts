@@ -123,7 +123,6 @@ function verifyWebhookHeaders(
 }
 
 async function validateWebhookSignature(
-  rawBody: string,
   timestamp: string,
   signature: string,
 ): Promise<Response | null> {
@@ -134,9 +133,9 @@ async function validateWebhookSignature(
     return new Response("Server configuration error", { status: 500 });
   }
 
-  let isValid = await verifySignature(timestamp, signature, primarySecret, rawBody);
+  let isValid = await verifySignature(timestamp, signature, primarySecret, "uet-crawl");
   if (!isValid && secondarySecret) {
-    isValid = await verifySignature(timestamp, signature, secondarySecret, rawBody);
+    isValid = await verifySignature(timestamp, signature, secondarySecret, "uet-crawl");
   }
   if (!isValid) {
     console.warn("Webhook rejected: Invalid signature");
@@ -146,7 +145,7 @@ async function validateWebhookSignature(
 }
 
 function extractWebhookPayload(rawBody: string): {
-  taskId: string;
+  taskId: string | undefined;
   status: string;
   results: any[];
   url: string | undefined;
@@ -156,14 +155,14 @@ function extractWebhookPayload(rawBody: string): {
     "Webhook received",
     JSON.stringify({ taskId: payload.task_id, jobId: payload.job_id, url: payload.url }),
   );
-  const taskId = payload.task_id || payload.job_id;
+  const taskId = payload.task_id || payload.job_id || undefined;
   const status = payload.status;
   const results = payload.data?.results || payload.results || (payload.url ? [payload] : []);
   return { taskId, status, results, url: payload.url };
 }
 
-async function markJobProcessed(ctx: any, taskId: string): Promise<void> {
-  await ctx.runMutation(internal.crawl.mutations.markWebhookProcessed, {
+async function markJobProcessed(ctx: any, taskId: string): Promise<boolean> {
+  return await ctx.runMutation(internal.crawl.mutations.markWebhookProcessed, {
     jobId: taskId,
     expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
   });
@@ -291,15 +290,25 @@ export const crawlWebhook = httpAction(async (ctx, request) => {
     const hmacInfo = verifyWebhookHeaders(request);
     if (hmacInfo instanceof Response) return hmacInfo;
 
-    const sigResp = await validateWebhookSignature(rawBody, hmacInfo.timestamp, hmacInfo.signature);
+    const sigResp = await validateWebhookSignature(hmacInfo.timestamp, hmacInfo.signature);
     if (sigResp) return sigResp;
 
     const { taskId: id, status, results, url } = extractWebhookPayload(rawBody);
+    if (!id) {
+      console.warn("Webhook rejected: Missing task_id and job_id");
+      return new Response("Missing task_id and job_id", { status: 400 });
+    }
     taskId = id;
 
     // Mark as processed BEFORE processing to prevent race condition with duplicate deliveries
-    // If processing fails, the entry still exists as processed (idempotent — won't reprocess)
-    await markJobProcessed(ctx, taskId);
+    const isNew = await markJobProcessed(ctx, taskId);
+    if (!isNew) {
+      console.log(`Webhook for task ${taskId} was already processed. Ignoring duplicate.`);
+      return new Response(JSON.stringify({ ok: true, duplicate: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
 
     let successfulPages = 0;
     let failedPages = 0;

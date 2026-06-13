@@ -43,8 +43,7 @@ export const getOrCreate = mutation({
 
     // First-admin bootstrap: auto-promote user matching ADMIN_BOOTSTRAP_EMAIL
     const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL;
-    const finalRole =
-      bootstrapEmail && email === bootstrapEmail ? "admin" : "user";
+    const finalRole = bootstrapEmail && email === bootstrapEmail ? "admin" : "user";
 
     const id = await ctx.db.insert("users", {
       clerkId: args.clerkId,
@@ -165,7 +164,13 @@ export const upsertFromWebhook = internalMutation({
       .unique();
 
     if (existing) {
-      const patch: Partial<{ name: string; email: string; imageUrl: string; role: typeof role; lastLoginAt: number }> = {
+      const patch: Partial<{
+        name: string;
+        email: string;
+        imageUrl: string;
+        role: typeof role;
+        lastLoginAt: number;
+      }> = {
         name: args.name,
         email: args.email,
         imageUrl: args.imageUrl ?? existing.imageUrl,
@@ -198,8 +203,7 @@ export const upsertFromWebhook = internalMutation({
       // First-admin bootstrap: applied only on creation, not on subsequent webhook events.
       // Bootstrap users who are deliberately demoted to "user" stay demoted.
       const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL;
-      const finalRole =
-        bootstrapEmail && args.email === bootstrapEmail ? "admin" : role;
+      const finalRole = bootstrapEmail && args.email === bootstrapEmail ? "admin" : role;
 
       await ctx.db.insert("users", {
         clerkId: args.clerkId,

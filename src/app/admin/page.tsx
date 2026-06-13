@@ -153,8 +153,13 @@ export default function AdminOverviewPage() {
   const crawlRecent = useQuery(api.admin.stats.crawlStats, {});
   const cache = useQuery(api.admin.stats.cacheStats, {});
 
-  const loading = docs === undefined || users === undefined || feedbackCount === undefined ||
-    feedbackRecent === undefined || crawlCount === undefined || crawlRecent === undefined ||
+  const loading =
+    docs === undefined ||
+    users === undefined ||
+    feedbackCount === undefined ||
+    feedbackRecent === undefined ||
+    crawlCount === undefined ||
+    crawlRecent === undefined ||
     cache === undefined;
 
   if (loading) {
@@ -176,17 +181,23 @@ export default function AdminOverviewPage() {
             <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider font-sans">
               Total Documents
             </span>
-            <div className="text-zinc-500 shrink-0"><FileText className="h-4 w-4 text-zinc-500" /></div>
+            <div className="text-zinc-500 shrink-0">
+              <FileText className="h-4 w-4 text-zinc-500" />
+            </div>
           </div>
-          <div className="mt-3 text-3xl font-bold text-zinc-100 tracking-tight font-mono">{docs.total}</div>
+          <div className="mt-3 text-3xl font-bold text-zinc-100 tracking-tight font-mono">
+            {docs.total}
+          </div>
           <div className="flex items-center gap-2 mt-1.5 flex-wrap">
             <span className="text-[10px] text-zinc-500 font-sans">{docs.indexed} indexed</span>
-            <span className={cn(
-              "text-[10px] font-semibold px-2 py-0.5 rounded-full border font-mono",
-              docs.failed === 0
-                ? "text-emerald-400 bg-emerald-500/5 border-emerald-500/10"
-                : "text-red-400 bg-red-500/5 border-red-500/10",
-            )}>
+            <span
+              className={cn(
+                "text-[10px] font-semibold px-2 py-0.5 rounded-full border font-mono",
+                docs.failed === 0
+                  ? "text-emerald-400 bg-emerald-500/5 border-emerald-500/10"
+                  : "text-red-400 bg-red-500/5 border-red-500/10",
+              )}
+            >
               {docs.pending} pending
             </span>
           </div>
@@ -229,17 +240,23 @@ export default function AdminOverviewPage() {
             <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider font-sans">
               Document Issues
             </span>
-            <div className="text-zinc-500 shrink-0"><Activity className="h-4 w-4 text-zinc-500" /></div>
+            <div className="text-zinc-500 shrink-0">
+              <Activity className="h-4 w-4 text-zinc-500" />
+            </div>
           </div>
-          <div className="mt-3 text-3xl font-bold text-zinc-100 tracking-tight font-mono">{docs.failed}</div>
+          <div className="mt-3 text-3xl font-bold text-zinc-100 tracking-tight font-mono">
+            {docs.failed}
+          </div>
           <div className="flex items-center gap-2 mt-1.5 flex-wrap">
             <span className="text-[10px] text-zinc-500 font-sans">Failed documents</span>
-            <span className={cn(
-              "text-[10px] font-semibold px-2 py-0.5 rounded-full border font-mono",
-              docs.failed === 0
-                ? "text-emerald-400 bg-emerald-500/5 border-emerald-500/10"
-                : "text-red-400 bg-red-500/5 border-red-500/10",
-            )}>
+            <span
+              className={cn(
+                "text-[10px] font-semibold px-2 py-0.5 rounded-full border font-mono",
+                docs.failed === 0
+                  ? "text-emerald-400 bg-emerald-500/5 border-emerald-500/10"
+                  : "text-red-400 bg-red-500/5 border-red-500/10",
+              )}
+            >
               {docs.failed === 0 ? "All clear" : "Needs attention"}
             </span>
           </div>
@@ -254,8 +271,8 @@ export default function AdminOverviewPage() {
 
       {/* Recent panels */}
       <div className="grid gap-4 md:grid-cols-2">
-        <RecentCrawlsPanel crawls={crawlRecent.recent} />
-        <RecentFeedbackPanel feedback={feedbackRecent.recent} />
+        <RecentCrawlsPanel crawls={crawlRecent?.recent ?? []} />
+        <RecentFeedbackPanel feedback={feedbackRecent?.recent ?? []} />
       </div>
     </div>
   );
@@ -273,25 +290,33 @@ interface StatCardProps {
 
 function StatCard({ title, value, description, icon, trend, className, children }: StatCardProps) {
   return (
-    <div className={cn(
-      "rounded-xl border border-white/5 bg-[#101012]/40 backdrop-blur-sm p-5 transition-all duration-300 hover:border-[var(--accent)]/30 hover:bg-[#101012]/60 active:scale-[0.99] ease-[var(--ease-spring)]",
-      className,
-    )}>
+    <div
+      className={cn(
+        "rounded-xl border border-white/5 bg-[#101012]/40 backdrop-blur-sm p-5 transition-all duration-300 hover:border-[var(--accent)]/30 hover:bg-[#101012]/60 active:scale-[0.99] ease-[var(--ease-spring)]",
+        className,
+      )}
+    >
       <div className="flex items-center justify-between gap-4">
-        <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider font-sans">{title}</span>
+        <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider font-sans">
+          {title}
+        </span>
         <div className="text-zinc-500 shrink-0">{icon}</div>
       </div>
       <div className="mt-3 text-3xl font-bold text-zinc-100 tracking-tight font-mono">{value}</div>
       {(description || trend) && (
         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-          {description && <span className="text-[10px] text-zinc-500 font-sans">{description}</span>}
+          {description && (
+            <span className="text-[10px] text-zinc-500 font-sans">{description}</span>
+          )}
           {trend && (
-            <span className={cn(
-              "text-[10px] font-semibold px-2 py-0.5 rounded-full border font-mono",
-              trend.positive
-                ? "text-emerald-400 bg-emerald-500/5 border-emerald-500/10"
-                : "text-red-400 bg-red-500/5 border-red-500/10",
-            )}>
+            <span
+              className={cn(
+                "text-[10px] font-semibold px-2 py-0.5 rounded-full border font-mono",
+                trend.positive
+                  ? "text-emerald-400 bg-emerald-500/5 border-emerald-500/10"
+                  : "text-red-400 bg-red-500/5 border-red-500/10",
+              )}
+            >
               {trend.value}
             </span>
           )}

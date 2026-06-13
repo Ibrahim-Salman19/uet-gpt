@@ -27,7 +27,7 @@ export default clerkMiddleware(async (auth, req) => {
     if (sessionClaims && typeof sessionClaims.metadata === "undefined") {
       console.warn(
         "[RBAC] Clerk JWT template not configured. " +
-        "Add { \"metadata\": \"{{user.public_metadata}}\" } in Clerk Dashboard → Sessions → Customize session token",
+          'Add { "metadata": "{{user.public_metadata}}" } in Clerk Dashboard → Sessions → Customize session token',
       );
     }
 

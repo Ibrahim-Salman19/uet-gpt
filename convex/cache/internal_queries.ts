@@ -65,10 +65,15 @@ export const getDocByEntryId = internalQuery({
     v.null(),
   ),
   handler: async (ctx, args) => {
-    const doc = await ctx.db
-      .query("documents")
-      .withIndex("by_entryId", (q) => q.eq("entryId", args.entryId))
+    // sourceEntryIds in the semantic cache refer to the ragId of crawledChunks
+    const chunk = await ctx.db
+      .query("crawledChunks")
+      .withIndex("by_ragId", (q) => q.eq("ragId", args.entryId))
       .first();
+
+    if (!chunk) return null;
+
+    const doc = await ctx.db.get(chunk.documentId);
     if (!doc) return null;
     return { updatedAt: doc.updatedAt, crawledAt: doc.crawledAt };
   },

@@ -193,19 +193,17 @@ function buildCrawlPayload(
   };
 }
 
-// Sign the body (without webhook_headers, which are unknown until after signing)
 function signCrawlPayload(
   crawlPayload: Record<string, unknown>,
   primarySecret: string,
   secondarySecret: string | undefined,
 ): string {
   const timestamp = Date.now().toString();
-  const bodyForSigning = JSON.stringify(crawlPayload);
   const secrets = [primarySecret, secondarySecret].filter(Boolean) as string[];
   const signatures = secrets
     .map((s) =>
       createHmac("sha256", s)
-        .update(timestamp + "." + bodyForSigning)
+        .update(timestamp + ".uet-crawl")
         .digest("hex"),
     )
     .join(",");
@@ -319,6 +317,21 @@ export const embedSingleChunk = internalAction({
         sourceHost = isPdfVirtualUrl(args.url) ? "pdf" : new URL(args.url).hostname;
       } catch {
         sourceHost = "unknown";
+      }
+
+      // Check for existing chunk to prevent orphaned vectors on retries
+      const existing = await ctx.runQuery(internal.crawl.queries.getChunkByHash, {
+        documentId: args.documentId,
+        contentHash: args.contentHash,
+      });
+      if (existing) {
+        return {
+          success: true,
+          ragId: existing.ragId,
+          contentHash: args.contentHash,
+          documentId: args.documentId,
+          url: args.url,
+        };
       }
 
       const result = await rag.add(ctx, {

@@ -130,24 +130,24 @@ export const reembedPendingBatch = internalMutation({
       }
 
       if (existingChunks.length > 0) {
-        for (const chunk of existingChunks) {
-          await embeddingPool.enqueueAction(
-            ctx,
-            internal.crawl.actions.embedSingleChunk,
-            {
-              documentId: doc._id,
-              url: doc.url,
-              chunkText: chunk.text,
-              contentHash: chunk.contentHash,
-              jobId: "reembed-job",
-              namespaceId: namespaceIdStr,
-            },
-            {
-              onComplete: internal.crawl.mutations.onChunkEmbedded,
-              context: { jobId: "reembed-job" },
-            },
-          );
-        }
+        const argsArray = existingChunks.map((chunk) => ({
+          documentId: doc._id,
+          url: doc.url,
+          chunkText: chunk.text,
+          contentHash: chunk.contentHash,
+          jobId: "reembed-job",
+          namespaceId: namespaceIdStr,
+        }));
+
+        await embeddingPool.enqueueActionBatch(
+          ctx,
+          internal.crawl.actions.embedSingleChunk,
+          argsArray,
+          {
+            onComplete: internal.crawl.mutations.onChunkEmbedded,
+            context: { jobId: "reembed-job" },
+          },
+        );
         queued += existingChunks.length;
       } else if (doc.chunkCount && doc.chunkCount > 0) {
         await ctx.db.patch(doc._id, {

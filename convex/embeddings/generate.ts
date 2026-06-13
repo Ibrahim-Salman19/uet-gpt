@@ -155,7 +155,11 @@ export const generate = action({
         latencyMs,
         textLength: args.text.length,
       });
-      return embeddings[0] as number[];
+      const emb = embeddings[0];
+      if (!emb || emb.length !== 3072) {
+        throw new ConvexError(`Invalid embedding dimension: expected 3072, got ${emb?.length}`);
+      }
+      return emb;
     } catch (error: unknown) {
       const latencyMs = timer.end();
       console.error("[EMBEDDING] Failed to generate embedding", {

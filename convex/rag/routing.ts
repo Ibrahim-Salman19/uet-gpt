@@ -45,7 +45,7 @@ export const classifyQueryAction = action({
             .enum([...INTENT_ENUM] as [string, ...string[]])
             .describe("The category of the user's query regarding UET Taxila."),
         }),
-        prompt: `Classify the following user query about UET Taxila into one of the categories. Query: "${args.query}"`,
+        prompt: `Classify the following user query about UET Taxila into one of the categories.\n<query>\n${JSON.stringify(args.query)}\n</query>`,
         temperature: 0,
       });
 

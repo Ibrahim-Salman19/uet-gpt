@@ -22,9 +22,13 @@ export function NewChatButton({ onCreateThread }: NewChatButtonProps) {
         const threadId = await onCreateThread();
         if (threadId) {
           router.push(`/chat/${threadId}`);
+        } else {
+          toast.error("Failed to start conversation. Please try again.");
         }
+      } catch {
+        toast.error("Failed to start conversation. Please try again.");
       } finally {
-        setIsCreating(false);
+        setTimeout(() => setIsCreating(false), 500);
       }
     } else {
       // Fallback: navigate to thread-less chat if no creation function

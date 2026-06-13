@@ -35,6 +35,18 @@ export const fullTextSearch = internalQuery({
   },
 });
 
+export const getChunkByHash = internalQuery({
+  args: { documentId: v.id("documents"), contentHash: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("crawledChunks")
+      .withIndex("by_documentId_and_contentHash", (q) =>
+        q.eq("documentId", args.documentId).eq("contentHash", args.contentHash),
+      )
+      .first();
+  },
+});
+
 /**
  * getDocumentCountByStatus — returns count of documents for one specific status.
  * Call multiple times with different statuses to build a full picture.

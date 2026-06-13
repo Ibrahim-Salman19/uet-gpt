@@ -5,7 +5,7 @@ import { recordTiming } from "../observability/metrics";
 import { rag } from "../rag/instance";
 import { type AdaptiveWeights, estimateIdf } from "./idf";
 
-const FAQ_BOOST_FACTOR = 2.0;
+const FAQ_BOOST_FACTOR = 0.015; // Scaled to match RRF fusion scores (typically 0.01 - 0.05)
 
 type VectorSearchResult = { entryId: string; score?: number; content?: { text: string }[] };
 type TextSearchResult = { ragId: string; text: string; score: number };
@@ -262,7 +262,9 @@ export const searchDocumentsAction = action({
     );
 
     const faqResults = await fetchActiveFaqs(ctx, args.queryText);
-    const combinedResults = [...faqResults, ...sortedEnriched];
+    const combinedResults = [...faqResults, ...sortedEnriched].sort(
+      (a, b) => b.relevanceScore - a.relevanceScore,
+    );
 
     const finalResults = combinedResults.slice(0, limit).map((r) => ({
       entryId: r.entryId,

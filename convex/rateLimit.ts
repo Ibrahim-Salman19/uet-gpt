@@ -17,7 +17,7 @@
 
 import { ConvexError, v } from "convex/values";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
-import { mutation, query, internalMutation } from "./_generated/server";
+import { internalMutation, mutation, query } from "./_generated/server";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -43,7 +43,7 @@ async function checkWindow(
   key: string,
   amount: number,
   limit: number,
-  userIdForSharding?: string
+  userIdForSharding?: string,
 ): Promise<{ exceeded: boolean; current: number }> {
   const now = Date.now();
   const windowStart = now - WINDOW_MS; // anything older is outside the window
@@ -53,8 +53,11 @@ async function checkWindow(
     const SHARD_COUNT = 10;
     const shards = await Promise.all(
       Array.from({ length: SHARD_COUNT }).map((_, i) =>
-        ctx.db.query("rateLimits").withIndex("by_key", (q) => q.eq("key", `global_${i}`)).unique()
-      )
+        ctx.db
+          .query("rateLimits")
+          .withIndex("by_key", (q) => q.eq("key", `global_${i}`))
+          .unique(),
+      ),
     );
 
     for (const shard of shards) {
@@ -68,10 +71,11 @@ async function checkWindow(
     }
 
     // Hash userId to pick a shard deterministically
-    const shardIndex = userIdForSharding 
-      ? Array.from(userIdForSharding).reduce((acc, char) => acc + char.charCodeAt(0), 0) % SHARD_COUNT
+    const shardIndex = userIdForSharding
+      ? Array.from(userIdForSharding).reduce((acc, char) => acc + char.charCodeAt(0), 0) %
+        SHARD_COUNT
       : 0;
-      
+
     const shardKey = `global_${shardIndex}`;
     const shardToUpdate = shards[shardIndex];
 
@@ -94,6 +98,10 @@ async function checkWindow(
     .unique();
 
   if (!existing || existing.windowStart < windowStart) {
+    // Check if the amount itself exceeds the limit
+    if (amount > limit) {
+      return { exceeded: true, current: 0 };
+    }
     // Window expired (or first request) — start a fresh window
     if (existing) {
       await ctx.db.patch(existing._id, { windowStart: now, count: amount });
@@ -178,13 +186,15 @@ export const checkRateLimit = mutation({
 
     const globalShards = await Promise.all(
       Array.from({ length: 10 }).map((_, i) =>
-        ctx.db.query("rateLimits").withIndex("by_key", (q) => q.eq("key", `global_${i}`)).first()
-      )
+        ctx.db
+          .query("rateLimits")
+          .withIndex("by_key", (q) => q.eq("key", `global_${i}`))
+          .first(),
+      ),
     );
 
-    const userCount =
-      userRow && userRow.windowStart >= windowStart ? userRow.count : 0;
-      
+    const userCount = userRow && userRow.windowStart >= windowStart ? userRow.count : 0;
+
     let globalCount = 0;
     for (const shard of globalShards) {
       if (shard && shard.windowStart >= windowStart) {
@@ -203,14 +213,15 @@ export const clearStaleRateLimits = internalMutation({
   args: {},
   handler: async (ctx) => {
     const windowStart = Date.now() - WINDOW_MS;
-    // We could use an index on windowStart, but without it we scan. 
+    // We could use an index on windowStart, but without it we scan.
     // Since rate limits are frequently overwritten, stale ones are only for inactive users.
-    const staleRows = await ctx.db.query("rateLimits")
+    const staleRows = await ctx.db
+      .query("rateLimits")
       .filter((q) => q.lt(q.field("windowStart"), windowStart))
       .take(100);
-      
+
     for (const row of staleRows) {
       await ctx.db.delete(row._id);
     }
-  }
+  },
 });

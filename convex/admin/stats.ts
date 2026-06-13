@@ -59,9 +59,7 @@ export const documentStats = query({
     // Paginate through ALL documents in batches of 1000
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      const page = await ctx.db
-        .query("documents")
-        .paginate({ numItems: 1000, cursor });
+      const page = await ctx.db.query("documents").paginate({ numItems: 1000, cursor });
       for (const doc of page.page) {
         total++;
         if (doc.status === "indexed") indexed++;
@@ -117,10 +115,7 @@ export const feedbackStats = query({
   handler: async (ctx) => {
     await requireAdmin(ctx);
     // Get recent 10 via take (which internally uses paginate)
-    const recent = await ctx.db
-      .query("feedback")
-      .order("desc")
-      .take(10);
+    const recent = await ctx.db.query("feedback").order("desc").take(10);
 
     // Count total via the same paginated stream... can't — already used take.
     // So we return recent only and compute total separately.
@@ -169,10 +164,7 @@ export const crawlStats = query({
   }),
   handler: async (ctx) => {
     await requireAdmin(ctx);
-    const recent = await ctx.db
-      .query("crawlJobs")
-      .order("desc")
-      .take(5);
+    const recent = await ctx.db.query("crawlJobs").order("desc").take(5);
 
     return {
       total: recent.length, // placeholder

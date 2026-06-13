@@ -162,12 +162,20 @@ export const getProcessedWebhook = internalQuery({
 
 export const markWebhookProcessed = internalMutation({
   args: { jobId: v.string(), expiresAt: v.optional(v.number()) },
+  returns: v.boolean(),
   handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("processedWebhooks")
+      .withIndex("by_jobId", (q) => q.eq("jobId", args.jobId))
+      .first();
+    if (existing) return false;
+
     await ctx.db.insert("processedWebhooks", {
       jobId: args.jobId,
       processedAt: Date.now(),
       expiresAt: args.expiresAt ?? Date.now() + 30 * 24 * 60 * 60 * 1000,
     });
+    return true;
   },
 });
 
@@ -278,7 +286,15 @@ export const saveEmbedding = internalMutation({
     if (doc) {
       const newCount = (doc.chunksEmbedded || 0) + 1;
       const updates: Partial<Doc<"documents">> = { chunksEmbedded: newCount };
-      if (doc.chunkCount !== undefined && newCount >= doc.chunkCount) {
+
+      // Check if all chunks are processed (either embedded or failed)
+      const allDlqEntries = await ctx.db
+        .query("crawlDeadLetter")
+        .withIndex("by_url", (q) => q.eq("url", doc.url))
+        .collect();
+      const failedCount = allDlqEntries.length;
+
+      if (doc.chunkCount !== undefined && newCount + failedCount >= doc.chunkCount) {
         if (doc.status !== "indexed") {
           updates.status = "indexed";
           updates.updatedAt = Date.now();
@@ -376,12 +392,22 @@ async function checkDocumentForFailure(
         .withIndex("by_url", (q) => q.eq("url", url))
         .collect();
       const failedCount = allDlqEntries.length;
-      if (failedCount >= chunkCount) {
-        await ctx.db.patch(documentId, {
-          status: "failed",
-          error: `All ${chunkCount} chunks failed. Last error: ${errorMsg}`,
-          updatedAt: Date.now(),
-        });
+      const embeddedCount = doc.chunksEmbedded || 0;
+
+      if (failedCount + embeddedCount >= chunkCount) {
+        if (embeddedCount === 0) {
+          await ctx.db.patch(documentId, {
+            status: "failed",
+            error: `All ${chunkCount} chunks failed. Last error: ${errorMsg}`,
+            updatedAt: Date.now(),
+          });
+        } else {
+          await ctx.db.patch(documentId, {
+            status: "indexed",
+            error: `Completed with ${failedCount} failed chunks. Last error: ${errorMsg}`,
+            updatedAt: Date.now(),
+          });
+        }
       } else {
         console.warn(
           `Chunk ${failedCount}/${chunkCount} failed for ${url} — document stays in processing`,

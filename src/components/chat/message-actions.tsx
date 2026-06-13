@@ -41,7 +41,7 @@ function handlePinAction(
   return () => {
     if (pinned) {
       const pin = pinnedHighlights.find(
-        (p) => p.query.toLowerCase().trim() === content.toLowerCase().trim(),
+        (p) => p.content.toLowerCase().trim() === content.toLowerCase().trim(),
       );
       if (pin) removePin(pin.id);
     } else {

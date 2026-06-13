@@ -130,7 +130,7 @@ export default function SettingsPage() {
   };
 
   const handleExport = () => {
-    toast.success("Chat history exported");
+    toast.info("Export functionality is coming in a future update.");
   };
 
   const handleDeleteData = () => {

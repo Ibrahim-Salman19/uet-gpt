@@ -136,7 +136,7 @@ const settingsSections: SettingsSection[] = [
 
 export default function AdminSettingsPage() {
   const dbSettings = useQuery(api.admin.settings.getSettings, {});
-  const upsertSetting = useMutation(api.admin.settings.upsertSetting);
+  const upsertSettingsBatch = useMutation(api.admin.settings.upsertSettingsBatch);
   const resetSettings = useMutation(api.admin.settings.resetSettings);
 
   const [settings, setSettings] =
@@ -160,14 +160,17 @@ export default function AdminSettingsPage() {
 
   const handleSave = useCallback(async () => {
     try {
+      const settingsToSave: { key: string; value: string | number | boolean; section: string }[] =
+        [];
       for (const section of settingsSections) {
         for (const field of section.fields) {
           const value = settings[field.key];
           if (value !== undefined) {
-            await upsertSetting({ key: field.key, value, section: section.key });
+            settingsToSave.push({ key: field.key, value, section: section.key });
           }
         }
       }
+      await upsertSettingsBatch({ settings: settingsToSave });
       toast.success("Settings saved successfully", {
         description: "Your system changes are now active.",
       });
@@ -176,11 +179,11 @@ export default function AdminSettingsPage() {
         description: error instanceof Error ? error.message : "Unknown error",
       });
     }
-  }, [settings, upsertSetting]);
+  }, [settings, upsertSettingsBatch]);
 
   const handleReset = useCallback(async () => {
     try {
-      await resetSettings();
+      await resetSettings({ confirm: true });
       setSettings(defaultSettings);
       toast.success("Settings reset to default values", {
         description: "All configuration keys have been restored.",

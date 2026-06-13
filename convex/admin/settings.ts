@@ -47,10 +47,52 @@ export const upsertSetting = mutation({
   },
 });
 
+export const upsertSettingsBatch = mutation({
+  args: {
+    settings: v.array(
+      v.object({
+        key: v.string(),
+        value: v.union(v.string(), v.number(), v.boolean()),
+        section: v.string(),
+      }),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const user = await requireAdmin(ctx);
+
+    for (const setting of args.settings) {
+      const existing = await ctx.db
+        .query("appSettings")
+        .withIndex("by_key", (q) => q.eq("key", setting.key))
+        .first();
+
+      if (existing) {
+        await ctx.db.patch(existing._id, {
+          value: setting.value,
+          updatedAt: Date.now(),
+          updatedBy: user._id,
+        });
+      } else {
+        await ctx.db.insert("appSettings", {
+          key: setting.key,
+          value: setting.value,
+          section: setting.section,
+          updatedAt: Date.now(),
+          updatedBy: user._id,
+        });
+      }
+    }
+  },
+});
+
 export const resetSettings = mutation({
-  args: {},
-  handler: async (ctx) => {
-    await requireAdmin(ctx);
+  args: { confirm: v.boolean() },
+  handler: async (ctx, args) => {
+    if (!args.confirm) throw new ConvexError("Confirmation required to reset settings.");
+    const user = await requireAdmin(ctx);
+    if (user.role !== "superadmin") {
+      throw new ConvexError("Superadmin access required to reset all settings.");
+    }
 
     const all = await ctx.db.query("appSettings").take(1000);
     for (const setting of all) {

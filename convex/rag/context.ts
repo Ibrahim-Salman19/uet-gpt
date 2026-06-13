@@ -36,7 +36,7 @@ export const buildContext = internalQuery({
         : "";
       const chunkText = `${sectionLabel}Source: [${chunk.title}](${chunk.url})\n\n${chunk.content}\n\n---\n\n`;
       if (currentChars + chunkText.length > maxChars) {
-        break;
+        continue;
       }
       budgetedChunks.push(chunk);
       currentChars += chunkText.length;

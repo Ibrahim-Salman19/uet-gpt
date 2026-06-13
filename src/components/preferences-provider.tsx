@@ -416,7 +416,7 @@ function usePreferenceActions(
 
   const addPin = React.useCallback((query: string, content: string) => {
     setters.setPinnedHighlights((prev) => {
-      if (prev.some((p) => p.query.toLowerCase().trim() === query.toLowerCase().trim())) {
+      if (prev.some((p) => p.content.toLowerCase().trim() === content.toLowerCase().trim())) {
         toast.info("Message is already pinned");
         return prev;
       }
@@ -445,9 +445,9 @@ function usePreferenceActions(
   }, []);
 
   const isPinned = React.useCallback(
-    (query: string) => {
+    (contentToCheck: string) => {
       return pinnedHighlights.some(
-        (p) => p.query.toLowerCase().trim() === query.toLowerCase().trim(),
+        (p) => p.content.toLowerCase().trim() === contentToCheck.toLowerCase().trim(),
       );
     },
     [pinnedHighlights],
