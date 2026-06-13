@@ -1,6 +1,6 @@
 {
   "framework": "nextjs",
-  "buildCommand": "pnpm build",
+  "buildCommand": "npx convex codegen && pnpm build",
   "installCommand": "pnpm install",
   "outputDirectory": ".next",
   "functions": {
