@@ -2,7 +2,7 @@
 
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
@@ -13,29 +13,38 @@ interface NewChatButtonProps {
 export function NewChatButton({ onCreateThread }: NewChatButtonProps) {
   const router = useRouter();
   const [isCreating, setIsCreating] = useState(false);
+  const creatingRef = useRef(false);
 
   const handleClick = useCallback(async () => {
-    if (isCreating) return;
+    if (creatingRef.current) return;
 
     if (onCreateThread) {
+      creatingRef.current = true;
       setIsCreating(true);
       try {
         const threadId = await onCreateThread();
         if (threadId) {
           router.push(`/chat/${threadId}`);
         } else {
+          creatingRef.current = false;
+          setIsCreating(false);
           toast.error("Failed to start conversation. Please try again.");
         }
       } catch {
+        creatingRef.current = false;
+        setIsCreating(false);
         toast.error("Failed to start conversation. Please try again.");
       } finally {
-        setTimeout(() => setIsCreating(false), 500);
+        setTimeout(() => {
+          creatingRef.current = false;
+          setIsCreating(false);
+        }, 500);
       }
     } else {
       // Fallback: navigate to thread-less chat if no creation function
       router.push("/chat");
     }
-  }, [onCreateThread, router, isCreating]);
+  }, [onCreateThread, router]);
 
   return (
     <div className="p-3">

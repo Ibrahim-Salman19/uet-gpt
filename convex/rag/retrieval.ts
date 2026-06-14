@@ -118,9 +118,13 @@ async function generateQueryEmbedding(
   safeQuestion: string,
 ): Promise<number[]> {
   try {
-    return await ctx.runAction(actions.embeddings.generate.generate, {
+    const res = await ctx.runAction(actions.embeddings.generate.generate, {
       text: hydeQuery || rewrittenQuery || safeQuestion,
     });
+    if (!res || !Array.isArray(res)) {
+      throw new Error("Embedding generation returned invalid response shape");
+    }
+    return res;
   } catch (e) {
     console.error("Failed to generate embedding", e);
     throw new Error("Failed to generate embedding for the query. Cannot proceed with retrieval.");
@@ -451,7 +455,12 @@ export const retrieveContext = action({
     const { rewrittenQuery, hydeQuery } = await enrichQuery(ctx, _a, _i, safeQuestion);
 
     // Generate cache embedding deterministically (ignoring HyDE)
-    const cacheEmbedding = await generateQueryEmbedding(ctx, _a, "", rewrittenQuery, safeQuestion);
+    let cacheEmbedding: number[] = [];
+    try {
+      cacheEmbedding = await generateQueryEmbedding(ctx, _a, "", rewrittenQuery, safeQuestion);
+    } catch (e) {
+      console.warn("Failed to generate cache embedding:", e);
+    }
 
     const cached = await checkSemanticCache(ctx, _a, safeQuestion, cacheEmbedding);
     if (cached) {
@@ -471,13 +480,18 @@ export const retrieveContext = action({
     }
 
     // Cache miss, now generate full query embedding with HyDE
-    const queryEmbedding = await generateQueryEmbedding(
-      ctx,
-      _a,
-      hydeQuery,
-      rewrittenQuery,
-      safeQuestion,
-    );
+    let queryEmbedding: number[] = [];
+    try {
+      queryEmbedding = await generateQueryEmbedding(
+        ctx,
+        _a,
+        hydeQuery,
+        rewrittenQuery,
+        safeQuestion,
+      );
+    } catch (e) {
+      console.warn("Failed to generate search embedding:", e);
+    }
 
     console.log("[RETRIEVAL] Cache miss, searching", {
       query: truncateQuery(safeQuestion),

@@ -15,8 +15,33 @@ function generateSignature(timestamp: string, body: string, secret: string): str
 }
 
 function createMockCtx() {
+  let webhookProcessed = false;
   return {
-    runMutation: vi.fn().mockResolvedValue(null),
+    runMutation: vi.fn().mockImplementation(async (ref: any, args: any) => {
+      let refName = "";
+      if (typeof ref === "string") {
+        refName = ref;
+      } else if (ref && (typeof ref === "object" || typeof ref === "function")) {
+        const sym = Symbol.for("functionName");
+        try {
+          if (sym in ref && typeof ref[sym] === "string") {
+            refName = ref[sym];
+          } else if ("name" in ref && typeof ref.name === "string") {
+            refName = ref.name;
+          } else {
+            refName = Object.prototype.toString.call(ref);
+          }
+        } catch (e) {
+          refName = "";
+        }
+      }
+      if (refName && refName.includes("markWebhookProcessed")) {
+        if (webhookProcessed) return false;
+        webhookProcessed = true;
+        return true;
+      }
+      return null;
+    }),
     runQuery: vi.fn().mockResolvedValue(null), // null means not processed
   };
 }
@@ -37,6 +62,7 @@ describe("Crawl Webhook Integration & Load Testing", () => {
     const request = {
       url: "http://localhost/webhook",
       text: async () => "x".repeat(10_485_761),
+      arrayBuffer: async () => new TextEncoder().encode("x".repeat(10_485_761)).buffer,
       headers: {
         get: (key: string) => {
           if (key.toLowerCase() === "content-length") return "10485761"; // >10MB
@@ -59,6 +85,7 @@ describe("Crawl Webhook Integration & Load Testing", () => {
     const request = {
       url: "http://localhost/webhook",
       text: async () => JSON.stringify({ job_id: "test", data: [] }),
+      arrayBuffer: async () => new TextEncoder().encode(JSON.stringify({ job_id: "test", data: [] })).buffer,
       headers: {
         get: (key: string) => {
           if (key === "x-crawl-timestamp") return timestamp;
@@ -80,6 +107,7 @@ describe("Crawl Webhook Integration & Load Testing", () => {
     const request = {
       url: "http://localhost/webhook",
       text: async () => JSON.stringify({ job_id: "test", data: [] }),
+      arrayBuffer: async () => new TextEncoder().encode(JSON.stringify({ job_id: "test", data: [] })).buffer,
       headers: {
         get: (key: string) => {
           if (key === "x-crawl-timestamp") return expiredTimestamp;
@@ -116,6 +144,7 @@ describe("Crawl Webhook Integration & Load Testing", () => {
     const request = {
       url: "http://localhost/webhook",
       text: async () => JSON.stringify(payload),
+      arrayBuffer: async () => new TextEncoder().encode(JSON.stringify(payload)).buffer,
       headers: {
         get: (key: string) => {
           if (key.toLowerCase() === "content-length") return "50000";

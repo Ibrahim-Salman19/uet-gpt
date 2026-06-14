@@ -42,27 +42,31 @@ export const SidebarHistory = memo(function SidebarHistory({
           chats.map((chat) => {
             const isActive = pathname === `/chat/${chat.id}`;
             return (
-              <Link
+              <div
                 key={chat.id}
-                href={`/chat/${chat.id}`}
                 className={cn(
-                  "group flex w-full items-center gap-2.5 rounded-[var(--radius-sm)] px-3 py-2 text-sm transition-[background-color] duration-[var(--duration-fast)] ease-[var(--ease-out-quart)]",
+                  "group flex w-full items-center justify-between rounded-[var(--radius-sm)] px-3 py-2 text-sm transition-[background-color] duration-[var(--duration-fast)] ease-[var(--ease-out-quart)]",
                   isActive
                     ? "bg-[var(--accent)]/10 text-[var(--accent)]"
                     : "text-[var(--text-sidebar)] hover:bg-white/5",
                 )}
               >
-                <MessageSquare className="h-4 w-4 shrink-0 text-[var(--text-muted)]" />
-                <span className="flex-1 truncate text-left leading-snug">{chat.title}</span>
+                <Link
+                  href={`/chat/${chat.id}`}
+                  className="flex flex-1 items-center gap-2.5 min-w-0"
+                >
+                  <MessageSquare className="h-4 w-4 shrink-0 text-[var(--text-muted)]" />
+                  <span className="flex-1 truncate text-left leading-snug">{chat.title}</span>
+                </Link>
                 <button
                   type="button"
                   onClick={(e) => onDelete(e, chat.id)}
-                  className="opacity-0 transition-opacity duration-[var(--duration-fast)] group-hover:opacity-60 hover:!opacity-100"
+                  className="opacity-0 transition-opacity duration-[var(--duration-fast)] group-hover:opacity-60 hover:!opacity-100 ml-2"
                   aria-label="Delete chat"
                 >
                   <Trash2 className="h-3.5 w-3.5 shrink-0 text-[var(--text-muted)]" />
                 </button>
-              </Link>
+              </div>
             );
           })
         )}

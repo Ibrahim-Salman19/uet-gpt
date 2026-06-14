@@ -7,6 +7,7 @@ vi.hoisted(() => {
   (globalThis as any).currentAdminMocks = buildAdminMocks({
     pathname: "/admin/documents",
     useMockConvexCtx: true,
+    includeRouter: true,
     lucideIcons: {
       FileText: "icon-filetext",
       Search: "icon-search",

@@ -26,17 +26,18 @@ describe("embeddings:generate", () => {
   it("should call Gemini API via KeyPool with gemini-embedding-2 and dimensions 3072", async () => {
     process.env.GEMINI_API_KEY_1 = "test_gemini_key";
 
+    const dummyEmbedding = new Array(3072).fill(0.1);
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
       headers: new Headers({ "content-type": "application/json" }),
       text: async () => JSON.stringify({
         embedding: {
-          values: [0.1, 0.2, 0.3],
+          values: dummyEmbedding,
         },
       }),
       json: async () => ({
         embedding: {
-          values: [0.1, 0.2, 0.3],
+          values: dummyEmbedding,
         },
       }),
     });
@@ -60,12 +61,12 @@ describe("embeddings:generate", () => {
     const body = JSON.parse(options!.body as string);
     expect(body).toEqual({
       content: {
-        parts: [{ text: "task: search result | query: Hello world" }],
+        parts: [{ text: "Hello world" }],
       },
       outputDimensionality: 3072,
     });
 
-    expect(result).toEqual([0.1, 0.2, 0.3]);
+    expect(result).toEqual(dummyEmbedding);
   });
 
   it("should throw an error if GEMINI_API_KEY is not set", async () => {

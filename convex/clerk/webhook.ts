@@ -17,7 +17,13 @@ function checkWebhookMethod(request: Request): Response | null {
 
 function getExpectedWebhookToken(): string {
   // Use a dedicated Clerk webhook secret instead of falling back to CRAWL_WEBHOOK_SECRET
-  return process.env.CLERK_WEBHOOK_SECRET || process.env.CONVEX_AUTH_TOKEN || "";
+  const token = process.env.CLERK_WEBHOOK_SECRET || process.env.CONVEX_AUTH_TOKEN || "";
+  // Reject whitespace-only tokens — they pass truthiness checks but are not valid secrets
+  if (token.trim().length === 0 && token.length > 0) {
+    console.error("Webhook secret is whitespace-only — rejecting as invalid configuration");
+    return "";
+  }
+  return token;
 }
 
 function constantTimeCompare(a: string, b: string): boolean {

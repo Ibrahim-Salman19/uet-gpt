@@ -10,6 +10,17 @@ function safeGetHostname(urlStr: string): string {
   }
 }
 
+function classifyDocument(url: string, title: string): "faculty" | "staff" | "admin" | null {
+  const FACULTY_PATTERNS = ["faculty", "professor", "dr.", "prof."];
+  const STAFF_PATTERNS = ["staff"];
+  const ADMIN_PATTERNS = ["admin", "head", "registrar", "chancellor"];
+  const text = `${url} ${title}`.toLowerCase();
+  if (FACULTY_PATTERNS.some((p) => text.includes(p))) return "faculty";
+  if (STAFF_PATTERNS.some((p) => text.includes(p))) return "staff";
+  if (ADMIN_PATTERNS.some((p) => text.includes(p))) return "admin";
+  return null;
+}
+
 function buildDocumentFields(args: {
   url: string;
   title: string;
@@ -37,6 +48,7 @@ function buildDocumentFields(args: {
     status: args.status,
     crawledAt: args.crawledAt,
     updatedAt: args.updatedAt,
+    personType: classifyDocument(args.url, args.title) ?? undefined,
   };
 }
 

@@ -21,11 +21,25 @@ interface MessageActionsProps {
 function handleCopyAction(content: string, setCopied: (v: boolean) => void) {
   return async () => {
     try {
-      await navigator.clipboard.writeText(content);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(content);
+      } else {
+        const textarea = document.createElement("textarea");
+        textarea.value = content;
+        textarea.style.position = "fixed";
+        textarea.style.top = "0";
+        textarea.style.left = "0";
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      }
       setCopied(true);
       toast.success("Copied to clipboard");
       setTimeout(() => setCopied(false), 2000);
-    } catch {
+    } catch (err) {
+      console.error("Copy failed:", err);
       toast.error("Failed to copy");
     }
   };

@@ -9,9 +9,7 @@ import { streamRegistry } from "./stream-registry";
 
 export function useMessages(threadId: string | undefined) {
   const messagesData = useStableQuery(
-    threadId
-      ? (api.messages.list as unknown as FunctionReference<"query", "public">)
-      : ("skip" as unknown as FunctionReference<"query", "public">),
+    api.messages.list,
     threadId ? { threadId } : "skip",
   );
 

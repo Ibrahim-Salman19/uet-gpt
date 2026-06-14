@@ -3,7 +3,7 @@
 import { api } from "convex/_generated/api";
 import { useMutation } from "convex/react";
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ChatInputNew } from "@/components/chat/chat-input-new";
 import { GlassPortal } from "@/components/chat/glass-portal";
@@ -20,29 +20,34 @@ export default function ChatPage() {
   const router = useRouter();
   const createThread = useMutation(api.threads.create);
   const [isCreating, setIsCreating] = useState(false);
+  const creatingRef = useRef(false);
 
   const handleSend = useCallback(
     async (message: string) => {
-      if (isCreating) return;
+      if (creatingRef.current) return;
+      creatingRef.current = true;
       setIsCreating(true);
       try {
         const threadId = await createThread({ title: "New Chat" });
         if (threadId) {
-          await new Promise((resolve) => setTimeout(resolve, 150));
           router.push(`/chat/${threadId}?q=${encodeURIComponent(message)}`);
         } else {
+          creatingRef.current = false;
           setIsCreating(false);
           toast.error("Failed to start conversation. Please try again.");
         }
       } catch {
+        creatingRef.current = false;
         setIsCreating(false);
         toast.error("Failed to start conversation. Please try again.");
       } finally {
-        // Resetting after a small delay allows navigation to start before enabling the button
-        setTimeout(() => setIsCreating(false), 500);
+        setTimeout(() => {
+          creatingRef.current = false;
+          setIsCreating(false);
+        }, 500);
       }
     },
-    [createThread, isCreating, router],
+    [createThread, router],
   );
 
   return (

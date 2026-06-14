@@ -49,6 +49,51 @@ function buildMockStats(overrides: Record<string, unknown> = {}) {
   };
 }
 
+function mockOverviewQueries(stats: any) {
+  vi.mocked(useQuery).mockImplementation((query: any, ..._args: any[]) => {
+    if (!stats || !query) return undefined;
+    const sym = Symbol.for("functionName");
+    const queryName = typeof query === "string" ? query : (query[sym] || query.name || "");
+    if (typeof queryName !== "string") return undefined;
+    if (queryName.includes("documentStats")) {
+      return {
+        total: stats.totalDocuments,
+        indexed: stats.indexedDocuments,
+        pending: stats.pendingDocuments,
+        failed: stats.failedDocuments,
+      };
+    }
+    if (queryName.includes("userStats")) {
+      return {
+        activeLast24h: stats.activeUsersLast24h,
+        total: stats.totalUsers,
+      };
+    }
+    if (queryName.includes("feedbackCount")) {
+      return stats.totalFeedback;
+    }
+    if (queryName.includes("feedbackStats")) {
+      return {
+        recent: stats.recentFeedback,
+      };
+    }
+    if (queryName.includes("crawlCount")) {
+      return stats.totalCrawlJobs;
+    }
+    if (queryName.includes("crawlStats")) {
+      return {
+        recent: stats.recentCrawls,
+      };
+    }
+    if (queryName.includes("cacheStats")) {
+      return {
+        total: stats.totalCacheEntries,
+      };
+    }
+    return undefined;
+  });
+}
+
 describe("AdminOverviewPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -60,7 +105,7 @@ describe("AdminOverviewPage", () => {
   });
 
   it("renders stat cards with data", () => {
-    vi.mocked(useQuery).mockReturnValue(buildMockStats());
+    mockOverviewQueries(buildMockStats());
     render(<AdminOverviewPage />);
 
     expect(screen.getByText("Total Documents")).toBeInTheDocument();
@@ -76,7 +121,7 @@ describe("AdminOverviewPage", () => {
   });
 
   it("renders secondary stat cards", () => {
-    vi.mocked(useQuery).mockReturnValue(buildMockStats());
+    mockOverviewQueries(buildMockStats());
     render(<AdminOverviewPage />);
 
     expect(screen.getByText("Total Feedback")).toBeInTheDocument();
@@ -90,25 +135,25 @@ describe("AdminOverviewPage", () => {
   });
 
   it("shows 'Needs attention' trend when there are failed documents", () => {
-    vi.mocked(useQuery).mockReturnValue(buildMockStats({ failedDocuments: 3 }));
+    mockOverviewQueries(buildMockStats({ failedDocuments: 3 }));
     render(<AdminOverviewPage />);
     expect(screen.getByText("Needs attention")).toBeInTheDocument();
   });
 
   it("shows 'All clear' trend when no failed documents", () => {
-    vi.mocked(useQuery).mockReturnValue(buildMockStats({ failedDocuments: 0 }));
+    mockOverviewQueries(buildMockStats({ failedDocuments: 0 }));
     render(<AdminOverviewPage />);
     expect(screen.getByText("All clear")).toBeInTheDocument();
   });
 
   it("renders document status breakdown section", () => {
-    vi.mocked(useQuery).mockReturnValue(buildMockStats());
+    mockOverviewQueries(buildMockStats());
     render(<AdminOverviewPage />);
     expect(screen.getByText("INDEXED / PENDING / FAILED")).toBeInTheDocument();
   });
 
   it("renders recent crawl jobs section", () => {
-    vi.mocked(useQuery).mockReturnValue(buildMockStats());
+    mockOverviewQueries(buildMockStats());
     render(<AdminOverviewPage />);
     expect(screen.getByText("[ SYSTEM: RECENT CRAWLS ]")).toBeInTheDocument();
     expect(screen.getByText("completed")).toBeInTheDocument();
@@ -116,31 +161,31 @@ describe("AdminOverviewPage", () => {
   });
 
   it("shows empty state when no recent crawls", () => {
-    vi.mocked(useQuery).mockReturnValue(buildMockStats({ recentCrawls: [] }));
+    mockOverviewQueries(buildMockStats({ recentCrawls: [] }));
     render(<AdminOverviewPage />);
     expect(screen.getByText("No crawl jobs yet")).toBeInTheDocument();
   });
 
   it("renders recent feedback section", () => {
-    vi.mocked(useQuery).mockReturnValue(buildMockStats());
+    mockOverviewQueries(buildMockStats());
     render(<AdminOverviewPage />);
     expect(screen.getByText("[ CUSTOMER: RECENT FEEDBACK ]")).toBeInTheDocument();
   });
 
   it("shows empty state when no recent feedback", () => {
-    vi.mocked(useQuery).mockReturnValue(buildMockStats({ recentFeedback: [] }));
+    mockOverviewQueries(buildMockStats({ recentFeedback: [] }));
     render(<AdminOverviewPage />);
     expect(screen.getByText("No feedback yet")).toBeInTheDocument();
   });
 
   it("shows '15 pending' trend text in total documents card", () => {
-    vi.mocked(useQuery).mockReturnValue(buildMockStats({ pendingDocuments: 15 }));
+    mockOverviewQueries(buildMockStats({ pendingDocuments: 15 }));
     render(<AdminOverviewPage />);
     expect(screen.getByText("15 pending")).toBeInTheDocument();
   });
 
   it("renders the page title in the layout", () => {
-    vi.mocked(useQuery).mockReturnValue(buildMockStats());
+    mockOverviewQueries(buildMockStats());
     const { container } = render(<AdminOverviewPage />);
     // The page is rendered inside the admin layout which adds the header
     // Just verify the stat cards render

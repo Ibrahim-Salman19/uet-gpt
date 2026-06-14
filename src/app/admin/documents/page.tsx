@@ -14,6 +14,7 @@ import {
   Trash2,
   XCircle,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { LoadingState } from "@/components/loading-state";
 import { Badge } from "@/components/ui/badge";
@@ -45,6 +46,7 @@ const statusIcons: Record<string, React.ReactNode> = {
 };
 
 export default function AdminDocumentsPage() {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
@@ -74,8 +76,8 @@ export default function AdminDocumentsPage() {
     ? documents.filter(
         (doc: any) =>
           !search ||
-          doc.title.toLowerCase().includes(search.toLowerCase()) ||
-          doc.url.toLowerCase().includes(search.toLowerCase()),
+          (doc.title ?? "").toLowerCase().includes(search.toLowerCase()) ||
+          (doc.url ?? "").toLowerCase().includes(search.toLowerCase()),
       )
     : [];
 
@@ -93,7 +95,7 @@ export default function AdminDocumentsPage() {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => window.location.reload()}
+          onClick={() => router.refresh()}
           className="h-8 border-white/5 bg-[#101012]/40 text-xs font-mono tracking-wider hover:bg-white/5 hover:text-white transition-all active:scale-[0.98]"
         >
           <RefreshCw className="h-3.5 w-3.5 mr-2 text-zinc-400" />

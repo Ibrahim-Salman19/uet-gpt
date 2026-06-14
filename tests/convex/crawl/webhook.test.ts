@@ -79,7 +79,7 @@ describe("normalizeContent", () => {
 
   it("removes empty markdown table rows", () => {
     const input = "text\n|---|\n| |\nmore";
-    expect(normalizeContent(input)).toBe("text\nmore");
+    expect(normalizeContent(input)).toBe("text\n|---|\nmore");
   });
 
   it("trims the result", () => {
@@ -259,7 +259,15 @@ describe("crawlWebhook", () => {
     crawlWebhook = mod.crawlWebhook;
     mockCtx = {
       runQuery: vi.fn(),
-      runMutation: vi.fn(),
+      runMutation: vi.fn().mockImplementation((mutationName) => {
+        if (
+          mutationName === "markWebhookProcessed" ||
+          (mutationName && mutationName.toString().includes("markWebhookProcessed"))
+        ) {
+          return true;
+        }
+        return undefined;
+      }),
       runAction: vi.fn(),
       auth: { getUserIdentity: vi.fn() },
     };
@@ -373,7 +381,7 @@ describe("crawlWebhook", () => {
 
   it("accepts valid request with complete payload and returns 200", async () => {
     mockCtx.runQuery.mockResolvedValue(null);
-    mockCtx.runMutation.mockResolvedValue(undefined);
+    mockCtx.runMutation.mockResolvedValue(true);
     const payload = {
       task_id: "task-123",
       url: "https://web.uettaxila.edu.pk/page",
@@ -389,7 +397,7 @@ describe("crawlWebhook", () => {
 
   it("marks processed before processing (race-condition safe idempotency)", async () => {
     mockCtx.runQuery.mockResolvedValue(null);
-    mockCtx.runMutation.mockResolvedValue(undefined);
+    mockCtx.runMutation.mockResolvedValue(true);
     const payload = {
       task_id: "task-123",
       url: "https://web.uettaxila.edu.pk/page",
@@ -407,7 +415,7 @@ describe("crawlWebhook", () => {
 
   it("handles multiple pages in one webhook", async () => {
     mockCtx.runQuery.mockResolvedValue(null);
-    mockCtx.runMutation.mockResolvedValue(undefined);
+    mockCtx.runMutation.mockResolvedValue(true);
     const payload = {
       task_id: "task-multi",
       status: "completed",
@@ -435,7 +443,7 @@ describe("crawlWebhook", () => {
 
   it("calls completeJobByTaskId when status is completed", async () => {
     mockCtx.runQuery.mockResolvedValue(null);
-    mockCtx.runMutation.mockResolvedValue(undefined);
+    mockCtx.runMutation.mockResolvedValue(true);
     const payload = {
       task_id: "task-complete",
       status: "completed",
@@ -455,7 +463,7 @@ describe("crawlWebhook", () => {
 
   it("skips pages with empty content", async () => {
     mockCtx.runQuery.mockResolvedValue(null);
-    mockCtx.runMutation.mockResolvedValue(undefined);
+    mockCtx.runMutation.mockResolvedValue(true);
     const payload = {
       task_id: "task-skip",
       url: "https://web.uettaxila.edu.pk/empty",

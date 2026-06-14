@@ -67,9 +67,27 @@ function PinnedSection({
             <Bookmark className="h-3 w-3 shrink-0 text-[var(--accent)] opacity-70 group-hover:opacity-100" />
             <span
               className="flex-1 truncate cursor-pointer font-sans"
-              onClick={() => {
-                navigator.clipboard.writeText(pin.content);
-                toast.success("Copied to clipboard!");
+              onClick={async () => {
+                try {
+                  if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(pin.content);
+                  } else {
+                    const textarea = document.createElement("textarea");
+                    textarea.value = pin.content;
+                    textarea.style.position = "fixed";
+                    textarea.style.top = "0";
+                    textarea.style.left = "0";
+                    document.body.appendChild(textarea);
+                    textarea.focus();
+                    textarea.select();
+                    document.execCommand("copy");
+                    document.body.removeChild(textarea);
+                  }
+                  toast.success("Copied to clipboard!");
+                } catch (err) {
+                  console.error("Copy failed:", err);
+                  toast.error("Failed to copy");
+                }
               }}
               title={pin.content}
             >

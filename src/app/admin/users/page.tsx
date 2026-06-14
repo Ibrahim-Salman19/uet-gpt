@@ -97,7 +97,7 @@ export default function AdminUsersPage() {
             placeholder="Search by name or email..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            onKeyDown={(e) => e.key === "Enter" && !loading && query.trim().length >= 2 && handleSearch()}
             className="h-9 pl-9 bg-black/40 border-white/5 text-xs font-mono rounded text-zinc-300 focus-visible:ring-1 focus-visible:ring-[var(--accent)]"
           />
         </div>

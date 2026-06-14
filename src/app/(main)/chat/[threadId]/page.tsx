@@ -15,5 +15,5 @@ export async function generateMetadata({ params }: ChatThreadPageProps) {
 export default async function ChatThreadPage({ params, searchParams }: ChatThreadPageProps) {
   const { threadId } = await params;
   const { q } = await searchParams;
-  return <ChatThreadClient threadId={threadId} initialMessage={q} />;
+  return <ChatThreadClient key={threadId} threadId={threadId} initialMessage={q} />;
 }

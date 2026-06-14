@@ -5,9 +5,13 @@ import { crawlWebhook, ingestWebhook, resetWebhook } from "./crawl/webhook";
 
 const http = httpRouter();
 
-if (!process.env.CONVEX_AUTH_TOKEN && !process.env.CRAWL_WEBHOOK_SECRET) {
+if (
+  !process.env.CONVEX_AUTH_TOKEN &&
+  !process.env.CRAWL_WEBHOOK_SECRET &&
+  !process.env.CLERK_WEBHOOK_SECRET
+) {
   throw new Error(
-    "CRITICAL: Neither CONVEX_AUTH_TOKEN nor CRAWL_WEBHOOK_SECRET is configured. Endpoints are unprotected.",
+    "CRITICAL: None of CONVEX_AUTH_TOKEN, CRAWL_WEBHOOK_SECRET, or CLERK_WEBHOOK_SECRET are configured. Endpoints are unprotected.",
   );
 }
 

@@ -137,8 +137,25 @@ describe("convex/auth helpers", () => {
         subject: "user_abc",
         tokenIdentifier: "token_abc",
       });
+      const fakeUser = { _id: "uid1", role: "user", isActive: true };
+      const withIndex = vi.fn().mockReturnValue({ unique: vi.fn().mockResolvedValue(fakeUser) });
+      ctx.db.query.mockReturnValue({ withIndex });
       const result = await isAuthenticated(ctx as any);
       expect(result).toBe(true);
+    });
+
+    it("returns false when user is deactivated", async () => {
+      const { isAuthenticated } = await import("../../convex/auth");
+      const ctx = createMockCtx();
+      ctx.auth.getUserIdentity.mockResolvedValue({
+        subject: "user_abc",
+        tokenIdentifier: "token_abc",
+      });
+      const fakeUser = { _id: "uid1", role: "user", isActive: false };
+      const withIndex = vi.fn().mockReturnValue({ unique: vi.fn().mockResolvedValue(fakeUser) });
+      ctx.db.query.mockReturnValue({ withIndex });
+      const result = await isAuthenticated(ctx as any);
+      expect(result).toBe(false);
     });
   });
 
@@ -175,7 +192,7 @@ describe("convex/auth helpers", () => {
         subject: "user_abc",
         tokenIdentifier: "token_abc",
       });
-      const fakeUser = { _id: "uid1", role: "user" };
+      const fakeUser = { _id: "uid1", role: "user", isActive: true };
       const withIndex = vi.fn().mockReturnValue({ unique: vi.fn().mockResolvedValue(fakeUser) });
       ctx.db.query.mockReturnValue({ withIndex });
       const result = await isAdmin(ctx as any);
@@ -189,7 +206,7 @@ describe("convex/auth helpers", () => {
         subject: "user_abc",
         tokenIdentifier: "token_abc",
       });
-      const fakeUser = { _id: "uid1", role: "admin" };
+      const fakeUser = { _id: "uid1", role: "admin", isActive: true };
       const withIndex = vi.fn().mockReturnValue({ unique: vi.fn().mockResolvedValue(fakeUser) });
       ctx.db.query.mockReturnValue({ withIndex });
       const result = await isAdmin(ctx as any);
@@ -203,7 +220,7 @@ describe("convex/auth helpers", () => {
         subject: "user_abc",
         tokenIdentifier: "token_abc",
       });
-      const fakeUser = { _id: "uid1", role: "superadmin" };
+      const fakeUser = { _id: "uid1", role: "superadmin", isActive: true };
       const withIndex = vi.fn().mockReturnValue({ unique: vi.fn().mockResolvedValue(fakeUser) });
       ctx.db.query.mockReturnValue({ withIndex });
       const result = await isAdmin(ctx as any);

@@ -52,7 +52,16 @@ export function AuthGuard({
             <CardDescription>Please sign in to access this page.</CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center">
-            <Button onClick={() => router.push("/sign-in")}>Sign In</Button>
+            <Button
+              onClick={() => {
+                const redirectUrl = encodeURIComponent(
+                  window.location.pathname + window.location.search,
+                );
+                router.push(`/sign-in?redirect_url=${redirectUrl}`);
+              }}
+            >
+              Sign In
+            </Button>
           </CardContent>
         </Card>
       </div>

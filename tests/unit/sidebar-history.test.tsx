@@ -45,11 +45,13 @@ describe("SidebarHistory", () => {
     render(<SidebarHistory chats={mockChats} onDelete={mockOnDelete} />);
 
     const links = screen.getAllByTestId("mock-link");
+    const container0 = links[0]?.parentElement;
+    const container1 = links[1]?.parentElement;
 
-    expect(links[0]?.className).toContain("bg-[var(--accent)]/10");
-    expect(links[0]?.className).not.toContain("text-[var(--text-sidebar)]");
+    expect(container0?.className).toContain("bg-[var(--accent)]/10");
+    expect(container0?.className).not.toContain("text-[var(--text-sidebar)]");
 
-    expect(links[1]?.className).toContain("text-[var(--text-sidebar)]");
-    expect(links[1]?.className).not.toContain("bg-[var(--accent)]/10");
+    expect(container1?.className).toContain("text-[var(--text-sidebar)]");
+    expect(container1?.className).not.toContain("bg-[var(--accent)]/10");
   });
 });

@@ -6,7 +6,21 @@ export function guardChunkSize(text: string): string[] {
   const result: string[] = [];
   let buf = "";
   for (const s of sentences) {
-    if (buf.length + s.length > MAX_SAFE_CHARS && buf.length > 0) {
+    if (s.length > MAX_SAFE_CHARS) {
+      if (buf.trim()) {
+        result.push(buf.trim());
+        buf = "";
+      }
+      const parts = wordSplitLongSentence(s, MAX_SAFE_CHARS);
+      for (const part of parts) {
+        if (buf.length + part.length > MAX_SAFE_CHARS && buf.length > 0) {
+          result.push(buf.trim());
+          buf = part;
+        } else {
+          buf += (buf ? " " : "") + part;
+        }
+      }
+    } else if (buf.length + s.length > MAX_SAFE_CHARS && buf.length > 0) {
       result.push(buf.trim());
       buf = s;
     } else {
@@ -14,7 +28,7 @@ export function guardChunkSize(text: string): string[] {
     }
   }
   if (buf.trim()) result.push(buf.trim());
-  return result.length > 1 ? result : [text.slice(0, MAX_SAFE_CHARS)];
+  return result.length > 0 ? result : [text.slice(0, MAX_SAFE_CHARS)];
 }
 
 export function isQualityChunk(text: string): boolean {
@@ -81,6 +95,19 @@ function wordSplitLongSentence(sentence: string, maxChunkSize: number): string[]
   return parts;
 }
 
+function getTableOverlapRows(text: string, overlapSize: number): string {
+  const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+  let overlap = "";
+  for (let i = lines.length - 1; i >= 0; i--) {
+    const line = lines[i]!;
+    if (overlap.length + line.length > overlapSize) {
+      if (overlap.length > 0) break;
+    }
+    overlap = line + "\n" + overlap;
+  }
+  return overlap.trim();
+}
+
 function chunkTableBlock(
   block: string,
   maxChunkSize: number,
@@ -96,7 +123,8 @@ function chunkTableBlock(
     const row = `${rows[i]}\n`;
     if (current.length + row.length > maxChunkSize) {
       if (current) pushFn(header + current);
-      current = `${getOverlapText(current.trim(), overlapSize)}\n${row}`;
+      const overlap = getTableOverlapRows(current, overlapSize);
+      current = overlap ? `${overlap}\n${row}` : row;
     } else {
       current += row;
     }
@@ -230,7 +258,6 @@ export function normalizeContent(text: string): string {
     .replace(/\r\n/g, "\n")
     .replace(/[ \t]+\n/g, "\n")
     .replace(/^[ \t]*\[[^\]]*\]\(#[^)]*\)[ \t]*\n?/gm, "")
-    .replace(/^[ \t]*\|?[ \t]*---[ \t]*\|?[ \t]*\n?/gm, "")
     .replace(/^[ \t]*\|[ \t]*\|[ \t]*\n?/gm, "")
     .replace(/\n{3,}/g, "\n\n")
     .trim();

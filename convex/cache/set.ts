@@ -1,5 +1,5 @@
 import { ConvexError, v } from "convex/values";
-import { internal } from "../_generated/api";
+import { api, internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import { action, internalMutation } from "../_generated/server";
 
@@ -9,9 +9,9 @@ const TTL_MEDIUM = 1 * DAY;
 const TTL_LOW = 0.5 * DAY;
 
 function tierToTtl(tier: "high" | "medium" | "low" | undefined, fallback: number): number {
-  if (tier === "high") return TTL_HIGH;
+  if (tier === "high") return TTL_LOW;
   if (tier === "medium") return TTL_MEDIUM;
-  if (tier === "low") return TTL_LOW;
+  if (tier === "low") return TTL_HIGH;
   return fallback;
 }
 
@@ -72,6 +72,7 @@ export const set = internalMutation({
  */
 export const setFromServer = action({
   args: {
+    secret: v.optional(v.string()),
     queryText: v.string(),
     queryEmbedding: v.array(v.float64()),
     response: v.string(),
@@ -101,10 +102,30 @@ export const setFromServer = action({
   },
   returns: v.id("semanticCache"),
   handler: async (ctx, args): Promise<Id<"semanticCache">> => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new ConvexError("Authentication required");
+    const internalSecret = process.env.INTERNAL_API_SECRET;
+    let authorized = false;
+
+    if (args.secret && internalSecret && args.secret === internalSecret) {
+      authorized = true;
     }
-    return await ctx.runMutation(internal.cache.set.set, args);
+
+    if (!authorized) {
+      const identity = await ctx.auth.getUserIdentity();
+      if (!identity) {
+        throw new ConvexError("Authentication required or invalid API secret");
+      }
+
+      const user = await ctx.runQuery(api.users.getByClerkId, {
+        clerkId: identity.subject,
+      });
+
+      if (!user || !user.isActive || (user.role !== "admin" && user.role !== "superadmin")) {
+        throw new ConvexError("Unauthorized: Admin privileges required");
+      }
+      authorized = true;
+    }
+
+    const { secret, ...mutationArgs } = args;
+    return await ctx.runMutation(internal.cache.set.set, mutationArgs);
   },
 });

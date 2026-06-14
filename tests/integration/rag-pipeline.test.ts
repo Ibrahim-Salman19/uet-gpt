@@ -51,7 +51,8 @@ describe("RAG Pipeline Integration", () => {
         2: "hyde: admission requirements for UET Taxila",
         3: Array(768).fill(0.1),
         4: null,
-        5: [
+        5: Array(768).fill(0.1),
+        6: [
           {
             entryId: "entry_1",
             url: "https://web.uettaxila.edu.pk/admissions/",
@@ -67,9 +68,13 @@ describe("RAG Pipeline Integration", () => {
             content: "The university offers BS, MS, and PhD programs...",
           },
         ],
-        6: [
+        7: [
           { text: "UET Taxila offers undergraduate programs in engineering...", score: 0.92, index: 0 },
           { text: "The university offers BS, MS, and PhD programs...", score: 0.85, index: 1 },
+        ],
+        8: [
+          { index: 0, relevant: true, confidence: 0.95 },
+          { index: 1, relevant: true, confidence: 0.92 },
         ],
       });
 
@@ -140,7 +145,8 @@ describe("RAG Pipeline Integration", () => {
         2: "hyde query",
         3: Array(768).fill(0.1),
         4: null,
-        5: [
+        5: Array(768).fill(0.1),
+        6: [
           {
             entryId: "entry_1",
             url: "https://web.uettaxila.edu.pk/",
@@ -149,8 +155,11 @@ describe("RAG Pipeline Integration", () => {
             content: "UET Taxila homepage content",
           },
         ],
-        6: [
+        7: [
           { text: "UET Taxila homepage content", score: 0.5, index: 0 },
+        ],
+        8: [
+          { index: 0, relevant: true, confidence: 0.95 },
         ],
       });
 
@@ -170,7 +179,8 @@ describe("RAG Pipeline Integration", () => {
         2: new Error("HyDE failed"),
         3: Array(768).fill(0.1),
         4: null,
-        5: [
+        5: Array(768).fill(0.1),
+        6: [
           {
             entryId: "entry_1",
             url: "https://web.uettaxila.edu.pk/",
@@ -179,8 +189,11 @@ describe("RAG Pipeline Integration", () => {
             content: "UET Taxila home",
           },
         ],
-        6: [
+        7: [
           { text: "UET Taxila home", score: 0.7, index: 0 },
+        ],
+        8: [
+          { index: 0, relevant: true, confidence: 0.95 },
         ],
       });
 
@@ -199,7 +212,8 @@ describe("RAG Pipeline Integration", () => {
         2: "hyde",
         3: Array(768).fill(0.1),
         4: null,
-        5: new Error("Search failed"),
+        5: Array(768).fill(0.1),
+        6: new Error("Search failed"),
       });
 
       const result = await (retrieveContext as any).handler(ctx as any, {

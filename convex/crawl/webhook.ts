@@ -101,6 +101,17 @@ function checkPayloadSize(request: Request): Response | null {
   return null;
 }
 
+const MAX_BODY_BYTES = 10_485_760;
+
+async function readBodyWithSizeCheck(request: Request): Promise<string | Response> {
+  const buffer = await request.arrayBuffer();
+  if (buffer.byteLength > MAX_BODY_BYTES) {
+    console.warn(`Webhook payload too large (actual): ${buffer.byteLength} bytes`);
+    return new Response("Payload too large", { status: 413 });
+  }
+  return new TextDecoder().decode(buffer);
+}
+
 function verifyWebhookHeaders(
   request: Request,
 ): { timestamp: string; signature: string } | Response {
@@ -125,6 +136,7 @@ function verifyWebhookHeaders(
 async function validateWebhookSignature(
   timestamp: string,
   signature: string,
+  body: string,
 ): Promise<Response | null> {
   const primarySecret = process.env.CRAWL_WEBHOOK_SECRET;
   const secondarySecret = process.env.CRAWL_WEBHOOK_SECRET_NEW;
@@ -133,9 +145,9 @@ async function validateWebhookSignature(
     return new Response("Server configuration error", { status: 500 });
   }
 
-  let isValid = await verifySignature(timestamp, signature, primarySecret, "uet-crawl");
+  let isValid = await verifySignature(timestamp, signature, primarySecret, body);
   if (!isValid && secondarySecret) {
-    isValid = await verifySignature(timestamp, signature, secondarySecret, "uet-crawl");
+    isValid = await verifySignature(timestamp, signature, secondarySecret, body);
   }
   if (!isValid) {
     console.warn("Webhook rejected: Invalid signature");
@@ -285,12 +297,14 @@ export const crawlWebhook = httpAction(async (ctx, request) => {
     const sizeResp = checkPayloadSize(request);
     if (sizeResp) return sizeResp;
 
-    const rawBody = await request.text();
+    const bodyResult = await readBodyWithSizeCheck(request);
+    if (bodyResult instanceof Response) return bodyResult;
+    const rawBody = bodyResult;
 
     const hmacInfo = verifyWebhookHeaders(request);
     if (hmacInfo instanceof Response) return hmacInfo;
 
-    const sigResp = await validateWebhookSignature(hmacInfo.timestamp, hmacInfo.signature);
+    const sigResp = await validateWebhookSignature(hmacInfo.timestamp, hmacInfo.signature, rawBody);
     if (sigResp) return sigResp;
 
     const { taskId: id, status, results, url } = extractWebhookPayload(rawBody);

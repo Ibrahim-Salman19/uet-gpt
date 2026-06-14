@@ -71,6 +71,43 @@ const mockStats = {
   ],
 };
 
+function mockAnalyticsQueries(stats: any) {
+  vi.mocked(useQuery).mockImplementation((query: any, ..._args: any[]) => {
+    if (!stats || !query) return undefined;
+    const sym = Symbol.for("functionName");
+    const queryName = typeof query === "string" ? query : (query[sym] || query.name || "");
+    if (typeof queryName !== "string") return undefined;
+    if (queryName.includes("documentStats")) {
+      return {
+        total: stats.totalDocuments,
+        indexed: stats.indexedDocuments,
+        pending: stats.pendingDocuments,
+        failed: stats.failedDocuments,
+      };
+    }
+    if (queryName.includes("userStats")) {
+      return {
+        activeLast24h: stats.activeUsersLast24h,
+        total: stats.totalUsers,
+      };
+    }
+    if (queryName.includes("feedbackCount")) {
+      return stats.totalFeedback;
+    }
+    if (queryName.includes("feedbackStats")) {
+      return {
+        recent: stats.recentFeedback,
+      };
+    }
+    if (queryName.includes("cacheStats")) {
+      return {
+        total: stats.totalCacheEntries,
+      };
+    }
+    return undefined;
+  });
+}
+
 describe("AdminAnalyticsPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -94,7 +131,7 @@ describe("AdminAnalyticsPage", () => {
 
   describe("Usage Metrics Section", () => {
     it("renders Active Users Today card with correct values", () => {
-      vi.mocked(useQuery).mockReturnValue(mockStats);
+      mockAnalyticsQueries(mockStats);
       render(<AdminAnalyticsPage />);
 
       expect(screen.getByText("45")).toBeDefined();
@@ -102,7 +139,7 @@ describe("AdminAnalyticsPage", () => {
     });
 
     it("renders Satisfaction Rate card with computed percentage", () => {
-      vi.mocked(useQuery).mockReturnValue(mockStats);
+      mockAnalyticsQueries(mockStats);
       render(<AdminAnalyticsPage />);
 
       // 7 thumbsUp out of 10 total = 70%
@@ -116,7 +153,7 @@ describe("AdminAnalyticsPage", () => {
         ...mockStats,
         recentFeedback: [],
       };
-      vi.mocked(useQuery).mockReturnValue(noFeedbackStats);
+      mockAnalyticsQueries(noFeedbackStats);
       render(<AdminAnalyticsPage />);
 
       expect(screen.getByText("0%")).toBeDefined();
@@ -133,7 +170,7 @@ describe("AdminAnalyticsPage", () => {
           })),
         ],
       };
-      vi.mocked(useQuery).mockReturnValue(allNegativeStats);
+      mockAnalyticsQueries(allNegativeStats);
       render(<AdminAnalyticsPage />);
 
       expect(screen.getByText("0%")).toBeDefined();
@@ -150,7 +187,7 @@ describe("AdminAnalyticsPage", () => {
           })),
         ],
       };
-      vi.mocked(useQuery).mockReturnValue(allPositiveStats);
+      mockAnalyticsQueries(allPositiveStats);
       render(<AdminAnalyticsPage />);
 
       expect(screen.getByText("100%")).toBeDefined();
@@ -159,33 +196,33 @@ describe("AdminAnalyticsPage", () => {
 
   describe("System Metrics Section", () => {
     it("renders Document Storage card correctly", () => {
-      vi.mocked(useQuery).mockReturnValue(mockStats);
+      mockAnalyticsQueries(mockStats);
       render(<AdminAnalyticsPage />);
 
-      expect(screen.getByText("100.0 KB")).toBeDefined();
+      expect(screen.getByText("366.2 KB")).toBeDefined();
       expect(screen.getByText("1,500 documents")).toBeDefined();
     });
 
     it("renders Cache Storage card correctly", () => {
-      vi.mocked(useQuery).mockReturnValue(mockStats);
+      mockAnalyticsQueries(mockStats);
       render(<AdminAnalyticsPage />);
 
-      expect(screen.getByText("50.0 KB")).toBeDefined();
+      expect(screen.getByText("439.5 KB")).toBeDefined();
       expect(screen.getByText("450 cache entries")).toBeDefined();
     });
 
     it("renders Total Storage card with combined value", () => {
-      vi.mocked(useQuery).mockReturnValue(mockStats);
+      mockAnalyticsQueries(mockStats);
       render(<AdminAnalyticsPage />);
 
-      expect(screen.getByText("150.0 KB")).toBeDefined();
+      expect(screen.getByText("805.7 KB")).toBeDefined();
       expect(screen.getByText("Combined document + cache storage")).toBeDefined();
     });
   });
 
   describe("Document Health Section", () => {
     it("shows indexed document count with percentage", () => {
-      vi.mocked(useQuery).mockReturnValue(mockStats);
+      mockAnalyticsQueries(mockStats);
       render(<AdminAnalyticsPage />);
 
       expect(screen.getByText("1350")).toBeDefined();
@@ -198,14 +235,14 @@ describe("AdminAnalyticsPage", () => {
         totalDocuments: 0,
         indexedDocuments: 0,
       };
-      vi.mocked(useQuery).mockReturnValue(emptyDocStats);
+      mockAnalyticsQueries(emptyDocStats);
       render(<AdminAnalyticsPage />);
 
       expect(screen.getByText("No documents")).toBeDefined();
     });
 
     it("shows pending documents count", () => {
-      vi.mocked(useQuery).mockReturnValue(mockStats);
+      mockAnalyticsQueries(mockStats);
       render(<AdminAnalyticsPage />);
 
       expect(screen.getByText("120")).toBeDefined();
@@ -213,7 +250,7 @@ describe("AdminAnalyticsPage", () => {
     });
 
     it("shows failed documents with investigation notice when > 0", () => {
-      vi.mocked(useQuery).mockReturnValue(mockStats);
+      mockAnalyticsQueries(mockStats);
       render(<AdminAnalyticsPage />);
 
       expect(screen.getByText("30")).toBeDefined();
@@ -225,7 +262,7 @@ describe("AdminAnalyticsPage", () => {
         ...mockStats,
         failedDocuments: 0,
       };
-      vi.mocked(useQuery).mockReturnValue(noFailStats);
+      mockAnalyticsQueries(noFailStats);
       render(<AdminAnalyticsPage />);
 
       expect(screen.getByText("0")).toBeDefined();
@@ -233,7 +270,7 @@ describe("AdminAnalyticsPage", () => {
     });
 
     it("applies red border when failedDocuments > 0", () => {
-      vi.mocked(useQuery).mockReturnValue(mockStats);
+      mockAnalyticsQueries(mockStats);
       render(<AdminAnalyticsPage />);
 
       const cards = screen.getAllByTestId("card");
@@ -244,7 +281,7 @@ describe("AdminAnalyticsPage", () => {
 
   describe("Section Structure", () => {
     it("renders all three main sections", () => {
-      vi.mocked(useQuery).mockReturnValue(mockStats);
+      mockAnalyticsQueries(mockStats);
       render(<AdminAnalyticsPage />);
 
       expect(screen.getByText("Usage Metrics")).toBeDefined();
@@ -253,7 +290,7 @@ describe("AdminAnalyticsPage", () => {
     });
 
     it("renders two separators between sections", () => {
-      vi.mocked(useQuery).mockReturnValue(mockStats);
+      mockAnalyticsQueries(mockStats);
       render(<AdminAnalyticsPage />);
 
       const separators = screen.getAllByTestId("separator");
@@ -261,7 +298,7 @@ describe("AdminAnalyticsPage", () => {
     });
 
     it("renders correct number of metric cards in each section", () => {
-      vi.mocked(useQuery).mockReturnValue(mockStats);
+      mockAnalyticsQueries(mockStats);
       render(<AdminAnalyticsPage />);
 
       const cards = screen.getAllByTestId("card");

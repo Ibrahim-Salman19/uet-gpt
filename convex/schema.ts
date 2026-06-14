@@ -211,6 +211,7 @@ export default defineSchema({
     error: v.optional(v.string()),
     freshnessTier: v.optional(v.union(v.literal("high"), v.literal("medium"), v.literal("low"))),
     isStale: v.optional(v.boolean()),
+    personType: v.optional(v.union(v.literal("faculty"), v.literal("staff"), v.literal("admin"))),
   })
     .index("by_url", ["url"])
     .index("by_entryId", ["entryId"])
@@ -221,7 +222,8 @@ export default defineSchema({
     .index("by_tier_and_crawled", ["freshnessTier", "crawledAt"])
     .searchIndex("search_title", { searchField: "title" })
     .index("by_contentHash", ["contentHash"])
-    .index("by_source_category", ["source", "category"]),
+    .index("by_source_category", ["source", "category"])
+    .index("by_personType", ["personType"]),
 
   processedWebhooks: defineTable({
     jobId: v.string(),

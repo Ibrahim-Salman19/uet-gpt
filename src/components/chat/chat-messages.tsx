@@ -41,21 +41,24 @@ function ErrorBanner({ error, onRetry }: { error: string; onRetry?: () => void }
 function useAutoScroll(messages: ChatMessage[], isAwaitingReply?: boolean) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const prevLengthRef = useRef(messages.length);
+  const lastMessageContent = messages[messages.length - 1]?.content;
 
   useEffect(() => {
     const viewport = scrollRef.current?.querySelector(
       "[data-radix-scroll-area-viewport]",
     ) as HTMLDivElement;
     if (viewport) {
-      const isNearBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 150;
+      const isNearBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 180;
       const isNewMessage = messages.length > prevLengthRef.current;
 
       if (isNearBottom || isNewMessage) {
-        viewport.scrollTop = viewport.scrollHeight;
+        requestAnimationFrame(() => {
+          viewport.scrollTop = viewport.scrollHeight;
+        });
       }
     }
     prevLengthRef.current = messages.length;
-  }, [messages, isAwaitingReply]);
+  }, [messages.length, lastMessageContent, isAwaitingReply]);
 
   return scrollRef;
 }

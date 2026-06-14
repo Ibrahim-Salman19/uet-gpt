@@ -73,6 +73,10 @@ export async function setUserRole(
     return { success: false, error: "Not authorized" };
   }
 
+  if (userId === admin.userId) {
+    return { success: false, error: "Self-demotion is not allowed. You cannot modify your own role." };
+  }
+
   const rateCheck = await checkAdminActionRateLimit(admin.userId);
   if (rateCheck && !rateCheck.success) {
     return { success: false, error: "Rate limit exceeded. Try again later." };
@@ -101,6 +105,10 @@ export async function removeUserRole(
   const admin = await getAuthenticatedAdmin();
   if (!admin) {
     return { success: false, error: "Not authorized" };
+  }
+
+  if (userId === admin.userId) {
+    return { success: false, error: "Self-demotion is not allowed. You cannot modify your own role." };
   }
 
   const rateCheck = await checkAdminActionRateLimit(admin.userId);

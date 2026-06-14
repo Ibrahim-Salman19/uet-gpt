@@ -52,6 +52,44 @@ export const incrementHits = internalMutation({
       const currentHits = typeof entry.hits === "number" ? entry.hits : 0;
       await ctx.db.patch(args.id, { hits: currentHits + 1 });
     }
+    return null;
+  },
+});
+
+export const getDocsByEntryIds = internalQuery({
+  args: { entryIds: v.array(v.string()) },
+  returns: v.array(
+    v.object({
+      entryId: v.string(),
+      doc: v.union(
+        v.object({
+          updatedAt: v.number(),
+          crawledAt: v.number(),
+        }),
+        v.null(),
+      ),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    const results = [];
+    for (const entryId of args.entryIds) {
+      results.push((async () => {
+        const chunk = await ctx.db
+          .query("crawledChunks")
+          .withIndex("by_ragId", (q) => q.eq("ragId", entryId))
+          .first();
+
+        if (!chunk) return { entryId, doc: null };
+
+        const doc = await ctx.db.get(chunk.documentId);
+        if (!doc) return { entryId, doc: null };
+        return {
+          entryId,
+          doc: { updatedAt: doc.updatedAt, crawledAt: doc.crawledAt },
+        };
+      })());
+    }
+    return await Promise.all(results);
   },
 });
 

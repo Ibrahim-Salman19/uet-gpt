@@ -38,29 +38,26 @@ async function getCachedEntry(
 
   const results = await ctx.vectorSearch("semanticCache", "by_queryEmbedding", {
     vector: queryEmbedding,
-    limit: 1,
+    limit: 5,
   });
 
-  if (results.length === 0) return null;
+  for (const res of results) {
+    if (!res) continue;
+    const entry = await ctx.runQuery(_internal.cache.internal_queries.getCacheEntry, {
+      id: res._id,
+    });
+    if (!entry || entry.expiresAt < Date.now()) continue;
 
-  const firstResult = results[0];
-  if (!firstResult) return null;
+    const similarity = cosineSimilarity(queryEmbedding, entry.queryEmbedding);
+    if (similarity >= CACHE_SIMILARITY_THRESHOLD) {
+      return { entry, entryId: res._id };
+    }
 
-  const entry = await ctx.runQuery(_internal.cache.internal_queries.getCacheEntry, {
-    id: firstResult._id,
-  });
-
-  if (!entry || entry.expiresAt < Date.now()) return null;
-
-  const similarity = cosineSimilarity(queryEmbedding, entry.queryEmbedding);
-  if (similarity >= CACHE_SIMILARITY_THRESHOLD) {
-    return { entry, entryId: firstResult._id };
-  }
-
-  if (entry.alternateEmbeddings && entry.alternateEmbeddings.length > 0) {
-    for (const altEmbedding of entry.alternateEmbeddings) {
-      if (cosineSimilarity(queryEmbedding, altEmbedding) >= CACHE_SIMILARITY_THRESHOLD) {
-        return { entry, entryId: firstResult._id };
+    if (entry.alternateEmbeddings && entry.alternateEmbeddings.length > 0) {
+      for (const altEmbedding of entry.alternateEmbeddings) {
+        if (cosineSimilarity(queryEmbedding, altEmbedding) >= CACHE_SIMILARITY_THRESHOLD) {
+          return { entry, entryId: res._id };
+        }
       }
     }
   }
@@ -72,16 +69,19 @@ async function checkSourceStaleness(ctx: any, entry: any): Promise<boolean> {
   const sourceEntryIds = entry.sourceEntryIds;
   if (!sourceEntryIds || sourceEntryIds.length === 0) return false;
 
-  const results = await Promise.allSettled(
-    sourceEntryIds.map(async (ragEntryId: string) => {
-      const doc = await ctx.runQuery(_internal.cache.internal_queries.getDocByEntryId, {
-        entryId: ragEntryId,
-      });
-      return doc && (doc.updatedAt > entry.createdAt || doc.crawledAt > entry.createdAt);
-    }),
-  );
-
-  return results.some((r) => r.status === "fulfilled" && r.value === true);
+  try {
+    const lookups = await ctx.runQuery(_internal.cache.internal_queries.getDocsByEntryIds, {
+      entryIds: sourceEntryIds,
+    });
+    for (const { doc } of lookups) {
+      if (doc && (doc.updatedAt > entry.createdAt || doc.crawledAt > entry.createdAt)) {
+        return true;
+      }
+    }
+  } catch (err) {
+    console.error("checkSourceStaleness query failed:", err);
+  }
+  return false;
 }
 
 async function findMatchingCacheEntry(

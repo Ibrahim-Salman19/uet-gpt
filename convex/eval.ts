@@ -1,5 +1,5 @@
 import { ConvexError, v } from "convex/values";
-import { internal } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import { action, internalMutation, internalQuery } from "./_generated/server";
 
 export const getChunksByRagIds = internalQuery({
@@ -7,25 +7,23 @@ export const getChunksByRagIds = internalQuery({
     ragIds: v.array(v.string()),
   },
   handler: async (ctx, args) => {
-    const results = [];
-    for (const ragId of args.ragIds) {
+    const promises = args.ragIds.map(async (ragId) => {
       const chunk = await ctx.db
         .query("crawledChunks")
         .withIndex("by_ragId", (q) => q.eq("ragId", ragId))
         .first();
 
-      if (chunk) {
-        const doc = await ctx.db.get(chunk.documentId);
-        if (doc) {
-          results.push({
-            ragId,
-            text: chunk.text,
-            url: doc.url,
-          });
-        }
-      }
-    }
-    return results;
+      if (!chunk) return null;
+      const doc = await ctx.db.get(chunk.documentId);
+      if (!doc) return null;
+      return {
+        ragId,
+        text: chunk.text,
+        url: doc.url,
+      };
+    });
+    const results = await Promise.all(promises);
+    return results.filter((r): r is { ragId: string; text: string; url: string } => r !== null);
   },
 });
 
@@ -38,6 +36,14 @@ export const evaluateSearch = action({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new ConvexError("Authentication required");
+    }
+
+    const user = await ctx.runQuery(api.users.getByClerkId, {
+      clerkId: identity.subject,
+    });
+
+    if (!user || !user.isActive || (user.role !== "admin" && user.role !== "superadmin")) {
+      throw new ConvexError("Unauthorized: Admin privileges required");
     }
 
     const { rag } = await import("./rag/instance.js");

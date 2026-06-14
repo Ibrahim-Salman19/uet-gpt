@@ -538,6 +538,17 @@ export const retryDeadLetterQueue = internalMutation({
   },
 });
 
+function classifyDocument(url: string, title: string): "faculty" | "staff" | "admin" | null {
+  const FACULTY_PATTERNS = ["faculty", "professor", "dr.", "prof."];
+  const STAFF_PATTERNS = ["staff"];
+  const ADMIN_PATTERNS = ["admin", "head", "registrar", "chancellor"];
+  const text = `${url} ${title}`.toLowerCase();
+  if (FACULTY_PATTERNS.some((p) => text.includes(p))) return "faculty";
+  if (STAFF_PATTERNS.some((p) => text.includes(p))) return "staff";
+  if (ADMIN_PATTERNS.some((p) => text.includes(p))) return "admin";
+  return null;
+}
+
 export const upsertDocument = internalMutation({
   args: {
     url: v.string(),
@@ -549,10 +560,17 @@ export const upsertDocument = internalMutation({
     freshnessTier: v.optional(v.union(v.literal("high"), v.literal("medium"), v.literal("low"))),
   },
   handler: async (ctx, args) => {
+    if (!isPdfVirtualUrl(args.url)) {
+      new URL(args.url); // validate URL, throws TypeError if invalid
+    }
+
     const existing = await ctx.db
       .query("documents")
       .withIndex("by_url", (q) => q.eq("url", args.url))
       .first();
+
+    const title = args.title ?? args.url;
+    const personType = classifyDocument(args.url, title) ?? undefined;
 
     if (existing) {
       if (existing.contentHash === args.contentHash) {
@@ -562,6 +580,7 @@ export const upsertDocument = internalMutation({
           updatedAt: Date.now(),
           freshnessTier: args.freshnessTier,
           metadata: { ...existing.metadata, sourceType: args.sourceType },
+          personType,
         });
         return { action: "skipped", documentId: existing._id };
       }
@@ -589,22 +608,35 @@ export const upsertDocument = internalMutation({
         updatedAt: Date.now(),
         freshnessTier: args.freshnessTier,
         metadata: { ...existing.metadata, sourceType: args.sourceType },
+        personType,
       });
       return { action: "updated", documentId: existing._id };
     }
 
+    let source = "unknown";
+    if (isPdfVirtualUrl(args.url)) {
+      source = "pdf";
+    } else {
+      try {
+        source = new URL(args.url).hostname;
+      } catch {
+        source = "unknown";
+      }
+    }
+
     const id = await ctx.db.insert("documents", {
       url: args.url,
-      source: isPdfVirtualUrl(args.url) ? "pdf" : new URL(args.url).hostname,
+      source,
       category: "crawled",
       contentHash: args.contentHash,
       crawlSessionId: args.crawlSessionId,
-      title: args.title ?? args.url,
+      title: title,
       status: "pending_embed",
       crawledAt: Date.now(),
       updatedAt: Date.now(),
       freshnessTier: args.freshnessTier,
       metadata: { sourceType: args.sourceType },
+      personType,
     });
     return { action: "inserted", documentId: id };
   },

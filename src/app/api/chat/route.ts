@@ -15,7 +15,9 @@ import { checkChatRateLimit } from "@/lib/rate-limit";
 import { assignFreshnessTier } from "../../../../convex/crawl/chunking";
 
 function getAllowedOrigins(req: NextRequest): string[] {
-  const allowed = [process.env.NEXT_PUBLIC_APP_URL].filter((url): url is string => !!url);
+  const allowed = [process.env.NEXT_PUBLIC_APP_URL]
+    .filter((url): url is string => !!url)
+    .map((url) => url.replace(/\/$/, ""));
   if (process.env.NODE_ENV === "development") {
     allowed.push("http://localhost:3000");
   }
@@ -237,43 +239,6 @@ function getAvailableModels(preferredModelKey?: string): LanguageModel[] {
   });
 }
 
-type SegmentAction =
-  | { type: "flush"; text: string }
-  | { type: "skip-close"; after: string }
-  | { type: "think"; before: string; content: string };
-
-function findNextThinkSegment(remaining: string): SegmentAction {
-  const openIdx = remaining.indexOf("<think>");
-  const closeIdx = remaining.indexOf("</think>");
-  if (openIdx === -1) {
-    if (closeIdx === -1) return { type: "flush", text: remaining };
-    return {
-      type: "flush",
-      text: remaining.substring(0, closeIdx) + remaining.substring(closeIdx + 8),
-    };
-  }
-  if (closeIdx === -1 || openIdx < closeIdx) {
-    return {
-      type: "think",
-      before: remaining.substring(0, openIdx),
-      content: remaining.substring(openIdx + 7),
-    };
-  }
-  return { type: "skip-close", after: remaining.substring(closeIdx + 8) };
-}
-
-function handleOpenThinkTag(remaining: string): { remaining: string; buffer: string } {
-  const nextEnd = remaining.indexOf("</think>");
-  if (nextEnd !== -1) {
-    return { remaining: remaining.substring(nextEnd + 8), buffer: "" };
-  }
-  const partialEndMatch = remaining.match(/<\/?(?:think|think)$/);
-  if (partialEndMatch) {
-    return { remaining: "", buffer: remaining.substring(partialEndMatch.index!) };
-  }
-  return { remaining: "", buffer: "" };
-}
-
 function flushTextFn(
   text: string,
   controller: ReadableStreamDefaultController,
@@ -310,32 +275,54 @@ function processChunk(
   value: string,
   buffer: { current: string },
   accumulated: { current: string },
+  state: { isThinking: boolean },
   controller: ReadableStreamDefaultController,
 ) {
-  const combined = buffer.current + value;
+  let remaining = buffer.current + value;
   buffer.current = "";
-  let remaining = combined;
+
   while (remaining.length > 0) {
-    const seg = findNextThinkSegment(remaining);
-    if (seg.type === "flush") {
-      flushTextFn(seg.text, controller, accumulated);
-      return;
+    if (state.isThinking) {
+      const partialCloseMatch = remaining.match(/<\/t?h?i?n?k?>?$/);
+      if (partialCloseMatch) {
+        buffer.current = remaining.substring(partialCloseMatch.index!);
+        remaining = remaining.substring(0, partialCloseMatch.index!);
+        if (remaining.length === 0) break;
+      }
+
+      const closeIdx = remaining.indexOf("</think>");
+      if (closeIdx === -1) {
+        remaining = "";
+      } else {
+        state.isThinking = false;
+        remaining = remaining.substring(closeIdx + 8);
+      }
+    } else {
+      const partialOpenMatch = remaining.match(/<t?h?i?n?k?>?$/);
+      if (partialOpenMatch) {
+        buffer.current = remaining.substring(partialOpenMatch.index!);
+        remaining = remaining.substring(0, partialOpenMatch.index!);
+        if (remaining.length === 0) break;
+      }
+
+      const openIdx = remaining.indexOf("<think>");
+      if (openIdx === -1) {
+        flushTextFn(remaining, controller, accumulated);
+        remaining = "";
+      } else {
+        const before = remaining.substring(0, openIdx);
+        flushTextFn(before, controller, accumulated);
+        state.isThinking = true;
+        remaining = remaining.substring(openIdx + 7);
+      }
     }
-    if (seg.type === "skip-close") {
-      remaining = seg.after;
-      continue;
-    }
-    flushTextFn(seg.before, controller, accumulated);
-    const result = handleOpenThinkTag(seg.content);
-    remaining = result.remaining;
-    buffer.current = result.buffer;
-    if (buffer.current) return;
   }
 }
 
 function streamWithStrippedThinking(
   reader: ReadableStreamDefaultReader<string>,
   model: LanguageModel,
+  state: { isThinking: boolean },
   onFinish?: (text: string, model: string) => void,
 ): ReadableStream<string> {
   return new ReadableStream({
@@ -350,7 +337,7 @@ function streamWithStrippedThinking(
             finalizeStream(buf.current, accumulated.current, onFinish, reader, controller, model);
             break;
           }
-          processChunk(value, buf, accumulated, controller);
+          processChunk(value, buf, accumulated, state, controller);
         }
       } catch (e) {
         console.error("Stream interrupted:", e);
@@ -393,10 +380,33 @@ async function tryModelWithFallback(
 
   const reader = result.textStream.getReader();
 
-  const textStream = streamWithStrippedThinking(reader, model, config.onFinish);
+  const { done, value } = await reader.read();
+
+  const textStream = new ReadableStream<string>({
+    async start(controller) {
+      if (!done && value) {
+        controller.enqueue(value);
+      }
+      try {
+        while (true) {
+          const { done: d, value: val } = await reader.read();
+          if (d) break;
+          controller.enqueue(val);
+        }
+        controller.close();
+      } catch (e) {
+        controller.error(e);
+      } finally {
+        reader.releaseLock();
+      }
+    }
+  });
+
+  const state = { isThinking: false };
+  const strippedStream = streamWithStrippedThinking(textStream.getReader(), model, state, config.onFinish);
 
   Object.defineProperty(result, "textStream", {
-    value: textStream,
+    value: strippedStream,
     writable: true,
     configurable: true,
   });
@@ -456,11 +466,14 @@ function buildCacheWriteCallback(
                 }
               : {};
 
-          const topSourceUrl = ragResult.sources[0]?.url ?? "";
+          const topSourceUrl = Array.isArray(ragResult.sources) && ragResult.sources[0]
+            ? ragResult.sources[0].url ?? ""
+            : "";
           const freshnessTier = assignFreshnessTier(topSourceUrl);
           const sourceEntryIds = ragResult.sources.map((s: any) => s.entryId).filter(Boolean);
 
           await convex.action(api.cache.set.setFromServer, {
+            secret: process.env.INTERNAL_API_SECRET,
             queryText: question,
             queryEmbedding: ragResult.queryEmbedding,
             response: text,
@@ -496,8 +509,8 @@ async function validateRequestPhase(
   const bodyOrError = parseBodyOrError(bodyText);
   if (bodyOrError instanceof NextResponse) return bodyOrError;
   const lastMessage = bodyOrError.messages[bodyOrError.messages.length - 1];
-  if (!lastMessage?.content) {
-    return NextResponse.json({ error: "Message content is required" }, { status: 400 });
+  if (lastMessage?.role !== "user" || !lastMessage?.content) {
+    return NextResponse.json({ error: "Last message must be a user message and have content" }, { status: 400 });
   }
   return { messages: bodyOrError.messages, question: lastMessage.content };
 }

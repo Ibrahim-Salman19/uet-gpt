@@ -39,12 +39,12 @@ describe("Embedding Generation Integration", () => {
         const body = JSON.parse(options.body);
         expect(body).toMatchObject({
           content: {
-            parts: [{ text: "task: search result | query: Test embedding generation" }],
+            parts: [{ text: "Test embedding generation" }],
           },
           outputDimensionality: 3072,
         });
         return createMockResponse({
-          embedding: { values: [0.1, 0.2, 0.3] },
+          embedding: { values: new Array(3072).fill(0.1) },
         });
       });
 
@@ -52,7 +52,7 @@ describe("Embedding Generation Integration", () => {
         text: "Test embedding generation",
       });
 
-      expect(embeddings).toEqual([0.1, 0.2, 0.3]);
+      expect(embeddings).toEqual(new Array(3072).fill(0.1));
     });
 
     it("retries on 5xx errors", async () => {
@@ -63,7 +63,7 @@ describe("Embedding Generation Integration", () => {
           return createMockResponse({ error: { message: "Internal server error" } }, 500);
         }
         return createMockResponse({
-          embedding: { values: [0.1, 0.2, 0.3] },
+          embedding: { values: new Array(3072).fill(0.1) },
         });
       });
 
@@ -72,7 +72,7 @@ describe("Embedding Generation Integration", () => {
       });
 
       expect(callCount).toBe(2);
-      expect(result).toEqual([0.1, 0.2, 0.3]);
+      expect(result).toEqual(new Array(3072).fill(0.1));
     });
 
     it("retries on 429 rate limit errors", async () => {
@@ -83,7 +83,7 @@ describe("Embedding Generation Integration", () => {
           return createMockResponse({ error: { message: "Too many requests" } }, 429);
         }
         return createMockResponse({
-          embedding: { values: [0.4, 0.5, 0.6] },
+          embedding: { values: new Array(3072).fill(0.4) },
         });
       });
 
@@ -92,7 +92,7 @@ describe("Embedding Generation Integration", () => {
       });
 
       expect(callCount).toBe(2);
-      expect(result).toEqual([0.4, 0.5, 0.6]);
+      expect(result).toEqual(new Array(3072).fill(0.4));
     });
 
     it("throws immediately on 4xx client errors", async () => {

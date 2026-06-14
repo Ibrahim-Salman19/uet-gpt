@@ -1,5 +1,4 @@
-// fallow-ignore-file security-sink
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { action } from "../_generated/server";
 import { CASCADE_CONFIG } from "../rag/constants";
 
@@ -10,7 +9,11 @@ export const rerank = action({
     topK: v.optional(v.number()),
   },
   returns: v.array(v.object({ text: v.string(), score: v.number(), index: v.number() })),
-  handler: async (_ctx, args) => {
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new ConvexError("Authentication required");
+    }
     const docs = args.documents;
     const topK = args.topK ?? docs.length;
 

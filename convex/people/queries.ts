@@ -17,34 +17,31 @@ export const getCount = query({
   args: {},
   handler: async (ctx) => {
     await requireAdmin(ctx);
-    let facultyCount = 0;
-    let staffCount = 0;
-    let adminCount = 0;
-    let cursor: string | null = null;
-    let isDone = false;
 
-    while (!isDone) {
-      const page = await ctx.db.query("documents").paginate({
-        cursor,
-        numItems: 200,
-      });
+    const faculty = await ctx.db
+      .query("documents")
+      .withIndex("by_personType", (q) => q.eq("personType", "faculty"))
+      .collect();
 
-      for (const doc of page.page) {
-        const category = classifyDocument(doc.url.toLowerCase(), doc.title.toLowerCase());
-        if (category === "faculty") facultyCount++;
-        else if (category === "staff") staffCount++;
-        else if (category === "admin") adminCount++;
-      }
+    const staff = await ctx.db
+      .query("documents")
+      .withIndex("by_personType", (q) => q.eq("personType", "staff"))
+      .collect();
 
-      cursor = page.continueCursor;
-      isDone = page.isDone;
-    }
+    const admin = await ctx.db
+      .query("documents")
+      .withIndex("by_personType", (q) => q.eq("personType", "admin"))
+      .collect();
+
+    const total = await ctx.db
+      .query("documents")
+      .collect();
 
     return {
-      faculty: facultyCount,
-      admin: adminCount,
-      staff: staffCount,
-      total: facultyCount + adminCount + staffCount,
+      faculty: faculty.length,
+      admin: admin.length,
+      staff: staff.length,
+      total: total.length,
     };
   },
 });

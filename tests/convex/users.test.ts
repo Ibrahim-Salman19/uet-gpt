@@ -44,9 +44,9 @@ describe("users", () => {
 
   describe("getOrCreate", () => {
     it("returns existing user id when user already exists (via Clerk identity)", async () => {
-      const fakeUser = { _id: "existing-id" as Id<"users">, clerkId: "clerk_123" };
+      const fakeUser = { _id: "existing-id" as Id<"users">, clerkId: "clerk_123", isActive: true };
       ctx.db.query.mockReturnValue(makeUniqueChain(fakeUser));
-      ctx.auth.getUserIdentity.mockResolvedValue({ subject: "clerk_123" });
+      ctx.auth.getUserIdentity.mockResolvedValue({ subject: "clerk_123", email: "test@example.com" });
 
       const { getOrCreate } = await import("../../convex/users");
       const handler = (getOrCreate as unknown as { handler: (ctx: MockUserCtx, args: any) => Promise<Id<"users">> }).handler;
@@ -64,7 +64,7 @@ describe("users", () => {
 
     it("creates new user when user does not exist (via Clerk identity)", async () => {
       ctx.db.query.mockReturnValue(makeUniqueChain(null));
-      ctx.auth.getUserIdentity.mockResolvedValue({ subject: "clerk_new" });
+      ctx.auth.getUserIdentity.mockResolvedValue({ subject: "clerk_new", email: "new@example.com" });
 
       const { getOrCreate } = await import("../../convex/users");
       const handler = (getOrCreate as unknown as { handler: (ctx: MockUserCtx, args: any) => Promise<Id<"users">> }).handler;
@@ -88,7 +88,7 @@ describe("users", () => {
 
     it("creates new user without optional imageUrl", async () => {
       ctx.db.query.mockReturnValue(makeUniqueChain(null));
-      ctx.auth.getUserIdentity.mockResolvedValue({ subject: "clerk_noimg" });
+      ctx.auth.getUserIdentity.mockResolvedValue({ subject: "clerk_noimg", email: "noimg@example.com" });
 
       const { getOrCreate } = await import("../../convex/users");
       const handler = (getOrCreate as unknown as { handler: (ctx: MockUserCtx, args: any) => Promise<Id<"users">> }).handler;

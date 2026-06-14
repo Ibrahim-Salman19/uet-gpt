@@ -4,7 +4,7 @@ import { api } from "convex/_generated/api";
 import { useQuery } from "convex/react";
 import type { FunctionReference } from "convex/server";
 import { BookOpen, ExternalLink, Grid3X3, List, Loader2, Search } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -144,16 +144,24 @@ function ExploreTabContent({
 
 export default function ExplorePage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
 
   // Pass category to backend when filtered — avoids the 50-doc client-side truncation bug
   const queryArgs = activeCategory === "all" ? {} : { category: activeCategory };
 
   // Use search API if query exists, otherwise use list API
-  const queryToUse = searchQuery.trim().length > 0 ? api.doc.search : api.doc.list;
+  const queryToUse = debouncedQuery.trim().length > 0 ? api.doc.search : api.doc.list;
   const finalArgs =
-    searchQuery.trim().length > 0 ? { query: searchQuery.trim(), ...queryArgs } : queryArgs;
+    debouncedQuery.trim().length > 0 ? { query: debouncedQuery.trim(), ...queryArgs } : queryArgs;
 
   const documents = useQuery(
     queryToUse as unknown as FunctionReference<"query", "public">,
@@ -164,9 +172,9 @@ export default function ExplorePage() {
     return documents
       ? documents.filter((doc: ExploreDoc) => {
           const matchesSearch =
-            !searchQuery ||
-            doc.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            doc.url?.toLowerCase().includes(searchQuery.toLowerCase());
+            !debouncedQuery ||
+            doc.title?.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
+            doc.url?.toLowerCase().includes(debouncedQuery.toLowerCase());
           // Strictly filter by category to prevent bleeding when switching tabs
           const matchesCategory = cat === "all" || doc.category === cat;
           return matchesSearch && matchesCategory;
@@ -251,16 +259,19 @@ export default function ExplorePage() {
       </div>
 
       <ScrollArea className="flex-1 bg-transparent">
-        {CATEGORIES.map((cat) => (
-          <ExploreTabContent
-            key={cat}
-            cat={cat}
-            documents={documents}
-            currentDocs={getFilteredDocs(cat)}
-            searchQuery={searchQuery}
-            viewMode={viewMode}
-          />
-        ))}
+        {CATEGORIES.map((cat) => {
+          if (cat !== activeCategory) return null;
+          return (
+            <ExploreTabContent
+              key={cat}
+              cat={cat}
+              documents={documents}
+              currentDocs={getFilteredDocs(cat)}
+              searchQuery={debouncedQuery}
+              viewMode={viewMode}
+            />
+          );
+        })}
       </ScrollArea>
     </Tabs>
   );

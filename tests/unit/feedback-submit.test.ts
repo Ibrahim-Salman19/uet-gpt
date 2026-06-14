@@ -34,7 +34,7 @@ describe("feedback:submit", () => {
     const mockInsert = vi.fn().mockResolvedValue("mocked_id" as Id<"feedback">);
     const mockQuery = vi
       .fn()
-      .mockReturnValueOnce(makeChain({ _id: "users_id_123" as Id<"users">, clerkId: "clerk_test_123" }))
+      .mockReturnValueOnce(makeChain({ _id: "users_id_123" as Id<"users">, clerkId: "clerk_test_123", isActive: true }))
       .mockReturnValueOnce(makeChain([]));
 
     const mockCtx: MockMutationCtx = {

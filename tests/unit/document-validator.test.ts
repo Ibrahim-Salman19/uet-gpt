@@ -411,7 +411,7 @@ describe("documentValidator", () => {
         tags: v.optional(v.array(v.string())),
       });
       expect(extended.kind).toBe("object");
-      expect(Object.keys(extended.fields)).toHaveLength(17);
+      expect(Object.keys(extended.fields)).toHaveLength(21);
       expect(extended.fields.popularity.kind).toBe("float64");
       expect(extended.fields.popularity.isOptional).toBe("required");
       expect(extended.fields.tags.kind).toBe("array");

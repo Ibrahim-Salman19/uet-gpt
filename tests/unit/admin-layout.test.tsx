@@ -42,6 +42,7 @@ vi.mock("lucide-react", () => ({
   BarChart3: () => <svg data-testid="icon-barchart" />,
   MessageSquare: () => <svg data-testid="icon-messagesquare" />,
   Settings: () => <svg data-testid="icon-settings" />,
+  Users: () => <svg data-testid="icon-users" />,
 }));
 
 import { usePathname } from "next/navigation";

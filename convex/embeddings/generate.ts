@@ -103,6 +103,10 @@ async function embedNativeGemini(texts: string[], apiKey: string): Promise<numbe
 }
 
 export async function generateEmbeddingsInternal(texts: string[]): Promise<number[][]> {
+  if (texts.length === 0) return [];
+
+  const sanitizedTexts = texts.map((t) => t.substring(0, 32000));
+
   const geminiKeys: string[] = [
     process.env.GEMINI_API_KEY,
     process.env.GEMINI_API_KEY_1,
@@ -116,20 +120,18 @@ export async function generateEmbeddingsInternal(texts: string[]): Promise<numbe
 
   const errors: string[] = [];
 
-  if (geminiKeys.length > 0) {
-    for (let keyIndex = 0; keyIndex < geminiKeys.length; keyIndex++) {
-      const key = geminiKeys[keyIndex]!;
-      try {
-        if (keyIndex > 0) {
-          console.warn(`Embedding failover: using key index ${keyIndex}`);
-        }
-        const embeddings = await embedNativeGemini(texts, key);
-        return embeddings;
-      } catch (err: unknown) {
-        const errMsg = err instanceof Error ? err.message : String(err);
-        console.warn(`Native Gemini Embeddings failed for key: ${errMsg}`);
-        errors.push(`Gemini: ${errMsg}`);
+  for (let keyIndex = 0; keyIndex < geminiKeys.length; keyIndex++) {
+    const key = geminiKeys[keyIndex]!;
+    try {
+      if (keyIndex > 0) {
+        console.warn(`Embedding failover: using key index ${keyIndex}`);
       }
+      const embeddings = await embedNativeGemini(sanitizedTexts, key);
+      return embeddings;
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      console.warn(`Native Gemini Embeddings failed for key: ${errMsg}`);
+      errors.push(`Gemini: ${errMsg}`);
     }
   }
 
@@ -148,7 +150,7 @@ export const generate = action({
   handler: async (_ctx, args) => {
     const timer = recordTiming();
     try {
-      const queryText = `task: search result | query: ${args.text}`;
+      const queryText = args.text;
       const embeddings = await generateEmbeddingsInternal([queryText]);
       const latencyMs = timer.end();
       console.log("[EMBEDDING] Generated embedding", {

@@ -21,9 +21,11 @@ interface ProvidersProps {
 function UserSync() {
   const { user, isLoaded, isSignedIn } = useUser();
   const createUser = useMutation(api.users.getOrCreate);
+  const lastSyncedId = React.useRef<string | null>(null);
 
   React.useEffect(() => {
-    if (!isLoaded || !isSignedIn || !user) return;
+    if (!isLoaded || !isSignedIn || !user || lastSyncedId.current === user.id) return;
+    lastSyncedId.current = user.id;
 
     const primary = user.primaryEmailAddress;
     retryWithBackoff(
@@ -91,9 +93,14 @@ export function Providers({ children }: ProvidersProps) {
           </ThemeProvider>
         </ConvexProviderWithClerk>
       ) : (
-        <ThemeProvider>
-          <PreferencesProvider>{content}</PreferencesProvider>
-        </ThemeProvider>
+        <div className="flex min-h-screen flex-col items-center justify-center p-6 bg-slate-900 text-slate-100 font-sans">
+          <div className="max-w-md w-full p-8 border border-red-500/30 rounded-xl bg-slate-950/80 shadow-2xl text-center space-y-4">
+            <h1 className="text-2xl font-bold text-red-400">Configuration Error</h1>
+            <p className="text-slate-400 text-sm">
+              The environment variable <code className="px-1.5 py-0.5 rounded bg-slate-800 text-red-300 font-mono text-xs">NEXT_PUBLIC_CONVEX_URL</code> is missing. Please set it in your local environment files or Vercel dashboard.
+            </p>
+          </div>
+        </div>
       )}
     </ClerkProvider>
   );

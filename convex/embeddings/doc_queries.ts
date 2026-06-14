@@ -40,8 +40,8 @@ export const getDocumentByEntryId = internalQuery({
           url: doc.url,
           title: doc.title,
           category: doc.category,
-          crawledAt: doc.crawledAt,
-          freshnessTier: doc.freshnessTier,
+          crawledAt: doc.crawledAt ?? undefined,
+          freshnessTier: doc.freshnessTier ?? undefined,
           parentText: chunk.parentText,
           headingPath: chunk.headingPath,
           contextualizedText: chunk.contextualizedText,
@@ -60,11 +60,85 @@ export const getDocumentByEntryId = internalQuery({
       url: doc.url,
       title: doc.title,
       category: doc.category,
-      crawledAt: doc.crawledAt,
-      freshnessTier: doc.freshnessTier,
+      crawledAt: doc.crawledAt ?? undefined,
+      freshnessTier: doc.freshnessTier ?? undefined,
       parentText: undefined,
       headingPath: undefined,
       contextualizedText: undefined,
     };
+  },
+});
+
+export const getDocumentsByEntryIds = internalQuery({
+  args: { entryIds: v.array(v.string()) },
+  returns: v.array(
+    v.object({
+      entryId: v.string(),
+      doc: v.union(
+        v.null(),
+        v.object({
+          url: v.string(),
+          title: v.string(),
+          category: v.string(),
+          crawledAt: v.optional(v.number()),
+          freshnessTier: v.optional(v.string()),
+          parentText: v.optional(v.string()),
+          headingPath: v.optional(v.array(v.string())),
+          contextualizedText: v.optional(v.string()),
+        }),
+      ),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    const results = [];
+    for (const entryId of args.entryIds) {
+      results.push((async () => {
+        const chunk = await ctx.db
+          .query("crawledChunks")
+          .withIndex("by_ragId", (q) => q.eq("ragId", entryId))
+          .unique();
+
+        if (chunk) {
+          const doc = await ctx.db.get(chunk.documentId);
+          if (doc) {
+            return {
+              entryId,
+              doc: {
+                url: doc.url,
+                title: doc.title,
+                category: doc.category,
+                crawledAt: doc.crawledAt ?? undefined,
+                freshnessTier: doc.freshnessTier ?? undefined,
+                parentText: chunk.parentText,
+                headingPath: chunk.headingPath,
+                contextualizedText: chunk.contextualizedText,
+              },
+            };
+          }
+        }
+
+        const doc = await ctx.db
+          .query("documents")
+          .withIndex("by_entryId", (q) => q.eq("entryId", entryId))
+          .unique();
+
+        if (!doc) return { entryId, doc: null };
+
+        return {
+          entryId,
+          doc: {
+            url: doc.url,
+            title: doc.title,
+            category: doc.category,
+            crawledAt: doc.crawledAt ?? undefined,
+            freshnessTier: doc.freshnessTier ?? undefined,
+            parentText: undefined,
+            headingPath: undefined,
+            contextualizedText: undefined,
+          },
+        };
+      })());
+    }
+    return await Promise.all(results);
   },
 });

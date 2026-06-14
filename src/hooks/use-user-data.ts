@@ -20,7 +20,7 @@ export function useUserData() {
     isClerkLoaded,
     convexUser,
     isConvexLoaded: convexUser !== undefined,
-    isFullyLoaded: isClerkLoaded && convexUser !== undefined,
+    isFullyLoaded: isClerkLoaded && (!user || convexUser !== undefined),
     preferences: convexUser?.preferences ?? null,
     modelPreference,
   };

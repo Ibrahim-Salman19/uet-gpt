@@ -51,7 +51,7 @@ export function hybridRank(
 
   const decay = (rank: number, total: number): number => {
     if (decayStrategy === "linear") {
-      return Math.max(0.001, total - rank);
+      return Math.max(0.001, total > 0 ? (total - rank) / total : 0);
     }
     return 1 / (k + rank);
   };
@@ -76,21 +76,17 @@ export function hybridRank(
     .sort((a, b) => b.score - a.score);
 }
 
-const getDocumentRef = internal.embeddings.doc_queries.getDocumentByEntryId;
-
 async function batchFetchDocMeta(
   ctx: ActionCtx,
   fused: FusedItem[],
 ): Promise<Map<string, DocMeta>> {
-  const docLookups = await Promise.all(
-    fused.map(async (item) => {
-      const doc = await ctx.runQuery(getDocumentRef, { entryId: item.id });
-      return { entryId: item.id, doc };
-    }),
-  );
+  const entryIds = fused.map((f) => f.id);
+  const lookups = await ctx.runQuery(internal.embeddings.doc_queries.getDocumentsByEntryIds, {
+    entryIds,
+  });
 
   const docMap = new Map<string, DocMeta>();
-  for (const { entryId, doc } of docLookups) {
+  for (const { entryId, doc } of lookups) {
     if (doc) {
       docMap.set(entryId, {
         url: doc.url,
@@ -140,17 +136,22 @@ async function fetchActiveFaqs(
 ): Promise<
   Array<{ entryId: string; content: string; url: string; title: string; relevanceScore: number }>
 > {
-  const faqs = await ctx.runQuery(internal.faq.searchFaqs, { query: queryText });
-  const now = Date.now();
-  return faqs
-    .filter((f: FaqResult) => !f.expiresAt || f.expiresAt > now)
-    .map((faq: FaqResult) => ({
-      entryId: faq._id,
-      content: `FAQ: ${faq.question}\nAnswer: ${faq.answer}`,
-      url: faq.sourceUrl || "Verified FAQ Database",
-      title: faq.question,
-      relevanceScore: (faq._score ?? 1.0) * FAQ_BOOST_FACTOR,
-    }));
+  try {
+    const faqs = await ctx.runQuery(internal.faq.searchFaqs, { query: queryText });
+    const now = Date.now();
+    return faqs
+      .filter((f: FaqResult) => !f.expiresAt || f.expiresAt > now)
+      .map((faq: FaqResult) => ({
+        entryId: faq._id,
+        content: `FAQ: ${faq.question}\nAnswer: ${faq.answer}`,
+        url: faq.sourceUrl || "Verified FAQ Database",
+        title: faq.question,
+        relevanceScore: (faq._score ?? 1.0) * FAQ_BOOST_FACTOR,
+      }));
+  } catch (err) {
+    console.error("FAQ search failed, falling back to empty FAQ list:", err);
+    return [];
+  }
 }
 
 export const searchDocumentsAction = action({
@@ -261,7 +262,7 @@ export const searchDocumentsAction = action({
       (a: EnrichedResult, b: EnrichedResult) => b.relevanceScore - a.relevanceScore,
     );
 
-    const faqResults = await fetchActiveFaqs(ctx, args.queryText);
+    const faqResults = (await fetchActiveFaqs(ctx, args.queryText)).slice(0, 2);
     const combinedResults = [...faqResults, ...sortedEnriched].sort(
       (a, b) => b.relevanceScore - a.relevanceScore,
     );
