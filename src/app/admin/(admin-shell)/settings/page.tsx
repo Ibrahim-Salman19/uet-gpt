@@ -216,7 +216,7 @@ export default function AdminSettingsPage() {
             variant="outline"
             size="sm"
             onClick={handleReset}
-            className="h-8 border-white/5 bg-[#101012]/40 text-xs font-mono tracking-wider hover:bg-white/5 hover:text-white transition-all active:scale-[0.98]"
+            className="h-8 border-white/5 bg-[var(--surface-3)]/40 text-xs font-mono tracking-wider hover:bg-white/5 hover:text-white transition-all active:scale-[0.98]"
           >
             <RotateCcw className="h-3.5 w-3.5 mr-2 text-zinc-400" />
             RESET
@@ -233,7 +233,7 @@ export default function AdminSettingsPage() {
       </div>
 
       {/* Split Pane Sections */}
-      <div className="border border-white/5 rounded-xl bg-[#101012]/20 px-6 py-2 divide-y divide-white/[0.04]">
+      <div className="border border-white/5 rounded-xl bg-[var(--surface-3)]/20 px-6 py-2 divide-y divide-white/[0.04]">
         {settingsSections.map((section) => (
           <div
             key={section.key}
@@ -287,7 +287,7 @@ export default function AdminSettingsPage() {
                         <SelectTrigger className="h-9 bg-black/40 border-white/5 text-xs font-mono rounded text-zinc-300">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#101012] border-white/10 text-xs font-mono text-zinc-300">
+                        <SelectContent className="bg-[var(--surface-3)] border-white/10 text-xs font-mono text-zinc-300">
                           {field.options?.map((opt) => (
                             <SelectItem key={opt.value} value={opt.value}>
                               {opt.label}

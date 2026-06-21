@@ -10,14 +10,23 @@ import { useRef } from "react";
  * Source: https://docs.convex.dev/client/react/advanced/useStableQuery
  */
 export const useStableQuery = ((name: any, args?: any) => {
-  const serializedArgs = JSON.stringify(args);
-  const prevArgsRef = useRef({ name, serializedArgs });
+  const prevNameRef = useRef(name);
+  const prevArgsRef = useRef(args);
+  const prevSerializedRef = useRef<string | undefined>(JSON.stringify(args));
   const result = useQuery(name, args);
   const stored = useRef(result);
 
-  if (prevArgsRef.current.name !== name || prevArgsRef.current.serializedArgs !== serializedArgs) {
-    stored.current = undefined;
-    prevArgsRef.current = { name, serializedArgs };
+  const nameChanged = prevNameRef.current !== name;
+  const argsRefChanged = prevArgsRef.current !== args;
+
+  if (nameChanged || argsRefChanged) {
+    const serialized = argsRefChanged ? JSON.stringify(args) : prevSerializedRef.current;
+    if (nameChanged || serialized !== prevSerializedRef.current) {
+      stored.current = undefined;
+    }
+    prevNameRef.current = name;
+    prevArgsRef.current = args;
+    prevSerializedRef.current = serialized;
   }
 
   if (result !== undefined) {

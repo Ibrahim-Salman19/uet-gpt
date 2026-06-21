@@ -45,12 +45,15 @@ export function PageHeader({
     >
       <div className="space-y-1">
         <h1
-          className={cn("font-semibold tracking-tight text-[var(--text)]", titleSizeClasses[size])}
+          className={cn(
+            "font-semibold tracking-tight text-[var(--text-primary)]",
+            titleSizeClasses[size],
+          )}
         >
           {title}
         </h1>
         {description && (
-          <p className={cn("text-[var(--text-muted)]", descriptionSizeClasses[size])}>
+          <p className={cn("text-[var(--text-secondary)]", descriptionSizeClasses[size])}>
             {description}
           </p>
         )}

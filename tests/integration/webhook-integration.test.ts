@@ -7,7 +7,7 @@ vi.mock("../../convex/_generated/server", () => ({
 
 import { crawlWebhook } from "../../convex/crawl/webhook";
 
-const WEBHOOK_SECRET = "700719dfc8d54dbfb6022b5150120149";
+const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET || process.env.CRAWL_WEBHOOK_SECRET || "dummy-webhook-secret-for-tests-12345";
 process.env.CRAWL_WEBHOOK_SECRET = WEBHOOK_SECRET;
 
 function generateSignature(timestamp: string, body: string, secret: string): string {

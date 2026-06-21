@@ -41,12 +41,11 @@ function ErrorBanner({ error, onRetry }: { error: string; onRetry?: () => void }
 function useAutoScroll(messages: ChatMessage[], isAwaitingReply?: boolean) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const prevLengthRef = useRef(messages.length);
-  const lastMessageContent = messages[messages.length - 1]?.content;
 
   useEffect(() => {
     const viewport = scrollRef.current?.querySelector(
       "[data-radix-scroll-area-viewport]",
-    ) as HTMLDivElement;
+    ) as HTMLDivElement | null;
     if (viewport) {
       const isNearBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 180;
       const isNewMessage = messages.length > prevLengthRef.current;
@@ -58,7 +57,7 @@ function useAutoScroll(messages: ChatMessage[], isAwaitingReply?: boolean) {
       }
     }
     prevLengthRef.current = messages.length;
-  }, [messages.length, lastMessageContent, isAwaitingReply]);
+  }, [messages.length, isAwaitingReply]);
 
   return scrollRef;
 }
@@ -116,11 +115,11 @@ export function ChatMessages({
 
   return (
     <ScrollArea ref={scrollRef} className={cn("h-full w-full scroll-momentum", className)}>
-      <div className="mx-auto flex w-full flex-col gap-1 pt-4 pb-36 md:pb-32 lg:pb-36 max-w-none xl:max-w-5xl 2xl:max-w-6xl px-0">
+      <div className="mx-auto flex w-full flex-col gap-1 pt-6 pb-32 md:pb-12 max-w-none md:max-w-3xl lg:max-w-4xl xl:max-w-5xl px-0">
         {messages.map((message, index) => (
           <div
             key={message.id}
-            className="animate-[slide-up_0.3s_ease-[var(--ease-out-expo)]_both]"
+            className="animate-[slide-up_0.4s_ease-[var(--ease-out-expo)]_both]"
           >
             <ChatMessageBubble message={message} isLatest={index === messages.length - 1} />
           </div>

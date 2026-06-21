@@ -1,8 +1,8 @@
 import { v } from "convex/values";
+import { internal } from "../_generated/api";
 import { internalAction, mutation } from "../_generated/server";
 import { requireAdmin } from "../auth";
 import { rag } from "../rag/instance";
-import { internal } from "../_generated/api";
 
 export const remove = mutation({
   args: { documentId: v.id("documents") },
@@ -25,9 +25,7 @@ export const remove = mutation({
         .query("crawledChunks")
         .withIndex("by_documentId", (q) => q.eq("documentId", args.documentId))
         .paginate({ numItems: 200, cursor });
-      for (const chunk of page.page) {
-        await ctx.db.delete(chunk._id);
-      }
+      await Promise.all(page.page.map((chunk) => ctx.db.delete(chunk._id)));
       cursor = page.continueCursor;
       isDone = page.isDone;
     }

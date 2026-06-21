@@ -96,7 +96,10 @@ function wordSplitLongSentence(sentence: string, maxChunkSize: number): string[]
 }
 
 function getTableOverlapRows(text: string, overlapSize: number): string {
-  const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+  const lines = text
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
   let overlap = "";
   for (let i = lines.length - 1; i >= 0; i--) {
     const line = lines[i]!;

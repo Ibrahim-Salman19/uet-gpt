@@ -91,11 +91,23 @@ export const hydeQueryAction = internalAction({
   args: { query: v.string() },
   returns: v.string(),
   handler: async (_ctx, args) => {
-    if (!process.env.GROQ_API_KEY) return args.query;
+    const geminiKey =
+      process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY_1 || process.env.GEMINI_API_KEY_2;
 
     try {
+      let model;
+      if (geminiKey) {
+        const { createGoogleGenerativeAI } = await import("@ai-sdk/google");
+        const google = createGoogleGenerativeAI({ apiKey: geminiKey });
+        model = google("gemini-2.5-flash");
+      } else if (process.env.GROQ_API_KEY) {
+        model = getGroq()("llama-3.1-8b-instant");
+      } else {
+        return args.query;
+      }
+
       const { text } = await generateText({
-        model: getGroq()("llama-3.1-8b-instant"),
+        model,
         system:
           "You are an expert on UET Taxila. Write a hypothetical, 3-5 sentence factual paragraph that directly answers the user's query. Pretend you are writing an official website excerpt.",
         prompt: args.query,

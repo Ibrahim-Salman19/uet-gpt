@@ -33,12 +33,18 @@ export const evaluateSearch = action({
     topK: v.number(),
   },
   handler: async (ctx, args): Promise<Array<{ ragId: string; text: string; url: string }>> => {
+    if (args.topK < 1 || args.topK > 100) {
+      throw new ConvexError("topK must be between 1 and 100");
+    }
+    if (args.query.length > 1000) {
+      throw new ConvexError("Query must be 1000 characters or fewer");
+    }
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new ConvexError("Authentication required");
     }
 
-    const user = await ctx.runQuery(api.users.getByClerkId, {
+    const user = await ctx.runQuery(internal.users.getByClerkIdInternal, {
       clerkId: identity.subject,
     });
 

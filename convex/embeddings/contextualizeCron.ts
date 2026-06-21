@@ -37,25 +37,20 @@ export const contextualizeCron = internalAction({
       }
     }
 
-    const currentValue = (await ctx.runQuery(
-      internal.embeddings.contextualize.getContextualizeProgress,
-    )) as number;
-    const newValue = currentValue + totalProcessed;
-
     await ctx.runMutation(internal.embeddings.contextualize.upsertContextualizeProgress, {
-      totalProcessed: newValue,
+      totalProcessed: totalProcessed,
+      increment: true,
     });
 
     console.log(
       `Contextualize cron: ${totalProcessed}/${pendingChunkIds.length} chunks ` +
-        `(${totalFailures} failures), cumulative: ${newValue}`,
+        `(${totalFailures} failures)`,
     );
 
     return {
       processed: totalProcessed,
       failures: totalFailures,
       totalPending: pendingChunkIds.length,
-      cumulativeProcessed: newValue,
     };
   },
 });

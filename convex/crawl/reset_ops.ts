@@ -11,19 +11,19 @@ async function deleteChunksBatch(
 ): Promise<{ deleted: number; remaining: string } | null> {
   const chunks = await ctx.db.query("crawledChunks").withIndex("by_documentId").take(batchSize);
   if (chunks.length === 0) return null;
-  let deleted = 0;
-  for (const chunk of chunks) {
-    try {
-      if (chunk.ragId) {
-        await rag.delete(ctx, {
-          entryId: chunk.ragId as unknown as import("@convex-dev/rag").EntryId,
-        });
-      }
-    } catch {}
-    await ctx.db.delete(chunk._id);
-    deleted++;
-  }
-  return { deleted, remaining: "more" };
+  await Promise.all(
+    chunks.map(async (chunk: any) => {
+      try {
+        if (chunk.ragId) {
+          await rag.delete(ctx, {
+            entryId: chunk.ragId as unknown as import("@convex-dev/rag").EntryId,
+          });
+        }
+      } catch {}
+      await ctx.db.delete(chunk._id);
+    }),
+  );
+  return { deleted: chunks.length, remaining: "more" };
 }
 
 async function deleteTableBatch(
@@ -35,12 +35,8 @@ async function deleteTableBatch(
   const query = index ? ctx.db.query(table as any).withIndex(index) : ctx.db.query(table as any);
   const items = await query.take(batchSize);
   if (items.length === 0) return null;
-  let deleted = 0;
-  for (const item of items) {
-    await ctx.db.delete(item._id);
-    deleted++;
-  }
-  return { deleted, remaining: "more" };
+  await Promise.all(items.map((item: any) => ctx.db.delete(item._id)));
+  return { deleted: items.length, remaining: "more" };
 }
 
 export const resetAbandonedDLQ = internalMutation({
@@ -52,12 +48,11 @@ export const resetAbandonedDLQ = internalMutation({
       .withIndex("by_status", (q) => q.eq("status", "abandoned"))
       .take(batchSize);
 
-    let resetCount = 0;
-    for (const dlq of abandoned) {
-      await ctx.db.patch(dlq._id, { status: "pending_retry" });
-      resetCount++;
-    }
-    return { resetCount, remaining: abandoned.length === batchSize ? "more" : "done" };
+    await Promise.all(abandoned.map((dlq) => ctx.db.patch(dlq._id, { status: "pending_retry" })));
+    return {
+      resetCount: abandoned.length,
+      remaining: abandoned.length === batchSize ? "more" : "done",
+    };
   },
 });
 
@@ -87,15 +82,18 @@ export const resetFailedDocuments = internalMutation({
       .withIndex("by_status", (q) => q.eq("status", "failed"))
       .take(batchSize);
 
-    let reset = 0;
-    for (const doc of failedDocs) {
-      await ctx.db.patch(doc._id, {
-        status: "pending_embed",
-        updatedAt: Date.now(),
-      });
-      reset++;
-    }
-    return { reset, remaining: failedDocs.length === batchSize ? "more" : "done" };
+    await Promise.all(
+      failedDocs.map((doc) =>
+        ctx.db.patch(doc._id, {
+          status: "pending_embed",
+          updatedAt: Date.now(),
+        }),
+      ),
+    );
+    return {
+      reset: failedDocs.length,
+      remaining: failedDocs.length === batchSize ? "more" : "done",
+    };
   },
 });
 

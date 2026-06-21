@@ -1,6 +1,7 @@
 "use client";
 
 import { Sparkles } from "lucide-react";
+import { DEFAULT_SUGGESTIONS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 interface ChatSuggestionsProps {
@@ -9,19 +10,9 @@ interface ChatSuggestionsProps {
   className?: string;
 }
 
-const DEFAULT_SUGGESTIONS = [
-  "What is the fee structure for BS programs?",
-  "When do admissions open for 2026?",
-  "How many departments does UET have?",
-  "What transport routes are available?",
-];
-
-export function ChatSuggestions({
-  suggestions = DEFAULT_SUGGESTIONS,
-  onSelect,
-  className,
-}: ChatSuggestionsProps) {
-  const hasSuggestions = suggestions.length > 0;
+export function ChatSuggestions({ suggestions, onSelect, className }: ChatSuggestionsProps) {
+  const finalSuggestions = suggestions ?? DEFAULT_SUGGESTIONS.map((s) => s.prompt);
+  const hasSuggestions = finalSuggestions.length > 0;
 
   if (!hasSuggestions) return null;
 
@@ -32,7 +23,7 @@ export function ChatSuggestions({
         Try asking:
       </p>
       <div className="flex flex-wrap gap-2">
-        {suggestions.map((suggestion) => (
+        {finalSuggestions.map((suggestion) => (
           <button
             type="button"
             key={suggestion}

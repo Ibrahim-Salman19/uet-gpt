@@ -4,6 +4,7 @@ import path from "path";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  devIndicators: false,
   allowedDevOrigins: ["127.0.0.1"],
   turbopack: {
     root: ".",
@@ -43,11 +44,11 @@ const nextConfig: NextConfig = {
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy", value: "geolocation=(), microphone=(self), camera=()" },
           {
-            key: "Content-Security-Policy-Report-Only",
+            key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' https://clerk.browser.systems 'unsafe-inline' 'unsafe-eval'",
-              "connect-src 'self' *.convex.cloud wss://*.convex.cloud https://clerk.browser.systems",
+              "script-src 'self' https://clerk.browser.systems *.clerk.accounts.dev 'unsafe-inline' 'unsafe-eval'",
+              "connect-src 'self' *.convex.cloud wss://*.convex.cloud https://clerk.browser.systems *.clerk.accounts.dev",
               "img-src 'self' data: blob: https://img.clerk.com https://*.convex.cloud",
               "style-src 'self' 'unsafe-inline'",
               "frame-ancestors 'none'",

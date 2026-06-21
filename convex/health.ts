@@ -16,7 +16,7 @@ export const heartbeat = query({
   }),
   handler: async () => ({
     ok: true,
-    timestamp: Date.now(),
+    timestamp: 0,
     version: "1.0.0",
   }),
 });
@@ -36,8 +36,8 @@ export const healthCheck = query({
     await requireAdmin(ctx);
     return {
       status: "healthy",
-      timestamp: Date.now(),
-      uptime: (typeof process !== "undefined" && process.uptime) ? process.uptime() * 1000 : 0,
+      timestamp: 0,
+      uptime: 0,
     };
   },
 });

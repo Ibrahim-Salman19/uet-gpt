@@ -1,7 +1,6 @@
 "use client";
 
 import { api } from "convex/_generated/api";
-import { useQuery } from "convex/react";
 import type { FunctionReference } from "convex/server";
 import { BookOpen, ExternalLink, Grid3X3, List, Loader2, Search } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -9,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useDebounce } from "@/hooks/use-debounce";
+import { useStableQuery } from "@/hooks/use-stable-query";
 import { cn } from "@/lib/utils";
 
 interface ExploreDoc {
@@ -44,7 +45,7 @@ function ExploreCard({ doc }: { doc: ExploreDoc }) {
       href={doc.url?.startsWith("http") ? doc.url : "#"}
       target="_blank"
       rel="noopener noreferrer"
-      className="group block rounded-xl border border-white/5 bg-[#101012]/40 backdrop-blur-sm p-4 transition-all duration-300 hover:border-[var(--accent)]/30 hover:bg-[#101012]/80 hover:-translate-y-0.5 active:scale-[0.99] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] relative overflow-hidden"
+      className="group block rounded-xl border border-white/5 bg-[var(--surface-3)]/40 backdrop-blur-sm p-4 transition-all duration-300 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-3)]/80 hover:-translate-y-0.5 active:scale-[0.99] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] relative overflow-hidden"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
@@ -64,7 +65,7 @@ function ExploreCard({ doc }: { doc: ExploreDoc }) {
             <span className="text-[10px] text-zinc-500 font-sans">
               {new Date(doc.crawledAt).toLocaleDateString()}
             </span>
-            {doc.chunkCount && (
+            {doc.chunkCount != null && doc.chunkCount > 0 && (
               <>
                 <span className="text-[10px] text-zinc-500 font-sans">·</span>
                 <span className="text-[10px] text-zinc-500 font-sans">{doc.chunkCount} chunks</span>
@@ -148,12 +149,13 @@ export default function ExplorePage() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
+  const setDebounced = useDebounce((val: string) => {
+    setDebouncedQuery(val);
+  }, 300);
+
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedQuery(searchQuery);
-    }, 300);
-    return () => clearTimeout(handler);
-  }, [searchQuery]);
+    setDebounced(searchQuery);
+  }, [searchQuery, setDebounced]);
 
   // Pass category to backend when filtered — avoids the 50-doc client-side truncation bug
   const queryArgs = activeCategory === "all" ? {} : { category: activeCategory };
@@ -163,24 +165,10 @@ export default function ExplorePage() {
   const finalArgs =
     debouncedQuery.trim().length > 0 ? { query: debouncedQuery.trim(), ...queryArgs } : queryArgs;
 
-  const documents = useQuery(
+  const documents = useStableQuery(
     queryToUse as unknown as FunctionReference<"query", "public">,
     finalArgs,
   );
-
-  const getFilteredDocs = (cat: string) => {
-    return documents
-      ? documents.filter((doc: ExploreDoc) => {
-          const matchesSearch =
-            !debouncedQuery ||
-            doc.title?.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
-            doc.url?.toLowerCase().includes(debouncedQuery.toLowerCase());
-          // Strictly filter by category to prevent bleeding when switching tabs
-          const matchesCategory = cat === "all" || doc.category === cat;
-          return matchesSearch && matchesCategory;
-        })
-      : [];
-  };
 
   return (
     <Tabs
@@ -188,7 +176,7 @@ export default function ExplorePage() {
       onValueChange={setActiveCategory}
       className="flex h-full flex-col w-full"
     >
-      <div className="border-b border-[#222226] bg-[#0a0a0c]/60 backdrop-blur-md px-3 py-3 md:px-6 md:py-5 sticky top-0 z-10">
+      <div className="border-b border-[var(--surface-5)] bg-[var(--surface-1)]/60 backdrop-blur-md px-3 py-3 md:px-6 md:py-5 sticky top-0 z-10">
         <div className="mx-auto flex max-w-5xl 2xl:max-w-6xl flex-col gap-3 md:gap-4">
           <div>
             <h1 className="text-base font-semibold text-zinc-100 font-sans tracking-tight">
@@ -266,7 +254,7 @@ export default function ExplorePage() {
               key={cat}
               cat={cat}
               documents={documents}
-              currentDocs={getFilteredDocs(cat)}
+              currentDocs={documents ?? []}
               searchQuery={debouncedQuery}
               viewMode={viewMode}
             />

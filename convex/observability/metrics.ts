@@ -31,6 +31,10 @@ export const incrementCounter = internalMutation({
   args: { key: v.string(), incrementBy: v.number() },
   returns: v.number(),
   handler: async (ctx, args) => {
+    // NOTE: This is a read-then-write without an idempotency key, which
+    // risks lost updates under concurrent calls. This is acceptable here
+    // because counters are observational — approximate values are fine and
+    // the cost of adding a transactional lock outweighs the precision gain.
     const existing = await ctx.db
       .query("appSettings")
       .withIndex("by_key", (q) => q.eq("key", args.key))

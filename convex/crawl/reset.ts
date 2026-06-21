@@ -10,11 +10,11 @@ export const resetDLQ = mutation({
     const abandoned = await ctx.db
       .query("crawlDeadLetter")
       .withIndex("by_status", (q) => q.eq("status", "abandoned"))
-      .take(500);
+      .take(100);
 
-    for (const doc of abandoned) {
-      await ctx.db.patch(doc._id, { status: "pending_retry", failureCount: 0 });
-    }
+    await Promise.all(
+      abandoned.map((doc) => ctx.db.patch(doc._id, { status: "pending_retry", failureCount: 0 })),
+    );
 
     return abandoned.length;
   },

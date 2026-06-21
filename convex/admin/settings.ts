@@ -11,7 +11,7 @@ export const getSettings = query({
     const builder = section
       ? ctx.db.query("appSettings").withIndex("by_section", (q) => q.eq("section", section))
       : ctx.db.query("appSettings");
-    return await builder.collect();
+    return await builder.take(200);
   },
 });
 
@@ -60,12 +60,11 @@ export const upsertSettingsBatch = mutation({
   handler: async (ctx, args) => {
     const user = await requireAdmin(ctx);
 
-    for (const setting of args.settings) {
-      const existing = await ctx.db
-        .query("appSettings")
-        .withIndex("by_key", (q) => q.eq("key", setting.key))
-        .first();
+    const allSettings = await ctx.db.query("appSettings").take(200);
+    const existingMap = new Map(allSettings.map((s) => [s.key, s]));
 
+    for (const setting of args.settings) {
+      const existing = existingMap.get(setting.key);
       if (existing) {
         await ctx.db.patch(existing._id, {
           value: setting.value,
@@ -94,9 +93,18 @@ export const resetSettings = mutation({
       throw new ConvexError("Superadmin access required to reset all settings.");
     }
 
-    const all = await ctx.db.query("appSettings").take(1000);
-    for (const setting of all) {
-      await ctx.db.delete(setting._id);
+    let cursor: string | null = null;
+    let done = false;
+    let totalDeleted = 0;
+    while (!done) {
+      const page = await ctx.db.query("appSettings").paginate({ numItems: 100, cursor });
+      if (page.page.length > 0) {
+        await Promise.all(page.page.map((s) => ctx.db.delete(s._id)));
+        totalDeleted += page.page.length;
+      }
+      done = page.isDone;
+      cursor = page.continueCursor;
     }
+    return { deleted: totalDeleted };
   },
 });

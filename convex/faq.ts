@@ -30,25 +30,22 @@ export const removeFaq = mutation({
 });
 
 export const listFaqs = query({
-  args: {},
-  handler: async (ctx) => {
-    const now = Date.now();
-    return await ctx.db
-      .query("faqs")
-      .filter((q) => q.or(q.eq(q.field("expiresAt"), undefined), q.gt(q.field("expiresAt"), now)))
-      .order("desc")
-      .take(100);
+  args: { now: v.number() },
+  handler: async (ctx, args) => {
+    const faqs = await ctx.db.query("faqs").order("desc").take(100);
+    return faqs.filter((faq) => faq.expiresAt === undefined || faq.expiresAt > args.now);
   },
 });
 
 export const searchFaqs = internalQuery({
-  args: { query: v.string() },
+  args: { query: v.string(), now: v.number() },
   handler: async (ctx, args) => {
-    const now = Date.now();
     return await ctx.db
       .query("faqs")
       .withSearchIndex("search_question", (q) => q.search("question", args.query))
-      .filter((q) => q.or(q.eq(q.field("expiresAt"), undefined), q.gt(q.field("expiresAt"), now)))
+      .filter((q) =>
+        q.or(q.eq(q.field("expiresAt"), undefined), q.gt(q.field("expiresAt"), args.now)),
+      )
       .take(3);
   },
 });

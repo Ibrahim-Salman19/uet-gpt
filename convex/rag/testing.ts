@@ -1,10 +1,21 @@
 import { v } from "convex/values";
-import { api } from "../_generated/api";
-import { action, mutation } from "../_generated/server";
+import { api, internal } from "../_generated/api";
+import { action, internalMutation } from "../_generated/server";
 import { rag } from "../rag/instance";
 
-// --- MUTATIONS ---
-export const insertTestChunk = mutation({
+async function requireAdminAuth(ctx: { auth: { getUserIdentity(): Promise<any> } }) {
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) {
+    throw new Error("Authentication required");
+  }
+  const role = identity.meta?.role;
+  if (role !== "admin" && role !== "superadmin") {
+    throw new Error("Admin access required");
+  }
+}
+
+// --- MUTATIONS (internal only — not callable from client) ---
+export const insertTestChunk = internalMutation({
   args: {
     url: v.string(),
     title: v.string(),
@@ -47,6 +58,8 @@ export const seed = action({
     entryId: v.string(),
   }),
   handler: async (ctx) => {
+    await requireAdminAuth(ctx);
+
     console.log("Seeding test document via RAG component...");
     const content =
       "The fee structure for BS Computer Science at UET Taxila for the 2024-25 academic year is: Tuition Fee: Rs. 45,000 per semester. Admission Fee: Rs. 15,000 (one-time). Hostel Fee: Rs. 12,000 per semester. Transport Fee: Rs. 8,000 per semester.";
@@ -70,7 +83,7 @@ export const seed = action({
     // Insert metadata document linked to the RAG entry
     // If this fails, clean up the RAG entry to avoid orphaned vector data
     try {
-      await ctx.runMutation(api.rag.testing.insertTestChunk, {
+      await ctx.runMutation(internal.rag.testing.insertTestChunk, {
         url: "https://web.uettaxila.edu.pk/test-doc",
         title: "Test Document: BS Computer Science Fee Structure",
         category: "academic",
@@ -95,6 +108,8 @@ export const verify = action({
   args: {},
   returns: v.object({ exists: v.boolean(), content: v.optional(v.string()), count: v.number() }),
   handler: async (ctx) => {
+    await requireAdminAuth(ctx);
+
     const queryStr = "What is the fee for BS Computer Science?";
     console.log(`Verifying RAG pipeline with query: "${queryStr}"`);
 

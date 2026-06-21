@@ -20,10 +20,10 @@ function Avatar({ isUser, initials }: { isUser: boolean; initials: string }) {
   return (
     <div
       className={cn(
-        "flex h-8 w-8 items-center justify-center shrink-0 rounded-[10px] transition-all duration-300 shadow-sm select-none border font-semibold text-xs tracking-wider font-sans",
+        "flex h-8 w-8 items-center justify-center shrink-0 rounded-[10px] transition-transform duration-300 shadow-sm select-none border font-semibold text-[11px] tracking-widest font-mono",
         isUser
           ? "bg-[var(--accent)] text-[var(--accent-fg)] border-[var(--accent)]/30"
-          : "bg-zinc-950/80 text-[var(--accent)] border-white/5",
+          : "bg-[var(--surface-elevated)] text-[var(--accent)] border-[var(--accent)]/10 shadow-inner",
       )}
     >
       {isUser ? (
@@ -39,6 +39,17 @@ function useScrambleText(message: ChatMessage, isLatest: boolean, isUser: boolea
   const { typingAnimEnabled, typingSoundEnabled, playTypingSound } = usePreferences();
   const [scrambleContent, setScrambleContent] = React.useState(message.content);
   const hasScrambledRef = React.useRef(false);
+
+  const playTypingSoundRef = React.useRef(playTypingSound);
+  const typingSoundEnabledRef = React.useRef(typingSoundEnabled);
+
+  React.useEffect(() => {
+    playTypingSoundRef.current = playTypingSound;
+  }, [playTypingSound]);
+
+  React.useEffect(() => {
+    typingSoundEnabledRef.current = typingSoundEnabled;
+  }, [typingSoundEnabled]);
 
   React.useEffect(() => {
     if (
@@ -70,8 +81,8 @@ function useScrambleText(message: ChatMessage, isLatest: boolean, isUser: boolea
           .join(""),
       );
 
-      if (iterations % 4 === 0 && typingSoundEnabled) {
-        playTypingSound();
+      if (iterations % 4 === 0 && typingSoundEnabledRef.current) {
+        playTypingSoundRef.current();
       }
 
       if (iterations >= length) {
@@ -82,27 +93,9 @@ function useScrambleText(message: ChatMessage, isLatest: boolean, isUser: boolea
     }, 12);
 
     return () => clearInterval(interval);
-  }, [
-    message.content,
-    isUser,
-    message.id,
-    isLatest,
-    typingAnimEnabled,
-    typingSoundEnabled,
-    playTypingSound,
-  ]);
+  }, [message.content, isUser, message.id, isLatest, typingAnimEnabled]);
 
   return scrambleContent;
-}
-
-function useTypingSound(message: ChatMessage, typingSoundEnabled: boolean): void {
-  const { playTypingSound } = usePreferences();
-
-  React.useEffect(() => {
-    if (message.id === "streaming-message" && typingSoundEnabled) {
-      playTypingSound();
-    }
-  }, [message.content, message.id, typingSoundEnabled, playTypingSound]);
 }
 
 export const ChatMessageBubble = React.memo(function ChatMessageBubble({
@@ -112,7 +105,7 @@ export const ChatMessageBubble = React.memo(function ChatMessageBubble({
 }: ChatMessageProps) {
   const isUser = message.role === "user";
   const { user } = useUser();
-  const { typingAnimEnabled, typingSoundEnabled } = usePreferences();
+  const { typingAnimEnabled } = usePreferences();
 
   const initials = user
     ? `${user.firstName?.charAt(0) || ""}${user.lastName?.charAt(0) || ""}`.toUpperCase()
@@ -120,29 +113,31 @@ export const ChatMessageBubble = React.memo(function ChatMessageBubble({
   const fallbackInitials = initials || "U";
 
   const scrambleContent = useScrambleText(message, isLatest, isUser);
-  useTypingSound(message, typingSoundEnabled);
 
   return (
     <div
-      className="flex items-start gap-3 lg:gap-5 px-3 py-3.5 md:px-5 md:py-4 lg:px-8 lg:py-5 xl:px-10 w-full border-b border-white/[0.02] last:border-b-0"
+      className={cn(
+        "flex items-start gap-4 lg:gap-6 px-4 py-5 md:px-6 md:py-6 lg:px-8 lg:py-7 xl:px-10 w-full transition-colors duration-200",
+        isUser ? "bg-transparent" : "bg-[var(--surface-base)]/20",
+      )}
       id={message.id}
     >
       <Avatar isUser={isUser} initials={fallbackInitials} />
 
-      <div className="group flex flex-1 flex-col gap-1 items-start min-w-0">
-        <div className="flex items-center gap-2 font-mono text-[9px] tracking-widest text-zinc-500 uppercase select-none mb-1">
-          <span className={cn(isUser ? "text-zinc-400" : "text-[var(--accent)] font-semibold")}>
+      <div className="group flex flex-1 flex-col gap-2 items-start min-w-0">
+        <div className="flex items-center gap-2 font-mono text-[10px] tracking-[0.15em] text-zinc-500 uppercase select-none mb-0.5">
+          <span className={cn(isUser ? "text-zinc-400" : "text-[var(--accent)] font-medium")}>
             {isUser ? "USER" : "UETGPT // RESPONSE"}
           </span>
-          <span className="opacity-40">//</span>
-          <span>{isUser ? "SYNC_OK" : "STREAM_LIVE"}</span>
+          <span className="opacity-30">//</span>
+          <span className="opacity-70">{isUser ? "SYNC_OK" : "STREAM_LIVE"}</span>
         </div>
 
         <div
           className={cn(
-            "w-full text-zinc-100 leading-relaxed font-sans text-[var(--chat-font-size,0.925rem)] md:text-[var(--chat-font-size,0.875rem)]",
+            "w-full text-zinc-100 leading-relaxed font-sans text-[15px] md:text-base",
             isUser
-              ? "bg-[#101012] border border-white/[0.04] rounded-xl px-4 py-3 md:px-5 md:py-3.5 shadow-sm"
+              ? "bg-[var(--surface-elevated)] border border-[var(--border)]/40 rounded-[14px] px-5 py-4 shadow-sm"
               : "px-0 py-1",
           )}
         >
@@ -153,17 +148,17 @@ export const ChatMessageBubble = React.memo(function ChatMessageBubble({
           )}
         </div>
 
-        {message.sources && message.sources.length > 0 && <SourceList sources={message.sources} />}
+        {message.sources && message.sources.length > 0 && (
+          <div className="mt-3 w-full">
+            <SourceList sources={message.sources} />
+          </div>
+        )}
 
-        <div className="flex items-center gap-3 mt-2">
-          <MessageActions
-            content={message.content}
-            role={message.role}
-            onFeedback={(type) => onFeedback?.(type)}
-          />
+        <div className="flex items-center gap-4 mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <MessageActions content={message.content} role={message.role} onFeedback={onFeedback} />
 
           {message.tokenCount && (
-            <span className="text-[9px] text-[var(--text-disabled)] font-mono opacity-50 tracking-wider">
+            <span className="text-[10px] text-zinc-600 font-mono tracking-wider">
               [{message.tokenCount.total} TOKENS]
             </span>
           )}

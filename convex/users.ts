@@ -1,6 +1,12 @@
 import { ConvexError, v } from "convex/values";
-import { internalMutation, mutation, query } from "./_generated/server";
+import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
+import { requireAdmin } from "./auth";
 import { userValidator } from "./users/validator";
+
+function getInitialRole(email: string): "admin" | "user" {
+  const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL;
+  return bootstrapEmail && email === bootstrapEmail ? "admin" : "user";
+}
 
 export const getOrCreate = mutation({
   args: {
@@ -41,9 +47,7 @@ export const getOrCreate = mutation({
       return existing._id;
     }
 
-    // First-admin bootstrap: auto-promote user matching ADMIN_BOOTSTRAP_EMAIL
-    const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL;
-    const finalRole = bootstrapEmail && email === bootstrapEmail ? "admin" : "user";
+    const finalRole = getInitialRole(email);
 
     const id = await ctx.db.insert("users", {
       clerkId: args.clerkId,
@@ -152,65 +156,30 @@ export const upsertFromWebhook = internalMutation({
     name: v.string(),
     email: v.string(),
     imageUrl: v.optional(v.string()),
-    role: v.optional(v.union(v.literal("user"), v.literal("admin"), v.literal("superadmin"))),
   },
   handler: async (ctx, args) => {
-    const validRoles = ["user", "admin", "superadmin"] as const;
-    const role = args.role && validRoles.includes(args.role) ? args.role : "user";
-
     const existing = await ctx.db
       .query("users")
       .withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
       .unique();
 
     if (existing) {
-      const patch: Partial<{
-        name: string;
-        email: string;
-        imageUrl: string;
-        role: typeof role;
-        lastLoginAt: number;
-      }> = {
+      // Webhook only syncs identity fields — role is never touched here
+      await ctx.db.patch(existing._id, {
         name: args.name,
         email: args.email,
         imageUrl: args.imageUrl ?? existing.imageUrl,
         lastLoginAt: Date.now(),
-      };
-
-      const oldRole = existing.role;
-      // Only update role if explicitly provided (prevents overwriting with default)
-      if (args.role && validRoles.includes(args.role)) {
-        patch.role = args.role;
-      }
-
-      await ctx.db.patch(existing._id, patch);
-
-      // Audit log for role changes
-      const newRole = patch.role ?? oldRole;
-      if (newRole !== oldRole) {
-        await ctx.db.insert("adminAuditLog", {
-          userId: existing._id,
-          action: "role.change",
-          target: existing.clerkId,
-          details: {
-            oldValue: oldRole,
-            newValue: newRole,
-          },
-          createdAt: Date.now(),
-        });
-      }
+      });
     } else {
-      // First-admin bootstrap: applied only on creation, not on subsequent webhook events.
-      // Bootstrap users who are deliberately demoted to "user" stay demoted.
-      const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL;
-      const finalRole = bootstrapEmail && args.email === bootstrapEmail ? "admin" : role;
+      const role = getInitialRole(args.email);
 
       await ctx.db.insert("users", {
         clerkId: args.clerkId,
         name: args.name,
         email: args.email,
         ...(args.imageUrl && { imageUrl: args.imageUrl }),
-        role: finalRole,
+        role,
         isActive: true,
         lastLoginAt: Date.now(),
       });
@@ -236,5 +205,52 @@ export const deleteFromWebhook = internalMutation({
         imageUrl: undefined,
       });
     }
+  },
+});
+
+const ROLE_HIERARCHY: Record<string, number> = { user: 0, admin: 1, superadmin: 2 };
+
+export const getByClerkIdInternal = internalQuery({
+  args: { clerkId: v.string() },
+  returns: v.union(v.null(), userValidator),
+  handler: async (ctx, args) => {
+    return (await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
+      .unique()) as typeof userValidator.type;
+  },
+});
+
+export const updateUserRole = mutation({
+  args: {
+    clerkId: v.string(),
+    role: v.union(v.literal("user"), v.literal("admin"), v.literal("superadmin")),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const caller = await requireAdmin(ctx);
+
+    const targetUser = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
+      .unique();
+    if (!targetUser) {
+      throw new ConvexError("User not found");
+    }
+
+    const callerLevel = ROLE_HIERARCHY[caller.role] ?? 0;
+    const targetAssignedLevel = ROLE_HIERARCHY[args.role] ?? 0;
+    if (targetAssignedLevel > callerLevel) {
+      throw new ConvexError("Cannot assign a role above your own");
+    }
+
+    const targetCurrentLevel = ROLE_HIERARCHY[targetUser.role] ?? 0;
+    if (targetCurrentLevel >= callerLevel) {
+      throw new ConvexError("Cannot modify a user with a role equal to or above your own");
+    }
+
+    await ctx.db.patch(targetUser._id, {
+      role: args.role,
+    });
   },
 });

@@ -3,7 +3,8 @@
 import { api } from "convex/_generated/api";
 import { useMutation } from "convex/react";
 import { useRouter } from "next/navigation";
-import { useCallback, useRef, useState } from "react";
+import * as React from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ChatInputNew } from "@/components/chat/chat-input-new";
 import { GlassPortal } from "@/components/chat/glass-portal";
@@ -41,7 +42,7 @@ export default function ChatPage() {
         setIsCreating(false);
         toast.error("Failed to start conversation. Please try again.");
       } finally {
-        setTimeout(() => {
+        timeoutRef.current = setTimeout(() => {
           creatingRef.current = false;
           setIsCreating(false);
         }, 500);
@@ -49,6 +50,16 @@ export default function ChatPage() {
     },
     [createThread, router],
   );
+
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  React.useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <GlassPortal>
@@ -96,16 +107,23 @@ export default function ChatPage() {
         {/* ── Suggestion Chips ── */}
         {!isCreating && (
           <div
-            className="w-full max-w-xl flex flex-wrap justify-center gap-2"
+            className="w-full max-w-3xl flex flex-wrap justify-center gap-2.5 mt-2 stagger-enter"
             aria-label="Quick suggestions"
           >
-            {DEFAULT_SUGGESTIONS.map((s) => (
+            {DEFAULT_SUGGESTIONS.map((s, i) => (
               <button
                 key={s.label}
                 onClick={() => handleSend(s.prompt)}
-                className="rounded-full border border-[var(--border)] bg-[var(--surface-card)] px-4 py-2.5 text-sm font-medium text-[var(--text-muted)] transition-all duration-200 ease-[var(--ease-spring)] hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--surface-hover)] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:outline-none shadow-[var(--shadow-sm)] font-sans cursor-pointer min-h-[44px] min-w-[44px]"
+                className="shrink-0 rounded-full border border-[var(--border)]/50 bg-[var(--surface-elevated)] px-4 py-2 md:px-5 md:py-2.5 text-[13px] md:text-sm font-medium text-[var(--text-secondary)] transition-all duration-300 ease-[var(--ease-spring)] hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--surface-hover)] active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:outline-none shadow-sm hover:shadow-[0_0_12px_rgba(212,168,74,0.15)] font-sans cursor-pointer whitespace-nowrap"
                 aria-label={`Suggestion: ${s.label}`}
+                style={{ animationDelay: `${i * 50}ms` }}
               >
+                <span
+                  className="opacity-40 font-mono text-[10px] mr-2 select-none hidden md:inline tracking-wider"
+                  aria-hidden="true"
+                >
+                  0{i + 1}
+                </span>
                 {s.label}
               </button>
             ))}
@@ -113,8 +131,8 @@ export default function ChatPage() {
         )}
 
         {/* ── Chat Input ── */}
-        <div className="relative z-20 w-full max-w-xl pt-2">
-          <ChatInputNew onSend={handleSend} isLoading={isCreating} />
+        <div className="relative z-20 w-full max-w-3xl pt-2">
+          <ChatInputNew onSend={handleSend} isLoading={isCreating} flat />
         </div>
       </div>
     </GlassPortal>

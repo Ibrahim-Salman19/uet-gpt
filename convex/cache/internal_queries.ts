@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import type { Doc, Id } from "../_generated/dataModel";
 import { internalMutation, internalQuery } from "../_generated/server";
 
@@ -33,6 +33,7 @@ const cacheEntryValidator = v.object({
   sourceEntryIds: v.optional(v.array(v.string())),
   alternateQueryTexts: v.optional(v.array(v.string())),
   alternateEmbeddings: v.optional(v.array(v.array(v.float64()))),
+  maxDocumentUpdatedAt: v.optional(v.number()),
 });
 
 export const getCacheEntry = internalQuery({
@@ -71,25 +72,28 @@ export const getDocsByEntryIds = internalQuery({
     }),
   ),
   handler: async (ctx, args) => {
-    const results = [];
-    for (const entryId of args.entryIds) {
-      results.push((async () => {
-        const chunk = await ctx.db
+    if (args.entryIds.length > 100)
+      throw new ConvexError("Cannot query more than 100 entry IDs at a time");
+    const chunks = await Promise.all(
+      args.entryIds.map((entryId) =>
+        ctx.db
           .query("crawledChunks")
           .withIndex("by_ragId", (q) => q.eq("ragId", entryId))
-          .first();
+          .first(),
+      ),
+    );
 
-        if (!chunk) return { entryId, doc: null };
+    const docIds = [...new Set(chunks.filter(Boolean).map((c) => c!.documentId))];
+    const docs = await Promise.all(docIds.map((id) => ctx.db.get(id)));
+    const docsById = new Map(docs.filter(Boolean).map((d) => [d!._id, d!]));
 
-        const doc = await ctx.db.get(chunk.documentId);
-        if (!doc) return { entryId, doc: null };
-        return {
-          entryId,
-          doc: { updatedAt: doc.updatedAt, crawledAt: doc.crawledAt },
-        };
-      })());
-    }
-    return await Promise.all(results);
+    return args.entryIds.map((entryId, i) => {
+      const chunk = chunks[i];
+      if (!chunk) return { entryId, doc: null };
+      const doc = docsById.get(chunk.documentId);
+      if (!doc) return { entryId, doc: null };
+      return { entryId, doc: { updatedAt: doc.updatedAt, crawledAt: doc.crawledAt } };
+    });
   },
 });
 
@@ -117,6 +121,33 @@ export const getDocByEntryId = internalQuery({
   },
 });
 
+export const chunksExistByRagIds = internalQuery({
+  args: { ragIds: v.array(v.string()) },
+  returns: v.array(v.boolean()),
+  handler: async (ctx, args) => {
+    if (args.ragIds.length > 100)
+      throw new ConvexError("Cannot check more than 100 rag IDs at a time");
+    const chunks = await Promise.all(
+      args.ragIds.map((ragId) =>
+        ctx.db
+          .query("crawledChunks")
+          .withIndex("by_ragId", (q) => q.eq("ragId", ragId))
+          .first(),
+      ),
+    );
+    return chunks.map(Boolean);
+  },
+});
+
+export const deleteCacheEntry = internalMutation({
+  args: { id: v.id("semanticCache") },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    await ctx.db.delete(args.id);
+    return null;
+  },
+});
+
 export const cleanupExpired = internalMutation({
   args: {
     limit: v.optional(v.number()),
@@ -131,9 +162,7 @@ export const cleanupExpired = internalMutation({
       .withIndex("by_expiresAt", (q) => q.lte("expiresAt", now))
       .take(maxToDelete);
 
-    for (const entry of expired) {
-      await ctx.db.delete(entry._id as Id<"semanticCache">);
-    }
+    await Promise.all(expired.map((entry) => ctx.db.delete(entry._id as Id<"semanticCache">)));
 
     return expired.length;
   },

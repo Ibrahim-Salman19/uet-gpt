@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative flex h-[100dvh] w-full overflow-hidden bg-[#050506] text-zinc-100">
+    <div className="relative flex h-[100dvh] w-full overflow-hidden bg-[var(--surface-base)] text-[var(--text-primary)]">
       {/* WebGL with graceful fallback if it crashes */}
       <BackdropWrapper />
 

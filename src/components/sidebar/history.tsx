@@ -24,53 +24,48 @@ export const SidebarHistory = memo(function SidebarHistory({
   const pathname = usePathname();
 
   return (
-    <div className="flex-1 px-2 py-2">
-      <div className="flex items-center justify-between px-2 py-1.5">
-        <div className="flex items-center gap-2">
-          <History className="h-3.5 w-3.5 text-[var(--text-muted)]" />
-          <span className="text-xs font-medium tracking-wide uppercase text-[var(--text-muted)]">
-            Recent Chats
-          </span>
-        </div>
-      </div>
-      <div className="mt-1 space-y-0.5">
-        {chats.length === 0 ? (
-          <p className="px-3 py-6 text-center text-xs text-[var(--text-muted)]">
-            No conversations yet
-          </p>
-        ) : (
-          chats.map((chat) => {
-            const isActive = pathname === `/chat/${chat.id}`;
-            return (
-              <div
-                key={chat.id}
-                className={cn(
-                  "group flex w-full items-center justify-between rounded-[var(--radius-sm)] px-3 py-2 text-sm transition-[background-color] duration-[var(--duration-fast)] ease-[var(--ease-out-quart)]",
-                  isActive
-                    ? "bg-[var(--accent)]/10 text-[var(--accent)]"
-                    : "text-[var(--text-sidebar)] hover:bg-white/5",
-                )}
+    <div className="space-y-0.5 px-2">
+      {chats.length === 0 ? (
+        <p className="px-3 py-6 text-center text-xs text-zinc-500 font-medium">
+          No conversations yet
+        </p>
+      ) : (
+        chats.map((chat) => {
+          const isActive = pathname === `/chat/${chat.id}`;
+          return (
+            <div
+              key={chat.id}
+              className={cn(
+                "group flex w-full items-center justify-between rounded-[8px] px-3 py-2 text-[13px] md:text-sm font-medium transition-all duration-300 ease-[var(--ease-spring)]",
+                isActive
+                  ? "bg-[var(--accent)]/10 text-[var(--accent)] shadow-[inset_0_1px_0_rgba(212,168,74,0.1)]"
+                  : "text-zinc-400 hover:bg-white/5 hover:text-zinc-200",
+              )}
+            >
+              <Link
+                href={`/chat/${chat.id}`}
+                className="flex flex-1 items-center gap-2.5 min-w-0 py-0.5"
               >
-                <Link
-                  href={`/chat/${chat.id}`}
-                  className="flex flex-1 items-center gap-2.5 min-w-0"
-                >
-                  <MessageSquare className="h-4 w-4 shrink-0 text-[var(--text-muted)]" />
-                  <span className="flex-1 truncate text-left leading-snug">{chat.title}</span>
-                </Link>
-                <button
-                  type="button"
-                  onClick={(e) => onDelete(e, chat.id)}
-                  className="opacity-0 transition-opacity duration-[var(--duration-fast)] group-hover:opacity-60 hover:!opacity-100 ml-2"
-                  aria-label="Delete chat"
-                >
-                  <Trash2 className="h-3.5 w-3.5 shrink-0 text-[var(--text-muted)]" />
-                </button>
-              </div>
-            );
-          })
-        )}
-      </div>
+                <MessageSquare
+                  className={cn(
+                    "h-3.5 w-3.5 shrink-0 transition-colors",
+                    isActive ? "text-[var(--accent)]" : "text-zinc-600",
+                  )}
+                />
+                <span className="flex-1 truncate text-left leading-snug">{chat.title}</span>
+              </Link>
+              <button
+                type="button"
+                onClick={(e) => onDelete(e, chat.id)}
+                className="opacity-0 transition-all duration-200 group-hover:opacity-60 hover:!opacity-100 hover:text-red-400 hover:scale-110 ml-2 p-0.5"
+                aria-label="Delete chat"
+              >
+                <Trash2 className="h-3.5 w-3.5 shrink-0" />
+              </button>
+            </div>
+          );
+        })
+      )}
     </div>
   );
 });

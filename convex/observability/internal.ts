@@ -16,7 +16,7 @@ export const getSettingsBySection = internalQuery({
     const results = await ctx.db
       .query("appSettings")
       .withIndex("by_section", (q) => q.eq("section", args.section))
-      .collect();
+      .take(200);
     return results.map((r) => ({
       _id: r._id,
       key: r.key,
@@ -36,18 +36,17 @@ export const getAdminUsers = internalQuery({
     }),
   ),
   handler: async (ctx) => {
-    const admins = await ctx.db
+    const admin = await ctx.db
       .query("users")
       .withIndex("by_role", (q) => q.eq("role", "admin"))
-      .collect();
-    const superadmins = await ctx.db
+      .first();
+    if (admin) return [{ _id: admin._id, clerkId: admin.clerkId }];
+    const superadmin = await ctx.db
       .query("users")
       .withIndex("by_role", (q) => q.eq("role", "superadmin"))
-      .collect();
-    return [...admins, ...superadmins].map((u) => ({
-      _id: u._id,
-      clerkId: u.clerkId,
-    }));
+      .first();
+    if (superadmin) return [{ _id: superadmin._id, clerkId: superadmin.clerkId }];
+    return [];
   },
 });
 
@@ -65,16 +64,17 @@ export const insertAuditLog = internalMutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const admins = await ctx.db
+    const admin = await ctx.db
       .query("users")
       .withIndex("by_role", (q) => q.eq("role", "admin"))
-      .collect();
-    const superadmins = await ctx.db
-      .query("users")
-      .withIndex("by_role", (q) => q.eq("role", "superadmin"))
-      .collect();
-    const allAdmins = [...admins, ...superadmins];
-    const userId = allAdmins.length > 0 ? allAdmins[0]!._id : undefined;
+      .first();
+    const superadmin = admin
+      ? null
+      : await ctx.db
+          .query("users")
+          .withIndex("by_role", (q) => q.eq("role", "superadmin"))
+          .first();
+    const userId = admin?._id ?? superadmin?._id;
     if (!userId) {
       console.warn("[AUDIT] No admin user found to associate audit log entry");
       return;
@@ -94,11 +94,19 @@ export const countDocumentsByStatus = internalQuery({
   args: { status: v.string() },
   returns: v.number(),
   handler: async (ctx, args) => {
-    const docs = await ctx.db
-      .query("documents")
-      .withIndex("by_status", (q) => q.eq("status", args.status as any))
-      .take(100000);
-    return docs.length;
+    let count = 0;
+    let cursor: string | null = null;
+    let isDone = false;
+    while (!isDone) {
+      const pageResult = await ctx.db
+        .query("documents")
+        .withIndex("by_status", (q) => q.eq("status", args.status as any))
+        .paginate({ numItems: 1000, cursor });
+      count += pageResult.page.length;
+      cursor = pageResult.continueCursor;
+      isDone = pageResult.isDone;
+    }
+    return count;
   },
 });
 
@@ -106,31 +114,56 @@ export const countAllDocuments = internalQuery({
   args: {},
   returns: v.number(),
   handler: async (ctx) => {
-    const docs = await ctx.db.query("documents").take(100000);
-    return docs.length;
+    let count = 0;
+    let cursor: string | null = null;
+    let isDone = false;
+    while (!isDone) {
+      const pageResult = await ctx.db.query("documents").paginate({ numItems: 1000, cursor });
+      count += pageResult.page.length;
+      cursor = pageResult.continueCursor;
+      isDone = pageResult.isDone;
+    }
+    return count;
   },
 });
 
 export const getStaleDocumentCount = internalQuery({
-  args: {},
+  args: { now: v.number() },
   returns: v.number(),
-  handler: async (ctx) => {
-    const threshold = Date.now() - 30 * 24 * 60 * 60 * 1000;
-    const staleByFlag = await ctx.db
-      .query("documents")
-      .withIndex("by_status", (q) => q.eq("status", "stale"))
-      .take(100000);
-
-    const staleByAge = await ctx.db
-      .query("documents")
-      .withIndex("by_tier_and_crawled", (q) =>
-        q.eq("freshnessTier", "low").lte("crawledAt", threshold),
-      )
-      .take(100000);
-
+  handler: async (ctx, args) => {
+    const threshold = args.now - 30 * 24 * 60 * 60 * 1000;
     const seen = new Set<string>();
-    for (const d of staleByFlag) seen.add(d._id);
-    for (const d of staleByAge) seen.add(d._id);
+
+    let cursorFlag: string | null = null;
+    let doneFlag = false;
+    while (!doneFlag) {
+      const page = await ctx.db
+        .query("documents")
+        .withIndex("by_status", (q) => q.eq("status", "stale"))
+        .paginate({ numItems: 1000, cursor: cursorFlag });
+      for (const d of page.page) {
+        seen.add(d._id);
+      }
+      cursorFlag = page.continueCursor;
+      doneFlag = page.isDone;
+    }
+
+    let cursorAge: string | null = null;
+    let doneAge = false;
+    while (!doneAge) {
+      const page = await ctx.db
+        .query("documents")
+        .withIndex("by_tier_and_crawled", (q) =>
+          q.eq("freshnessTier", "low").lte("crawledAt", threshold),
+        )
+        .paginate({ numItems: 1000, cursor: cursorAge });
+      for (const d of page.page) {
+        seen.add(d._id);
+      }
+      cursorAge = page.continueCursor;
+      doneAge = page.isDone;
+    }
+
     return seen.size;
   },
 });

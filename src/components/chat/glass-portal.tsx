@@ -31,19 +31,14 @@ function GridOverlay() {
 export function GlassPortal({ children, className }: GlassPortalProps) {
   return (
     <div
-      className={cn(
-        "flex h-full flex-col items-center justify-end p-0 md:px-6 md:pb-6 lg:px-8 lg:pb-8",
-        className,
-      )}
+      className={cn("flex h-full flex-col items-center justify-end p-0 md:p-6 lg:p-8", className)}
     >
       <div
         className={cn(
           // Mobile: full bleed, no border radius
           "w-full h-full",
           // MD+: card-like with border and rounding
-          "md:max-h-[92dvh] md:rounded-3xl md:border md:border-[var(--border)]/50",
-          // LG+: constrain width
-          "lg:max-h-[90dvh]",
+          "md:max-h-full md:rounded-3xl md:border md:border-[var(--border)]/50",
           // XL+: wider
           "xl:max-w-4xl 2xl:max-w-5xl",
           // Shared styles

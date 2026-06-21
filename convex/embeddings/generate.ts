@@ -5,7 +5,7 @@ import { action } from "../_generated/server";
 import { recordTiming } from "../observability/metrics";
 
 // gemini-embedding-2 — stable as of May 2026
-// Dimensions: 3072 (MRL supports 768/1536/3072)
+// Dimensions: 768 (MRL supports 768/1536/3072)
 // Context: 8192 tokens
 // Free tier: ~60 RPM, ~1500 RPD (post-Dec 2025 cuts)
 // Paid Tier 1: 3000 RPM, 1M TPM
@@ -46,17 +46,19 @@ async function fetchWithRetry(
 async function embedNativeGemini(texts: string[], apiKey: string): Promise<number[][]> {
   // Single endpoint is faster for small batches; batch API for 2+
   if (texts.length < BATCH_THRESHOLD) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2:embedContent?key=${apiKey}`;
+    const url =
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2:embedContent";
     const response = await fetchWithRetry(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "x-goog-api-key": apiKey,
       },
       body: JSON.stringify({
         content: {
           parts: [{ text: texts[0] }],
         },
-        outputDimensionality: 3072,
+        outputDimensionality: 768,
       }),
     });
     if (!response.ok) {
@@ -69,11 +71,13 @@ async function embedNativeGemini(texts: string[], apiKey: string): Promise<numbe
     }
     return [data.embedding.values];
   } else {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2:batchEmbedContents?key=${apiKey}`;
+    const url =
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2:batchEmbedContents";
     const response = await fetchWithRetry(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "x-goog-api-key": apiKey,
       },
       body: JSON.stringify({
         requests: texts.map((text) => ({
@@ -81,7 +85,7 @@ async function embedNativeGemini(texts: string[], apiKey: string): Promise<numbe
           content: {
             parts: [{ text }],
           },
-          outputDimensionality: 3072,
+          outputDimensionality: 768,
         })),
       }),
     });
@@ -158,8 +162,8 @@ export const generate = action({
         textLength: args.text.length,
       });
       const emb = embeddings[0];
-      if (!emb || emb.length !== 3072) {
-        throw new ConvexError(`Invalid embedding dimension: expected 3072, got ${emb?.length}`);
+      if (!emb || emb.length !== 768) {
+        throw new ConvexError(`Invalid embedding dimension: expected 768, got ${emb?.length}`);
       }
       return emb;
     } catch (error: unknown) {

@@ -36,11 +36,12 @@ export const submit = mutation({
     if (!user.isActive) {
       throw new ConvexError("User account is inactive");
     }
-    const existing = await ctx.db
+    const existingByUser = await ctx.db
       .query("feedback")
-      .withIndex("by_messageId", (q) => q.eq("messageId", args.messageId))
-      .collect();
-    const existingByUser = existing.find((f) => f.userId === user._id);
+      .withIndex("by_messageId_and_userId", (q) =>
+        q.eq("messageId", args.messageId).eq("userId", user._id),
+      )
+      .unique();
     if (existingByUser) {
       return existingByUser._id;
     }

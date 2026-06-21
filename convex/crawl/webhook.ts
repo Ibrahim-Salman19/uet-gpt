@@ -10,6 +10,7 @@ import {
   normalizeContent,
   sha256,
 } from "./chunking";
+import { constantTimeCompare } from "./utils";
 
 function hexToBuffer(hex: string): ArrayBuffer {
   const bytes = new Uint8Array(hex.length / 2);
@@ -355,7 +356,7 @@ export const resetWebhook = httpAction(async (ctx, request) => {
     if (!expectedToken) {
       return new Response("Server configuration error", { status: 500 });
     }
-    if (token !== expectedToken) {
+    if (!token || !constantTimeCompare(token, expectedToken)) {
       return new Response("Unauthorized", { status: 401 });
     }
     await ctx.runAction(internal.crawl.actions.resetPipelineAction);
@@ -365,8 +366,7 @@ export const resetWebhook = httpAction(async (ctx, request) => {
     });
   } catch (error: unknown) {
     console.error("Reset error:", error);
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });
@@ -403,7 +403,7 @@ async function parseAndValidateIngestRequest(
     return new Response("Server configuration error", { status: 500 });
   }
 
-  if (token !== expectedToken) {
+  if (!token || !constantTimeCompare(token, expectedToken)) {
     console.warn("Unauthorized /ingest request");
     return new Response("Unauthorized", { status: 401 });
   }
@@ -488,12 +488,9 @@ export const ingestWebhook = httpAction(async (ctx, request) => {
     });
   } catch (error: unknown) {
     console.error("Ingest webhook error:", error);
-    return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : String(error) }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      },
-    );
+    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 });

@@ -534,7 +534,7 @@ Cache TTLs apply to `semanticCache` entries. Document expiry TTLs apply to `docu
 | `Strict-Transport-Security` | `max-age=63072000; includeSubDomains; preload` |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` |
 | `Permissions-Policy` | `geolocation=(), microphone=(), camera=()` |
-| `Content-Security-Policy` | Dynamic (set in middleware with per-request nonce) |
+| `Content-Security-Policy` | Statically set in `next.config.ts` (whitelists `*.clerk.accounts.dev` and `clerk.browser.systems` for authentication) |
 
 ### 7.5 Chat API Security (`src/app/api/chat/route.ts`)
 

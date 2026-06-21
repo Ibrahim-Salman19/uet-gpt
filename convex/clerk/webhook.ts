@@ -1,5 +1,6 @@
 import { internal } from "../_generated/api";
 import { httpAction } from "../_generated/server";
+import { constantTimeCompare } from "../crawl/utils";
 
 function getAuthToken(request: Request): string | null {
   const auth = request.headers.get("Authorization");
@@ -16,23 +17,13 @@ function checkWebhookMethod(request: Request): Response | null {
 }
 
 function getExpectedWebhookToken(): string {
-  // Use a dedicated Clerk webhook secret instead of falling back to CRAWL_WEBHOOK_SECRET
-  const token = process.env.CLERK_WEBHOOK_SECRET || process.env.CONVEX_AUTH_TOKEN || "";
+  const token = process.env.CLERK_WEBHOOK_SECRET || "";
   // Reject whitespace-only tokens — they pass truthiness checks but are not valid secrets
   if (token.trim().length === 0 && token.length > 0) {
     console.error("Webhook secret is whitespace-only — rejecting as invalid configuration");
     return "";
   }
   return token;
-}
-
-function constantTimeCompare(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  let result = 0;
-  for (let i = 0; i < a.length; i++) {
-    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  }
-  return result === 0;
 }
 
 function authenticateWebhook(request: Request): Response | null {
@@ -69,22 +60,12 @@ async function handleUserCreatedOrUpdated(ctx: any, data: Record<string, unknown
   const email = extractWebhookEmail(data);
   const imageUrl = data.image_url as string | undefined;
 
-  // Sync publicMetadata.role from Clerk → Convex users.role
-  const publicMetadata = data.public_metadata as Record<string, unknown> | undefined;
-  const validRoles = ["user", "admin", "superadmin"] as const;
-  const roleFromMetadata = publicMetadata?.role;
-  const role =
-    typeof roleFromMetadata === "string" &&
-    validRoles.includes(roleFromMetadata.toLowerCase().trim() as (typeof validRoles)[number])
-      ? (roleFromMetadata.toLowerCase().trim() as (typeof validRoles)[number])
-      : "user";
-
+  // Never trust publicMetadata.role from Clerk — roles must only be set via admin mutations
   await ctx.runMutation(internal.users.upsertFromWebhook, {
     clerkId,
     name,
     email,
     imageUrl,
-    role,
   });
 }
 

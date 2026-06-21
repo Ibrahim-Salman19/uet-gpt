@@ -10,10 +10,9 @@ export const checkStaleness = internalAction({
     console.log("[STALENESS] Starting staleness check");
 
     const totalDocs = await ctx.runQuery(internal.observability.internal.countAllDocuments, {});
-    const staleCount = await ctx.runQuery(
-      internal.observability.internal.getStaleDocumentCount,
-      {},
-    );
+    const staleCount = await ctx.runQuery(internal.observability.internal.getStaleDocumentCount, {
+      now: Date.now(),
+    });
 
     const stalePercentage = totalDocs > 0 ? (staleCount / totalDocs) * 100 : 0;
 

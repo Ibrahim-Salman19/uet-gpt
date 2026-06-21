@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
-import AdminAnalyticsPage from "@/app/admin/analytics/page";
+import AdminAnalyticsPage from "@/app/admin/(admin-shell)/analytics/page";
 
 vi.hoisted(() => {
   const buildAdminMocks = (globalThis as any).buildAdminMocks;

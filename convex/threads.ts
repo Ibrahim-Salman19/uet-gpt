@@ -152,6 +152,48 @@ export const remove = mutation({
   },
 });
 
+export const safeDeleteThread = internalMutation({
+  args: {
+    threadId: v.string(),
+    cutoff: v.number(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const thread = await ctx.runQuery(components.agent.threads.getThread, {
+      threadId: args.threadId,
+    });
+    if (!thread) {
+      return null;
+    }
+    if (thread.status === "archived" && thread._creationTime < args.cutoff) {
+      // 1. Get messages in the thread to identify their message IDs
+      const messagesResult = await ctx.runQuery(components.agent.messages.listMessagesByThreadId, {
+        threadId: args.threadId,
+        order: "asc",
+        paginationOpts: { numItems: 200, cursor: null },
+      });
+
+      // 2. Delete feedback records associated with those messages
+      const messageIds = messagesResult.page.map((m: any) => m._id);
+      for (const msgId of messageIds) {
+        const feedbackEntries = await ctx.db
+          .query("feedback")
+          .withIndex("by_messageId", (q) => q.eq("messageId", msgId))
+          .collect();
+        for (const fb of feedbackEntries) {
+          await ctx.db.delete(fb._id);
+        }
+      }
+
+      // 3. Delete thread and messages inside the agent component
+      await ctx.runMutation(components.agent.threads.deleteAllForThreadIdAsync, {
+        threadId: args.threadId,
+      });
+    }
+    return null;
+  },
+});
+
 export const getOldArchivedUsersBatch = internalQuery({
   args: { cursor: v.union(v.string(), v.null()) },
   handler: async (ctx, { cursor }) => {
@@ -174,10 +216,13 @@ export const purgeOldArchived = internalAction({
     const startTime = Date.now();
     const MAX_EXECUTION_TIME_MS = 8 * 60 * 1000; // 8 minutes
 
+    let usersProcessed = 0;
+    const MAX_USERS_PER_BATCH = 10;
+
     while (!userDone) {
-      if (Date.now() - startTime > MAX_EXECUTION_TIME_MS) {
+      if (Date.now() - startTime > MAX_EXECUTION_TIME_MS || usersProcessed >= MAX_USERS_PER_BATCH) {
         console.log(
-          `Execution time limit reached. Scheduling continuation. Purged so far: ${purged}`,
+          `Execution limit reached (users processed: ${usersProcessed}). Scheduling continuation. Purged so far: ${purged}`,
         );
         await ctx.scheduler.runAfter(0, internal.threads.purgeOldArchived, {
           userCursor,
@@ -191,6 +236,7 @@ export const purgeOldArchived = internalAction({
       })) as { page: Doc<"users">[]; continueCursor: string; isDone: boolean };
 
       for (const user of userPage.page) {
+        usersProcessed++;
         if (!user.clerkId) continue;
 
         let threadCursor = null as string | null;
@@ -201,13 +247,22 @@ export const purgeOldArchived = internalAction({
             paginationOpts: { numItems: 100, cursor: threadCursor },
           });
 
-          for (const t of result.page) {
-            if (t.status === "archived" && t._creationTime < cutoff) {
-              await ctx.runMutation(components.agent.threads.deleteAllForThreadIdAsync, {
-                threadId: t._id,
-              });
-              purged++;
-            }
+          // Batch parallel deletions for independent thread IDs
+          const threadsToDelete = result.page.filter(
+            (t: any) => t.status === "archived" && t._creationTime < cutoff,
+          );
+          const BATCH_SIZE = 10;
+          for (let i = 0; i < threadsToDelete.length; i += BATCH_SIZE) {
+            const chunk = threadsToDelete.slice(i, i + BATCH_SIZE);
+            await Promise.all(
+              chunk.map((t: any) =>
+                ctx.runMutation(internal.threads.safeDeleteThread, {
+                  threadId: t._id,
+                  cutoff,
+                }),
+              ),
+            );
+            purged += chunk.length;
           }
           threadDone = result.isDone;
           threadCursor = result.continueCursor;

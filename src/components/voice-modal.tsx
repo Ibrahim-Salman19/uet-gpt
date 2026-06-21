@@ -211,7 +211,7 @@ function VoiceDialogContent({
   onStart: () => void;
 }) {
   return (
-    <div className="bg-[#101012] border border-[#2d2d34] rounded-[1.5rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.9)] p-6 flex flex-col items-center text-center gap-4">
+    <div className="bg-[var(--surface-3)] border border-[var(--surface-4)] rounded-[1.5rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.9)] p-6 flex flex-col items-center text-center gap-4">
       <div>
         <h3 className="text-sm font-semibold text-zinc-100 tracking-wide font-sans">Voice Input</h3>
         <p className="text-xs text-zinc-500 mt-1 font-sans">
@@ -288,7 +288,7 @@ export function VoiceModal({ onTranscript }: VoiceModalProps) {
       stopListening();
       dialog.close();
     }
-  }, [voiceInputOpen, startListening, stopListening]);
+  }, [voiceInputOpen, startListening, stopListening, setTranscript, setError]);
 
   return (
     <dialog

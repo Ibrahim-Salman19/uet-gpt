@@ -24,7 +24,7 @@ vi.mock("next/navigation", () => (globalThis as any).currentAdminMocks.navigatio
 vi.mock("lucide-react", () => (globalThis as any).currentAdminMocks.lucideMock);
 
 import { useQuery } from "convex/react";
-import AdminOverviewPage from "@/app/admin/page";
+import AdminOverviewPage from "@/app/admin/(admin-shell)/page";
 
 function buildMockStats(overrides: Record<string, unknown> = {}) {
   return {

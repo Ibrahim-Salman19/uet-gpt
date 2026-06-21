@@ -2,7 +2,7 @@
 
 import { ClerkProvider, useAuth, useUser } from "@clerk/nextjs";
 import { api } from "convex/_generated/api";
-import { ConvexReactClient, useMutation } from "convex/react";
+import { ConvexReactClient, useConvexAuth, useMutation } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import * as React from "react";
 import { ConvexConnectionMonitor } from "@/components/ConvexConnectionMonitor";
@@ -19,12 +19,20 @@ interface ProvidersProps {
 }
 
 function UserSync() {
-  const { user, isLoaded, isSignedIn } = useUser();
+  const { user, isLoaded: isClerkLoaded, isSignedIn } = useUser();
+  const { isAuthenticated: isConvexAuthenticated } = useConvexAuth();
   const createUser = useMutation(api.users.getOrCreate);
   const lastSyncedId = React.useRef<string | null>(null);
 
   React.useEffect(() => {
-    if (!isLoaded || !isSignedIn || !user || lastSyncedId.current === user.id) return;
+    if (
+      !isClerkLoaded ||
+      !isSignedIn ||
+      !user ||
+      !isConvexAuthenticated ||
+      lastSyncedId.current === user.id
+    )
+      return;
     lastSyncedId.current = user.id;
 
     const primary = user.primaryEmailAddress;
@@ -41,8 +49,12 @@ function UserSync() {
         baseDelayMs: 1000,
         onRetry: (attempt, err) => console.warn(`User sync retry ${attempt}:`, err),
       },
-    ).catch((err) => console.error("Failed to sync user after retries:", err));
-  }, [isLoaded, isSignedIn, user, createUser]);
+    ).catch((err) => {
+      console.error("Failed to sync user after retries:", err);
+      // Do NOT reset lastSyncedId — prevent infinite loop
+      // The sync will be retried on the next user change (sign-in, etc.)
+    });
+  }, [isClerkLoaded, isSignedIn, user, isConvexAuthenticated, createUser]);
 
   return null;
 }
@@ -97,7 +109,11 @@ export function Providers({ children }: ProvidersProps) {
           <div className="max-w-md w-full p-8 border border-red-500/30 rounded-xl bg-slate-950/80 shadow-2xl text-center space-y-4">
             <h1 className="text-2xl font-bold text-red-400">Configuration Error</h1>
             <p className="text-slate-400 text-sm">
-              The environment variable <code className="px-1.5 py-0.5 rounded bg-slate-800 text-red-300 font-mono text-xs">NEXT_PUBLIC_CONVEX_URL</code> is missing. Please set it in your local environment files or Vercel dashboard.
+              The environment variable{" "}
+              <code className="px-1.5 py-0.5 rounded bg-slate-800 text-red-300 font-mono text-xs">
+                NEXT_PUBLIC_CONVEX_URL
+              </code>{" "}
+              is missing. Please set it in your local environment files or Vercel dashboard.
             </p>
           </div>
         </div>

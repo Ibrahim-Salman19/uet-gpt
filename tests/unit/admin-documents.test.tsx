@@ -46,7 +46,7 @@ vi.mock("@/components/ui/select", () => ({
 }));
 
 import { useMutation } from "convex/react";
-import AdminDocumentsPage from "@/app/admin/documents/page";
+import AdminDocumentsPage from "@/app/admin/(admin-shell)/documents/page";
 
 function buildMockDoc(overrides: Record<string, unknown> = {}) {
   return {

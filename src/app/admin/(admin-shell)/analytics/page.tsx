@@ -21,7 +21,10 @@ function AnalyticsLoadingSkeleton() {
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {["skele-1", "skele-2", "skele-3", "skele-4", "skele-5", "skele-6"].map((id) => (
-          <Card key={id} className="rounded-xl border border-white/5 bg-[#101012]/40 p-5 space-y-3">
+          <Card
+            key={id}
+            className="rounded-xl border border-white/5 bg-[var(--surface-3)]/40 p-5 space-y-3"
+          >
             <CardHeader className="pb-2 p-0">
               <Skeleton className="h-4 w-24 bg-white/5" />
             </CardHeader>
@@ -64,7 +67,7 @@ function UsageMetricsSection({
     <div className="space-y-4">
       <SectionHeader title="Usage Metrics" subtitle="[ METRICS: USER UTILITY ]" />
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="md:col-span-2 rounded-xl border border-white/5 bg-[#101012]/40 p-6 hover:border-[var(--accent)]/20 hover:bg-[#101012]/60 transition-all duration-300">
+        <Card className="md:col-span-2 rounded-xl border border-white/5 bg-[var(--surface-3)]/40 p-6 hover:border-[var(--accent)]/20 hover:bg-[var(--surface-3)]/60 transition-all duration-300">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider font-sans flex items-center gap-2">
               <Users className="h-4 w-4 text-zinc-400" />
@@ -83,7 +86,7 @@ function UsageMetricsSection({
           </div>
         </Card>
 
-        <Card className="rounded-xl border border-white/5 bg-[#101012]/40 p-6 hover:border-[var(--accent)]/20 hover:bg-[#101012]/60 transition-all duration-300">
+        <Card className="rounded-xl border border-white/5 bg-[var(--surface-3)]/40 p-6 hover:border-[var(--accent)]/20 hover:bg-[var(--surface-3)]/60 transition-all duration-300">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider font-sans flex items-center gap-2">
               <Activity className="h-4 w-4 text-zinc-400" />
@@ -121,7 +124,7 @@ function SystemMetricsSection({
     <div className="space-y-4">
       <SectionHeader title="System Metrics" subtitle="[ STORAGE: DATA CORE ]" />
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="rounded-xl border border-white/5 bg-[#101012]/40 p-5 hover:border-[var(--accent)]/20 transition-all duration-300">
+        <Card className="rounded-xl border border-white/5 bg-[var(--surface-3)]/40 p-5 hover:border-[var(--accent)]/20 transition-all duration-300">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider font-sans flex items-center gap-2">
               <Database className="h-4 w-4 text-zinc-400" />
@@ -136,7 +139,7 @@ function SystemMetricsSection({
           </div>
         </Card>
 
-        <Card className="rounded-xl border border-white/5 bg-[#101012]/40 p-5 hover:border-[var(--accent)]/20 transition-all duration-300">
+        <Card className="rounded-xl border border-white/5 bg-[var(--surface-3)]/40 p-5 hover:border-[var(--accent)]/20 transition-all duration-300">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider font-sans flex items-center gap-2">
               <Database className="h-4 w-4 text-zinc-400" />
@@ -151,7 +154,7 @@ function SystemMetricsSection({
           </div>
         </Card>
 
-        <Card className="rounded-xl border border-white/5 bg-[#101012]/40 p-5 hover:border-[var(--accent)]/20 transition-all duration-300">
+        <Card className="rounded-xl border border-white/5 bg-[var(--surface-3)]/40 p-5 hover:border-[var(--accent)]/20 transition-all duration-300">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider font-sans flex items-center gap-2">
               <HardDrive className="h-4 w-4 text-zinc-400" />
@@ -185,7 +188,7 @@ function DocumentHealthSection({
     <div className="space-y-4">
       <SectionHeader title="Document Health" subtitle="[ PIPELINE: INDEXER HEALTH ]" />
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="rounded-xl border border-green-500/10 bg-[#101012]/40 p-5 hover:border-green-500/20 transition-all duration-300">
+        <Card className="rounded-xl border border-green-500/10 bg-[var(--surface-3)]/40 p-5 hover:border-green-500/20 transition-all duration-300">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-green-500 uppercase tracking-wider font-sans flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
@@ -200,7 +203,7 @@ function DocumentHealthSection({
           </div>
         </Card>
 
-        <Card className="rounded-xl border border-yellow-500/10 bg-[#101012]/40 p-5 hover:border-yellow-500/20 transition-all duration-300">
+        <Card className="rounded-xl border border-yellow-500/10 bg-[var(--surface-3)]/40 p-5 hover:border-yellow-500/20 transition-all duration-300">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider font-sans flex items-center gap-2">
               <Activity className="h-4 w-4" />
@@ -215,7 +218,7 @@ function DocumentHealthSection({
           className={`rounded-xl p-5 transition-all duration-300 border ${
             failedDocuments > 0
               ? "border-red-500/20 bg-red-950/5 hover:border-red-500/30"
-              : "border-gray-500/20 bg-[#101012]/40 hover:border-white/10"
+              : "border-gray-500/20 bg-[var(--surface-3)]/40 hover:border-white/10"
           }`}
         >
           <div className="flex items-center justify-between">

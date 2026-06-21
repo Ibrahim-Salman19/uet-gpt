@@ -24,46 +24,30 @@ export const list = query({
     const limit = Math.min(args.limit ?? 50, 100);
     const status = args.status;
     const category = args.category;
-    const cursor = args.cursor;
+    const offset = Math.min(args.cursor ? Number.parseInt(args.cursor, 10) : 0, 1000);
 
+    let baseQuery;
     if (status && category) {
-      const results: (typeof documentValidator.type)[] = [];
-      let currentCursor = cursor ?? null;
-      while (results.length < limit) {
-        const page = await ctx.db
-          .query("documents")
-          .withIndex("by_status", (q) => q.eq("status", status))
-          .paginate({ numItems: limit, cursor: currentCursor });
-
-        for (const doc of page.page) {
-          if (doc.category === category) {
-            results.push(doc as typeof documentValidator.type);
-            if (results.length >= limit) break;
-          }
-        }
-        if (page.isDone) break;
-        currentCursor = page.continueCursor;
-      }
-      return results;
-    }
-
-    if (status) {
-      const page = await ctx.db
+      // Compound index: status + category — most selective
+      baseQuery = ctx.db
         .query("documents")
-        .withIndex("by_status", (q) => q.eq("status", status))
-        .paginate({ numItems: limit, cursor: cursor ?? null });
-      return page.page as (typeof documentValidator.type)[];
-    }
-
-    if (category) {
-      const page = await ctx.db
+        .withIndex("by_status_and_category", (q) =>
+          q.eq("status", status).eq("category", category),
+        );
+    } else if (status) {
+      baseQuery = ctx.db.query("documents").withIndex("by_status", (q) => q.eq("status", status));
+    } else if (category) {
+      baseQuery = ctx.db
         .query("documents")
-        .withIndex("by_category", (q) => q.eq("category", category))
-        .paginate({ numItems: limit, cursor: cursor ?? null });
-      return page.page as (typeof documentValidator.type)[];
+        .withIndex("by_category", (q) => q.eq("category", category));
+    } else {
+      baseQuery = ctx.db.query("documents");
     }
 
-    const page = await ctx.db.query("documents").paginate({ numItems: limit, cursor: cursor ?? null });
-    return page.page as (typeof documentValidator.type)[];
+    const maxToTake = Math.min(offset + limit, 1100);
+    const results = await baseQuery.take(maxToTake);
+
+    const page = results.slice(offset);
+    return page as (typeof documentValidator.type)[];
   },
 });

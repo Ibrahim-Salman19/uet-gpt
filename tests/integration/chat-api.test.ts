@@ -1,39 +1,93 @@
-import { describe, expect, it, vi } from "vitest";
+import { vi } from "vitest";
+
+vi.hoisted(() => {
+  process.env.UPSTASH_REDIS_REST_URL = "https://mock.upstash.io";
+  process.env.UPSTASH_REDIS_REST_TOKEN = "mock_token";
+});
+
+import { describe, expect, it, beforeEach } from "vitest";
 import {
   FALLBACK_MAX,
   buildSystemPrompt,
-  createRateLimiter,
+  checkChatRateLimit,
   extractText,
   getModelPriorities,
 } from "./helpers";
 
+// Mock @upstash/redis and @upstash/ratelimit for real-like testing
+vi.mock("@upstash/redis", () => ({
+  Redis: class {},
+}));
+
+const counts = new Map<string, number>();
+
+vi.mock("@upstash/ratelimit", () => {
+  const slidingWindowSpy = vi.fn().mockReturnValue({ kind: "sliding", limit: 50, window: 3600 });
+  class RatelimitMock {
+    private limitValue: number;
+    constructor(config: any) {
+      const prefix: string = config?.prefix ?? "";
+      if (prefix.includes("admin")) {
+        this.limitValue = 200;
+      } else if (prefix.includes("anonymous")) {
+        this.limitValue = 10;
+      } else {
+        this.limitValue = 50;
+      }
+    }
+    async limit(identifier: string) {
+      const count = (counts.get(identifier) ?? 0) + 1;
+      counts.set(identifier, count);
+      const success = count <= this.limitValue;
+      return {
+        success,
+        limit: this.limitValue,
+        remaining: Math.max(0, this.limitValue - count),
+        reset: Date.now() + 3_600_000,
+        pending: Promise.resolve(),
+      };
+    }
+  }
+  (RatelimitMock as any).slidingWindow = slidingWindowSpy;
+  return { Ratelimit: RatelimitMock };
+});
+
 describe("Chat API Integration", () => {
   describe("rate limiting logic", () => {
-    it("rate limits after exceeding threshold", async () => {
-      const limiter = createRateLimiter();
-
-      for (let i = 0; i < FALLBACK_MAX; i++) {
-        expect(await limiter.isRateLimited("user_123")).toBe(false);
-      }
-      expect(await limiter.isRateLimited("user_123")).toBe(true);
+    beforeEach(() => {
+      counts.clear();
+      // Ensure redis env variables are mock-set to pass checkChatRateLimit guards
+      vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://mock.upstash.io");
+      vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "mock_token");
     });
 
-    it("resets rate limit after window expires", async () => {
-      const limiter = createRateLimiter();
-      limiter.store.set("user_456", { count: 20, resetAt: Date.now() - 1000 });
+    it("rate limits after exceeding threshold", async () => {
+      for (let i = 0; i < FALLBACK_MAX; i++) {
+        const res = await checkChatRateLimit("user_123", "user");
+        expect(res.success).toBe(true);
+      }
+      const finalRes = await checkChatRateLimit("user_123", "user");
+      expect(finalRes.success).toBe(false);
+    });
 
-      expect(await limiter.isRateLimited("user_456")).toBe(false);
-      expect(limiter.store.get("user_456")?.count).toBe(1);
+    it("resets rate limit after window expires (or manual clear)", async () => {
+      for (let i = 0; i < FALLBACK_MAX; i++) {
+        await checkChatRateLimit("user_456", "user");
+      }
+      expect((await checkChatRateLimit("user_456", "user")).success).toBe(false);
+
+      // Simulate reset
+      counts.clear();
+
+      expect((await checkChatRateLimit("user_456", "user")).success).toBe(true);
     });
 
     it("tracks separate limits for different users", async () => {
-      const limiter = createRateLimiter();
-
       for (let i = 0; i < FALLBACK_MAX; i++) {
-        await limiter.isRateLimited("user_a");
+        await checkChatRateLimit("user_a", "user");
       }
-      expect(await limiter.isRateLimited("user_a")).toBe(true);
-      expect(await limiter.isRateLimited("user_b")).toBe(false);
+      expect((await checkChatRateLimit("user_a", "user")).success).toBe(false);
+      expect((await checkChatRateLimit("user_b", "user")).success).toBe(true);
     });
   });
 

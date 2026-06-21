@@ -227,11 +227,9 @@ export const clearStaleRateLimits = internalMutation({
   args: {},
   handler: async (ctx) => {
     const windowStart = Date.now() - WINDOW_MS;
-    // We could use an index on windowStart, but without it we scan.
-    // Since rate limits are frequently overwritten, stale ones are only for inactive users.
     const staleRows = await ctx.db
       .query("rateLimits")
-      .filter((q) => q.lt(q.field("windowStart"), windowStart))
+      .withIndex("by_windowStart", (q) => q.lt("windowStart", windowStart))
       .take(100);
 
     for (const row of staleRows) {

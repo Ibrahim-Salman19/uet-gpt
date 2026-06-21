@@ -5,7 +5,8 @@ import type { Doc } from "convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReference } from "convex/server";
 import { Filter, MessageSquare, ThumbsDown, ThumbsUp, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -34,24 +35,28 @@ export default function AdminFeedbackPage() {
     if (confirm("Are you sure you want to delete this feedback entry?")) {
       try {
         await deleteFeedback({ feedbackId: feedbackId as any });
+        toast.success("Feedback deleted successfully");
       } catch (error) {
         console.error("Failed to delete feedback:", error);
+        toast.error("Failed to delete feedback. Please try again.");
       }
     }
   };
 
-  const filteredFeedback: FeedbackDoc[] = feedback
-    ? ratingFilter === "all"
-      ? (feedback as FeedbackDoc[])
-      : (feedback as FeedbackDoc[]).filter((f) => f.rating === ratingFilter)
-    : [];
+  const filteredFeedback = useMemo(() => {
+    if (!feedback) return [];
+    const all = feedback as FeedbackDoc[];
+    return ratingFilter === "all" ? all : all.filter((f) => f.rating === ratingFilter);
+  }, [feedback, ratingFilter]);
 
-  const positiveCount = feedback
-    ? (feedback as FeedbackDoc[]).filter((f) => f.rating === "thumbsUp").length
-    : 0;
-  const negativeCount = feedback
-    ? (feedback as FeedbackDoc[]).filter((f) => f.rating === "thumbsDown").length
-    : 0;
+  const { positiveCount, negativeCount } = useMemo(() => {
+    if (!feedback) return { positiveCount: 0, negativeCount: 0 };
+    const all = feedback as FeedbackDoc[];
+    return {
+      positiveCount: all.filter((f) => f.rating === "thumbsUp").length,
+      negativeCount: all.filter((f) => f.rating === "thumbsDown").length,
+    };
+  }, [feedback]);
 
   if (feedback === undefined) {
     return (
@@ -61,7 +66,7 @@ export default function AdminFeedbackPage() {
           {["skele-sum-1", "skele-sum-2", "skele-sum-3"].map((id) => (
             <Card
               key={id}
-              className="rounded-xl border border-white/5 bg-[#101012]/40 p-5 space-y-4"
+              className="rounded-xl border border-white/5 bg-[var(--surface-3)]/40 p-5 space-y-4"
             >
               <Skeleton className="h-3.5 w-24 bg-white/5 rounded" />
               <Skeleton className="h-8 w-16 bg-white/10 rounded" />
@@ -73,7 +78,10 @@ export default function AdminFeedbackPage() {
         {/* List skeleton */}
         <div className="space-y-3">
           {["skele-row-1", "skele-row-2", "skele-row-3", "skele-row-4", "skele-row-5"].map((id) => (
-            <Card key={id} className="p-4 bg-[#101012]/40 border-white/5 relative overflow-hidden">
+            <Card
+              key={id}
+              className="p-4 bg-[var(--surface-3)]/40 border-white/5 relative overflow-hidden"
+            >
               <div className="space-y-2">
                 <Skeleton className="h-4 w-48 mb-2 bg-white/10 rounded" />
                 <Skeleton className="h-3 w-32 bg-white/5 rounded" />
@@ -89,7 +97,7 @@ export default function AdminFeedbackPage() {
     <div className="space-y-6 animate-[slide-up_0.3s_ease-[var(--ease-out-expo)]_both]">
       {/* Bento Summary Metrics */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="rounded-xl border border-white/5 bg-[#101012]/40 p-5 hover:border-white/10 hover:bg-[#101012]/60 transition-colors">
+        <Card className="rounded-xl border border-white/5 bg-[var(--surface-3)]/40 p-5 hover:border-white/10 hover:bg-[var(--surface-3)]/60 transition-colors">
           <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider font-sans">
             Total Feedback
           </span>
@@ -98,7 +106,7 @@ export default function AdminFeedbackPage() {
           </div>
         </Card>
 
-        <Card className="rounded-xl border border-green-500/10 bg-[#101012]/40 p-5 hover:border-green-500/20 hover:bg-[#101012]/60 transition-colors">
+        <Card className="rounded-xl border border-green-500/10 bg-[var(--surface-3)]/40 p-5 hover:border-green-500/20 hover:bg-[var(--surface-3)]/60 transition-colors">
           <span className="text-xs font-semibold text-green-500 uppercase tracking-wider font-sans flex items-center gap-2">
             <ThumbsUp className="h-3.5 w-3.5" />
             Positive
@@ -108,7 +116,7 @@ export default function AdminFeedbackPage() {
           </div>
         </Card>
 
-        <Card className="rounded-xl border border-red-500/10 bg-[#101012]/40 p-5 hover:border-red-500/20 hover:bg-[#101012]/60 transition-colors">
+        <Card className="rounded-xl border border-red-500/10 bg-[var(--surface-3)]/40 p-5 hover:border-red-500/20 hover:bg-[var(--surface-3)]/60 transition-colors">
           <span className="text-xs font-semibold text-red-500 uppercase tracking-wider font-sans flex items-center gap-2">
             <ThumbsDown className="h-3.5 w-3.5" />
             Negative
@@ -127,7 +135,7 @@ export default function AdminFeedbackPage() {
               <Filter className="h-3.5 w-3.5 mr-2 text-zinc-500" />
               <SelectValue placeholder="Filter by rating" />
             </SelectTrigger>
-            <SelectContent className="bg-[#101012] border-white/10 text-xs font-mono text-zinc-300">
+            <SelectContent className="bg-[var(--surface-3)] border-white/10 text-xs font-mono text-zinc-300">
               <SelectItem value="all">ALL_FEEDBACK</SelectItem>
               <SelectItem value="thumbsUp">POSITIVE</SelectItem>
               <SelectItem value="thumbsDown">NEGATIVE</SelectItem>
@@ -143,14 +151,14 @@ export default function AdminFeedbackPage() {
 
       {/* Feedback List Container */}
       {filteredFeedback.length === 0 ? (
-        <Card className="flex flex-col items-center justify-center py-20 border border-white/5 rounded-xl bg-[#101012]/20">
+        <Card className="flex flex-col items-center justify-center py-20 border border-white/5 rounded-xl bg-[var(--surface-3)]/20">
           <MessageSquare className="h-10 w-10 text-zinc-500 mb-4" />
           <p className="text-xs text-zinc-400 font-mono tracking-wider">
             {ratingFilter !== "all" ? "No feedback matches your filter" : "No feedback yet"}
           </p>
         </Card>
       ) : (
-        <div className="border border-white/5 rounded-xl bg-[#101012]/20 overflow-hidden">
+        <div className="border border-white/5 rounded-xl bg-[var(--surface-3)]/20 overflow-hidden">
           <ScrollArea className="h-[calc(100dvh-360px)]">
             <div className="divide-y divide-white/[0.04]">
               {filteredFeedback.map((fb) => (

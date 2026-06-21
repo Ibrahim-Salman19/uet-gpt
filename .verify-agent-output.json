@@ -1,0 +1,13 @@
+{
+  "verification_results": [
+    {
+      "title": "CORS Wildcard on Crawl Endpoint",
+      "verdict": "false_positive",
+      "reasoning": "The finding points to line 42 which is `statusText: response.statusText` — not a CORS header. The actual CORS reflection (lines 38, 61) does reflect any origin, but the crawl endpoint is a server-to-server webhook protected by HMAC signature verification (CRAWL_WEBHOOK_SECRET). CORS only governs browser cross-origin reads; it does not protect (or need to protect) backend webhook endpoints. The HMAC signature verification at webhook.ts:115-157 provides the real authentication. This is not a security issue."
+    }
+  ],
+  "summary": {
+    "confirmed": 0,
+    "false_positive": 1
+  }
+}

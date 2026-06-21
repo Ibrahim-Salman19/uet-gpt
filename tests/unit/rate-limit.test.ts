@@ -46,27 +46,36 @@ describe("rate-limit", () => {
     process.env = { ...originalEnv };
   });
 
-  it("returns null when UPSTASH_REDIS_REST_URL is missing", async () => {
+  it("denies when UPSTASH_REDIS_REST_URL is missing", async () => {
     delete process.env.UPSTASH_REDIS_REST_URL;
     delete process.env.UPSTASH_REDIS_REST_TOKEN;
     const { checkChatRateLimit } = await import("../../src/lib/rate-limit");
     const result = await checkChatRateLimit("test_user");
-    expect(result).toBeNull();
+    expect(result).not.toBeNull();
+    expect(result!.success).toBe(false);
+    expect(result!.limit).toBe(0);
+    expect(result!.remaining).toBe(0);
   });
 
-  it("returns null when UPSTASH_REDIS_REST_TOKEN is missing", async () => {
+  it("denies when UPSTASH_REDIS_REST_TOKEN is missing", async () => {
     process.env.UPSTASH_REDIS_REST_URL = "https://test.upstash.io";
     delete process.env.UPSTASH_REDIS_REST_TOKEN;
     const { checkChatRateLimit } = await import("../../src/lib/rate-limit");
     const result = await checkChatRateLimit("test_user");
-    expect(result).toBeNull();
+    expect(result).not.toBeNull();
+    expect(result!.success).toBe(false);
+    expect(result!.limit).toBe(0);
+    expect(result!.remaining).toBe(0);
   });
 
-  it("returns null for unconfigured rate limiter (graceful fallback)", async () => {
+  it("denies for unconfigured rate limiter (fail-closed)", async () => {
     delete process.env.UPSTASH_REDIS_REST_URL;
     const { checkChatRateLimit } = await import("../../src/lib/rate-limit");
     const result = await checkChatRateLimit("test_user_42", "user");
-    expect(result).toBeNull();
+    expect(result).not.toBeNull();
+    expect(result!.success).toBe(false);
+    expect(result!.limit).toBe(0);
+    expect(result!.remaining).toBe(0);
   });
 
   it("applies correct role-based tier for admin", async () => {

@@ -10,14 +10,85 @@ export function ConvexReadyGate({ children }: { children: React.ReactNode }) {
   const { isLoaded: isClerkLoaded } = useUser();
   const { isLoading: isConvexLoading } = useConvexAuth();
   const [timedOut, setTimedOut] = useState(false);
+  const [networkError, setNetworkError] = useState<string | null>(null);
+  const [diagnosing, setDiagnosing] = useState(false);
 
   const isReady = isClerkLoaded && !isConvexLoading;
+
+  const runDiagnostics = async () => {
+    setDiagnosing(true);
+    setNetworkError(null);
+    try {
+      const url = process.env.NEXT_PUBLIC_CONVEX_URL;
+      if (!url) {
+        setNetworkError(
+          "Convex URL environment variable (NEXT_PUBLIC_CONVEX_URL) is not configured.",
+        );
+        return;
+      }
+
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), 6000);
+
+      await fetch(url, {
+        method: "GET",
+        mode: "no-cors",
+        signal: controller.signal,
+      });
+      clearTimeout(id);
+      setNetworkError("DATABASE_REACHABLE");
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        setNetworkError("TIMEOUT_ERROR");
+      } else {
+        setNetworkError("UNREACHABLE_ERROR");
+      }
+    } finally {
+      setDiagnosing(false);
+    }
+  };
 
   useEffect(() => {
     if (isReady) return;
     const timer = setTimeout(() => setTimedOut(true), TIMEOUT_MS);
     return () => clearTimeout(timer);
   }, [isReady]);
+
+  useEffect(() => {
+    if (!timedOut) return;
+    let cancelled = false;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+    (async () => {
+      setDiagnosing(true);
+      setNetworkError(null);
+      try {
+        const url = process.env.NEXT_PUBLIC_CONVEX_URL;
+        if (!url) {
+          if (!cancelled)
+            setNetworkError(
+              "Convex URL environment variable (NEXT_PUBLIC_CONVEX_URL) is not configured.",
+            );
+          return;
+        }
+        await fetch(url, { method: "GET", mode: "no-cors", signal: controller.signal });
+        if (!cancelled) setNetworkError("DATABASE_REACHABLE");
+      } catch (err: any) {
+        if (!cancelled) {
+          setNetworkError(err.name === "AbortError" ? "TIMEOUT_ERROR" : "UNREACHABLE_ERROR");
+        }
+      } finally {
+        if (!cancelled) setDiagnosing(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+      controller.abort();
+    };
+  }, [timedOut]);
 
   // Rotate console loading subtexts for premium technical feel
   const [loadStep, setLoadStep] = useState(0);
@@ -43,25 +114,101 @@ export function ConvexReadyGate({ children }: { children: React.ReactNode }) {
   // Timed out — show retry UI instead of infinite blank
   if (timedOut) {
     return (
-      <div className="flex h-full w-full flex-col items-center justify-center gap-6 px-6 text-center bg-[#070708]">
-        <div className="relative p-8 max-w-md w-full border border-[oklch(58%_0.15_35_/_0.2)] bg-[var(--surface-1)] rounded-[2px] shadow-2xl">
+      <div className="flex h-full w-full flex-col items-center justify-center gap-6 px-6 text-center bg-[var(--surface-0)] overflow-y-auto py-10">
+        <div className="relative p-6 md:p-8 max-w-md w-full border border-[oklch(58%_0.15_35_/_0.2)] bg-[var(--surface-card)] rounded-[4px] shadow-2xl text-left">
           {/* Vermilion alert node */}
           <div className="mx-auto w-10 h-10 border border-[oklch(58%_0.15_35)] bg-[oklch(58%_0.15_35_/_0.08)] flex items-center justify-center rounded-[2px] mb-4">
             <span className="font-mono text-sm text-[oklch(58%_0.15_35)] font-bold">!</span>
           </div>
 
-          <h2 className="text-xs font-mono tracking-[0.25em] text-[var(--ks-champagne)] uppercase">
+          <h2 className="text-xs font-mono tracking-[0.25em] text-[var(--ks-champagne)] uppercase text-center">
             TIMEOUT // CONNECTION FAILURE
           </h2>
-          <p className="text-xs text-[var(--ks-text-muted)] mt-3 leading-relaxed font-sans">
+          <p className="text-xs text-[var(--ks-text-muted)] mt-3 leading-relaxed font-sans text-center">
             The database connection handshake timed out. Check your network or verify the database
-            status and try again.
+            status.
           </p>
 
-          <div className="mt-6 flex justify-center">
+          {/* Diagnostic Log Panel */}
+          <div className="mt-5 p-4 border border-zinc-800 bg-zinc-950/80 rounded font-mono text-[10px] space-y-2.5">
+            <div className="flex justify-between items-center text-zinc-500 border-b border-zinc-900 pb-1.5">
+              <span>DIAGNOSTIC LOG</span>
+              <span className="text-[9px] text-zinc-600">v1.40.0</span>
+            </div>
+
+            <div className="flex justify-between items-center">
+              <span className="text-zinc-500">Clerk Auth:</span>
+              <span className={isClerkLoaded ? "text-emerald-400" : "text-zinc-400"}>
+                {isClerkLoaded ? "LOADED" : "PENDING..."}
+              </span>
+            </div>
+
+            <div className="flex justify-between items-center">
+              <span className="text-zinc-500">Convex Dev Sync:</span>
+              <span className={isConvexLoading ? "text-amber-400" : "text-emerald-400"}>
+                {isConvexLoading ? "CONNECTING..." : "CONNECTED"}
+              </span>
+            </div>
+
+            <div className="flex justify-between items-center border-t border-zinc-900 pt-2">
+              <span className="text-zinc-500">Server Reachability:</span>
+              {diagnosing ? (
+                <span className="text-zinc-400 animate-pulse">TESTING...</span>
+              ) : networkError === "DATABASE_REACHABLE" ? (
+                <span className="text-emerald-400">REACHABLE (HTTP OK)</span>
+              ) : networkError === "TIMEOUT_ERROR" ? (
+                <span className="text-[oklch(58%_0.15_35)]">FAILED (TIMEOUT)</span>
+              ) : networkError === "UNREACHABLE_ERROR" ? (
+                <span className="text-[oklch(58%_0.15_35)]">FAILED (UNREACHABLE)</span>
+              ) : (
+                <span className="text-zinc-500">{networkError || "UNKNOWN"}</span>
+              )}
+            </div>
+
+            {/* Diagnostic Message */}
+            {!diagnosing && networkError && (
+              <div className="text-[9.5px] text-zinc-400 leading-normal pt-2 border-t border-zinc-900 font-sans space-y-1.5">
+                <span className="font-mono text-[9px] uppercase tracking-wider text-[var(--ks-kinpaku-gold)] block">
+                  RECOMMENDED ACTION:
+                </span>
+                {networkError === "DATABASE_REACHABLE" && (
+                  <p>
+                    The server is reachable via HTTP, but WebSocket (wss://) connections are
+                    failing. This often indicates a local firewall, VPN, or proxy blocking
+                    WebSockets. If you are using <strong>127.0.0.1:3000</strong>, try accessing the
+                    app via <strong>localhost:3000</strong> to ensure Clerk authentication cookies
+                    settle correctly.
+                  </p>
+                )}
+                {networkError === "TIMEOUT_ERROR" && (
+                  <p>
+                    Connection timed out. This is commonly caused by a broken IPv6 configuration on
+                    your Wi-Fi/network interface (resolving the database host to IPv6 addresses that
+                    are blackholed). Try disabling IPv6 on your network adapter or switching to a
+                    mobile hotspot.
+                  </p>
+                )}
+                {networkError === "UNREACHABLE_ERROR" && (
+                  <p>
+                    Database host resolved but cannot be reached. Check if your network connection
+                    is active or if your router/DNS configuration has issues.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="mt-6 flex gap-3 justify-center">
+            <button
+              onClick={runDiagnostics}
+              disabled={diagnosing}
+              className="px-4 py-2 border border-zinc-800 hover:bg-zinc-900 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none text-zinc-400 font-mono text-[9px] tracking-wider rounded-[2px] transition-all cursor-pointer"
+            >
+              RUN DIAGNOSTICS
+            </button>
             <button
               onClick={() => window.location.reload()}
-              className="px-6 py-2.5 border border-[var(--ks-rule-strong)] hover:bg-[oklch(84%_0.19_80.46_/_0.08)] active:scale-[0.98] text-[var(--ks-kinpaku-gold)] font-mono text-[10px] tracking-widest rounded-[2px] transition-all cursor-pointer"
+              className="px-4 py-2 border border-[var(--ks-rule-strong)] hover:bg-[oklch(84%_0.19_80.46_/_0.08)] active:scale-[0.98] text-[var(--ks-kinpaku-gold)] font-mono text-[9px] tracking-wider rounded-[2px] transition-all cursor-pointer"
             >
               RETRY CONNECTION
             </button>

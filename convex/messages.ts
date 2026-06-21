@@ -7,8 +7,14 @@ import { enforceRateLimit } from "./rateLimit";
 
 // Transform component source format to app format
 function toAppSource(s: Record<string, unknown>) {
-  const providerOpts = s.providerOptions && typeof s.providerOptions === "object" ? (s.providerOptions as Record<string, unknown>) : undefined;
-  const opts = providerOpts?.meta && typeof providerOpts.meta === "object" ? (providerOpts.meta as Record<string, unknown>) : undefined;
+  const providerOpts =
+    s.providerOptions && typeof s.providerOptions === "object"
+      ? (s.providerOptions as Record<string, unknown>)
+      : undefined;
+  const opts =
+    providerOpts?.meta && typeof providerOpts.meta === "object"
+      ? (providerOpts.meta as Record<string, unknown>)
+      : undefined;
   return {
     documentId: (opts?.documentId as string | undefined) ?? (s.id as string | undefined),
     chunkId: (opts?.chunkId as string) ?? "",
@@ -61,13 +67,16 @@ export const insert = mutation({
     // Uses actual token count if the caller provides it, otherwise 1000 token estimate.
     const tokenEstimate = args.tokenCount?.total ?? 1_000;
     const identity = await ctx.auth.getUserIdentity();
-    const role = (identity?.publicMetadata as Record<string, unknown> | undefined)?.role as string | undefined;
+    const role = (identity?.publicMetadata as Record<string, unknown> | undefined)?.role as
+      | string
+      | undefined;
     const isAdmin = role === "admin" || role === "superadmin";
-    await enforceRateLimit(ctx, user.clerkId, tokenEstimate, isAdmin);
-
-    const thread = await ctx.runQuery(components.agent.threads.getThread, {
-      threadId: args.threadId,
-    });
+    const [, thread] = await Promise.all([
+      enforceRateLimit(ctx, user.clerkId, tokenEstimate, isAdmin),
+      ctx.runQuery(components.agent.threads.getThread, {
+        threadId: args.threadId,
+      }),
+    ]);
     if (!thread || thread.userId !== user.clerkId) {
       throw new ConvexError("Not authorized to write to this thread");
     }

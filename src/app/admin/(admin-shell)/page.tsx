@@ -47,7 +47,7 @@ function DocumentsStatusBar({
 
 function RecentCrawlsPanel({ crawls }: { crawls: any[] }) {
   return (
-    <div className="border border-white/5 rounded-xl bg-[#101012]/40 backdrop-blur-sm p-6 flex flex-col h-[280px]">
+    <div className="border border-white/5 rounded-xl bg-[var(--surface-3)]/40 backdrop-blur-sm p-6 flex flex-col h-[280px]">
       <div className="mb-4 pb-3 border-b border-white/5 flex justify-between items-center">
         <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 font-mono">
           [ SYSTEM: RECENT CRAWLS ]
@@ -98,7 +98,7 @@ function RecentCrawlsPanel({ crawls }: { crawls: any[] }) {
 
 function RecentFeedbackPanel({ feedback }: { feedback: any[] }) {
   return (
-    <div className="border border-white/5 rounded-xl bg-[#101012]/40 backdrop-blur-sm p-6 flex flex-col h-[280px]">
+    <div className="border border-white/5 rounded-xl bg-[var(--surface-3)]/40 backdrop-blur-sm p-6 flex flex-col h-[280px]">
       <div className="mb-4 pb-3 border-b border-white/5 flex justify-between items-center">
         <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 font-mono">
           [ CUSTOMER: RECENT FEEDBACK ]
@@ -145,26 +145,21 @@ function RecentFeedbackPanel({ feedback }: { feedback: any[] }) {
 }
 
 export default function AdminOverviewPage() {
-  const docs = useQuery(api.admin.stats.documentStats, {});
-  const users = useQuery(api.admin.stats.userStats, {});
-  const feedbackCount = useQuery(api.admin.stats.feedbackCount, {});
-  const feedbackRecent = useQuery(api.admin.stats.feedbackStats, {});
-  const crawlCount = useQuery(api.admin.stats.crawlCount, {});
-  const crawlRecent = useQuery(api.admin.stats.crawlStats, {});
-  const cache = useQuery(api.admin.stats.cacheStats, {});
+  const data = useQuery(api.admin.stats.getOverviewData, {});
 
-  const loading =
-    docs === undefined ||
-    users === undefined ||
-    feedbackCount === undefined ||
-    feedbackRecent === undefined ||
-    crawlCount === undefined ||
-    crawlRecent === undefined ||
-    cache === undefined;
-
-  if (loading) {
+  if (data === undefined) {
     return <LoadingState type="admin-overview" />;
   }
+
+  const {
+    documentStats: docs,
+    userStats: users,
+    feedbackCount,
+    crawlCount,
+    cacheStats: cache,
+    recentCrawls,
+    recentFeedback,
+  } = data;
 
   return (
     <div className="space-y-6 animate-[slide-up_0.3s_ease-[var(--ease-out-expo)]_both]">
@@ -176,7 +171,7 @@ export default function AdminOverviewPage() {
 
       {/* Primary row */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div className="lg:col-span-2 rounded-xl border border-white/5 bg-[#101012]/40 backdrop-blur-sm p-5 transition-all duration-300 hover:border-[var(--accent)]/30 hover:bg-[#101012]/60 active:scale-[0.99] ease-[var(--ease-spring)]">
+        <div className="lg:col-span-2 rounded-xl border border-white/5 bg-[var(--surface-3)]/40 backdrop-blur-sm p-5 transition-all duration-300 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-3)]/60 active:scale-[0.99] ease-[var(--ease-spring)]">
           <div className="flex items-center justify-between gap-4">
             <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider font-sans">
               Total Documents
@@ -235,7 +230,7 @@ export default function AdminOverviewPage() {
           description="Semantic cache"
           icon={<Database className="h-4 w-4" />}
         />
-        <div className="lg:col-span-2 rounded-xl border border-white/5 bg-[#101012]/40 backdrop-blur-sm p-5 transition-all duration-300 hover:border-[var(--accent)]/30 hover:bg-[#101012]/60 active:scale-[0.99] ease-[var(--ease-spring)]">
+        <div className="lg:col-span-2 rounded-xl border border-white/5 bg-[var(--surface-3)]/40 backdrop-blur-sm p-5 transition-all duration-300 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-3)]/60 active:scale-[0.99] ease-[var(--ease-spring)]">
           <div className="flex items-center justify-between gap-4">
             <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider font-sans">
               Document Issues
@@ -271,8 +266,8 @@ export default function AdminOverviewPage() {
 
       {/* Recent panels */}
       <div className="grid gap-4 md:grid-cols-2">
-        <RecentCrawlsPanel crawls={crawlRecent?.recent ?? []} />
-        <RecentFeedbackPanel feedback={feedbackRecent?.recent ?? []} />
+        <RecentCrawlsPanel crawls={recentCrawls} />
+        <RecentFeedbackPanel feedback={recentFeedback} />
       </div>
     </div>
   );
@@ -292,7 +287,7 @@ function StatCard({ title, value, description, icon, trend, className, children 
   return (
     <div
       className={cn(
-        "rounded-xl border border-white/5 bg-[#101012]/40 backdrop-blur-sm p-5 transition-all duration-300 hover:border-[var(--accent)]/30 hover:bg-[#101012]/60 active:scale-[0.99] ease-[var(--ease-spring)]",
+        "rounded-xl border border-white/5 bg-[var(--surface-3)]/40 backdrop-blur-sm p-5 transition-all duration-300 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-3)]/60 active:scale-[0.99] ease-[var(--ease-spring)]",
         className,
       )}
     >

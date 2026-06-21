@@ -55,7 +55,7 @@ export const aggregateDailyStats = internalMutation({
     const recentFeedback = await ctx.db
       .query("feedback")
       .withIndex("by_createdAt", (q) => q.gte("createdAt", twentyFourHoursAgo))
-      .take(10000);
+      .take(1000);
 
     const positiveFeedback = recentFeedback.filter((f) => f.rating === "thumbsUp").length;
 
@@ -87,7 +87,7 @@ export const aggregateDailyStats = internalMutation({
         target: "daily-stats",
         details: {
           newValue: JSON.stringify({
-            date: new Date().toISOString().split("T")[0],
+            date: new Date(now).toISOString().split("T")[0],
             feedback: recentFeedback.length,
             positiveFeedback,
             positiveRate:

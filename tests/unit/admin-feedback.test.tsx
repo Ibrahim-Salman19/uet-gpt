@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import AdminFeedbackPage from "@/app/admin/feedback/page";
+import AdminFeedbackPage from "@/app/admin/(admin-shell)/feedback/page";
 
 const mockDeleteFeedback = vi.hoisted(() => vi.fn());
 

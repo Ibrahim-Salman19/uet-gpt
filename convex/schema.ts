@@ -48,6 +48,7 @@ export default defineSchema({
   })
     .index("by_messageId", ["messageId"])
     .index("by_userId", ["userId"])
+    .index("by_messageId_and_userId", ["messageId", "userId"])
     .index("by_rating", ["rating"])
     .index("by_createdAt", ["createdAt"]),
 
@@ -117,9 +118,10 @@ export default defineSchema({
     sourceEntryIds: v.optional(v.array(v.string())),
     alternateQueryTexts: v.optional(v.array(v.string())),
     alternateEmbeddings: v.optional(v.array(v.array(v.float64()))),
+    maxDocumentUpdatedAt: v.optional(v.number()),
   })
     .index("by_expiresAt", ["expiresAt"])
-    .vectorIndex("by_queryEmbedding", { vectorField: "queryEmbedding", dimensions: 3072 }),
+    .vectorIndex("by_queryEmbedding", { vectorField: "queryEmbedding", dimensions: 768 }),
 
   adminAuditLog: defineTable({
     userId: v.id("users"),
@@ -217,13 +219,15 @@ export default defineSchema({
     .index("by_entryId", ["entryId"])
     .index("by_category", ["category"])
     .index("by_status", ["status"])
+    .index("by_status_and_category", ["status", "category"])
     .index("by_crawledAt", ["crawledAt"])
     .index("by_session", ["crawlSessionId"])
     .index("by_tier_and_crawled", ["freshnessTier", "crawledAt"])
     .searchIndex("search_title", { searchField: "title" })
     .index("by_contentHash", ["contentHash"])
     .index("by_source_category", ["source", "category"])
-    .index("by_personType", ["personType"]),
+    .index("by_personType", ["personType"])
+    .index("by_status_and_isStale", ["status", "isStale"]),
 
   processedWebhooks: defineTable({
     jobId: v.string(),
@@ -270,6 +274,7 @@ export default defineSchema({
     .index("by_documentId", ["documentId"])
     .index("by_documentId_and_contentHash", ["documentId", "contentHash"])
     .index("by_ragId", ["ragId"])
+    .index("by_contextualizedText", ["contextualizedText"])
     .searchIndex("search_text", { searchField: "text" }),
 
   crawlStats: defineTable({
@@ -288,7 +293,9 @@ export default defineSchema({
     sourceUrl: v.optional(v.string()),
     createdAt: v.number(),
     expiresAt: v.optional(v.number()),
-  }).searchIndex("search_question", { searchField: "question" }),
+  })
+    .index("by_expiresAt", ["expiresAt"])
+    .searchIndex("search_question", { searchField: "question" }),
 
   appSettings: defineTable({
     key: v.string(),
@@ -308,7 +315,9 @@ export default defineSchema({
     key: v.string(), // clerkUserId OR "global"
     windowStart: v.number(), // epoch ms — start of current 1-minute window
     count: v.number(), // requests (per-user) or tokens (global) in window
-  }).index("by_key", ["key"]),
+  })
+    .index("by_key", ["key"])
+    .index("by_windowStart", ["windowStart"]),
 
   evalResults: defineTable({
     evalName: v.string(),

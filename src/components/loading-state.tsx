@@ -123,7 +123,7 @@ function AdminOverviewSkeleton() {
 
       {/* Primary Bento Row: 2 + 1 + 1 */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div className="lg:col-span-2 rounded-xl border border-white/5 bg-[#101012]/40 p-5 space-y-4 relative overflow-hidden">
+        <div className="lg:col-span-2 rounded-xl border border-white/5 bg-[var(--surface-3)]/40 p-5 space-y-4 relative overflow-hidden">
           <div className="flex justify-between items-center">
             <div className="h-3 w-24 bg-white/5 rounded" />
             <div className="h-4 w-4 bg-white/5 rounded" />
@@ -131,14 +131,14 @@ function AdminOverviewSkeleton() {
           <div className="h-8 w-32 bg-white/10 rounded" />
           <div className="h-2 w-full bg-white/5 rounded-full" />
         </div>
-        <div className="rounded-xl border border-white/5 bg-[#101012]/40 p-5 space-y-4">
+        <div className="rounded-xl border border-white/5 bg-[var(--surface-3)]/40 p-5 space-y-4">
           <div className="flex justify-between items-center">
             <div className="h-3 w-24 bg-white/5 rounded" />
             <div className="h-4 w-4 bg-white/5 rounded" />
           </div>
           <div className="h-8 w-16 bg-white/10 rounded" />
         </div>
-        <div className="rounded-xl border border-white/5 bg-[#101012]/40 p-5 space-y-4">
+        <div className="rounded-xl border border-white/5 bg-[var(--surface-3)]/40 p-5 space-y-4">
           <div className="flex justify-between items-center">
             <div className="h-3 w-20 bg-white/5 rounded" />
             <div className="h-4 w-4 bg-white/5 rounded" />
@@ -149,21 +149,21 @@ function AdminOverviewSkeleton() {
 
       {/* Secondary Bento Row: 1 + 1 + 2 */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-xl border border-white/5 bg-[#101012]/40 p-5 space-y-4">
+        <div className="rounded-xl border border-white/5 bg-[var(--surface-3)]/40 p-5 space-y-4">
           <div className="flex justify-between items-center">
             <div className="h-3 w-20 bg-white/5 rounded" />
             <div className="h-4 w-4 bg-white/5 rounded" />
           </div>
           <div className="h-8 w-16 bg-white/10 rounded" />
         </div>
-        <div className="rounded-xl border border-white/5 bg-[#101012]/40 p-5 space-y-4">
+        <div className="rounded-xl border border-white/5 bg-[var(--surface-3)]/40 p-5 space-y-4">
           <div className="flex justify-between items-center">
             <div className="h-3 w-24 bg-white/5 rounded" />
             <div className="h-4 w-4 bg-white/5 rounded" />
           </div>
           <div className="h-8 w-20 bg-white/10 rounded" />
         </div>
-        <div className="lg:col-span-2 rounded-xl border border-white/5 bg-[#101012]/40 p-5 space-y-4 relative overflow-hidden">
+        <div className="lg:col-span-2 rounded-xl border border-white/5 bg-[var(--surface-3)]/40 p-5 space-y-4 relative overflow-hidden">
           <div className="flex justify-between items-center">
             <div className="h-3 w-28 bg-white/5 rounded" />
             <div className="h-4 w-4 bg-white/5 rounded" />
@@ -175,7 +175,7 @@ function AdminOverviewSkeleton() {
 
       {/* Breakdown and Jobs Row */}
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="border border-white/5 rounded-2xl bg-[#101012]/40 p-6 space-y-4">
+        <div className="border border-white/5 rounded-2xl bg-[var(--surface-3)]/40 p-6 space-y-4">
           <div className="pb-3 border-b border-white/5">
             <div className="h-3.5 w-32 bg-white/10 rounded" />
           </div>
@@ -192,7 +192,7 @@ function AdminOverviewSkeleton() {
           </div>
         </div>
 
-        <div className="border border-white/5 rounded-2xl bg-[#101012]/40 p-6 space-y-4">
+        <div className="border border-white/5 rounded-2xl bg-[var(--surface-3)]/40 p-6 space-y-4">
           <div className="pb-3 border-b border-white/5">
             <div className="h-3.5 w-36 bg-white/10 rounded" />
           </div>
@@ -211,7 +211,7 @@ function AdminOverviewSkeleton() {
       </div>
 
       {/* Recent Feedback */}
-      <div className="border border-white/5 rounded-2xl bg-[#101012]/40 p-6 space-y-4">
+      <div className="border border-white/5 rounded-2xl bg-[var(--surface-3)]/40 p-6 space-y-4">
         <div className="pb-3 border-b border-white/5">
           <div className="h-3.5 w-28 bg-white/10 rounded" />
         </div>
@@ -263,7 +263,7 @@ function AdminListSkeleton() {
         {["row-1", "row-2", "row-3", "row-4", "row-5"].map((id) => (
           <div
             key={id}
-            className="flex items-center justify-between p-4 bg-[#101012]/40 relative overflow-hidden"
+            className="flex items-center justify-between p-4 bg-[var(--surface-3)]/40 relative overflow-hidden"
           >
             {/* Shimmer overlay line */}
             <div className="absolute top-0 bottom-0 left-0 w-[2px] bg-[var(--accent)]/30 animate-pulse" />

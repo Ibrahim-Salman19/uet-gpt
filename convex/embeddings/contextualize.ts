@@ -23,21 +23,10 @@ export const getChunksPendingContext = internalQuery({
   handler: async (ctx, args) => {
     const chunks = await ctx.db
       .query("crawledChunks")
-      .filter((q) => q.eq(q.field("contextualizedText"), undefined))
+      .withIndex("by_contextualizedText", (q) => q.eq("contextualizedText", undefined))
       .order("desc")
       .take(args.limit);
     return chunks.map((c) => c._id);
-  },
-});
-
-export const getContextualizeProgress = internalQuery({
-  args: {},
-  handler: async (ctx) => {
-    const setting = await ctx.db
-      .query("appSettings")
-      .withIndex("by_key", (q) => q.eq("key", "contextualize_progress"))
-      .first();
-    return (setting?.value as number) ?? 0;
   },
 });
 
@@ -66,22 +55,29 @@ export const saveContextualizedText = internalMutation({
 });
 
 export const upsertContextualizeProgress = internalMutation({
-  args: { totalProcessed: v.number() },
+  args: {
+    totalProcessed: v.number(),
+    increment: v.optional(v.boolean()),
+  },
   handler: async (ctx, args) => {
     const existing = await ctx.db
       .query("appSettings")
       .withIndex("by_key", (q) => q.eq("key", "contextualize_progress"))
       .first();
 
+    const newValue = args.increment
+      ? ((existing?.value as number) ?? 0) + args.totalProcessed
+      : args.totalProcessed;
+
     if (existing) {
       await ctx.db.patch(existing._id, {
-        value: args.totalProcessed,
+        value: newValue,
         updatedAt: Date.now(),
       });
     } else {
       await ctx.db.insert("appSettings", {
         key: "contextualize_progress",
-        value: args.totalProcessed,
+        value: newValue,
         section: "contextualization",
         updatedAt: Date.now(),
       });

@@ -714,7 +714,7 @@ describe("markStaleDocuments", () => {
     });
 
     expect(result.marked).toBe(2);
-    expect(result.remaining).toBe("more"); // function returns "more" when any docs are marked
+    expect(result.remaining).toBe("done");
     expect(db.patch).toHaveBeenCalledWith("doc-stale-1", { status: "stale" });
     expect(db.patch).toHaveBeenCalledWith("doc-stale-2", { status: "stale" });
   });

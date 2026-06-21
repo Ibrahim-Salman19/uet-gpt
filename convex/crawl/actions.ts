@@ -58,17 +58,16 @@ async function fetchSitemapUrls(
     }
 
     // Filter through include/exclude patterns
+    const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const globToRegex = (pattern: string) => {
+      const escaped = escapeRegExp(pattern);
+      const regexPattern = escaped.replace(/\\\*\\\*/g, ".*").replace(/\\\*/g, "[^/]*");
+      return new RegExp(`^${regexPattern}$`);
+    };
     const allowed = urls.filter((u) => {
       const include =
-        includePatterns.length === 0 ||
-        includePatterns.some((p) => {
-          const pattern = p.replace(/\*\*/g, ".*").replace(/\*/g, "[^/]*");
-          return new RegExp(`^${pattern}$`).test(u);
-        });
-      const exclude = excludePatterns.some((p) => {
-        const pattern = p.replace(/\*\*/g, ".*").replace(/\*/g, "[^/]*");
-        return new RegExp(`^${pattern}$`).test(u);
-      });
+        includePatterns.length === 0 || includePatterns.some((p) => globToRegex(p).test(u));
+      const exclude = excludePatterns.some((p) => globToRegex(p).test(u));
       return include && !exclude;
     });
 

@@ -11,45 +11,52 @@ export const findDuplicatesBatch = internalQuery({
 });
 
 async function deleteDocumentChunks(ctx: any, doc: Doc<"documents">): Promise<void> {
-  const chunks: Doc<"crawledChunks">[] = [];
-  let paginationCursor: string | null = null;
-  let paginationDone = false;
-  while (!paginationDone) {
-    const page: any = await ctx.db
+  while (true) {
+    const chunks = await ctx.db
       .query("crawledChunks")
       .withIndex("by_documentId", (q: any) => q.eq("documentId", doc._id))
-      .paginate({ numItems: 500, cursor: paginationCursor });
-    chunks.push(...page.page);
-    paginationDone = page.isDone;
-    paginationCursor = page.continueCursor;
-  }
+      .take(100);
 
-  for (const chunk of chunks) {
-    try {
-      if (chunk.ragId) {
-        await rag.delete(ctx, {
-          entryId: chunk.ragId as unknown as import("@convex-dev/rag").EntryId,
-        });
-      }
-      await ctx.db.delete(chunk._id);
-    } catch (err) {
-      console.warn(`Failed to delete vector ${chunk.ragId} from RAG during dedup:`, err);
+    if (chunks.length === 0) {
+      break;
     }
+
+    await Promise.all(
+      chunks.map(async (chunk: any) => {
+        try {
+          if (chunk.ragId) {
+            try {
+              await rag.delete(ctx, {
+                entryId: chunk.ragId as unknown as import("@convex-dev/rag").EntryId,
+              });
+            } catch (err) {
+              console.warn(`Failed to delete vector ${chunk.ragId} from RAG during dedup:`, err);
+            }
+          }
+          await ctx.db.delete(chunk._id);
+        } catch (err) {
+          console.error("Failed to delete chunk:", err);
+          throw err;
+        }
+      }),
+    );
   }
 }
 
 export const deleteDuplicateDocuments = internalMutation({
   args: { documentIds: v.array(v.id("documents")) },
   handler: async (ctx, { documentIds }) => {
-    let deleted = 0;
-    for (const docId of documentIds) {
-      const doc = await ctx.db.get(docId);
-      if (!doc) continue;
+    const results = await Promise.all(
+      documentIds.map(async (docId): Promise<number> => {
+        const doc = await ctx.db.get(docId);
+        if (!doc) return 0;
 
-      await deleteDocumentChunks(ctx, doc);
-      await ctx.db.delete(doc._id);
-      deleted++;
-    }
+        await deleteDocumentChunks(ctx, doc);
+        await ctx.db.delete(doc._id);
+        return 1;
+      }),
+    );
+    const deleted = results.reduce((sum, count) => sum + count, 0);
     return { deleted };
   },
 });

@@ -106,3 +106,11 @@ export const DURATION = {
   slow: 400,
   entrance: 600,
 } as const;
+
+export const DEFAULT_SUGGESTIONS = [
+  { label: "BS Fee Structure", prompt: "What is the fee structure for BS programs?" },
+  { label: "2026 Admissions", prompt: "When do admissions open for 2026?" },
+  { label: "Departments", prompt: "How many departments does UET have?" },
+  { label: "Transport Routes", prompt: "What transport routes are available?" },
+  { label: "Hostel Allotment", prompt: "Explain the hostel allotment process." },
+] as const;

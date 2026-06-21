@@ -249,20 +249,17 @@ function useConvexPreferenceSync(
   setFontSizeState: (v: "small" | "medium" | "large") => void,
   setAccentThemeState: (v: AccentTheme) => void,
 ) {
+  const fontSize = userData?.preferences?.fontSize;
+  const theme = userData?.preferences?.theme;
+
   React.useEffect(() => {
-    const prefs = userData?.preferences;
-    if (!prefs) return;
     syncPrefFromConvex(
-      prefs.fontSize as "small" | "medium" | "large" | undefined,
+      fontSize as "small" | "medium" | "large" | undefined,
       setFontSizeState,
       "pref-font-size",
     );
-    syncPrefFromConvex(
-      prefs.theme as AccentTheme | undefined,
-      setAccentThemeState,
-      "pref-accent-theme",
-    );
-  }, [userData]);
+    syncPrefFromConvex(theme as AccentTheme | undefined, setAccentThemeState, "pref-accent-theme");
+  }, [fontSize, theme, setFontSizeState, setAccentThemeState]);
 }
 
 function useFontSizeEffect(fontSize: "small" | "medium" | "large") {
@@ -302,26 +299,34 @@ function usePreferencePersistence({
   typingSoundEnabled: boolean;
 }) {
   React.useEffect(() => {
+    localStorage.setItem("pref-webgl", String(webglEnabled));
+  }, [webglEnabled]);
+
+  React.useEffect(() => {
+    localStorage.setItem("pref-glow", String(glowEnabled));
+  }, [glowEnabled]);
+
+  React.useEffect(() => {
+    localStorage.setItem("pref-sounds", String(soundsEnabled));
+  }, [soundsEnabled]);
+
+  React.useEffect(() => {
+    localStorage.setItem("pref-typing-anim", String(typingAnimEnabled));
+  }, [typingAnimEnabled]);
+
+  React.useEffect(() => {
+    localStorage.setItem("pref-typing-sound", String(typingSoundEnabled));
+  }, [typingSoundEnabled]);
+
+  React.useEffect(() => {
     const body = document.body;
     if (animsEnabled) {
       body.classList.remove("reduce-micro-animations");
     } else {
       body.classList.add("reduce-micro-animations");
     }
-    localStorage.setItem("pref-webgl", String(webglEnabled));
-    localStorage.setItem("pref-glow", String(glowEnabled));
-    localStorage.setItem("pref-sounds", String(soundsEnabled));
-    localStorage.setItem("pref-typing-anim", String(typingAnimEnabled));
-    localStorage.setItem("pref-typing-sound", String(typingSoundEnabled));
     localStorage.setItem("pref-anims", String(animsEnabled));
-  }, [
-    webglEnabled,
-    glowEnabled,
-    soundsEnabled,
-    typingAnimEnabled,
-    typingSoundEnabled,
-    animsEnabled,
-  ]);
+  }, [animsEnabled]);
 }
 
 function useGlobalClickSound(soundsEnabled: boolean, playTapSound: () => void) {
@@ -538,45 +543,60 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
 
   useGlobalClickSound(soundsEnabled, playTapSound);
 
-  return (
-    <PreferencesContext.Provider
-      value={{
-        accentTheme,
-        webglEnabled,
-        glowEnabled,
-        animsEnabled,
-        soundsEnabled,
-        typingAnimEnabled,
-        typingSoundEnabled,
-        pinnedHighlights,
-        fontSize,
-        modelPreference,
-        updateModelPreference,
-        commandPaletteOpen,
-        setCommandPaletteOpen,
-        diagnosticsOpen,
-        setDiagnosticsOpen,
-        voiceInputOpen,
-        setVoiceInputOpen,
-        settingsOpen,
-        setSettingsOpen,
-        voiceTranscriptCallback,
-        setVoiceTranscriptCallback,
-        setAccentTheme,
-        toggleSetting,
-        resetPreferences,
-        addPin,
-        removePin,
-        isPinned,
-        playTypingSound,
-        playTapSound,
-        playSweepSound,
-        playChimeSound,
-      }}
-    >
-      {children}
-    </PreferencesContext.Provider>
+  const contextValue = React.useMemo(
+    () => ({
+      accentTheme,
+      webglEnabled,
+      glowEnabled,
+      animsEnabled,
+      soundsEnabled,
+      typingAnimEnabled,
+      typingSoundEnabled,
+      pinnedHighlights,
+      fontSize,
+      modelPreference,
+      updateModelPreference,
+      commandPaletteOpen,
+      setCommandPaletteOpen,
+      diagnosticsOpen,
+      setDiagnosticsOpen,
+      voiceInputOpen,
+      setVoiceInputOpen,
+      settingsOpen,
+      setSettingsOpen,
+      voiceTranscriptCallback,
+      setVoiceTranscriptCallback,
+      setAccentTheme,
+      toggleSetting,
+      resetPreferences,
+      addPin,
+      removePin,
+      isPinned,
+      playTypingSound,
+      playTapSound,
+      playSweepSound,
+      playChimeSound,
+    }),
+    [
+      accentTheme,
+      webglEnabled,
+      glowEnabled,
+      animsEnabled,
+      soundsEnabled,
+      typingAnimEnabled,
+      typingSoundEnabled,
+      pinnedHighlights,
+      fontSize,
+      modelPreference,
+      commandPaletteOpen,
+      diagnosticsOpen,
+      voiceInputOpen,
+      settingsOpen,
+      voiceTranscriptCallback,
+    ],
   );
+
+  return <PreferencesContext.Provider value={contextValue}>{children}</PreferencesContext.Provider>;
 }
 
 export function usePreferences() {
@@ -589,6 +609,16 @@ export function usePreferences() {
 
 function useAudioSynth(soundsEnabled: boolean, typingSoundEnabled: boolean) {
   const audioCtxRef = React.useRef<AudioContext | null>(null);
+  const soundsEnabledRef = React.useRef(soundsEnabled);
+  const typingSoundEnabledRef = React.useRef(typingSoundEnabled);
+
+  React.useEffect(() => {
+    soundsEnabledRef.current = soundsEnabled;
+  }, [soundsEnabled]);
+
+  React.useEffect(() => {
+    typingSoundEnabledRef.current = typingSoundEnabled;
+  }, [typingSoundEnabled]);
 
   const getAudioContext = React.useCallback(() => {
     if (!audioCtxRef.current) {
@@ -627,26 +657,29 @@ function useAudioSynth(soundsEnabled: boolean, typingSoundEnabled: boolean) {
   React.useEffect(() => {
     return () => {
       if (chimeTimeoutRef.current) clearTimeout(chimeTimeoutRef.current);
+      if (audioCtxRef.current && audioCtxRef.current.state !== "closed") {
+        audioCtxRef.current.close().catch(() => {});
+      }
     };
   }, []);
 
   const playTypingSound = React.useCallback(() => {
-    if (!soundsEnabled || !typingSoundEnabled) return;
+    if (!soundsEnabledRef.current || !typingSoundEnabledRef.current) return;
     playTone(800, 200, 0.03, 0.03);
-  }, [soundsEnabled, typingSoundEnabled]);
+  }, []);
 
   const playTapSound = React.useCallback(() => {
-    if (!soundsEnabled) return;
+    if (!soundsEnabledRef.current) return;
     playTone(800, 200, 0.03, 0.03);
-  }, [soundsEnabled]);
+  }, []);
 
   const playSweepSound = React.useCallback(() => {
-    if (!soundsEnabled) return;
+    if (!soundsEnabledRef.current) return;
     playTone(300, 1200, 0.4, 0.06);
-  }, [soundsEnabled]);
+  }, []);
 
   const playChimeSound = React.useCallback(() => {
-    if (!soundsEnabled) return;
+    if (!soundsEnabledRef.current) return;
     try {
       const ctx = getAudioContext();
       const osc1 = ctx.createOscillator();
@@ -661,7 +694,7 @@ function useAudioSynth(soundsEnabled: boolean, typingSoundEnabled: boolean) {
       osc1.stop(ctx.currentTime + 0.35);
 
       chimeTimeoutRef.current = setTimeout(() => {
-        if (!soundsEnabled) return;
+        if (!soundsEnabledRef.current) return;
         try {
           const osc2 = ctx.createOscillator();
           const gain2 = ctx.createGain();
@@ -676,7 +709,7 @@ function useAudioSynth(soundsEnabled: boolean, typingSoundEnabled: boolean) {
         } catch (e) {}
       }, 80);
     } catch (err) {}
-  }, [soundsEnabled, getAudioContext]);
+  }, [getAudioContext]);
 
   return { playTypingSound, playTapSound, playSweepSound, playChimeSound };
 }

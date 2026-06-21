@@ -8,6 +8,7 @@ import { LoadingState } from "@/components/loading-state";
 import { usePreferences } from "@/components/preferences-provider";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useThreads } from "@/hooks/use-threads";
+import { copyToClipboard } from "@/lib/utils";
 import { SidebarHistory } from "./history";
 import { NewChatButton } from "./new-chat-button";
 import { SidebarSearch } from "./search";
@@ -68,24 +69,10 @@ function PinnedSection({
             <span
               className="flex-1 truncate cursor-pointer font-sans"
               onClick={async () => {
-                try {
-                  if (navigator.clipboard && navigator.clipboard.writeText) {
-                    await navigator.clipboard.writeText(pin.content);
-                  } else {
-                    const textarea = document.createElement("textarea");
-                    textarea.value = pin.content;
-                    textarea.style.position = "fixed";
-                    textarea.style.top = "0";
-                    textarea.style.left = "0";
-                    document.body.appendChild(textarea);
-                    textarea.focus();
-                    textarea.select();
-                    document.execCommand("copy");
-                    document.body.removeChild(textarea);
-                  }
+                const success = await copyToClipboard(pin.content);
+                if (success) {
                   toast.success("Copied to clipboard!");
-                } catch (err) {
-                  console.error("Copy failed:", err);
+                } else {
                   toast.error("Failed to copy");
                 }
               }}
@@ -161,7 +148,7 @@ function UserProfileFooter({
   onOpenSettings: () => void;
 }) {
   return (
-    <div className="p-3 border-t border-[#222226] flex items-center justify-between gap-2 shrink-0 bg-[#0a0a0c]/60">
+    <div className="p-3 border-t border-[var(--surface-5)] flex items-center justify-between gap-2 shrink-0 bg-[var(--surface-1)]/60">
       <div className="flex items-center gap-3 min-w-0">
         {user?.imageUrl ? (
           <img

@@ -137,8 +137,8 @@ async function fetchActiveFaqs(
   Array<{ entryId: string; content: string; url: string; title: string; relevanceScore: number }>
 > {
   try {
-    const faqs = await ctx.runQuery(internal.faq.searchFaqs, { query: queryText });
     const now = Date.now();
+    const faqs = await ctx.runQuery(internal.faq.searchFaqs, { query: queryText, now });
     return faqs
       .filter((f: FaqResult) => !f.expiresAt || f.expiresAt > now)
       .map((faq: FaqResult) => ({

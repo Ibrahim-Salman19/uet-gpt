@@ -411,7 +411,6 @@ async function buildResponseContext(
 export const retrieveContext = action({
   args: {
     question: v.string(),
-    secret: v.optional(v.string()),
   },
   returns: v.object({
     intent: v.string(),
@@ -422,8 +421,9 @@ export const retrieveContext = action({
     queryEmbedding: v.array(v.float64()),
   }),
   handler: async (ctx, args) => {
-    if (args.secret !== process.env.INTERNAL_API_SECRET) {
-      throw new ConvexError("Unauthorized access to RAG retrieval pipeline");
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new ConvexError("Authentication required for RAG retrieval");
     }
 
     // Break circular type chain through api/internal (Convex known pattern)

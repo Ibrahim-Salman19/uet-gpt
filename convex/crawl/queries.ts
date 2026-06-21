@@ -55,8 +55,11 @@ export const getDocumentCountByStatus = query({
   args: { status: v.string() },
   handler: async (ctx, { status }) => {
     await requireAdmin(ctx);
-    const count = (
-      await ctx.db
+    let count = 0;
+    let cursor: string | null = null;
+    let done = false;
+    while (!done) {
+      const page = await ctx.db
         .query("documents")
         .withIndex("by_status", (q) =>
           q.eq(
@@ -71,8 +74,11 @@ export const getDocumentCountByStatus = query({
               | "pending_embed",
           ),
         )
-        .take(100000)
-    ).length;
+        .paginate({ numItems: 100, cursor });
+      count += page.page.length;
+      done = page.isDone;
+      cursor = page.continueCursor;
+    }
     return { status, count };
   },
 });
@@ -108,7 +114,10 @@ export const getDLQSample = query({
   args: {},
   handler: async (ctx) => {
     await requireAdmin(ctx);
-    return await ctx.db.query("crawlDeadLetter").take(50);
+    return await ctx.db
+      .query("crawlDeadLetter")
+      .withIndex("by_status", (q) => q.eq("status", "pending_retry"))
+      .take(50);
   },
 });
 
@@ -228,7 +237,7 @@ export const getChunksWithHeadings = query({
   args: {},
   handler: async (ctx) => {
     await requireAdmin(ctx);
-    const chunks = await ctx.db.query("crawledChunks").take(100);
+    const chunks = await ctx.db.query("crawledChunks").take(20);
     return chunks
       .filter((c) => c.headingPath && c.headingPath.length > 0)
       .slice(0, 10)

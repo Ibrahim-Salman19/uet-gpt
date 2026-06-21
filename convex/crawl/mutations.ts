@@ -116,14 +116,14 @@ async function upsertDocumentForCrawl(
   existing: Doc<"documents"> | null,
 ): Promise<Id<"documents">> {
   if (existing) {
-    const metadata = buildMetadataPatch(lastModified, etag);
+    const metadataPatch = buildMetadataPatch(lastModified, etag);
     await ctx.db.patch(existing._id, {
       contentHash,
       crawledAt: Date.now(),
       updatedAt: Date.now(),
       status: "processing",
       chunksEmbedded: 0,
-      ...(metadata ? { metadata } : {}),
+      ...(metadataPatch ? { metadata: { ...existing.metadata, ...metadataPatch } } : {}),
     });
     return existing._id;
   }
@@ -288,11 +288,12 @@ export const saveEmbedding = internalMutation({
       const updates: Partial<Doc<"documents">> = { chunksEmbedded: newCount };
 
       // Check if all chunks are processed (either embedded or failed)
-      const allDlqEntries = await ctx.db
+      const chunkCount = doc.chunkCount ?? 1;
+      const dlqEntries = await ctx.db
         .query("crawlDeadLetter")
         .withIndex("by_url", (q) => q.eq("url", doc.url))
-        .collect();
-      const failedCount = allDlqEntries.length;
+        .take(chunkCount);
+      const failedCount = dlqEntries.length;
 
       if (doc.chunkCount !== undefined && newCount + failedCount >= doc.chunkCount) {
         if (doc.status !== "indexed") {
@@ -386,12 +387,12 @@ async function checkDocumentForFailure(
         updatedAt: Date.now(),
       });
     } else {
-      // Query ALL DLQ entries for this URL (across all batches), not just this jobId
-      const allDlqEntries = await ctx.db
+      // Query DLQ entries for this URL (bounded by chunk count)
+      const dlqEntries = await ctx.db
         .query("crawlDeadLetter")
         .withIndex("by_url", (q) => q.eq("url", url))
-        .collect();
-      const failedCount = allDlqEntries.length;
+        .take(chunkCount);
+      const failedCount = dlqEntries.length;
       const embeddedCount = doc.chunksEmbedded || 0;
 
       if (failedCount + embeddedCount >= chunkCount) {
@@ -471,10 +472,48 @@ export const onChunkEmbedded = internalMutation({
   },
 });
 
+export const resetStuckDLQEntries = internalMutation({
+  args: { timeoutMs: v.optional(v.number()) },
+  handler: async (ctx, { timeoutMs }) => {
+    const timeout = timeoutMs ?? 30 * 60 * 1000; // 30 minutes default
+    const cutoff = Date.now() - timeout;
+
+    const stuckEntries = await ctx.db
+      .query("crawlDeadLetter")
+      .withIndex("by_status", (q) => q.eq("status", "processing"))
+      .take(100);
+
+    let reset = 0;
+    for (const entry of stuckEntries) {
+      if ((entry.lastAttemptAt ?? 0) < cutoff) {
+        await ctx.db.patch(entry._id, {
+          status: "pending_retry",
+          lastAttemptAt: Date.now(),
+        });
+        reset++;
+      }
+    }
+    return { reset };
+  },
+});
+
 export const retryDeadLetterQueue = internalMutation({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, { limit }) => {
     const batchSize = limit ?? 20;
+
+    // Idempotency guard: if entries are already in "processing" state from a
+    // concurrent or crashed run, skip this batch to avoid duplicate processing.
+    // The resetStuckDLQEntries cron will recover stuck entries after 30 minutes.
+    const currentlyProcessing = await ctx.db
+      .query("crawlDeadLetter")
+      .withIndex("by_status", (q) => q.eq("status", "processing"))
+      .first();
+    if (currentlyProcessing) {
+      console.log("Skipping DLQ retry: entries already in processing state");
+      return { reprocessed: 0, remaining: "skipped" as const };
+    }
+
     const pendingDLQ = await ctx.db
       .query("crawlDeadLetter")
       .withIndex("by_status", (q) => q.eq("status", "pending_retry"))

@@ -23,7 +23,7 @@ vi.mock("@/components/ui/card", () => (globalThis as any).currentAdminMocks.card
 vi.mock("@/components/ui/button", () => (globalThis as any).currentAdminMocks.buttonMock);
 vi.mock("sonner", () => (globalThis as any).currentAdminMocks.sonnerMock as any);
 
-import AdminSettingsPage from "@/app/admin/settings/page";
+import AdminSettingsPage from "@/app/admin/(admin-shell)/settings/page";
 
 vi.mock("@/components/ui/switch", () => ({
   Switch: ({ id, checked, onCheckedChange }: any) => (

@@ -2,7 +2,7 @@
 
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
@@ -35,7 +35,7 @@ export function NewChatButton({ onCreateThread }: NewChatButtonProps) {
         setIsCreating(false);
         toast.error("Failed to start conversation. Please try again.");
       } finally {
-        setTimeout(() => {
+        timeoutRef.current = setTimeout(() => {
           creatingRef.current = false;
           setIsCreating(false);
         }, 500);
@@ -46,18 +46,26 @@ export function NewChatButton({ onCreateThread }: NewChatButtonProps) {
     }
   }, [onCreateThread, router]);
 
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
   return (
-    <div className="p-3">
-      <Button
-        variant="outline"
-        size="default"
+    <div className="p-4 md:p-5 pb-3">
+      <button
         onClick={handleClick}
         disabled={isCreating}
-        className="w-full justify-start gap-2 border-[var(--border)] bg-transparent text-[var(--text-sidebar)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-sidebar)]"
+        className="group relative flex w-full items-center justify-start gap-2.5 rounded-[12px] border border-white/10 bg-white/[0.02] px-4 py-3 text-sm font-medium text-zinc-300 transition-all duration-300 ease-[var(--ease-spring)] hover:border-[var(--accent)]/40 hover:bg-[var(--accent)]/5 hover:text-[var(--accent)] hover:shadow-[0_0_12px_rgba(212,168,74,0.1)] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] disabled:opacity-50 min-h-[44px]"
       >
-        <Plus className="h-4 w-4" />
-        {isCreating ? "Creating..." : "New Chat"}
-      </Button>
+        <Plus className="h-4 w-4 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-90" />
+        {isCreating ? "Starting…" : "New Chat"}
+      </button>
     </div>
   );
 }

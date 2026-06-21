@@ -17,7 +17,7 @@ const resilientEmbeddingModel: EmbeddingModel = {
 };
 
 export const rag = new RAG(components.rag, {
-  embeddingDimension: 3072,
+  embeddingDimension: 768,
   textEmbeddingModel: resilientEmbeddingModel,
   filterNames: ["category", "source"],
 });

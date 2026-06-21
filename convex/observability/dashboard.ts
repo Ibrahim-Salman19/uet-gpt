@@ -3,7 +3,7 @@ import { query } from "../_generated/server";
 import { isAdmin } from "../auth";
 
 export const getObservabilityData = query({
-  args: {},
+  args: { now: v.optional(v.number()) },
   returns: v.object({
     metrics: v.object({
       queriesTotal: v.number(),
@@ -33,7 +33,7 @@ export const getObservabilityData = query({
       }),
     ),
   }),
-  handler: async (ctx) => {
+  handler: async (ctx, args) => {
     const admin = await isAdmin(ctx);
     if (!admin) {
       return {
@@ -54,7 +54,7 @@ export const getObservabilityData = query({
     const settings = await ctx.db
       .query("appSettings")
       .withIndex("by_section", (q) => q.eq("section", "observability"))
-      .collect();
+      .take(200);
 
     const settingsMap = new Map<string, unknown>();
     for (const s of settings) {
@@ -111,7 +111,8 @@ export const getObservabilityData = query({
       }
     }
 
-    const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000;
+    const now = args.now ?? Date.now();
+    const twentyFourHoursAgo = now - 24 * 60 * 60 * 1000;
     const recentErrors = await ctx.db
       .query("adminAuditLog")
       .withIndex("by_createdAt", (q) => q.gte("createdAt", twentyFourHoursAgo))

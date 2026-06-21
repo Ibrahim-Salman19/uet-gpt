@@ -84,7 +84,7 @@ export function AuthGuard({
           <Card className="max-w-md w-full">
             <CardHeader className="text-center">
               <div className="flex justify-center mb-4">
-                <ShieldAlert className="h-12 w-12 text-red-500" />
+                <ShieldAlert className="h-12 w-12 text-[var(--destructive)]" />
               </div>
               <CardTitle>Access Denied</CardTitle>
               <CardDescription>

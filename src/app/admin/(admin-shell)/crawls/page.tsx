@@ -2,16 +2,7 @@
 
 import { api } from "convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import {
-  AlertTriangle,
-  CheckCircle2,
-  Clock,
-  Globe,
-  Loader2,
-  Play,
-  RotateCw,
-  XCircle,
-} from "lucide-react";
+import { AlertTriangle, CheckCircle2, Clock, Globe, Loader2, Play, XCircle } from "lucide-react";
 import { useState } from "react";
 import { LoadingState } from "@/components/loading-state";
 import { Badge } from "@/components/ui/badge";
@@ -49,7 +40,6 @@ export default function AdminCrawlsPage() {
         maxPages: 500,
         maxDepth: UET_CRAWL_CONFIG.maxDepth,
       });
-      window.location.reload();
     } catch (error) {
       console.error("Failed to trigger crawl:", error);
     } finally {
@@ -72,11 +62,12 @@ export default function AdminCrawlsPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => window.location.reload()}
-            className="h-8 border-white/5 bg-[#101012]/40 text-xs font-mono tracking-wider hover:bg-white/5 hover:text-white transition-all active:scale-[0.98] ease-[var(--ease-spring)]"
+            disabled
+            className="h-8 border-white/5 bg-[var(--surface-3)]/40 text-xs font-mono tracking-wider text-zinc-500"
+            title="Data updates automatically"
           >
-            <RotateCw className="h-3.5 w-3.5 mr-2 text-zinc-400" />
-            REFRESH
+            <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse mr-2" />
+            LIVE
           </Button>
           <Button
             size="sm"
@@ -97,7 +88,7 @@ export default function AdminCrawlsPage() {
       {crawls === undefined ? (
         <LoadingState type="admin-list" />
       ) : crawls.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 border border-white/5 rounded-xl bg-[#101012]/20">
+        <div className="flex flex-col items-center justify-center py-20 border border-white/5 rounded-xl bg-[var(--surface-3)]/20">
           <Globe className="h-10 w-10 text-zinc-500 mb-4" />
           <p className="text-xs text-zinc-400 font-mono tracking-wider">
             NO ACTIVE CRAWL RECORDS FOUND
@@ -105,7 +96,7 @@ export default function AdminCrawlsPage() {
           <Button
             variant="outline"
             size="sm"
-            className="mt-6 h-8 border-white/5 bg-[#101012]/40 text-xs font-mono tracking-wider hover:bg-white/5 hover:text-white transition-all active:scale-[0.98]"
+            className="mt-6 h-8 border-white/5 bg-[var(--surface-3)]/40 text-xs font-mono tracking-wider hover:bg-white/5 hover:text-white transition-all active:scale-[0.98]"
             onClick={handleTriggerCrawl}
             disabled={isTriggering}
           >
@@ -113,7 +104,7 @@ export default function AdminCrawlsPage() {
           </Button>
         </div>
       ) : (
-        <div className="border border-white/5 rounded-xl bg-[#101012]/20 overflow-hidden">
+        <div className="border border-white/5 rounded-xl bg-[var(--surface-3)]/20 overflow-hidden">
           <ScrollArea className="h-[calc(100dvh-220px)]">
             <div className="divide-y divide-white/[0.04]">
               {crawls.map((crawl: any) => (

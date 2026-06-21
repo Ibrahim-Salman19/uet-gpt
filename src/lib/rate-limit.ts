@@ -54,17 +54,27 @@ const anonLimiter = redis
   ? createRatelimit(redis, 10, 3600000, "chat/anonymous") // 10 requests/hour
   : null;
 
+function deniedResult(): RateLimitResult {
+  return {
+    success: false,
+    limit: 0,
+    remaining: 0,
+    reset: Date.now(),
+    pending: Promise.resolve(),
+  };
+}
+
 /**
  * Check rate limit for a chat request based on user role.
  *
  * @param identifier - Unique user identifier (userId or IP)
  * @param role - User role for limit tier
- * @returns Rate limit result or null if rate limiting is not configured
+ * @returns Rate limit result — denies requests when rate limiting is unavailable
  */
 export async function checkChatRateLimit(
   identifier: string,
   role: "user" | "admin" | "superadmin" | "anonymous" = "user",
-): Promise<RateLimitResult | null> {
+): Promise<RateLimitResult> {
   const limiter =
     role === "admin" || role === "superadmin"
       ? adminLimiter
@@ -73,15 +83,15 @@ export async function checkChatRateLimit(
         : userLimiter;
 
   if (!limiter) {
-    console.warn("[RATE-LIMIT] Rate limiting not configured — allowing through");
-    return null;
+    console.warn("[RATE-LIMIT] Rate limiting not configured — denying for safety");
+    return deniedResult();
   }
 
   try {
     return await limiter.limit(identifier);
   } catch (error) {
-    console.error("[RATE-LIMIT] Redis error — allowing through:", error);
-    return null;
+    console.error("[RATE-LIMIT] Redis error — denying for safety:", error);
+    return deniedResult();
   }
 }
 
@@ -91,19 +101,18 @@ const adminActionLimiter = redis ? createRatelimit(redis, 30, 60000, "admin/acti
 /**
  * Check rate limit for admin actions (role changes, etc.).
  * @param identifier - Admin user identifier
- * @returns Rate limit result or null if not configured
+ * @returns Rate limit result — denies when rate limiting is unavailable
  */
-export async function checkAdminActionRateLimit(
-  identifier: string,
-): Promise<RateLimitResult | null> {
+export async function checkAdminActionRateLimit(identifier: string): Promise<RateLimitResult> {
   if (!adminActionLimiter) {
-    return null;
+    console.warn("[RATE-LIMIT] Admin rate limiter not configured — denying for safety");
+    return deniedResult();
   }
   try {
     return await adminActionLimiter.limit(identifier);
   } catch (error) {
-    console.error("[RATE-LIMIT] Admin rate limit error:", error);
-    return null;
+    console.error("[RATE-LIMIT] Admin rate limit error — denying for safety:", error);
+    return deniedResult();
   }
 }
 

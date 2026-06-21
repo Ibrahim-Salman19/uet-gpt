@@ -1,6 +1,8 @@
 "use client";
 
+import { AlertCircle } from "lucide-react";
 import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
 
 interface ErrorViewProps {
   label: string;
@@ -16,33 +18,26 @@ export function ErrorView({ label, heading, message, error, reset }: ErrorViewPr
   }, [label, error]);
 
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-6 px-6 text-center">
-      <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
-        <svg
-          className="w-8 h-8 text-red-400"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        >
-          <circle cx="12" cy="12" r="10" />
-          <line x1="12" y1="8" x2="12" y2="12" />
-          <line x1="12" y1="16" x2="12.01" y2="16" />
-        </svg>
+    <div className="flex h-full flex-col items-center justify-center gap-6 px-6 text-center animate-in fade-in zoom-in-95 duration-300">
+      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--destructive)]/10 border border-[var(--destructive)]/20 shadow-sm ring-1 ring-[var(--destructive)]/10">
+        <AlertCircle className="h-8 w-8 text-[var(--destructive)]" />
       </div>
-      <div>
-        <h2 className="text-lg font-semibold text-zinc-100">{heading}</h2>
-        <p className="text-sm text-zinc-400 mt-2 max-w-md">{error.message || message}</p>
+      <div className="space-y-2">
+        <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
+          {heading}
+        </h2>
+        <p className="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
+          {error.message || message}
+        </p>
         {error.digest && (
-          <p className="text-xs text-zinc-600 mt-1 font-mono">Error ID: {error.digest}</p>
+          <p className="text-xs text-[var(--text-muted)] font-mono bg-[var(--surface-muted)] py-1 px-2 rounded-md inline-block mt-2">
+            Error ID: {error.digest}
+          </p>
         )}
       </div>
-      <button
-        onClick={reset}
-        className="px-6 py-2.5 bg-[var(--accent)] hover:opacity-90 text-[var(--accent-fg)] rounded-xl text-sm font-medium transition-all active:scale-95 cursor-pointer"
-      >
+      <Button onClick={reset} size="lg" className="mt-2 min-w-[120px]">
         Try Again
-      </button>
+      </Button>
     </div>
   );
 }

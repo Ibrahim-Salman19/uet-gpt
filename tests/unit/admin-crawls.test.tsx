@@ -29,7 +29,7 @@ vi.mock("lucide-react", () => (globalThis as any).currentAdminMocks.lucideMock);
 const mockConvex = (globalThis as any).currentAdminMocks.mockConvex;
 
 import { useMutation } from "convex/react";
-import AdminCrawlsPage from "@/app/admin/crawls/page";
+import AdminCrawlsPage from "@/app/admin/(admin-shell)/crawls/page";
 
 function buildMockCrawl(overrides: Record<string, unknown> = {}) {
   return {

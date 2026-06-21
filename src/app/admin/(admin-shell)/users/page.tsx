@@ -97,7 +97,9 @@ export default function AdminUsersPage() {
             placeholder="Search by name or email..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && !loading && query.trim().length >= 2 && handleSearch()}
+            onKeyDown={(e) =>
+              e.key === "Enter" && !loading && query.trim().length >= 2 && handleSearch()
+            }
             className="h-9 pl-9 bg-black/40 border-white/5 text-xs font-mono rounded text-zinc-300 focus-visible:ring-1 focus-visible:ring-[var(--accent)]"
           />
         </div>
@@ -132,7 +134,7 @@ export default function AdminUsersPage() {
       )}
 
       {users.length > 0 && (
-        <div className="border border-white/5 rounded-xl bg-[#101012]/40 backdrop-blur-sm overflow-hidden">
+        <div className="border border-white/5 rounded-xl bg-[var(--surface-3)]/40 backdrop-blur-sm overflow-hidden">
           {/* Table Header */}
           <div className="grid grid-cols-[1fr_1fr_auto_auto] gap-4 px-6 py-3 border-b border-white/5 text-[9px] font-mono text-zinc-500 uppercase tracking-wider">
             <span>User</span>

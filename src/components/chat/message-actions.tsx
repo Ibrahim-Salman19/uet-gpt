@@ -1,12 +1,12 @@
 "use client";
 
 import { Bookmark, Check, Copy, Pencil, ThumbsDown, ThumbsUp, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { usePreferences } from "@/components/preferences-provider";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
+import { cn, copyToClipboard } from "@/lib/utils";
 
 interface MessageActionsProps {
   content: string;
@@ -16,52 +16,6 @@ interface MessageActionsProps {
   onFeedback?: (rating: "thumbsUp" | "thumbsDown") => void;
   className?: string;
   show?: boolean;
-}
-
-function handleCopyAction(content: string, setCopied: (v: boolean) => void) {
-  return async () => {
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(content);
-      } else {
-        const textarea = document.createElement("textarea");
-        textarea.value = content;
-        textarea.style.position = "fixed";
-        textarea.style.top = "0";
-        textarea.style.left = "0";
-        document.body.appendChild(textarea);
-        textarea.focus();
-        textarea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textarea);
-      }
-      setCopied(true);
-      toast.success("Copied to clipboard");
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Copy failed:", err);
-      toast.error("Failed to copy");
-    }
-  };
-}
-
-function handlePinAction(
-  content: string,
-  pinned: boolean,
-  pinnedHighlights: { id: string; query: string; content: string }[],
-  addPin: (query: string, highlight: string) => void,
-  removePin: (id: string) => void,
-) {
-  return () => {
-    if (pinned) {
-      const pin = pinnedHighlights.find(
-        (p) => p.content.toLowerCase().trim() === content.toLowerCase().trim(),
-      );
-      if (pin) removePin(pin.id);
-    } else {
-      addPin(content.slice(0, 40) + (content.length > 40 ? "..." : ""), content);
-    }
-  };
 }
 
 function CopyButton({ copied, onCopy }: { copied: boolean; onCopy: () => void }) {
@@ -235,8 +189,27 @@ export function MessageActions({
   const { addPin, removePin, isPinned, pinnedHighlights } = usePreferences();
   const pinned = isPinned(content);
 
-  const handleCopy = handleCopyAction(content, setCopied);
-  const handlePin = handlePinAction(content, pinned, pinnedHighlights, addPin, removePin);
+  const handleCopy = useCallback(async () => {
+    const success = await copyToClipboard(content);
+    if (success) {
+      setCopied(true);
+      toast.success("Copied to clipboard");
+      setTimeout(() => setCopied(false), 2000);
+    } else {
+      toast.error("Failed to copy");
+    }
+  }, [content]);
+
+  const handlePin = useCallback(() => {
+    if (pinned) {
+      const pin = pinnedHighlights.find(
+        (p) => p.content.toLowerCase().trim() === content.toLowerCase().trim(),
+      );
+      if (pin) removePin(pin.id);
+    } else {
+      addPin(content.slice(0, 40) + (content.length > 40 ? "..." : ""), content);
+    }
+  }, [content, pinned, pinnedHighlights, addPin, removePin]);
 
   return (
     <div

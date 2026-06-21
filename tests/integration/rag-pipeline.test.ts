@@ -16,6 +16,9 @@ function createMockCtx() {
   const actionResults: Record<number, unknown> = {};
 
   const ctx = {
+    auth: {
+      getUserIdentity: vi.fn().mockResolvedValue({ subject: "clerk_test_123" }),
+    },
     runAction: vi.fn().mockImplementation(async (_ref: unknown, args: unknown) => {
       const idx = callIndex++;
       const result = actionResults[idx];

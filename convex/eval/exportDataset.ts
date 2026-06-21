@@ -32,6 +32,11 @@ export const exportGoldenDataset = internalQuery({
       { text: string; role: string; order: number; threadId: string }
     >();
 
+    const threadMessagesCache = new Map<
+      string,
+      Array<{ _id: string; text: string; role: string; order: number }>
+    >();
+
     let userCursor = null as string | null;
     let usersDone = false;
     let usersChecked = 0;
@@ -53,17 +58,64 @@ export const exportGoldenDataset = internalQuery({
             paginationOpts: { numItems: 20, cursor: threadCursor },
           });
 
-          for (const thread of threadsResult.page) {
-            if (thread.status !== "active") continue;
+          const activeThreads = threadsResult.page.filter((t) => t.status === "active");
+          const messagesResults = await Promise.all(
+            activeThreads.map((thread) =>
+              ctx
+                .runQuery(components.agent.messages.listMessagesByThreadId, {
+                  threadId: thread._id,
+                  order: "asc",
+                  paginationOpts: { numItems: 100, cursor: null },
+                })
+                .then((result) => ({ thread, result })),
+            ),
+          );
 
-            const messagesResult = await ctx.runQuery(
-              components.agent.messages.listMessagesByThreadId,
-              {
-                threadId: thread._id,
-                order: "asc",
-                paginationOpts: { numItems: 100, cursor: null },
-              },
-            );
+          for (const { thread, result: messagesResult } of messagesResults) {
+            // Cache the paired messages for this thread to avoid repeating queries later
+            if (!threadMessagesCache.has(thread._id)) {
+              const userMessages = messagesResult.page.filter(
+                (m) =>
+                  m.message &&
+                  typeof m.message === "object" &&
+                  "role" in m.message &&
+                  String(m.message.role) === "user" &&
+                  !m.tool,
+              );
+
+              const assistantMessages = messagesResult.page.filter(
+                (m) =>
+                  m.message &&
+                  typeof m.message === "object" &&
+                  "role" in m.message &&
+                  String(m.message.role) === "assistant" &&
+                  !m.tool,
+              );
+
+              const paired: Array<{ _id: string; text: string; role: string; order: number }> = [];
+              for (let i = 0; i < Math.min(userMessages.length, assistantMessages.length); i++) {
+                const userMsg = userMessages[i]!;
+                const assistantMsg = assistantMessages[i]!;
+                const text: string = typeof userMsg.text === "string" ? userMsg.text : "";
+                const answer: string =
+                  typeof assistantMsg.text === "string" ? assistantMsg.text : "";
+
+                paired.push({
+                  _id: userMsg._id,
+                  text,
+                  role: "user",
+                  order: i,
+                });
+                paired.push({
+                  _id: assistantMsg._id,
+                  text: answer,
+                  role: "assistant",
+                  order: i,
+                });
+              }
+
+              threadMessagesCache.set(thread._id, paired);
+            }
 
             for (const msg of messagesResult.page) {
               if (targetMessageIds.has(msg._id)) {
@@ -89,76 +141,29 @@ export const exportGoldenDataset = internalQuery({
                 });
               }
             }
+
+            // Early termination: stop scanning threads once all target messages found
+            if (messageInfos.size >= targetMessageIds.size) break;
           }
 
+          if (messageInfos.size >= targetMessageIds.size) break;
           threadsDone = threadsResult.isDone;
           threadCursor = threadsResult.continueCursor as string | null;
         }
+
+        // Early termination: stop scanning users once all target messages found
+        if (messageInfos.size >= targetMessageIds.size) break;
       }
 
       usersDone = usersPage.isDone;
       userCursor = usersPage.continueCursor;
     }
 
-    const threadMessagesCache = new Map<
-      string,
-      Array<{ _id: string; text: string; role: string; order: number }>
-    >();
-
     async function getPairedMessages(
       threadId: string,
       messageId: string,
       currentRole: string,
     ): Promise<{ query: string; answer: string }> {
-      if (!threadMessagesCache.has(threadId)) {
-        const msgsResult = await ctx.runQuery(components.agent.messages.listMessagesByThreadId, {
-          threadId,
-          order: "asc",
-          paginationOpts: { numItems: 100, cursor: null },
-        });
-
-        const userMessages = msgsResult.page.filter(
-          (m) =>
-            m.message &&
-            typeof m.message === "object" &&
-            "role" in m.message &&
-            String(m.message.role) === "user" &&
-            !m.tool,
-        );
-
-        const assistantMessages = msgsResult.page.filter(
-          (m) =>
-            m.message &&
-            typeof m.message === "object" &&
-            "role" in m.message &&
-            String(m.message.role) === "assistant" &&
-            !m.tool,
-        );
-
-        const paired: Array<{ _id: string; text: string; role: string; order: number }> = [];
-        for (let i = 0; i < Math.min(userMessages.length, assistantMessages.length); i++) {
-          const userMsg = userMessages[i]!;
-          const assistantMsg = assistantMessages[i]!;
-          const text: string = typeof userMsg.text === "string" ? userMsg.text : "";
-          const answer: string = typeof assistantMsg.text === "string" ? assistantMsg.text : "";
-
-          paired.push({
-            _id: userMessages[i]!._id,
-            text,
-            role: "user",
-            order: i,
-          });
-          paired.push({
-            _id: assistantMessages[i]!._id,
-            text: answer,
-            role: "assistant",
-            order: i,
-          });
-        }
-
-        threadMessagesCache.set(threadId, paired);
-      }
-
       const cached = threadMessagesCache.get(threadId) ?? [];
       const msgIndex = cached.findIndex((m) => m._id === messageId);
 

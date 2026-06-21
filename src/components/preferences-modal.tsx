@@ -81,7 +81,7 @@ export function PreferencesModal() {
       onClose={handleClose}
       className="fixed inset-0 z-[100] m-auto bg-transparent p-0 w-full max-w-[400px] border-none outline-none"
     >
-      <div className="bg-[#101012] border border-[#2d2d34] rounded-[1.5rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col pointer-events-auto">
+      <div className="bg-[var(--surface-3)] border border-[var(--surface-4)] rounded-[1.5rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col pointer-events-auto">
         <div className="px-6 py-5 border-b border-white/5 flex justify-between items-center bg-zinc-950/50">
           <h2 className="text-sm font-semibold text-zinc-100 tracking-wide font-sans">
             Preferences

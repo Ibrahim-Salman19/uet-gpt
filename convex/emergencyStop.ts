@@ -6,27 +6,26 @@ import { internalAction, internalMutation } from "./_generated/server";
 // See: requirePermission(ctx, "emergency:stop") on external entry points.
 
 export const stopBatch = internalMutation({
-  args: {},
+  args: {
+    shouldLog: v.optional(v.boolean()),
+  },
   returns: v.boolean(),
-  handler: async (ctx) => {
+  handler: async (ctx, args) => {
     const docs = await ctx.db
       .query("documents")
       .withIndex("by_status", (q) => q.eq("status", "processing"))
       .take(100);
-    for (const d of docs) {
-      await ctx.db.patch(d._id, { status: "failed" });
-    }
-
     const jobs = await ctx.db
       .query("crawlJobs")
       .withIndex("by_status", (q) => q.eq("status", "running"))
       .take(100);
-    for (const j of jobs) {
-      await ctx.db.patch(j._id, { status: "cancelled" });
-    }
+    await Promise.all([
+      ...docs.map((d) => ctx.db.patch(d._id, { status: "failed" })),
+      ...jobs.map((j) => ctx.db.patch(j._id, { status: "cancelled" })),
+    ]);
 
     // Audit log for emergency stop
-    if (docs.length > 0 || jobs.length > 0) {
+    if ((docs.length > 0 || jobs.length > 0) && (args.shouldLog ?? true)) {
       let adminUser = await ctx.db
         .query("users")
         .withIndex("by_role", (q) => q.eq("role", "superadmin"))
@@ -55,14 +54,22 @@ export const stopBatch = internalMutation({
 });
 
 export const stopAll = internalAction({
-  args: {},
+  args: {
+    isFirstRun: v.optional(v.boolean()),
+  },
   returns: v.null(),
-  handler: async (ctx) => {
-    let hasMore = true;
-    while (hasMore) {
-      hasMore = await ctx.runMutation(internal.emergencyStop.stopBatch);
+  handler: async (ctx, args) => {
+    const isFirst = args.isFirstRun ?? true;
+    const hasMore = await ctx.runMutation(internal.emergencyStop.stopBatch, {
+      shouldLog: isFirst,
+    });
+    if (hasMore) {
+      await ctx.scheduler.runAfter(0, internal.emergencyStop.stopAll, {
+        isFirstRun: false,
+      });
+    } else {
+      console.log("Emergency stop complete.");
     }
-    console.log("Emergency stop complete.");
   },
 });
 

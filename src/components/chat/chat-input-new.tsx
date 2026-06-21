@@ -9,6 +9,7 @@ interface ChatInputNewProps {
   onStop?: () => void;
   isLoading?: boolean;
   className?: string;
+  flat?: boolean;
 }
 
 function SendButton({
@@ -62,7 +63,13 @@ function SendButton({
   );
 }
 
-export function ChatInputNew({ onSend, onStop, isLoading, className }: ChatInputNewProps) {
+export function ChatInputNew({
+  onSend,
+  onStop,
+  isLoading,
+  className,
+  flat = false,
+}: ChatInputNewProps) {
   const [input, setInput] = React.useState("");
   const inputRef = React.useRef<HTMLTextAreaElement>(null);
   const { playTypingSound, playChimeSound, setVoiceTranscriptCallback, setVoiceInputOpen } =
@@ -135,7 +142,10 @@ export function ChatInputNew({ onSend, onStop, isLoading, className }: ChatInput
     <form
       onSubmit={handleSubmit}
       className={cn(
-        "bg-[var(--surface-base)]/80 backdrop-blur-xl border-t border-[var(--border)] p-3 pb-safe md:p-4 lg:p-5 relative z-20 flex flex-col gap-2",
+        "relative z-20 flex flex-col gap-2 w-full transition-all duration-300",
+        flat
+          ? "bg-transparent border-t-0 p-0"
+          : "bg-[var(--surface-base)]/70 backdrop-blur-2xl border-t border-[var(--border)]/60 p-3 pt-4 pb-safe md:p-5 md:pt-5 shadow-[0_-10px_40px_rgba(0,0,0,0.15)]",
         className,
       )}
     >
@@ -143,9 +153,9 @@ export function ChatInputNew({ onSend, onStop, isLoading, className }: ChatInput
         Ask anything about UET Taxila
       </label>
 
-      <div className="flex w-full items-end gap-2 rounded-2xl bg-[var(--surface-card)]/80 p-1.5 border border-[var(--border)] hover:border-[var(--border-hover)] focus-within:border-[var(--text-muted)] focus-within:ring-2 focus-within:ring-[var(--text-muted)]/20 focus-within:bg-[var(--surface-card)] transition-all duration-300 ease-[var(--ease-spring)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]">
+      <div className="flex w-full items-end gap-2 rounded-[20px] bg-[var(--surface-card)]/90 p-1.5 border border-[var(--border)]/80 hover:border-[var(--border-focus)] focus-within:border-[var(--accent)]/50 focus-within:ring-4 focus-within:ring-[var(--accent)]/10 focus-within:bg-[var(--surface-elevated)] transition-all duration-300 ease-[var(--ease-spring)] shadow-sm">
         {/* Multimodal Actions (Left) */}
-        <div className="flex items-center gap-1 mb-0.5 ml-1 shrink-0">
+        <div className="flex items-center gap-1 mb-0.5 ml-1.5 shrink-0">
           <button
             type="button"
             onClick={() => setVoiceInputOpen(true)}

@@ -1,4 +1,4 @@
-// @vitest-environment jsdom
+// @vitest-environment happy-dom
 import { describe, test, expect, vi, beforeEach } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { useStableQuery } from "../../src/hooks/use-stable-query";

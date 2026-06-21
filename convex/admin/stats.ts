@@ -175,6 +175,63 @@ export const cacheStats = query({
 });
 
 /**
+ * Consolidated dashboard overview data — fetches all metrics in a single request.
+ */
+export const getOverviewData = query({
+  args: {},
+  returns: v.object({
+    documentStats: v.object({
+      total: v.number(),
+      indexed: v.number(),
+      pending: v.number(),
+      failed: v.number(),
+    }),
+    userStats: v.object({
+      total: v.number(),
+      activeLast24h: v.number(),
+    }),
+    feedbackCount: v.number(),
+    crawlCount: v.number(),
+    cacheStats: v.object({
+      total: v.number(),
+    }),
+    recentCrawls: v.array(crawlValidator),
+    recentFeedback: v.array(feedbackValidator),
+  }),
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+
+    const stats = await ctx.db
+      .query("dashboardStats")
+      .withIndex("by_statsId", (q) => q.eq("statsId", "global"))
+      .unique();
+
+    const recentCrawls = await ctx.db.query("crawlJobs").order("desc").take(5);
+    const recentFeedback = await ctx.db.query("feedback").order("desc").take(10);
+
+    return {
+      documentStats: stats?.documentStats ?? { total: 0, indexed: 0, pending: 0, failed: 0 },
+      userStats: stats?.userStats ?? { total: 0, activeLast24h: 0 },
+      feedbackCount: stats?.feedbackCount ?? 0,
+      crawlCount: stats?.crawlCount ?? 0,
+      cacheStats: stats?.cacheStats ?? { total: 0 },
+      recentCrawls: recentCrawls.map((c: Doc<"crawlJobs">) => ({
+        _id: c._id,
+        status: c.status,
+        startedAt: c.startedAt,
+        trigger: c.trigger,
+      })),
+      recentFeedback: recentFeedback.map((f: Doc<"feedback">) => ({
+        _id: f._id,
+        rating: f.rating,
+        createdAt: f.createdAt,
+        category: f.category,
+      })),
+    };
+  },
+});
+
+/**
  * Background mutation run by cron to compute and store dashboard statistics.
  */
 export const computeDashboardStats = internalMutation({
@@ -218,7 +275,9 @@ export const computeDashboardStats = internalMutation({
     let feedbackTotal = 0;
     let feedbackCursor: string | null = null;
     while (true) {
-      const page = await ctx.db.query("feedback").paginate({ numItems: 1000, cursor: feedbackCursor });
+      const page = await ctx.db
+        .query("feedback")
+        .paginate({ numItems: 1000, cursor: feedbackCursor });
       feedbackTotal += page.page.length;
       if (page.isDone) break;
       feedbackCursor = page.continueCursor;
@@ -228,7 +287,9 @@ export const computeDashboardStats = internalMutation({
     let crawlTotal = 0;
     let crawlCursor: string | null = null;
     while (true) {
-      const page = await ctx.db.query("crawlJobs").paginate({ numItems: 1000, cursor: crawlCursor });
+      const page = await ctx.db
+        .query("crawlJobs")
+        .paginate({ numItems: 1000, cursor: crawlCursor });
       crawlTotal += page.page.length;
       if (page.isDone) break;
       crawlCursor = page.continueCursor;
@@ -238,7 +299,9 @@ export const computeDashboardStats = internalMutation({
     let cacheTotal = 0;
     let cacheCursor: string | null = null;
     while (true) {
-      const page = await ctx.db.query("semanticCache").paginate({ numItems: 1000, cursor: cacheCursor });
+      const page = await ctx.db
+        .query("semanticCache")
+        .paginate({ numItems: 1000, cursor: cacheCursor });
       cacheTotal += page.page.length;
       if (page.isDone) break;
       cacheCursor = page.continueCursor;
@@ -290,13 +353,17 @@ export const deleteDocument = mutation({
     const document = await ctx.db.get(args.documentId);
     if (!document) throw new ConvexError("Document not found");
 
-    const chunks = await ctx.db
-      .query("crawledChunks")
-      .withIndex("by_documentId", (q) => q.eq("documentId", args.documentId))
-      .collect();
+    while (true) {
+      const chunks = await ctx.db
+        .query("crawledChunks")
+        .withIndex("by_documentId", (q) => q.eq("documentId", args.documentId))
+        .take(100);
 
-    for (const chunk of chunks) {
-      await ctx.db.delete(chunk._id);
+      if (chunks.length === 0) {
+        break;
+      }
+
+      await Promise.all(chunks.map((chunk) => ctx.db.delete(chunk._id)));
     }
 
     await ctx.db.delete(args.documentId);

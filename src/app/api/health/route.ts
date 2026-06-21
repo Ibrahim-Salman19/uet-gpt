@@ -53,8 +53,9 @@ export async function GET(req: NextRequest) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  const services: Record<string, ServiceStatus> = {
-    convex: await checkService(
+  // Start all checks in parallel
+  const checks: Record<string, Promise<ServiceStatus>> = {
+    convex: checkService(
       "Convex",
       async () => {
         const url = process.env.NEXT_PUBLIC_CONVEX_URL;
@@ -72,7 +73,7 @@ export async function GET(req: NextRequest) {
       },
       true,
     ),
-    groq: await checkService(
+    groq: checkService(
       "Groq",
       async () => {
         if (!process.env.GROQ_API_KEY) return false;
@@ -90,7 +91,7 @@ export async function GET(req: NextRequest) {
       },
       true,
     ),
-    gemini: await checkService(
+    gemini: checkService(
       "Gemini",
       async () => {
         if (!process.env.GEMINI_API_KEY) return false;
@@ -108,7 +109,7 @@ export async function GET(req: NextRequest) {
       },
       true,
     ),
-    cerebras: await checkService(
+    cerebras: checkService(
       "Cerebras",
       async () => {
         if (!process.env.CEREBRAS_API_KEY) return false;
@@ -126,7 +127,7 @@ export async function GET(req: NextRequest) {
       },
       true,
     ),
-    clerk: await checkService(
+    clerk: checkService(
       "Clerk",
       async () => {
         return !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
@@ -134,6 +135,11 @@ export async function GET(req: NextRequest) {
       true,
     ),
   };
+  const entries = Object.entries(checks);
+  const results = await Promise.all(
+    entries.map(async ([key, promise]) => [key, await promise] as const),
+  );
+  const services: Record<string, ServiceStatus> = Object.fromEntries(results);
 
   const allOk = Object.values(services).every((s) => s.status === "ok");
   const anyOk = Object.values(services).some((s) => s.status === "ok");

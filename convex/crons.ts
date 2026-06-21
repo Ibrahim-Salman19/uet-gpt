@@ -24,6 +24,15 @@ crons.interval("retry-dead-letter", { hours: 4 }, internal.crawl.mutations.retry
   limit: 100,
 });
 
+// Reset DLQ entries stuck in "processing" state (worker crash recovery)
+// Runs every 30 minutes — entries stuck for >30min are reset to "pending_retry"
+crons.interval(
+  "reset-stuck-dlq-entries",
+  { minutes: 30 },
+  internal.crawl.mutations.resetStuckDLQEntries,
+  {},
+);
+
 // Every 2 hours: detect crawl jobs stuck in "running" state for >2 hours (reduced from 30min)
 crons.interval("fail-stuck-crawl-jobs", { hours: 2 }, internal.crawl.workflow.failStuckJobs);
 

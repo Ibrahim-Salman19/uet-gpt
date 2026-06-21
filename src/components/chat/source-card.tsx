@@ -1,6 +1,7 @@
 "use client";
 
 import { ExternalLink, Percent } from "lucide-react";
+import { useMemo } from "react";
 import type { Source } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +12,14 @@ interface SourceCardProps {
 }
 
 export function SourceCard({ source, index, className }: SourceCardProps) {
+  const hostname = useMemo(() => {
+    try {
+      return new URL(source.url).hostname;
+    } catch {
+      return source.url;
+    }
+  }, [source.url]);
+
   return (
     <a
       href={source.url?.startsWith("http") ? source.url : "#"}
@@ -31,15 +40,7 @@ export function SourceCard({ source, index, className }: SourceCardProps) {
         <p className="truncate text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors duration-[var(--duration-fast)]">
           {source.title}
         </p>
-        <p className="mt-0.5 truncate text-xs text-[var(--text-muted)]">
-          {(() => {
-            try {
-              return new URL(source.url).hostname;
-            } catch {
-              return source.url;
-            }
-          })()}
-        </p>
+        <p className="mt-0.5 truncate text-xs text-[var(--text-muted)]">{hostname}</p>
         {(() => {
           const excerpt = source.excerpt || source.providerOptions?.excerpt;
           if (excerpt) {

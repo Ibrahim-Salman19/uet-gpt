@@ -8,10 +8,7 @@ import { api } from "../../convex/_generated/api";
 import { streamRegistry } from "./stream-registry";
 
 export function useMessages(threadId: string | undefined) {
-  const messagesData = useStableQuery(
-    api.messages.list,
-    threadId ? { threadId } : "skip",
-  );
+  const messagesData = useStableQuery(api.messages.list, threadId ? { threadId } : "skip");
 
   const [streamingMessage, setStreamingMessage] = useState<ChatMessage | null>(null);
 

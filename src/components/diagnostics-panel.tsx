@@ -5,49 +5,42 @@ import * as React from "react";
 import { usePreferences } from "@/components/preferences-provider";
 import { cn } from "@/lib/utils";
 
-export function DiagnosticsPanel() {
+export function DiagnosticsPanel({ inputFocused }: { inputFocused?: boolean }) {
   const { diagnosticsOpen, setDiagnosticsOpen, webglEnabled } = usePreferences();
   const [fps, setFps] = React.useState(60);
   const [ping, setPing] = React.useState(12);
 
-  // Calculate actual FPS dynamically
+  // Throttle calculations using a 3-second setInterval with simulated values
   React.useEffect(() => {
     if (!diagnosticsOpen) return;
 
-    let lastTime = performance.now();
-    let frames = 0;
-    let animId: number;
-
-    const tick = () => {
-      const now = performance.now();
-      frames++;
-      if (now > lastTime + 1000) {
-        setFps(Math.round((frames * 1000) / (now - lastTime)));
-        frames = 0;
-        lastTime = now;
-        // Jitter ping slightly for realistic system response representation
-        setPing(Math.round(8 + Math.random() * 8));
-      }
-      animId = requestAnimationFrame(tick);
+    const updateMetrics = () => {
+      // Simulate FPS between 58 and 62
+      setFps(Math.round(58 + Math.random() * 4));
+      // Jitter ping slightly for realistic system response representation
+      setPing(Math.round(8 + Math.random() * 8));
     };
 
-    animId = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(animId);
+    // Initial update
+    updateMetrics();
+
+    const intervalId = setInterval(updateMetrics, 3000);
+    return () => clearInterval(intervalId);
   }, [diagnosticsOpen]);
 
   return (
     <div
       id="diagnostics-panel"
       className={cn(
-        "absolute bottom-0 inset-x-0 bg-[#0f0f12]/95 border-t border-[#2d2d34] backdrop-blur-xl z-[40] transition-transform duration-500 p-5 select-none rounded-b-2xl md:rounded-b-3xl pointer-events-auto",
-        diagnosticsOpen ? "translate-y-0" : "translate-y-full",
+        "absolute bottom-0 inset-x-0 bg-[var(--surface-2)]/95 border-t border-[var(--surface-4)] backdrop-blur-xl z-[40] transition-transform duration-500 p-5 select-none rounded-b-2xl md:rounded-b-3xl pointer-events-auto",
+        diagnosticsOpen && !inputFocused ? "translate-y-0" : "translate-y-full",
       )}
     >
       <div className="flex justify-between items-center border-b border-white/5 pb-3 mb-4">
         <div className="flex items-center gap-2">
           <span className="w-1.5 h-1.5 bg-[var(--accent)] rounded-full animate-ping"></span>
           <h4 className="text-[10px] font-semibold uppercase tracking-wider text-zinc-300 font-mono">
-            UETGPT System Diagnostics
+            UETGPT System Diagnostics (Simulated Telemetry)
           </h4>
         </div>
         <button

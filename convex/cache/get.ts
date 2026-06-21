@@ -69,14 +69,18 @@ async function checkSourceStaleness(ctx: any, entry: any): Promise<boolean> {
   const sourceEntryIds = entry.sourceEntryIds;
   if (!sourceEntryIds || sourceEntryIds.length === 0) return false;
 
+  // Fast path: use denormalized maxDocumentUpdatedAt if available
+  if (entry.maxDocumentUpdatedAt) {
+    return entry.maxDocumentUpdatedAt > entry.createdAt;
+  }
+
+  // Fallback: fetch all source docs in a single query
   try {
-    const lookups = await ctx.runQuery(_internal.cache.internal_queries.getDocsByEntryIds, {
+    const docs = await ctx.runQuery(_internal.cache.internal_queries.getDocsByEntryIds, {
       entryIds: sourceEntryIds,
     });
-    for (const { doc } of lookups) {
-      if (doc && (doc.updatedAt > entry.createdAt || doc.crawledAt > entry.createdAt)) {
-        return true;
-      }
+    if (docs.some((d: any) => d.doc && d.doc.updatedAt > entry.createdAt)) {
+      return true;
     }
   } catch (err) {
     console.error("checkSourceStaleness query failed:", err);
@@ -104,6 +108,19 @@ async function findMatchingCacheEntry(
 
   const isStale = await checkSourceStaleness(ctx, cached.entry);
   if (isStale) return null;
+
+  // Defensive: verify source chunks still exist (orphaned by document deletion)
+  if (cached.entry.sourceEntryIds && cached.entry.sourceEntryIds.length > 0) {
+    const sourceExists = await ctx.runQuery(_internal.cache.internal_queries.chunksExistByRagIds, {
+      ragIds: cached.entry.sourceEntryIds,
+    });
+    if (!sourceExists.every(Boolean)) {
+      await ctx.runMutation(_internal.cache.internal_queries.deleteCacheEntry, {
+        id: cached.entryId,
+      });
+      return null;
+    }
+  }
 
   await ctx.runMutation(_internal.cache.internal_queries.incrementHits, { id: cached.entryId });
 

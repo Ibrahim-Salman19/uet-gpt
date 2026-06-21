@@ -4,7 +4,7 @@ import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, copyToClipboard } from "@/lib/utils";
 
 interface MarkdownProps {
   content: string;
@@ -15,12 +15,10 @@ function CodeBlock({ language, children }: { language?: string; children: string
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(children);
+    const success = await copyToClipboard(children);
+    if (success) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // silently fail
     }
   };
 

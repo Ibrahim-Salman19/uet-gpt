@@ -2,7 +2,7 @@
 
 import { UserButton, useUser } from "@clerk/nextjs";
 import { api } from "convex/_generated/api";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import { ChevronRight, Download, Info, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { useStableQuery } from "@/hooks/use-stable-query";
 import { cn } from "@/lib/utils";
 
 const FONT_SIZES = [
@@ -72,7 +73,7 @@ function RadioOption<T extends string>({
         "flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left transition-all duration-300 cursor-pointer active:scale-[0.99]",
         selected === value
           ? "border-[var(--accent)]/40 bg-[var(--accent)]/5 shadow-[0_4px_20px_rgba(0,0,0,0.2)]"
-          : "border-white/5 bg-[#101012]/40 hover:border-white/10 hover:bg-[#101012]/60",
+          : "border-white/5 bg-[var(--surface-3)]/40 hover:border-white/10 hover:bg-[var(--surface-3)]/60",
       )}
     >
       <div
@@ -95,7 +96,7 @@ function RadioOption<T extends string>({
 
 export default function SettingsPage() {
   const { user } = useUser();
-  const userData = useQuery(api.users.getByClerkId, user?.id ? { clerkId: user.id } : "skip");
+  const userData = useStableQuery(api.users.getByClerkId, user?.id ? { clerkId: user.id } : "skip");
   const updatePreferences = useMutation(api.users.updatePreferences);
   const [fontSize, setFontSize] = useState<string>("medium");
   const [model, setModel] = useState<string>("llama-3.1-8b");
@@ -107,7 +108,7 @@ export default function SettingsPage() {
     if (userData?.preferences?.model) {
       setModel(userData.preferences.model);
     }
-  }, [userData]);
+  }, [userData?.preferences?.fontSize, userData?.preferences?.model]);
 
   const handleFontSizeChange = async (value: string) => {
     setFontSize(value);
@@ -139,7 +140,7 @@ export default function SettingsPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="border-b border-[#222226] bg-[#0a0a0c]/60 backdrop-blur-md px-3 py-3 md:px-6 md:py-5 sticky top-0 z-10">
+      <div className="border-b border-[var(--surface-5)] bg-[var(--surface-1)]/60 backdrop-blur-md px-3 py-3 md:px-6 md:py-5 sticky top-0 z-10">
         <h1 className="text-base font-semibold text-zinc-100 font-sans tracking-tight">Settings</h1>
         <p className="text-xs text-zinc-500 mt-0.5 font-sans">
           Manage your application preferences
@@ -149,7 +150,7 @@ export default function SettingsPage() {
       <ScrollArea className="flex-1 bg-transparent">
         <div className="mx-auto max-w-2xl px-3 py-4 md:px-6 md:py-6 space-y-6 pb-20 md:pb-8">
           <SettingsSection title="Account" description="Manage your profile">
-            <div className="flex items-center gap-3 rounded-xl border border-white/5 bg-[#101012]/40 backdrop-blur-sm px-4 py-3">
+            <div className="flex items-center gap-3 rounded-xl border border-white/5 bg-[var(--surface-3)]/40 backdrop-blur-sm px-4 py-3">
               <UserButton
                 appearance={{
                   elements: {
@@ -218,7 +219,7 @@ export default function SettingsPage() {
               <button
                 type="button"
                 onClick={handleExport}
-                className="flex w-full items-center gap-2.5 rounded-xl border border-white/5 bg-[#101012]/40 px-4 py-3 text-xs font-semibold text-zinc-300 transition-all duration-300 hover:bg-[#101012]/75 hover:border-white/10 active:scale-[0.98] cursor-pointer font-sans"
+                className="flex w-full items-center gap-2.5 rounded-xl border border-white/5 bg-[var(--surface-3)]/40 px-4 py-3 text-xs font-semibold text-zinc-300 transition-all duration-300 hover:bg-[var(--surface-3)]/75 hover:border-white/10 active:scale-[0.98] cursor-pointer font-sans"
               >
                 <Download className="h-4 w-4 text-zinc-400" />
                 Export chat history
@@ -237,7 +238,7 @@ export default function SettingsPage() {
           <Separator className="bg-white/5" />
 
           <SettingsSection title="About" description="Version and legal information">
-            <div className="flex items-center gap-3 rounded-xl border border-white/5 bg-[#101012]/40 backdrop-blur-sm px-4 py-3.5">
+            <div className="flex items-center gap-3 rounded-xl border border-white/5 bg-[var(--surface-3)]/40 backdrop-blur-sm px-4 py-3.5">
               <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-[var(--accent)]/10 border border-[var(--accent)]/20">
                 <Info className="h-4 w-4 text-[var(--accent)]" />
               </div>

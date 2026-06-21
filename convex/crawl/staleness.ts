@@ -9,12 +9,15 @@ export const markStaleDocuments = internalMutation({
     const batchSize = limit ?? 500;
     const statuses = ["active", "pending_embed", "processing", "indexed"] as const;
     let marked = 0;
+    let hasMore = false;
 
     for (const status of statuses) {
       const docs = await ctx.db
         .query("documents")
         .withIndex("by_status", (q) => q.eq("status", status))
         .take(batchSize);
+
+      if (docs.length >= batchSize) hasMore = true;
 
       for (const doc of docs) {
         if (doc.crawlSessionId !== crawlSessionId) {
@@ -23,7 +26,7 @@ export const markStaleDocuments = internalMutation({
         }
       }
     }
-    return { marked, remaining: marked > 0 ? "more" : "done" };
+    return { marked, remaining: hasMore ? "more" : "done" };
   },
 });
 
@@ -66,8 +69,7 @@ export const purgeStaleDocuments = internalMutation({
     if (purged < batchSize) {
       const isStaleDocs = await ctx.db
         .query("documents")
-        .withIndex("by_status", (q) => q.eq("status", "indexed"))
-        .filter((q) => q.eq(q.field("isStale"), true))
+        .withIndex("by_status_and_isStale", (q) => q.eq("status", "indexed").eq("isStale", true))
         .take(batchSize);
 
       for (const doc of isStaleDocs) {
@@ -97,14 +99,12 @@ export const flagExpiredDocuments = internalMutation({
 
     const indexedDocs = await ctx.db
       .query("documents")
-      .withIndex("by_status", (q) => q.eq("status", "indexed"))
-      .filter((q) => q.neq(q.field("isStale"), true))
+      .withIndex("by_status_and_isStale", (q) => q.eq("status", "indexed").eq("isStale", false))
       .take(batchSize);
 
     const activeDocs = await ctx.db
       .query("documents")
-      .withIndex("by_status", (q) => q.eq("status", "active"))
-      .filter((q) => q.neq(q.field("isStale"), true))
+      .withIndex("by_status_and_isStale", (q) => q.eq("status", "active").eq("isStale", false))
       .take(batchSize);
 
     const candidates = [...indexedDocs, ...activeDocs];

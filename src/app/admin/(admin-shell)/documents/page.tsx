@@ -96,7 +96,7 @@ export default function AdminDocumentsPage() {
           variant="outline"
           size="sm"
           onClick={() => router.refresh()}
-          className="h-8 border-white/5 bg-[#101012]/40 text-xs font-mono tracking-wider hover:bg-white/5 hover:text-white transition-all active:scale-[0.98]"
+          className="h-8 border-white/5 bg-[var(--surface-3)]/40 text-xs font-mono tracking-wider hover:bg-white/5 hover:text-white transition-all active:scale-[0.98]"
         >
           <RefreshCw className="h-3.5 w-3.5 mr-2 text-zinc-400" />
           REFRESH
@@ -119,7 +119,7 @@ export default function AdminDocumentsPage() {
             <SelectTrigger className="w-[130px] h-9 bg-black/40 border-white/5 text-xs font-mono rounded">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
-            <SelectContent className="bg-[#101012] border-white/10 text-xs font-mono">
+            <SelectContent className="bg-[var(--surface-3)] border-white/10 text-xs font-mono">
               <SelectItem value="all">ALL_STATUS</SelectItem>
               <SelectItem value="indexed">INDEXED</SelectItem>
               <SelectItem value="pending">PENDING</SelectItem>
@@ -132,7 +132,7 @@ export default function AdminDocumentsPage() {
             <SelectTrigger className="w-[150px] h-9 bg-black/40 border-white/5 text-xs font-mono rounded">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
-            <SelectContent className="bg-[#101012] border-white/10 text-xs font-mono">
+            <SelectContent className="bg-[var(--surface-3)] border-white/10 text-xs font-mono">
               <SelectItem value="all">ALL_CATEGORIES</SelectItem>
               <SelectItem value="admissions">ADMISSIONS</SelectItem>
               <SelectItem value="academics">ACADEMICS</SelectItem>
@@ -148,7 +148,7 @@ export default function AdminDocumentsPage() {
       {documents === undefined ? (
         <LoadingState type="admin-list" />
       ) : filteredDocs.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 border border-white/5 rounded-xl bg-[#101012]/20">
+        <div className="flex flex-col items-center justify-center py-20 border border-white/5 rounded-xl bg-[var(--surface-3)]/20">
           <FileText className="h-10 w-10 text-zinc-500 mb-4" />
           <p className="text-xs text-zinc-400 font-mono tracking-wider">
             {search || statusFilter !== "all" || categoryFilter !== "all"
@@ -157,7 +157,7 @@ export default function AdminDocumentsPage() {
           </p>
         </div>
       ) : (
-        <div className="border border-white/5 rounded-xl bg-[#101012]/20 overflow-hidden">
+        <div className="border border-white/5 rounded-xl bg-[var(--surface-3)]/20 overflow-hidden">
           <ScrollArea className="h-[calc(100dvh-230px)]">
             <div className="divide-y divide-white/[0.04]">
               {filteredDocs.map((doc: any) => (

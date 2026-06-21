@@ -50,20 +50,13 @@ async function insertUserMessage(
 }
 
 async function fetchChatResponse(
-  threadId: string,
-  convex: any,
+  messages: { role: string; content: string }[],
   abortSignal: AbortSignal,
 ): Promise<{ response: Response; sources: any[] }> {
-  const dbMessages = await convex.query(api.messages.list, { threadId });
-  const formattedMessages = dbMessages.map((msg: any) => ({
-    role: msg.role,
-    content: msg.content,
-  }));
-
   const response = await fetch("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ messages: formattedMessages }),
+    body: JSON.stringify({ messages }),
     signal: abortSignal,
   });
 
@@ -101,8 +94,8 @@ function getErrorMessage(err: unknown): string {
 async function executeStreamPhase(
   threadId: string,
   content: string,
-  insertMutation: any,
   convex: any,
+  insertMutation: any,
   abortController: AbortController,
 ): Promise<StreamResult> {
   const timeoutId = setTimeout(() => {
@@ -111,8 +104,25 @@ async function executeStreamPhase(
     toast.error("Response took too long. Please try again.");
   }, CHAT_TIMEOUT_MS);
   try {
-    await insertUserMessage(insertMutation, threadId, content);
-    const { response, sources } = await fetchChatResponse(threadId, convex, abortController.signal);
+    const dbMessages = await convex.query(api.messages.list, { threadId });
+    const isRetry =
+      dbMessages.length > 0 &&
+      dbMessages[dbMessages.length - 1].role === "user" &&
+      dbMessages[dbMessages.length - 1].content === content.trim();
+
+    if (!isRetry) {
+      await insertUserMessage(insertMutation, threadId, content);
+    }
+
+    const formattedMessages = dbMessages.map((m: any) => ({ role: m.role, content: m.content }));
+    if (!isRetry) {
+      formattedMessages.push({ role: "user", content: content.trim() });
+    }
+
+    const { response, sources } = await fetchChatResponse(
+      formattedMessages,
+      abortController.signal,
+    );
     const reader = response.body?.getReader();
     if (!reader) throw new Error("No response body reader available");
     streamRegistry.update(threadId, "", sources);
@@ -142,14 +152,14 @@ export function useChat(threadId: string | undefined) {
 
   const insertMutation = useMutation(api.messages.insert);
 
-  // Abort any in-flight requests on unmount
+  // Abort any in-flight requests on thread change or unmount
   useEffect(() => {
     return () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
     };
-  }, []);
+  }, [threadId]);
 
   function shouldSkipSend(content: string, threadId: string | undefined): boolean {
     return !content.trim() || !threadId || isLoadingRef.current;
@@ -178,22 +188,24 @@ export function useChat(threadId: string | undefined) {
       const abortController = new AbortController();
       abortControllerRef.current = abortController;
 
-      const result = await executeStreamPhase(
-        threadId,
-        content,
-        insertMutation,
-        convex,
-        abortController,
-      );
+      try {
+        const result = await executeStreamPhase(
+          threadId,
+          content,
+          convex,
+          insertMutation,
+          abortController,
+        );
 
-      if (!result.ok && result.error !== "aborted") {
-        setError(result.error);
-        toast.error(result.error);
+        if (!result.ok && result.error !== "aborted") {
+          setError(result.error);
+          toast.error(result.error);
+        }
+      } finally {
+        cleanupStreamState(threadId, generation);
       }
-
-      cleanupStreamState(threadId, generation);
     },
-    [threadId, insertMutation, convex],
+    [threadId, convex, insertMutation],
   );
 
   const handleStop = useCallback(() => {

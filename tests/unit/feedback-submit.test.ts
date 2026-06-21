@@ -22,10 +22,12 @@ function makeChain(value: unknown) {
     withIndex: vi.fn(),
     unique: vi.fn(),
     collect: vi.fn(),
+    take: vi.fn(),
   };
   chain.withIndex.mockReturnValue(chain);
   chain.unique.mockResolvedValue(value);
   chain.collect.mockResolvedValue(value);
+  chain.take.mockResolvedValue(value);
   return chain;
 }
 
@@ -35,7 +37,7 @@ describe("feedback:submit", () => {
     const mockQuery = vi
       .fn()
       .mockReturnValueOnce(makeChain({ _id: "users_id_123" as Id<"users">, clerkId: "clerk_test_123", isActive: true }))
-      .mockReturnValueOnce(makeChain([]));
+      .mockReturnValueOnce(makeChain(null));
 
     const mockCtx: MockMutationCtx = {
       auth: {

@@ -365,6 +365,14 @@
   .stagger-enter > *:nth-child(8) {
     animation-delay: 350ms;
   }
+
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
 }
 
 @keyframes stagger-fade-in {

@@ -13,19 +13,24 @@ export const run = internalMutation({
         numItems: 100,
       });
 
-      for (const doc of page.page) {
-        if (doc.chunksEmbedded === undefined) {
-          if (doc.status === "indexed") {
-            await ctx.db.patch(doc._id, { chunksEmbedded: doc.chunkCount || 0 });
-            updated++;
-          } else {
-            const chunks = await ctx.db
-              .query("crawledChunks")
-              .withIndex("by_documentId", (q) => q.eq("documentId", doc._id))
-              .take(200);
-            await ctx.db.patch(doc._id, { chunksEmbedded: chunks.length });
-            updated++;
-          }
+      const docsToUpdate = page.page.filter((doc) => doc.chunksEmbedded === undefined);
+      if (docsToUpdate.length > 0) {
+        const updates = await Promise.all(
+          docsToUpdate.map(async (doc) => {
+            if (doc.status === "indexed") {
+              return { id: doc._id, count: doc.chunkCount || 0 };
+            } else {
+              const chunks = await ctx.db
+                .query("crawledChunks")
+                .withIndex("by_documentId", (q) => q.eq("documentId", doc._id))
+                .take(200);
+              return { id: doc._id, count: chunks.length };
+            }
+          }),
+        );
+        for (const update of updates) {
+          await ctx.db.patch(update.id, { chunksEmbedded: update.count });
+          updated++;
         }
       }
 
