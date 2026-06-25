@@ -2,13 +2,13 @@ import { createGroq } from "@ai-sdk/groq";
 import { generateObject } from "ai";
 import { v } from "convex/values";
 import { z } from "zod";
-import { action } from "../_generated/server";
+import { internalAction } from "../_generated/server";
 
 function getGroq() {
   return createGroq({ apiKey: process.env.GROQ_API_KEY || "" });
 }
 
-export const groqRerank = action({
+export const groqRerank = internalAction({
   args: {
     query: v.string(),
     documents: v.array(v.object({ text: v.string(), id: v.string() })),

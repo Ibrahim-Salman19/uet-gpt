@@ -12,9 +12,9 @@ async function forwardWebhookToConvex(evt: {
   type: string;
   data: Record<string, unknown>;
 }): Promise<Response> {
-  const webhookSecret = process.env.WEBHOOK_SECRET;
+  const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
   if (!webhookSecret) {
-    console.error("Missing WEBHOOK_SECRET — server misconfigured");
+    console.error("Missing CLERK_WEBHOOK_SECRET — server misconfigured");
     return new Response("Server configuration error", { status: 500 });
   }
 

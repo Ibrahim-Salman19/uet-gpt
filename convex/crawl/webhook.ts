@@ -13,6 +13,12 @@ import {
 import { constantTimeCompare } from "./utils";
 
 function hexToBuffer(hex: string): ArrayBuffer {
+  // Reject anything that is not a clean, even-length hex string. A malformed
+  // (e.g. comma-joined) signature would otherwise produce NaN bytes and a
+  // silently-false verification; failing loudly here is safer.
+  if (hex.length % 2 !== 0 || !/^[0-9a-fA-F]*$/.test(hex)) {
+    throw new Error("Invalid hex signature");
+  }
   const bytes = new Uint8Array(hex.length / 2);
   for (let i = 0; i < bytes.length; i++) {
     bytes[i] = parseInt(hex.substring(i * 2, i * 2 + 2), 16);
@@ -146,10 +152,26 @@ async function validateWebhookSignature(
     return new Response("Server configuration error", { status: 500 });
   }
 
-  let isValid = await verifySignature(timestamp, signature, primarySecret, body);
-  if (!isValid && secondarySecret) {
-    isValid = await verifySignature(timestamp, signature, secondarySecret, body);
+  // The signature header may carry MULTIPLE comma-separated candidate signatures
+  // (one per secret) to support key rotation. Try every candidate against every
+  // configured secret and accept if any pair validates.
+  const candidateSignatures = signature
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const secrets = [primarySecret, secondarySecret].filter(Boolean) as string[];
+
+  let isValid = false;
+  for (const candidate of candidateSignatures) {
+    for (const secret of secrets) {
+      if (await verifySignature(timestamp, candidate, secret, body)) {
+        isValid = true;
+        break;
+      }
+    }
+    if (isValid) break;
   }
+
   if (!isValid) {
     console.warn("Webhook rejected: Invalid signature");
     return new Response("Invalid signature", { status: 401 });
@@ -203,6 +225,25 @@ function extractPageInfo(
   return { url, canonicalUrl, isPdf, content, title, etag, lastModified };
 }
 
+const ALLOWED_DOMAIN_SUFFIX = "uettaxila.edu.pk";
+
+/**
+ * SECURITY: enforce the same domain allowlist on the crawl webhook page path that
+ * /ingest already enforces, so attacker-/redirect-supplied off-domain URLs cannot
+ * be normalized, chunked, and embedded into the knowledge base (data poisoning).
+ * pdf:// virtual URLs are allowed (they are produced internally from on-domain PDFs).
+ */
+function isAllowedHost(url: string): boolean {
+  if (isPdfVirtualUrl(url)) return true;
+  let host: string;
+  try {
+    host = new URL(url).hostname.toLowerCase();
+  } catch {
+    return false;
+  }
+  return host === ALLOWED_DOMAIN_SUFFIX || host.endsWith(`.${ALLOWED_DOMAIN_SUFFIX}`);
+}
+
 async function validatePageContent(content: string, url: string, isPdf: boolean): Promise<boolean> {
   if (isPdf && (!content || content.trim().length === 0)) {
     console.log(`PDF skipped (no extractable content): ${url}`);
@@ -225,6 +266,13 @@ async function processSinglePage(
 ): Promise<"success" | "skip" | "fail"> {
   try {
     const info = extractPageInfo(result, payloadUrl);
+
+    // SECURITY: reject off-domain pages before any normalize/chunk/embed work.
+    if (!info.url || !isAllowedHost(info.url)) {
+      console.warn(`Page skipped (domain not in allowlist): ${info.url ?? "unknown URL"}`);
+      return "skip";
+    }
+
     if (await validatePageContent(info.content, info.url, info.isPdf)) return "skip";
 
     console.log(`Processing and normalising crawled page: ${info.url}`);
@@ -344,6 +392,18 @@ export const crawlWebhook = httpAction(async (ctx, request) => {
     });
   } catch (error) {
     console.error(`Webhook processing error for task ${taskId}:`, error);
+    // Compensating action: a dedup marker may have been inserted before the failure.
+    // Remove it so the crawler's redelivery (triggered by this 500) is reprocessed
+    // instead of being short-circuited as a duplicate and silently dropped.
+    if (taskId) {
+      try {
+        await ctx.runMutation(internal.crawl.mutations.unmarkWebhookProcessed, {
+          jobId: taskId,
+        });
+      } catch (cleanupErr) {
+        console.error(`Failed to roll back webhook dedup marker for ${taskId}:`, cleanupErr);
+      }
+    }
     return new Response("Internal Server Error", { status: 500 });
   }
 });
@@ -417,7 +477,6 @@ async function parseAndValidateIngestRequest(
     );
   }
 
-  const ALLOWED_DOMAIN_SUFFIX = "uettaxila.edu.pk";
   if (!isPdfVirtualUrl(url)) {
     let parsedHost: string;
     try {

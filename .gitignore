@@ -48,3 +48,34 @@ next-env.d.ts
 /dist
 
 .vercel
+
+# logs (runtime artifacts must never be tracked)
+*.log
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# local databases / caches (incl. accidentally-committed pnpm store indexes)
+*.db
+*.sqlite
+*.sqlite*
+**/index.db
+.pnpm-store/
+
+# agent / scratch / recon artifacts
+/.agent/
+/scratch/
+/recon-report.md
+eval_*.json
+
+# test auth state — NEVER commit Clerk session tokens / cookies
+**/.clerk/
+/playwright/.clerk/
+
+# debug captures
+*-debug.png

@@ -80,11 +80,14 @@ function LoadingContent({ className }: { className?: string }) {
 
 function AwaitingReplyIndicator() {
   return (
-    <div className="flex items-start gap-3 px-4 py-3">
+    <div className="flex items-start gap-3 px-4 py-3" role="status">
+      <span className="sr-only">Generating response…</span>
       <div className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--primary-muted)]">
-        <span className="text-xs font-semibold text-[var(--primary)]">AI</span>
+        <span className="text-xs font-semibold text-[var(--primary)]" aria-hidden="true">
+          AI
+        </span>
       </div>
-      <div className="flex items-center gap-1.5 pt-2">
+      <div className="flex items-center gap-1.5 pt-2" aria-hidden="true">
         <span className="h-2 w-2 animate-[pulse-dot_1.4s_ease-in-out_infinite] rounded-full bg-[var(--primary)]" />
         <span className="h-2 w-2 animate-[pulse-dot_1.4s_ease-in-out_0.2s_infinite] rounded-full bg-[var(--primary)]" />
         <span className="h-2 w-2 animate-[pulse-dot_1.4s_ease-in-out_0.4s_infinite] rounded-full bg-[var(--primary)]" />
@@ -115,7 +118,13 @@ export function ChatMessages({
 
   return (
     <ScrollArea ref={scrollRef} className={cn("h-full w-full scroll-momentum", className)}>
-      <div className="mx-auto flex w-full flex-col gap-1 pt-6 pb-32 md:pb-12 max-w-none md:max-w-3xl lg:max-w-4xl xl:max-w-5xl px-0">
+      <div
+        className="mx-auto flex w-full flex-col gap-1 pt-6 pb-32 md:pb-12 max-w-none md:max-w-3xl lg:max-w-4xl xl:max-w-5xl px-0"
+        role="log"
+        aria-live="polite"
+        aria-relevant="additions text"
+        aria-busy={isAwaitingReply || isLoading || false}
+      >
         {messages.map((message, index) => (
           <div
             key={message.id}

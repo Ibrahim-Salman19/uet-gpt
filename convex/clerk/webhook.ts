@@ -1,4 +1,5 @@
 import { internal } from "../_generated/api";
+import type { ActionCtx } from "../_generated/server";
 import { httpAction } from "../_generated/server";
 import { constantTimeCompare } from "../crawl/utils";
 
@@ -42,23 +43,55 @@ function authenticateWebhook(request: Request): Response | null {
 function parseWebhookPayloadSafe(
   rawBody: string,
 ): { type: string; data: Record<string, unknown> } | Response {
+  let parsed: unknown;
   try {
-    return JSON.parse(rawBody);
+    parsed = JSON.parse(rawBody);
   } catch {
     return new Response("Invalid JSON body", { status: 400 });
   }
+  // Runtime shape validation — never trust the parsed body's type.
+  // A malformed/forged-but-authorized payload must be rejected, not coerced
+  // via `as` casts into the users table.
+  if (typeof parsed !== "object" || parsed === null) {
+    return new Response("Invalid webhook payload", { status: 400 });
+  }
+  const candidate = parsed as { type?: unknown; data?: unknown };
+  if (typeof candidate.type !== "string" || candidate.type.length === 0) {
+    return new Response("Invalid webhook payload: missing 'type'", { status: 400 });
+  }
+  if (typeof candidate.data !== "object" || candidate.data === null) {
+    return new Response("Invalid webhook payload: missing 'data'", { status: 400 });
+  }
+  return { type: candidate.type, data: candidate.data as Record<string, unknown> };
 }
 
 function extractWebhookEmail(data: Record<string, unknown>): string {
-  const addresses = data.email_addresses as Array<{ email_address: string }> | undefined;
-  return addresses?.[0]?.email_address ?? "";
+  const addresses = data.email_addresses;
+  if (!Array.isArray(addresses)) return "";
+  const first = addresses[0] as { email_address?: unknown } | undefined;
+  return typeof first?.email_address === "string" ? first.email_address : "";
 }
 
-async function handleUserCreatedOrUpdated(ctx: any, data: Record<string, unknown>): Promise<void> {
-  const clerkId = data.id as string;
+// Validate the Clerk user id before it reaches the users table — a missing or
+// non-string `id` must never be coerced via `as string` into a corrupt row.
+function extractClerkId(data: Record<string, unknown>): string | null {
+  const id = data.id;
+  return typeof id === "string" && id.length > 0 ? id : null;
+}
+
+function asOptionalString(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
+}
+
+async function handleUserCreatedOrUpdated(
+  ctx: ActionCtx,
+  data: Record<string, unknown>,
+): Promise<boolean> {
+  const clerkId = extractClerkId(data);
+  if (!clerkId) return false;
   const name = [data.first_name, data.last_name].filter(Boolean).join(" ").trim() || "Unknown";
   const email = extractWebhookEmail(data);
-  const imageUrl = data.image_url as string | undefined;
+  const imageUrl = asOptionalString(data.image_url);
 
   // Never trust publicMetadata.role from Clerk — roles must only be set via admin mutations
   await ctx.runMutation(internal.users.upsertFromWebhook, {
@@ -67,13 +100,16 @@ async function handleUserCreatedOrUpdated(ctx: any, data: Record<string, unknown
     email,
     imageUrl,
   });
+  return true;
 }
 
-async function handleUserDeleted(ctx: any, data: Record<string, unknown>): Promise<void> {
-  const clerkId = data.id as string;
+async function handleUserDeleted(ctx: ActionCtx, data: Record<string, unknown>): Promise<boolean> {
+  const clerkId = extractClerkId(data);
+  if (!clerkId) return false;
   await ctx.runMutation(internal.users.deleteFromWebhook, {
     clerkId,
   });
+  return true;
 }
 
 function okResponse(): Response {
@@ -83,17 +119,21 @@ function okResponse(): Response {
   });
 }
 
+// Returns true if the event was dispatched (or intentionally ignored),
+// false if the payload was malformed and should be rejected with 400.
 async function dispatchWebhookEvent(
-  ctx: any,
+  ctx: ActionCtx,
   type: string,
   data: Record<string, unknown>,
-): Promise<void> {
+): Promise<boolean> {
   if (type === "user.created" || type === "user.updated") {
-    await handleUserCreatedOrUpdated(ctx, data);
+    return await handleUserCreatedOrUpdated(ctx, data);
   }
   if (type === "user.deleted") {
-    await handleUserDeleted(ctx, data);
+    return await handleUserDeleted(ctx, data);
   }
+  // Unhandled event types are acknowledged as no-ops.
+  return true;
 }
 
 export const userWebhook = httpAction(async (ctx, request) => {
@@ -107,7 +147,10 @@ export const userWebhook = httpAction(async (ctx, request) => {
   const payload = parseWebhookPayloadSafe(rawBody);
   if (payload instanceof Response) return payload;
 
-  await dispatchWebhookEvent(ctx, payload.type, payload.data);
+  const dispatched = await dispatchWebhookEvent(ctx, payload.type, payload.data);
+  if (!dispatched) {
+    return new Response("Invalid webhook payload: missing user id", { status: 400 });
+  }
 
   return okResponse();
 });

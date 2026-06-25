@@ -8,9 +8,11 @@ Handles Dead Letter Queues locally and manages transient timeouts.
 import asyncio
 import fnmatch
 import hashlib
+import ipaddress
 import logging
 import random
 import re
+import socket
 import sys
 import time
 import os
@@ -272,6 +274,101 @@ def is_allowed_url(url: str) -> bool:
     except Exception:
         return False
 
+# ─── SSRF / redirect re-validation (security fix) ────────────────────────────
+MAX_REDIRECTS = 5
+
+
+def _is_public_ip(ip_str: str) -> bool:
+    """Return True only if the IP is a routable, public address."""
+    try:
+        ip = ipaddress.ip_address(ip_str)
+    except ValueError:
+        return False
+    # Reject IPv4-mapped / 6to4 / Teredo embedded private addresses too.
+    if isinstance(ip, ipaddress.IPv6Address):
+        if ip.ipv4_mapped is not None:
+            ip = ip.ipv4_mapped
+        elif ip.sixtofour is not None:
+            ip = ip.sixtofour
+    return not (
+        ip.is_private
+        or ip.is_loopback
+        or ip.is_link_local
+        or ip.is_reserved
+        or ip.is_multicast
+        or ip.is_unspecified
+    )
+
+
+def is_safe_host(netloc: str) -> bool:
+    """
+    Resolve the host and confirm every resolved IP is public.
+    Defends against DNS-rebinding / internal-range hosts and IP-literal hosts
+    (decimal/octal/hex/IPv4-mapped) that bypass the string allowlist.
+    """
+    # Robustly extract the host, handling bracketed IPv6 literals ("[::1]:8080")
+    # so the port-colon split does not corrupt an IPv6 address.
+    netloc_noauth = netloc.rsplit("@", 1)[-1]
+    if netloc_noauth.startswith("["):
+        host = netloc_noauth[1:].split("]", 1)[0]
+    else:
+        host = netloc_noauth.rsplit(":", 1)[0] if ":" in netloc_noauth else netloc_noauth
+    if not host:
+        return False
+    # If the host is itself an IP literal, validate it directly.
+    try:
+        ipaddress.ip_address(host)
+        return _is_public_ip(host)
+    except ValueError:
+        pass
+    try:
+        infos = socket.getaddrinfo(host, None)
+    except (socket.gaierror, UnicodeError, OSError):
+        return False
+    if not infos:
+        return False
+    for info in infos:
+        ip_str = info[4][0]
+        if not _is_public_ip(ip_str):
+            log.warning(f"Blocked SSRF: {host} resolves to non-public IP {ip_str}")
+            return False
+    return True
+
+
+def is_fetchable_url(url: str) -> bool:
+    """Allowlist check + resolved-IP public check, used before any network fetch."""
+    if not is_allowed_url(url):
+        return False
+    try:
+        netloc = urllib.parse.urlparse(url).netloc
+    except Exception:
+        return False
+    return is_safe_host(netloc)
+
+
+async def safe_get(session: AsyncSession, url: str, timeout: int):
+    """
+    Perform a GET with manual redirect handling so every hop is re-validated
+    against the domain allowlist AND the resolved-IP public check. curl_cffi
+    follows 3xx by default, which would let an on-domain open-redirect bounce
+    the crawler to internal/metadata hosts — so redirects are disabled and
+    walked manually here.
+    """
+    current = url
+    for _ in range(MAX_REDIRECTS + 1):
+        if not is_fetchable_url(current):
+            raise RequestsError(f"Blocked disallowed/unsafe URL: {current}")
+        resp = await session.get(current, timeout=timeout, allow_redirects=False)
+        if resp.status_code in (301, 302, 303, 307, 308):
+            location = resp.headers.get("Location") or resp.headers.get("location")
+            if not location:
+                return resp
+            current = urllib.parse.urljoin(current, location)
+            continue
+        return resp
+    raise RequestsError(f"Too many redirects (>{MAX_REDIRECTS}) for {url}")
+
+
 def extract_links(html: str, base_url: str) -> list[str]:
     soup = BeautifulSoup(html, "lxml")
     seen, links = set(), []
@@ -318,7 +415,7 @@ async def discover_sitemap(base_url: str) -> list[str]:
     sitemap_url = base_url.rstrip("/") + "/sitemap.xml"
     try:
         async with AsyncSession(impersonate="chrome", timeout=10) as s_session:
-            resp = await s_session.get(sitemap_url)
+            resp = await safe_get(s_session, sitemap_url, timeout=10)
             if resp.status_code == 200:
                 soup = BeautifulSoup(resp.text, "xml")
                 urls = [loc.text.strip() for loc in soup.find_all("loc")]
@@ -346,6 +443,7 @@ async def reset_pipeline():
                 f"{CONVEX_SITE_URL}/api/reset",
                 headers=headers,
                 timeout=30,
+                allow_redirects=False,
             )
             if resp.status_code == 200:
                 log.info("Pipeline data reset successfully")
@@ -491,7 +589,7 @@ async def fetch_and_extract(url: str, session: AsyncSession) -> tuple[str | None
     """Returns: (markdown, title, links, error_reason, status_code)"""
     try:
         resp = await asyncio.wait_for(
-            session.get(url, timeout=REQUEST_TIMEOUT),
+            safe_get(session, url, timeout=REQUEST_TIMEOUT),
             timeout=REQUEST_TIMEOUT + 5
         )
     except asyncio.TimeoutError:
@@ -562,19 +660,27 @@ async def push_to_convex(url: str, markdown: str, title: str, source_type: str, 
         
     endpoint = f"{CONVEX_SITE_URL}/ingest"
 
+    last_error = "unknown"
     for attempt in range(1, PUSH_RETRIES + 1):
         try:
-            resp = await push_session.post(endpoint, json=payload, headers=headers, timeout=15)
+            resp = await push_session.post(endpoint, json=payload, headers=headers, timeout=15, allow_redirects=False)
             if resp.status_code == 200:
                 data = resp.json()
                 return data.get("action", "unknown")
             if 400 <= resp.status_code < 500:
-                raise RuntimeError(f"Client error HTTP {resp.status_code}: {resp.text}")
+                # Client error — not retryable.
+                raise RuntimeError(f"Client error HTTP {resp.status_code}")
+            # 5xx / other — transient, record and fall through to retry.
+            last_error = f"HTTP {resp.status_code}"
+        except RuntimeError:
+            raise
         except Exception as e:
-            if attempt == PUSH_RETRIES:
-                raise RuntimeError(f"Failed to push to Convex after {PUSH_RETRIES} tries: {e}")
-            await asyncio.sleep(retry_delay(attempt, base=1.0))
-    return "failed"
+            last_error = str(e)
+        if attempt == PUSH_RETRIES:
+            raise RuntimeError(f"Failed to push to Convex after {PUSH_RETRIES} tries: {last_error}")
+        await asyncio.sleep(retry_delay(attempt, base=1.0))
+    # Unreachable: the final attempt either returns 200 or raises above.
+    raise RuntimeError(f"Failed to push to Convex: {last_error}")
 
 # ═════════════════════════════════════════════════════════════════════════════
 # WORKER
@@ -651,8 +757,18 @@ async def worker(
                 continue
 
             source_type = "pdf" if url.lower().endswith(".pdf") else "html"
-            
-            action = await push_to_convex(url, markdown, title or url, source_type, session_id, push_session)
+
+            try:
+                action = await push_to_convex(url, markdown, title or url, source_type, session_id, push_session)
+            except Exception as push_exc:
+                # Ingestion did not persist — do NOT count as saved. Route to DLQ for retry.
+                write_to_dlq(url, depth)
+                async with stats_lock:
+                    stats.failed += 1
+                    stats.dlq += 1
+                log.error(f"[push_fail] {url} — {push_exc}")
+                continue
+
             async with stats_lock: stats.saved += 1
             log.info(f"[{action:8}] depth={depth} words={len(markdown.split()):>5} | {url}")
 

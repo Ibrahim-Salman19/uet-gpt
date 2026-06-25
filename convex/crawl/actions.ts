@@ -198,20 +198,34 @@ function signCrawlPayload(
   secondarySecret: string | undefined,
 ): string {
   const timestamp = Date.now().toString();
+
+  // SECURITY: the HMAC must bind the EXACT transmitted body (not a constant string),
+  // so the receiver — which verifies over `timestamp + "." + rawBody` — actually
+  // authenticates the payload and rejects any tampering. We set only the timestamp
+  // header, serialize the body, then sign `timestamp + "." + body` over that exact
+  // string. The signature is sent as a separate transport header (NOT inside the
+  // signed body) so the receiver verifies over the same bytes it received.
+  (crawlPayload.webhook_config as Record<string, unknown>).webhook_headers = {
+    "x-crawl-timestamp": timestamp,
+  };
+  const signedBody = JSON.stringify(crawlPayload);
+
   const secrets = [primarySecret, secondarySecret].filter(Boolean) as string[];
+  // Emit one signature per secret, comma-separated, so the receiver can try each
+  // candidate during key rotation. Each signature is a self-contained hex MAC.
   const signatures = secrets
     .map((s) =>
       createHmac("sha256", s)
-        .update(timestamp + ".uet-crawl")
+        .update(timestamp + "." + signedBody)
         .digest("hex"),
     )
     .join(",");
-  // Add the computed signature to the webhook config
+
   (crawlPayload.webhook_config as Record<string, unknown>).webhook_headers = {
     "x-crawl-timestamp": timestamp,
     "x-crawl-signature": signatures,
   };
-  return JSON.stringify(crawlPayload);
+  return signedBody;
 }
 
 async function sendCrawlRequest(
@@ -348,6 +362,7 @@ export const embedSingleChunk = internalAction({
         chunkText: args.chunkText,
         contentHash: args.contentHash,
         ragId: result.entryId,
+        jobId: args.jobId,
         parentText: args.parentText,
         headingPath: args.headingPath,
       });

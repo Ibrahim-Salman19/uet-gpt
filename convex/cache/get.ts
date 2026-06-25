@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
-import { action } from "../_generated/server";
+import { internalAction } from "../_generated/server";
 import { CACHE_SIMILARITY_THRESHOLD } from "../constants";
 import { truncateQuery } from "../observability/metrics";
 
@@ -131,7 +131,11 @@ async function findMatchingCacheEntry(
   };
 }
 
-export const get = action({
+// internalAction: only callable server-side via internal.cache.get.get from the
+// already-authenticated RAG retrieval pipeline. The write path is already gated via
+// setFromServer; this makes the read path symmetric so unauthenticated clients cannot
+// probe the cache or trigger vector search + metrics-counter spam.
+export const get = internalAction({
   args: {
     queryText: v.string(),
     queryEmbedding: v.array(v.float64()),

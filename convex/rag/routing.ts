@@ -2,7 +2,7 @@ import { createGroq } from "@ai-sdk/groq";
 import { generateObject, generateText } from "ai";
 import { v } from "convex/values";
 import { z } from "zod";
-import { action, internalAction } from "../_generated/server";
+import { internalAction } from "../_generated/server";
 
 function getGroq() {
   return createGroq({ apiKey: process.env.GROQ_API_KEY || "" });
@@ -28,7 +28,7 @@ const intentValidator = v.union(
   v.literal("simple_fact"),
 );
 
-export const classifyQueryAction = action({
+export const classifyQueryAction = internalAction({
   args: { query: v.string() },
   returns: intentValidator,
   handler: async (_ctx, args) => {
@@ -61,7 +61,7 @@ export const classifyQueryAction = action({
   },
 });
 
-export const rewriteQueryAction = action({
+export const rewriteQueryAction = internalAction({
   args: { query: v.string() },
   returns: v.string(),
   handler: async (_ctx, args) => {

@@ -1,7 +1,7 @@
 // fallow-ignore-file security-sink
 import { v } from "convex/values";
-import { api, internal } from "../_generated/api";
-import { action } from "../_generated/server";
+import { internal } from "../_generated/api";
+import { internalAction } from "../_generated/server";
 import { CASCADE_CONFIG } from "../rag/constants";
 
 function computeWordOverlap(query: string, chunk: string): number {
@@ -30,15 +30,14 @@ function computeWordOverlap(query: string, chunk: string): number {
   return overlap / queryWords.size;
 }
 
-export const cascadeRerank = action({
+export const cascadeRerank = internalAction({
   args: {
     query: v.string(),
     documents: v.array(v.object({ text: v.string(), id: v.string() })),
     topK: v.optional(v.number()),
   },
   returns: v.array(v.object({ text: v.string(), score: v.number(), index: v.number() })),
-  handler: async (_ctx, args) => {
-    const _api: any = api;
+  handler: async (ctx, args) => {
     const docs = args.documents;
     const topK = args.topK ?? docs.length;
     if (docs.length === 0) return [];
@@ -103,12 +102,26 @@ export const cascadeRerank = action({
 
     // ── Tier 2b: Groq lightweight reranker (free, no extra infra) ──
     try {
-      const groqResult = await _ctx.runAction(_api.reranking.groqRerank.groqRerank, {
+      const groqResult = await ctx.runAction(internal.reranking.groqRerank.groqRerank, {
         query: args.query,
         documents: tier2Candidates.map((d) => ({ text: d.text, id: d.id })),
         topK: Math.min(topK, tier2Candidates.length),
       });
-      if (groqResult.length > 0) return groqResult;
+      if (groqResult.length > 0) {
+        // groqResult[i].index is a position into tier2Candidates, NOT the
+        // caller's original document order. Remap to originalIndex (and pull
+        // text from the candidate) the same way the other tiers do, so the
+        // caller can index back into the original results array correctly.
+        return groqResult.map((r) => {
+          const candidate =
+            r.index >= 0 && r.index < tier2Candidates.length ? tier2Candidates[r.index] : undefined;
+          return {
+            text: candidate?.text ?? r.text,
+            score: r.score,
+            index: candidate?.originalIndex ?? r.index,
+          };
+        });
+      }
     } catch (error) {
       console.warn("Groq rerank failed:", error);
     }

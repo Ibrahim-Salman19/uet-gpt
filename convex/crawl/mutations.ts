@@ -179,6 +179,26 @@ export const markWebhookProcessed = internalMutation({
   },
 });
 
+/**
+ * Compensating action for the webhook dedup marker. If processing fails after the
+ * `processedWebhooks` row was inserted, we delete that row so the crawler's retried
+ * (at-least-once) delivery is reprocessed instead of being silently swallowed as a
+ * duplicate. Per-document/per-chunk content-hash idempotency makes reprocessing safe.
+ */
+export const unmarkWebhookProcessed = internalMutation({
+  args: { jobId: v.string() },
+  returns: v.boolean(),
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("processedWebhooks")
+      .withIndex("by_jobId", (q) => q.eq("jobId", args.jobId))
+      .first();
+    if (!existing) return false;
+    await ctx.db.delete(existing._id);
+    return true;
+  },
+});
+
 export const queueChunksForEmbedding = internalMutation({
   args: {
     url: v.string(),
@@ -257,6 +277,7 @@ export const saveEmbedding = internalMutation({
     chunkText: v.string(),
     contentHash: v.string(),
     ragId: v.string(),
+    jobId: v.optional(v.string()),
     parentText: v.optional(v.string()),
     headingPath: v.optional(v.array(v.string())),
   },
@@ -287,13 +308,11 @@ export const saveEmbedding = internalMutation({
       const newCount = (doc.chunksEmbedded || 0) + 1;
       const updates: Partial<Doc<"documents">> = { chunksEmbedded: newCount };
 
-      // Check if all chunks are processed (either embedded or failed)
+      // Check if all chunks are processed (either embedded or failed). Count failed
+      // chunks scoped to THIS job + URL so stale rows from earlier re-crawls do not
+      // inflate the count and prematurely mark the doc indexed.
       const chunkCount = doc.chunkCount ?? 1;
-      const dlqEntries = await ctx.db
-        .query("crawlDeadLetter")
-        .withIndex("by_url", (q) => q.eq("url", doc.url))
-        .take(chunkCount);
-      const failedCount = dlqEntries.length;
+      const failedCount = args.jobId ? await countFailedChunks(ctx, args.jobId, doc.url) : 0;
 
       if (doc.chunkCount !== undefined && newCount + failedCount >= doc.chunkCount) {
         if (doc.status !== "indexed") {
@@ -306,18 +325,60 @@ export const saveEmbedding = internalMutation({
   },
 });
 
-async function getDLQEntry(ctx: MutationCtx, jobId: string, url: string) {
+async function getDLQEntriesForUrl(ctx: MutationCtx, jobId: string, url: string) {
   return await ctx.db
     .query("crawlDeadLetter")
     .withIndex("by_jobId_and_url", (q) => q.eq("jobId", jobId).eq("url", url))
-    .first();
+    .collect();
 }
 
-async function clearDLQEntry(ctx: MutationCtx, jobId: string, url: string) {
-  const dlqEntry = await getDLQEntry(ctx, jobId, url);
-  if (dlqEntry) {
-    await ctx.db.delete(dlqEntry._id);
+/**
+ * Resolve a single chunk's DLQ row for (jobId, url, contentHash). DLQ rows are kept
+ * one-per-failed-chunk so completion accounting can count DISTINCT failed chunks; we
+ * therefore match on contentHash when available rather than collapsing all chunks of
+ * a URL into one row.
+ */
+async function getDLQEntry(ctx: MutationCtx, jobId: string, url: string, contentHash?: string) {
+  const entries = await getDLQEntriesForUrl(ctx, jobId, url);
+  if (contentHash !== undefined) {
+    return entries.find((e) => e.payload?.contentHash === contentHash) ?? null;
   }
+  return entries[0] ?? null;
+}
+
+async function clearDLQEntry(ctx: MutationCtx, jobId: string, url: string, contentHash?: string) {
+  // Clear only the row for the specific chunk that just succeeded when we know its
+  // contentHash; otherwise (legacy callers) clear every row for the (jobId, url).
+  if (contentHash !== undefined) {
+    const dlqEntry = await getDLQEntry(ctx, jobId, url, contentHash);
+    if (dlqEntry) await ctx.db.delete(dlqEntry._id);
+    return;
+  }
+  const entries = await getDLQEntriesForUrl(ctx, jobId, url);
+  for (const entry of entries) {
+    await ctx.db.delete(entry._id);
+  }
+}
+
+const ACTIVE_DLQ_STATUSES = new Set(["pending_retry", "processing", "abandoned"]);
+
+/**
+ * Count DISTINCT failed chunks for the current job + URL. Each failed chunk has its
+ * own DLQ row (keyed by contentHash), so the number of active rows equals the number
+ * of distinct chunks that have failed for this document in this job. Scoping to jobId
+ * avoids conflating stale rows from earlier re-crawls of the same URL.
+ */
+async function countFailedChunks(ctx: MutationCtx, jobId: string, url: string): Promise<number> {
+  const entries = await getDLQEntriesForUrl(ctx, jobId, url);
+  const failedHashes = new Set<string>();
+  let unhashed = 0;
+  for (const entry of entries) {
+    if (!ACTIVE_DLQ_STATUSES.has(entry.status)) continue;
+    const hash = entry.payload?.contentHash;
+    if (hash) failedHashes.add(hash);
+    else unhashed++;
+  }
+  return failedHashes.size + unhashed;
 }
 
 function getEmbeddingErrorDetails(
@@ -346,7 +407,9 @@ async function updateOrCreateDLQEntry(
   chunkText?: string,
 ) {
   const MAX_RETRIES = 5;
-  const dlqEntry = await getDLQEntry(ctx, jobId, url);
+  // One DLQ row per failed chunk (jobId, url, contentHash) so completion accounting
+  // can count distinct failed chunks rather than collapsing all chunks of a URL.
+  const dlqEntry = await getDLQEntry(ctx, jobId, url, contentHash);
 
   if (dlqEntry) {
     const newFailureCount = (dlqEntry.failureCount ?? 0) + 1;
@@ -374,7 +437,7 @@ async function checkDocumentForFailure(
   ctx: MutationCtx,
   documentId: Id<"documents">,
   url: string,
-  _jobId: string,
+  jobId: string,
   errorMsg: string,
 ) {
   const doc = await ctx.db.get(documentId);
@@ -387,12 +450,10 @@ async function checkDocumentForFailure(
         updatedAt: Date.now(),
       });
     } else {
-      // Query DLQ entries for this URL (bounded by chunk count)
-      const dlqEntries = await ctx.db
-        .query("crawlDeadLetter")
-        .withIndex("by_url", (q) => q.eq("url", url))
-        .take(chunkCount);
-      const failedCount = dlqEntries.length;
+      // Count DISTINCT failed chunks scoped to THIS job + URL (one DLQ row per
+      // failed chunk). Using by_url across all jobs/statuses previously both
+      // under-counted multi-chunk failures and over-counted stale re-crawl rows.
+      const failedCount = await countFailedChunks(ctx, jobId, url);
       const embeddedCount = doc.chunksEmbedded || 0;
 
       if (failedCount + embeddedCount >= chunkCount) {
@@ -453,9 +514,11 @@ async function routeChunkResult(
   const returnValue = result.kind === "success" ? result.returnValue : null;
   const url = returnValue?.url as string | undefined;
   const documentId = returnValue?.documentId as Id<"documents"> | undefined;
+  const contentHash = returnValue?.contentHash as string | undefined;
 
   if (result.kind === "success" && returnValue?.success && returnValue.ragId && url) {
-    await clearDLQEntry(ctx, jobId, url);
+    // Clear only the specific chunk's DLQ row that just succeeded (per-chunk rows).
+    await clearDLQEntry(ctx, jobId, url, contentHash);
   } else if (url && documentId) {
     await handleEmbeddingFailure(ctx, jobId, url, documentId, result, (returnValue || null) as any);
   }

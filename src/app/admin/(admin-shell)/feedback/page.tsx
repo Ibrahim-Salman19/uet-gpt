@@ -1,9 +1,8 @@
 "use client";
 
 import { api } from "convex/_generated/api";
-import type { Doc } from "convex/_generated/dataModel";
+import type { Doc, Id } from "convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import type { FunctionReference } from "convex/server";
 import { Filter, MessageSquare, ThumbsDown, ThumbsUp, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -25,16 +24,13 @@ type FeedbackDoc = Doc<"feedback">;
 
 export default function AdminFeedbackPage() {
   const [ratingFilter, setRatingFilter] = useState<string>("all");
-  const feedback = useQuery(
-    api.feedback.list as unknown as FunctionReference<"query", "public">,
-    {},
-  );
+  const feedback = useQuery(api.feedback.list, {});
   const deleteFeedback = useMutation(api.admin.stats.deleteFeedback);
 
-  const handleDelete = async (feedbackId: unknown) => {
+  const handleDelete = async (feedbackId: Id<"feedback">) => {
     if (confirm("Are you sure you want to delete this feedback entry?")) {
       try {
-        await deleteFeedback({ feedbackId: feedbackId as any });
+        await deleteFeedback({ feedbackId });
         toast.success("Feedback deleted successfully");
       } catch (error) {
         console.error("Failed to delete feedback:", error);

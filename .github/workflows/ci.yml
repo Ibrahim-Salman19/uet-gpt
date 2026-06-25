@@ -18,125 +18,114 @@ jobs:
     name: Lint & Format
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
         with:
           version: ${{ env.PNPM_VERSION }}
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22"
       - name: Get pnpm store directory
         id: pnpm-store
         run: echo "store=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
-      - uses: actions/cache@v4
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ${{ steps.pnpm-store.outputs.store }}
           key: pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             pnpm-store-
       - name: Install dependencies
-        working-directory: uet-gpt
         run: pnpm install --frozen-lockfile
       - name: Run Biome check (read-only)
-        working-directory: uet-gpt
         run: npx biome check src/ convex/
 
   typecheck:
     name: TypeScript Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
         with:
           version: ${{ env.PNPM_VERSION }}
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22"
       - name: Get pnpm store directory
         id: pnpm-store
         run: echo "store=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
-      - uses: actions/cache@v4
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ${{ steps.pnpm-store.outputs.store }}
           key: pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             pnpm-store-
       - name: Install dependencies
-        working-directory: uet-gpt
         run: pnpm install --frozen-lockfile
 
       - name: Generate Convex types
         if: ${{ secrets.CONVEX_DEPLOYMENT != '' }}
-        working-directory: uet-gpt
         run: npx convex@latest codegen
         env:
           CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOYMENT }}
 
       - name: Type check (with full types)
         if: ${{ secrets.CONVEX_DEPLOYMENT != '' }}
-        working-directory: uet-gpt
         run: pnpm typecheck
 
       - name: Type check skipped (no Convex deployment available)
         if: ${{ secrets.CONVEX_DEPLOYMENT == '' }}
-        working-directory: uet-gpt
         run: echo "Skipping typecheck — CONVEX_DEPLOYMENT not available (expected for fork PRs). Run npx convex dev locally to generate types."
 
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
         with:
           version: ${{ env.PNPM_VERSION }}
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22"
       - name: Get pnpm store directory
         id: pnpm-store
         run: echo "store=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
-      - uses: actions/cache@v4
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ${{ steps.pnpm-store.outputs.store }}
           key: pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             pnpm-store-
       - name: Install dependencies
-        working-directory: uet-gpt
         run: pnpm install --frozen-lockfile
       - name: Run tests
-        working-directory: uet-gpt
         run: pnpm test -- --run --reporter verbose
 
   e2e:
     name: E2E Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
         with:
           version: ${{ env.PNPM_VERSION }}
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22"
       - name: Get pnpm store directory
         id: pnpm-store
         run: echo "store=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
-      - uses: actions/cache@v4
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ${{ steps.pnpm-store.outputs.store }}
           key: pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             pnpm-store-
       - name: Install dependencies
-        working-directory: uet-gpt
         run: pnpm install --frozen-lockfile
       - name: Install Playwright browsers
-        working-directory: uet-gpt
         run: npx playwright install --with-deps chromium
       - name: Run E2E tests
-        working-directory: uet-gpt
         run: pnpm test:e2e
 
   build:
@@ -146,32 +135,29 @@ jobs:
     # Build only runs on push to main (not PRs) since it requires all secrets
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
         with:
           version: ${{ env.PNPM_VERSION }}
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22"
       - name: Get pnpm store directory
         id: pnpm-store
         run: echo "store=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
-      - uses: actions/cache@v4
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ${{ steps.pnpm-store.outputs.store }}
           key: pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             pnpm-store-
       - name: Install dependencies
-        working-directory: uet-gpt
         run: pnpm install --frozen-lockfile
       - name: Generate Convex types
-        working-directory: uet-gpt
         run: npx convex@latest codegen
         env:
           CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOYMENT }}
       - name: Build
-        working-directory: uet-gpt
         run: pnpm build
         env:
           CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOYMENT }}
@@ -183,3 +169,4 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
           WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
+          CLERK_WEBHOOK_SECRET: ${{ secrets.CLERK_WEBHOOK_SECRET }}

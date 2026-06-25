@@ -1,7 +1,7 @@
 // fallow-ignore-file security-sink
 "use node";
 import { ConvexError, v } from "convex/values";
-import { action } from "../_generated/server";
+import { internalAction } from "../_generated/server";
 import { recordTiming } from "../observability/metrics";
 
 // gemini-embedding-2 — stable as of May 2026
@@ -146,7 +146,10 @@ export async function generateEmbeddingsInternal(texts: string[]): Promise<numbe
   throw new ConvexError(`All embedding providers failed:\n- ${errors.join("\n- ")}`);
 }
 
-export const generate = action({
+// internalAction: only callable server-side (e.g. internal.embeddings.generate.generate
+// from the already-authenticated RAG retrieval pipeline). Not part of the public API
+// surface, so unauthenticated clients cannot trigger paid Gemini embedding calls.
+export const generate = internalAction({
   args: {
     text: v.string(),
   },

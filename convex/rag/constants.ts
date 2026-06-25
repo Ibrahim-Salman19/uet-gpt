@@ -24,6 +24,11 @@ export const CRAG_CONFIG = {
   batchSize: 4,
   groqModel: "llama-3.1-8b-instant",
   highConfidenceThreshold: 0.7,
+  // When the reranker's top score is already at/above the "normal" confidence
+  // tier (see determineConfidenceTier), the rerank ordering is trusted and the
+  // (expensive, often redundant) CRAG LLM judge is skipped. Borderline/low
+  // results still go through CRAG.
+  skipThreshold: 0.6,
 } as const;
 
 export const FAITHFULNESS_CONFIG = {

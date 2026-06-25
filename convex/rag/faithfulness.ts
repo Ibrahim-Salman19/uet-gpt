@@ -2,7 +2,7 @@ import { createGroq } from "@ai-sdk/groq";
 import { generateObject } from "ai";
 import { v } from "convex/values";
 import { z } from "zod";
-import { action } from "../_generated/server";
+import { internalAction } from "../_generated/server";
 import { FAITHFULNESS_CONFIG } from "./constants";
 
 function buildFaithfulnessPrompt(answer: string, sources: string[]): string {
@@ -23,7 +23,7 @@ A claim is unsupported if it cannot be found or reasonably inferred from the sou
 Do not penalize the answer for omitting information — only penalize it for ADDING information not present in sources.`;
 }
 
-export const judgeFaithfulness = action({
+export const judgeFaithfulness = internalAction({
   args: {
     query: v.string(),
     answer: v.string(),

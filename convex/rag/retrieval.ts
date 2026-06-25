@@ -1,5 +1,5 @@
 import { ConvexError, type Infer, v } from "convex/values";
-import { api, internal } from "../_generated/api";
+import { internal } from "../_generated/api";
 import { action } from "../_generated/server";
 import { recordTiming, truncateQuery } from "../observability/metrics";
 import { type ConfidenceTier, CRAG_CONFIG, INJECTION_RE, MAX_QUERY_LEN } from "./constants";
@@ -79,9 +79,9 @@ const sourceValidator = v.object({
   headingPath: v.optional(v.array(v.string())),
 });
 
-async function classifyUserIntent(ctx: any, actions: any, safeQuestion: string): Promise<string> {
+async function classifyUserIntent(ctx: any, internals: any, safeQuestion: string): Promise<string> {
   try {
-    return await ctx.runAction(actions.rag.routing.classifyQueryAction, {
+    return await ctx.runAction(internals.rag.routing.classifyQueryAction, {
       query: safeQuestion,
     });
   } catch (error) {
@@ -95,12 +95,11 @@ async function classifyUserIntent(ctx: any, actions: any, safeQuestion: string):
 
 async function enrichQuery(
   ctx: any,
-  actions: any,
   internals: any,
   safeQuestion: string,
 ): Promise<{ rewrittenQuery: string; hydeQuery: string }> {
   const [rewrittenQuery, hydeQuery] = await Promise.allSettled([
-    ctx.runAction(actions.rag.routing.rewriteQueryAction, { query: safeQuestion }),
+    ctx.runAction(internals.rag.routing.rewriteQueryAction, { query: safeQuestion }),
     ctx.runAction(internals.rag.routing.hydeQueryAction, { query: safeQuestion }),
   ]);
 
@@ -198,7 +197,7 @@ async function searchVectorDB(
 
 async function rerankSearchResults(
   ctx: any,
-  actions: any,
+  internals: any,
   rewrittenQuery: string,
   safeQuestion: string,
   results: SearchResult[],
@@ -206,7 +205,7 @@ async function rerankSearchResults(
   if (results.length === 0) return [];
 
   try {
-    const reranked = await ctx.runAction(actions.reranking.cascade.cascadeRerank, {
+    const reranked = await ctx.runAction(internals.reranking.cascade.cascadeRerank, {
       query: rewrittenQuery || safeQuestion,
       documents: results.map((r) => ({
         id: r.entryId,
@@ -246,7 +245,7 @@ type CragEval = { index: number; relevant: boolean; confidence: number };
 /** CRAG evaluation: uses Groq to judge chunk relevance, adjusts tier. */
 async function evaluateWithCrag(
   ctx: any,
-  actions: any,
+  internals: any,
   safeQuestion: string,
   results: SearchResult[],
 ): Promise<{
@@ -259,7 +258,7 @@ async function evaluateWithCrag(
   }
 
   const cragEval = await ctx
-    .runAction(actions.rag.crag.evaluateChunks, {
+    .runAction(internals.rag.crag.evaluateChunks, {
       query: safeQuestion,
       chunks: results.map((r, i) => ({ text: r.content, index: i })),
     })
@@ -326,6 +325,7 @@ async function evaluateWithCrag(
 async function searchAndRerank(
   ctx: any,
   actions: any,
+  internals: any,
   queryEmbedding: number[],
   rewrittenQuery: string,
   safeQuestion: string,
@@ -341,7 +341,7 @@ async function searchAndRerank(
     hydeQuery,
     intent,
   );
-  const reranked = await rerankSearchResults(ctx, actions, rewrittenQuery, safeQuestion, results);
+  const reranked = await rerankSearchResults(ctx, internals, rewrittenQuery, safeQuestion, results);
   const sources = buildSourcesFromResults(reranked);
   return { results: reranked, sources };
 }
@@ -426,9 +426,8 @@ export const retrieveContext = action({
       throw new ConvexError("Authentication required for RAG retrieval");
     }
 
-    // Break circular type chain through api/internal (Convex known pattern)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const _a: any = api;
+    // Break circular type chain through internal (Convex known pattern).
+    // generate/cache.get/search are internalAction, so all sub-actions resolve via `internal`.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const _i: any = internal;
 
@@ -440,7 +439,7 @@ export const retrieveContext = action({
       timestamp: Date.now(),
     });
 
-    const intent = await classifyUserIntent(ctx, _a, safeQuestion);
+    const intent = await classifyUserIntent(ctx, _i, safeQuestion);
     if (intent === "off_topic") {
       return {
         intent,
@@ -452,17 +451,17 @@ export const retrieveContext = action({
       };
     }
 
-    const { rewrittenQuery, hydeQuery } = await enrichQuery(ctx, _a, _i, safeQuestion);
+    const { rewrittenQuery, hydeQuery } = await enrichQuery(ctx, _i, safeQuestion);
 
     // Generate cache embedding deterministically (ignoring HyDE)
     let cacheEmbedding: number[] = [];
     try {
-      cacheEmbedding = await generateQueryEmbedding(ctx, _a, "", rewrittenQuery, safeQuestion);
+      cacheEmbedding = await generateQueryEmbedding(ctx, _i, "", rewrittenQuery, safeQuestion);
     } catch (e) {
       console.warn("Failed to generate cache embedding:", e);
     }
 
-    const cached = await checkSemanticCache(ctx, _a, safeQuestion, cacheEmbedding);
+    const cached = await checkSemanticCache(ctx, _i, safeQuestion, cacheEmbedding);
     if (cached) {
       console.log("[RETRIEVAL] Cache hit", {
         query: truncateQuery(safeQuestion),
@@ -484,7 +483,7 @@ export const retrieveContext = action({
     try {
       queryEmbedding = await generateQueryEmbedding(
         ctx,
-        _a,
+        _i,
         hydeQuery,
         rewrittenQuery,
         safeQuestion,
@@ -499,9 +498,10 @@ export const retrieveContext = action({
       intent,
     });
 
-    const { results, sources } = await searchAndRerank(
+    const { results } = await searchAndRerank(
       ctx,
-      _a,
+      _i,
+      _i,
       queryEmbedding,
       rewrittenQuery,
       safeQuestion,
@@ -517,11 +517,32 @@ export const retrieveContext = action({
       retrievalLatencyMs: retrievalLatency,
     });
 
+    // Skip the (expensive, often redundant) CRAG LLM judge when the reranker is
+    // already confident: if the top reranked score is at/above the "normal"
+    // tier threshold, trust the rerank ordering and reserve CRAG for
+    // borderline/low-confidence retrievals. Saves a Groq call per query on the
+    // common high-confidence path.
+    const topRerankScore = results[0]?.relevanceScore ?? 0;
+    const skipCrag = results.length > 0 && topRerankScore >= CRAG_CONFIG.skipThreshold;
+
     const {
       finalResults,
       finalSources,
       tier: cragTier,
-    } = await evaluateWithCrag(ctx, _a, safeQuestion, results);
+    } = skipCrag
+      ? {
+          finalResults: results,
+          finalSources: buildSourcesFromResults(results),
+          tier: null as ConfidenceTier | null,
+        }
+      : await evaluateWithCrag(ctx, _i, safeQuestion, results);
+
+    if (skipCrag) {
+      console.log("[RETRIEVAL] CRAG skipped (high-confidence rerank)", {
+        query: truncateQuery(safeQuestion),
+        topRerankScore,
+      });
+    }
 
     const context = await buildResponseContext(ctx, _i, finalResults, cragTier);
 

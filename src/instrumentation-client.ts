@@ -9,6 +9,9 @@ if (dsn) {
     debug: false,
     replaysSessionSampleRate: 0.1,
     replaysOnErrorSampleRate: 1.0,
+    // Replay sample rates above have no effect unless the replay integration
+    // is registered.
+    integrations: [Sentry.replayIntegration()],
     environment: process.env.NODE_ENV || "development",
   });
 } else {
@@ -16,3 +19,6 @@ if (dsn) {
     "[Sentry] SENTRY_DSN not configured. Error monitoring is disabled. Set SENTRY_DSN in your environment to enable.",
   );
 }
+
+// Instruments client-side navigations (App Router) so route changes are traced.
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

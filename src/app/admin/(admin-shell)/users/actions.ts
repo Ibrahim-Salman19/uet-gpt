@@ -116,9 +116,21 @@ export async function setUserRole(
 
   try {
     const client = await clerkClient();
-    await client.users.updateUserMetadata(userId, {
-      publicMetadata: { role: newRole },
-    });
+
+    // Guard against modifying a peer/superior: load the target's CURRENT role
+    // and reject if it is equal to or above the acting admin's level (mirrors
+    // removeUserRole). Without this, an admin could alter another admin or a
+    // superadmin.
+    const targetUser = await client.users.getUser(userId);
+    const targetRole =
+      ((targetUser.publicMetadata as Record<string, unknown>)?.role as string) || "user";
+    const targetRoleLevel = ROLE_HIERARCHY[targetRole as keyof typeof ROLE_HIERARCHY] ?? 0;
+    if (targetRoleLevel >= adminRoleLevel) {
+      return {
+        success: false,
+        error: "Cannot modify a user with a role equal to or above your own",
+      };
+    }
 
     const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
     if (!convexUrl) {
@@ -130,9 +142,19 @@ export async function setUserRole(
     if (token) {
       convex.setAuth(token);
     }
+
+    // Write the authoritative store (Convex) FIRST so the operation fails
+    // closed: if Convex rejects (e.g. its own requireAdmin / role guard),
+    // Clerk metadata is never mutated and the two stores cannot diverge.
     await convex.mutation(api.users.updateUserRole, {
       clerkId: userId,
       role: newRole as "user" | "admin" | "superadmin",
+    });
+
+    // Update Clerk publicMetadata (the derived cache used by edge/middleware)
+    // only after the authoritative Convex write succeeds.
+    await client.users.updateUserMetadata(userId, {
+      publicMetadata: { role: newRole },
     });
 
     revalidatePath("/admin/users");

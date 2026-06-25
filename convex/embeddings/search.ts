@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
-import { type ActionCtx, action } from "../_generated/server";
+import { type ActionCtx, internalAction } from "../_generated/server";
 import { recordTiming } from "../observability/metrics";
 import { rag } from "../rag/instance";
 import { type AdaptiveWeights, estimateIdf } from "./idf";
@@ -154,7 +154,11 @@ async function fetchActiveFaqs(
   }
 }
 
-export const searchDocumentsAction = action({
+// internalAction: only callable server-side via
+// internal.embeddings.search.searchDocumentsAction from the already-authenticated
+// RAG retrieval pipeline. Removing it from the public API surface prevents
+// unauthenticated vector/full-text/FAQ search + HyDE LLM cost-amplification.
+export const searchDocumentsAction = internalAction({
   args: {
     queryText: v.string(),
     queryEmbedding: v.optional(v.array(v.float64())),

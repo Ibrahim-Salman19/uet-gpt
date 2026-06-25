@@ -1,4 +1,4 @@
-import { withSentryConfig, type SentryBuildOptions } from "@sentry/nextjs";
+import { type SentryBuildOptions, withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 import path from "path";
 
@@ -34,23 +34,37 @@ const nextConfig: NextConfig = {
     return [{ source: "/", destination: "/chat", permanent: false }];
   },
   async headers() {
+    const isDev = process.env.NODE_ENV !== "production";
+    // 'unsafe-eval' is only ever needed by dev tooling (React Refresh / HMR).
+    // It is dropped entirely in production. 'unsafe-inline' for script-src is
+    // still required until a nonce/'strict-dynamic' policy is wired through the
+    // middleware (see cross_cutting: src/middleware.ts) because Next.js emits
+    // inline bootstrap scripts; it is therefore left in place but flagged.
+    const scriptSrc = [
+      "script-src 'self' https://clerk.browser.systems *.clerk.accounts.dev 'unsafe-inline'",
+      isDev ? " 'unsafe-eval'" : "",
+    ].join("");
     return [
       {
         source: "/(.*)",
         headers: [
           { key: "X-Frame-Options", value: "DENY" },
           { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy", value: "geolocation=(), microphone=(self), camera=()" },
           {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' https://clerk.browser.systems *.clerk.accounts.dev 'unsafe-inline' 'unsafe-eval'",
+              scriptSrc,
               "connect-src 'self' *.convex.cloud wss://*.convex.cloud https://clerk.browser.systems *.clerk.accounts.dev",
               "img-src 'self' data: blob: https://img.clerk.com https://*.convex.cloud",
               "style-src 'self' 'unsafe-inline'",
+              "object-src 'none'",
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",
@@ -74,6 +88,4 @@ const sentryOptions: SentryBuildOptions = {
   automaticVercelMonitors: true,
 };
 
-export default process.env.SENTRY_DSN
-  ? withSentryConfig(nextConfig, sentryOptions)
-  : nextConfig;
+export default process.env.SENTRY_DSN ? withSentryConfig(nextConfig, sentryOptions) : nextConfig;

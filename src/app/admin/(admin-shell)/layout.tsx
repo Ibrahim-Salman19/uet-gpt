@@ -107,9 +107,9 @@ export default function AdminShellLayout({ children }: { children: React.ReactNo
               {navItems.find((i) => i.href === pathname)?.label ?? "Admin"}
             </h1>
           </header>
-          <div className="flex-1 overflow-auto p-6 bg-transparent">
+          <main className="flex-1 overflow-auto p-6 bg-transparent">
             <ClientOnly>{children}</ClientOnly>
-          </div>
+          </main>
         </div>
       </div>
     </AuthGuard>

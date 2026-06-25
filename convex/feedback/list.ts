@@ -1,6 +1,7 @@
 import { ConvexError, v } from "convex/values";
 import type { Doc } from "../_generated/dataModel";
 import { query } from "../_generated/server";
+import { requireAdmin } from "../auth";
 
 const feedbackValidator = v.object({
   _id: v.id("feedback"),
@@ -20,8 +21,9 @@ export const list = query({
   },
   returns: v.array(feedbackValidator),
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new ConvexError("Authentication required");
+    // Admin-only: `list` returns ALL users' feedback (comments + userIds).
+    // Non-admins must use `listByUser`, which scopes to the caller's own rows.
+    await requireAdmin(ctx);
     const limit = args.limit ?? 50;
     const cursor = args.cursor;
     const page = await ctx.db

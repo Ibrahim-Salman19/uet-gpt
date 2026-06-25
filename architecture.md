@@ -19,7 +19,7 @@ UET Taxila GPT is an autonomous RAG pipeline chatbot for UET Taxila. It answers 
 | **Backend** | Convex (cloud-hosted real-time DB + serverless functions) |
 | **Auth** | Clerk (`@clerk/nextjs` v7.3.7) — session management, RBAC (user/admin/superadmin) |
 | **LLM Orchestration** | Vercel AI SDK (`ai` v6, `@ai-sdk/react`, `@ai-sdk/groq`, `@ai-sdk/google`, `@ai-sdk/cerebras`) |
-| **Vector DB** | Convex native `vectorIndex` (3072 dimensions for semantic cache and RAG) |
+| **Vector DB** | Convex native `vectorIndex` (768 dimensions for semantic cache and RAG) |
 | **Caching** | Convex `semanticCache` table with cosine similarity + Upstash Redis (`@upstash/ratelimit`) |
 | **Crawler** | Python async BFS (`curl_cffi`, `trafilatura`) → POST `/ingest` (primary). Also supports external crawl4AI service → POST `/api/webhook/crawl` (secondary). |
 | **RAG** | `@convex-dev/rag` (embedding, indexing, retrieval), `@convex-dev/agent` (agent framework) |
@@ -83,7 +83,7 @@ UET Taxila GPT is an autonomous RAG pipeline chatbot for UET Taxila. It answers 
 │   ├── people/                      # People data
 │   │   └── queries.ts               #   getCount (faculty/admin/staff classification)
 │   ├── rag/                         # RAG pipeline
-│   │   ├── instance.ts              #   rag singleton (3072d, resilient embedding model)
+│   │   ├── instance.ts              #   rag singleton (768d, resilient embedding model)
 │   │   ├── retrieval.ts             #   Orchestrator: classify → rewrite → HyDE → embed → cache → search → rerank → context
 │   │   ├── context.ts               #   Sandwich strategy context assembly (internalQuery)
 │   │   ├── routing.ts               #   Intent classification, query rewriting, HyDE generation (Groq LLM)
@@ -138,7 +138,7 @@ UET Taxila GPT is an autonomous RAG pipeline chatbot for UET Taxila. It answers 
 │   └── setup.ts                     # Test setup (jest-dom, global fetch mock)
 ├── docs/
 │   ├── anti-pattern-audit-report.md # Test anti-pattern audit
-│   ├── chunking-strategy.md         # Note: dimension 768 listed here is OUTDATED — actual is 3072
+│   ├── chunking-strategy.md         # Chunking design (dimension 768 — matches schema.ts / instance.ts)
 │   ├── crawling-strategy.md
 │   ├── deployment.md
 │   ├── embedding-strategy.md
@@ -205,7 +205,7 @@ The schema is defined in `convex/schema.ts`. Tables `threads` and `messages` are
 | Field | Type | Notes |
 |-------|------|-------|
 | `queryText` | `string` | |
-| `queryEmbedding` | `float64[]` | **vectorIndex** `by_queryEmbedding`, 3072 dimensions |
+| `queryEmbedding` | `float64[]` | **vectorIndex** `by_queryEmbedding`, 768 dimensions |
 | `response` | `string` | |
 | `sources` | `{ entryId, url, title, relevanceScore, excerpt }[]` | |
 | `model` | `string` | |
@@ -360,7 +360,7 @@ Convex-native sliding window rate limiter state.
 
 ## 5. RAG Pipeline
 
-The RAG pipeline is orchestrated by `convex/rag/retrieval.ts:retrieveContext` (a Convex action). The RAG component instance is initialized in `convex/rag/instance.ts` with `embeddingDimension: 3072`, custom resilient embedding model wrapping Gemini, and filter names `["category", "source"]`. RAG namespace: `"uet-global"`.
+The RAG pipeline is orchestrated by `convex/rag/retrieval.ts:retrieveContext` (a Convex action). The RAG component instance is initialized in `convex/rag/instance.ts` with `embeddingDimension: 768`, custom resilient embedding model wrapping Gemini, and filter names `["category", "source"]`. RAG namespace: `"uet-global"`.
 
 ### 5.1 Pipeline Stages
 
@@ -370,7 +370,7 @@ The RAG pipeline is orchestrated by `convex/rag/retrieval.ts:retrieveContext` (a
 | 2 | **Intent Classification** | `rag/routing.ts:classifyQueryAction` | Groq Llama 3.1 8B classifies as `admissions`, `academic`, `administrative`, `campus_life`, `general`, `off_topic`, `simple_fact`. Off-topic → short-circuit with refusal. |
 | 3 | **Query Rewriting** | `rag/routing.ts:rewriteQueryAction` | Keyword-rich expansion, Roman Urdu → English translation, abbreviation expansion (UET → University of Engineering and Technology). Temperature 0.3. |
 | 4 | **HyDE** | `rag/routing.ts:hydeQueryAction` | Hypothetical 3-5 sentence document for queries < 15 words. Temperature 0.5. |
-| 5 | **Embedding** | `embeddings/generate.ts:generate` | Gemini `gemini-embedding-2`, 3072 dimensions. Key rotation across 4 env vars. Batch API for ≥2 texts. 3× retry with exponential backoff + jitter. Prefix: `task: search result \| query: ${text}`. |
+| 5 | **Embedding** | `embeddings/generate.ts:generate` | Gemini `gemini-embedding-2`, 768 dimensions. Key rotation across 4 env vars. Batch API for ≥2 texts. 3× retry with exponential backoff + jitter. Prefix: `task: search result \| query: ${text}`. |
 | 6 | **Semantic Cache** | `cache/get.ts:get` | Cosine similarity via `ctx.vectorSearch` at threshold **0.92** from `constants.ts`. Hit → return cached response + sources; increment hit counter. Source re-index invalidation (R-5): checks if source doc updated since cache entry. |
 | 7 | **Hybrid Search** | `embeddings/search.ts:searchDocumentsAction` | Vector search (`rag.search`, 40 results) + BM25 full-text (`search_text` searchIndex, 40 results) → RRF fusion (k=60). Time decay weighting per freshness tier (floor at 0.20). FAQ tier-1 retrieval (score * 2.0). |
 | 8 | **Reranking** | `reranking/rerank.ts:rerank` | External FlashRank endpoint via `RERANKER_URL` env var. Falls back to linear decay scoring if unconfigured. topK=4. |
@@ -407,7 +407,7 @@ scripts/crawler.py (curl_cffi + trafilatura)
   → POST /ingest (Bearer token auth)
     → ingestWebhook (upsertDocument → enqueueDocumentChunks)
       → workpool embedSingleChunk
-        → RAG component embed + index (3072d) → crawledChunks table
+        → RAG component embed + index (768d) → crawledChunks table
 ```
 
 **Path B — External crawl4AI Service (Secondary)**:
@@ -416,7 +416,7 @@ External crawl4AI instance
   → POST /api/webhook/crawl (HMAC-SHA256 auth)
     → crawlWebhook (chunkMarkdown → queueChunksForEmbedding)
       → workpool embedSingleChunk
-        → RAG component embed + index (3072d) → crawledChunks table
+        → RAG component embed + index (768d) → crawledChunks table
 ```
 
 **Path C — Reset Pipeline**:
@@ -625,7 +625,7 @@ Defined in `convex/crons.ts`:
 | Property | Value |
 |----------|-------|
 | **Model** | `gemini-embedding-2` |
-| **Dimensions** | 3072 (MRL supports 768/1536/3072) |
+| **Dimensions** | 768 (MRL supports 768/1536/3072; this deployment uses 768) |
 | **Context** | 8192 tokens |
 | **Free tier** | ~60 RPM, ~1500 RPD |
 | **Paid Tier 1** | 3000 RPM, 1M TPM |
@@ -652,7 +652,7 @@ Defined in `rag/instance.ts` — custom `EmbeddingModel` wrapping `generateEmbed
 | Property | Value | File |
 |----------|-------|------|
 | **Similarity threshold** | 0.92 (cosine) | `convex/constants.ts` |
-| **Vector index dimensions** | 3072 | `schema.ts` — `vectorIndex("by_queryEmbedding", ...)` |
+| **Vector index dimensions** | 768 | `schema.ts` — `vectorIndex("by_queryEmbedding", ...)` |
 | **Search method** | `ctx.vectorSearch` on `semanticCache` table | `cache/get.ts` |
 | **Cache TTL tiers** | High=7d, Medium=2d, Low=1d | `cache/set.ts` |
 | **Write trigger** | Async via `after()` after successful LLM generation | `cache/set.ts`, `chat/route.ts` |

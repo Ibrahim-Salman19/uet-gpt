@@ -1,26 +1,42 @@
 # Embedding Strategy
 
+> **Authoritative source:** see [`architecture.md`](../architecture.md) §5 (RAG pipeline)
+> and §6.6 / §11 (cache + dimensions). This page summarizes the *implemented*
+> pipeline; do not hand-duplicate drift-prone numbers — defer to architecture.md
+> and the code (`convex/rag/instance.ts`, `convex/schema.ts`, `convex/constants.ts`).
+
 ## Provider
 
-- **Primary:** Google Gemini `text-embedding-004`
-- **Dimensions:** 768 (configured via `outputDimensionality`)
-- **Fallback:** None (Gemini free tier sufficient for 1K RPD)
+- **Primary model:** Google Gemini `gemini-embedding-2`
+  (configured in `convex/rag/instance.ts` as the resilient embedding model).
+- **Dimensions:** **768** (`embeddingDimension: 768` in `convex/rag/instance.ts`;
+  matched by the `vectorIndex("by_queryEmbedding", { dimensions: 768 })` in
+  `convex/schema.ts`). This is the single most load-bearing constant in the RAG
+  system — changing it requires a full re-embed and is treated as forbidden.
+- **Resilience:** multi-key rotation across the configured Gemini API keys plus
+  fallback handling, with 3× retry and exponential backoff + jitter
+  (`convex/embeddings/generate.ts`). Batch API used for ≥2 texts.
 
 ## Vector Store
 
-- Convex native `vectorIndex` (actions only)
+- Convex native `vectorIndex` (queried from actions only).
 - Indexes:
-  - `chunks.by_embedding` (768d) — document chunk embeddings
+  - RAG document/chunk embeddings are managed by the `@convex-dev/rag`
+    component (indexed into the `crawledChunks` flow); see architecture.md §5/§6.
   - `semanticCache.by_queryEmbedding` (768d) — cached query embeddings
+    (`convex/schema.ts`).
 
-## Hybrid Search
+## Retrieval & Hybrid Search
 
-- **Vector:** Cosine similarity via `ctx.vectorSearch`
-- **Full-text:** Convex `searchIndex` on `chunks.content`
-- **Fusion:** Reciprocal Rank Fusion (RRF, K=60)
+- **Vector:** cosine similarity via `ctx.vectorSearch` / the RAG component.
+- **Full-text:** Convex `searchIndex` over chunk content.
+- **Fusion:** Reciprocal Rank Fusion (RRF). See architecture.md §5 and
+  `convex/rag/retrieval.ts` for the live constants.
 
-## TODO
+## Notes
 
-- [ ] Monitor embedding API costs and rate limits
-- [ ] Add embedding caching for repeat queries
-- [ ] Evaluate alternative embedding models (e.g. Cohere)
+- Embedding caching for repeat queries is implemented via the `semanticCache`
+  table with tiered TTLs (see architecture.md §6.6 / §11), not a flat 24h TTL.
+- Cost / rate-limit monitoring and alternative-model evaluation remain open
+  operational concerns; track them in the issue tracker rather than as code TODOs
+  here.

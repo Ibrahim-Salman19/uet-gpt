@@ -2,7 +2,7 @@ import { createGroq } from "@ai-sdk/groq";
 import { generateObject } from "ai";
 import { v } from "convex/values";
 import { z } from "zod";
-import { action } from "../_generated/server";
+import { internalAction } from "../_generated/server";
 import { CRAG_CONFIG } from "./constants";
 
 function buildCragPrompt(query: string, batch: Array<{ text: string; index: number }>): string {
@@ -24,7 +24,7 @@ For each chunk above, determine if it is relevant to answering the user query.
 Respond with a JSON array of evaluations, one per chunk in the order shown above.`;
 }
 
-export const evaluateChunks = action({
+export const evaluateChunks = internalAction({
   args: {
     query: v.string(),
     chunks: v.array(

@@ -26,27 +26,25 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment || 'production' }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
         with:
           version: ${{ env.PNPM_VERSION }}
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22"
       - name: Get pnpm store directory
         id: pnpm-store
         run: echo "store=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
-      - uses: actions/cache@v4
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ${{ steps.pnpm-store.outputs.store }}
-          key: pnpm-store-${{ hashFiles('uet-gpt/pnpm-lock.yaml') }}
+          key: pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             pnpm-store-
       - name: Install dependencies
-        working-directory: uet-gpt
         run: pnpm install --frozen-lockfile
       - name: Deploy Convex
-        working-directory: uet-gpt
         run: npx convex@latest deploy
         env:
           CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOYMENT }}
@@ -56,6 +54,7 @@ jobs:
           CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
+          CLERK_WEBHOOK_SECRET: ${{ secrets.CLERK_WEBHOOK_SECRET }}
 
   build-and-deploy:
     name: Build & Deploy Frontend
@@ -63,34 +62,31 @@ jobs:
     needs: [deploy-convex]
     environment: ${{ inputs.environment || 'production' }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
         with:
           version: ${{ env.PNPM_VERSION }}
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22"
       - name: Get pnpm store directory
         id: pnpm-store
         run: echo "store=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
-      - uses: actions/cache@v4
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ${{ steps.pnpm-store.outputs.store }}
-          key: pnpm-store-${{ hashFiles('uet-gpt/pnpm-lock.yaml') }}
+          key: pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             pnpm-store-
       - name: Install dependencies
-        working-directory: uet-gpt
         run: pnpm install --frozen-lockfile
 
       - name: Generate Convex types
-        working-directory: uet-gpt
         run: npx convex@latest codegen
         env:
           CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOYMENT }}
 
       - name: Build Next.js
-        working-directory: uet-gpt
         run: pnpm build
         env:
           CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOYMENT }}
@@ -102,11 +98,21 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
 
+      # Official Vercel CLI flow. `vercel/actions/deploy@v2` does not exist as a
+      # first-party action, so we use the documented CLI: pull project config,
+      # build with Vercel, then deploy the prebuilt output (avoids re-building).
       - name: Deploy to Vercel
-        uses: vercel/actions/deploy@v2
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: ${{ inputs.environment == 'preview' && '--preview' || '--prod' }}
-          working-directory: uet-gpt
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          VERCEL_ENV="${{ inputs.environment == 'preview' && 'preview' || 'production' }}"
+          pnpm dlx vercel@latest pull --yes --environment="$VERCEL_ENV" --token="$VERCEL_TOKEN"
+          if [ "$VERCEL_ENV" = "production" ]; then
+            pnpm dlx vercel@latest build --prod --token="$VERCEL_TOKEN"
+            pnpm dlx vercel@latest deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+          else
+            pnpm dlx vercel@latest build --token="$VERCEL_TOKEN"
+            pnpm dlx vercel@latest deploy --prebuilt --token="$VERCEL_TOKEN"
+          fi
