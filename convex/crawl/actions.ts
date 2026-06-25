@@ -13,21 +13,63 @@ import { isPdfVirtualUrl } from "./chunking";
 
 // legacy processWebhookResult removed
 
+// SECURITY (SSRF hardening): only fetch sitemaps and accept <loc> URLs on the
+// university domain. An attacker who can influence sitemap contents must not be able
+// to make the server fetch arbitrary internal/external hosts or follow redirects to them.
+const SITEMAP_ALLOWED_DOMAIN_SUFFIX = "uettaxila.edu.pk";
+// Bound recursion of nested sitemap indexes and the total number of sitemap documents
+// fetched per crawl so a maliciously deep/wide sitemap tree cannot cause unbounded fetches (DoS).
+const MAX_SITEMAP_DEPTH = 3;
+const MAX_SITEMAPS_FETCHED = 50;
+const MAX_SITEMAP_BYTES = 10_485_760; // 10 MiB response cap
+
+function isAllowedSitemapHost(url: string): boolean {
+  let host: string;
+  try {
+    host = new URL(url).hostname.toLowerCase();
+  } catch {
+    return false;
+  }
+  return (
+    host === SITEMAP_ALLOWED_DOMAIN_SUFFIX || host.endsWith(`.${SITEMAP_ALLOWED_DOMAIN_SUFFIX}`)
+  );
+}
+
 /**
  * A-3: Sitemap pre-seeding — merges sitemap URLs into the crawl seed list.
  * Fetches standard sitemap XML, extracts <loc> URLs, and filters through include/exclude patterns.
  * Improves coverage by catching pages not explicitly listed as seed URLs.
+ *
+ * SSRF-hardened: bounded recursion depth + visited-set, host allowlist on both the
+ * fetched sitemap and every emitted <loc> URL, response-size cap, and redirects are
+ * disabled (a redirect off-domain is treated as a failed fetch rather than followed).
  */
 async function fetchSitemapUrls(
   sitemapUrl: string,
   includePatterns: readonly string[],
   excludePatterns: readonly string[],
   timeoutMs: number = 10000,
+  depth: number = 0,
+  visited: Set<string> = new Set(),
+  fetchBudget: { count: number } = { count: 0 },
 ): Promise<string[]> {
+  // Bound recursion, total fetches, and avoid revisiting the same sitemap.
+  if (depth > MAX_SITEMAP_DEPTH) return [];
+  if (fetchBudget.count >= MAX_SITEMAPS_FETCHED) return [];
+  if (visited.has(sitemapUrl)) return [];
+  // SECURITY: never fetch a sitemap off the allowed domain.
+  if (!isAllowedSitemapHost(sitemapUrl)) {
+    console.warn(`Sitemap fetch skipped (host not in allowlist): ${sitemapUrl}`);
+    return [];
+  }
+  visited.add(sitemapUrl);
+  fetchBudget.count++;
+
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-    const response = await fetch(sitemapUrl, { signal: controller.signal });
+    // redirect: "error" — do NOT silently follow redirects to other (possibly internal) hosts.
+    const response = await fetch(sitemapUrl, { signal: controller.signal, redirect: "error" });
     clearTimeout(timeoutId);
 
     if (!response.ok) {
@@ -35,13 +77,20 @@ async function fetchSitemapUrls(
       return [];
     }
 
-    const xml = await response.text();
+    // Cap response size to avoid memory exhaustion from a hostile sitemap.
+    const buffer = await response.arrayBuffer();
+    if (buffer.byteLength > MAX_SITEMAP_BYTES) {
+      console.warn(`Sitemap too large (${buffer.byteLength} bytes) for ${sitemapUrl}`);
+      return [];
+    }
+    const xml = new TextDecoder().decode(buffer);
     const locRegex = /<loc[^>]*>([^<]+)<\/loc>/gi;
     const urls: string[] = [];
     let match: RegExpExecArray | null;
     while ((match = locRegex.exec(xml)) !== null) {
       const url = match[1]!.trim();
-      urls.push(url);
+      // SECURITY: only emit on-domain page URLs.
+      if (isAllowedSitemapHost(url)) urls.push(url);
     }
 
     // Handle sitemap index (sitemap that points to other sitemaps)
@@ -53,6 +102,9 @@ async function fetchSitemapUrls(
         includePatterns,
         excludePatterns,
         timeoutMs,
+        depth + 1,
+        visited,
+        fetchBudget,
       );
       urls.push(...childUrls);
     }
@@ -345,6 +397,10 @@ export const embedSingleChunk = internalAction({
           contentHash: args.contentHash,
           documentId: args.documentId,
           url: args.url,
+          // Echo this chunk's own jobId so the onComplete handler routes DLQ
+          // updates by the chunk's real job rather than a batch-level jobId
+          // (DLQ retries batch entries from many jobs under one enqueue).
+          jobId: args.jobId,
         };
       }
 
@@ -382,6 +438,7 @@ export const embedSingleChunk = internalAction({
         contentHash: args.contentHash,
         documentId: args.documentId,
         url: args.url,
+        jobId: args.jobId,
       };
     } catch (error: unknown) {
       const err = error as { status?: number; message?: string };
@@ -396,6 +453,7 @@ export const embedSingleChunk = internalAction({
           documentId: args.documentId,
           url: args.url,
           chunkText: args.chunkText,
+          jobId: args.jobId,
         };
       }
 

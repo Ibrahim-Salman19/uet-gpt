@@ -1,7 +1,6 @@
 "use client";
 
 import { api } from "convex/_generated/api";
-import type { FunctionReference } from "convex/server";
 import { BookOpen, ExternalLink, Grid3X3, List, Loader2, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -158,17 +157,20 @@ export default function ExplorePage() {
   }, [searchQuery, setDebounced]);
 
   // Pass category to backend when filtered — avoids the 50-doc client-side truncation bug
-  const queryArgs = activeCategory === "all" ? {} : { category: activeCategory };
+  const category = activeCategory === "all" ? undefined : activeCategory;
+  const trimmedQuery = debouncedQuery.trim();
+  const isSearching = trimmedQuery.length > 0;
 
-  // Use search API if query exists, otherwise use list API
-  const queryToUse = debouncedQuery.trim().length > 0 ? api.doc.search : api.doc.list;
-  const finalArgs =
-    debouncedQuery.trim().length > 0 ? { query: debouncedQuery.trim(), ...queryArgs } : queryArgs;
-
-  const documents = useStableQuery(
-    queryToUse as unknown as FunctionReference<"query", "public">,
-    finalArgs,
+  // Branch the query call itself so each reference keeps its precise generated
+  // arg/return types (no `as unknown as FunctionReference` cast). The inactive
+  // query is skipped, so only one runs at a time.
+  const searchResults = useStableQuery(
+    api.doc.search,
+    isSearching ? { query: trimmedQuery, category } : "skip",
   );
+  const listResults = useStableQuery(api.doc.list, isSearching ? "skip" : { category });
+
+  const documents = isSearching ? searchResults : listResults;
 
   return (
     <Tabs
@@ -189,18 +191,28 @@ export default function ExplorePage() {
 
           <div className="flex items-center gap-3">
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-500" />
+              <Search
+                className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-500"
+                aria-hidden="true"
+              />
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search documents…"
+                aria-label="Search documents"
                 className="pl-9 text-base md:text-xs bg-zinc-950/60 border border-white/10 rounded-xl text-zinc-200 placeholder:text-zinc-500 focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:outline-none"
               />
             </div>
-            <div className="flex items-center gap-1 rounded-xl border border-white/10 bg-zinc-950/60 p-0.5 shrink-0">
+            <div
+              role="group"
+              aria-label="View mode"
+              className="flex items-center gap-1 rounded-xl border border-white/10 bg-zinc-950/60 p-0.5 shrink-0"
+            >
               <button
                 type="button"
                 onClick={() => setViewMode("grid")}
+                aria-label="Grid view"
+                aria-pressed={viewMode === "grid"}
                 className={cn(
                   "rounded-lg p-1.5 transition-colors cursor-pointer",
                   viewMode === "grid"
@@ -208,11 +220,13 @@ export default function ExplorePage() {
                     : "text-zinc-500 hover:text-zinc-300",
                 )}
               >
-                <Grid3X3 className="h-3.5 w-3.5" />
+                <Grid3X3 className="h-3.5 w-3.5" aria-hidden="true" />
               </button>
               <button
                 type="button"
                 onClick={() => setViewMode("list")}
+                aria-label="List view"
+                aria-pressed={viewMode === "list"}
                 className={cn(
                   "rounded-lg p-1.5 transition-colors cursor-pointer",
                   viewMode === "list"
@@ -220,7 +234,7 @@ export default function ExplorePage() {
                     : "text-zinc-500 hover:text-zinc-300",
                 )}
               >
-                <List className="h-3.5 w-3.5" />
+                <List className="h-3.5 w-3.5" aria-hidden="true" />
               </button>
             </div>
           </div>

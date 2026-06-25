@@ -26,37 +26,42 @@ export type Permission =
   | "users:manage"
   | "emergency:stop";
 
+// Permissions granted *additionally* at each level. Roles are composed
+// hierarchically below so higher roles always include lower-role permissions
+// by construction — the lists cannot drift relative to each other.
+//
+// NOTE: this must stay in sync with the canonical matrix in convex/auth.ts
+// across the trust boundary. See the CI diff test recommendation in the audit.
+const USER_PERMISSIONS: readonly Permission[] = ["chat:send", "doc:read"];
+const ADMIN_EXTRA: readonly Permission[] = [
+  "crawl:trigger",
+  "crawl:list",
+  "doc:delete",
+  "settings:manage",
+  "users:manage",
+];
+const SUPERADMIN_EXTRA: readonly Permission[] = ["emergency:stop"];
+
 const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
-  user: ["chat:send", "doc:read"],
-  admin: [
-    "chat:send",
-    "doc:read",
-    "crawl:trigger",
-    "crawl:list",
-    "doc:delete",
-    "settings:manage",
-    "users:manage",
-  ],
-  superadmin: [
-    "chat:send",
-    "doc:read",
-    "crawl:trigger",
-    "crawl:list",
-    "doc:delete",
-    "settings:manage",
-    "users:manage",
-    "emergency:stop",
-  ],
+  user: USER_PERMISSIONS,
+  admin: [...USER_PERMISSIONS, ...ADMIN_EXTRA],
+  superadmin: [...USER_PERMISSIONS, ...ADMIN_EXTRA, ...SUPERADMIN_EXTRA],
 } as const;
+
+/**
+ * Type guard for the known {@link Role} literals.
+ */
+function isRole(role: unknown): role is Role {
+  return typeof role === "string" && role in ROLE_PERMISSIONS;
+}
 
 /**
  * Check if a role has a specific permission.
  * Roles are hierarchical: superadmin includes all admin permissions, admin includes all user permissions.
  */
 export function hasPermission(role: string | undefined | null, permission: Permission): boolean {
-  const validRole = role as Role;
-  if (!(validRole in ROLE_PERMISSIONS)) return false;
-  return ROLE_PERMISSIONS[validRole].includes(permission);
+  if (!isRole(role)) return false;
+  return ROLE_PERMISSIONS[role].includes(permission);
 }
 
 /**
@@ -70,7 +75,6 @@ export function isAdminRole(role: string | undefined | null): boolean {
  * Get all permissions for a role.
  */
 export function getPermissionsForRole(role: string | undefined | null): readonly Permission[] {
-  const validRole = role as Role;
-  if (!(validRole in ROLE_PERMISSIONS)) return [];
-  return ROLE_PERMISSIONS[validRole];
+  if (!isRole(role)) return [];
+  return ROLE_PERMISSIONS[role];
 }

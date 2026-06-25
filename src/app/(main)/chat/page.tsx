@@ -22,6 +22,7 @@ export default function ChatPage() {
   const createThread = useMutation(api.threads.create);
   const [isCreating, setIsCreating] = useState(false);
   const creatingRef = useRef(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleSend = useCallback(
     async (message: string) => {
@@ -50,8 +51,6 @@ export default function ChatPage() {
     },
     [createThread, router],
   );
-
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   React.useEffect(() => {
     return () => {

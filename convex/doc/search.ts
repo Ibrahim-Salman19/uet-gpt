@@ -16,10 +16,10 @@ export const search = query({
     const q = args.query.toLowerCase();
     const category = args.category;
 
-    const results = (await ctx.db
+    const results = await ctx.db
       .query("documents")
       .withSearchIndex("search_title", (searchQ) => searchQ.search("title", q))
-      .take(limit)) as (typeof documentValidator.type)[];
+      .take(limit);
 
     // Client-side filter is required here because Convex search indexes
     // only support .search() calls, not combined .eq() filters. The

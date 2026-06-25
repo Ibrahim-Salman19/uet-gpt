@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "./fixtures/base-test";
 
 test("sign-in page shows welcome message and Clerk component", async ({ page }) => {
   await page.goto("/sign-in");

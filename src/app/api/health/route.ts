@@ -1,5 +1,22 @@
 // fallow-ignore-file security-sink
+import { timingSafeEqual } from "node:crypto";
 import { type NextRequest, NextResponse } from "next/server";
+
+/**
+ * Constant-time comparison of a bearer header against the expected value.
+ * Equal-length-checks first (still running a same-length comparison on
+ * mismatch) so neither the secret's bytes nor its length leak via timing.
+ */
+function timingSafeBearerMatch(provided: string | null, expected: string): boolean {
+  if (!provided) return false;
+  const a = Buffer.from(provided);
+  const b = Buffer.from(`Bearer ${expected}`);
+  if (a.length !== b.length) {
+    timingSafeEqual(b, b);
+    return false;
+  }
+  return timingSafeEqual(a, b);
+}
 
 interface ServiceStatus {
   status: "ok" | "error" | "not_configured";
@@ -49,7 +66,8 @@ async function checkService(
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
-  if (!process.env.CRON_SECRET || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  const cronSecret = process.env.CRON_SECRET;
+  if (!cronSecret || !timingSafeBearerMatch(authHeader, cronSecret)) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 

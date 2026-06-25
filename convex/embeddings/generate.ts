@@ -13,15 +13,33 @@ import { recordTiming } from "../observability/metrics";
 // Note: taskType parameter has no effect on gemini-embedding-2 (confirmed bug)
 const BATCH_THRESHOLD = 2;
 
+// Parse a Retry-After header (delta-seconds or HTTP-date) into milliseconds.
+// Returns null if absent or unparseable.
+function parseRetryAfter(header: string | null): number | null {
+  if (!header) return null;
+  const seconds = Number(header);
+  if (Number.isFinite(seconds)) {
+    return Math.max(0, seconds * 1000);
+  }
+  const dateMs = Date.parse(header);
+  if (!Number.isNaN(dateMs)) {
+    return Math.max(0, dateMs - Date.now());
+  }
+  return null;
+}
+
 async function fetchWithRetry(
   url: string,
   options: RequestInit,
   maxRetries = 3,
 ): Promise<Response> {
-  const baseDelayMs = process.env.NODE_ENV === "test" ? 1 : 100;
+  const isTest = process.env.NODE_ENV === "test";
+  const baseDelayMs = isTest ? 1 : 100;
+  const maxDelayMs = isTest ? 50 : 20_000;
   let attempt = 0;
   while (true) {
     attempt++;
+    let retryAfterMs: number | null = null;
     try {
       const response = await fetch(url, options);
       if (response.ok) {
@@ -32,14 +50,23 @@ async function fetchWithRetry(
       if (!isTransient || attempt >= maxRetries) {
         return response;
       }
+      // Honor the server's Retry-After instruction when present (Gemini returns
+      // it on 429/503), capped to avoid pathologically long sleeps.
+      retryAfterMs = parseRetryAfter(response.headers.get("retry-after"));
     } catch (err) {
       if (attempt >= maxRetries) {
         throw err;
       }
     }
-    const delay = baseDelayMs * 2 ** (attempt - 1);
-    const jitter = delay * Math.random() * 0.5;
-    await new Promise((resolve) => setTimeout(resolve, delay + jitter));
+    let delay: number;
+    if (retryAfterMs !== null) {
+      delay = Math.min(retryAfterMs, maxDelayMs);
+    } else {
+      // Capped exponential backoff with jitter.
+      const expo = Math.min(baseDelayMs * 2 ** (attempt - 1), maxDelayMs);
+      delay = expo + expo * Math.random() * 0.5;
+    }
+    await new Promise((resolve) => setTimeout(resolve, delay));
   }
 }
 

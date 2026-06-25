@@ -1,3 +1,11 @@
+# Supply-chain hardening (pnpm). minimumReleaseAge delays adoption of
+# freshly-published versions to dodge compromised releases (e.g. Shai-Hulud
+# 2025); blockExoticSubdeps rejects git/tarball/URL subdependencies.
+minimumReleaseAge: 1440 # minutes (24h)
+blockExoticSubdeps: true
+
+# Packages explicitly permitted to run lifecycle (postinstall) build scripts.
+# Keep this list as tight as possible — each entry runs arbitrary code on install.
 allowBuilds:
   '@clerk/shared': true
   '@sentry/cli': true
@@ -5,6 +13,3 @@ allowBuilds:
   esbuild: true
   sharp: true
   unrs-resolver: true
-ignoredBuiltDependencies:
-  - sharp
-  - unrs-resolver

@@ -5,7 +5,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getRoleFromClaims, isAdminRole } from "@/lib/clerk-claims";
 import { buildSystemPrompt } from "@/lib/prompt";
 import { checkChatRateLimit } from "@/lib/rate-limit";
-import { buildCacheWriteCallback, encodeSourcesHeader } from "./cache";
+import { buildCacheWriteCallback, encodeSourcesHeader, type RagResult } from "./cache";
 import { getAvailableModels, getPreferredModel } from "./models";
 import { tryStreamWithFallback } from "./stream";
 
@@ -57,16 +57,7 @@ function initConvexOrError(): ConvexHttpClient | NextResponse {
 function fetchRagData(
   convex: ConvexHttpClient,
   question: string,
-): Promise<
-  | {
-      context: string | null;
-      sources: any[];
-      intent: string;
-      queryEmbedding: number[] | null;
-      cachedResponse: string | null;
-    }
-  | NextResponse
-> {
+): Promise<RagResult | NextResponse> {
   return convex
     .action(api.rag.retrieval.retrieveContext, {
       question,
@@ -93,7 +84,8 @@ export async function convexRagAndModelPhase(
   userId: string,
   question: string,
 ): Promise<
-  { convex: ConvexHttpClient; ragResult: any; preferredModelKey: string | undefined } | NextResponse
+  | { convex: ConvexHttpClient; ragResult: RagResult; preferredModelKey: string | undefined }
+  | NextResponse
 > {
   const convexOrError = initConvexOrError();
   if (convexOrError instanceof NextResponse) return convexOrError;
@@ -120,7 +112,7 @@ export async function buildStreamResponse(
   messages: { role: string; content: string }[],
   question: string,
   convex: ConvexHttpClient,
-  ragResult: any,
+  ragResult: RagResult,
   preferredModelKey: string | undefined,
 ): Promise<Response | NextResponse> {
   if (ragResult.cachedResponse) {

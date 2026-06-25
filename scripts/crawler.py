@@ -133,15 +133,43 @@ _traf_config.set("DEFAULT", "EXTRACTION_TIMEOUT", "0")
 
 _robot_parsers: dict[str, urllib.robotparser.RobotFileParser | None] = {}
 
+# The UA we actually send (curl_cffi impersonate="chrome"). robots.txt must be
+# fetched with the SAME UA and evaluated against it — fetching with urllib's
+# default "Python-urllib" UA both trips the WAF and checks the wrong agent.
+ROBOTS_USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+)
+
 def _get_robot_parser(netloc: str) -> urllib.robotparser.RobotFileParser | None:
     if netloc not in _robot_parsers:
         rp = urllib.robotparser.RobotFileParser()
         rp.set_url(f"https://{netloc}/robots.txt")
         try:
-            rp.read()
-            _robot_parsers[netloc] = rp
-            log.info(f"Loaded robots.txt for {netloc}")
+            # Fetch through curl_cffi with chrome impersonation so the WAF does
+            # not block/serve a challenge page (which urllib would silently turn
+            # into allow-all). Parse the body ourselves with RobotFileParser.parse.
+            from curl_cffi import requests as _cffi_requests
+            resp = _cffi_requests.get(
+                f"https://{netloc}/robots.txt",
+                impersonate="chrome",
+                timeout=10,
+                allow_redirects=True,
+            )
+            # Per RFC 9309: 4xx/5xx (or empty) ⇒ unrestricted (allow-all).
+            if 200 <= resp.status_code < 300 and resp.text.strip():
+                rp.parse(resp.text.splitlines())
+                _robot_parsers[netloc] = rp
+                log.info(f"Loaded robots.txt for {netloc}")
+            else:
+                log.info(
+                    f"robots.txt for {netloc} returned HTTP {resp.status_code}/empty "
+                    f"— treating as allow-all (RFC 9309)"
+                )
+                _robot_parsers[netloc] = None
         except Exception as e:
+            # Network/parse failure ⇒ allow-all rather than silently blocking,
+            # matching RFC 9309 guidance for unreachable robots.txt.
             log.warning(f"Could not fetch robots.txt for {netloc}: {e}")
             _robot_parsers[netloc] = None
     return _robot_parsers[netloc]
@@ -268,7 +296,7 @@ def is_allowed_url(url: str) -> bool:
         if _matches_exclude(url):
             return False
         rp = _get_robot_parser(p.netloc)
-        if rp is not None and not rp.can_fetch("*", url):
+        if rp is not None and not rp.can_fetch(ROBOTS_USER_AGENT, url):
             return False
         return True
     except Exception:
@@ -702,9 +730,20 @@ async def worker(
         try:
             item = queue.get_nowait()
         except asyncio.QueueEmpty:
+            # Termination must be unanimous-safe: a worker that just finished an
+            # item may have enqueued children that no other worker has dequeued
+            # yet. Only exit when the queue is empty AND no worker is currently
+            # processing an item, confirmed across a short grace re-check so a
+            # transient empty window doesn't abandon queued URLs.
             async with active_lock:
-                if active_workers[0] == 0:
+                idle = active_workers[0] == 0
+            if idle and queue.empty():
+                await asyncio.sleep(0.5)
+                async with active_lock:
+                    still_idle = active_workers[0] == 0
+                if still_idle and queue.empty():
                     break
+                continue
             await asyncio.sleep(0.5)
             continue
 
@@ -713,39 +752,51 @@ async def worker(
 
         try:
             await rate_limiter.wait()
-            await token_bucket.acquire()
+            # TokenBucket.acquire() is synchronous and returns the time the
+            # caller must wait before a token is available; we must actually
+            # sleep that duration, otherwise the proactive rate cap is a no-op.
+            bucket_wait = token_bucket.acquire()
+            if bucket_wait > 0:
+                await asyncio.sleep(bucket_wait)
 
             markdown, title, links = None, "", []
             error_reason, status_code = None, 0
             
+            # Only client errors (4xx) are terminal/non-retryable. Transient
+            # 5xx (500/502/503/504) and 429 are retried with backoff.
+            NON_RETRYABLE = (400, 401, 403, 404)
             for attempt in range(MAX_RETRIES):
                 markdown, title, links, error_reason, status_code = await fetch_and_extract(url, session)
-                
+
                 if error_reason is None:
                     rate_limiter.on_success()
                     break
-                
-                if status_code in (404, 400, 500):
+
+                if status_code in NON_RETRYABLE:
                     break
-                
+
+                # Transient failure — slow the limiter once per attempt and back off.
                 rate_limiter.on_failure(status_code)
                 log.warning(f"Retry {attempt+1}/{MAX_RETRIES} on {url}: {error_reason}")
                 if attempt < MAX_RETRIES - 1:
                     await asyncio.sleep(retry_delay(attempt))
-            
-            async with stats_lock: stats.fetched += 1
 
+            # Account each page in exactly ONE terminal bucket so the MAX_PAGES
+            # stop condition (fetched + skipped + failed) is not double-counted.
             if error_reason:
-                rate_limiter.on_failure(status_code)
-                if status_code not in (404, 500) and status_code != 400:
+                # DLQ everything except hard client errors so transient failures
+                # (5xx/429/timeouts) get retried on a later run.
+                if status_code not in NON_RETRYABLE:
                     write_to_dlq(url, depth)
                     async with stats_lock: stats.dlq += 1
-                    
+
                 async with stats_lock: stats.failed += 1
-                if status_code != 500:
-                    log.error(f"[fail] {url} — {error_reason}")
+                log.error(f"[fail] {url} — {error_reason} (HTTP {status_code})")
                 continue
 
+            # NOTE: a page lands in EXACTLY ONE terminal bucket
+            # (fetched / skipped / failed) so MAX_PAGES accounting via
+            # total_processed = fetched + skipped + failed never double-counts.
             if not markdown or len(markdown.split()) < MIN_WORD_COUNT:
                 async with stats_lock: stats.skipped += 1
                 continue
@@ -769,7 +820,11 @@ async def worker(
                 log.error(f"[push_fail] {url} — {push_exc}")
                 continue
 
-            async with stats_lock: stats.saved += 1
+            # Terminal success bucket: count once toward both fetched (the
+            # MAX_PAGES budget) and saved.
+            async with stats_lock:
+                stats.fetched += 1
+                stats.saved += 1
             log.info(f"[{action:8}] depth={depth} words={len(markdown.split()):>5} | {url}")
 
             if depth < MAX_DEPTH:

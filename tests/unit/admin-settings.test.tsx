@@ -1,20 +1,32 @@
 // @vitest-environment happy-dom
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, act, waitFor } from "@testing-library/react";
+
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.hoisted(() => {
   const buildAdminMocks = (globalThis as any).buildAdminMocks;
-  console.log("HOISTED RUNNING, buildAdminMocks is:", typeof buildAdminMocks);
-  if (buildAdminMocks) {
-    (globalThis as any).currentAdminMocks = buildAdminMocks({
-      pathname: "/admin/settings",
-      mockSonner: true,
-      lucideIcons: ["Settings", "Save", "RotateCcw", "Shield", "Bell", "Database", "RefreshCw", "Globe"],
-    });
-    console.log("HOISTED RUNNING, set currentAdminMocks successfully, keys:", Object.keys((globalThis as any).currentAdminMocks));
-  } else {
-    console.log("HOISTED RUNNING, buildAdminMocks was NOT defined!");
+  if (!buildAdminMocks) {
+    // Fail loudly instead of silently no-op'ing — a missing global here means
+    // the shared admin test setup did not load, which would otherwise surface
+    // as confusing "cannot read property of undefined" errors below.
+    throw new Error(
+      "buildAdminMocks global is not defined — admin test setup did not run (check tests/setup).",
+    );
   }
+  (globalThis as any).currentAdminMocks = buildAdminMocks({
+    pathname: "/admin/settings",
+    mockSonner: true,
+    lucideIcons: [
+      "Settings",
+      "Save",
+      "RotateCcw",
+      "Shield",
+      "Bell",
+      "Database",
+      "RefreshCw",
+      "Globe",
+    ],
+  });
 });
 
 vi.mock("convex/react", () => (globalThis as any).currentAdminMocks?.convexReactMock);
@@ -107,20 +119,32 @@ vi.mock("@/components/ui/select", () => {
     SelectTrigger: () => null,
     SelectValue: () => null,
     SelectContent: SelectContentMock,
-    SelectItem: ({ children, value }: any) => (
-      <div data-value={value}>{children}</div>
-    ),
+    SelectItem: ({ children, value }: any) => <div data-value={value}>{children}</div>,
   };
 });
 
+import { useMutation, useQuery } from "convex/react";
 import { toast } from "sonner";
-import { useQuery, useMutation } from "convex/react";
+
+// Distinct spies per mutation so tests can assert the exact persistence call.
+// The page builds these as useMutation(api.admin.settings.upsertSettingsBatch)
+// and useMutation(api.admin.settings.resetSettings); useMutation is called in
+// that order on render, so map by call order.
+let upsertSpy: ReturnType<typeof vi.fn>;
+let resetSpy: ReturnType<typeof vi.fn>;
 
 describe("AdminSettingsPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(useQuery).mockReturnValue([]);
-    vi.mocked(useMutation).mockReturnValue(vi.fn().mockResolvedValue(undefined) as any);
+    upsertSpy = vi.fn().mockResolvedValue(undefined);
+    resetSpy = vi.fn().mockResolvedValue(undefined);
+    let callCount = 0;
+    vi.mocked(useMutation).mockImplementation(() => {
+      callCount += 1;
+      // First useMutation() call -> upsertSettingsBatch, second -> resetSettings.
+      return (callCount === 1 ? upsertSpy : resetSpy) as any;
+    });
   });
 
   describe("Page Structure", () => {
@@ -152,9 +176,7 @@ describe("AdminSettingsPage", () => {
     it("renders section descriptions", () => {
       render(<AdminSettingsPage />);
 
-      expect(
-        screen.getByText("Configure university web indexers and crawl depths"),
-      ).toBeDefined();
+      expect(screen.getByText("Configure university web indexers and crawl depths")).toBeDefined();
       expect(
         screen.getByText("Adjust threshold matching, context count, and models"),
       ).toBeDefined();
@@ -309,21 +331,38 @@ describe("AdminSettingsPage", () => {
   });
 
   describe("Save and Reset", () => {
-    it("shows success toast when Save Changes is clicked", async () => {
+    it("persists settings via the Convex mutation when Save Changes is clicked", async () => {
       render(<AdminSettingsPage />);
 
       await act(async () => {
         fireEvent.click(screen.getByText("SAVE CHANGES"));
       });
 
+      // The persistence contract: handleSave must call upsertSettingsBatch with
+      // the collected form values, not merely show a toast. Assert the real
+      // backend write happened with a non-empty settings array of {key,value,section}.
       await waitFor(() => {
-        expect(toast.success).toHaveBeenCalledWith("Settings saved successfully", {
-          description: "Your system changes are now active.",
-        });
+        expect(upsertSpy).toHaveBeenCalledTimes(1);
+      });
+      const payload = upsertSpy.mock.calls[0]?.[0];
+      expect(Array.isArray(payload.settings)).toBe(true);
+      expect(payload.settings.length).toBeGreaterThan(0);
+      for (const entry of payload.settings) {
+        expect(entry).toHaveProperty("key");
+        expect(entry).toHaveProperty("value");
+        expect(entry).toHaveProperty("section");
+      }
+
+      // And only then a success toast (title is the stable, asserted part).
+      await waitFor(() => {
+        expect(toast.success).toHaveBeenCalledWith(
+          "Settings saved successfully",
+          expect.objectContaining({ description: expect.any(String) }),
+        );
       });
     });
 
-    it("shows success toast when Reset is clicked", async () => {
+    it("persists a reset via the Convex mutation when Reset is clicked", async () => {
       render(<AdminSettingsPage />);
 
       await act(async () => {
@@ -331,9 +370,13 @@ describe("AdminSettingsPage", () => {
       });
 
       await waitFor(() => {
-        expect(toast.success).toHaveBeenCalledWith("Settings reset to default values", {
-          description: "All configuration keys have been restored.",
-        });
+        expect(resetSpy).toHaveBeenCalledWith({ confirm: true });
+      });
+      await waitFor(() => {
+        expect(toast.success).toHaveBeenCalledWith(
+          "Settings reset to default values",
+          expect.objectContaining({ description: expect.any(String) }),
+        );
       });
     });
 
@@ -385,9 +428,7 @@ describe("AdminSettingsPage", () => {
       const switches = screen.getAllByTestId("switch");
       const selects = screen.getAllByTestId("native-select");
 
-      expect(inputs.length + switches.length + selects.length).toBe(
-        fieldKeys.length,
-      );
+      expect(inputs.length + switches.length + selects.length).toBe(fieldKeys.length);
 
       // 7 inputs: 3 crawl + 3 RAG (maxContextChunks, similarityThreshold, cacheTTLHours) + 1 security (rateLimitPerMinute)
       expect(inputs).toHaveLength(7);

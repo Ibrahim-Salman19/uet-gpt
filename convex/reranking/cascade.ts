@@ -4,6 +4,25 @@ import { internal } from "../_generated/api";
 import { internalAction } from "../_generated/server";
 import { CASCADE_CONFIG } from "../rag/constants";
 
+// Bound external reranker latency so a hung/slow reranker degrades quickly to
+// the next cascade tier (Groq/Cohere) instead of stalling the whole retrieval
+// action and burning action compute.
+const RERANKER_TIMEOUT_MS = 5_000;
+
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit,
+  timeoutMs: number,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 function computeWordOverlap(query: string, chunk: string): number {
   const queryWords = new Set(
     query
@@ -69,15 +88,19 @@ export const cascadeRerank = internalAction({
     const rerankerUrl = process.env.RERANKER_URL;
     if (rerankerUrl) {
       try {
-        const response = await fetch(`${rerankerUrl.replace(/\/$/, "")}/rerank`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            query: args.query,
-            documents: tier2Candidates.map((d) => d.text),
-            top_n: Math.min(topK, tier2Candidates.length),
-          }),
-        });
+        const response = await fetchWithTimeout(
+          `${rerankerUrl.replace(/\/$/, "")}/rerank`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              query: args.query,
+              documents: tier2Candidates.map((d) => d.text),
+              top_n: Math.min(topK, tier2Candidates.length),
+            }),
+          },
+          RERANKER_TIMEOUT_MS,
+        );
 
         if (response.ok) {
           type RerankerResult = { index: number; score: number; text: string };
@@ -130,19 +153,23 @@ export const cascadeRerank = internalAction({
     const cohereKey = process.env.COHERE_API_KEY;
     if (cohereKey && tier2Candidates.length > 0) {
       try {
-        const response = await fetch(CASCADE_CONFIG.cohereEndpoint, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${cohereKey}`,
-            "Content-Type": "application/json",
+        const response = await fetchWithTimeout(
+          CASCADE_CONFIG.cohereEndpoint,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${cohereKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model: CASCADE_CONFIG.cohereModel,
+              query: args.query,
+              documents: tier2Candidates.map((d) => d.text),
+              top_n: Math.min(topK, tier2Candidates.length),
+            }),
           },
-          body: JSON.stringify({
-            model: CASCADE_CONFIG.cohereModel,
-            query: args.query,
-            documents: tier2Candidates.map((d) => d.text),
-            top_n: Math.min(topK, tier2Candidates.length),
-          }),
-        });
+          RERANKER_TIMEOUT_MS,
+        );
 
         if (response.ok) {
           type CohereResult = { index: number; relevance_score: number };

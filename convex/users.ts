@@ -81,10 +81,10 @@ export const getByClerkId = query({
       }
     }
 
-    return (await ctx.db
+    return await ctx.db
       .query("users")
       .withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
-      .unique()) as typeof userValidator.type;
+      .unique();
   },
 });
 
@@ -127,6 +127,7 @@ export const updatePreferences = mutation({
     fontSize: v.optional(v.string()),
     model: v.optional(v.string()),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
@@ -198,6 +199,20 @@ export const deleteFromWebhook = internalMutation({
       .unique();
 
     if (existing) {
+      // Cascade-delete the user's feedback rows (PII-linked comments) so account
+      // deletion does not leave orphaned, indefinitely-retained records (GDPR erasure).
+      let isDone = false;
+      let cursor: string | null = null;
+      while (!isDone) {
+        const batch = await ctx.db
+          .query("feedback")
+          .withIndex("by_userId", (q) => q.eq("userId", existing._id))
+          .paginate({ numItems: 200, cursor });
+        await Promise.all(batch.page.map((row) => ctx.db.delete(row._id)));
+        cursor = batch.continueCursor;
+        isDone = batch.isDone;
+      }
+
       await ctx.db.patch(existing._id, {
         isActive: false,
         name: "Deleted User",
@@ -214,10 +229,10 @@ export const getByClerkIdInternal = internalQuery({
   args: { clerkId: v.string() },
   returns: v.union(v.null(), userValidator),
   handler: async (ctx, args) => {
-    return (await ctx.db
+    return await ctx.db
       .query("users")
       .withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
-      .unique()) as typeof userValidator.type;
+      .unique();
   },
 });
 

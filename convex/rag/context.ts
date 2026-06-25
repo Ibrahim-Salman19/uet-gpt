@@ -25,7 +25,11 @@ export const buildContext = internalQuery({
     // 1. Sort chunks by relevance score descending
     const sortedChunks = [...args.chunks].sort((a, b) => b.relevanceScore - a.relevanceScore);
 
-    // 2. Filter and keep only chunks that fit within the token budget (maxChars)
+    // 2. Greedily pack chunks in rank order until the budget is exhausted.
+    //
+    // Approximate chars-per-token at 4 (matches the rest of the pipeline and the
+    // unit test). A true tokenizer would be more accurate but is unavailable in
+    // the Convex runtime.
     const maxChars = (args.maxTokens ?? 3000) * 4;
     const budgetedChunks: typeof sortedChunks = [];
     let currentChars = 0;
@@ -35,6 +39,8 @@ export const buildContext = internalQuery({
         ? `Section: ${chunk.headingPath.join(" > ")}\n`
         : "";
       const chunkText = `${sectionLabel}Source: [${chunk.title}](${chunk.url})\n\n${chunk.content}\n\n---\n\n`;
+      // Skip an oversized chunk but keep packing smaller, lower-ranked ones so a
+      // single large top chunk never blanks out the entire context.
       if (currentChars + chunkText.length > maxChars) {
         continue;
       }

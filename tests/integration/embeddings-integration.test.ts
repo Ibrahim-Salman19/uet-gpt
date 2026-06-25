@@ -35,16 +35,18 @@ describe("Embedding Generation Integration", () => {
   describe("generate - Gemini API integration", () => {
     it("calls Gemini API with correct payload and returns embedding", async () => {
       global.fetch = vi.fn().mockImplementation(async (url, options: any) => {
-        expect(url).toContain("generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2:embedContent");
+        expect(url).toContain(
+          "generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2:embedContent",
+        );
         const body = JSON.parse(options.body);
         expect(body).toMatchObject({
           content: {
             parts: [{ text: "Test embedding generation" }],
           },
-          outputDimensionality: 3072,
+          outputDimensionality: 768,
         });
         return createMockResponse({
-          embedding: { values: new Array(3072).fill(0.1) },
+          embedding: { values: new Array(768).fill(0.1) },
         });
       });
 
@@ -52,7 +54,7 @@ describe("Embedding Generation Integration", () => {
         text: "Test embedding generation",
       });
 
-      expect(embeddings).toEqual(new Array(3072).fill(0.1));
+      expect(embeddings).toEqual(new Array(768).fill(0.1));
     });
 
     it("retries on 5xx errors", async () => {
@@ -63,7 +65,7 @@ describe("Embedding Generation Integration", () => {
           return createMockResponse({ error: { message: "Internal server error" } }, 500);
         }
         return createMockResponse({
-          embedding: { values: new Array(3072).fill(0.1) },
+          embedding: { values: new Array(768).fill(0.1) },
         });
       });
 
@@ -72,7 +74,7 @@ describe("Embedding Generation Integration", () => {
       });
 
       expect(callCount).toBe(2);
-      expect(result).toEqual(new Array(3072).fill(0.1));
+      expect(result).toEqual(new Array(768).fill(0.1));
     });
 
     it("retries on 429 rate limit errors", async () => {
@@ -83,7 +85,7 @@ describe("Embedding Generation Integration", () => {
           return createMockResponse({ error: { message: "Too many requests" } }, 429);
         }
         return createMockResponse({
-          embedding: { values: new Array(3072).fill(0.4) },
+          embedding: { values: new Array(768).fill(0.4) },
         });
       });
 
@@ -92,7 +94,7 @@ describe("Embedding Generation Integration", () => {
       });
 
       expect(callCount).toBe(2);
-      expect(result).toEqual(new Array(3072).fill(0.4));
+      expect(result).toEqual(new Array(768).fill(0.4));
     });
 
     it("throws immediately on 4xx client errors", async () => {
@@ -125,7 +127,7 @@ describe("Embedding Generation Integration", () => {
       vi.stubEnv("GEMINI_API_KEY_1", "");
       vi.stubEnv("GEMINI_API_KEY_2", "");
       vi.stubEnv("GOOGLE_GENERATIVE_AI_API_KEY", "");
-      vi.stubEnv("OPENROUTER_API_KEY", ""); 
+      vi.stubEnv("OPENROUTER_API_KEY", "");
 
       await expect(
         (generate as any).handler({} as any, {

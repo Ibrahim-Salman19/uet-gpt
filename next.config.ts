@@ -83,6 +83,9 @@ const sentryOptions: SentryBuildOptions = {
   widenClientFileUpload: true,
   sourcemaps: {
     disable: false,
+    // Upload source maps to Sentry but delete them from the client bundle so
+    // readable .map files are never served publicly (CVE-2025-55183 exposure).
+    deleteSourcemapsAfterUpload: true,
   },
   disableLogger: true,
   automaticVercelMonitors: true,

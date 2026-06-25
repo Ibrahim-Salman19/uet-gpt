@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "./fixtures/base-test";
 
 test("chat page has the chat input", async ({ page }) => {
   await page.goto("/chat");

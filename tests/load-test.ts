@@ -17,15 +17,22 @@ interface WebhookResponse {
   text: string;
 }
 
-function generateSignature(timestamp: string, secret: string): string {
-  return createHmac("sha256", secret).update(timestamp).digest("hex");
+// The crawl webhook (convex/crawl/webhook.ts) signs `${timestamp}.${rawBody}`,
+// matching tests/convex/crawl/webhook.test.ts. Signing the timestamp alone
+// produced an invalid signature, so every non-safe-mode request was rejected
+// with 401. Sign over the timestamp AND the exact serialized body.
+function generateSignature(timestamp: string, rawBody: string, secret: string): string {
+  return createHmac("sha256", secret).update(`${timestamp}.${rawBody}`).digest("hex");
 }
 
 function generateMarkdown(paragraphs: number): string {
   let md = "# Stress Test Document\n\n";
   for (let i = 0; i < paragraphs; i++) {
     md += `## Section ${i}\n`;
-    md += `This is paragraph ${i}. We are generating a large amount of text to simulate a realistic web page crawl. `.repeat(10) + "\n\n";
+    md +=
+      `This is paragraph ${i}. We are generating a large amount of text to simulate a realistic web page crawl. `.repeat(
+        10,
+      ) + "\n\n";
   }
   return md;
 }
@@ -38,7 +45,6 @@ async function sendWebhookRequest(
   webhookSecret: string,
 ): Promise<WebhookResponse> {
   const timestamp = Date.now().toString();
-  const signature = generateSignature(timestamp, webhookSecret);
 
   const payload: WebhookPayload = {
     job_id: jobId,
@@ -52,6 +58,11 @@ async function sendWebhookRequest(
     ],
   };
 
+  // Serialize once and sign the exact bytes we send, so the server's
+  // HMAC-over-raw-body verification matches.
+  const rawBody = JSON.stringify(payload);
+  const signature = generateSignature(timestamp, rawBody, webhookSecret);
+
   const response = await fetch(`${convexSiteUrl}/api/webhook/crawl`, {
     method: "POST",
     headers: {
@@ -59,7 +70,7 @@ async function sendWebhookRequest(
       "x-crawl-timestamp": timestamp,
       "x-crawl-signature": signature,
     },
-    body: JSON.stringify(payload),
+    body: rawBody,
   });
 
   return { status: response.status, text: await response.text() };
@@ -106,7 +117,13 @@ async function doLoadTest(convexSiteUrl: string, webhookSecret: string): Promise
   console.log("\n[Test 1] Large Document (50 Paragraphs)");
   const largeDoc = generateMarkdown(50);
   console.log(`Document size: ${(largeDoc.length / 1024).toFixed(2)} KB`);
-  const res1 = await sendWebhookRequest("job-large-1", "https://example.com/large", largeDoc, convexSiteUrl, webhookSecret);
+  const res1 = await sendWebhookRequest(
+    "job-large-1",
+    "https://example.com/large",
+    largeDoc,
+    convexSiteUrl,
+    webhookSecret,
+  );
   console.log(`Response: ${res1.status} - body: ${res1.text}`);
 
   console.log("\n[Test 2] Thundering Herd (5 concurrent webhook calls)");
@@ -114,7 +131,13 @@ async function doLoadTest(convexSiteUrl: string, webhookSecret: string): Promise
   for (let i = 0; i < 5; i++) {
     const md = generateMarkdown(5);
     promises.push(
-      sendWebhookRequest(`job-herd-${i}`, `https://example.com/herd-${i}`, md, convexSiteUrl, webhookSecret),
+      sendWebhookRequest(
+        `job-herd-${i}`,
+        `https://example.com/herd-${i}`,
+        md,
+        convexSiteUrl,
+        webhookSecret,
+      ),
     );
   }
 
@@ -125,7 +148,8 @@ async function doLoadTest(convexSiteUrl: string, webhookSecret: string): Promise
 
   console.log("\n[Test 3] Invalid Signature (Security Verification)");
   const fakeTimestamp = Date.now().toString();
-  const fakeSignature = generateSignature(fakeTimestamp, "fake-secret");
+  const fakeBody = JSON.stringify({ job_id: "fake", data: [] });
+  const fakeSignature = generateSignature(fakeTimestamp, fakeBody, "fake-secret");
   const res3 = await fetch(`${convexSiteUrl}/api/webhook/crawl`, {
     method: "POST",
     headers: {
@@ -133,7 +157,7 @@ async function doLoadTest(convexSiteUrl: string, webhookSecret: string): Promise
       "x-crawl-timestamp": fakeTimestamp,
       "x-crawl-signature": fakeSignature,
     },
-    body: JSON.stringify({ job_id: "fake", data: [] }),
+    body: fakeBody,
   });
   const res3text = await res3.text();
   console.log(`Expected rejection (401). Got: ${res3.status} - ${res3text}`);

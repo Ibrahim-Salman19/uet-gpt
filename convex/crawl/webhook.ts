@@ -477,6 +477,14 @@ async function parseAndValidateIngestRequest(
     );
   }
 
+  // Validate freshnessTier against its allowed enum rather than blindly casting it
+  // downstream. A bogus value (e.g. "urgent") would otherwise be persisted through the
+  // unchecked `as` cast and silently break TTL/staleness math.
+  if (freshnessTier !== undefined && !["high", "medium", "low"].includes(freshnessTier)) {
+    console.warn(`Ingest rejected: invalid freshnessTier "${freshnessTier}"`);
+    return new Response("Invalid freshnessTier (expected high|medium|low)", { status: 400 });
+  }
+
   if (!isPdfVirtualUrl(url)) {
     let parsedHost: string;
     try {

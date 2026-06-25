@@ -20,36 +20,29 @@ export const contextualizeCron = internalAction({
       return { processed: 0, totalPending: 0 };
     }
 
-    let totalProcessed = 0;
-    let totalFailures = 0;
-
+    // Fan out: schedule each batch via the scheduler instead of holding this
+    // action open on wall-clock sleeps. The cron body returns immediately and
+    // batches are spaced by DELAY_MS. Each scheduled contextualizeChunks run
+    // self-reports its progress, so no aggregation is needed here.
+    let scheduledBatches = 0;
     for (let i = 0; i < pendingChunkIds.length; i += BATCH_SIZE) {
       const batch = pendingChunkIds.slice(i, i + BATCH_SIZE);
-      const result = (await ctx.runAction(internal.embeddings.contextualize.contextualizeChunks, {
-        chunkIds: batch,
-      })) as { processed: number; successes: number; failures: number };
-
-      totalProcessed += result.successes ?? 0;
-      totalFailures += result.failures ?? 0;
-
-      if (i + BATCH_SIZE < pendingChunkIds.length) {
-        await new Promise((resolve) => setTimeout(resolve, DELAY_MS));
-      }
+      await ctx.scheduler.runAfter(
+        scheduledBatches * DELAY_MS,
+        internal.embeddings.contextualize.contextualizeChunks,
+        { chunkIds: batch },
+      );
+      scheduledBatches++;
     }
 
-    await ctx.runMutation(internal.embeddings.contextualize.upsertContextualizeProgress, {
-      totalProcessed: totalProcessed,
-      increment: true,
-    });
-
     console.log(
-      `Contextualize cron: ${totalProcessed}/${pendingChunkIds.length} chunks ` +
-        `(${totalFailures} failures)`,
+      `Contextualize cron: scheduled ${scheduledBatches} batch(es) for ` +
+        `${pendingChunkIds.length} pending chunks`,
     );
 
     return {
-      processed: totalProcessed,
-      failures: totalFailures,
+      processed: 0,
+      scheduledBatches,
       totalPending: pendingChunkIds.length,
     };
   },

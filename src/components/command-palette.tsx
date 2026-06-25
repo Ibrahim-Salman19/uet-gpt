@@ -161,8 +161,21 @@ function CommandItem({
   onSelect: (cmd: CommandItemData) => void;
 }) {
   const Icon = cmd.icon;
+  const ref = React.useRef<HTMLButtonElement | null>(null);
+
+  React.useEffect(() => {
+    if (isSelected) {
+      ref.current?.scrollIntoView({ block: "nearest" });
+    }
+  }, [isSelected]);
+
   return (
     <button
+      ref={ref}
+      type="button"
+      id={`cmd-option-${cmd.id}`}
+      role="option"
+      aria-selected={isSelected}
       onClick={() => onSelect(cmd)}
       className={cn(
         "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-all duration-150 group active:scale-[0.99] border border-transparent cursor-pointer",
@@ -196,10 +209,12 @@ function CommandPaletteContent({
   selectedIndex: number;
   handleSelect: (cmd: CommandItemData) => void;
 }) {
+  const activeItem = filteredCommands[selectedIndex];
+  const activeDescendant = activeItem ? `cmd-option-${activeItem.id}` : undefined;
   return (
     <div className="bg-[#101012] border border-[#2d2d34] rounded-[1.5rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col pointer-events-auto">
       <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/5 bg-zinc-950/60">
-        <Search className="w-4 h-4 text-zinc-500 shrink-0" />
+        <Search className="w-4 h-4 text-zinc-500 shrink-0" aria-hidden="true" />
         <input
           type="text"
           value={query}
@@ -208,6 +223,12 @@ function CommandPaletteContent({
           className="w-full bg-transparent text-xs text-zinc-100 placeholder:text-zinc-500 outline-none font-sans"
           spellCheck="false"
           autoComplete="off"
+          role="combobox"
+          aria-expanded="true"
+          aria-controls="cmd-list"
+          aria-activedescendant={activeDescendant}
+          aria-label="Search commands"
+          // biome-ignore lint/a11y/noAutofocus: command palette opens on user intent and focus is expected
           autoFocus
         />
         <div className="flex items-center gap-1 shrink-0 select-none">
@@ -218,9 +239,14 @@ function CommandPaletteContent({
       </div>
       <div
         id="cmd-list"
+        role="listbox"
+        aria-label="Commands"
         className="max-h-[320px] overflow-y-auto custom-scroll p-2 space-y-0.5 text-zinc-300"
       >
-        <div className="text-[9px] font-mono text-zinc-500 uppercase tracking-wider px-3 py-2 select-none">
+        <div
+          className="text-[9px] font-mono text-zinc-500 uppercase tracking-wider px-3 py-2 select-none"
+          role="presentation"
+        >
           Quick Actions
         </div>
         {filteredCommands.length === 0 ? (

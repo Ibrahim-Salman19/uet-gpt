@@ -508,19 +508,32 @@ async function handleEmbeddingFailure(
 
 async function routeChunkResult(
   ctx: MutationCtx,
-  jobId: string,
+  contextJobId: string,
   result: { kind: string; returnValue?: Record<string, unknown>; error?: string },
 ) {
   const returnValue = result.kind === "success" ? result.returnValue : null;
   const url = returnValue?.url as string | undefined;
   const documentId = returnValue?.documentId as Id<"documents"> | undefined;
   const contentHash = returnValue?.contentHash as string | undefined;
+  // Prefer the jobId the chunk itself reports. The DLQ-retry path enqueues a batch of
+  // entries that may belong to MANY different jobs under a single onComplete context
+  // jobId; routing DLQ updates by the batch-level context jobId would clear/insert rows
+  // under the wrong (jobId, url), corrupting failure accounting. Fall back to the context
+  // jobId only when the chunk did not report one (e.g. a hard failure with no returnValue).
+  const chunkJobId = (returnValue?.jobId as string | undefined) ?? contextJobId;
 
   if (result.kind === "success" && returnValue?.success && returnValue.ragId && url) {
     // Clear only the specific chunk's DLQ row that just succeeded (per-chunk rows).
-    await clearDLQEntry(ctx, jobId, url, contentHash);
+    await clearDLQEntry(ctx, chunkJobId, url, contentHash);
   } else if (url && documentId) {
-    await handleEmbeddingFailure(ctx, jobId, url, documentId, result, (returnValue || null) as any);
+    await handleEmbeddingFailure(
+      ctx,
+      chunkJobId,
+      url,
+      documentId,
+      result,
+      (returnValue || null) as any,
+    );
   }
 }
 
@@ -565,18 +578,14 @@ export const retryDeadLetterQueue = internalMutation({
   handler: async (ctx, { limit }) => {
     const batchSize = limit ?? 20;
 
-    // Idempotency guard: if entries are already in "processing" state from a
-    // concurrent or crashed run, skip this batch to avoid duplicate processing.
-    // The resetStuckDLQEntries cron will recover stuck entries after 30 minutes.
-    const currentlyProcessing = await ctx.db
-      .query("crawlDeadLetter")
-      .withIndex("by_status", (q) => q.eq("status", "processing"))
-      .first();
-    if (currentlyProcessing) {
-      console.log("Skipping DLQ retry: entries already in processing state");
-      return { reprocessed: 0, remaining: "skipped" as const };
-    }
-
+    // Idempotency is enforced PER ENTRY, not globally: we only ever fetch
+    // "pending_retry" rows below and atomically flip each to "processing" within this
+    // transaction before enqueuing. Convex mutations are serializable, so a concurrent
+    // run cannot re-grab the same rows. We therefore do NOT gate the whole queue on the
+    // existence of any single "processing" row — one permanently-stuck entry would
+    // otherwise stall recovery of every other failed chunk for up to 30 minutes
+    // (resetStuckDLQEntries still recovers genuinely stuck "processing" rows on its own
+    // cron cycle).
     const pendingDLQ = await ctx.db
       .query("crawlDeadLetter")
       .withIndex("by_status", (q) => q.eq("status", "pending_retry"))
@@ -634,7 +643,12 @@ export const retryDeadLetterQueue = internalMutation({
     }
 
     return {
-      reprocessed: pendingDLQ.length,
+      // Report only entries actually re-enqueued (not abandoned/invalid ones) so the
+      // metric reflects real reprocessing. The pagination flag is based on whether the
+      // fetched batch was full (more pending rows may remain), independent of how many
+      // were valid.
+      reprocessed: validDLQ.length,
+      abandoned: invalidDLQ.length,
       remaining: pendingDLQ.length === batchSize ? "more" : "done",
     };
   },

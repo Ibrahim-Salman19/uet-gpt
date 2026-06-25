@@ -10,6 +10,15 @@ interface ThreadItem {
   _creationTime: number;
 }
 
+// Shape of a thread document returned by api.threads.list. Defined locally
+// because the Convex generated `Doc<"threads">` types are not always present
+// (e.g. before `convex dev`/codegen has run).
+interface ThreadDoc {
+  _id: string;
+  title?: string;
+  _creationTime: number;
+}
+
 export function useThreads() {
   const threadsData = useStableQuery(api.threads.list, {});
   const createMutation = useMutation(api.threads.create);
@@ -29,13 +38,13 @@ export function useThreads() {
   }, [isLoading]);
 
   // Map and sort the Convex threads
-  const threads: ThreadItem[] = (threadsData ?? [])
-    .map((t: any) => ({
+  const threads: ThreadItem[] = ((threadsData ?? []) as ThreadDoc[])
+    .map((t) => ({
       _id: t._id,
       title: t.title ?? "New Chat",
       _creationTime: t._creationTime,
     }))
-    .sort((a: any, b: any) => b._creationTime - a._creationTime);
+    .sort((a, b) => b._creationTime - a._creationTime);
 
   const handleCreate = useCallback(async () => {
     try {

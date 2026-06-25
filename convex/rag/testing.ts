@@ -1,16 +1,21 @@
-import { v } from "convex/values";
-import { api, internal } from "../_generated/api";
-import { action, internalMutation } from "../_generated/server";
+import { ConvexError, v } from "convex/values";
+import { internal } from "../_generated/api";
+import { type ActionCtx, action, internalMutation } from "../_generated/server";
 import { rag } from "../rag/instance";
 
-async function requireAdminAuth(ctx: { auth: { getUserIdentity(): Promise<any> } }) {
+// Canonical admin authorization for actions: derive the role from the DB record
+// of the authenticated user (matching eval.ts / cache/set.ts), NOT from an
+// untyped/ad-hoc JWT claim. Fails closed and also enforces isActive.
+async function requireAdminAuth(ctx: ActionCtx) {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) {
-    throw new Error("Authentication required");
+    throw new ConvexError("Authentication required");
   }
-  const role = identity.meta?.role;
-  if (role !== "admin" && role !== "superadmin") {
-    throw new Error("Admin access required");
+  const user = await ctx.runQuery(internal.users.getByClerkIdInternal, {
+    clerkId: identity.subject,
+  });
+  if (!user || !user.isActive || (user.role !== "admin" && user.role !== "superadmin")) {
+    throw new ConvexError("Admin access required");
   }
 }
 

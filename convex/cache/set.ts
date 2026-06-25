@@ -60,24 +60,37 @@ export const set = internalMutation({
 
     let maxDocUpdatedAt = args.maxDocumentUpdatedAt;
 
-    // If caller didn't provide maxDocumentUpdatedAt, derive it from source documents
+    // If caller didn't provide maxDocumentUpdatedAt, derive it from ALL source
+    // documents. The denormalized value is trusted by the read fast-path
+    // (get.ts checkSourceStaleness) for the entire entry, so it must cover every
+    // source — sampling only a prefix would let updates to later sources go
+    // undetected and serve stale answers. Resolve ragId -> chunk in batches of
+    // 100 to bound the concurrent query fan-out.
     if (maxDocUpdatedAt === undefined && args.sourceEntryIds && args.sourceEntryIds.length > 0) {
       const docIds = new Set<Id<"documents">>();
-      const chunks = await Promise.all(
-        args.sourceEntryIds.slice(0, 20).map((ragId) =>
-          ctx.db
-            .query("crawledChunks")
-            .withIndex("by_ragId", (q) => q.eq("ragId", ragId))
-            .first(),
-        ),
-      );
-      for (const chunk of chunks) {
-        if (chunk) docIds.add(chunk.documentId);
+      const RESOLVE_BATCH = 100;
+      for (let i = 0; i < args.sourceEntryIds.length; i += RESOLVE_BATCH) {
+        const chunkBatch = await Promise.all(
+          args.sourceEntryIds.slice(i, i + RESOLVE_BATCH).map((ragId) =>
+            ctx.db
+              .query("crawledChunks")
+              .withIndex("by_ragId", (q) => q.eq("ragId", ragId))
+              .first(),
+          ),
+        );
+        for (const chunk of chunkBatch) {
+          if (chunk) docIds.add(chunk.documentId);
+        }
       }
-      const docs = await Promise.all(Array.from(docIds).map((id) => ctx.db.get(id)));
-      for (const doc of docs) {
-        if (doc && (maxDocUpdatedAt === undefined || doc.updatedAt > maxDocUpdatedAt)) {
-          maxDocUpdatedAt = doc.updatedAt;
+      const uniqueDocIds = Array.from(docIds);
+      for (let i = 0; i < uniqueDocIds.length; i += RESOLVE_BATCH) {
+        const docs = await Promise.all(
+          uniqueDocIds.slice(i, i + RESOLVE_BATCH).map((id) => ctx.db.get(id)),
+        );
+        for (const doc of docs) {
+          if (doc && (maxDocUpdatedAt === undefined || doc.updatedAt > maxDocUpdatedAt)) {
+            maxDocUpdatedAt = doc.updatedAt;
+          }
         }
       }
     }

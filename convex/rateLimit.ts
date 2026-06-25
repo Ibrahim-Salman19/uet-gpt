@@ -17,7 +17,7 @@
 
 import { ConvexError, v } from "convex/values";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
-import { internalMutation, mutation, query } from "./_generated/server";
+import { internalMutation, query } from "./_generated/server";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -169,16 +169,13 @@ export async function enforceRateLimit(
  * Check current rate limit status for a user (read-only, no side effects).
  * Returns the current window count and limit for both user and global windows.
  */
-export const checkRateLimit = mutation({
-  args: {
-    userId: v.optional(v.string()),
-    tokenEstimate: v.optional(v.number()),
-  },
+export const checkRateLimit = query({
+  args: {},
   returns: v.object({
     user: v.object({ current: v.number(), limit: v.number() }),
     global: v.object({ current: v.number(), limit: v.number() }),
   }),
-  handler: async (ctx: MutationCtx) => {
+  handler: async (ctx: QueryCtx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       return {
@@ -186,8 +183,13 @@ export const checkRateLimit = mutation({
         global: { current: 0, limit: GLOBAL_TOKEN_LIMIT },
       };
     }
-    const role = (identity.publicMetadata as Record<string, unknown>)?.role as string | undefined;
-    const isAdmin = role === "admin" || role === "superadmin";
+    // Derive admin tier from the authoritative DB role (same source as auth.ts),
+    // not the Clerk session-token claim which may be absent/unconfigured.
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+    const isAdmin = user?.role === "admin" || user?.role === "superadmin";
     const msgLimit = isAdmin ? PER_ADMIN_MSG_LIMIT : PER_USER_MSG_LIMIT;
 
     const now = Date.now();

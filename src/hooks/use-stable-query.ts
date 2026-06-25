@@ -1,37 +1,50 @@
 "use client";
 
 import { useQuery } from "convex/react";
+import type { FunctionReference } from "convex/server";
 import { useRef } from "react";
 
 /**
  * Drop-in replacement for Convex useQuery that prevents flicker
  * by returning the previous result while a new query is loading.
  *
+ * Unlike a naive implementation, the cached value is keyed by the serialized
+ * query name + args. If the caller switches to a different query/argument set
+ * (e.g. a different threadId), we never return the previously cached value for
+ * the new key — doing so would briefly leak another thread's data into the UI.
+ *
  * Source: https://docs.convex.dev/client/react/advanced/useStableQuery
  */
-export const useStableQuery = ((name: any, args?: any) => {
-  const prevNameRef = useRef(name);
-  const prevArgsRef = useRef(args);
-  const prevSerializedRef = useRef<string | undefined>(JSON.stringify(args));
-  const result = useQuery(name, args);
-  const stored = useRef(result);
+export function useStableQuery<Query extends FunctionReference<"query">>(
+  query: Query,
+  args: Query["_args"] | "skip",
+): Query["_returnType"] | undefined {
+  const result = useQuery(query, args);
 
-  const nameChanged = prevNameRef.current !== name;
-  const argsRefChanged = prevArgsRef.current !== args;
+  // Cache the last non-undefined result together with the key it belongs to.
+  const cache = useRef<{ key: string; value: Query["_returnType"] } | undefined>(undefined);
 
-  if (nameChanged || argsRefChanged) {
-    const serialized = argsRefChanged ? JSON.stringify(args) : prevSerializedRef.current;
-    if (nameChanged || serialized !== prevSerializedRef.current) {
-      stored.current = undefined;
-    }
-    prevNameRef.current = name;
-    prevArgsRef.current = args;
-    prevSerializedRef.current = serialized;
-  }
+  // Identify the current query by name + serialized args.
+  const key = `${getQueryName(query)}|${JSON.stringify(args)}`;
 
   if (result !== undefined) {
-    stored.current = result;
+    cache.current = { key, value: result };
+    return result;
   }
 
-  return result === undefined ? stored.current : result;
-}) as typeof useQuery;
+  // Loading: only fall back to the cached value if it belongs to the SAME key.
+  // For a different query/args (e.g. a new thread) return undefined (loading)
+  // rather than the stale value from the previous key.
+  if (cache.current && cache.current.key === key) {
+    return cache.current.value;
+  }
+
+  return undefined;
+}
+
+function getQueryName(query: FunctionReference<"query">): string {
+  // Convex function references expose a stable identifier; fall back to a
+  // string coercion if the internal field is unavailable.
+  const name = (query as { _name?: string })._name;
+  return name ?? String(query);
+}

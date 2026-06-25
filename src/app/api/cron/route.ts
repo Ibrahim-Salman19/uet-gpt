@@ -1,3 +1,5 @@
+import { timingSafeEqual } from "node:crypto";
+import { api } from "convex/_generated/api";
 import { ConvexHttpClient } from "convex/browser";
 import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
@@ -5,10 +7,30 @@ import { type NextRequest, NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-async function verifyCronSecret(request: NextRequest): Promise<boolean> {
+const ALLOWED_TASKS = new Set(["daily", "all"]);
+
+/**
+ * Constant-time comparison of a bearer header against the expected value.
+ * Checks length first (still running a same-length comparison on mismatch) so
+ * timingSafeEqual never throws and no early-exit leaks the secret byte-by-byte.
+ */
+function timingSafeBearerMatch(provided: string | null, expected: string): boolean {
+  if (!provided) return false;
+  const a = Buffer.from(provided);
+  const b = Buffer.from(`Bearer ${expected}`);
+  if (a.length !== b.length) {
+    // Still run a comparison of equal-length buffers to avoid leaking length.
+    timingSafeEqual(b, b);
+    return false;
+  }
+  return timingSafeEqual(a, b);
+}
+
+async function verifyCronSecret(_request: NextRequest): Promise<boolean> {
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret) {
-    // If no CRON_SECRET is configured, only allow in development
+    // Fail closed: require CRON_SECRET in every environment except an explicit
+    // local dev run. NODE_ENV must be strictly "development" to bypass.
     if (process.env.NODE_ENV === "development") return true;
     return false;
   }
@@ -16,9 +38,7 @@ async function verifyCronSecret(request: NextRequest): Promise<boolean> {
   const headerPayload = await headers();
   const authHeader = headerPayload.get("authorization");
 
-  if (authHeader === `Bearer ${cronSecret}`) return true;
-
-  return false;
+  return timingSafeBearerMatch(authHeader, cronSecret);
 }
 
 async function executeCronTask(
@@ -30,12 +50,9 @@ async function executeCronTask(
   if (task === "daily" || task === "all") {
     try {
       const cronSecret = process.env.CRON_SECRET || "";
-      await convex.mutation(
-        "crawl/tasks:runStatsAggregation" as never,
-        {
-          secret: cronSecret,
-        } as never,
-      );
+      await convex.mutation(api.crawl.tasks.runStatsAggregation, {
+        secret: cronSecret,
+      });
       results.dailyStats = { status: "ok" };
     } catch (error) {
       results.dailyStats = {
@@ -64,6 +81,10 @@ export async function GET(request: NextRequest) {
 
     const url = new URL(request.url);
     const task = url.searchParams.get("task") || "daily";
+
+    if (!ALLOWED_TASKS.has(task)) {
+      return NextResponse.json({ error: `Unknown task: ${task}` }, { status: 400 });
+    }
 
     const results = await executeCronTask(convex, task);
 

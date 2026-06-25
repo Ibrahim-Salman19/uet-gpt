@@ -10,8 +10,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  PNPM_VERSION: "10"
+# Least-privilege default token: these jobs only read the repo.
+permissions:
+  contents: read
 
 jobs:
   lint:
@@ -19,9 +20,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      # No `version:` input — action-setup reads the pinned pnpm version from
+      # package.json `packageManager` (pnpm@11.1.3), keeping a single source of truth.
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
-        with:
-          version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22"
@@ -44,9 +45,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      # No `version:` input — action-setup reads the pinned pnpm version from
+      # package.json `packageManager` (pnpm@11.1.3), keeping a single source of truth.
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
-        with:
-          version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22"
@@ -62,28 +63,24 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Generate Convex types
-        if: ${{ secrets.CONVEX_DEPLOYMENT != '' }}
-        run: npx convex@latest codegen
-        env:
-          CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOYMENT }}
+      # Generate Convex `_generated` types OFFLINE so the type check always runs,
+      # including on fork PRs that have no CONVEX_DEPLOYMENT secret. `codegen
+      # --typecheck disable` does not contact a deployment, so the gate is real
+      # for every PR rather than passing green when the secret is absent.
+      - name: Generate Convex types (offline)
+        run: npx convex@latest codegen --typecheck disable
 
-      - name: Type check (with full types)
-        if: ${{ secrets.CONVEX_DEPLOYMENT != '' }}
+      - name: Type check
         run: pnpm typecheck
-
-      - name: Type check skipped (no Convex deployment available)
-        if: ${{ secrets.CONVEX_DEPLOYMENT == '' }}
-        run: echo "Skipping typecheck — CONVEX_DEPLOYMENT not available (expected for fork PRs). Run npx convex dev locally to generate types."
 
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      # No `version:` input — action-setup reads the pinned pnpm version from
+      # package.json `packageManager` (pnpm@11.1.3), keeping a single source of truth.
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
-        with:
-          version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22"
@@ -104,11 +101,26 @@ jobs:
   e2e:
     name: E2E Tests
     runs-on: ubuntu-latest
+    # The Playwright suite boots the real Next.js dev server and authenticates a
+    # Clerk test user, both of which require Clerk + Convex credentials. Fork PRs
+    # cannot access secrets, so this job only runs on push to main (matching the
+    # `build` job). Without this gate the suite would be guaranteed-red on forks.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Provided to both the setup project (clerkSetup / clerk.signIn) and the
+    # dev webServer that Playwright launches.
+    env:
+      NEXT_PUBLIC_CONVEX_URL: ${{ secrets.NEXT_PUBLIC_CONVEX_URL }}
+      CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOYMENT }}
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+      CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+      CLERK_JWT_ISSUER: ${{ secrets.CLERK_JWT_ISSUER }}
+      E2E_CLERK_USER_EMAIL: ${{ secrets.E2E_CLERK_USER_EMAIL }}
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      # No `version:` input — action-setup reads the pinned pnpm version from
+      # package.json `packageManager` (pnpm@11.1.3), keeping a single source of truth.
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
-        with:
-          version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22"
@@ -123,6 +135,10 @@ jobs:
             pnpm-store-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      # The dev server imports Convex `_generated` modules at build/run time, so
+      # generate them offline before launching Playwright's webServer.
+      - name: Generate Convex types (offline)
+        run: npx convex@latest codegen --typecheck disable
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
       - name: Run E2E tests
@@ -136,9 +152,9 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      # No `version:` input — action-setup reads the pinned pnpm version from
+      # package.json `packageManager` (pnpm@11.1.3), keeping a single source of truth.
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
-        with:
-          version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22"

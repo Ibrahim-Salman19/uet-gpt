@@ -86,6 +86,14 @@ function useSpeechRecognition() {
     setIsListening(false);
   }, []);
 
+  // Ensure the microphone is released if the component unmounts while listening.
+  React.useEffect(() => {
+    return () => {
+      recognitionRef.current?.abort?.();
+      recognitionRef.current = null;
+    };
+  }, []);
+
   return {
     transcript,
     isListening,
@@ -100,6 +108,23 @@ function useSpeechRecognition() {
 
 // ── Waveform Bars ──
 
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = React.useState(false);
+
+  React.useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduced(mql.matches);
+    const handler = (e: MediaQueryListEvent) => setReduced(e.matches);
+    mql.addEventListener("change", handler);
+    return () => mql.removeEventListener("change", handler);
+  }, []);
+
+  return reduced;
+}
+
+const WAVEFORM_HEIGHTS = [0.3, 0.7, 0.5, 0.9, 0.4, 0.6, 0.8, 0.35, 0.65];
+
 function WaveformBars({
   isListening,
   hasTranscript,
@@ -107,11 +132,13 @@ function WaveformBars({
   isListening: boolean;
   hasTranscript: boolean;
 }) {
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const animate = isListening && !prefersReducedMotion;
   return (
-    <div className="flex items-end justify-center gap-1.5 h-12">
-      {[0.3, 0.7, 0.5, 0.9, 0.4, 0.6, 0.8, 0.35, 0.65].map((h, i) => (
+    <div className="flex items-end justify-center gap-1.5 h-12" aria-hidden="true">
+      {WAVEFORM_HEIGHTS.map((h, i) => (
         <div
-          key={i}
+          key={`bar-${h}`}
           className="w-1 rounded-full transition-all duration-300"
           style={{
             height: isListening ? `${h * 100}%` : "20%",
@@ -120,7 +147,7 @@ function WaveformBars({
               : hasTranscript
                 ? "oklch(0.55 0.18 145)"
                 : "rgb(63, 63, 70)",
-            animationName: isListening ? "pulse" : "none",
+            animationName: animate ? "pulse" : "none",
             animationDuration: `${0.6 + i * 0.07}s`,
             animationTimingFunction: "ease-in-out",
             animationIterationCount: "infinite",
@@ -155,7 +182,9 @@ function VoiceActionButtons({
   return (
     <div className="w-full flex gap-3">
       <button
+        type="button"
         onClick={onCancel}
+        aria-label="Cancel voice input"
         className="flex-1 py-2.5 border border-white/5 hover:bg-white/5 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white transition-all duration-200 active:scale-95 cursor-pointer font-sans"
       >
         Cancel
@@ -163,27 +192,33 @@ function VoiceActionButtons({
 
       {isListening ? (
         <button
+          type="button"
           onClick={onStop}
+          aria-label="Stop listening"
           className="flex-1 py-2.5 bg-red-500/20 border border-red-500/30 hover:bg-red-500/30 rounded-lg text-xs font-semibold text-red-400 hover:text-red-300 transition-all duration-200 active:scale-95 cursor-pointer font-sans flex items-center justify-center gap-1.5"
         >
-          <MicOff className="h-3.5 w-3.5" />
+          <MicOff className="h-3.5 w-3.5" aria-hidden="true" />
           Stop
         </button>
       ) : transcript ? (
         <button
+          type="button"
           onClick={onConfirm}
+          aria-label="Confirm and send transcript"
           className="flex-1 py-2.5 bg-[var(--accent)]/20 border border-[var(--accent)]/30 hover:bg-[var(--accent)]/30 rounded-lg text-xs font-semibold text-[var(--accent)] transition-all duration-200 active:scale-95 cursor-pointer font-sans flex items-center justify-center gap-1.5"
         >
-          <CheckCircle className="h-3.5 w-3.5" />
+          <CheckCircle className="h-3.5 w-3.5" aria-hidden="true" />
           Confirm
         </button>
       ) : (
         <button
+          type="button"
           onClick={onStart}
           disabled={!isSupported}
+          aria-label="Start listening"
           className="flex-1 py-2.5 bg-[var(--accent)]/20 border border-[var(--accent)]/30 hover:bg-[var(--accent)]/30 rounded-lg text-xs font-semibold text-[var(--accent)] transition-all duration-200 active:scale-95 cursor-pointer font-sans flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          <Mic className="h-3.5 w-3.5" />
+          <Mic className="h-3.5 w-3.5" aria-hidden="true" />
           Start
         </button>
       )}
@@ -213,8 +248,18 @@ function VoiceDialogContent({
   return (
     <div className="bg-[var(--surface-3)] border border-[var(--surface-4)] rounded-[1.5rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.9)] p-6 flex flex-col items-center text-center gap-4">
       <div>
-        <h3 className="text-sm font-semibold text-zinc-100 tracking-wide font-sans">Voice Input</h3>
-        <p className="text-xs text-zinc-500 mt-1 font-sans">
+        <h3
+          id="voice-modal-title"
+          className="text-sm font-semibold text-zinc-100 tracking-wide font-sans"
+        >
+          Voice Input
+        </h3>
+        <p
+          id="voice-modal-status"
+          role="status"
+          aria-live="polite"
+          className="text-xs text-zinc-500 mt-1 font-sans"
+        >
           {isListening
             ? "Listening… speak your question"
             : transcript
@@ -229,12 +274,19 @@ function VoiceDialogContent({
 
       <p
         id="voice-transcript"
+        role="status"
+        aria-live="polite"
+        aria-label="Recognized speech transcript"
         className="text-xs font-mono text-[var(--accent)] italic min-h-[2.5rem] px-2 select-text leading-relaxed w-full text-left"
       >
         {transcript || (error ? "" : "\u00a0")}
       </p>
 
-      {error && <p className="text-xs text-red-400 font-sans -mt-2 px-2">{error}</p>}
+      {error && (
+        <p role="alert" className="text-xs text-red-400 font-sans -mt-2 px-2">
+          {error}
+        </p>
+      )}
 
       <VoiceActionButtons
         isListening={isListening}
@@ -283,17 +335,22 @@ export function VoiceModal({ onTranscript }: VoiceModalProps) {
       dialog.showModal();
       setTranscript("");
       setError(null);
-      setTimeout(startListening, 200);
-    } else {
-      stopListening();
-      dialog.close();
+      // Defer mic start slightly so the open animation settles. Capture the id
+      // so we can cancel it if the modal closes within the delay window,
+      // otherwise startListening would fire after close and re-open the mic.
+      const startTimer = setTimeout(startListening, 200);
+      return () => clearTimeout(startTimer);
     }
+    stopListening();
+    dialog.close();
   }, [voiceInputOpen, startListening, stopListening, setTranscript, setError]);
 
   return (
     <dialog
       ref={dialogRef}
       id="voice-modal"
+      aria-labelledby="voice-modal-title"
+      aria-describedby="voice-modal-status"
       onClose={handleClose}
       className="fixed inset-0 z-[100] m-auto bg-transparent p-0 w-full max-w-[360px] border-none outline-none"
     >

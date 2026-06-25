@@ -1,6 +1,6 @@
-import { test, expect } from "@playwright/test";
 import { AxeBuilder } from "@axe-core/playwright";
 import { setupClerkTestingToken } from "@clerk/testing/playwright";
+import { expect, test } from "@playwright/test";
 
 test.describe("Accessibility (WCAG 2.2)", () => {
   test.beforeEach(async ({ page }) => {
@@ -23,13 +23,36 @@ test.describe("Accessibility (WCAG 2.2)", () => {
     await page.goto("/chat");
     await expect(page.locator("#chat-input-field")).toBeVisible({ timeout: 5000 });
 
-    // Check all buttons have labels
+    // Compute the real accessible name per button instead of hand-rolling a
+    // partial check. This honors aria-label, aria-labelledby, text content,
+    // title, and an <img alt>-only button, and rejects whitespace-only labels.
     const buttons = await page.locator("button").all();
     for (const button of buttons) {
-      const name = await button.getAttribute("aria-label");
-      const text = await button.textContent();
-      const hasLabel = name || (text && text.trim().length > 0);
-      expect(hasLabel).toBeTruthy();
+      const accessibleName = (
+        await button.evaluate((el) => {
+          const byId = (ids: string | null) =>
+            (ids || "")
+              .split(/\s+/)
+              .filter(Boolean)
+              .map((id) => document.getElementById(id)?.textContent ?? "")
+              .join(" ");
+
+          const ariaLabel = el.getAttribute("aria-label") ?? "";
+          const labelledBy = byId(el.getAttribute("aria-labelledby"));
+          const text = el.textContent ?? "";
+          const title = el.getAttribute("title") ?? "";
+          const imgAlt = Array.from(el.querySelectorAll("img"))
+            .map((img) => img.getAttribute("alt") ?? "")
+            .join(" ");
+
+          return [ariaLabel, labelledBy, text, title, imgAlt].join(" ");
+        })
+      ).trim();
+
+      expect(
+        accessibleName.length,
+        `Button is missing an accessible name: ${await button.evaluate((el) => el.outerHTML.slice(0, 200))}`,
+      ).toBeGreaterThan(0);
     }
   });
 });

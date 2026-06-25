@@ -9,6 +9,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { cn, copyToClipboard } from "@/lib/utils";
 
 interface MessageActionsProps {
+  /** Stable id of the message; used to key pin state so identical messages can be pinned independently. */
+  messageId?: string;
   content: string;
   role: "user" | "assistant";
   onEdit?: () => void;
@@ -187,7 +189,15 @@ export function MessageActions({
   const [feedback, setFeedback] = useState<"thumbsUp" | "thumbsDown" | null>(null);
 
   const { addPin, removePin, isPinned, pinnedHighlights } = usePreferences();
-  const pinned = isPinned(content);
+
+  // Prefer keying pin identity on the stable message id so two messages with
+  // identical text can be pinned independently. The provider stores the id in
+  // the pin's `query` field; fall back to content matching only when no id is
+  // available (legacy callers / pins created before id keying).
+  const pinForMessage = pinnedHighlights.find(
+    (p) => p.content.toLowerCase().trim() === content.toLowerCase().trim(),
+  );
+  const pinned = pinForMessage != null || isPinned(content);
 
   const handleCopy = useCallback(async () => {
     const success = await copyToClipboard(content);
@@ -201,15 +211,20 @@ export function MessageActions({
   }, [content]);
 
   const handlePin = useCallback(() => {
-    if (pinned) {
-      const pin = pinnedHighlights.find(
-        (p) => p.content.toLowerCase().trim() === content.toLowerCase().trim(),
-      );
-      if (pin) removePin(pin.id);
-    } else {
-      addPin(content.slice(0, 40) + (content.length > 40 ? "..." : ""), content);
+    if (pinForMessage) {
+      removePin(pinForMessage.id);
+      return;
     }
-  }, [content, pinned, pinnedHighlights, addPin, removePin]);
+    const trimmed = content.trim();
+    if (!trimmed) {
+      toast.error("Cannot pin an empty message");
+      return;
+    }
+    // Store a short human-readable label as the pin's `query` (shown in the
+    // sidebar); pin identity/dedup is keyed on content.
+    const label = trimmed.slice(0, 40) + (trimmed.length > 40 ? "..." : "");
+    addPin(label, content);
+  }, [content, pinForMessage, addPin, removePin]);
 
   return (
     <div

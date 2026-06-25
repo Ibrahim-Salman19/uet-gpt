@@ -102,7 +102,7 @@ UET Taxila GPT is an autonomous RAG pipeline chatbot for UET Taxila. It answers 
 │   ├── http.ts                      #   HTTP router (3 routes: crawl, ingest, reset)
 │   ├── lib/db_helpers.ts            #   fastCount (thin wrapper around internal .count() API)
 │   ├── emergencyStop.ts             #   stopAll / stopBatch — drains in-flight processing jobs
-│   ├── schema.ts                    #   DATABASE SCHEMA (15 tables, plus 2 component-managed)
+│   ├── schema.ts                    #   DATABASE SCHEMA (16 tables, plus 2 component-managed)
 │   └── threads.ts                   #   Thread actions
 ├── src/
 │   ├── app/                         # Next.js App Router pages
@@ -126,7 +126,7 @@ UET Taxila GPT is an autonomous RAG pipeline chatbot for UET Taxila. It answers 
 │   ├── run_agent.sh                 # Cron entry point for Antigravity 2.0 (agy CLI)
 │   ├── boot_lock.ps1                # Windows lock file for boot safety
 │   └── eval/
-│       ├── golden_set.jsonl         #   75 QA pairs across categories
+│       ├── golden_set.jsonl         #   50 QA pairs across categories
 │       └── run_eval.py              #   Evaluation runner (recall_at_k, fragment_hit_rate)
 ├── tests/
 │   ├── convex/                      # Convex function tests (webhook, users, tasks, mutations, actions)

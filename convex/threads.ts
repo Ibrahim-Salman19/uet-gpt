@@ -8,6 +8,7 @@ import {
   mutation,
   query,
 } from "./_generated/server";
+import { requireAuth } from "./auth";
 import { threadValidator } from "./threads/validator";
 
 export const create = mutation({
@@ -16,30 +17,13 @@ export const create = mutation({
   },
   returns: v.string(),
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new ConvexError("Authentication required");
-    }
-    let user = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) {
-      const userId = await ctx.db.insert("users", {
-        clerkId: identity.subject,
-        name: identity.name ?? "Unknown",
-        email: identity.email ?? "",
-        imageUrl: identity.pictureUrl,
-        role: "user",
-        isActive: true,
-        lastLoginAt: Date.now(),
-      });
-      user = await ctx.db.get(userId);
-    }
+    // requireAuth enforces identity, user existence, and isActive.
+    // Provisioning is handled by getOrCreate/webhook — do not auto-insert here,
+    // so a deactivated user cannot resurrect their own row by creating a thread.
+    const user = await requireAuth(ctx);
 
     const thread = await ctx.runMutation(components.agent.threads.createThread, {
-      userId: identity.subject,
+      userId: user.clerkId,
       title: args.title,
     });
 
@@ -52,18 +36,10 @@ export const list = query({
   args: {},
   returns: v.array(threadValidator),
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      return [];
-    }
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) return [];
+    const user = await requireAuth(ctx);
 
     const result = await ctx.runQuery(components.agent.threads.listThreadsByUserId, {
-      userId: identity.subject,
+      userId: user.clerkId,
       paginationOpts: { numItems: 100, cursor: null },
     });
 
@@ -89,10 +65,8 @@ export const rename = mutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new ConvexError("Authentication required");
-    }
+    // requireAuth enforces identity, user existence, and isActive.
+    const user = await requireAuth(ctx);
 
     // Verify thread exists via component query
     const thread = await ctx.runQuery(components.agent.threads.getThread, { threadId: args.id });
@@ -101,11 +75,7 @@ export const rename = mutation({
     }
 
     // Authorize: thread owner must match current user
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user || thread.userId !== identity.subject) {
+    if (thread.userId !== user.clerkId) {
       throw new ConvexError("Not authorized");
     }
 
@@ -122,10 +92,8 @@ export const remove = mutation({
   args: { id: v.string() },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new ConvexError("Authentication required");
-    }
+    // requireAuth enforces identity, user existence, and isActive.
+    const user = await requireAuth(ctx);
 
     // Verify thread exists via component query
     const thread = await ctx.runQuery(components.agent.threads.getThread, { threadId: args.id });
@@ -134,11 +102,7 @@ export const remove = mutation({
     }
 
     // Authorize: thread owner must match current user
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user || thread.userId !== identity.subject) {
+    if (thread.userId !== user.clerkId) {
       throw new ConvexError("Not authorized");
     }
 

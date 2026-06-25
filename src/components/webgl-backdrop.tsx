@@ -156,15 +156,27 @@ function useWebGLScene(
     };
     window.addEventListener("mousemove", handleMouseMove);
 
+    // Once perf has degraded we stop doing the heavy per-frame work but keep the
+    // rAF loop alive so the scene can recover / re-render on resize and so the
+    // loop never permanently dies.
+    let degradedMode = false;
+
     const animate = () => {
-      if (!webglEnabled) {
+      // Always reschedule first so the loop never stops permanently. Heavy work
+      // below is skipped while disabled or after a degradation event.
+      frameId = requestAnimationFrame(animate);
+
+      const positionAttr = geometry.getAttribute("position") as THREE.BufferAttribute | undefined;
+
+      // When disabled or degraded, just render the static scene once more and
+      // skip the expensive particle update (but keep requesting frames cheaply).
+      if (!webglEnabled || degradedMode || !positionAttr) {
         renderer.render(scene, camera);
         return;
       }
+
       const frameStart = performance.now();
       const elapsed = performance.now() * 0.001;
-      const positionAttr = geometry.getAttribute("position") as THREE.BufferAttribute;
-      if (!positionAttr) return;
       const pos = positionAttr.array as Float32Array;
 
       targetX += (mouseX - targetX) * 0.05;
@@ -181,12 +193,11 @@ function useWebGLScene(
         slowFrameCount,
       );
       if (perfResult.degraded) {
-        console.warn("WebGL backdrop performance degraded, halting render loop");
-        cancelAnimationFrame(frameId);
+        console.warn("WebGL backdrop performance degraded, pausing animation");
+        degradedMode = true;
         return;
       }
       slowFrameCount = perfResult.newCount;
-      frameId = requestAnimationFrame(animate);
     };
     animate();
 

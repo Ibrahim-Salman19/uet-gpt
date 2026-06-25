@@ -66,20 +66,25 @@ function PinnedSection({
             className="group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-zinc-400 hover:bg-white/5 hover:text-zinc-200 transition-all duration-200"
           >
             <Bookmark className="h-3 w-3 shrink-0 text-[var(--accent)] opacity-70 group-hover:opacity-100" />
-            <span
-              className="flex-1 truncate cursor-pointer font-sans"
+            <button
+              type="button"
+              className="flex-1 truncate text-left cursor-pointer font-sans"
               onClick={async () => {
-                const success = await copyToClipboard(pin.content);
-                if (success) {
-                  toast.success("Copied to clipboard!");
-                } else {
+                try {
+                  const success = await copyToClipboard(pin.content);
+                  if (success) {
+                    toast.success("Copied to clipboard!");
+                  } else {
+                    toast.error("Failed to copy");
+                  }
+                } catch {
                   toast.error("Failed to copy");
                 }
               }}
               title={pin.content}
             >
               {pin.query || pin.content}
-            </span>
+            </button>
             <button
               onClick={() => onRemove(pin.id)}
               className="opacity-0 group-hover:opacity-60 hover:!opacity-100 p-0.5"
@@ -153,14 +158,14 @@ function UserProfileFooter({
         {user?.imageUrl ? (
           <img
             src={user.imageUrl}
-            alt="User profile"
-            className="h-8 w-8 rounded-full border border-[var(--accent)]/20 object-cover shrink-0 cursor-pointer hover:opacity-90 transition-opacity"
-            onClick={onOpenSettings}
+            alt=""
+            aria-hidden="true"
+            className="h-8 w-8 rounded-full border border-[var(--accent)]/20 object-cover shrink-0"
           />
         ) : (
           <div
-            className="h-8 w-8 rounded-full bg-zinc-800 border border-white/5 flex items-center justify-center shrink-0 cursor-pointer"
-            onClick={onOpenSettings}
+            aria-hidden="true"
+            className="h-8 w-8 rounded-full bg-zinc-800 border border-white/5 flex items-center justify-center shrink-0"
           >
             <svg
               className="w-4 h-4 text-zinc-400"

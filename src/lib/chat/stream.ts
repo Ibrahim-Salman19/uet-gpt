@@ -101,7 +101,12 @@ function streamWithStrippedThinking(
           processChunk(value, buf, accumulated, state, controller);
         }
       } catch (e) {
-        console.error("Stream interrupted:", e);
+        // NOTE: fallback to the next model is only possible before/at the first
+        // token (see tryStreamWithFallback). Once streaming has started the model
+        // is committed, so a mid-stream provider failure surfaces an inline error
+        // rather than retrying. We deliberately do NOT call onFinish here, so a
+        // truncated/error answer is never written to the semantic cache.
+        console.error(`Stream interrupted (model: ${getModelName(model)}):`, e);
         controller.enqueue("\n\n[Error: Connection to AI provider lost mid-stream]");
         controller.close();
       } finally {

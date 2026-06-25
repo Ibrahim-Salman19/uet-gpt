@@ -24,6 +24,12 @@ interface SettingsField {
   type: "text" | "number" | "boolean" | "select";
   defaultValue: string | number | boolean;
   options?: { label: string; value: string }[];
+  /**
+   * Marks a control whose value is persisted but NOT yet read by any runtime
+   * enforcement path (rate limiter / auth gate / RAG pipeline). Surfaced in the
+   * UI so admins do not assume toggling it changes security posture.
+   */
+  notEnforced?: boolean;
 }
 
 interface SettingsSection {
@@ -77,18 +83,26 @@ const settingsSections: SettingsSection[] = [
     description: "Adjust threshold matching, context count, and models",
     icon: <Database className="h-4 w-4" />,
     fields: [
-      { key: "maxContextChunks", label: "Max Context Chunks", type: "number", defaultValue: 10 },
+      {
+        key: "maxContextChunks",
+        label: "Max Context Chunks",
+        type: "number",
+        defaultValue: 10,
+        notEnforced: true,
+      },
       {
         key: "similarityThreshold",
         label: "Similarity Threshold",
         type: "number",
         defaultValue: 0.7,
+        notEnforced: true,
       },
       {
         key: "defaultModel",
         label: "Default Model",
         type: "select",
         defaultValue: "llama-3.3-70b-versatile",
+        notEnforced: true,
         options: [
           { label: "Llama 3.3 70B", value: "llama-3.3-70b-versatile" },
           { label: "Llama 3.1 8B", value: "llama-3.1-8b-instant" },
@@ -117,18 +131,26 @@ const settingsSections: SettingsSection[] = [
     description: "Manage global endpoint rate limiting and authentication",
     icon: <Shield className="h-4 w-4" />,
     fields: [
-      { key: "requireAuth", label: "Require authentication", type: "boolean", defaultValue: true },
+      {
+        key: "requireAuth",
+        label: "Require authentication",
+        type: "boolean",
+        defaultValue: true,
+        notEnforced: true,
+      },
       {
         key: "allowGuestAccess",
         label: "Allow guest access",
         type: "boolean",
         defaultValue: false,
+        notEnforced: true,
       },
       {
         key: "rateLimitPerMinute",
         label: "Rate limit (requests/minute)",
         type: "number",
         defaultValue: 60,
+        notEnforced: true,
       },
     ],
   },
@@ -172,7 +194,8 @@ export default function AdminSettingsPage() {
       }
       await upsertSettingsBatch({ settings: settingsToSave });
       toast.success("Settings saved successfully", {
-        description: "Your system changes are now active.",
+        description:
+          "Values are persisted. Controls marked NOT ENFORCED do not yet affect runtime behavior.",
       });
     } catch (error) {
       toast.error("Failed to save settings", {
@@ -262,9 +285,19 @@ export default function AdminSettingsPage() {
                   className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-2 border-b border-white/[0.02] last:border-0"
                 >
                   <div className="flex-1">
-                    <Label htmlFor={field.key} className="text-xs font-sans text-zinc-300">
-                      {field.label}
-                    </Label>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Label htmlFor={field.key} className="text-xs font-sans text-zinc-300">
+                        {field.label}
+                      </Label>
+                      {field.notEnforced && (
+                        <span
+                          title="Stored for future use — this value is not yet read by the running pipeline and does not change behavior."
+                          className="text-[8px] font-mono uppercase tracking-wider text-amber-400/90 bg-amber-500/10 border border-amber-500/20 rounded px-1.5 py-0.5"
+                        >
+                          NOT ENFORCED
+                        </span>
+                      )}
+                    </div>
                     <span className="block text-[9px] font-mono text-zinc-600 mt-0.5">
                       KEY: {field.key.toUpperCase()}
                     </span>

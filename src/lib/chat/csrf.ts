@@ -1,20 +1,24 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-function getAllowedOrigins(req: NextRequest): string[] {
-  const allowed = [process.env.NEXT_PUBLIC_APP_URL]
+/**
+ * Build the CSRF allowlist from server-configured origins ONLY. We deliberately
+ * do NOT derive trust from the request's own Host / X-Forwarded-* headers,
+ * because those are client-controllable and would make the Origin/Referer
+ * check self-referential (an attacker-supplied Host would auto-authorize the
+ * matching Origin). Multi-host deployments should set CSRF_ALLOWED_ORIGINS
+ * (comma-separated) in addition to NEXT_PUBLIC_APP_URL.
+ */
+function getAllowedOrigins(): string[] {
+  const configured = [
+    process.env.NEXT_PUBLIC_APP_URL,
+    ...(process.env.CSRF_ALLOWED_ORIGINS?.split(",") ?? []),
+  ];
+  const allowed = configured
+    .map((url) => url?.trim())
     .filter((url): url is string => !!url)
     .map((url) => url.replace(/\/$/, ""));
   if (process.env.NODE_ENV === "development") {
     allowed.push("http://localhost:3000");
-  }
-  const host = req.headers.get("host");
-  if (host) {
-    const proto =
-      req.headers.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-    const selfOrigin = `${proto}://${host}`;
-    if (!allowed.includes(selfOrigin)) {
-      allowed.push(selfOrigin);
-    }
   }
   return allowed;
 }
@@ -42,8 +46,21 @@ function checkReferer(referer: string | null, allowed: string[]): NextResponse |
 export function checkCsrf(req: NextRequest): NextResponse | null {
   const origin = req.headers.get("origin");
   const referer = req.headers.get("referer");
-  const allowed = getAllowedOrigins(req);
+  const secFetchSite = req.headers.get("sec-fetch-site");
+  const allowed = getAllowedOrigins();
 
+  // Fast path: modern browsers send Sec-Fetch-Site on every navigation/fetch.
+  // A same-origin request is unambiguously trusted regardless of Origin/Referer.
+  if (secFetchSite === "same-origin" || secFetchSite === "none") {
+    return null;
+  }
+  // Any cross-site signal is a hard reject for this state-changing POST.
+  if (secFetchSite === "cross-site" || secFetchSite === "same-site") {
+    return new NextResponse("Forbidden: CSRF check failed (sec-fetch-site)", { status: 403 });
+  }
+
+  // Fallback for clients without Sec-Fetch-Site: require a verified same-origin
+  // signal via Origin or Referer. Treat the both-missing case as a deny.
   if (!origin && !referer) {
     return new NextResponse("Forbidden: CSRF check failed (missing origin/referer)", {
       status: 403,

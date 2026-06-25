@@ -3,19 +3,33 @@ import type { Source } from "@/lib/types";
 type StreamCallback = (content: string, sources?: Source[]) => void;
 
 class StreamRegistry {
-  private listeners = new Map<string, StreamCallback>();
+  // Multiple listeners may observe the same thread concurrently (e.g. transient
+  // double-mounts during navigation or React StrictMode in dev). Use a Set per
+  // thread so registering/unregistering one listener never clobbers another.
+  private listeners = new Map<string, Set<StreamCallback>>();
 
   register(threadId: string, callback: StreamCallback) {
-    this.listeners.set(threadId, callback);
+    let callbacks = this.listeners.get(threadId);
+    if (!callbacks) {
+      callbacks = new Set();
+      this.listeners.set(threadId, callbacks);
+    }
+    callbacks.add(callback);
   }
 
-  unregister(threadId: string) {
-    this.listeners.delete(threadId);
+  unregister(threadId: string, callback: StreamCallback) {
+    const callbacks = this.listeners.get(threadId);
+    if (!callbacks) return;
+    callbacks.delete(callback);
+    if (callbacks.size === 0) {
+      this.listeners.delete(threadId);
+    }
   }
 
   update(threadId: string, content: string, sources?: Source[]) {
-    const callback = this.listeners.get(threadId);
-    if (callback) {
+    const callbacks = this.listeners.get(threadId);
+    if (!callbacks) return;
+    for (const callback of callbacks) {
       callback(content, sources);
     }
   }

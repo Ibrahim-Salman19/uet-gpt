@@ -18,6 +18,7 @@ interface ChatMessagesProps {
   onRetry?: () => void;
   onSuggestionSelect?: (suggestion: string) => void;
   suggestions?: string[];
+  onFeedback?: (messageId: string, rating: "thumbsUp" | "thumbsDown") => void;
   className?: string;
 }
 
@@ -104,6 +105,7 @@ export function ChatMessages({
   onRetry,
   onSuggestionSelect,
   suggestions,
+  onFeedback,
   className,
 }: ChatMessagesProps) {
   const scrollRef = useAutoScroll(messages, isAwaitingReply);
@@ -130,7 +132,11 @@ export function ChatMessages({
             key={message.id}
             className="animate-[slide-up_0.4s_ease-[var(--ease-out-expo)]_both]"
           >
-            <ChatMessageBubble message={message} isLatest={index === messages.length - 1} />
+            <ChatMessageBubble
+              message={message}
+              isLatest={index === messages.length - 1}
+              onFeedback={onFeedback ? (rating) => onFeedback(message.id, rating) : undefined}
+            />
           </div>
         ))}
 

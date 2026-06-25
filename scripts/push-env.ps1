@@ -23,11 +23,11 @@ foreach ($line in $envFile) {
     }
     
     Write-Host "Adding $key to Vercel..."
-    
-    # Add to production
-    cmd /c "npx vercel env add $key production --value `"$value`" --yes --force"
-    
-    # Add to development
-    cmd /c "npx vercel env add $key development --value `"$value`" --yes --force"
+
+    # SECURITY: never pass the secret via --value (it lands in the process table
+    # and PowerShell history). Pipe it to the CLI over stdin instead; Vercel reads
+    # the value from stdin when --value is omitted.
+    $value | & npx vercel env add $key production --yes --force
+    $value | & npx vercel env add $key development --yes --force
 }
 Write-Host "Environment variables pushed successfully!"

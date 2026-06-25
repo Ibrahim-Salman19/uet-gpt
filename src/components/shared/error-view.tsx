@@ -27,7 +27,7 @@ export function ErrorView({ label, heading, message, error, reset }: ErrorViewPr
           {heading}
         </h2>
         <p className="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
-          {error.message || message}
+          {process.env.NODE_ENV === "development" ? error.message || message : message}
         </p>
         {error.digest && (
           <p className="text-xs text-[var(--text-muted)] font-mono bg-[var(--surface-muted)] py-1 px-2 rounded-md inline-block mt-2">

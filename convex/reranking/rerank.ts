@@ -2,6 +2,24 @@ import { ConvexError, v } from "convex/values";
 import { action } from "../_generated/server";
 import { CASCADE_CONFIG } from "../rag/constants";
 
+// Bound external reranker latency so a hung/slow reranker degrades quickly to
+// the next fallback tier instead of stalling the whole action.
+const RERANKER_TIMEOUT_MS = 5_000;
+
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit,
+  timeoutMs: number,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export const rerank = action({
   args: {
     query: v.string(),
@@ -21,15 +39,19 @@ export const rerank = action({
     const rerankerUrl = process.env.RERANKER_URL;
     if (rerankerUrl) {
       try {
-        const response = await fetch(`${rerankerUrl.replace(/\/$/, "")}/rerank`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            query: args.query,
-            documents: docs.map((d) => d.text),
-            top_n: topK,
-          }),
-        });
+        const response = await fetchWithTimeout(
+          `${rerankerUrl.replace(/\/$/, "")}/rerank`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              query: args.query,
+              documents: docs.map((d) => d.text),
+              top_n: topK,
+            }),
+          },
+          RERANKER_TIMEOUT_MS,
+        );
 
         if (response.ok) {
           const results = (await response.json()) as Array<{
@@ -53,19 +75,23 @@ export const rerank = action({
     const cohereKey = process.env.COHERE_API_KEY;
     if (cohereKey && docs.length > 0) {
       try {
-        const response = await fetch(CASCADE_CONFIG.cohereEndpoint, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${cohereKey}`,
-            "Content-Type": "application/json",
+        const response = await fetchWithTimeout(
+          CASCADE_CONFIG.cohereEndpoint,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${cohereKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model: CASCADE_CONFIG.cohereModel,
+              query: args.query,
+              documents: docs.map((d) => d.text),
+              top_n: topK,
+            }),
           },
-          body: JSON.stringify({
-            model: CASCADE_CONFIG.cohereModel,
-            query: args.query,
-            documents: docs.map((d) => d.text),
-            top_n: topK,
-          }),
-        });
+          RERANKER_TIMEOUT_MS,
+        );
 
         if (response.ok) {
           type CohereResult = { index: number; relevance_score: number };

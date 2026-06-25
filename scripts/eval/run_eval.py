@@ -1,5 +1,6 @@
 import os
 import json
+import math
 import time
 import argparse
 import tempfile
@@ -30,8 +31,23 @@ def _evaluate_single(client: "ConvexClient", item: dict, top_k: int) -> dict:
 
     results = client.action("eval:evaluateSearch", {"query": query, "topK": top_k})
 
-    url_matched = any(expected_url in r.get("url", "") for r in results)
+    # Rank-aware relevance: find the 1-based rank of the first result whose URL
+    # matches the expected URL. A substring "any() in" check is rank-blind and
+    # overstates quality (a hit at position 5 scores the same as position 1).
+    url_rank = 0
+    for idx, r in enumerate(results, start=1):
+        if expected_url in r.get("url", ""):
+            url_rank = idx
+            break
+
+    url_matched = url_rank > 0
     fragment_matched = any(expected_fragment in r.get("text", "").lower() for r in results)
+
+    # MRR contribution: reciprocal of the first-relevant rank (0 if no hit).
+    reciprocal_rank = (1.0 / url_rank) if url_rank > 0 else 0.0
+    # nDCG@k with a single relevant document: DCG = 1/log2(rank+1); the ideal
+    # DCG (relevant doc at rank 1) is 1/log2(2) = 1, so nDCG == DCG here.
+    ndcg = (1.0 / math.log2(url_rank + 1)) if url_rank > 0 else 0.0
 
     return {
         "query": query,
@@ -40,6 +56,9 @@ def _evaluate_single(client: "ConvexClient", item: dict, top_k: int) -> dict:
         "expected_fragment": expected_fragment,
         "url_matched": url_matched,
         "fragment_matched": fragment_matched,
+        "url_rank": url_rank,
+        "reciprocal_rank": reciprocal_rank,
+        "ndcg": ndcg,
     }
 
 
@@ -76,6 +95,8 @@ def run_eval(golden_path: str, top_k: int = 5, category_filter: str | None = Non
 
     url_hits = 0
     fragment_hits = 0
+    rr_sum = 0.0      # accumulates reciprocal ranks for MRR
+    ndcg_sum = 0.0    # accumulates per-query nDCG@k
     failures = []
     categories: dict = {}
 
@@ -103,6 +124,12 @@ def run_eval(golden_path: str, top_k: int = 5, category_filter: str | None = Non
                 fragment_hits += 1
                 categories[cat]["fragment_hits"] += 1
 
+            # Rank-aware aggregation (MRR / nDCG@k). Missed queries contribute 0.
+            rr_sum += result.get("reciprocal_rank", 0.0)
+            ndcg_sum += result.get("ndcg", 0.0)
+            categories[cat]["rr_sum"] = categories[cat].get("rr_sum", 0.0) + result.get("reciprocal_rank", 0.0)
+            categories[cat]["ndcg_sum"] = categories[cat].get("ndcg_sum", 0.0) + result.get("ndcg", 0.0)
+
             if not result["url_matched"] or not result["fragment_matched"]:
                 failures.append(result)
 
@@ -127,6 +154,8 @@ def run_eval(golden_path: str, top_k: int = 5, category_filter: str | None = Non
             "fragment_hits": stats["fragment_hits"],
             "recall": round(stats["url_hits"] / n, 4),
             "fragment_hit_rate": round(stats["fragment_hits"] / n, 4),
+            "mrr": round(stats.get("rr_sum", 0.0) / n, 4),
+            "ndcg": round(stats.get("ndcg_sum", 0.0) / n, 4),
         }
 
     metrics = {
@@ -135,6 +164,9 @@ def run_eval(golden_path: str, top_k: int = 5, category_filter: str | None = Non
         "fragment_hit_rate": round(fragment_hits / total, 4) if total > 0 else 0.0,
         # Alias for backward compatibility
         "recall_at_k": round(url_hits / total, 4) if total > 0 else 0.0,
+        # Rank-aware retrieval metrics (overall)
+        "mrr": round(rr_sum / total, 4) if total > 0 else 0.0,
+        f"ndcg_at_{top_k}": round(ndcg_sum / total, 4) if total > 0 else 0.0,
         # Metadata
         "top_k": top_k,
         "total_pairs": total,
@@ -148,11 +180,14 @@ def run_eval(golden_path: str, top_k: int = 5, category_filter: str | None = Non
     print(f"\n--- Evaluation Results (Top K={top_k}, {elapsed:.1f}s) ---")
     print(f"Recall@5:          {metrics['recall_at_5']:.2%}")
     print(f"Fragment Hit Rate: {metrics['fragment_hit_rate']:.2%}")
+    print(f"MRR:               {metrics['mrr']:.4f}")
+    print(f"nDCG@{top_k}:            {metrics[f'ndcg_at_{top_k}']:.4f}")
     print("\nPer Category Breakdown:")
     for cat, stats in per_cat_summary.items():
         print(
             f"  {cat:20s}: Recall={stats['recall']:.2%}  "
             f"Fragment={stats['fragment_hit_rate']:.2%}  "
+            f"MRR={stats['mrr']:.3f}  nDCG={stats['ndcg']:.3f}  "
             f"({stats['url_hits']}/{stats['total']})"
         )
 

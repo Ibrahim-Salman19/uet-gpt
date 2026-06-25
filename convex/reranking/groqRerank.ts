@@ -39,7 +39,10 @@ export const groqRerank = internalAction({
           "Return array of {index, score}. " +
           "Score 1 = directly answers query, 0 = completely irrelevant. " +
           "Be strict: prefer precision over recall.",
-        prompt: `Query: "${args.query}"\n\nDocuments:\n${docs.map((d, i) => `[${i}] ${d.text.slice(0, 500)}`).join("\n---\n")}`,
+        // Escape the (untrusted, possibly LLM-rewritten) query with JSON.stringify
+        // so quotes/newlines/instructions cannot break out of the delimiter and
+        // manipulate the reranker — matching crag.ts / routing.ts prompt handling.
+        prompt: `Query: ${JSON.stringify(args.query)}\n\nDocuments:\n${docs.map((d, i) => `[${i}] ${d.text.slice(0, 500)}`).join("\n---\n")}`,
         temperature: 0,
         maxOutputTokens: 500,
       });

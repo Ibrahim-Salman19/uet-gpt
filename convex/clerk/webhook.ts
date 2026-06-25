@@ -10,6 +10,19 @@ function getAuthToken(request: Request): string | null {
   return match?.[1] ?? null;
 }
 
+// Per-delivery idempotency key. Clerk/svix deliveries are at-least-once and can
+// arrive out of order; the upstream Next.js route forwards svix's unique message
+// id so replays of the same delivery can be detected and dropped. Falls back to
+// the non-prefixed `webhook-id` header for resilience. Returns null when no key
+// is available (dedup is then skipped — never blocks a legitimate delivery).
+function getIdempotencyKey(request: Request): string | null {
+  const id =
+    request.headers.get("svix-id") ??
+    request.headers.get("webhook-id") ??
+    request.headers.get("x-webhook-id");
+  return id && id.length > 0 ? id : null;
+}
+
 function checkWebhookMethod(request: Request): Response | null {
   if (request.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
@@ -147,9 +160,47 @@ export const userWebhook = httpAction(async (ctx, request) => {
   const payload = parseWebhookPayloadSafe(rawBody);
   if (payload instanceof Response) return payload;
 
-  const dispatched = await dispatchWebhookEvent(ctx, payload.type, payload.data);
-  if (!dispatched) {
-    return new Response("Invalid webhook payload: missing user id", { status: 400 });
+  // Idempotency: drop replays of an already-processed delivery (svix is
+  // at-least-once). markWebhookProcessed atomically inserts the dedup row and
+  // returns false if it already existed. When no idempotency key is forwarded we
+  // skip dedup rather than block delivery.
+  const idempotencyKey = getIdempotencyKey(request);
+  if (idempotencyKey) {
+    const isNew = await ctx.runMutation(internal.crawl.mutations.markWebhookProcessed, {
+      jobId: `clerk:${idempotencyKey}`,
+    });
+    if (!isNew) {
+      // Already processed — acknowledge so Clerk stops retrying.
+      return okResponse();
+    }
+  }
+
+  try {
+    const dispatched = await dispatchWebhookEvent(ctx, payload.type, payload.data);
+    if (!dispatched) {
+      // Validation failure: roll back the dedup marker so a corrected retry reprocesses.
+      if (idempotencyKey) {
+        await ctx.runMutation(internal.crawl.mutations.unmarkWebhookProcessed, {
+          jobId: `clerk:${idempotencyKey}`,
+        });
+      }
+      return new Response("Invalid webhook payload: missing user id", { status: 400 });
+    }
+  } catch (err) {
+    // Processing threw (e.g. OCC conflict, cascade-delete failure). Roll back the
+    // dedup marker (best-effort) and re-throw so Clerk receives a 5xx and retries —
+    // otherwise the already-committed marker turns the retry into a silent no-op and
+    // the user.created/updated/deleted event is permanently dropped.
+    if (idempotencyKey) {
+      try {
+        await ctx.runMutation(internal.crawl.mutations.unmarkWebhookProcessed, {
+          jobId: `clerk:${idempotencyKey}`,
+        });
+      } catch (cleanupErr) {
+        console.error("Failed to roll back webhook idempotency marker", cleanupErr);
+      }
+    }
+    throw err;
   }
 
   return okResponse();

@@ -14,6 +14,8 @@ export const list = query({
         v.literal("indexed"),
         v.literal("failed"),
         v.literal("stale"),
+        v.literal("active"),
+        v.literal("pending_embed"),
       ),
     ),
     category: v.optional(v.string()),
@@ -48,6 +50,6 @@ export const list = query({
     const results = await baseQuery.take(maxToTake);
 
     const page = results.slice(offset);
-    return page as (typeof documentValidator.type)[];
+    return page;
   },
 });

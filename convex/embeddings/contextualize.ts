@@ -142,6 +142,16 @@ export const contextualizeChunks = internalAction({
     if (failures > 0) {
       console.warn(`Contextualize batch: ${successes} ok, ${failures} failed`);
     }
+
+    // Self-report progress so the count stays accurate when batches are fanned
+    // out via the scheduler (the cron no longer aggregates results).
+    if (successes > 0) {
+      await ctx.runMutation(internal.embeddings.contextualize.upsertContextualizeProgress, {
+        totalProcessed: successes,
+        increment: true,
+      });
+    }
+
     return { processed: batch.length, successes, failures };
   },
 });

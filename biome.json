@@ -11,7 +11,7 @@
     "rules": {
       "recommended": true,
       "suspicious": {
-        "noExplicitAny": "off"
+        "noExplicitAny": "warn"
       },
       "correctness": {
         "noUnusedVariables": "error"

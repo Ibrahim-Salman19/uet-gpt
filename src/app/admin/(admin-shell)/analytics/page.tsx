@@ -92,7 +92,12 @@ function UsageMetricsSection({
               <Activity className="h-4 w-4 text-zinc-400" />
               Satisfaction Rate
             </span>
-            <span className="text-[9px] font-mono text-zinc-500">KPI</span>
+            <span
+              className="text-[9px] font-mono text-zinc-500"
+              title="Computed from the 10 most recent feedback entries, not all-time feedback."
+            >
+              LAST 10
+            </span>
           </div>
           <div className="mt-4 text-4xl font-bold text-zinc-100 font-mono tracking-tight">
             {satisfactionRate}%
@@ -103,6 +108,9 @@ function UsageMetricsSection({
             </span>
             <span className="flex items-center gap-1 text-[10px] font-mono text-red-400">
               <ThumbsDown className="h-3 w-3" /> {negativeFeedback}
+            </span>
+            <span className="ml-auto text-[9px] font-mono text-zinc-600 uppercase tracking-wider">
+              recent window
             </span>
           </div>
         </Card>

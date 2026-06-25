@@ -89,8 +89,13 @@ export const feedbackStats = query({
   handler: async (ctx) => {
     await requireAdmin(ctx);
     const recent = await ctx.db.query("feedback").order("desc").take(10);
+    const stats = await ctx.db
+      .query("dashboardStats")
+      .withIndex("by_statsId", (q) => q.eq("statsId", "global"))
+      .unique();
     return {
-      total: recent.length, // placeholder
+      // Use the precomputed count rather than the page size (recent.length capped at 10).
+      total: stats?.feedbackCount ?? 0,
       recent: recent.map((f: Doc<"feedback">) => ({
         _id: f._id,
         rating: f.rating,
@@ -129,9 +134,14 @@ export const crawlStats = query({
   handler: async (ctx) => {
     await requireAdmin(ctx);
     const recent = await ctx.db.query("crawlJobs").order("desc").take(5);
+    const stats = await ctx.db
+      .query("dashboardStats")
+      .withIndex("by_statsId", (q) => q.eq("statsId", "global"))
+      .unique();
 
     return {
-      total: recent.length, // placeholder
+      // Use the precomputed count rather than the page size (recent.length capped at 5).
+      total: stats?.crawlCount ?? 0,
       recent: recent.map((c: Doc<"crawlJobs">) => ({
         _id: c._id,
         status: c.status,

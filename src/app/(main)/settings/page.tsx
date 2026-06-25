@@ -57,21 +57,30 @@ function RadioOption<T extends string>({
   label,
   description,
   onChange,
+  onKeyDown,
 }: {
   value: T;
   selected: T;
   label: string;
   description: string;
   onChange: (value: T) => void;
+  onKeyDown?: (event: React.KeyboardEvent<HTMLButtonElement>) => void;
 }) {
-  const id = `radio-${value}`;
+  const isSelected = selected === value;
   return (
     <button
       type="button"
+      role="radio"
+      aria-checked={isSelected}
+      // Roving tabindex: only the selected option is in the tab order; arrow
+      // keys move between options within the group.
+      tabIndex={isSelected ? 0 : -1}
+      data-radio-value={value}
       onClick={() => onChange(value)}
+      onKeyDown={onKeyDown}
       className={cn(
         "flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left transition-all duration-300 cursor-pointer active:scale-[0.99]",
-        selected === value
+        isSelected
           ? "border-[var(--accent)]/40 bg-[var(--accent)]/5 shadow-[0_4px_20px_rgba(0,0,0,0.2)]"
           : "border-white/5 bg-[var(--surface-3)]/40 hover:border-white/10 hover:bg-[var(--surface-3)]/60",
       )}
@@ -79,18 +88,74 @@ function RadioOption<T extends string>({
       <div
         className={cn(
           "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition-all duration-300",
-          selected === value
+          isSelected
             ? "border-[var(--accent)] bg-[var(--accent)]/10"
             : "border-zinc-700 bg-transparent",
         )}
       >
-        {selected === value && <div className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />}
+        {isSelected && <div className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />}
       </div>
       <div className="flex-1 min-w-0">
         <span className="text-xs font-semibold text-zinc-200 block font-sans">{label}</span>
         <p className="text-[10px] text-zinc-500 font-sans mt-0.5">{description}</p>
       </div>
     </button>
+  );
+}
+
+function RadioGroup<T extends string>({
+  label,
+  selected,
+  options,
+  onChange,
+}: {
+  label: string;
+  selected: T;
+  options: readonly { value: T; label: string; desc: string }[];
+  onChange: (value: T) => void;
+}) {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, value: T) => {
+    const currentIndex = options.findIndex((opt) => opt.value === value);
+    if (currentIndex === -1) return;
+
+    let nextIndex: number | null = null;
+    switch (event.key) {
+      case "ArrowDown":
+      case "ArrowRight":
+        nextIndex = (currentIndex + 1) % options.length;
+        break;
+      case "ArrowUp":
+      case "ArrowLeft":
+        nextIndex = (currentIndex - 1 + options.length) % options.length;
+        break;
+      default:
+        return;
+    }
+
+    event.preventDefault();
+    const next = options[nextIndex];
+    onChange(next.value);
+    // Move focus to the newly-selected option to keep the roving tabindex
+    // in sync with the visual selection.
+    const group = event.currentTarget.closest('[role="radiogroup"]');
+    const target = group?.querySelector<HTMLButtonElement>(`[data-radio-value="${next.value}"]`);
+    target?.focus();
+  };
+
+  return (
+    <div role="radiogroup" aria-label={label} className="flex flex-col gap-2">
+      {options.map((opt) => (
+        <RadioOption
+          key={opt.value}
+          value={opt.value}
+          selected={selected}
+          label={opt.label}
+          description={opt.desc}
+          onChange={onChange}
+          onKeyDown={(event) => handleKeyDown(event, opt.value)}
+        />
+      ))}
+    </div>
   );
 }
 
@@ -181,35 +246,23 @@ export default function SettingsPage() {
           <Separator className="bg-white/5" />
 
           <SettingsSection title="Font Size" description="Adjust the text size in chat messages">
-            <div className="flex flex-col gap-2">
-              {FONT_SIZES.map((opt) => (
-                <RadioOption
-                  key={opt.value}
-                  value={opt.value}
-                  selected={fontSize}
-                  label={opt.label}
-                  description={opt.desc}
-                  onChange={handleFontSizeChange}
-                />
-              ))}
-            </div>
+            <RadioGroup
+              label="Font size"
+              selected={fontSize}
+              options={FONT_SIZES}
+              onChange={handleFontSizeChange}
+            />
           </SettingsSection>
 
           <Separator className="bg-white/5" />
 
           <SettingsSection title="AI Model" description="Choose the language model for responses">
-            <div className="flex flex-col gap-2">
-              {MODELS.map((opt) => (
-                <RadioOption
-                  key={opt.value}
-                  value={opt.value}
-                  selected={model}
-                  label={opt.label}
-                  description={opt.desc}
-                  onChange={handleModelChange}
-                />
-              ))}
-            </div>
+            <RadioGroup
+              label="AI model"
+              selected={model}
+              options={MODELS}
+              onChange={handleModelChange}
+            />
           </SettingsSection>
 
           <Separator className="bg-white/5" />

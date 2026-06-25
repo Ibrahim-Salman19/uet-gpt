@@ -66,11 +66,18 @@ export const purgeStaleDocuments = internalMutation({
       purged++;
     }
 
-    if (purged < batchSize) {
+    // Purge isStale-flagged docs across EVERY status that flagExpiredDocuments flags
+    // (currently "indexed" and "active"). Previously only "indexed" was purged, so
+    // expired "active" docs (ingested via the upsertDocument path) were flagged but
+    // never deleted, leaking their chunks/vectors. Keep these in sync via FLAGGED_STATUSES.
+    const FLAGGED_STATUSES = ["indexed", "active"] as const;
+    for (const status of FLAGGED_STATUSES) {
+      if (purged >= batchSize) break;
+      const remainingBudget = batchSize - purged;
       const isStaleDocs = await ctx.db
         .query("documents")
-        .withIndex("by_status_and_isStale", (q) => q.eq("status", "indexed").eq("isStale", true))
-        .take(batchSize);
+        .withIndex("by_status_and_isStale", (q) => q.eq("status", status).eq("isStale", true))
+        .take(remainingBudget);
 
       for (const doc of isStaleDocs) {
         if (!doc.isStale) continue;

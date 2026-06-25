@@ -35,10 +35,34 @@ function Avatar({ isUser, initials }: { isUser: boolean; initials: string }) {
   );
 }
 
-function useScrambleText(message: ChatMessage, isLatest: boolean, isUser: boolean): string {
+function prefersReducedMotion(): boolean {
+  if (typeof window === "undefined" || !window.matchMedia) return false;
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+/**
+ * Drives the one-shot "typewriter" scramble for the freshly-settled assistant
+ * message. Returns both the (plain-text) animation frame and a flag indicating
+ * whether the animation is still running. The caller renders plain text while
+ * animating and only mounts <Markdown> once the animation settles — this keeps
+ * the heavy Markdown + highlight.js pipeline off the per-frame render path and
+ * prevents transient markdown corruption / random garbage from being shown.
+ *
+ * The animation is gated by message.id (NOT message.content) so a given message
+ * never re-animates when its content reference changes, and it short-circuits
+ * for streaming messages, users who set prefers-reduced-motion, and when the
+ * typing animation preference is disabled.
+ */
+function useScrambleText(
+  message: ChatMessage,
+  isLatest: boolean,
+  isUser: boolean,
+): { text: string; isAnimating: boolean } {
   const { typingAnimEnabled, typingSoundEnabled, playTypingSound } = usePreferences();
   const [scrambleContent, setScrambleContent] = React.useState(message.content);
-  const hasScrambledRef = React.useRef(false);
+  const [isAnimating, setIsAnimating] = React.useState(false);
+  // Gate the one-shot on the message id so the same message never re-animates.
+  const animatedIdRef = React.useRef<string | null>(null);
 
   const playTypingSoundRef = React.useRef(playTypingSound);
   const typingSoundEnabledRef = React.useRef(typingSoundEnabled);
@@ -51,25 +75,30 @@ function useScrambleText(message: ChatMessage, isLatest: boolean, isUser: boolea
     typingSoundEnabledRef.current = typingSoundEnabled;
   }, [typingSoundEnabled]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: refs (animatedIdRef, *Ref) and stable setters are intentionally omitted; all reactive inputs (message.id, message.content, isUser, isLatest, typingAnimEnabled) are listed.
   React.useEffect(() => {
     if (
       isUser ||
       message.id === "streaming-message" ||
       !isLatest ||
       !typingAnimEnabled ||
-      hasScrambledRef.current
+      prefersReducedMotion() ||
+      animatedIdRef.current === message.id
     ) {
       setScrambleContent(message.content);
+      setIsAnimating(false);
       return;
     }
 
-    hasScrambledRef.current = true;
+    animatedIdRef.current = message.id;
     const targetText = message.content;
     const chars = "0101A,^^+A^`A #%&+?-=";
     let iterations = 0;
     const length = targetText.length;
+    setIsAnimating(true);
 
     const interval = setInterval(() => {
+      // Scramble plain text only — Markdown is rendered once on completion.
       setScrambleContent(
         targetText
           .split("")
@@ -88,14 +117,18 @@ function useScrambleText(message: ChatMessage, isLatest: boolean, isUser: boolea
       if (iterations >= length) {
         clearInterval(interval);
         setScrambleContent(targetText);
+        setIsAnimating(false);
       }
       iterations += Math.max(2, Math.floor(length / 40));
     }, 12);
 
     return () => clearInterval(interval);
-  }, [message.content, isUser, message.id, isLatest, typingAnimEnabled]);
+    // Re-runs on content changes so streaming text (which keeps a constant id)
+    // updates live; the animatedIdRef guard below prevents re-animating a message
+    // that has already played its scramble animation.
+  }, [message.id, message.content, isUser, isLatest, typingAnimEnabled]);
 
-  return scrambleContent;
+  return { text: scrambleContent, isAnimating };
 }
 
 export const ChatMessageBubble = React.memo(function ChatMessageBubble({
@@ -105,14 +138,13 @@ export const ChatMessageBubble = React.memo(function ChatMessageBubble({
 }: ChatMessageProps) {
   const isUser = message.role === "user";
   const { user } = useUser();
-  const { typingAnimEnabled } = usePreferences();
 
   const initials = user
     ? `${user.firstName?.charAt(0) || ""}${user.lastName?.charAt(0) || ""}`.toUpperCase()
     : "";
   const fallbackInitials = initials || "U";
 
-  const scrambleContent = useScrambleText(message, isLatest, isUser);
+  const { text: scrambleContent, isAnimating } = useScrambleText(message, isLatest, isUser);
 
   return (
     <div
@@ -125,8 +157,12 @@ export const ChatMessageBubble = React.memo(function ChatMessageBubble({
       <Avatar isUser={isUser} initials={fallbackInitials} />
 
       <div className="group flex flex-1 flex-col gap-2 items-start min-w-0">
-        <div className="flex items-center gap-2 font-mono text-[10px] tracking-[0.15em] text-zinc-500 uppercase select-none mb-0.5">
-          <span className={cn(isUser ? "text-zinc-400" : "text-[var(--accent)] font-medium")}>
+        <div className="flex items-center gap-2 font-mono text-[10px] tracking-[0.15em] text-[var(--text-muted)] uppercase select-none mb-0.5">
+          <span
+            className={cn(
+              isUser ? "text-[var(--text-secondary)]" : "text-[var(--accent)] font-medium",
+            )}
+          >
             {isUser ? "USER" : "UETGPT // RESPONSE"}
           </span>
           <span className="opacity-30">//</span>
@@ -135,7 +171,7 @@ export const ChatMessageBubble = React.memo(function ChatMessageBubble({
 
         <div
           className={cn(
-            "w-full text-zinc-100 leading-relaxed font-sans text-[15px] md:text-base",
+            "w-full text-[var(--text-primary)] leading-relaxed font-sans text-[15px] md:text-base",
             isUser
               ? "bg-[var(--surface-elevated)] border border-[var(--border)]/40 rounded-[14px] px-5 py-4 shadow-sm"
               : "px-0 py-1",
@@ -143,6 +179,12 @@ export const ChatMessageBubble = React.memo(function ChatMessageBubble({
         >
           {isUser ? (
             <p className="whitespace-pre-wrap">{message.content}</p>
+          ) : isAnimating ? (
+            // While the typewriter animation runs we render plain text so the
+            // heavy Markdown/highlight.js pipeline is not re-executed every
+            // frame and transient markdown control characters cannot corrupt
+            // the output. Markdown is mounted once the animation settles.
+            <p className="whitespace-pre-wrap">{scrambleContent}</p>
           ) : (
             <Markdown content={scrambleContent} />
           )}
@@ -155,13 +197,18 @@ export const ChatMessageBubble = React.memo(function ChatMessageBubble({
         )}
 
         <div className="flex items-center gap-4 mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <MessageActions content={message.content} role={message.role} onFeedback={onFeedback} />
+          <MessageActions
+            messageId={message.id}
+            content={message.content}
+            role={message.role}
+            onFeedback={onFeedback}
+          />
 
-          {message.tokenCount && (
-            <span className="text-[10px] text-zinc-600 font-mono tracking-wider">
+          {message.tokenCount?.total ? (
+            <span className="text-[10px] text-[var(--text-muted)] font-mono tracking-wider">
               [{message.tokenCount.total} TOKENS]
             </span>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

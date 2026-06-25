@@ -44,6 +44,28 @@ export const getCacheEntry = internalQuery({
   },
 });
 
+// Lightweight projection used by the read path to check alternate-embedding
+// matches without hauling the full row (response, sources, primary queryEmbedding)
+// across the action/query boundary for every vector-search candidate.
+export const getCacheEntryAlternates = internalQuery({
+  args: { id: v.id("semanticCache") },
+  returns: v.union(
+    v.object({
+      expiresAt: v.number(),
+      alternateEmbeddings: v.optional(v.array(v.array(v.float64()))),
+    }),
+    v.null(),
+  ),
+  handler: async (ctx, args) => {
+    const entry = await ctx.db.get(args.id);
+    if (!entry) return null;
+    return {
+      expiresAt: entry.expiresAt,
+      alternateEmbeddings: entry.alternateEmbeddings,
+    };
+  },
+});
+
 export const incrementHits = internalMutation({
   args: { id: v.id("semanticCache") },
   returns: v.null(),

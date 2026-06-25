@@ -18,6 +18,7 @@ interface MainShellProps {
 function useModelDropdown() {
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef<HTMLDivElement | null>(null);
+  const triggerRef = React.useRef<HTMLButtonElement | null>(null);
 
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -29,31 +30,83 @@ function useModelDropdown() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  return { open, setOpen, ref };
+  // Close on Escape and return focus to the trigger.
+  React.useEffect(() => {
+    if (!open) return;
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [open]);
+
+  return { open, setOpen, ref, triggerRef };
 }
 
 // ── Model Selector ──
 
 function ModelSelector({
   activeModelLabel,
+  activeModelKey,
   isOpen,
   onToggle,
   onSelect,
   ref,
+  triggerRef,
 }: {
   activeModelLabel: string;
+  activeModelKey: "llama-3.1-8b" | "llama-4-scout";
   isOpen: boolean;
   onToggle: () => void;
   onSelect: (modelKey: "llama-3.1-8b" | "llama-4-scout") => void;
   ref: React.RefObject<HTMLDivElement | null>;
+  triggerRef: React.RefObject<HTMLButtonElement | null>;
 }) {
+  const menuRef = React.useRef<HTMLDivElement | null>(null);
+
+  // When the menu opens, move focus to the first menu item for keyboard users.
+  React.useEffect(() => {
+    if (isOpen) {
+      const first = menuRef.current?.querySelector<HTMLButtonElement>('[role="menuitemradio"]');
+      first?.focus();
+    }
+  }, [isOpen]);
+
+  const handleMenuKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const items = Array.from(
+      menuRef.current?.querySelectorAll<HTMLButtonElement>('[role="menuitemradio"]') ?? [],
+    );
+    if (items.length === 0) return;
+    const currentIndex = items.indexOf(document.activeElement as HTMLButtonElement);
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      items[(currentIndex + 1) % items.length]?.focus();
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      items[(currentIndex - 1 + items.length) % items.length]?.focus();
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      items[0]?.focus();
+    } else if (event.key === "End") {
+      event.preventDefault();
+      items[items.length - 1]?.focus();
+    }
+  };
+
   return (
     <div className="relative" ref={ref}>
       <button
         type="button"
+        ref={triggerRef}
         onClick={onToggle}
         className="flex items-center gap-2 px-3 py-2 md:px-4 bg-zinc-950/60 backdrop-blur-md rounded-lg border border-white/5 text-xs text-zinc-300 hover:text-white transition-all duration-300 ease-[var(--ease-spring)] group focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:outline-none active:scale-[0.98] active:translate-y-[1px] min-h-[36px]"
         aria-label="Select AI Model"
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
       >
         <span className="font-medium">{activeModelLabel}</span>
         <svg
@@ -62,17 +115,26 @@ function ModelSelector({
           fill="none"
           stroke="currentColor"
           strokeWidth="2"
+          aria-hidden="true"
         >
           <title>Dropdown arrow</title>
           <path d="M6 9l6 6 6-6" />
         </svg>
       </button>
       {isOpen && (
-        <div className="absolute left-0 mt-2 w-48 rounded-xl bg-[var(--surface-3)] border border-[var(--surface-4)] shadow-[0_16px_32px_rgba(0,0,0,0.8)] py-1.5 z-50 pointer-events-auto animate-[dropdown-open_200ms_ease-out]">
+        <div
+          ref={menuRef}
+          role="menu"
+          aria-label="AI model"
+          onKeyDown={handleMenuKeyDown}
+          className="absolute left-0 mt-2 w-48 rounded-xl bg-[var(--surface-3)] border border-[var(--surface-4)] shadow-[0_16px_32px_rgba(0,0,0,0.8)] py-1.5 z-50 pointer-events-auto animate-[dropdown-open_200ms_ease-out]"
+        >
           <button
             type="button"
+            role="menuitemradio"
+            aria-checked={activeModelKey === "llama-3.1-8b"}
             onClick={() => onSelect("llama-3.1-8b")}
-            className="w-full text-left px-4 py-2.5 hover:bg-white/5 text-xs text-zinc-200 hover:text-white transition-colors flex items-center justify-between"
+            className="w-full text-left px-4 py-2.5 hover:bg-white/5 text-xs text-zinc-200 hover:text-white transition-colors flex items-center justify-between focus-visible:bg-white/5 focus-visible:outline-none"
           >
             <span>UET-Fast</span>
             <span className="text-[9px] font-mono text-zinc-500 bg-zinc-900 border border-white/5 px-1 rounded">
@@ -81,8 +143,10 @@ function ModelSelector({
           </button>
           <button
             type="button"
+            role="menuitemradio"
+            aria-checked={activeModelKey === "llama-4-scout"}
             onClick={() => onSelect("llama-4-scout")}
-            className="w-full text-left px-4 py-2.5 hover:bg-white/5 text-xs text-zinc-200 hover:text-white transition-colors flex items-center justify-between"
+            className="w-full text-left px-4 py-2.5 hover:bg-white/5 text-xs text-zinc-200 hover:text-white transition-colors flex items-center justify-between focus-visible:bg-white/5 focus-visible:outline-none"
           >
             <span>UET-Pro</span>
             <span className="text-[9px] font-mono text-zinc-500 bg-zinc-900 border border-white/5 px-1 rounded">
@@ -412,6 +476,7 @@ export function MainShell({ children }: MainShellProps) {
     open: modelDropdownOpen,
     setOpen: setModelDropdownOpen,
     ref: dropdownRef,
+    triggerRef: modelTriggerRef,
   } = useModelDropdown();
 
   // Global focus tracker to check if keyboard is likely open / user is typing
@@ -498,10 +563,12 @@ export function MainShell({ children }: MainShellProps) {
           modelSelector={
             <ModelSelector
               activeModelLabel={activeModelLabel}
+              activeModelKey={modelPreference}
               isOpen={modelDropdownOpen}
               onToggle={() => setModelDropdownOpen((p) => !p)}
               onSelect={handleSelectModel}
               ref={dropdownRef}
+              triggerRef={modelTriggerRef}
             />
           }
           onShareClick={onShareClick}

@@ -5,7 +5,12 @@ import { recordTiming } from "../observability/metrics";
 import { rag } from "../rag/instance";
 import { type AdaptiveWeights, estimateIdf } from "./idf";
 
-const FAQ_BOOST_FACTOR = 0.015; // Scaled to match RRF fusion scores (typically 0.01 - 0.05)
+// FAQ results are fused on the same reciprocal-rank scale as document results
+// (1/(RRF_K + rank)) rather than by multiplying a raw, unbounded BM25 _score by
+// a magic constant. FAQ_WEIGHT scales that rank-decay relative to the document
+// channels; tune it with a retrieval eval rather than by hand.
+const FAQ_WEIGHT = 1.0;
+const RRF_K = 60;
 
 type VectorSearchResult = { entryId: string; score?: number; content?: { text: string }[] };
 type TextSearchResult = { ragId: string; text: string; score: number };
@@ -139,14 +144,17 @@ async function fetchActiveFaqs(
   try {
     const now = Date.now();
     const faqs = await ctx.runQuery(internal.faq.searchFaqs, { query: queryText, now });
+    // searchFaqs returns results already ordered by BM25 relevance, so use the
+    // rank position to compute a reciprocal-rank score on the same scale as the
+    // fused document results, instead of a raw BM25 _score * constant.
     return faqs
       .filter((f: FaqResult) => !f.expiresAt || f.expiresAt > now)
-      .map((faq: FaqResult) => ({
+      .map((faq: FaqResult, rank: number) => ({
         entryId: faq._id,
         content: `FAQ: ${faq.question}\nAnswer: ${faq.answer}`,
         url: faq.sourceUrl || "Verified FAQ Database",
         title: faq.question,
-        relevanceScore: (faq._score ?? 1.0) * FAQ_BOOST_FACTOR,
+        relevanceScore: FAQ_WEIGHT * (1 / (RRF_K + rank)),
       }));
   } catch (err) {
     console.error("FAQ search failed, falling back to empty FAQ list:", err);
@@ -236,7 +244,7 @@ export const searchDocumentsAction = internalAction({
     const chunkRanked = chunkTextRes.map((r) => ({ id: r.ragId, score: r.score }));
 
     // 3-way RRF fusion: vector + text + chunk text search
-    const fused = hybridRank(vectorRanked, textRanked, 60, adaptiveWeights, "reciprocal", [
+    const fused = hybridRank(vectorRanked, textRanked, RRF_K, adaptiveWeights, "reciprocal", [
       { results: chunkRanked, weight: adaptiveWeights.text * 0.5 },
     ]).slice(0, limit);
 

@@ -30,6 +30,9 @@ export const run = internalQuery({
           ragId: chunk.ragId,
           text: chunk.text,
           url: doc.url,
+          // Convex search indexes do not expose a numeric BM25 score; results are
+          // already returned in relevance order, so use a constant and let the
+          // downstream RRF / hybridRank re-rank by position.
           score: 1.0,
         };
       })

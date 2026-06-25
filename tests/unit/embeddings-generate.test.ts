@@ -25,10 +25,13 @@ describe("embeddings:generate", () => {
     vi.restoreAllMocks();
   });
 
-  it("should call Gemini API via KeyPool with gemini-embedding-2 and dimensions 3072", async () => {
+  it("should call Gemini API via KeyPool with gemini-embedding-2 and dimensions 768", async () => {
     vi.stubEnv("GEMINI_API_KEY_1", "test_gemini_key");
 
-    const dummyEmbedding = new Array(3072).fill(0.1);
+    // Production embedder uses 768-dim vectors (convex/embeddings/generate.ts
+    // requests outputDimensionality: 768; schema vectorIndex is dimensions: 768;
+    // generate.ts validates emb.length === 768). Keep this fixture in sync.
+    const dummyEmbedding = new Array(768).fill(0.1);
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
       headers: new Headers({ "content-type": "application/json" }),
@@ -69,7 +72,7 @@ describe("embeddings:generate", () => {
       content: {
         parts: [{ text: "Hello world" }],
       },
-      outputDimensionality: 3072,
+      outputDimensionality: 768,
     });
 
     expect(result).toEqual(dummyEmbedding);

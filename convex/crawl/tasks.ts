@@ -2,6 +2,7 @@ import { ConvexError, v } from "convex/values";
 import { internal } from "../_generated/api";
 import type { Doc, Id } from "../_generated/dataModel";
 import { internalMutation, mutation } from "../_generated/server";
+import { constantTimeCompare } from "./utils";
 
 /**
  * Clean up expired entries from the semantic cache.
@@ -110,15 +111,14 @@ export const runStatsAggregation = mutation({
   args: { secret: v.optional(v.string()) },
   returns: v.null(),
   handler: async (ctx, args) => {
+    // SECURITY: only ONE purpose-specific secret (CRON_SECRET) may authorize this
+    // cron-style operation — a webhook secret must NOT grant cron access (over-broad
+    // blast radius). Compare with constantTimeCompare (the codebase's timing-safe
+    // primitive in ./utils) instead of `===` to avoid a timing side-channel on the
+    // shared secret, matching how the webhook handlers compare secrets.
     const cronSecret = process.env.CRON_SECRET;
-    const webhookSecret = process.env.WEBHOOK_SECRET;
 
-    if (args.secret && cronSecret && args.secret === cronSecret) {
-      await ctx.runMutation(internal.crawl.tasks.aggregateDailyStats);
-      return null;
-    }
-
-    if (args.secret && webhookSecret && args.secret === webhookSecret) {
+    if (args.secret && cronSecret && constantTimeCompare(args.secret, cronSecret)) {
       await ctx.runMutation(internal.crawl.tasks.aggregateDailyStats);
       return null;
     }

@@ -66,11 +66,9 @@ export const insert = mutation({
     // TASK-S02: Enforce rate limits before any DB write.
     // Uses actual token count if the caller provides it, otherwise 1000 token estimate.
     const tokenEstimate = args.tokenCount?.total ?? 1_000;
-    const identity = await ctx.auth.getUserIdentity();
-    const role = (identity?.publicMetadata as Record<string, unknown> | undefined)?.role as
-      | string
-      | undefined;
-    const isAdmin = role === "admin" || role === "superadmin";
+    // Derive admin tier from the authoritative DB role (same source as auth.ts),
+    // not the Clerk session-token claim which may be absent/unconfigured.
+    const isAdmin = user.role === "admin" || user.role === "superadmin";
     const [, thread] = await Promise.all([
       enforceRateLimit(ctx, user.clerkId, tokenEstimate, isAdmin),
       ctx.runQuery(components.agent.threads.getThread, {

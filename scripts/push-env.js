@@ -39,40 +39,52 @@ try {
     console.log(`Processing ${key}...`);
     console.log(`========================================`);
     
-    // Write value to temporary file to avoid shell escaping issues
-    fs.writeFileSync(tempFilePath, value, 'utf8');
-    
-    // Vercel CLI supports reading values from stdin using redirection like `< file.txt`
-    const vercelCmd = process.platform === 'win32' ? 'npx.cmd vercel' : 'npx vercel';
-
-    const shellCommandProd = process.platform === 'win32'
-      ? `cmd.exe /c "${vercelCmd} env add ${key} production --yes --force < _temp_env_val.txt"`
-      : `"${vercelCmd}" env add ${key} production --yes --force < _temp_env_val.txt`;
-      
-    const shellCommandDev = process.platform === 'win32'
-      ? `cmd.exe /c "${vercelCmd} env add ${key} development --yes --force < _temp_env_val.txt"`
-      : `"${vercelCmd}" env add ${key} development --yes --force < _temp_env_val.txt`;
-
-    console.log(`Adding ${key} to production...`);
+    // SECURITY: write the secret to a temp file that is ALWAYS removed via the
+    // finally block below, so an exception mid-loop can never leave a plaintext
+    // secrets file (_temp_env_val.txt) on disk. The value is passed to Vercel
+    // over stdin redirection — never via --value (process-table exposure).
     try {
-      execSync(shellCommandProd, { stdio: 'inherit' });
-    } catch (e) {
-      console.error(`Failed to add ${key} to production`);
-    }
+      fs.writeFileSync(tempFilePath, value, { encoding: 'utf8', mode: 0o600 });
 
-    console.log(`Adding ${key} to development...`);
-    try {
-      execSync(shellCommandDev, { stdio: 'inherit' });
-    } catch (e) {
-      console.error(`Failed to add ${key} to development`);
+      const vercelCmd = process.platform === 'win32' ? 'npx.cmd vercel' : 'npx vercel';
+
+      const shellCommandProd = process.platform === 'win32'
+        ? `cmd.exe /c "${vercelCmd} env add ${key} production --yes --force < _temp_env_val.txt"`
+        : `"${vercelCmd}" env add ${key} production --yes --force < _temp_env_val.txt`;
+
+      const shellCommandDev = process.platform === 'win32'
+        ? `cmd.exe /c "${vercelCmd} env add ${key} development --yes --force < _temp_env_val.txt"`
+        : `"${vercelCmd}" env add ${key} development --yes --force < _temp_env_val.txt`;
+
+      console.log(`Adding ${key} to production...`);
+      try {
+        execSync(shellCommandProd, { stdio: 'inherit' });
+      } catch (e) {
+        console.error(`Failed to add ${key} to production`);
+      }
+
+      console.log(`Adding ${key} to development...`);
+      try {
+        execSync(shellCommandDev, { stdio: 'inherit' });
+      } catch (e) {
+        console.error(`Failed to add ${key} to development`);
+      }
+    } finally {
+      // Guarantee the plaintext secret file is deleted on every iteration,
+      // success or failure.
+      if (fs.existsSync(tempFilePath)) {
+        fs.unlinkSync(tempFilePath);
+      }
     }
   }
 
-  // Clean up
-  if (fs.existsSync(tempFilePath)) {
-    fs.unlinkSync(tempFilePath);
-  }
   console.log('\nAll environment variables processed successfully!');
 } catch (err) {
   console.error('Error executing script:', err);
+} finally {
+  // Defense-in-depth: ensure no temp secrets file survives an outer throw.
+  const tempFilePath = path.join(process.cwd(), '_temp_env_val.txt');
+  if (fs.existsSync(tempFilePath)) {
+    fs.unlinkSync(tempFilePath);
+  }
 }

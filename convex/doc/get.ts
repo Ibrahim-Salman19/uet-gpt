@@ -8,7 +8,7 @@ export const get = query({
   returns: v.union(documentValidator, v.null()),
   handler: async (ctx, args) => {
     await requireAuth(ctx);
-    return (await ctx.db.get(args.documentId)) as typeof documentValidator.type | null;
+    return await ctx.db.get(args.documentId);
   },
 });
 
@@ -17,9 +17,9 @@ export const getByUrl = query({
   returns: v.union(documentValidator, v.null()),
   handler: async (ctx, args) => {
     await requireAuth(ctx);
-    return (await ctx.db
+    return await ctx.db
       .query("documents")
       .withIndex("by_url", (q) => q.eq("url", args.url))
-      .unique()) as typeof documentValidator.type | null;
+      .unique();
   },
 });

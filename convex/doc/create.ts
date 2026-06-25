@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import type { Id } from "../_generated/dataModel";
+import type { Doc, Id } from "../_generated/dataModel";
 import { internalMutation } from "../_generated/server";
 
 function safeGetHostname(urlStr: string): string {
@@ -29,12 +29,12 @@ function buildDocumentFields(args: {
   entryId?: string;
   contentHash?: string;
   subcategory?: string;
-  metadata?: unknown;
+  metadata?: Doc<"documents">["metadata"];
   chunkCount?: number;
   status: "pending";
   crawledAt: number;
   updatedAt: number;
-}): Record<string, unknown> {
+}): Omit<Doc<"documents">, "_id" | "_creationTime"> {
   return {
     url: args.url,
     title: args.title,
@@ -96,7 +96,7 @@ export const create = internalMutation({
         status: "pending",
         crawledAt: now,
         updatedAt: now,
-      }) as any,
+      }),
     );
     return documentId as Id<"documents">;
   },

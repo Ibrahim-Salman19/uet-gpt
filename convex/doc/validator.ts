@@ -32,6 +32,7 @@ export const documentValidator = v.object({
   chunkCount: v.optional(v.number()),
   chunksEmbedded: v.optional(v.number()),
   crawlSessionId: v.optional(v.string()),
+  personType: v.optional(v.union(v.literal("faculty"), v.literal("staff"), v.literal("admin"))),
   freshnessTier: v.optional(v.union(v.literal("high"), v.literal("medium"), v.literal("low"))),
   isStale: v.optional(v.boolean()),
   crawledAt: v.number(),

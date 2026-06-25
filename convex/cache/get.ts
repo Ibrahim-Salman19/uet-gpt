@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
-import { internalAction } from "../_generated/server";
+import type { Doc, Id } from "../_generated/dataModel";
+import { type ActionCtx, internalAction } from "../_generated/server";
 import { CACHE_SIMILARITY_THRESHOLD } from "../constants";
 import { truncateQuery } from "../observability/metrics";
 
@@ -25,14 +26,12 @@ export function cosineSimilarity(a: number[], b: number[]) {
   return dotProduct / denominator;
 }
 
-const _internal: any = internal;
-
 async function getCachedEntry(
-  ctx: any,
+  ctx: ActionCtx,
   queryEmbedding: number[],
 ): Promise<{
-  entry: any;
-  entryId: string;
+  entry: Doc<"semanticCache">;
+  entryId: Id<"semanticCache">;
 } | null> {
   if (queryEmbedding.length === 0) return null;
 
@@ -43,29 +42,47 @@ async function getCachedEntry(
 
   for (const res of results) {
     if (!res) continue;
-    const entry = await ctx.runQuery(_internal.cache.internal_queries.getCacheEntry, {
-      id: res._id,
-    });
-    if (!entry || entry.expiresAt < Date.now()) continue;
 
-    const similarity = cosineSimilarity(queryEmbedding, entry.queryEmbedding);
-    if (similarity >= CACHE_SIMILARITY_THRESHOLD) {
+    // The vector index already ranks by cosine; trust `_score` for the primary
+    // embedding instead of re-fetching the doc and recomputing cosineSimilarity
+    // over the (768-dim) query vector for every candidate.
+    if (res._score >= CACHE_SIMILARITY_THRESHOLD) {
+      const entry = await ctx.runQuery(internal.cache.internal_queries.getCacheEntry, {
+        id: res._id,
+      });
+      if (!entry || entry.expiresAt < Date.now()) continue;
       return { entry, entryId: res._id };
     }
 
-    if (entry.alternateEmbeddings && entry.alternateEmbeddings.length > 0) {
-      for (const altEmbedding of entry.alternateEmbeddings) {
-        if (cosineSimilarity(queryEmbedding, altEmbedding) >= CACHE_SIMILARITY_THRESHOLD) {
-          return { entry, entryId: res._id };
-        }
-      }
+    // Primary embedding missed the threshold. Only the alternate embeddings can
+    // still produce a hit, so fetch just those (not the whole row incl. response,
+    // sources and the full queryEmbedding) before deciding.
+    const altCandidate = await ctx.runQuery(
+      internal.cache.internal_queries.getCacheEntryAlternates,
+      { id: res._id },
+    );
+    if (!altCandidate || altCandidate.expiresAt < Date.now()) continue;
+    if (!altCandidate.alternateEmbeddings || altCandidate.alternateEmbeddings.length === 0) {
+      continue;
+    }
+
+    const altHit = altCandidate.alternateEmbeddings.some(
+      (altEmbedding) =>
+        cosineSimilarity(queryEmbedding, altEmbedding) >= CACHE_SIMILARITY_THRESHOLD,
+    );
+    if (altHit) {
+      const entry = await ctx.runQuery(internal.cache.internal_queries.getCacheEntry, {
+        id: res._id,
+      });
+      if (!entry || entry.expiresAt < Date.now()) continue;
+      return { entry, entryId: res._id };
     }
   }
 
   return null;
 }
 
-async function checkSourceStaleness(ctx: any, entry: any): Promise<boolean> {
+async function checkSourceStaleness(ctx: ActionCtx, entry: Doc<"semanticCache">): Promise<boolean> {
   const sourceEntryIds = entry.sourceEntryIds;
   if (!sourceEntryIds || sourceEntryIds.length === 0) return false;
 
@@ -76,10 +93,10 @@ async function checkSourceStaleness(ctx: any, entry: any): Promise<boolean> {
 
   // Fallback: fetch all source docs in a single query
   try {
-    const docs = await ctx.runQuery(_internal.cache.internal_queries.getDocsByEntryIds, {
+    const docs = await ctx.runQuery(internal.cache.internal_queries.getDocsByEntryIds, {
       entryIds: sourceEntryIds,
     });
-    if (docs.some((d: any) => d.doc && d.doc.updatedAt > entry.createdAt)) {
+    if (docs.some((d) => d.doc && d.doc.updatedAt > entry.createdAt)) {
       return true;
     }
   } catch (err) {
@@ -89,7 +106,7 @@ async function checkSourceStaleness(ctx: any, entry: any): Promise<boolean> {
 }
 
 async function findMatchingCacheEntry(
-  ctx: any,
+  ctx: ActionCtx,
   queryEmbedding: number[],
 ): Promise<{
   response: string;
@@ -111,18 +128,18 @@ async function findMatchingCacheEntry(
 
   // Defensive: verify source chunks still exist (orphaned by document deletion)
   if (cached.entry.sourceEntryIds && cached.entry.sourceEntryIds.length > 0) {
-    const sourceExists = await ctx.runQuery(_internal.cache.internal_queries.chunksExistByRagIds, {
+    const sourceExists = await ctx.runQuery(internal.cache.internal_queries.chunksExistByRagIds, {
       ragIds: cached.entry.sourceEntryIds,
     });
     if (!sourceExists.every(Boolean)) {
-      await ctx.runMutation(_internal.cache.internal_queries.deleteCacheEntry, {
+      await ctx.runMutation(internal.cache.internal_queries.deleteCacheEntry, {
         id: cached.entryId,
       });
       return null;
     }
   }
 
-  await ctx.runMutation(_internal.cache.internal_queries.incrementHits, { id: cached.entryId });
+  await ctx.runMutation(internal.cache.internal_queries.incrementHits, { id: cached.entryId });
 
   return {
     response: cached.entry.response,
