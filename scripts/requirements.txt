@@ -1,10 +1,15 @@
-curl_cffi>=0.7.0
-trafilatura>=1.6.0
-beautifulsoup4>=4.12.0
-lxml>=4.9.0
-markdownify>=1.2.2
-pypdf>=4.0.0
-pymupdf4llm>=0.0.3
-tqdm>=4.66.0
-python-dotenv>=1.0.0
-convex
+# Pinned for reproducible builds. Packages verified installed in the dev
+# environment are pinned to exact (==) versions; packages not present in that
+# environment are bounded with compatible-release (~=) on their known-good floor.
+# A fully hashed lockfile (pip-tools/uv, --require-hashes) is still recommended
+# — see owner_actions.
+curl_cffi~=0.7.0
+trafilatura~=1.6.0
+beautifulsoup4==4.14.2
+lxml==6.1.0
+markdownify==1.2.2
+pypdf==6.10.2
+pymupdf4llm~=0.0.3
+tqdm~=4.66.0
+python-dotenv==1.2.2
+convex~=0.7.0

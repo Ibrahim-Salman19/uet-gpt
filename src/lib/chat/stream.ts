@@ -1,4 +1,12 @@
-import { type LanguageModel, streamText } from "ai";
+import { type LanguageModel, type ModelMessage, streamText } from "ai";
+
+type StreamConfig = {
+  system: string;
+  messages: ModelMessage[];
+  temperature: number;
+  maxOutputTokens: number;
+  onFinish?: (text: string, model: string) => void;
+};
 
 function flushTextFn(
   text: string,
@@ -15,16 +23,24 @@ function getModelName(model: LanguageModel): string {
   return m.modelId || m.provider || "unknown";
 }
 
+// A leftover buffer is only a real in-progress think-tag if it is a strict
+// prefix of "<think>"/"</think>". Arbitrary trailing text that merely starts
+// with "<" (e.g. an inequality `x < `, a generic `<T>`, or truncated markup) is
+// legitimate answer content and must NOT be dropped.
+function isPartialThinkTag(buffer: string): boolean {
+  return "<think>".startsWith(buffer) || "</think>".startsWith(buffer);
+}
+
 function finalizeStream(
   buffer: string,
   accumulatedText: string,
   onFinish: ((text: string, model: string) => void) | undefined,
-  reader: ReadableStreamDefaultReader<string>,
   controller: ReadableStreamDefaultController,
   model: LanguageModel,
 ) {
-  if (buffer && !buffer.startsWith("<")) {
+  if (buffer && !isPartialThinkTag(buffer)) {
     controller.enqueue(buffer);
+    accumulatedText += buffer;
   }
   controller.close();
   if (onFinish) {
@@ -95,7 +111,7 @@ function streamWithStrippedThinking(
         while (true) {
           const { done, value } = await reader.read();
           if (done) {
-            finalizeStream(buf.current, accumulated.current, onFinish, reader, controller, model);
+            finalizeStream(buf.current, accumulated.current, onFinish, controller, model);
             break;
           }
           processChunk(value, buf, accumulated, state, controller);
@@ -119,21 +135,20 @@ function streamWithStrippedThinking(
   });
 }
 
+// Reasoning models require temperature 1.0 (they reject/ignore lower values).
+// Keyed on canonical model ids from the fallback chain. NOTE: this still matches
+// by id string; a fuller fix would carry an `isReasoning` flag on the model
+// registry (see models.ts / llm-models.ts) — tracked as a cross-cutting change.
+const REASONING_MODEL_IDS = new Set<string>(["gpt-oss-120b"]);
+const REASONING_TEMPERATURE = 1.0;
+
 function resolveTemperature(model: LanguageModel, defaultTemp: number): number {
-  const isReasoningModel = (model as { modelId?: string }).modelId === "gpt-oss-120b";
-  return isReasoningModel ? 1.0 : defaultTemp;
+  const m = model as { modelId?: string; model?: string };
+  const id = m.modelId ?? m.model;
+  return id && REASONING_MODEL_IDS.has(id) ? REASONING_TEMPERATURE : defaultTemp;
 }
 
-async function tryModelWithFallback(
-  model: LanguageModel,
-  config: {
-    system: string;
-    messages: unknown[];
-    temperature: number;
-    maxOutputTokens: number;
-    onFinish?: (text: string, model: string) => void;
-  },
-) {
+async function tryModelWithFallback(model: LanguageModel, config: StreamConfig) {
   const resolvedTemp = resolveTemperature(model, config.temperature);
 
   const result = streamText({
@@ -142,7 +157,7 @@ async function tryModelWithFallback(
     messages: config.messages,
     temperature: resolvedTemp,
     maxOutputTokens: config.maxOutputTokens,
-  } as Parameters<typeof streamText>[0]);
+  });
 
   const reader = result.textStream.getReader();
 
@@ -190,16 +205,7 @@ async function tryModelWithFallback(
   });
 }
 
-export async function tryStreamWithFallback(
-  models: LanguageModel[],
-  config: {
-    system: string;
-    messages: unknown[];
-    temperature: number;
-    maxOutputTokens: number;
-    onFinish?: (text: string, model: string) => void;
-  },
-) {
+export async function tryStreamWithFallback(models: LanguageModel[], config: StreamConfig) {
   let lastError: unknown;
   for (const model of models) {
     try {

@@ -3,12 +3,17 @@ import { defineConfig } from "vitest/config";
 
 const srcPath = fileURLToPath(new URL("./src", import.meta.url));
 const apiPath = fileURLToPath(new URL("./convex/_generated/api.js", import.meta.url));
+// `server-only` throws unless resolved via the "react-server" condition (set by
+// Next.js, not by Vitest's node env). Alias it to a no-op stub so server-only
+// modules can be unit-tested without weakening the production bundle guard.
+const serverOnlyStub = fileURLToPath(new URL("./tests/stubs/server-only.ts", import.meta.url));
 
 export default defineConfig({
   resolve: {
     alias: {
       "@": srcPath,
       "convex/_generated/api": apiPath,
+      "server-only": serverOnlyStub,
     },
   },
   test: {

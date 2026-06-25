@@ -79,6 +79,8 @@ const nextConfig: NextConfig = {
 const sentryOptions: SentryBuildOptions = {
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,
+  // CI-only secret; without it source-map upload silently no-ops in CI.
+  authToken: process.env.SENTRY_AUTH_TOKEN,
   silent: !process.env.CI,
   widenClientFileUpload: true,
   sourcemaps: {

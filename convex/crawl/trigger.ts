@@ -5,8 +5,7 @@ import { requireAdmin } from "../auth";
 import { crawlPool } from "./workpools";
 
 function buildCrawlJobInsertPayload(args: {
-  trigger?: string;
-  startedBy?: string;
+  startedBy: string;
   maxPages?: number;
   maxDepth?: number;
   includePaths?: string[];
@@ -14,8 +13,10 @@ function buildCrawlJobInsertPayload(args: {
   allowExternalLinks?: boolean;
 }) {
   return {
-    trigger: args.trigger ?? "manual",
-    ...(args.startedBy && { startedBy: args.startedBy }),
+    // Provenance is server-derived, not client-supplied: this client-facing
+    // mutation always records a manual trigger attributed to the authenticated admin.
+    trigger: "manual",
+    startedBy: args.startedBy,
     status: "pending",
     config: {
       maxPages: args.maxPages ?? 10,
@@ -45,12 +46,10 @@ export const trigger = mutation({
     includePaths: v.optional(v.array(v.string())),
     excludePaths: v.optional(v.array(v.string())),
     allowExternalLinks: v.optional(v.boolean()),
-    startedBy: v.optional(v.id("users")),
-    trigger: v.optional(v.union(v.literal("manual"), v.literal("scheduled"), v.literal("webhook"))),
   },
   returns: v.id("crawlJobs"),
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
+    const admin = await requireAdmin(ctx);
     const existing = await ctx.db
       .query("crawlJobs")
       .withIndex("by_status", (q) => q.eq("status", "pending"))
@@ -58,7 +57,10 @@ export const trigger = mutation({
     if (existing !== null) {
       throw new ConvexError("A crawl job is already pending");
     }
-    const jobId = await ctx.db.insert("crawlJobs", buildCrawlJobInsertPayload(args) as any);
+    const jobId = await ctx.db.insert(
+      "crawlJobs",
+      buildCrawlJobInsertPayload({ ...args, startedBy: admin._id }) as any,
+    );
 
     await crawlPool.enqueueAction(ctx, internal.crawl.actions.executeCrawlJob, { jobId });
 

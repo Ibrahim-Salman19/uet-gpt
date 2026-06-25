@@ -1,5 +1,5 @@
 import { useMutation } from "convex/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useStableQuery } from "@/hooks/use-stable-query";
 import { api } from "../../convex/_generated/api";
@@ -37,14 +37,22 @@ export function useThreads() {
     return () => clearTimeout(timer);
   }, [isLoading]);
 
-  // Map and sort the Convex threads
-  const threads: ThreadItem[] = ((threadsData ?? []) as ThreadDoc[])
-    .map((t) => ({
-      _id: t._id,
-      title: t.title ?? "New Chat",
-      _creationTime: t._creationTime,
-    }))
-    .sort((a, b) => b._creationTime - a._creationTime);
+  // Map and sort the Convex threads. Memoized so the array identity is stable
+  // between renders where `threadsData` is unchanged (avoids re-running the
+  // map/sort and defeating memoized consumers; React Compiler is not enabled).
+  // Note: the client-side sort assumes api.threads.list returns the full list;
+  // ordering/pagination ideally belongs in the Convex query (see cross_cutting).
+  const threads: ThreadItem[] = useMemo(
+    () =>
+      ((threadsData ?? []) as ThreadDoc[])
+        .map((t) => ({
+          _id: t._id,
+          title: t.title ?? "New Chat",
+          _creationTime: t._creationTime,
+        }))
+        .sort((a, b) => b._creationTime - a._creationTime),
+    [threadsData],
+  );
 
   const handleCreate = useCallback(async () => {
     try {

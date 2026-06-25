@@ -22,9 +22,10 @@ import { internalMutation, query } from "./_generated/server";
 // ── Constants ────────────────────────────────────────────────────────────────
 
 /**
- * Per-user message rate limit.
- * NOTE: each Q&A exchange inserts 2 messages (user + assistant),
- * so this counts both. 30 = ~15 real exchanges per minute.
+ * Per-user message rate limit, counted per logical user turn.
+ * Only user-role inserts increment this counter (see enforceRateLimit's
+ * `countMessage` param), so 30 = 30 real exchanges per minute regardless of how
+ * many message rows each exchange writes.
  */
 const PER_USER_MSG_LIMIT = 30;
 
@@ -134,26 +135,36 @@ async function checkWindow(
  * Enforces per-user message rate limit AND global token budget.
  * Throws ConvexError if either limit is exceeded.
  *
+ * The per-user limit counts logical user turns, not physical message inserts:
+ * pass `countMessage:false` for assistant/system inserts so the limit is
+ * deterministic (PER_USER_MSG_LIMIT real turns) regardless of how many rows a
+ * single exchange writes. The global token budget is always enforced.
+ *
  * @param ctx          Mutation context (must be inside a Convex mutation)
  * @param userId       Clerk user subject ID (from ctx.auth.getUserIdentity())
  * @param tokenEstimate Estimated tokens for this request (default 1000 if unknown)
  * @param isAdmin      Whether the caller is an admin (higher limit applies)
+ * @param countMessage Whether to increment the per-user message counter
+ *                     (true for user turns, false for assistant/system inserts)
  */
 export async function enforceRateLimit(
   ctx: MutationCtx,
   userId: string,
   tokenEstimate = 1_000,
   isAdmin = false,
+  countMessage = true,
 ): Promise<void> {
   const msgLimit = isAdmin ? PER_ADMIN_MSG_LIMIT : PER_USER_MSG_LIMIT;
 
-  // 1. Per-user message rate limit (count = 1 message per call)
-  const userCheck = await checkWindow(ctx, userId, 1, msgLimit);
-  if (userCheck.exceeded) {
-    throw new ConvexError(
-      `Rate limit exceeded: You can send at most ${msgLimit} messages per minute. ` +
-        `Current window: ${userCheck.current}/${msgLimit}. Please wait a moment.`,
-    );
+  // 1. Per-user message rate limit — only counts logical user turns.
+  if (countMessage) {
+    const userCheck = await checkWindow(ctx, userId, 1, msgLimit);
+    if (userCheck.exceeded) {
+      throw new ConvexError(
+        `Rate limit exceeded: You can send at most ${msgLimit} messages per minute. ` +
+          `Current window: ${userCheck.current}/${msgLimit}. Please wait a moment.`,
+      );
+    }
   }
 
   // 2. Global token budget (shared across all users)

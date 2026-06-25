@@ -99,6 +99,14 @@ function shouldDegradeAnimation(
   return { degraded: false, newCount: Math.max(0, slowFrameCount - 1) };
 }
 
+function prefersReducedMotion(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+}
+
 function useWebGLScene(
   containerRef: React.RefObject<HTMLDivElement | null>,
   webglEnabled: boolean,
@@ -107,6 +115,9 @@ function useWebGLScene(
     const container = containerRef.current;
     if (!container) return;
     if (!isWebGLSupported()) return;
+    // Respect the OS-level reduced-motion setting: skip the animated backdrop
+    // entirely for users who request reduced motion (WCAG 2.3.3).
+    if (prefersReducedMotion()) return;
 
     const canvas = document.createElement("canvas");
     canvas.id = "webgl-canvas";
@@ -218,7 +229,10 @@ function useWebGLScene(
       renderer.dispose();
       try {
         renderer.forceContextLoss();
-      } catch (e) {}
+      } catch (e) {
+        // Non-fatal: some drivers throw on forceContextLoss during teardown.
+        console.warn("WebGL forceContextLoss failed during cleanup", e);
+      }
       if (container.contains(canvas)) container.removeChild(canvas);
     };
   }, [webglEnabled]);

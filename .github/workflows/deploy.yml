@@ -3,6 +3,13 @@ name: Deploy
 on:
   push:
     branches: [main]
+    # Skip production deploys (Convex + frontend) for documentation-only commits.
+    # paths-ignore applies only to the push trigger; workflow_dispatch always runs.
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+      - "LICENSE"
+      - ".gitignore"
   workflow_dispatch:
     inputs:
       environment:
@@ -28,25 +35,22 @@ jobs:
   # that cannot build (avoids a live backend paired with a stale/broken frontend).
   build:
     name: Build Frontend (gate)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
     environment: ${{ inputs.environment || 'production' }}
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
       # No `version:` input — action-setup reads the pinned pnpm version from
       # package.json `packageManager` (pnpm@11.1.3), keeping a single source of truth.
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      # setup-node's native pnpm cache keys on pnpm-lock.yaml automatically
+      # (pnpm is installed above), replacing the manual store/cache dance.
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22"
-      - name: Get pnpm store directory
-        id: pnpm-store
-        run: echo "store=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
-      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        with:
-          path: ${{ steps.pnpm-store.outputs.store }}
-          key: pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            pnpm-store-
+          cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Generate Convex types
@@ -67,26 +71,23 @@ jobs:
 
   deploy-convex:
     name: Deploy Convex Backend
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     needs: [build]
     environment: ${{ inputs.environment || 'production' }}
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
       # No `version:` input — action-setup reads the pinned pnpm version from
       # package.json `packageManager` (pnpm@11.1.3), keeping a single source of truth.
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      # setup-node's native pnpm cache keys on pnpm-lock.yaml automatically
+      # (pnpm is installed above), replacing the manual store/cache dance.
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22"
-      - name: Get pnpm store directory
-        id: pnpm-store
-        run: echo "store=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
-      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        with:
-          path: ${{ steps.pnpm-store.outputs.store }}
-          key: pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            pnpm-store-
+          cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Deploy Convex
@@ -103,11 +104,14 @@ jobs:
 
   deploy-frontend:
     name: Deploy Frontend
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     needs: [deploy-convex]
     environment: ${{ inputs.environment || 'production' }}
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
       # No `version:` input — action-setup reads the pinned pnpm version from
       # package.json `packageManager` (pnpm@11.1.3), keeping a single source of truth.
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0

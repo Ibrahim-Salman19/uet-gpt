@@ -17,24 +17,21 @@ permissions:
 jobs:
   lint:
     name: Lint & Format
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
       # No `version:` input — action-setup reads the pinned pnpm version from
       # package.json `packageManager` (pnpm@11.1.3), keeping a single source of truth.
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      # setup-node's native pnpm cache keys on pnpm-lock.yaml automatically
+      # (pnpm is installed above), replacing the manual store/cache dance.
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22"
-      - name: Get pnpm store directory
-        id: pnpm-store
-        run: echo "store=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
-      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        with:
-          path: ${{ steps.pnpm-store.outputs.store }}
-          key: pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            pnpm-store-
+          cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Run Biome check (read-only)
@@ -42,24 +39,21 @@ jobs:
 
   typecheck:
     name: TypeScript Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
       # No `version:` input — action-setup reads the pinned pnpm version from
       # package.json `packageManager` (pnpm@11.1.3), keeping a single source of truth.
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      # setup-node's native pnpm cache keys on pnpm-lock.yaml automatically
+      # (pnpm is installed above), replacing the manual store/cache dance.
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22"
-      - name: Get pnpm store directory
-        id: pnpm-store
-        run: echo "store=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
-      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        with:
-          path: ${{ steps.pnpm-store.outputs.store }}
-          key: pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            pnpm-store-
+          cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -75,32 +69,52 @@ jobs:
 
   test:
     name: Unit Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      # No `version:` input — action-setup reads the pinned pnpm version from
+      # package.json `packageManager` (pnpm@11.1.3), keeping a single source of truth.
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      # setup-node's native pnpm cache keys on pnpm-lock.yaml automatically
+      # (pnpm is installed above), replacing the manual store/cache dance.
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run tests
+        run: pnpm test -- --run --reporter verbose
+
+  audit:
+    name: Dependency Audit (SCA)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
       # No `version:` input — action-setup reads the pinned pnpm version from
       # package.json `packageManager` (pnpm@11.1.3), keeping a single source of truth.
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22"
-      - name: Get pnpm store directory
-        id: pnpm-store
-        run: echo "store=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
-      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        with:
-          path: ${{ steps.pnpm-store.outputs.store }}
-          key: pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            pnpm-store-
+          cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Run tests
-        run: pnpm test -- --run --reporter verbose
+      # Fail CI on high/critical advisories (no `|| true`) so supply-chain
+      # regressions are surfaced rather than silently merged.
+      - name: Audit dependencies
+        run: pnpm audit --audit-level=high
 
   e2e:
     name: E2E Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
     # The Playwright suite boots the real Next.js dev server and authenticates a
     # Clerk test user, both of which require Clerk + Convex credentials. Fork PRs
     # cannot access secrets, so this job only runs on push to main (matching the
@@ -118,21 +132,17 @@ jobs:
       E2E_CLERK_USER_EMAIL: ${{ secrets.E2E_CLERK_USER_EMAIL }}
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
       # No `version:` input — action-setup reads the pinned pnpm version from
       # package.json `packageManager` (pnpm@11.1.3), keeping a single source of truth.
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      # setup-node's native pnpm cache keys on pnpm-lock.yaml automatically
+      # (pnpm is installed above), replacing the manual store/cache dance.
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22"
-      - name: Get pnpm store directory
-        id: pnpm-store
-        run: echo "store=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
-      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        with:
-          path: ${{ steps.pnpm-store.outputs.store }}
-          key: pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            pnpm-store-
+          cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       # The dev server imports Convex `_generated` modules at build/run time, so
@@ -146,27 +156,26 @@ jobs:
 
   build:
     name: Build Check
-    runs-on: ubuntu-latest
-    needs: [lint, typecheck, test]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    # e2e is included so an e2e failure blocks the gated build (build runs only on
+    # push to main, where e2e also runs). lint/typecheck/test gate as before.
+    needs: [lint, typecheck, test, e2e]
     # Build only runs on push to main (not PRs) since it requires all secrets
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
       # No `version:` input — action-setup reads the pinned pnpm version from
       # package.json `packageManager` (pnpm@11.1.3), keeping a single source of truth.
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      # setup-node's native pnpm cache keys on pnpm-lock.yaml automatically
+      # (pnpm is installed above), replacing the manual store/cache dance.
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22"
-      - name: Get pnpm store directory
-        id: pnpm-store
-        run: echo "store=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
-      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        with:
-          path: ${{ steps.pnpm-store.outputs.store }}
-          key: pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            pnpm-store-
+          cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Generate Convex types

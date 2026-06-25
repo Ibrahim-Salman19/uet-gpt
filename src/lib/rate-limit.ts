@@ -1,3 +1,4 @@
+import "server-only";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 
@@ -34,7 +35,10 @@ function createRatelimit(
       analytics: true,
       prefix: `@upstash/ratelimit/${prefix}`,
     });
-  } catch {
+  } catch (error) {
+    // Distinguish a construction failure (misconfiguration) from the
+    // intentional "Redis not set" case, which never reaches here.
+    console.error(`[RATE-LIMIT] Failed to construct Ratelimit for "${prefix}":`, error);
     return null;
   }
 }
@@ -54,12 +58,17 @@ const anonLimiter = redis
   ? createRatelimit(redis, 10, 3600000, "chat/anonymous") // 10 requests/hour
   : null;
 
+// Cooldown applied to the synthetic denied result so a client computing
+// "retry after = reset - now" backs off instead of hot-looping.
+const DENIED_COOLDOWN_MS = 60_000;
+
 function deniedResult(): RateLimitResult {
   return {
     success: false,
     limit: 0,
     remaining: 0,
-    reset: Date.now(),
+    // Near-future timestamp so clients back off rather than retrying immediately.
+    reset: Date.now() + DENIED_COOLDOWN_MS,
     pending: Promise.resolve(),
   };
 }
@@ -117,12 +126,22 @@ export async function checkAdminActionRateLimit(identifier: string): Promise<Rat
 }
 
 /**
+ * Result of {@link getChatRateLimitRemaining}. Modeled as a discriminated union
+ * so the "unknown" state (rate limiting not configured, or a Redis error) is
+ * unrepresentable as a magic-number count and must be handled explicitly by the
+ * UI rather than rendering a nonsense value like -1.
+ */
+export type RateLimitRemaining =
+  | { configured: true; remaining: number; limit: number }
+  | { configured: false };
+
+/**
  * Get remaining requests for a user — used to show in UI.
  */
 export async function getChatRateLimitRemaining(
   identifier: string,
   role: "user" | "admin" | "superadmin" | "anonymous" = "user",
-): Promise<{ remaining: number; limit: number; configured: boolean }> {
+): Promise<RateLimitRemaining> {
   const limiter =
     role === "admin" || role === "superadmin"
       ? adminLimiter
@@ -131,17 +150,18 @@ export async function getChatRateLimitRemaining(
         : userLimiter;
 
   if (!limiter) {
-    return { remaining: -1, limit: -1, configured: false };
+    return { configured: false };
   }
 
   try {
     const result = await limiter.getRemaining(identifier);
     return {
+      configured: true,
       remaining: result.remaining,
       limit: result.limit,
-      configured: true,
     };
-  } catch {
-    return { remaining: -1, limit: -1, configured: false };
+  } catch (error) {
+    console.error("[RATE-LIMIT] Failed to read remaining quota:", error);
+    return { configured: false };
   }
 }

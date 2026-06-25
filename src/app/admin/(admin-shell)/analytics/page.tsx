@@ -130,7 +130,7 @@ function SystemMetricsSection({
 }) {
   return (
     <div className="space-y-4">
-      <SectionHeader title="System Metrics" subtitle="[ STORAGE: DATA CORE ]" />
+      <SectionHeader title="System Metrics" subtitle="[ STORAGE: DATA CORE — ESTIMATED ]" />
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="rounded-xl border border-white/5 bg-[var(--surface-3)]/40 p-5 hover:border-[var(--accent)]/20 transition-all duration-300">
           <div className="flex items-center justify-between">
@@ -140,10 +140,10 @@ function SystemMetricsSection({
             </span>
           </div>
           <div className="mt-4 text-2xl font-bold text-zinc-100 font-mono tracking-tight">
-            {(storageUsed.documents / 1024).toFixed(1)} KB
+            ~{(storageUsed.documents / 1024).toFixed(1)} KB
           </div>
           <div className="mt-1 text-[10px] text-zinc-500 font-mono">
-            {totalDocuments.toLocaleString()} documents
+            {totalDocuments.toLocaleString()} documents · estimated
           </div>
         </Card>
 
@@ -155,10 +155,10 @@ function SystemMetricsSection({
             </span>
           </div>
           <div className="mt-4 text-2xl font-bold text-zinc-100 font-mono tracking-tight">
-            {(storageUsed.cache / 1024).toFixed(1)} KB
+            ~{(storageUsed.cache / 1024).toFixed(1)} KB
           </div>
           <div className="mt-1 text-[10px] text-zinc-500 font-mono">
-            {totalCacheEntries.toLocaleString()} cache entries
+            {totalCacheEntries.toLocaleString()} cache entries · estimated
           </div>
         </Card>
 
@@ -170,10 +170,10 @@ function SystemMetricsSection({
             </span>
           </div>
           <div className="mt-4 text-2xl font-bold text-zinc-100 font-mono tracking-tight">
-            {(storageUsed.total / 1024).toFixed(1)} KB
+            ~{(storageUsed.total / 1024).toFixed(1)} KB
           </div>
           <div className="mt-1 text-[10px] text-zinc-500 font-mono">
-            Combined document + cache storage
+            Estimated document + cache storage
           </div>
         </Card>
       </div>
@@ -273,10 +273,8 @@ export default function AdminAnalyticsPage() {
     return <AnalyticsLoadingSkeleton />;
   }
 
-  const positiveFeedback = feedbackRecent.recent.filter((f: any) => f.rating === "thumbsUp").length;
-  const negativeFeedback = feedbackRecent.recent.filter(
-    (f: any) => f.rating === "thumbsDown",
-  ).length;
+  const positiveFeedback = feedbackRecent.recent.filter((f) => f.rating === "thumbsUp").length;
+  const negativeFeedback = feedbackRecent.recent.filter((f) => f.rating === "thumbsDown").length;
   const totalRecent = positiveFeedback + negativeFeedback;
   const satisfactionRate = totalRecent > 0 ? Math.round((positiveFeedback / totalRecent) * 100) : 0;
 

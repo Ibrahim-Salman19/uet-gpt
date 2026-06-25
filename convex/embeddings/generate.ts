@@ -13,6 +13,13 @@ import { recordTiming } from "../observability/metrics";
 // Note: taskType parameter has no effect on gemini-embedding-2 (confirmed bug)
 const BATCH_THRESHOLD = 2;
 
+// gemini-embedding-2 context is 8192 tokens. There is no tokenizer in this
+// runtime, so cap by characters using a conservative ~3.5 chars/token estimate
+// (8192 * 3.5 ≈ 28_672) so typical English/Roman-Urdu text stays under the token
+// limit and the tail is not silently dropped by the server. Upstream chunking
+// should already keep inputs well under this; the cap is only a safety net.
+const MAX_EMBED_CHARS = 28_000;
+
 // Parse a Retry-After header (delta-seconds or HTTP-date) into milliseconds.
 // Returns null if absent or unparseable.
 function parseRetryAfter(header: string | null): number | null {
@@ -70,6 +77,24 @@ async function fetchWithRetry(
   }
 }
 
+// Carries the upstream HTTP status so the key-rotation loop can decide whether
+// an error is key-specific (rotate) or deterministic (fail fast).
+class GeminiHttpError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+    this.name = "GeminiHttpError";
+  }
+}
+
+// Only auth/quota failures justify trying a different API key; any other status
+// (e.g. 400 bad request) is deterministic and would just be re-thrown per key.
+function isKeySpecificStatus(status: number): boolean {
+  return status === 401 || status === 403 || status === 429;
+}
+
 async function embedNativeGemini(texts: string[], apiKey: string): Promise<number[][]> {
   // Single endpoint is faster for small batches; batch API for 2+
   if (texts.length < BATCH_THRESHOLD) {
@@ -90,7 +115,10 @@ async function embedNativeGemini(texts: string[], apiKey: string): Promise<numbe
     });
     if (!response.ok) {
       const errText = await response.text();
-      throw new Error(`Gemini embedContent failed (${response.status}): ${errText}`);
+      throw new GeminiHttpError(
+        `Gemini embedContent failed (${response.status}): ${errText}`,
+        response.status,
+      );
     }
     const data = (await response.json()) as { embedding?: { values: number[] } };
     if (!data.embedding?.values) {
@@ -118,7 +146,10 @@ async function embedNativeGemini(texts: string[], apiKey: string): Promise<numbe
     });
     if (!response.ok) {
       const errText = await response.text();
-      throw new Error(`Gemini batchEmbedContents failed (${response.status}): ${errText}`);
+      throw new GeminiHttpError(
+        `Gemini batchEmbedContents failed (${response.status}): ${errText}`,
+        response.status,
+      );
     }
     const data = (await response.json()) as { embeddings?: Array<{ values: number[] }> };
     if (!data.embeddings || !Array.isArray(data.embeddings)) {
@@ -136,7 +167,7 @@ async function embedNativeGemini(texts: string[], apiKey: string): Promise<numbe
 export async function generateEmbeddingsInternal(texts: string[]): Promise<number[][]> {
   if (texts.length === 0) return [];
 
-  const sanitizedTexts = texts.map((t) => t.substring(0, 32000));
+  const sanitizedTexts = texts.map((t) => t.substring(0, MAX_EMBED_CHARS));
 
   const geminiKeys: string[] = [
     process.env.GEMINI_API_KEY,
@@ -161,6 +192,12 @@ export async function generateEmbeddingsInternal(texts: string[]): Promise<numbe
       return embeddings;
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : String(err);
+      // Fail fast on deterministic errors (e.g. 400 bad request, malformed
+      // response): retrying the same input against every other key just wastes
+      // quota/latency and hides the real cause. Only rotate on auth/quota errors.
+      if (err instanceof GeminiHttpError && !isKeySpecificStatus(err.status)) {
+        throw new ConvexError(`Gemini embedding request failed (non-retryable): ${errMsg}`);
+      }
       console.warn(`Native Gemini Embeddings failed for key: ${errMsg}`);
       errors.push(`Gemini: ${errMsg}`);
     }

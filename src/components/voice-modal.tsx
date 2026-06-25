@@ -8,6 +8,61 @@ interface VoiceModalProps {
   onTranscript?: (text: string) => void;
 }
 
+// ── Minimal Web Speech API types ──
+// The DOM lib does not ship SpeechRecognition typings in all TS configs, so we
+// declare the narrow surface we actually use instead of falling back to `any`.
+
+interface SpeechRecognitionAlternative {
+  readonly transcript: string;
+}
+
+interface SpeechRecognitionResult {
+  readonly isFinal: boolean;
+  readonly length: number;
+  [index: number]: SpeechRecognitionAlternative;
+}
+
+interface SpeechRecognitionResultList {
+  readonly length: number;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionEventLike extends Event {
+  readonly resultIndex: number;
+  readonly results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionErrorEventLike extends Event {
+  readonly error: string;
+}
+
+interface SpeechRecognitionInstance {
+  lang: string;
+  interimResults: boolean;
+  continuous: boolean;
+  maxAlternatives: number;
+  onstart: (() => void) | null;
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEventLike) => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
+}
+
+type SpeechRecognitionConstructor = new () => SpeechRecognitionInstance;
+
+interface SpeechRecognitionWindow {
+  SpeechRecognition?: SpeechRecognitionConstructor;
+  webkitSpeechRecognition?: SpeechRecognitionConstructor;
+}
+
+function getSpeechRecognition(): SpeechRecognitionConstructor | undefined {
+  if (typeof window === "undefined") return undefined;
+  const w = window as unknown as SpeechRecognitionWindow;
+  return w.SpeechRecognition ?? w.webkitSpeechRecognition;
+}
+
 // ── Speech Recognition Hook ──
 
 function useSpeechRecognition() {
@@ -15,21 +70,18 @@ function useSpeechRecognition() {
   const [isListening, setIsListening] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [isSupported, setIsSupported] = React.useState(true);
-  const recognitionRef = React.useRef<any>(null);
+  const recognitionRef = React.useRef<SpeechRecognitionInstance | null>(null);
 
   // Check browser support
   React.useEffect(() => {
-    const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
+    if (!getSpeechRecognition()) {
       setIsSupported(false);
     }
   }, []);
 
   // Setup speech recognition
   const startListening = React.useCallback(() => {
-    const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRecognition = getSpeechRecognition();
     if (!SpeechRecognition) {
       setError("Speech recognition is not supported in this browser.");
       return;
@@ -47,7 +99,7 @@ function useSpeechRecognition() {
       setError(null);
     };
 
-    recognition.onresult = (event: any) => {
+    recognition.onresult = (event: SpeechRecognitionEventLike) => {
       let interimTranscript = "";
       let finalTranscript = "";
       for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -61,7 +113,7 @@ function useSpeechRecognition() {
       setTranscript(finalTranscript || interimTranscript);
     };
 
-    recognition.onerror = (event: any) => {
+    recognition.onerror = (event: SpeechRecognitionErrorEventLike) => {
       if (event.error === "no-speech") {
         setError("No speech detected. Try again.");
       } else if (event.error === "not-allowed") {
@@ -89,7 +141,7 @@ function useSpeechRecognition() {
   // Ensure the microphone is released if the component unmounts while listening.
   React.useEffect(() => {
     return () => {
-      recognitionRef.current?.abort?.();
+      recognitionRef.current?.abort();
       recognitionRef.current = null;
     };
   }, []);

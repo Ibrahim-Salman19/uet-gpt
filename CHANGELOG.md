@@ -2,14 +2,20 @@
 
 All notable changes to the UETGPT project are documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+> **Note on versioning:** This is an engineering work log, not a strict
+> [SemVer](https://semver.org/spec/v2.0.0.html) release history. The numbered
+> headings below are internal iteration markers and are **not** guaranteed to be
+> ordered, contiguous, or aligned with the product version reported in
+> `AGENTS.md` / `architecture.md`. Entries are loosely grouped in the
+> [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) style (Added /
+> Changed / Fixed / Removed / Security) but should be read chronologically by
+> date, not by version number.
 
 ## [Unreleased]
 
 ### Added
 - `CHANGELOG.md` — project changelog established
-- `scripts/crawl_config.json` — shared configuration with 49 seed URLs, rate limiter, queue settings
+- `scripts/crawl_config.json` — shared crawl configuration (rate limiter, queue settings, and the authoritative `seedUrls` list — count is whatever the file contains; do not hard-code it in prose)
 - `scripts/smoke_test_ingest.py` — 18 end-to-end pipeline tests (auth, domain allowlist, dedup, SimHash, etc.)
 
 ### Fixed

@@ -1,11 +1,6 @@
-import { test, expect } from "@playwright/test";
-import { setupClerkTestingToken } from "@clerk/testing/playwright";
+import { expect, test } from "./fixtures/base-test";
 
 test.describe("Chat Flow", () => {
-  test.beforeEach(async ({ page }) => {
-    await setupClerkTestingToken({ page });
-  });
-
   test("page loads within 5 seconds without getting stuck", async ({ page }) => {
     const startTime = Date.now();
     await page.goto("/chat");
@@ -30,7 +25,8 @@ test.describe("Chat Flow", () => {
     await page.locator("#chat-input-field").fill("What is the fee structure?");
     await page.keyboard.press("Enter");
 
-    // Should navigate to /chat/[threadId]
-    await expect(page).toHaveURL(/\/chat\/[a-z0-9]+/, { timeout: 10000 });
+    // Should navigate to /chat/[threadId]. Convex IDs are mixed-case, so match
+    // the full ID charset and anchor the pattern to the end of the path.
+    await expect(page).toHaveURL(/\/chat\/[a-zA-Z0-9_-]+$/, { timeout: 10000 });
   });
 });

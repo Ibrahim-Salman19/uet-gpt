@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { APP_DESCRIPTION, APP_NAME, APP_TAGLINE } from "@/lib/constants";
@@ -14,7 +14,14 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
 });
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.NEXT_PUBLIC_VERCEL_URL
+    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+    : "http://localhost:3000");
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: `${APP_NAME} — ${APP_TAGLINE}`,
   description: APP_DESCRIPTION,
   keywords: ["UET", "UET Taxila", "chatbot", "RAG", "AI", "university"],
@@ -23,6 +30,11 @@ export const metadata: Metadata = {
     description: APP_TAGLINE,
     type: "website",
   },
+};
+
+export const viewport: Viewport = {
+  colorScheme: "dark",
+  themeColor: "#070708",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

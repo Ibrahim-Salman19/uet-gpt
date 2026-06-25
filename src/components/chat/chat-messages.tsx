@@ -42,7 +42,11 @@ function ErrorBanner({ error, onRetry }: { error: string; onRetry?: () => void }
 function useAutoScroll(messages: ChatMessage[], isAwaitingReply?: boolean) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const prevLengthRef = useRef(messages.length);
+  // Track the streaming content length so follow-scrolling works while the last
+  // message grows token-by-token (message count stays constant during a stream).
+  const lastContentLength = messages[messages.length - 1]?.content.length ?? 0;
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: lastContentLength and isAwaitingReply are reactive values intentionally driving follow-scroll on streaming ticks; refs are intentionally omitted.
   useEffect(() => {
     const viewport = scrollRef.current?.querySelector(
       "[data-radix-scroll-area-viewport]",
@@ -51,14 +55,17 @@ function useAutoScroll(messages: ChatMessage[], isAwaitingReply?: boolean) {
       const isNearBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 180;
       const isNewMessage = messages.length > prevLengthRef.current;
 
-      if (isNearBottom || isNewMessage) {
+      // Always follow a brand-new outgoing message; otherwise only auto-follow
+      // (streaming text / awaiting indicator) when the user is already near the
+      // bottom, so we never yank the view away from someone scrolled up reading.
+      if (isNewMessage || isNearBottom) {
         requestAnimationFrame(() => {
           viewport.scrollTop = viewport.scrollHeight;
         });
       }
     }
     prevLengthRef.current = messages.length;
-  }, [messages.length, isAwaitingReply]);
+  }, [messages.length, lastContentLength, isAwaitingReply]);
 
   return scrollRef;
 }
@@ -109,13 +116,26 @@ export function ChatMessages({
   className,
 }: ChatMessagesProps) {
   const scrollRef = useAutoScroll(messages, isAwaitingReply);
+  const hasError = error != null && error !== "";
 
-  if (messages.length === 0 && !isLoading && !isAwaitingReply && !error) {
+  if (messages.length === 0 && !isLoading && !isAwaitingReply && !hasError) {
     return <EmptyContent suggestions={suggestions} onSuggestionSelect={onSuggestionSelect} />;
   }
 
   if ((isLoading || isAwaitingReply) && messages.length === 0) {
     return <LoadingContent className={className} />;
+  }
+
+  // No messages yet but a request failed — show the error explicitly instead of
+  // falling through to an empty scroll area.
+  if (messages.length === 0 && hasError) {
+    return (
+      <div className="flex h-full w-full items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <ErrorBanner error={error} onRetry={onRetry} />
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -140,7 +160,7 @@ export function ChatMessages({
           </div>
         ))}
 
-        {error && <ErrorBanner error={error} onRetry={onRetry} />}
+        {hasError && <ErrorBanner error={error} onRetry={onRetry} />}
 
         {isAwaitingReply && <AwaitingReplyIndicator />}
       </div>

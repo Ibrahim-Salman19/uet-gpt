@@ -423,14 +423,15 @@ export const embedSingleChunk = internalAction({
         headingPath: args.headingPath,
       });
 
-      ctx
-        .runAction(internal.embeddings.contextualize.contextualizeNewChunk, {
-          documentId: args.documentId,
-          contentHash: args.contentHash,
-        })
-        .catch((err: unknown) => {
-          console.warn("Immediate contextualization failed:", err);
-        });
+      // Durably schedule contextualization instead of firing a non-awaited
+      // ctx.runAction (a floating promise can be cut off when this action returns,
+      // silently dropping the work). runAfter(0) commits the scheduled job so it
+      // runs independently with its own error handling; the daily contextualizeCron
+      // remains the backstop.
+      await ctx.scheduler.runAfter(0, internal.embeddings.contextualize.contextualizeNewChunk, {
+        documentId: args.documentId,
+        contentHash: args.contentHash,
+      });
 
       return {
         success: true,

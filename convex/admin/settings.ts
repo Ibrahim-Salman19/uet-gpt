@@ -27,7 +27,7 @@ export const upsertSetting = mutation({
     const existing = await ctx.db
       .query("appSettings")
       .withIndex("by_key", (q) => q.eq("key", args.key))
-      .first();
+      .unique();
 
     if (existing) {
       await ctx.db.patch(existing._id, {
@@ -60,11 +60,13 @@ export const upsertSettingsBatch = mutation({
   handler: async (ctx, args) => {
     const user = await requireAdmin(ctx);
 
-    const allSettings = await ctx.db.query("appSettings").take(200);
-    const existingMap = new Map(allSettings.map((s) => [s.key, s]));
-
     for (const setting of args.settings) {
-      const existing = existingMap.get(setting.key);
+      // Look up each key via the by_key index rather than a bounded take(200)
+      // snapshot, so keys beyond the first 200 rows are patched, not duplicated.
+      const existing = await ctx.db
+        .query("appSettings")
+        .withIndex("by_key", (q) => q.eq("key", setting.key))
+        .unique();
       if (existing) {
         await ctx.db.patch(existing._id, {
           value: setting.value,

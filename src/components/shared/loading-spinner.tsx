@@ -8,14 +8,11 @@ interface LoadingSpinnerProps extends React.HTMLAttributes<HTMLDivElement> {
   label?: string;
 }
 
-const sizeClasses: Record<
-  NonNullable<LoadingSpinnerProps["size"]>,
-  { container: string; icon: string }
-> = {
-  sm: { container: "h-6 w-6", icon: "h-4 w-4" },
-  md: { container: "h-10 w-10", icon: "h-6 w-6" },
-  lg: { container: "h-14 w-14", icon: "h-8 w-8" },
-  xl: { container: "h-20 w-20", icon: "h-12 w-12" },
+const sizeClasses: Record<NonNullable<LoadingSpinnerProps["size"]>, { container: string }> = {
+  sm: { container: "h-6 w-6" },
+  md: { container: "h-10 w-10" },
+  lg: { container: "h-14 w-14" },
+  xl: { container: "h-20 w-20" },
 };
 
 /**
@@ -33,13 +30,12 @@ export function LoadingSpinner({ size = "md", label, className, ...props }: Load
       {...props}
     >
       <div
+        aria-hidden="true"
         className={cn(
           "animate-spin rounded-full border-2 border-[var(--border)] border-t-[var(--accent)]",
           dimensions.container,
         )}
-      >
-        <span className="sr-only">{label ?? "Loading…"}</span>
-      </div>
+      />
       {label && <p className="text-sm text-[var(--text-muted)] animate-pulse">{label}</p>}
     </div>
   );

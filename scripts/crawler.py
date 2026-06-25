@@ -52,6 +52,11 @@ if not CONVEX_SITE_URL:
     print("[ERROR] CONVEX_SITE_URL is not configured in .env.local")
     sys.exit(1)
 
+# Never send the Bearer ingest token over cleartext http://.
+if not CONVEX_SITE_URL.startswith("https://"):
+    print(f"[ERROR] CONVEX_SITE_URL must be https:// (got: {CONVEX_SITE_URL})")
+    sys.exit(1)
+
 CONVEX_AUTH_TOKEN = os.environ.get("CONVEX_AUTH_TOKEN")
 if not CONVEX_AUTH_TOKEN:
     print("WARNING: CONVEX_AUTH_TOKEN not set — /ingest endpoint may reject the request")
@@ -96,6 +101,9 @@ PUSH_RETRIES    = CONFIG.get("pushRetries", 3)
 MIN_WORD_COUNT  = CONFIG.get("minWordCount", 80)
 QUEUE_MAXSIZE   = CONFIG.get("queueMaxSize", 500)
 EXCLUDE_PATTERNS = CONFIG.get("excludePatterns", [])
+# Cap on a single fetched response body (defends against decompression bombs /
+# huge PDFs exhausting memory). Default 25 MiB, overridable via config.
+MAX_RESPONSE_BYTES = CONFIG.get("maxResponseBytes", 25 * 1024 * 1024)
 
 SKIP_EXTENSIONS = frozenset(
     ".doc .docx .ppt .pptx .xls .xlsx .zip .rar .exe "
@@ -263,13 +271,25 @@ def decode_all_emails(html: str) -> str:
             tag.replace_with(decode_cf_email(raw))
     return str(soup)
 
+_DEFAULT_PORTS = {"http": "80", "https": "443"}
+
+
 def canonicalize_url(url: str) -> str:
     parsed = urllib.parse.urlparse(url)
+    # Normalize scheme + host case and strip the default port so that
+    # Host vs host and example.com:443 collapse to one canonical form.
+    scheme = parsed.scheme.lower()
+    hostname = (parsed.hostname or "").lower()
+    netloc = hostname
+    if parsed.port is not None and str(parsed.port) != _DEFAULT_PORTS.get(scheme):
+        netloc = f"{hostname}:{parsed.port}"
+    # Strip tracking params, then sort the remaining keys so that
+    # ?a=1&b=2 and ?b=2&a=1 yield the same canonical string.
     params = urllib.parse.parse_qs(parsed.query, keep_blank_values=True)
-    cleaned = {k: v for k, v in params.items() if k not in STRIP_PARAMS}
+    cleaned = {k: params[k] for k in sorted(params) if k not in STRIP_PARAMS}
     new_query = urllib.parse.urlencode(cleaned, doseq=True)
     path = parsed.path.rstrip("/") or "/"
-    return urllib.parse.urlunparse((parsed.scheme, parsed.netloc, path, parsed.params, new_query, ""))
+    return urllib.parse.urlunparse((scheme, netloc, path, parsed.params, new_query, ""))
 
 def _matches_exclude(url: str) -> bool:
     path = urllib.parse.urlparse(url).path
@@ -291,8 +311,9 @@ def is_allowed_url(url: str) -> bool:
             return False
         if any(p.path.lower().endswith(ext) for ext in SKIP_EXTENSIONS):
             return False
-        if p.path.startswith(("mailto:", "javascript:", "tel:")):
-            return False
+        # NOTE: mailto/javascript/tel are URL *schemes*, not path prefixes —
+        # they are already rejected by the scheme allowlist above. A previous
+        # p.path.startswith(("mailto:", ...)) check here was dead code.
         if _matches_exclude(url):
             return False
         rp = _get_robot_parser(p.netloc)
@@ -476,7 +497,9 @@ async def reset_pipeline():
             if resp.status_code == 200:
                 log.info("Pipeline data reset successfully")
             else:
-                log.warning(f"Reset returned HTTP {resp.status_code}: {resp.text}")
+                # Avoid echoing the raw response body into crawler.log — it can
+                # carry server detail / secrets. Log only the status code.
+                log.warning(f"Reset returned HTTP {resp.status_code}")
     except Exception as e:
         log.error(f"Reset failed: {e}")
 
@@ -632,11 +655,28 @@ async def fetch_and_extract(url: str, session: AsyncSession) -> tuple[str | None
         return None, "", [], f"HTTP {status}", status
 
     content_type = resp.headers.get("Content-Type", "").lower()
-    
+
+    # Reject oversized responses up front via Content-Length, and cap the
+    # buffered body to guard against decompression bombs / multi-GB downloads
+    # exhausting memory.
+    declared_len = resp.headers.get("Content-Length") or resp.headers.get("content-length")
+    if declared_len and declared_len.isdigit() and int(declared_len) > MAX_RESPONSE_BYTES:
+        return None, "", [], f"response too large ({declared_len} bytes)", status
+
+    is_pdf = "application/pdf" in content_type or url.lower().endswith(".pdf")
+    # Content-Type allowlist: only HTML and PDF are parseable here. Anything
+    # else (octet-stream, video, etc.) is rejected before buffering/parsing.
+    if not is_pdf and "text/html" not in content_type and "application/xhtml" not in content_type:
+        return None, "", [], f"unsupported content-type: {content_type or 'unknown'}", status
+
+    body = resp.content
+    if body is not None and len(body) > MAX_RESPONSE_BYTES:
+        return None, "", [], f"response body exceeds {MAX_RESPONSE_BYTES} bytes", status
+
     # Handle PDF
-    if "application/pdf" in content_type or url.lower().endswith(".pdf"):
+    if is_pdf:
         try:
-            doc = fitz.open(stream=resp.content, filetype="pdf")
+            doc = fitz.open(stream=body, filetype="pdf")
             markdown = pymupdf4llm.to_markdown(doc, table_strategy='lines')
             title = os.path.basename(urllib.parse.urlparse(url).path) or url
             return markdown, title, [], None, status
@@ -875,13 +915,36 @@ async def crawl():
 
     # Crash recovery: check for saved state
     saved_state = load_crawl_state()
-    if saved_state:
-        log.info("Crash recovery mode — resuming from saved state")
-    else:
+    if not saved_state:
         remove_crawl_state()
 
     queue: asyncio.PriorityQueue = asyncio.PriorityQueue(maxsize=QUEUE_MAXSIZE)
     visited: set = set()
+
+    # Crash recovery: actually repopulate the queue/visited set from the saved
+    # snapshot instead of merely logging "resuming" (previously the loaded state
+    # was discarded, making recovery cosmetic).
+    if saved_state:
+        recovered = 0
+        for entry in saved_state.get("queue", []):
+            try:
+                url, depth = entry[0], entry[1]
+            except (TypeError, IndexError, KeyError):
+                continue
+            canonical = canonicalize_url(url)
+            if canonical in visited:
+                continue
+            visited.add(canonical)
+            priority = (depth, -url_priority(canonical, depth))
+            try:
+                queue.put_nowait((priority, (canonical, depth)))
+                recovered += 1
+            except asyncio.QueueFull:
+                break
+        log.info(
+            f"Crash recovery: re-enqueued {recovered} URL(s) from saved state "
+            f"(snapshot was capped at 100 entries; non-snapshot URLs resume via DLQ/seeds)"
+        )
     simhash = SimHash()
 
     # 0. Recover orphaned DLQ processing files

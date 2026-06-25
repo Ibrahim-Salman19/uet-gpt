@@ -13,6 +13,7 @@ import asyncio
 import base64
 import hashlib
 import os
+import random
 import re
 import sys
 import tempfile
@@ -50,6 +51,11 @@ if not CONVEX_SITE_URL and os.environ.get("NEXT_PUBLIC_CONVEX_URL"):
 
 if not CONVEX_SITE_URL:
     print("[ERROR] CONVEX_SITE_URL is not configured in .env.local")
+    sys.exit(1)
+
+# Never send the Bearer ingest token over cleartext http://.
+if not CONVEX_SITE_URL.startswith("https://"):
+    print(f"[ERROR] CONVEX_SITE_URL must be https:// (got: {CONVEX_SITE_URL})")
     sys.exit(1)
 
 
@@ -213,13 +219,17 @@ def extract_vlm(path: str) -> str:
                 break
             except Exception as e:
                 err = str(e)
+                # Add jitter so concurrent/sequential retries don't synchronize
+                # against the Gemini quota window (thundering-herd avoidance).
                 if "429" in err or "RESOURCE_EXHAUSTED" in err or "quota" in err.lower():
-                    wait = 30 * attempt  # 30s, 60s, 90s
-                    print(f"quota — waiting {wait}s...")
+                    base = 30 * attempt  # 30s, 60s, 90s
+                    wait = base + random.uniform(0, base * 0.25)
+                    print(f"quota — waiting {wait:.1f}s...")
                     time.sleep(wait)
                 elif attempt < 4:
-                    wait = 5 * attempt
-                    print(f"error ({e}) — retry in {wait}s...")
+                    base = 5 * attempt
+                    wait = base + random.uniform(0, base * 0.25)
+                    print(f"error ({e}) — retry in {wait:.1f}s...")
                     time.sleep(wait)
                 else:
                     print(f"failed after 4 attempts: {e}")

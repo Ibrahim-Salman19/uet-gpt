@@ -85,16 +85,21 @@ python scripts/ingest_pdf.py path/to/file.pdf
 # Run full eval harness
 python scripts/eval/run_eval.py --golden scripts/eval/golden_set.jsonl
 
-# Run all tests
-npx vitest run
+# Run all tests (pnpm is the ONLY supported package manager — never mix npm/yarn)
+pnpm vitest run
 
 # Run specific test file
-npx vitest run tests/integration/chat-api.test.ts
+pnpm vitest run tests/integration/chat-api.test.ts
 
 # Convex dev + deploy
-npx convex dev
-npx convex deploy
+pnpm convex dev
+pnpm convex deploy
 ```
+
+> **Package manager:** This repo is pnpm-only (see the `packageManager` field in
+> `package.json`; enable it with `corepack enable`). Do **not** run npm/yarn/bun
+> against the pnpm-managed `node_modules` — `architecture.md §17` documents this as a
+> known breakage source.
 
 ## Quality Gate (must pass before any commit)
 1. `npx convex dev --dry-run` → zero TypeScript errors

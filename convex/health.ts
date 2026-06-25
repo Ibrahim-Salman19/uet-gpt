@@ -1,6 +1,5 @@
 import { v } from "convex/values";
 import { query } from "./_generated/server";
-import { requireAdmin } from "./auth";
 
 /**
  * Lightweight heartbeat query for WebSocket keepalive.
@@ -16,7 +15,7 @@ export const heartbeat = query({
   }),
   handler: async () => ({
     ok: true,
-    timestamp: 0,
+    timestamp: Date.now(),
     version: "1.0.0",
   }),
 });
@@ -24,6 +23,10 @@ export const heartbeat = query({
 /**
  * Health check for monitoring/load balancers.
  * Verifies Convex backend is responsive.
+ *
+ * Intentionally unauthenticated: a liveness probe must be callable by an
+ * unauthenticated LB/monitor and reveals nothing sensitive (only a static
+ * status string and the current server time).
  */
 export const healthCheck = query({
   args: {},
@@ -32,11 +35,10 @@ export const healthCheck = query({
     timestamp: v.number(),
     uptime: v.number(),
   }),
-  handler: async (ctx) => {
-    await requireAdmin(ctx);
+  handler: async () => {
     return {
       status: "healthy",
-      timestamp: 0,
+      timestamp: Date.now(),
       uptime: 0,
     };
   },

@@ -1,5 +1,8 @@
+# Standalone crawl4ai server config. Bind to loopback by default so the server is
+# not exposed on all interfaces. Only change `host` to 0.0.0.0 if remote access is
+# genuinely required AND `security.enabled` below is set to true (auth on).
 app:
-  host: "0.0.0.0"
+  host: "127.0.0.1"
   port: 8020
   timeout_keep_alive: 300
 
@@ -15,5 +18,7 @@ rate_limiting:
   enabled: true
   default_limit: "100/minute"
 
+# Keep auth enabled unless the server is reachable only from localhost. If `host`
+# is ever changed to a non-loopback address, this MUST be true.
 security:
-  enabled: false
+  enabled: true

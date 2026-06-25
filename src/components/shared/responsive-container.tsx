@@ -11,7 +11,7 @@ interface ResponsiveContainerProps extends React.HTMLAttributes<HTMLDivElement> 
   as?: "div" | "section" | "article" | "main";
 }
 
-const sizeClasses: Record<string, string> = {
+const sizeClasses: Record<NonNullable<ResponsiveContainerProps["size"]>, string> = {
   sm: "max-w-3xl",
   md: "max-w-5xl",
   lg: "max-w-7xl",

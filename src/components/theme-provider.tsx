@@ -23,18 +23,17 @@ function getInitialTheme(): Theme {
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = React.useState<Theme>(getInitialTheme);
-  const [mounted, setMounted] = React.useState(false);
 
   React.useLayoutEffect(() => {
     const root = document.documentElement;
     root.classList.remove("light", "dark");
     root.classList.add(theme);
-    localStorage.setItem("theme", theme);
+    try {
+      localStorage.setItem("theme", theme);
+    } catch (err) {
+      console.error("Failed to persist theme:", err);
+    }
   }, [theme]);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const toggleTheme = React.useCallback(() => {
     setThemeState((prev) => (prev === "light" ? "dark" : "light"));
@@ -46,7 +45,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
-      {mounted ? children : null}
+      {children}
     </ThemeContext.Provider>
   );
 }

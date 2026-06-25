@@ -35,8 +35,22 @@ interface HealthResponse {
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
+/**
+ * Map an arbitrary upstream error to a coarse, non-revealing code so the
+ * response never reflects raw fetch/abort strings (which can contain internal
+ * hostnames or URLs). Full detail stays in server logs only.
+ */
+function coarseErrorCode(error: unknown): string {
+  if (error instanceof Error) {
+    if (error.name === "AbortError" || error.message.toLowerCase().includes("abort")) {
+      return "timeout";
+    }
+  }
+  return "unreachable";
+}
+
 async function checkService(
-  _name: string,
+  name: string,
   checkFn: () => Promise<boolean>,
   configRequired?: boolean,
 ): Promise<ServiceStatus> {
@@ -56,10 +70,12 @@ async function checkService(
     return { status: "ok", latency };
   } catch (error) {
     const latency = Math.round(performance.now() - start);
+    // Log full detail server-side; return only a coarse code to the caller.
+    console.error(`[Health] ${name} check failed:`, error);
     return {
       status: "error",
       latency,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: coarseErrorCode(error),
     };
   }
 }

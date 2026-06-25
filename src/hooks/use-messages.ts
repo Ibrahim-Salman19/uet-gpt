@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useStableQuery } from "@/hooks/use-stable-query";
 import type { ChatMessage, Source, TokenCount } from "@/lib/types";
 import { api } from "../../convex/_generated/api";
@@ -50,20 +50,21 @@ export function useMessages(threadId: string | undefined) {
 
   const isLoading = threadId ? messagesData === undefined : false;
 
-  // Map Convex messages format to ChatMessage frontend interface
-  const dbMessages: ChatMessage[] = ((messagesData ?? []) as MessageDoc[]).map((msg) => ({
-    id: msg._id,
-    role: msg.role,
-    content: msg.content,
-    sources: msg.sources,
-    tokenCount: msg.tokenCount,
-  }));
+  // Map Convex messages format to ChatMessage frontend interface, then merge
+  // with the active streaming message. Memoized so consumers relying on a
+  // stable `messages` identity aren't forced to re-render every parent render
+  // (React Compiler is not enabled on this project).
+  const messages = useMemo<ChatMessage[]>(() => {
+    const dbMessages: ChatMessage[] = ((messagesData ?? []) as MessageDoc[]).map((msg) => ({
+      id: msg._id,
+      role: msg.role,
+      content: msg.content,
+      sources: msg.sources,
+      tokenCount: msg.tokenCount,
+    }));
 
-  // Merge database messages with active streaming message
-  const messages = [...dbMessages];
-  if (streamingMessage) {
-    messages.push(streamingMessage);
-  }
+    return streamingMessage ? [...dbMessages, streamingMessage] : dbMessages;
+  }, [messagesData, streamingMessage]);
 
   return {
     messages,

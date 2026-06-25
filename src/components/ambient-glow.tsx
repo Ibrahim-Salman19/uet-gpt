@@ -16,11 +16,19 @@ export function AmbientGlow() {
     // Initially fade in
     glow.style.opacity = "0.08";
 
+    // Coalesce pointer updates into a single pending rAF so rapid mousemove
+    // events don't queue many gradient repaints per frame.
+    let frameId: number | null = null;
+    let lastX = 0;
+    let lastY = 0;
+
     const handleMouseMove = (e: MouseEvent) => {
-      requestAnimationFrame(() => {
-        if (glow) {
-          glow.style.background = `radial-gradient(circle 600px at ${e.clientX}px ${e.clientY}px, color-mix(in oklch, var(--accent) 8%, transparent), transparent 70%)`;
-        }
+      lastX = e.clientX;
+      lastY = e.clientY;
+      if (frameId !== null) return;
+      frameId = requestAnimationFrame(() => {
+        frameId = null;
+        glow.style.background = `radial-gradient(circle 600px at ${lastX}px ${lastY}px, color-mix(in oklch, var(--accent) 8%, transparent), transparent 70%)`;
       });
     };
 
@@ -28,6 +36,7 @@ export function AmbientGlow() {
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
+      if (frameId !== null) cancelAnimationFrame(frameId);
     };
   }, [glowEnabled]);
 

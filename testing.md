@@ -300,7 +300,7 @@ the test should be an integration test instead.
 ### 2.3 Cache Layer
 
 - [ ] **2.3.1** `convex/cache/get.ts`:
-  - Vector search + cosine similarity at threshold 0.98
+  - Vector search + cosine similarity at threshold 0.92 (`CACHE_SIMILARITY_THRESHOLD` in `convex/constants.ts`)
   - Manual dimension-safe loop correctness
   - Empty embedding → null (no search)
   - Expired entry → null (even if vector match)

@@ -15,7 +15,15 @@ type Permission =
 // CANONICAL permission matrix — server-side source of truth.
 // Client-side mirror at src/lib/permissions.ts must be kept in sync.
 // When adding permissions, update both files.
-const ROLE_PERMISSIONS: Record<"user" | "admin" | "superadmin", readonly Permission[]> = {
+type Role = "user" | "admin" | "superadmin";
+
+/** Compile-time exhaustiveness guard: errors if the role union grows without
+ * a matching ROLE_PERMISSIONS entry. */
+function assertNever(value: never): never {
+  throw new ConvexError(`Unhandled role: ${String(value)}`);
+}
+
+const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
   user: ["chat:send", "doc:read"],
   admin: [
     "chat:send",
@@ -91,7 +99,13 @@ export async function requirePermission(
   if (!user) throw new ConvexError("User not found");
   if (!user.isActive) throw new ConvexError("User account is deactivated");
 
-  const userPerms = ROLE_PERMISSIONS[user.role] ?? [];
+  const role = user.role as Role;
+  const userPerms = ROLE_PERMISSIONS[role];
+  // Fail closed on an unrecognized role (e.g. after a future schema change):
+  // assertNever throws so callers never get silent allow-through.
+  if (!userPerms) {
+    assertNever(role as never);
+  }
   if (!userPerms.includes(permission)) {
     throw new ConvexError(`Insufficient permissions: requires "${permission}"`);
   }

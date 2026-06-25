@@ -176,21 +176,29 @@ export default function SettingsPage() {
   }, [userData?.preferences?.fontSize, userData?.preferences?.model]);
 
   const handleFontSizeChange = async (value: string) => {
+    const previous = fontSize;
+    // Optimistic update; revert if the mutation fails so the UI never shows a
+    // selection the backend didn't persist.
     setFontSize(value);
     try {
       await updatePreferences({ fontSize: value });
       toast.success("Font size saved successfully");
     } catch {
+      setFontSize(previous);
       toast.error("Failed to save font size preference");
     }
   };
 
   const handleModelChange = async (value: string) => {
+    const previous = model;
+    // Optimistic update; revert if the mutation fails so the UI never shows a
+    // selection the backend didn't persist.
     setModel(value);
     try {
       await updatePreferences({ model: value });
       toast.success("Model preference saved successfully");
     } catch {
+      setModel(previous);
       toast.error("Failed to save model preference");
     }
   };

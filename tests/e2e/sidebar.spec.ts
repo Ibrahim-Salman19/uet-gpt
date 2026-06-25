@@ -1,22 +1,18 @@
-import { test, expect } from "@playwright/test";
-import { setupClerkTestingToken } from "@clerk/testing/playwright";
+import { expect, test } from "./fixtures/base-test";
 
 test.describe("Sidebar", () => {
-  test.beforeEach(async ({ page }) => {
-    await setupClerkTestingToken({ page });
-    await page.goto("/chat");
-    // Wait for page to be interactive
-    await expect(page.locator("#chat-input-field")).toBeVisible({ timeout: 5000 });
-  });
-
   test("desktop: sidebar visible by default", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/chat");
+    await expect(page.locator("#chat-input-field")).toBeVisible({ timeout: 5000 });
     const sidebar = page.locator("aside[aria-label='Navigation sidebar']");
     await expect(sidebar).toBeVisible();
   });
 
   test("desktop: toggle on hamburger click", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/chat");
+    await expect(page.locator("#chat-input-field")).toBeVisible({ timeout: 5000 });
     const hamburger = page.getByLabel("Toggle navigation");
     const sidebar = page.locator("aside[aria-label='Navigation sidebar']");
 
@@ -30,10 +26,18 @@ test.describe("Sidebar", () => {
   });
 
   test("mobile: sidebar hidden by default", async ({ page }) => {
+    // Set the mobile viewport BEFORE navigation so the app renders in its
+    // mobile (collapsed-sidebar) state, rather than resizing a desktop-open
+    // layout after load.
     await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("/chat");
+    await expect(page.locator("#chat-input-field")).toBeVisible({ timeout: 5000 });
+
+    // Assert the sidebar is not presented to the user. Using a semantic
+    // visibility check is resilient to the hiding mechanism (display:none,
+    // visibility:hidden, zero width, or an off-screen transform) instead of
+    // relying on brittle bounding-box pixel math.
     const sidebar = page.locator("aside[aria-label='Navigation sidebar']");
-    const box = await sidebar.boundingBox();
-    expect(box).not.toBeNull();
-    expect(box!.x + box!.width).toBeLessThanOrEqual(0);
+    await expect(sidebar).toBeHidden();
   });
 });

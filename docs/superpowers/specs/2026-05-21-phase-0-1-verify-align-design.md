@@ -1,5 +1,14 @@
 # Phase 0–1 Verify & Align Design
 
+> **⚠️ HISTORICAL / SUPERSEDED (2026-05-21).** This design is a point-in-time
+> planning artifact and is **not** current guidance. Key decisions here were
+> reversed during implementation — notably, `documents` and `crawledChunks` are
+> **manually defined** in `convex/schema.ts` (only `threads`/`messages` are
+> component-managed), and the embedding dimension is **not** 768. Do **not** follow
+> the "remove manual `documents`/`chunks` tables" or "confirm dimensions are 768"
+> steps below. For the authoritative schema and dimensions, see `architecture.md`
+> §4 (schema) and §6 (embedding). Kept for historical context only.
+
 **Goal:** Verify and fill gaps in Phase 0 scaffolding and Phase 1 schema alignment for `uet-gpt`, strictly following `todo.md` and Path A (strict free tier) constraints.
 
 **Scope:**

@@ -12,12 +12,23 @@ CONVEX_URL="${CONVEX_URL:-}"
 TOP_K="${TOP_K:-8}"
 QUERIES_FILE="${QUERIES_FILE:-scripts/eval/golden_set.jsonl}"
 
-if [ -z "${CONVEX_URL}" ] && command -v npx &>/dev/null; then
-  if [ -f ".env.local" ]; then
-    set -a
-    source .env.local
-    set +a
-  fi
+# Safely read CONVEX_URL from .env.local WITHOUT `source`ing it — sourcing
+# executes arbitrary shell (command substitution, etc.) embedded in the file.
+# Parse only the keys we need, stripping surrounding quotes.
+read_env_var() {
+  local key="$1" file="$2" line val
+  [ -f "${file}" ] || return 1
+  line=$(grep -E "^[[:space:]]*(export[[:space:]]+)?${key}=" "${file}" | tail -1) || return 1
+  [ -n "${line}" ] || return 1
+  val="${line#*=}"
+  # strip optional surrounding single/double quotes
+  val="${val%\"}"; val="${val#\"}"
+  val="${val%\'}"; val="${val#\'}"
+  printf '%s' "${val}"
+}
+
+if [ -z "${CONVEX_URL}" ] && [ -f ".env.local" ]; then
+  CONVEX_URL="$(read_env_var CONVEX_URL .env.local || true)"
 fi
 
 if [ -z "${CONVEX_URL}" ]; then
@@ -100,12 +111,17 @@ echo "Dataset:   ${QUERIES_FILE}"
 echo ""
 
 echo "Running eval against ${QUERIES_FILE}..."
-RESULTS=$(run_eval_via_api "${QUERIES_FILE}" "${TOP_K}" 2>/dev/null || echo "{\"error\": \"API call failed\"}")
+# Do NOT swallow API failures: this measurement feeds a leaderboard, so a failed
+# call must surface (non-zero exit) rather than be masked into a fake result.
+if ! RESULTS=$(run_eval_via_api "${QUERIES_FILE}" "${TOP_K}"); then
+  echo "ERROR: eval API call failed — aborting measurement (leaderboard not updated)."
+  exit 1
+fi
 
 echo "${RESULTS}" > "${OUTPUT_FILE}"
 echo "Results written to: ${OUTPUT_FILE}"
 
-METRICS=$(echo "${RESULTS}" | node -e "
+if ! METRICS=$(node -e "
   const fs = require('fs');
   const data = JSON.parse(fs.readFileSync('/dev/stdin', 'utf-8'));
   if (data.metrics) {
@@ -117,7 +133,10 @@ METRICS=$(echo "${RESULTS}" | node -e "
     console.error('Unexpected response format');
     process.exit(1);
   }
-" < "${OUTPUT_FILE}" 2>/dev/null || echo "{\"error\": \"Metrics extraction failed\"}")
+" < "${OUTPUT_FILE}"); then
+  echo "ERROR: metrics extraction failed — leaderboard not updated."
+  exit 1
+fi
 
 RECALL=$(echo "${METRICS}" | node -e "const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf-8')); console.log(d.recallAtK.toFixed(4));" 2>/dev/null || echo "0.0000")
 PRECISION=$(echo "${METRICS}" | node -e "const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf-8')); console.log(d.precisionAtK.toFixed(4));" 2>/dev/null || echo "0.0000")

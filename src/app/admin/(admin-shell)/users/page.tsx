@@ -1,6 +1,7 @@
 "use client";
 
 import { Crown, Search, Shield, ShieldCheck, ShieldOff, UserPlus } from "lucide-react";
+import Image from "next/image";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -156,9 +157,12 @@ export default function AdminUsersPage() {
                   {/* User */}
                   <div className="flex items-center gap-3 min-w-0">
                     {user.imageUrl ? (
-                      <img
+                      <Image
                         src={user.imageUrl}
                         alt=""
+                        width={28}
+                        height={28}
+                        referrerPolicy="no-referrer"
                         className="h-7 w-7 rounded-full border border-white/10"
                       />
                     ) : (

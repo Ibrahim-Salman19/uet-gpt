@@ -1,7 +1,7 @@
 "use client";
 
 import { api } from "convex/_generated/api";
-import type { Id } from "convex/_generated/dataModel";
+import type { Doc, Id } from "convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import {
   AlertCircle,
@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 import { LoadingState } from "@/components/loading-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -66,15 +67,17 @@ export default function AdminDocumentsPage() {
     if (confirm("Are you sure you want to delete this document?")) {
       try {
         await deleteDocument({ documentId: docId });
+        toast.success("Document deleted successfully");
       } catch (error) {
         console.error("Failed to delete document:", error);
+        toast.error("Failed to delete document. Please try again.");
       }
     }
   };
 
-  const filteredDocs = documents
+  const filteredDocs: Doc<"documents">[] = documents
     ? documents.filter(
-        (doc: any) =>
+        (doc) =>
           !search ||
           (doc.title ?? "").toLowerCase().includes(search.toLowerCase()) ||
           (doc.url ?? "").toLowerCase().includes(search.toLowerCase()),
@@ -145,6 +148,13 @@ export default function AdminDocumentsPage() {
         </div>
       </div>
 
+      {documents && documents.length >= 100 && (
+        <p className="text-[10px] text-amber-400/90 font-mono tracking-wide">
+          Showing the first 100 documents. Text search only matches within this window — narrow by
+          status or category to reach the rest.
+        </p>
+      )}
+
       {documents === undefined ? (
         <LoadingState type="admin-list" />
       ) : filteredDocs.length === 0 ? (
@@ -160,7 +170,7 @@ export default function AdminDocumentsPage() {
         <div className="border border-white/5 rounded-xl bg-[var(--surface-3)]/20 overflow-hidden">
           <ScrollArea className="h-[calc(100dvh-230px)]">
             <div className="divide-y divide-white/[0.04]">
-              {filteredDocs.map((doc: any) => (
+              {filteredDocs.map((doc) => (
                 <div
                   key={String(doc._id)}
                   className="group flex items-center justify-between p-3.5 hover:bg-white/[0.02] transition-colors relative"
@@ -217,12 +227,13 @@ export default function AdminDocumentsPage() {
                           const u = new URL(String(doc.url));
                           if (u.protocol === "http:" || u.protocol === "https:") {
                             // fallow-ignore-next-line security-sink
-                            window.open(u.href, "_blank");
+                            window.open(u.href, "_blank", "noopener,noreferrer");
                           }
                         } catch {
                           // ignore invalid URLs
                         }
                       }}
+                      aria-label="Open source link"
                       title="Open source link"
                     >
                       <ExternalLink className="h-3.5 w-3.5 text-zinc-400 hover:text-zinc-200" />
@@ -232,6 +243,7 @@ export default function AdminDocumentsPage() {
                       size="icon"
                       className="h-8 w-8 hover:bg-red-500/10 hover:text-red-400 rounded active:scale-[0.98]"
                       onClick={() => handleDelete(doc._id)}
+                      aria-label="Delete document"
                       title="Delete document"
                     >
                       <Trash2 className="h-3.5 w-3.5 text-red-500" />

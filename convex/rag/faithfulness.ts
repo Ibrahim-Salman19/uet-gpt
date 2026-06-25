@@ -23,6 +23,16 @@ A claim is unsupported if it cannot be found or reasonably inferred from the sou
 Do not penalize the answer for omitting information — only penalize it for ADDING information not present in sources.`;
 }
 
+/**
+ * Post-generation faithfulness/groundedness judge.
+ *
+ * NOTE: This is an intentionally available safety net that is NOT yet wired
+ * into the generation flow. It is meant to be invoked on a draft answer (e.g.
+ * from the chat route, after the answer LLM streams) to verify that the answer's
+ * claims are supported by the retrieved sources. Wiring it in requires changes
+ * in the generation/chat route (outside the RAG retrieval pipeline). Keep it
+ * `internalAction` so it stays off the public API until then.
+ */
 export const judgeFaithfulness = internalAction({
   args: {
     query: v.string(),
@@ -47,14 +57,17 @@ export const judgeFaithfulness = internalAction({
         schema: z.object({
           faithful: z.boolean(),
           unsupportedClaims: z.array(z.string()),
-          score: z.number(),
+          // Constrain to [0,1] so the faithfulness score is on a known scale
+          // for any downstream threshold comparison.
+          score: z.number().min(0).max(1),
         }),
         prompt: buildFaithfulnessPrompt(args.answer, args.sources),
         temperature: 0,
         maxOutputTokens: 500,
       });
 
-      return object;
+      // Defense-in-depth: clamp the score to [0,1] before returning.
+      return { ...object, score: Math.max(0, Math.min(1, object.score)) };
     } catch (error) {
       console.warn("Faithfulness check failed, defaulting to faithful:", error);
       return { faithful: true, unsupportedClaims: [], score: 1.0 };

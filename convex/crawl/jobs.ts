@@ -37,8 +37,15 @@ async function deleteOldJobsByStatus(
       .take(batchSize);
 
     for (const job of jobs) {
-      const ageMs = job.completedAt ?? job._creationTime ?? 0;
-      if (now - ageMs > cutoff) {
+      // Stop as soon as we have deleted a full batch, even mid-status, so a single
+      // status iteration can never exceed batchSize deletions.
+      if (totalDeleted >= batchSize) return totalDeleted;
+
+      // Require a real timestamp before considering a job old enough to delete.
+      // Previously, when both completedAt and _creationTime were missing, ageMs
+      // fell back to 0 and `now - 0 > cutoff` force-deleted the job.
+      const ageMs = job.completedAt ?? job._creationTime;
+      if (typeof ageMs === "number" && now - ageMs > cutoff) {
         await ctx.db.delete(job._id);
         totalDeleted++;
       }

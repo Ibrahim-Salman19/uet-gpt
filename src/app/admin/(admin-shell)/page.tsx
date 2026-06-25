@@ -2,11 +2,16 @@
 
 import { api } from "convex/_generated/api";
 import { useQuery } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
 import { Activity, Database, FileText, Globe, ThumbsDown, ThumbsUp, Users } from "lucide-react";
 import { LoadingState } from "@/components/loading-state";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+
+type OverviewData = FunctionReturnType<typeof api.admin.stats.getOverviewData>;
+type RecentCrawl = OverviewData["recentCrawls"][number];
+type RecentFeedback = OverviewData["recentFeedback"][number];
 
 function DocumentsStatusBar({
   indexed,
@@ -45,7 +50,7 @@ function DocumentsStatusBar({
   );
 }
 
-function RecentCrawlsPanel({ crawls }: { crawls: any[] }) {
+function RecentCrawlsPanel({ crawls }: { crawls: RecentCrawl[] }) {
   return (
     <div className="border border-white/5 rounded-xl bg-[var(--surface-3)]/40 backdrop-blur-sm p-6 flex flex-col h-[280px]">
       <div className="mb-4 pb-3 border-b border-white/5 flex justify-between items-center">
@@ -60,7 +65,7 @@ function RecentCrawlsPanel({ crawls }: { crawls: any[] }) {
         ) : (
           <ScrollArea className="h-full pr-2">
             <div className="space-y-3">
-              {crawls.map((crawl: any) => (
+              {crawls.map((crawl) => (
                 <div
                   key={crawl._id}
                   className="flex items-center justify-between py-2 border-b border-white/[0.02] last:border-0 hover:bg-white/[0.02] rounded px-2 transition-colors"
@@ -96,7 +101,7 @@ function RecentCrawlsPanel({ crawls }: { crawls: any[] }) {
   );
 }
 
-function RecentFeedbackPanel({ feedback }: { feedback: any[] }) {
+function RecentFeedbackPanel({ feedback }: { feedback: RecentFeedback[] }) {
   return (
     <div className="border border-white/5 rounded-xl bg-[var(--surface-3)]/40 backdrop-blur-sm p-6 flex flex-col h-[280px]">
       <div className="mb-4 pb-3 border-b border-white/5 flex justify-between items-center">
@@ -111,7 +116,7 @@ function RecentFeedbackPanel({ feedback }: { feedback: any[] }) {
         ) : (
           <ScrollArea className="h-full pr-2">
             <div className="space-y-2">
-              {feedback.map((fb: any) => (
+              {feedback.map((fb) => (
                 <div
                   key={fb._id}
                   className="flex items-center justify-between rounded-lg border border-white/5 bg-zinc-950/20 px-3 py-2 hover:border-white/10 hover:bg-zinc-950/40 transition-colors"

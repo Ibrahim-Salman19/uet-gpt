@@ -2,6 +2,7 @@
 
 import { api } from "convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
 import { AlertTriangle, CheckCircle2, Clock, Globe, Loader2, Play, XCircle } from "lucide-react";
 import { useState } from "react";
 import { LoadingState } from "@/components/loading-state";
@@ -26,6 +27,8 @@ const statusIcons: Record<string, React.ReactNode> = {
   cancelled: <AlertTriangle className="h-3 w-3" />,
 };
 
+type CrawlJob = FunctionReturnType<typeof api.crawl.list.list>[number];
+
 export default function AdminCrawlsPage() {
   const [isTriggering, setIsTriggering] = useState(false);
   const crawls = useQuery(api.crawl.list.list, {});
@@ -36,8 +39,8 @@ export default function AdminCrawlsPage() {
     setIsTriggering(true);
     try {
       await triggerCrawl({
-        url: "https://web.uettaxila.edu.pk/",
-        maxPages: 500,
+        url: UET_CRAWL_CONFIG.seedUrls[0],
+        maxPages: UET_CRAWL_CONFIG.maxPages,
         maxDepth: UET_CRAWL_CONFIG.maxDepth,
       });
     } catch (error) {
@@ -107,7 +110,7 @@ export default function AdminCrawlsPage() {
         <div className="border border-white/5 rounded-xl bg-[var(--surface-3)]/20 overflow-hidden">
           <ScrollArea className="h-[calc(100dvh-220px)]">
             <div className="divide-y divide-white/[0.04]">
-              {crawls.map((crawl: any) => (
+              {crawls.map((crawl: CrawlJob) => (
                 <div
                   key={crawl._id}
                   className="group flex flex-col p-4 bg-transparent hover:bg-white/[0.02] transition-all duration-200 relative overflow-hidden"

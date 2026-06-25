@@ -383,11 +383,11 @@ The RAG pipeline is orchestrated by `convex/rag/retrieval.ts:retrieveContext` (a
 | # | Provider | Model | SDK | Purpose |
 |---|----------|-------|-----|---------|
 | 1 | Groq | Llama 4 Scout (`meta-llama/llama-4-scout-17b-16e-instruct`) | `@ai-sdk/groq` | Primary RAG generation |
-| 2 | Cerebras | Llama 3.3 70B (`gpt-oss-120b`) | `@ai-sdk/cerebras` | Speed fallback |
+| 2 | Cerebras | GPT-OSS 120B (`gpt-oss-120b`) | `@ai-sdk/cerebras` | Speed fallback |
 | 3 | Groq | Llama 3.1 8B (`llama-3.1-8b-instant`) | `@ai-sdk/groq` | Fast fallback |
-| 4 | Gemini | 1.5 Flash (`gemini-2.5-flash`) | `@ai-sdk/google` | Reliable fallback |
+| 4 | Gemini | 2.5 Flash (`gemini-2.5-flash`) | `@ai-sdk/google` | Reliable fallback |
 
-Chain defined in `src/lib/llm-models.ts`.
+Model IDs are the single source of truth; they live in `src/lib/llm-models.ts` (`LLM_FALLBACK_CHAIN`). Keep the human-readable labels above in sync with those IDs.
 
 ### 5.3 System Prompt
 
@@ -505,6 +505,19 @@ Cache TTLs apply to `semanticCache` entries. Document expiry TTLs apply to `docu
 | **Ingest/Reset Webhooks** | Bearer token via `CONVEX_AUTH_TOKEN` | `convex/crawl/webhook.ts` |
 
 **Note:** `auth.config.ts` currently uses `applicationID: "uet-gpt"`. If Clerk JWT audience doesn't match, `getUserIdentity()` silently returns null. Change to `"convex"` (Clerk default) or configure custom JWT template in Clerk dashboard.
+
+> **Defense-in-depth caveat:** `src/middleware.ts` (the Clerk middleware) is an
+> *intercept-only* layer for redirects and is **not** a sufficient authorization
+> boundary on its own — middleware can be bypassed (cf. CVE-2025-29927). Every
+> privileged operation must **also** enforce authZ server-side in Convex functions
+> (`requireAuth` / `requireAdmin` / `requirePermission` in `convex/auth.ts`) and in
+> route handlers. Treat middleware as UX routing, not as the gate.
+>
+> **Next.js 16 migration note:** Next.js 16 renames the middleware convention to
+> `proxy.ts` (exporting `proxy` instead of `middleware`); `src/middleware.ts` is the
+> legacy name. Track migrating `src/middleware.ts` → `src/proxy.ts` as a known item
+> (the bundled Clerk skill template under `.agents/skills/clerk-nextjs-patterns/`
+> already uses `proxy.ts`).
 
 ### 7.2 Route Protection
 
@@ -780,11 +793,11 @@ The admin interface at `/admin(.*)` provides:
 | Feedback | View user feedback with ratings and categories |
 | Settings | Configure app settings (key/value/section) |
 
-### 16.0 Admin Stats Queries (Convex v1.40+ Compliance)
+### 16.0 Admin Stats Queries (Per-Query Read-Limit Compliance)
 
-**Constraint:** Convex v1.40+ enforces ONE paginated query (`.paginate()`, `.collect()`, `.take()`) per function. Sequential queries in the same function still count.
+**Constraint:** Convex enforces per-function transaction limits — a single query/mutation may read at most ~16,384 documents / ~8 MiB and is subject to overall execution-time limits (see the Convex "Limits" docs). There is **no** "one paginated call per function" rule; `.collect()`/`.take()`/`.paginate()` may be called multiple times. The real risk is that one monolithic `dashboardStats` summing every table in a single transaction can exceed the document-read / scan limit as data grows.
 
-**Solution:** Split monolithic `dashboardStats` into 7 independent queries, each with exactly ONE paginated call. Client uses `useQuery()` hooks to fetch all in parallel.
+**Solution:** Split monolithic `dashboardStats` into 7 independent queries so each stays comfortably under the per-query read limit and can page large tables with a cursor loop. The client uses parallel `useQuery()` hooks to fetch them concurrently.
 
 | Query | Paginated Call | Returns |
 |-------|---------------|---------|

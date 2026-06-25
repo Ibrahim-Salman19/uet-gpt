@@ -175,10 +175,6 @@ describe("convex/auth helpers", () => {
         subject: "user_abc",
         tokenIdentifier: "token_abc",
       });
-      ctx.auth.getUserIdentity.mockResolvedValue({
-        subject: "user_abc",
-        tokenIdentifier: "token_abc",
-      });
       const withIndex = vi.fn().mockReturnValue({ unique: vi.fn().mockResolvedValue(null) });
       ctx.db.query.mockReturnValue({ withIndex });
       const result = await isAdmin(ctx as any);

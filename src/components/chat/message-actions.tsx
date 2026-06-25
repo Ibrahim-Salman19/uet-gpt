@@ -33,9 +33,13 @@ function CopyButton({ copied, onCopy }: { copied: boolean; onCopy: () => void })
           data-touch-target="true"
         >
           {copied ? (
-            <Check className="h-3.5 w-3.5 text-[var(--semantic-success)]" />
+            <Check
+              className="h-3.5 w-3.5 text-[var(--semantic-success)]"
+              aria-hidden="true"
+              focusable="false"
+            />
           ) : (
-            <Copy className="h-3.5 w-3.5" />
+            <Copy className="h-3.5 w-3.5" aria-hidden="true" focusable="false" />
           )}
         </Button>
       </TooltipTrigger>
@@ -61,7 +65,11 @@ function PinButton({ pinned, onPin }: { pinned: boolean; onPin: () => void }) {
           aria-label={pinned ? "Unpin message" : "Pin message"}
           data-touch-target="true"
         >
-          <Bookmark className={cn("h-3.5 w-3.5", pinned && "fill-current")} />
+          <Bookmark
+            className={cn("h-3.5 w-3.5", pinned && "fill-current")}
+            aria-hidden="true"
+            focusable="false"
+          />
         </Button>
       </TooltipTrigger>
       <TooltipContent side="top">{pinned ? "Unpin" : "Pin message"}</TooltipContent>
@@ -82,7 +90,7 @@ function EditButton({ onEdit }: { onEdit?: () => void }) {
           aria-label="Edit message"
           data-touch-target="true"
         >
-          <Pencil className="h-3.5 w-3.5" />
+          <Pencil className="h-3.5 w-3.5" aria-hidden="true" focusable="false" />
         </Button>
       </TooltipTrigger>
       <TooltipContent side="top">Edit</TooltipContent>
@@ -103,7 +111,7 @@ function DeleteButton({ onDelete }: { onDelete?: () => void }) {
           aria-label="Delete message"
           data-touch-target="true"
         >
-          <Trash2 className="h-3.5 w-3.5" />
+          <Trash2 className="h-3.5 w-3.5" aria-hidden="true" focusable="false" />
         </Button>
       </TooltipTrigger>
       <TooltipContent side="top">Delete</TooltipContent>
@@ -142,7 +150,7 @@ function FeedbackButtons({
             aria-label={feedback === "thumbsUp" ? "Remove helpful" : "Mark as helpful"}
             data-touch-target="true"
           >
-            <ThumbsUp className="h-3.5 w-3.5" />
+            <ThumbsUp className="h-3.5 w-3.5" aria-hidden="true" focusable="false" />
           </Button>
         </TooltipTrigger>
         <TooltipContent side="top">Helpful</TooltipContent>
@@ -167,7 +175,7 @@ function FeedbackButtons({
             aria-label={feedback === "thumbsDown" ? "Remove not helpful" : "Mark as not helpful"}
             data-touch-target="true"
           >
-            <ThumbsDown className="h-3.5 w-3.5" />
+            <ThumbsDown className="h-3.5 w-3.5" aria-hidden="true" focusable="false" />
           </Button>
         </TooltipTrigger>
         <TooltipContent side="top">Not helpful</TooltipContent>

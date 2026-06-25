@@ -61,15 +61,23 @@ export const getObservabilityData = query({
       settingsMap.set(s.key, s.value);
     }
 
-    const queriesTotal = (settingsMap.get("observability_queries_total") as number) ?? 0;
-    const cacheHits = (settingsMap.get("observability_cache_hits_total") as number) ?? 0;
-    const cacheMisses = (settingsMap.get("observability_cache_misses_total") as number) ?? 0;
-    const errorsTotal = (settingsMap.get("observability_errors_total") as number) ?? 0;
-    const embeddingsTotal = (settingsMap.get("observability_embeddings_total") as number) ?? 0;
-    const aggregatedSummary = settingsMap.get("observability_aggregated_summary") as
-      | string
-      | undefined;
-    const aggregatedAt = settingsMap.get("observability_aggregated_at") as number | undefined;
+    // appSettings.value is string | number | boolean; narrow to number so a
+    // counter accidentally stored as a string cannot produce NaN downstream.
+    const asNumber = (key: string): number => {
+      const raw = settingsMap.get(key);
+      return typeof raw === "number" ? raw : 0;
+    };
+
+    const queriesTotal = asNumber("observability_queries_total");
+    const cacheHits = asNumber("observability_cache_hits_total");
+    const cacheMisses = asNumber("observability_cache_misses_total");
+    const errorsTotal = asNumber("observability_errors_total");
+    const embeddingsTotal = asNumber("observability_embeddings_total");
+    const aggregatedSummaryRaw = settingsMap.get("observability_aggregated_summary");
+    const aggregatedSummary =
+      typeof aggregatedSummaryRaw === "string" ? aggregatedSummaryRaw : undefined;
+    const aggregatedAtRaw = settingsMap.get("observability_aggregated_at");
+    const aggregatedAt = typeof aggregatedAtRaw === "number" ? aggregatedAtRaw : undefined;
     const stalenessRaw = settingsMap.get("observability_staleness_summary") as string | undefined;
 
     const totalCache = cacheHits + cacheMisses;

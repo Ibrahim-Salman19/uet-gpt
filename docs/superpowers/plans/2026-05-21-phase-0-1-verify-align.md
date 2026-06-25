@@ -1,5 +1,13 @@
 # Phase 0–1 Verify & Align Implementation Plan
 
+> **⚠️ HISTORICAL / SUPERSEDED (2026-05-21).** This implementation plan is a
+> point-in-time artifact and is **not** current guidance. Its core architectural
+> step — "replace manual `documents/chunks/threads/messages` schema definitions
+> with component-managed tables" — was only partially carried out: `documents` and
+> `crawledChunks` remain **manually defined** in `convex/schema.ts`. Do **not**
+> delete those tables. See `architecture.md` §4 for the authoritative schema. Kept
+> for historical context only.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Verify and fill all Phase 0 scaffolding gaps and align the Convex schema to component-managed tables for Phase 1, strictly following `todo.md` (Path A free tier).

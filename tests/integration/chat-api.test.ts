@@ -5,12 +5,12 @@ vi.hoisted(() => {
   process.env.UPSTASH_REDIS_REST_TOKEN = "mock_token";
 });
 
-import { describe, expect, it, beforeEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
-  FALLBACK_MAX,
   buildSystemPrompt,
   checkChatRateLimit,
   extractText,
+  FALLBACK_MAX,
   getModelPriorities,
 } from "./helpers";
 
@@ -59,6 +59,13 @@ describe("Chat API Integration", () => {
       // Ensure redis env variables are mock-set to pass checkChatRateLimit guards
       vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://mock.upstash.io");
       vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "mock_token");
+    });
+
+    // Also reset the module-level shared counter after each test so leaked
+    // counts cannot bleed into a subsequent test (or suite) and cause
+    // order-dependent rate-limit failures.
+    afterEach(() => {
+      counts.clear();
     });
 
     it("rate limits after exceeding threshold", async () => {

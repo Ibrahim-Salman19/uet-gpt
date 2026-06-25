@@ -69,8 +69,12 @@ export const insert = mutation({
     // Derive admin tier from the authoritative DB role (same source as auth.ts),
     // not the Clerk session-token claim which may be absent/unconfigured.
     const isAdmin = user.role === "admin" || user.role === "superadmin";
+    // Count only user turns toward the per-user message limit so the limit is
+    // deterministic regardless of whether assistant turns are persisted here.
+    // The global token budget is enforced for every insert.
+    const countMessage = args.role === "user";
     const [, thread] = await Promise.all([
-      enforceRateLimit(ctx, user.clerkId, tokenEstimate, isAdmin),
+      enforceRateLimit(ctx, user.clerkId, tokenEstimate, isAdmin, countMessage),
       ctx.runQuery(components.agent.threads.getThread, {
         threadId: args.threadId,
       }),

@@ -158,12 +158,14 @@ export const failStuckJobs = internalMutation({
 
     const now = Date.now();
     const TIMEOUT_MS = 3 * 60 * 60 * 1000; // 3 hours (must exceed 2h cron interval to avoid race)
+    const TIMEOUT_HOURS = TIMEOUT_MS / (60 * 60 * 1000);
 
     for (const job of runningJobs) {
       if (now - job.startedAt > TIMEOUT_MS) {
         await ctx.db.patch(job._id, {
           status: "failed",
-          error: "Job timed out (no webhook response after 2 hours)",
+          // Message derived from TIMEOUT_MS so it always matches the actual threshold.
+          error: `Job timed out (no webhook response after ${TIMEOUT_HOURS} hours)`,
           completedAt: now,
         });
       }

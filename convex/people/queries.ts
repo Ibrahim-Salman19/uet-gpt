@@ -1,17 +1,10 @@
 import { type QueryCtx, query } from "../_generated/server";
 import { requireAdmin } from "../auth";
 
-const FACULTY_PATTERNS = ["faculty", "professor", "dr.", "prof."];
-const STAFF_PATTERNS = ["staff"];
-const ADMIN_PATTERNS = ["admin", "head", "registrar", "chancellor"];
-
-function classifyDocument(url: string, title: string): "faculty" | "staff" | "admin" | null {
-  const text = `${url} ${title}`.toLowerCase();
-  if (FACULTY_PATTERNS.some((p) => text.includes(p))) return "faculty";
-  if (STAFF_PATTERNS.some((p) => text.includes(p))) return "staff";
-  if (ADMIN_PATTERNS.some((p) => text.includes(p))) return "admin";
-  return null;
-}
+// NOTE: document classification (the FACULTY/STAFF/ADMIN pattern matching) lives
+// in convex/doc/create.ts and is persisted to `documents.personType` at create
+// time. This query reads the persisted value via the `by_personType` index, so
+// no local classifier is needed here — a former copy was dead code and removed.
 
 async function countDocuments(ctx: QueryCtx, filterType?: "faculty" | "staff" | "admin") {
   let count = 0;

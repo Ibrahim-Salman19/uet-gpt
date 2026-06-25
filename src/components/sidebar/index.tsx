@@ -1,8 +1,9 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
-import { Bookmark, X } from "lucide-react";
-import { useCallback, useState } from "react";
+import { AlertCircle, Bookmark, Settings, User, X } from "lucide-react";
+import Image from "next/image";
+import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { LoadingState } from "@/components/loading-state";
 import { usePreferences } from "@/components/preferences-provider";
@@ -63,7 +64,7 @@ function PinnedSection({
         {pins.map((pin) => (
           <div
             key={pin.id}
-            className="group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-zinc-400 hover:bg-white/5 hover:text-zinc-200 transition-all duration-200"
+            className="group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-[var(--text-secondary)] hover:bg-white/5 hover:text-[var(--text-primary)] transition-all duration-200"
           >
             <Bookmark className="h-3 w-3 shrink-0 text-[var(--accent)] opacity-70 group-hover:opacity-100" />
             <button
@@ -90,7 +91,7 @@ function PinnedSection({
               className="opacity-0 group-hover:opacity-60 hover:!opacity-100 p-0.5"
               aria-label="Remove pin"
             >
-              <X className="h-3 w-3 text-zinc-500 hover:text-red-400" />
+              <X className="h-3 w-3 text-[var(--text-muted)] hover:text-[var(--destructive)]" />
             </button>
           </div>
         ))}
@@ -110,7 +111,7 @@ function HistorySection({
 }) {
   return (
     <>
-      <div className="text-[9px] font-mono text-zinc-400 tracking-wider mb-3 mt-1 px-3 uppercase select-none">
+      <div className="text-[9px] font-mono text-[var(--text-secondary)] tracking-wider mb-3 mt-1 px-3 uppercase select-none">
         Recent
       </div>
       <SidebarHistory chats={chats} onDelete={onDelete} />
@@ -123,18 +124,8 @@ function HistorySection({
 function ErrorState({ message }: { message: string }) {
   return (
     <div className="flex-1 flex flex-col overflow-hidden items-center justify-center p-4 text-center">
-      <svg
-        className="w-8 h-8 text-red-500/80 mb-2"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-      >
-        <circle cx="12" cy="12" r="10" />
-        <line x1="12" y1="8" x2="12" y2="12" />
-        <line x1="12" y1="16" x2="12.01" y2="16" />
-      </svg>
-      <span className="text-xs text-zinc-400 font-medium">{message}</span>
+      <AlertCircle className="w-8 h-8 text-[var(--destructive)]/80 mb-2" aria-hidden="true" />
+      <span className="text-xs text-[var(--text-secondary)] font-medium">{message}</span>
     </div>
   );
 }
@@ -156,27 +147,21 @@ function UserProfileFooter({
     <div className="p-3 border-t border-[var(--surface-5)] flex items-center justify-between gap-2 shrink-0 bg-[var(--surface-1)]/60">
       <div className="flex items-center gap-3 min-w-0">
         {user?.imageUrl ? (
-          <img
+          <Image
             src={user.imageUrl}
             alt=""
             aria-hidden="true"
+            width={32}
+            height={32}
+            sizes="32px"
             className="h-8 w-8 rounded-full border border-[var(--accent)]/20 object-cover shrink-0"
           />
         ) : (
           <div
             aria-hidden="true"
-            className="h-8 w-8 rounded-full bg-zinc-800 border border-white/5 flex items-center justify-center shrink-0"
+            className="h-8 w-8 rounded-full bg-[var(--surface-3)] border border-[var(--surface-5)] flex items-center justify-center shrink-0"
           >
-            <svg
-              className="w-4 h-4 text-zinc-400"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
+            <User className="w-4 h-4 text-[var(--text-secondary)]" aria-hidden="true" />
           </div>
         )}
         <button
@@ -184,29 +169,20 @@ function UserProfileFooter({
           className="text-left min-w-0 hover:opacity-80 transition-opacity"
           aria-label="Open Preferences"
         >
-          <div className="text-[13px] font-medium text-zinc-200 truncate select-none">
+          <div className="text-[13px] font-medium text-[var(--text-primary)] truncate select-none">
             {user?.fullName || user?.primaryEmailAddress?.emailAddress || "Guest User"}
           </div>
-          <div className="text-[10px] text-zinc-400 font-mono truncate hover:text-zinc-300 select-none">
+          <div className="text-[10px] text-[var(--text-secondary)] font-mono truncate hover:text-[var(--text-primary)] select-none">
             Preferences
           </div>
         </button>
       </div>
       <button
         onClick={onOpenSettings}
-        className="p-2 text-zinc-500 hover:text-zinc-300 hover:bg-white/5 rounded-lg transition-all active:scale-95 shrink-0"
+        className="p-2 text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-white/5 rounded-lg transition-all active:scale-95 shrink-0"
         aria-label="Open Settings"
       >
-        <svg
-          className="w-4 h-4 transition-colors"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
-          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" />
-        </svg>
+        <Settings className="w-4 h-4 transition-colors" aria-hidden="true" />
       </button>
     </div>
   );
@@ -218,14 +194,22 @@ export function Sidebar({ className }: SidebarProps) {
   const { pinnedHighlights, removePin, setSettingsOpen } = usePreferences();
   const { user } = useUser();
 
-  const chatItems: ChatItem[] = threads.map((t) => ({
-    id: t._id,
-    title: t.title ?? "New Chat",
-  }));
+  const chatItems: ChatItem[] = useMemo(
+    () =>
+      threads.map((t) => ({
+        id: t._id,
+        title: t.title ?? "New Chat",
+      })),
+    [threads],
+  );
 
-  const filteredChats = debouncedQuery
-    ? chatItems.filter((c) => c.title.toLowerCase().includes(debouncedQuery.toLowerCase()))
-    : chatItems;
+  const filteredChats = useMemo(
+    () =>
+      debouncedQuery
+        ? chatItems.filter((c) => c.title.toLowerCase().includes(debouncedQuery.toLowerCase()))
+        : chatItems,
+    [chatItems, debouncedQuery],
+  );
 
   const handleDelete = useCallback(
     (e: React.MouseEvent, id: string) => {

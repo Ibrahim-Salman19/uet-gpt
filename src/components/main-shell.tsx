@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { DiagnosticsPanel } from "@/components/diagnostics-panel";
 import { usePreferences } from "@/components/preferences-provider";
 import { Sidebar } from "@/components/sidebar";
-import { cn } from "@/lib/utils";
+import { cn, copyToClipboard } from "@/lib/utils";
 
 interface MainShellProps {
   children: React.ReactNode;
@@ -416,8 +416,8 @@ function MobileBottomNav({ visible }: { visible: boolean }) {
               <span className="relative z-10">{item.icon(isActive)}</span>
               <span
                 className={cn(
-                  "relative z-10 text-[10px] font-medium tracking-wide transition-all duration-200",
-                  isActive ? "text-[var(--accent)]" : "text-zinc-600",
+                  "relative z-10 text-[11px] font-medium tracking-wide transition-all duration-200",
+                  isActive ? "text-[var(--accent)]" : "text-zinc-400",
                 )}
               >
                 {item.label}
@@ -453,10 +453,13 @@ function useSidebarKeyboardShortcuts(closeSidebar: () => void, toggleSidebar: ()
 // ── Share Button Handler ──
 
 function useShareHandler() {
-  return React.useCallback(() => {
-    if (typeof window !== "undefined") {
-      navigator.clipboard.writeText(window.location.href);
+  return React.useCallback(async () => {
+    if (typeof window === "undefined") return;
+    const success = await copyToClipboard(window.location.href);
+    if (success) {
       toast.success("Share link copied!");
+    } else {
+      toast.error("Could not copy the share link");
     }
   }, []);
 }
@@ -483,23 +486,27 @@ export function MainShell({ children }: MainShellProps) {
   const [inputFocused, setInputFocused] = React.useState(false);
 
   React.useEffect(() => {
+    const isTextEntry = (el: Element | null): boolean =>
+      !!el &&
+      (el.tagName === "INPUT" ||
+        el.tagName === "TEXTAREA" ||
+        (el as HTMLElement).isContentEditable);
+
     const handleFocusIn = (e: FocusEvent) => {
-      const target = e.target as HTMLElement;
-      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
+      if (isTextEntry(e.target as Element | null)) {
         setInputFocused(true);
       }
     };
 
     const handleFocusOut = (e: FocusEvent) => {
       const target = e.target as HTMLElement;
-      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
-        // Delay setting state in case focus is moving to another input/textarea
-        setTimeout(() => {
-          const activeEl = document.activeElement;
-          if (!activeEl || (activeEl.tagName !== "INPUT" && activeEl.tagName !== "TEXTAREA")) {
-            setInputFocused(false);
-          }
-        }, 50);
+      if (isTextEntry(target)) {
+        // Inspect where focus is moving to directly (no timeout race). If it is
+        // not another text-entry control, mark inputs as no longer focused.
+        const next = e.relatedTarget as Element | null;
+        if (!isTextEntry(next)) {
+          setInputFocused(false);
+        }
       }
     };
 

@@ -22,7 +22,11 @@ function UserSync() {
   const { user, isLoaded: isClerkLoaded, isSignedIn } = useUser();
   const { isAuthenticated: isConvexAuthenticated } = useConvexAuth();
   const createUser = useMutation(api.users.getOrCreate);
-  const lastSyncedId = React.useRef<string | null>(null);
+  // Id of the user that has been *successfully* synced; null until a sync lands.
+  const syncedId = React.useRef<string | null>(null);
+  // Guards against launching a second concurrent attempt while one is in flight
+  // (the effect can re-run on dep changes before the async work resolves).
+  const inFlight = React.useRef(false);
 
   React.useEffect(() => {
     if (
@@ -30,12 +34,14 @@ function UserSync() {
       !isSignedIn ||
       !user ||
       !isConvexAuthenticated ||
-      lastSyncedId.current === user.id
+      syncedId.current === user.id ||
+      inFlight.current
     )
       return;
-    lastSyncedId.current = user.id;
 
+    inFlight.current = true;
     const primary = user.primaryEmailAddress;
+    const targetId = user.id;
     retryWithBackoff(
       () =>
         createUser({
@@ -49,11 +55,21 @@ function UserSync() {
         baseDelayMs: 1000,
         onRetry: (attempt, err) => console.warn(`User sync retry ${attempt}:`, err),
       },
-    ).catch((err) => {
-      console.error("Failed to sync user after retries:", err);
-      // Do NOT reset lastSyncedId — prevent infinite loop
-      // The sync will be retried on the next user change (sign-in, etc.)
-    });
+    )
+      .then(() => {
+        // Mark as synced only on success so a transient failure does not
+        // permanently suppress sync for the session.
+        syncedId.current = targetId;
+      })
+      .catch((err) => {
+        console.error("Failed to sync user after retries:", err);
+        // Leave syncedId unset so a later reconnect (isConvexAuthenticated
+        // toggling back to true) re-arms the effect and retries. The inFlight
+        // guard plus the effect's dependency gating prevent a tight loop.
+      })
+      .finally(() => {
+        inFlight.current = false;
+      });
   }, [isClerkLoaded, isSignedIn, user, isConvexAuthenticated, createUser]);
 
   return null;
@@ -64,6 +80,14 @@ export function Providers({ children }: ProvidersProps) {
     if (!convexUrl) return null;
     return new ConvexReactClient(convexUrl);
   });
+
+  // Close the client on unmount to release the WebSocket. This is a root,
+  // app-lifetime provider so this only fires on full teardown.
+  React.useEffect(() => {
+    return () => {
+      convexClient?.close().catch((err) => console.error("Failed to close Convex client:", err));
+    };
+  }, [convexClient]);
 
   const content = (
     <TooltipProvider delayDuration={300} skipDelayDuration={100}>

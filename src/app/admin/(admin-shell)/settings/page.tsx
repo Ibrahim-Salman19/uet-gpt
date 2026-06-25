@@ -24,6 +24,12 @@ interface SettingsField {
   type: "text" | "number" | "boolean" | "select";
   defaultValue: string | number | boolean;
   options?: { label: string; value: string }[];
+  /** Inclusive lower bound for numeric inputs (also applied as a clamp on save). */
+  min?: number;
+  /** Inclusive upper bound for numeric inputs (also applied as a clamp on save). */
+  max?: number;
+  /** Step granularity for numeric inputs. */
+  step?: number;
   /**
    * Marks a control whose value is persisted but NOT yet read by any runtime
    * enforcement path (rate limiter / auth gate / RAG pipeline). Surfaced in the
@@ -66,13 +72,32 @@ const settingsSections: SettingsSection[] = [
     description: "Configure university web indexers and crawl depths",
     icon: <Globe className="h-4 w-4" />,
     fields: [
-      { key: "maxPagesPerCrawl", label: "Max Pages Per Crawl", type: "number", defaultValue: 500 },
-      { key: "maxCrawlDepth", label: "Max Crawl Depth", type: "number", defaultValue: 5 },
+      {
+        key: "maxPagesPerCrawl",
+        label: "Max Pages Per Crawl",
+        type: "number",
+        defaultValue: 500,
+        min: 1,
+        max: 10000,
+        step: 1,
+      },
+      {
+        key: "maxCrawlDepth",
+        label: "Max Crawl Depth",
+        type: "number",
+        defaultValue: 5,
+        min: 1,
+        max: 20,
+        step: 1,
+      },
       {
         key: "crawlIntervalHours",
         label: "Crawl Interval (hours)",
         type: "number",
         defaultValue: 24,
+        min: 1,
+        max: 8760,
+        step: 1,
       },
       { key: "autoCrawlEnabled", label: "Auto-crawl enabled", type: "boolean", defaultValue: true },
     ],
@@ -88,6 +113,9 @@ const settingsSections: SettingsSection[] = [
         label: "Max Context Chunks",
         type: "number",
         defaultValue: 10,
+        min: 1,
+        max: 50,
+        step: 1,
         notEnforced: true,
       },
       {
@@ -95,6 +123,9 @@ const settingsSections: SettingsSection[] = [
         label: "Similarity Threshold",
         type: "number",
         defaultValue: 0.7,
+        min: 0,
+        max: 1,
+        step: 0.05,
         notEnforced: true,
       },
       {
@@ -110,7 +141,15 @@ const settingsSections: SettingsSection[] = [
         ],
       },
       { key: "cacheEnabled", label: "Semantic cache enabled", type: "boolean", defaultValue: true },
-      { key: "cacheTTLHours", label: "Cache TTL (hours)", type: "number", defaultValue: 24 },
+      {
+        key: "cacheTTLHours",
+        label: "Cache TTL (hours)",
+        type: "number",
+        defaultValue: 24,
+        min: 1,
+        max: 8760,
+        step: 1,
+      },
     ],
   },
   {
@@ -150,6 +189,9 @@ const settingsSections: SettingsSection[] = [
         label: "Rate limit (requests/minute)",
         type: "number",
         defaultValue: 60,
+        min: 1,
+        max: 10000,
+        step: 1,
         notEnforced: true,
       },
     ],
@@ -186,10 +228,19 @@ export default function AdminSettingsPage() {
         [];
       for (const section of settingsSections) {
         for (const field of section.fields) {
-          const value = settings[field.key];
-          if (value !== undefined) {
-            settingsToSave.push({ key: field.key, value, section: section.key });
+          let value = settings[field.key];
+          if (value === undefined) continue;
+          if (field.type === "number") {
+            // Coerce empty / NaN inputs to the field default, then clamp to bounds
+            // so semantically invalid config (negative depth, similarity > 1,
+            // rate limit of 0) can never be persisted.
+            let n = Number(value);
+            if (!Number.isFinite(n)) n = field.defaultValue as number;
+            if (field.min !== undefined) n = Math.max(field.min, n);
+            if (field.max !== undefined) n = Math.min(field.max, n);
+            value = n;
           }
+          settingsToSave.push({ key: field.key, value, section: section.key });
         }
       }
       await upsertSettingsBatch({ settings: settingsToSave });
@@ -333,6 +384,9 @@ export default function AdminSettingsPage() {
                         id={field.key}
                         type={field.type}
                         value={settings[field.key] as string}
+                        min={field.type === "number" ? field.min : undefined}
+                        max={field.type === "number" ? field.max : undefined}
+                        step={field.type === "number" ? field.step : undefined}
                         onChange={(e) =>
                           handleChange(
                             field.key,

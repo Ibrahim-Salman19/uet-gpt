@@ -13,6 +13,14 @@ const ScrollArea = React.forwardRef<
     className={cn("relative overflow-hidden", className)}
     {...props}
   >
+    {/*
+     * [&>div]:!block overrides Radix's default `display:table` on its inner
+     * content wrapper. Radix uses a table wrapper so the viewport reports the
+     * content's intrinsic width, but that breaks 100%-width and flex children
+     * (the sidebar renders full-width flex/sticky content inside this viewport).
+     * Forcing `display:block` restores normal block/flex flow. Revisit if Radix
+     * ships a width fix; the `!important` is required to beat the inline style.
+     */}
     <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit] [&>div]:!block">
       {children}
     </ScrollAreaPrimitive.Viewport>

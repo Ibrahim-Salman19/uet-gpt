@@ -3,10 +3,18 @@ import { z } from "zod";
 import { extractText } from "@/lib/prompt";
 import { checkCsrf } from "./csrf";
 
+// Per-message content limit. Applied to both `content` and each `parts[].text`
+// so a client cannot bypass the cap by splitting text across many `parts`.
+const MAX_MESSAGE_CHARS = 8000;
+const MAX_PARTS_PER_MESSAGE = 32;
+
 const MessageSchema = z.object({
   role: z.enum(["user", "assistant"]),
-  content: z.string().max(8000).optional(),
-  parts: z.array(z.object({ type: z.string(), text: z.string() })).optional(),
+  content: z.string().max(MAX_MESSAGE_CHARS).optional(),
+  parts: z
+    .array(z.object({ type: z.string(), text: z.string().max(MAX_MESSAGE_CHARS) }))
+    .max(MAX_PARTS_PER_MESSAGE)
+    .optional(),
 });
 
 const ChatRequestSchema = z
@@ -47,6 +55,14 @@ export function parseBodyOrError(
     role: m.role,
     content: extractText(m as { content?: string; parts?: { type: string; text: string }[] }),
   }));
+
+  // Defense in depth: even with per-field caps, the extracted text (which feeds
+  // the LLM prompt) must stay within an overall budget to bound token cost.
+  const MAX_TOTAL_CHARS = 32_000;
+  const totalChars = messages.reduce((sum, m) => sum + m.content.length, 0);
+  if (totalChars > MAX_TOTAL_CHARS) {
+    return NextResponse.json({ error: "Request body too large" }, { status: 413 });
+  }
 
   return { messages, rawMessages: parsed.data.messages };
 }

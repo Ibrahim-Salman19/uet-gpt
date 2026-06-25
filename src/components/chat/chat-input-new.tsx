@@ -4,6 +4,9 @@ import * as React from "react";
 import { usePreferences } from "@/components/preferences-provider";
 import { cn } from "@/lib/utils";
 
+/** Maximum auto-grow height of the textarea, in pixels (matches the CSS max-h-36 = 9rem). */
+const MAX_TEXTAREA_HEIGHT = 144;
+
 interface ChatInputNewProps {
   onSend: (message: string) => void;
   onStop?: () => void;
@@ -16,12 +19,10 @@ function SendButton({
   isLoading,
   onStop,
   canSend,
-  onSubmit,
 }: {
   isLoading?: boolean;
   onStop?: () => void;
   canSend: boolean;
-  onSubmit: (e?: React.FormEvent) => void;
 }) {
   if (isLoading && onStop) {
     return (
@@ -79,11 +80,13 @@ export function ChatInputNew({
   // Register as the voice transcript receiver
   React.useEffect(() => {
     const receiveVoiceText = (text: string) => {
-      setInput(text);
+      // Append the transcript to any in-progress text instead of replacing it,
+      // so voice input never destroys what the user has already typed.
+      setInput((prev) => (prev ? `${prev.trimEnd()} ${text}` : text));
       requestAnimationFrame(() => {
         if (inputRef.current) {
           inputRef.current.style.height = "auto";
-          inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 144)}px`;
+          inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, MAX_TEXTAREA_HEIGHT)}px`;
           inputRef.current.focus();
         }
       });
@@ -131,7 +134,7 @@ export function ChatInputNew({
       }
       const el = e.target;
       el.style.height = "auto";
-      el.style.height = `${Math.min(el.scrollHeight, 144)}px`;
+      el.style.height = `${Math.min(el.scrollHeight, MAX_TEXTAREA_HEIGHT)}px`;
     },
     [playTypingSound],
   );
@@ -188,36 +191,37 @@ export function ChatInputNew({
             onKeyDown={handleKeyDown}
             placeholder="Ask about UET Taxila…"
             rows={1}
-            disabled={isLoading && !onStop}
+            // Keep the input editable while a request is in flight so a hung
+            // send can never soft-lock the textarea; submission itself is still
+            // guarded in handleSubmit/handleKeyDown via isLoading.
             className="chat-textarea w-full resize-none bg-transparent px-2 py-2.5 md:px-3 md:py-2 text-[16px] md:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none max-h-36 custom-scroll font-sans leading-relaxed disabled:opacity-50"
             spellCheck={false}
             autoComplete="off"
           />
         </div>
 
-        <SendButton
-          isLoading={isLoading}
-          onStop={onStop}
-          canSend={canSend}
-          onSubmit={handleSubmit}
-        />
+        <SendButton isLoading={isLoading} onStop={onStop} canSend={canSend} />
       </div>
 
-      {/* Telemetry footer */}
-      <div
-        className="hidden md:flex justify-between items-center px-2 text-[9px] font-mono text-[var(--text-muted)] select-none"
-        aria-hidden="true"
-      >
+      {/* Telemetry footer. The accuracy disclaimer is exposed to assistive tech;
+          only the decorative GENERATING/IDLE state is hidden. */}
+      <div className="hidden md:flex justify-between items-center px-2 text-[9px] font-mono text-[var(--text-muted)] select-none">
         <span>UET GPT may produce inaccurate information. Verify critical details.</span>
         <span
           className={cn(
             "transition-colors",
             isLoading ? "text-[var(--accent)]/60 animate-pulse" : "text-[var(--text-muted)]/50",
           )}
+          aria-hidden="true"
         >
           {isLoading ? "GENERATING…" : "IDLE"}
         </span>
       </div>
+
+      {/* Accessible streaming-state announcement for screen readers. */}
+      <span role="status" aria-live="polite" className="sr-only">
+        {isLoading ? "Generating response" : ""}
+      </span>
     </form>
   );
 }

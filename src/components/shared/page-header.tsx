@@ -12,13 +12,13 @@ interface PageHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   size?: "sm" | "md" | "lg";
 }
 
-const titleSizeClasses: Record<string, string> = {
+const titleSizeClasses: Record<NonNullable<PageHeaderProps["size"]>, string> = {
   sm: "text-lg sm:text-xl",
   md: "text-xl sm:text-2xl",
   lg: "text-2xl sm:text-3xl",
 };
 
-const descriptionSizeClasses: Record<string, string> = {
+const descriptionSizeClasses: Record<NonNullable<PageHeaderProps["size"]>, string> = {
   sm: "text-sm",
   md: "text-sm sm:text-base",
   lg: "text-base sm:text-lg",

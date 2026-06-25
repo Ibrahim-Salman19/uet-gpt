@@ -129,6 +129,15 @@ const accentThemes: Record<AccentTheme, Record<string, string>> = {
   },
 };
 
+function safeSetItem(key: string, value: string): void {
+  try {
+    localStorage.setItem(key, value);
+  } catch (err) {
+    // Private mode / quota exceeded — persistence is best-effort.
+    console.error(`Failed to persist "${key}":`, err);
+  }
+}
+
 function loadBooleanInitial(key: string, defaultVal: boolean): boolean {
   try {
     const val = localStorage.getItem(key);
@@ -151,12 +160,46 @@ function loadAccentThemeInitial(): AccentTheme {
   return stored && accentThemes[stored] ? stored : "indigo";
 }
 
+const MAX_PINNED_HIGHLIGHTS = 200;
+
+function isValidPin(value: unknown): value is PinnedHighlight {
+  if (typeof value !== "object" || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return (
+    typeof v.id === "string" &&
+    typeof v.query === "string" &&
+    typeof v.content === "string" &&
+    typeof v.createdAt === "number"
+  );
+}
+
 function loadPinsInitial(): PinnedHighlight[] {
   try {
     const stored = localStorage.getItem("pref-pinned-highlights");
-    return stored ? JSON.parse(stored) : [];
+    if (!stored) return [];
+    const parsed = JSON.parse(stored);
+    if (!Array.isArray(parsed)) return [];
+    // Validate each item so corrupted/legacy data can't crash consumers that
+    // assume `.content` exists (e.g. isPinned), and cap the array length.
+    return parsed.filter(isValidPin).slice(-MAX_PINNED_HIGHLIGHTS);
   } catch {
     return [];
+  }
+}
+
+function generatePinId(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return `pin_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function savePins(pins: PinnedHighlight[]): void {
+  try {
+    localStorage.setItem("pref-pinned-highlights", JSON.stringify(pins));
+  } catch (err) {
+    // localStorage can throw in private mode or when the quota is exceeded.
+    console.error("Failed to persist pinned highlights:", err);
   }
 }
 
@@ -239,13 +282,18 @@ function syncPrefFromConvex<T>(
 ): void {
   if (val == null) return;
   setter(val);
-  try {
-    localStorage.setItem(storageKey, String(val));
-  } catch {}
+  safeSetItem(storageKey, String(val));
+}
+
+interface ConvexUserPreferences {
+  preferences?: {
+    fontSize?: string | null;
+    theme?: string | null;
+  } | null;
 }
 
 function useConvexPreferenceSync(
-  userData: any,
+  userData: ConvexUserPreferences | null | undefined,
   setFontSizeState: (v: "small" | "medium" | "large") => void,
   setAccentThemeState: (v: AccentTheme) => void,
 ) {
@@ -254,11 +302,15 @@ function useConvexPreferenceSync(
 
   React.useEffect(() => {
     syncPrefFromConvex(
-      fontSize as "small" | "medium" | "large" | undefined,
+      isValidFontSize(typeof fontSize === "string" ? fontSize : null) ? fontSize : undefined,
       setFontSizeState,
       "pref-font-size",
     );
-    syncPrefFromConvex(theme as AccentTheme | undefined, setAccentThemeState, "pref-accent-theme");
+    // Only apply a server-provided accent theme if it is a known key; otherwise
+    // ignore it rather than trusting arbitrary stored data as a valid theme.
+    const validTheme =
+      typeof theme === "string" && theme in accentThemes ? (theme as AccentTheme) : undefined;
+    syncPrefFromConvex(validTheme, setAccentThemeState, "pref-accent-theme");
   }, [fontSize, theme, setFontSizeState, setAccentThemeState]);
 }
 
@@ -279,7 +331,7 @@ function useThemeEffect(accentTheme: AccentTheme) {
         root.style.setProperty(key, val);
       });
     }
-    localStorage.setItem("pref-accent-theme", accentTheme);
+    safeSetItem("pref-accent-theme", accentTheme);
   }, [accentTheme]);
 }
 
@@ -299,23 +351,23 @@ function usePreferencePersistence({
   typingSoundEnabled: boolean;
 }) {
   React.useEffect(() => {
-    localStorage.setItem("pref-webgl", String(webglEnabled));
+    safeSetItem("pref-webgl", String(webglEnabled));
   }, [webglEnabled]);
 
   React.useEffect(() => {
-    localStorage.setItem("pref-glow", String(glowEnabled));
+    safeSetItem("pref-glow", String(glowEnabled));
   }, [glowEnabled]);
 
   React.useEffect(() => {
-    localStorage.setItem("pref-sounds", String(soundsEnabled));
+    safeSetItem("pref-sounds", String(soundsEnabled));
   }, [soundsEnabled]);
 
   React.useEffect(() => {
-    localStorage.setItem("pref-typing-anim", String(typingAnimEnabled));
+    safeSetItem("pref-typing-anim", String(typingAnimEnabled));
   }, [typingAnimEnabled]);
 
   React.useEffect(() => {
-    localStorage.setItem("pref-typing-sound", String(typingSoundEnabled));
+    safeSetItem("pref-typing-sound", String(typingSoundEnabled));
   }, [typingSoundEnabled]);
 
   React.useEffect(() => {
@@ -325,14 +377,16 @@ function usePreferencePersistence({
     } else {
       body.classList.add("reduce-micro-animations");
     }
-    localStorage.setItem("pref-anims", String(animsEnabled));
+    safeSetItem("pref-anims", String(animsEnabled));
   }, [animsEnabled]);
 }
 
 function useGlobalClickSound(soundsEnabled: boolean, playTapSound: () => void) {
   React.useEffect(() => {
+    // Don't attach the document-level listener at all when sounds are off, so we
+    // avoid running closest() on every click in the app for no reason.
+    if (!soundsEnabled) return;
     const handleGlobalClick = (e: MouseEvent) => {
-      if (!soundsEnabled) return;
       const target = (e.target as HTMLElement).closest(
         'button:not([data-custom-sound="true"]), [role="tab"], [role="switch"], a, input[type="submit"]',
       );
@@ -355,8 +409,14 @@ function useVoiceTranscriptCallback() {
   return { voiceTranscriptCallback: callback, setVoiceTranscriptCallback: setFn };
 }
 
+type UpdatePreferencesFn = (args: {
+  theme?: string;
+  fontSize?: string;
+  model?: "llama-3.1-8b" | "llama-4-scout";
+}) => Promise<unknown>;
+
 function usePreferenceActions(
-  updatePreferences: any,
+  updatePreferences: UpdatePreferencesFn,
   setters: {
     setAccentThemeState: (v: AccentTheme) => void;
     setWebglEnabled: (v: boolean | ((p: boolean) => boolean)) => void;
@@ -373,15 +433,26 @@ function usePreferenceActions(
 ) {
   const setAccentTheme = React.useCallback(
     (theme: AccentTheme) => {
+      // Apply locally immediately for responsiveness, then persist. Only surface
+      // success once the mutation resolves so a failed save isn't reported as OK.
       setters.setAccentThemeState(theme);
-      updatePreferences({ theme }).catch(console.error);
-      toast.success(`Theme switched to ${theme.charAt(0).toUpperCase() + theme.slice(1)}`);
+      updatePreferences({ theme })
+        .then(() => {
+          toast.success(`Theme switched to ${theme.charAt(0).toUpperCase() + theme.slice(1)}`);
+        })
+        .catch((err: unknown) => {
+          console.error("Failed to persist accent theme:", err);
+          toast.error("Theme applied locally but could not be saved");
+        });
     },
     [updatePreferences],
   );
 
   const toggleSetting = React.useCallback(
     (key: "webgl" | "glow" | "anims" | "sounds" | "typingAnim" | "typingSound") => {
+      // NOTE: these toggles are intentionally device-local (persisted only to
+      // localStorage via usePreferencePersistence); they are not synced to
+      // Convex. The success toast reflects the local update completing.
       const toggleFns: Record<string, () => void> = {
         webgl: () => setters.setWebglEnabled((p) => !p),
         glow: () => setters.setGlowEnabled((p) => !p),
@@ -428,13 +499,13 @@ function usePreferenceActions(
       const updated = [
         ...prev,
         {
-          id: `pin_${Math.random().toString(36).slice(2, 9)}`,
+          id: generatePinId(),
           query,
           content,
           createdAt: Date.now(),
         },
-      ];
-      localStorage.setItem("pref-pinned-highlights", JSON.stringify(updated));
+      ].slice(-MAX_PINNED_HIGHLIGHTS);
+      savePins(updated);
       toast.success("Added to pinned highlights");
       return updated;
     });
@@ -443,7 +514,7 @@ function usePreferenceActions(
   const removePin = React.useCallback((id: string) => {
     setters.setPinnedHighlights((prev) => {
       const updated = prev.filter((p) => p.id !== id);
-      localStorage.setItem("pref-pinned-highlights", JSON.stringify(updated));
+      savePins(updated);
       toast.success("Removed from pinned highlights");
       return updated;
     });
@@ -649,7 +720,11 @@ function useAudioSynth(soundsEnabled: boolean, typingSoundEnabled: boolean) {
       gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
       osc.start(ctx.currentTime);
       osc.stop(ctx.currentTime + duration + 0.02);
-    } catch {}
+    } catch (err) {
+      // Best-effort cosmetic audio; AudioContext can fail (autoplay policy,
+      // unsupported browser). Log for diagnostics rather than swallowing silently.
+      console.warn("playTone failed:", err);
+    }
   }
 
   const chimeTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -706,9 +781,13 @@ function useAudioSynth(soundsEnabled: boolean, typingSoundEnabled: boolean) {
           gain2.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.3);
           osc2.start(ctx.currentTime);
           osc2.stop(ctx.currentTime + 0.35);
-        } catch (e) {}
+        } catch (e) {
+          console.warn("playChimeSound (second tone) failed:", e);
+        }
       }, 80);
-    } catch (err) {}
+    } catch (err) {
+      console.warn("playChimeSound failed:", err);
+    }
   }, [getAudioContext]);
 
   return { playTypingSound, playTapSound, playSweepSound, playChimeSound };

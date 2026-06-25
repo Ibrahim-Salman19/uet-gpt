@@ -84,13 +84,11 @@ function ExploreCard({ doc }: { doc: ExploreDoc }) {
 function ExploreTabContent({
   cat,
   documents,
-  currentDocs,
   searchQuery,
   viewMode,
 }: {
   cat: string;
   documents: ExploreDoc[] | undefined;
-  currentDocs: ExploreDoc[];
   searchQuery: string;
   viewMode: "grid" | "list";
 }) {
@@ -101,7 +99,7 @@ function ExploreTabContent({
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-5 w-5 animate-spin text-[var(--accent)]" />
           </div>
-        ) : currentDocs.length === 0 ? (
+        ) : documents.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center animate-[slide-up_0.3s_ease-[var(--ease-out-expo)]_both]">
             <div className="w-12 h-12 flex items-center justify-center rounded-2xl bg-[var(--accent)]/10 border border-[var(--accent)]/20 mb-4">
               <BookOpen className="h-5 w-5 text-[var(--accent)]" />
@@ -117,21 +115,18 @@ function ExploreTabContent({
           <>
             <div className="flex items-center justify-between mb-4 animate-[slide-up_0.3s_ease-[var(--ease-out-expo)]_both]">
               <p className="text-[10px] font-mono text-zinc-500">
-                SHOWING {currentDocs.length} DOCUMENT{currentDocs.length !== 1 ? "S" : ""}
-                {documents.length !== currentDocs.length ? ` OF ${documents.length} TOTAL` : ""}
+                SHOWING {documents.length} DOCUMENT{documents.length !== 1 ? "S" : ""}
               </p>
             </div>
             <div
               className={cn(
                 "stagger-enter",
-                viewMode === "grid" && documents && currentDocs.length > 0
+                viewMode === "grid"
                   ? "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
-                  : documents && currentDocs.length > 0
-                    ? "flex flex-col gap-2"
-                    : "",
+                  : "flex flex-col gap-2",
               )}
             >
-              {currentDocs.map((doc: ExploreDoc) => (
+              {documents.map((doc: ExploreDoc) => (
                 <ExploreCard key={doc._id} doc={doc} />
               ))}
             </div>
@@ -261,19 +256,12 @@ export default function ExplorePage() {
       </div>
 
       <ScrollArea className="flex-1 bg-transparent">
-        {CATEGORIES.map((cat) => {
-          if (cat !== activeCategory) return null;
-          return (
-            <ExploreTabContent
-              key={cat}
-              cat={cat}
-              documents={documents}
-              currentDocs={documents ?? []}
-              searchQuery={debouncedQuery}
-              viewMode={viewMode}
-            />
-          );
-        })}
+        <ExploreTabContent
+          cat={activeCategory}
+          documents={documents}
+          searchQuery={debouncedQuery}
+          viewMode={viewMode}
+        />
       </ScrollArea>
     </Tabs>
   );

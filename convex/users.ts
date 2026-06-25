@@ -3,9 +3,35 @@ import { internalMutation, internalQuery, mutation, query } from "./_generated/s
 import { requireAdmin } from "./auth";
 import { userValidator } from "./users/validator";
 
-function getInitialRole(email: string): "admin" | "user" {
+function getInitialRole(email: string, emailVerified = true): "admin" | "user" {
   const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL;
-  return bootstrapEmail && email === bootstrapEmail ? "admin" : "user";
+  if (!bootstrapEmail || !emailVerified) return "user";
+  // Case-insensitive comparison: email addresses are not case-sensitive in the
+  // local-part for practical purposes and domains are case-insensitive, so a
+  // mismatch like "Admin@x.com" vs "admin@x.com" must not silently skip bootstrap.
+  return email.trim().toLowerCase() === bootstrapEmail.trim().toLowerCase() ? "admin" : "user";
+}
+
+const MAX_NAME_LENGTH = 256;
+
+// Bound the client-supplied display name. Clerk (the trustworthy source via the
+// webhook) populates this too, but the interactive getOrCreate path takes it
+// straight from the client, so cap length to avoid storing oversized strings.
+function sanitizeName(name: string): string {
+  return name.trim().slice(0, MAX_NAME_LENGTH);
+}
+
+// Only persist a client-supplied avatar URL if it is a well-formed https URL.
+// Anything else (javascript:, data:, http:, malformed) is dropped so it cannot
+// become an SSRF/tracking/attribute-injection vector when later rendered.
+function sanitizeImageUrl(imageUrl: string | undefined): string | undefined {
+  if (!imageUrl) return undefined;
+  try {
+    const parsed = new URL(imageUrl);
+    return parsed.protocol === "https:" ? parsed.toString() : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 export const getOrCreate = mutation({
@@ -34,26 +60,31 @@ export const getOrCreate = mutation({
       .withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
       .unique();
 
+    const name = sanitizeName(args.name);
+    const imageUrl = sanitizeImageUrl(args.imageUrl);
+
     if (existing) {
       if (!existing.isActive) {
         throw new ConvexError("Your account has been deactivated.");
       }
       await ctx.db.patch(existing._id, {
-        name: args.name,
+        name,
         email: email,
-        imageUrl: args.imageUrl ?? existing.imageUrl,
+        imageUrl: imageUrl ?? existing.imageUrl,
         lastLoginAt: Date.now(),
       });
       return existing._id;
     }
 
-    const finalRole = getInitialRole(email);
+    // Only honor the bootstrap-admin grant for a verified email to avoid an
+    // account-takeover vector via an unverified address matching the bootstrap.
+    const finalRole = getInitialRole(email, identity.emailVerified === true);
 
     const id = await ctx.db.insert("users", {
       clerkId: args.clerkId,
-      name: args.name,
+      name,
       email: email,
-      ...(args.imageUrl && { imageUrl: args.imageUrl }),
+      ...(imageUrl && { imageUrl }),
       role: finalRole,
       isActive: true,
       lastLoginAt: Date.now(),
@@ -141,12 +172,19 @@ export const updatePreferences = mutation({
       throw new ConvexError("User not found");
     }
 
+    // Explicit field allowlist: only merge the four permitted preference fields,
+    // and only when actually provided, so a partial update never clobbers an
+    // existing value with `undefined` and a future-widened args validator cannot
+    // leak unintended keys into stored preferences.
     const currentPrefs = user.preferences ?? {};
+    const nextPrefs = { ...currentPrefs };
+    if (args.theme !== undefined) nextPrefs.theme = args.theme;
+    if (args.language !== undefined) nextPrefs.language = args.language;
+    if (args.fontSize !== undefined) nextPrefs.fontSize = args.fontSize;
+    if (args.model !== undefined) nextPrefs.model = args.model;
+
     await ctx.db.patch(user._id, {
-      preferences: {
-        ...currentPrefs,
-        ...args,
-      },
+      preferences: nextPrefs,
     });
   },
 });
@@ -264,8 +302,21 @@ export const updateUserRole = mutation({
       throw new ConvexError("Cannot modify a user with a role equal to or above your own");
     }
 
+    const previousRole = targetUser.role;
     await ctx.db.patch(targetUser._id, {
       role: args.role,
+    });
+
+    // Tamper-evident record of privileged role changes (OWASP A09).
+    await ctx.db.insert("adminAuditLog", {
+      userId: caller._id,
+      action: "role.change",
+      target: args.clerkId,
+      details: {
+        oldValue: previousRole,
+        newValue: args.role,
+      },
+      createdAt: Date.now(),
     });
   },
 });

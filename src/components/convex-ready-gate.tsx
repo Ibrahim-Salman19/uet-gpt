@@ -155,7 +155,7 @@ export function ConvexReadyGate({ children }: { children: React.ReactNode }) {
               {diagnosing ? (
                 <span className="text-zinc-400 animate-pulse">TESTING...</span>
               ) : networkError === "DATABASE_REACHABLE" ? (
-                <span className="text-emerald-400">REACHABLE (HTTP OK)</span>
+                <span className="text-emerald-400">HOST REACHABLE (TCP/TLS)</span>
               ) : networkError === "TIMEOUT_ERROR" ? (
                 <span className="text-[oklch(58%_0.15_35)]">FAILED (TIMEOUT)</span>
               ) : networkError === "UNREACHABLE_ERROR" ? (
@@ -173,7 +173,8 @@ export function ConvexReadyGate({ children }: { children: React.ReactNode }) {
                 </span>
                 {networkError === "DATABASE_REACHABLE" && (
                   <p>
-                    The server is reachable via HTTP, but WebSocket (wss://) connections are
+                    The host resolved and accepted a TCP/TLS connection (this opaque check cannot
+                    confirm an HTTP 200), but the realtime WebSocket (wss://) connection is still
                     failing. This often indicates a local firewall, VPN, or proxy blocking
                     WebSockets. If you are using <strong>127.0.0.1:3000</strong>, try accessing the
                     app via <strong>localhost:3000</strong> to ensure Clerk authentication cookies

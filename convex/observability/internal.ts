@@ -1,6 +1,38 @@
 import { v } from "convex/values";
 import { internalMutation, internalQuery } from "../_generated/server";
 
+// Mirror of the adminAuditLog.action union in schema.ts — keep in sync.
+const auditActionValidator = v.union(
+  v.literal("user.login"),
+  v.literal("user.logout"),
+  v.literal("user.create"),
+  v.literal("thread.create"),
+  v.literal("thread.delete"),
+  v.literal("document.create"),
+  v.literal("document.delete"),
+  v.literal("crawl.start"),
+  v.literal("crawl.stop"),
+  v.literal("feedback.submit"),
+  v.literal("settings.update"),
+  v.literal("admin.access"),
+  v.literal("metrics.summary"),
+  v.literal("metrics.errors"),
+  v.literal("metrics.performance"),
+  v.literal("staleness.check"),
+  v.literal("role.change"),
+);
+
+// Mirror of the documents.status union in schema.ts — keep in sync.
+const documentStatusValidator = v.union(
+  v.literal("pending"),
+  v.literal("processing"),
+  v.literal("indexed"),
+  v.literal("failed"),
+  v.literal("stale"),
+  v.literal("active"),
+  v.literal("pending_embed"),
+);
+
 export const getSettingsBySection = internalQuery({
   args: { section: v.string() },
   returns: v.array(
@@ -52,7 +84,7 @@ export const getAdminUsers = internalQuery({
 
 export const insertAuditLog = internalMutation({
   args: {
-    action: v.string(),
+    action: auditActionValidator,
     target: v.optional(v.string()),
     details: v.optional(
       v.object({
@@ -82,7 +114,7 @@ export const insertAuditLog = internalMutation({
 
     await ctx.db.insert("adminAuditLog", {
       userId,
-      action: args.action as any,
+      action: args.action,
       target: args.target,
       details: args.details,
       createdAt: Date.now(),
@@ -91,7 +123,7 @@ export const insertAuditLog = internalMutation({
 });
 
 export const countDocumentsByStatus = internalQuery({
-  args: { status: v.string() },
+  args: { status: documentStatusValidator },
   returns: v.number(),
   handler: async (ctx, args) => {
     let count = 0;
@@ -100,7 +132,7 @@ export const countDocumentsByStatus = internalQuery({
     while (!isDone) {
       const pageResult = await ctx.db
         .query("documents")
-        .withIndex("by_status", (q) => q.eq("status", args.status as any))
+        .withIndex("by_status", (q) => q.eq("status", args.status))
         .paginate({ numItems: 1000, cursor });
       count += pageResult.page.length;
       cursor = pageResult.continueCursor;

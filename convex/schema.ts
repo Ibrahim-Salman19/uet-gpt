@@ -27,8 +27,7 @@ export default defineSchema({
   })
     .index("by_clerkId", ["clerkId"])
     .index("by_email", ["email"])
-    .index("by_role", ["role"])
-    .index("by_lastLoginAt", ["lastLoginAt"]),
+    .index("by_role", ["role"]),
 
   feedback: defineTable({
     messageId: v.string(),
@@ -49,7 +48,6 @@ export default defineSchema({
     .index("by_messageId", ["messageId"])
     .index("by_userId", ["userId"])
     .index("by_messageId_and_userId", ["messageId", "userId"])
-    .index("by_rating", ["rating"])
     .index("by_createdAt", ["createdAt"]),
 
   crawlJobs: defineTable({
@@ -85,7 +83,6 @@ export default defineSchema({
     duration: v.optional(v.number()),
   })
     .index("by_status", ["status"])
-    .index("by_trigger", ["trigger"])
     .index("by_startedAt", ["startedAt"])
     .index("by_providerJobId", ["providerJobId"]),
 
@@ -156,8 +153,7 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_createdAt", ["createdAt"])
-    .index("by_userId", ["userId"])
-    .index("by_action", ["action"]),
+    .index("by_userId", ["userId"]),
 
   // DEPRECATED: notifications table is unused — no code reads or writes to it.
   // Kept for schema backward compatibility; can be removed in a future migration.
@@ -332,9 +328,7 @@ export default defineSchema({
       totalTokens: v.optional(v.number()),
     }),
     metadata: v.optional(v.string()),
-  })
-    .index("by_timestamp", ["timestamp"])
-    .index("by_evalName", ["evalName"]),
+  }).index("by_timestamp", ["timestamp"]),
 
   dashboardStats: defineTable({
     statsId: v.string(), // singleton e.g., 'global'

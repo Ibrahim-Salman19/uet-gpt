@@ -13,20 +13,25 @@
 | Condition | Symptom | Root Cause |
 |-----------|---------|-----------|
 | `environment: "jsdom"` in vitest.config.ts | vitest hangs before any test runs | jsdom 29.1.1 incompatibility with vitest 4.1.7 on this WSL distro. The `jsdom` package is installed but hangs during initialization. |
-| `resolve.alias` with `path.resolve(__dirname, ...)` | vitest hangs during config resolution | vitest 4 + ESM + `__dirname` results in infinite resolution loop on WSL. **Only absolute string paths work.** |
+| `resolve.alias` with a bare `__dirname` reference | vitest hangs during config resolution | vitest 4 + ESM has no `__dirname`; use absolute paths derived portably via `fileURLToPath(import.meta.url)`. **Never hard-code a machine-specific path.** |
 
 ### 1.2 Config Fixed
 
 Current `vitest.config.ts` (verified working):
 
 ```ts
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
+
+// Portable absolute paths — resolved from this config file's own location,
+// so the config works on any checkout (Windows, WSL, CI) without edits.
+const root = fileURLToPath(new URL(".", import.meta.url));
 
 export default defineConfig({
   resolve: {
     alias: {
-      "@": "/mnt/c/Users/hafiz/UETGPT/uet-gpt/src",
-      "convex/_generated/api": "/mnt/c/Users/hafiz/UETGPT/uet-gpt/convex/_generated/api.js",
+      "@": `${root}src`,
+      "convex/_generated/api": `${root}convex/_generated/api.js`,
     },
   },
   test: {
@@ -40,7 +45,7 @@ export default defineConfig({
 
 Critical details:
 - `environment: "node"` — NOT jsdom. If changed to jsdom, ALL tests hang.
-- `resolve.alias` — uses hardcoded absolute paths (`/mnt/c/...`). If changed to `path.resolve(__dirname, ...)`, ALL tests hang.
+- `resolve.alias` — must use **absolute** paths, derived portably via `fileURLToPath(import.meta.url)` (never a hard-coded `/mnt/c/...` or another machine's home directory).
 - `exclude: ["tests/unit/**/*.test.tsx"]` — 12 tsx files excluded because they need a DOM.
 
 ### 1.3 Rewritten Tests
@@ -55,6 +60,11 @@ Two test files were rewritten to avoid importing framework modules that hang:
 **Rule:** No test in `tests/unit/` may import a Next.js route handler (anything from `src/app/api/`), `next/headers`, `next/navigation` (outside mocks), or `svix`. These pull in Next.js runtime dependencies that hang under plain vitest.
 
 ### 1.4 Passing vs Excluded Tests
+
+> **Test counts below are a historical snapshot, not the current baseline.** Other
+> docs cite different totals (`testing.md`, `architecture.md §17.3`) because they
+> were captured at different points. Do not treat any hard-coded number here as the
+> regression gate — derive the current count from a real `pnpm test` run.
 
 | Group | Count | Status | Environment Needed |
 |-------|-------|--------|-------------------|
@@ -300,7 +310,7 @@ vi.mock("convex/react", () => ({
 |---------|---------------|-----|
 | `pnpm add -D jsdom` | Already installed; installing again doesn't fix the hang | Use happy-dom instead |
 | `environment: "jsdom"` | Hangs at startup | Use `environment: "node"` globally + per-file `// @vitest-environment happy-dom` for tsx |
-| `path.resolve(__dirname, "src")` in alias | Hangs at config resolution | Use `"/mnt/c/Users/hafiz/UETGPT/uet-gpt/src"` |
+| A bare `__dirname` reference in alias | Not defined under ESM; breaks config resolution | Derive an absolute path with `fileURLToPath(new URL(".", import.meta.url))` |
 | `vi.mock("next/headers")` | Importing `next/headers` at all (even in mock factory) hangs | Remove the import entirely |
 | `import { POST } from "@/app/api/..."` in unit test | Pulls Next.js route dependencies that hang | Test the logic function directly |
 | `getByTestId("skeleton")` | Tests mock existence, not component behavior | Test `aria-busy` or actual rendered content |

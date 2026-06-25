@@ -5,28 +5,50 @@ import { crawlWebhook, ingestWebhook, resetWebhook } from "./crawl/webhook";
 
 const http = httpRouter();
 
-function getCorsOrigin(request: Request): string {
+/**
+ * Returns the value for Access-Control-Allow-Origin, or null when the request
+ * origin is not explicitly allow-listed.
+ *
+ * These routes are server-to-server webhooks (auth is enforced via tokens/HMAC),
+ * so CORS is largely irrelevant. We only ever reflect an origin that is an exact
+ * match in the allow-list — we never echo an arbitrary/non-allowlisted origin and
+ * never emit a placeholder origin. When nothing matches we return null and the
+ * caller omits the header entirely.
+ */
+function getCorsOrigin(request: Request): string | null {
   const reqOrigin = request.headers.get("Origin");
   const origins = [process.env.NEXT_PUBLIC_APP_URL].filter(Boolean) as string[];
   if (process.env.NODE_ENV === "development") {
     origins.push("http://localhost:3000");
   }
+  if (origins.length === 0) {
+    console.error("CRITICAL: No allowed origins configured. Set NEXT_PUBLIC_APP_URL env var.");
+    return null;
+  }
   if (reqOrigin && origins.includes(reqOrigin)) {
     return reqOrigin;
   }
-  if (!origins[0]) {
-    console.error("CRITICAL: No allowed origins configured. Set NEXT_PUBLIC_APP_URL env var.");
-    return "https://localhost";
+  return null;
+}
+
+function corsHeaders(request: Request): Record<string, string> {
+  const allowOrigin = getCorsOrigin(request);
+  const headers: Record<string, string> = {
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    Vary: "Origin",
+  };
+  if (allowOrigin) {
+    headers["Access-Control-Allow-Origin"] = allowOrigin;
   }
-  return origins[0];
+  return headers;
 }
 
 export function withCORS(request: Request, response: Response, restricted = false): Response {
   const headers = new Headers(response.headers);
-  headers.set("Access-Control-Allow-Methods", "POST, OPTIONS");
-  headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  headers.set("Access-Control-Allow-Origin", getCorsOrigin(request));
-  headers.set("Vary", "Origin");
+  for (const [key, value] of Object.entries(corsHeaders(request))) {
+    headers.set(key, value);
+  }
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
@@ -47,12 +69,7 @@ http.route({
     async (_ctx, request) =>
       new Response(null, {
         status: 204,
-        headers: {
-          "Access-Control-Allow-Origin": getCorsOrigin(request),
-          "Access-Control-Allow-Methods": "POST, OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type, Authorization",
-          Vary: "Origin",
-        },
+        headers: corsHeaders(request),
       }),
   ),
 });
@@ -70,12 +87,7 @@ http.route({
     async (_ctx, request) =>
       new Response(null, {
         status: 204,
-        headers: {
-          "Access-Control-Allow-Origin": getCorsOrigin(request),
-          "Access-Control-Allow-Methods": "POST, OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type, Authorization",
-          Vary: "Origin",
-        },
+        headers: corsHeaders(request),
       }),
   ),
 });
@@ -93,12 +105,7 @@ http.route({
     async (_ctx, request) =>
       new Response(null, {
         status: 204,
-        headers: {
-          "Access-Control-Allow-Origin": getCorsOrigin(request),
-          "Access-Control-Allow-Methods": "POST, OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type, Authorization",
-          Vary: "Origin",
-        },
+        headers: corsHeaders(request),
       }),
   ),
 });
@@ -116,12 +123,7 @@ http.route({
     async (_ctx, request) =>
       new Response(null, {
         status: 204,
-        headers: {
-          "Access-Control-Allow-Origin": getCorsOrigin(request),
-          "Access-Control-Allow-Methods": "POST, OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type, Authorization",
-          Vary: "Origin",
-        },
+        headers: corsHeaders(request),
       }),
   ),
 });

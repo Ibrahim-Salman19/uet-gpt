@@ -61,6 +61,17 @@ export function buildCacheWriteCallback(
   convex: ConvexHttpClient,
 ): (text: string, modelName: string) => void {
   return (text, modelName) => {
+    // The cache write must be authorized by the server-trust secret, never by
+    // the end user's identity. If INTERNAL_API_SECRET is missing, do NOT fall
+    // through to the identity-based admin path (which would silently disable
+    // cache writes for all non-admin traffic): skip deliberately and log loudly.
+    const secret = process.env.INTERNAL_API_SECRET;
+    if (!secret) {
+      console.error(
+        "INTERNAL_API_SECRET is not set — skipping semantic cache write (server-trust required).",
+      );
+      return;
+    }
     if (ragResult.queryEmbedding && ragResult.queryEmbedding.length > 0) {
       after(async () => {
         try {
@@ -73,7 +84,7 @@ export function buildCacheWriteCallback(
           const sourceEntryIds = ragResult.sources.map((s) => s.entryId).filter(Boolean);
 
           await convex.action(api.cache.set.setFromServer, {
-            secret: process.env.INTERNAL_API_SECRET,
+            secret,
             queryText: question,
             queryEmbedding: ragResult.queryEmbedding,
             response: text,

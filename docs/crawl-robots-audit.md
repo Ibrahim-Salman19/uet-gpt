@@ -16,8 +16,12 @@ Source: https://web.uettaxila.edu.pk/robots.txt
 
 - **Respect disallow rules:** No standard rules to respect. The absence of blocking directives means all paths are crawlable.
 - **Conservative crawl defaults:** Apply rate limiting and respect `Crawl-delay` if specified (none present). Honor any future robots.txt updates.
-- **Content-signal compliance:** Since ai-input and ai-train signals default to neither granted nor restricted, our RAG pipeline should treat crawled content as available for search indexing but exercise caution regarding AI training use of the data.
-- **Crawl scope:** Full site crawl is permitted. No paths are explicitly blocked.
+- **Content-signal compliance (explicit, conservative decision):** The `ai-input` and `ai-train` signals are unset (neither granted nor restricted). We deliberately resolve this ambiguity conservatively:
+  - **Permitted:** use crawled content solely to build a retrieval/search index that links back to and quotes the original UET pages (the same access a standard search engine has under the absent `Disallow`).
+  - **Not permitted from this signal alone:** using the crawled corpus to train or fine-tune any model. `ai-train` being unset is treated as "no consent" for training, not as a grant.
+  - **Caveat:** an unset content-signal is not affirmative permission. If UET later publishes explicit `ai-input`/`ai-train` directives, honor them on the next re-audit.
+- **Crawl scope:** No paths are explicitly blocked by a `Disallow` rule, so a rate-limited, search-indexing crawl of the public site is permitted. Scope is still bounded by the crawler's own `includePaths`/`excludePaths` (see `src/lib/constants.ts` / `scripts/crawl_config.json`), not by robots.txt.
+- **Tooling limitation:** the Python crawler enforces robots via `urllib.robotparser` (standard REP only); it does **not** parse the content-signal directives above. Compliance with `ai-input`/`ai-train` is therefore a manual policy decision recorded here, re-checked on each re-audit, rather than something enforced in code.
 
 ## Notes
 

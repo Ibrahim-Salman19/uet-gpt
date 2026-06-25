@@ -64,7 +64,9 @@ export const evaluateChunks = internalAction({
               z.object({
                 index: z.number(),
                 relevant: z.boolean(),
-                confidence: z.number(),
+                // Constrain to [0,1] so a model returning e.g. 0-100 cannot
+                // silently skew downstream threshold comparisons.
+                confidence: z.number().min(0).max(1),
               }),
             ),
           }),
@@ -73,11 +75,24 @@ export const evaluateChunks = internalAction({
           maxOutputTokens: 500,
         });
 
-        results.push(...object.evaluations);
+        // Defense-in-depth: clamp confidence to [0,1] before it reaches any
+        // threshold comparison, regardless of what the model emitted.
+        results.push(
+          ...object.evaluations.map((e) => ({
+            ...e,
+            confidence: Math.max(0, Math.min(1, e.confidence)),
+          })),
+        );
       } catch (error) {
-        console.warn(`CRAG batch ${i} failed, marking as NOT relevant (conservative):`, error);
+        // Fail OPEN: on a transient LLM failure (rate limit/timeout) keep the
+        // chunks the search + rerank cascade already vetted, rather than marking
+        // them NOT relevant — which would strip good context and could force a
+        // spurious "refuse" exactly when upstream retrieval succeeded. Reserve
+        // "not relevant" for explicit model judgments. Use a low-but-nonzero
+        // confidence so callers can still distinguish unjudged from confident.
+        console.warn(`CRAG batch ${i} failed, keeping chunks (fail-open):`, error);
         for (const chunk of batch) {
-          results.push({ index: chunk.index, relevant: false, confidence: 0.3 });
+          results.push({ index: chunk.index, relevant: true, confidence: 0.5 });
         }
       }
     }

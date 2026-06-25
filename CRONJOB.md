@@ -56,24 +56,41 @@ SECURITY CONTRACT (non-negotiable):
 
 ### Step 0.1 — Acquire run lock
 ```bash
-LOCK_FILE=".agent/run.lock"
+LOCK_DIR=".agent/run.lock"        # directory, NOT a file — mkdir is atomic
 mkdir -p .agent
 
-if [ -f "$LOCK_FILE" ]; then
-  LOCK_AGE=$(( $(date +%s) - $(stat -c %Y "$LOCK_FILE" 2>/dev/null || echo 0) ))
+# mkdir succeeds for exactly one racing process and fails for the rest, so the
+# check-and-acquire is a single atomic step (no TOCTOU window).
+if ! mkdir "$LOCK_DIR" 2>/dev/null; then
+  # Lock already held — decide whether it is stale. Read the recorded epoch
+  # from the lock's own meta file instead of stat(1) so we stay portable
+  # (GNU `stat -c` / BSD `stat -f` differ; we control the format we wrote).
+  LOCK_STARTED=$(cat "$LOCK_DIR/started_epoch" 2>/dev/null || echo 0)
+  NOW=$(date +%s)
+  LOCK_AGE=$(( NOW - LOCK_STARTED ))
   if [ "$LOCK_AGE" -lt 7200 ]; then
     echo "ABORT: Previous run still active (${LOCK_AGE}s). Exiting."
     exit 0
   fi
-  echo "WARN: Stale lock (${LOCK_AGE}s). Clearing."
-  rm -f "$LOCK_FILE"
+  echo "WARN: Stale lock (${LOCK_AGE}s). Reclaiming."
+  rm -rf "$LOCK_DIR"
+  mkdir "$LOCK_DIR" || { echo "ABORT: could not reclaim lock."; exit 0; }
 fi
 
-echo "$$:$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$LOCK_FILE"
-trap "rm -f $LOCK_FILE" EXIT
+# Record metadata for the staleness check above and for forensics.
+date +%s > "$LOCK_DIR/started_epoch"
+echo "$$:$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$LOCK_DIR/owner"
+
+# Best-effort cleanup. NOTE: trap EXIT does NOT fire on SIGKILL/power loss, so
+# the >2h stale-age fallback above is the real safety net — keep both.
+trap 'rm -rf "$LOCK_DIR"' EXIT
 ```
+The lock is a **directory** created with `mkdir`, which is atomic on POSIX
+filesystems, so two runs starting in the same window cannot both acquire it.
 If a fresh lock (< 2 hours) exists, exit immediately — another run is active.
-Stale lock (> 2 hours) means a previous run crashed. Clear it and proceed.
+A stale lock (> 2 hours) means a previous run was SIGKILLed before its `trap`
+could clean up; reclaim it and proceed. Epoch is read from the lock's own
+`started_epoch` file to avoid GNU-only `stat -c %Y`.
 
 ### Step 0.2 — Read source of truth files (MANDATORY, every run)
 ```
@@ -121,8 +138,10 @@ document findings in state.md, make zero code changes. Exit after reporting.
 Run the full verification suite. Record every result.
 
 ```bash
-# 1. TypeScript compilation
-npx convex dev --dry-run 2>&1 | tail -20
+# 1. TypeScript compilation — the real CI gate (package.json: "typecheck": "tsc --noEmit")
+# NOTE: `convex dev --dry-run` only validates Convex function deployment, not the
+# Next.js/TS program, and can start a dev process — do NOT use it as the TS gate.
+pnpm typecheck 2>&1 | tail -20
 
 # 2. Python syntax check
 python -m py_compile scripts/crawler.py scripts/ingest_pdf.py \
@@ -261,7 +280,7 @@ If wrong, this one line tells the human exactly what to verify and fix.
 
 **Rule 6 — Sub-step checkpoint pattern.**
 After each logical sub-step:
-1. Run fast verification: `npx convex dev --dry-run && python -m py_compile`
+1. Run fast verification: `pnpm typecheck && python -m py_compile scripts/*.py`
 2. If passes: WIP commit
 3. Update `current_task_progress` in `.agent/state.md`
 4. Continue
@@ -274,11 +293,14 @@ After each logical sub-step:
 
 A task is done only when all five gates pass. Every gate. No exceptions.
 
-### Gate 1 — TypeScript compilation
+### Gate 1 — TypeScript compilation (matches CI)
 ```bash
-npx convex dev --dry-run 2>&1 | grep -iE "error|Error"
+pnpm typecheck            # tsc --noEmit — the real compilation gate
+pnpm build                # next build — catches what tsc alone misses
 ```
-Zero errors required.
+Both must exit 0. Do NOT substitute `convex dev --dry-run`: it validates Convex
+deployment only, can launch a dev process, and lets type-broken Next.js/TS code
+pass that `tsc --noEmit` / `next build` (CI) would reject.
 
 ### Gate 2 — Python syntax
 ```bash
@@ -473,8 +495,8 @@ Ref: architecture.md §4.3 | Research: 4 independent 2026 deployments"
 # Do NOT push. A human reviews the agent branch and pushes/merges it.
 # git push and PR creation are human-only actions — never run them here.
 
-# Release lock
-rm -f .agent/run.lock
+# Release lock (directory lock from Step 0.1)
+rm -rf .agent/run.lock
 
 echo "=== RUN COMPLETE $(date -u +%Y-%m-%dT%H:%M:%SZ) ==="
 ```
