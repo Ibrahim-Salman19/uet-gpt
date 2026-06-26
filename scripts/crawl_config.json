@@ -2,6 +2,13 @@
   "seedUrls": [
     "https://web.uettaxila.edu.pk/",
     "https://uettaxila.edu.pk/",
+    "https://admissions.uettaxila.edu.pk/",
+    "https://admissions.uettaxila.edu.pk/Fees.php",
+    "https://admissions.uettaxila.edu.pk/ProcedureAndRequirements.php",
+    "https://admissions.uettaxila.edu.pk/Schedule.php",
+    "https://admissions.uettaxila.edu.pk/Seats_Allocation.php",
+    "https://admissions.uettaxila.edu.pk/Merit_List.php",
+    "https://admissions.uettaxila.edu.pk/ProspectusAvailability.php",
     "https://web.uettaxila.edu.pk/admissions/",
     "https://web.uettaxila.edu.pk/academics/",
     "https://web.uettaxila.edu.pk/departments/",
@@ -34,13 +41,14 @@
   "queueMaxSize": 500,
   "excludePatterns": [
     "/search*", "/print/**", "/feed/**", "/gallery/**",
-    "*.pdf", "*.doc", "*.docx", "*.ppt", "*.pptx",
+    "*.doc", "*.docx", "*.ppt", "*.pptx",
     "*.xls", "*.xlsx", "*.zip", "*.rar", "*.exe",
     "*.jpg", "*.jpeg", "*.png", "*.gif"
   ],
   "includePatterns": [
     "https://web.uettaxila.edu.pk/**",
-    "https://uettaxila.edu.pk/**"
+    "https://uettaxila.edu.pk/**",
+    "https://admissions.uettaxila.edu.pk/**"
   ],
   "rateLimiter": {
     "minDelay": 0.05,

@@ -39,13 +39,24 @@ function determineConfidenceTier(results: { relevanceScore: number }[]): {
   const topScore = results[0]!.relevanceScore;
 
   if (topScore < 0.2) {
+    // We DID retrieve content here (results is non-empty); only the top reranker score
+    // is very low. Reranker scores are NOT calibrated across the cascade tiers — the
+    // word-overlap fallback and RRF fusion produce low numbers even for genuinely good
+    // matches — so a low score does NOT reliably mean "irrelevant". The CRAG relevance
+    // judge is the authoritative irrelevance gate (and it is not skipped at low scores).
+    // Therefore HEDGE (answer strictly from context, with a strong qualifier) instead of
+    // hard-refusing, so the bot stops replying "I don't have verified information" when it
+    // actually retrieved relevant context. Only a genuinely EMPTY retrieval refuses (above).
     return {
-      tier: "refuse",
+      tier: "hedge",
       instruction:
-        "SYSTEM INSTRUCTION TO AI: The retrieved documents have extremely low relevance " +
-        "(score < 0.20) to the user's query. You MUST respond exactly with: " +
+        "SYSTEM INSTRUCTION TO AI: The retrieved documents have low confidence scores. " +
+        "Answer ONLY from the provided context. Prefix your answer with " +
+        "'Based on limited information available — ' and end with " +
+        "'For authoritative details, please verify at uettaxila.edu.pk.' " +
+        "If the provided context genuinely does not contain the answer, respond exactly with: " +
         "'I don't have verified information about this — please check uettaxila.edu.pk directly.' " +
-        "Do not attempt to guess or hallucinate an answer.\n\n",
+        "Never invent facts beyond the provided context.\n\n",
     };
   }
   if (topScore < 0.4) {
@@ -393,7 +404,9 @@ async function buildResponseContext(
   }
 
   if (overrideTier === "refuse") {
-    const { instruction } = determineConfidenceTier([{ relevanceScore: 0.1 }]);
+    // CRAG judged the chunks irrelevant — use the genuine empty-retrieval refuse
+    // instruction (determineConfidenceTier no longer hard-refuses on a low score alone).
+    const { instruction } = determineConfidenceTier([]);
     if (instruction) context = instruction + context;
   } else if (overrideTier === "hedge") {
     const { instruction } = determineConfidenceTier([{ relevanceScore: 0.3 }]);

@@ -305,16 +305,28 @@ export const computeDashboardStats = internalMutation({
       crawlCursor = page.continueCursor;
     }
 
-    // 5. Compute cacheStats
-    let cacheTotal = 0;
-    let cacheCursor: string | null = null;
-    while (true) {
-      const page = await ctx.db
-        .query("semanticCache")
-        .paginate({ numItems: 1000, cursor: cacheCursor });
-      cacheTotal += page.page.length;
-      if (page.isDone) break;
-      cacheCursor = page.continueCursor;
+    // 5. Compute cacheStats — semanticCache rows are large (each carries a 768-float
+    // queryEmbedding + optional alternateEmbeddings + full response), so scanning the
+    // whole table is the dominant DB-bandwidth cost and grows O(cacheRows). Re-count it
+    // at most ~4×/day (every 6th UTC hour) and reuse the last known count otherwise; the
+    // lighter tables above are still counted every run.
+    const existing = await ctx.db
+      .query("dashboardStats")
+      .withIndex("by_statsId", (q) => q.eq("statsId", "global"))
+      .unique();
+    let cacheTotal = existing?.cacheStats?.total ?? 0;
+    // Re-count ~4×/day (UTC hours 0/6/12/18), and always on the first run (no prior stats).
+    if (!existing || new Date(now).getUTCHours() % 6 === 0) {
+      cacheTotal = 0;
+      let cacheCursor: string | null = null;
+      while (true) {
+        const page = await ctx.db
+          .query("semanticCache")
+          .paginate({ numItems: 1000, cursor: cacheCursor });
+        cacheTotal += page.page.length;
+        if (page.isDone) break;
+        cacheCursor = page.continueCursor;
+      }
     }
 
     const statsData = {
@@ -336,11 +348,6 @@ export const computeDashboardStats = internalMutation({
       },
       lastUpdatedAt: now,
     };
-
-    const existing = await ctx.db
-      .query("dashboardStats")
-      .withIndex("by_statsId", (q) => q.eq("statsId", "global"))
-      .unique();
 
     if (existing) {
       await ctx.db.patch(existing._id, statsData);

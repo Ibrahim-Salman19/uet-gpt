@@ -2,6 +2,15 @@ export const UET_CRAWL_CONFIG = {
   baseUrl: "https://web.uettaxila.edu.pk",
   seedUrls: [
     "https://web.uettaxila.edu.pk/",
+    // Admissions content (fees, procedure, schedule, seats, merit lists) lives on
+    // this SEPARATE subdomain — must be seeded or it is never crawled.
+    "https://admissions.uettaxila.edu.pk/",
+    "https://admissions.uettaxila.edu.pk/Fees.php",
+    "https://admissions.uettaxila.edu.pk/ProcedureAndRequirements.php",
+    "https://admissions.uettaxila.edu.pk/Schedule.php",
+    "https://admissions.uettaxila.edu.pk/Seats_Allocation.php",
+    "https://admissions.uettaxila.edu.pk/Merit_List.php",
+    "https://admissions.uettaxila.edu.pk/ProspectusAvailability.php",
     "https://web.uettaxila.edu.pk/admissions/",
     "https://web.uettaxila.edu.pk/academics/",
     "https://web.uettaxila.edu.pk/departments/",
@@ -36,12 +45,15 @@ export const UET_CRAWL_CONFIG = {
   maxPages: 500,
   // M1: reduced from 5 to 4 for faster crawl completion
   maxDepth: 4,
-  includePaths: ["https://web.uettaxila.edu.pk/**", "https://uettaxila.edu.pk/**"],
+  includePaths: [
+    "https://web.uettaxila.edu.pk/**",
+    "https://uettaxila.edu.pk/**",
+    "https://admissions.uettaxila.edu.pk/**",
+  ],
   excludePaths: [
     "https://web.uettaxila.edu.pk/**/edit",
     "https://web.uettaxila.edu.pk/**/delete",
     "https://web.uettaxila.edu.pk/wp-admin/**",
-    "https://web.uettaxila.edu.pk/**/*.pdf",
     "https://web.uettaxila.edu.pk/**/*.jpg",
     "https://web.uettaxila.edu.pk/**/*.png",
     "https://web.uettaxila.edu.pk/**/*.zip",

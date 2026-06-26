@@ -404,9 +404,17 @@ export const embedSingleChunk = internalAction({
         };
       }
 
+      // Contextual retrieval: embed the chunk WITH its section breadcrumb so the vector
+      // captures context the raw chunk may lack (e.g. "It is Rs. 38,000" under
+      // "Admissions > Fee Structure > BS"). Only the embedded/stored vector text is
+      // contextualized; the raw chunkText is saved separately below for display + BM25.
+      const contextPrefix =
+        args.headingPath && args.headingPath.length > 0
+          ? `Section: ${args.headingPath.join(" > ")}\n\n`
+          : "";
       const result = await rag.add(ctx, {
         namespaceId: args.namespaceId as unknown as NamespaceId,
-        text: args.chunkText,
+        text: contextPrefix + args.chunkText,
         filterValues: [
           { name: "category", value: "crawled" },
           { name: "source", value: sourceHost },
