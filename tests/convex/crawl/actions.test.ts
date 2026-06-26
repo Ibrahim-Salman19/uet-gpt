@@ -44,6 +44,9 @@ describe("executeCrawlJob", () => {
       runQuery: vi.fn().mockResolvedValue(null), // getJobById returns null (no crash-recovery state)
       runAction: vi.fn().mockResolvedValue(undefined),
       auth: { getUserIdentity: vi.fn() },
+      scheduler: {
+        runAfter: vi.fn().mockResolvedValue(undefined),
+      },
     };
   });
 
@@ -241,6 +244,9 @@ describe("embedSingleChunk", () => {
       runQuery: vi.fn(),
       runAction: vi.fn().mockResolvedValue(undefined),
       auth: { getUserIdentity: vi.fn() },
+      scheduler: {
+        runAfter: vi.fn().mockResolvedValue(undefined),
+      },
     };
   });
 

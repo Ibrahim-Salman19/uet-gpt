@@ -277,7 +277,7 @@ function signCrawlPayload(
     "x-crawl-timestamp": timestamp,
     "x-crawl-signature": signatures,
   };
-  return signedBody;
+  return JSON.stringify(crawlPayload);
 }
 
 async function sendCrawlRequest(
