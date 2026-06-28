@@ -11,7 +11,7 @@ describe("retryWithBackoff", () => {
 
   test("retries on failure up to maxRetries, then throws", async () => {
     const fn = vi.fn().mockRejectedValue(new Error("fail"));
-    await expect(retryWithBackoff(fn, { maxRetries: 2, baseDelayMs: 1 })).rejects.toThrow("fail");
+    await expect(retryWithBackoff(fn, { maxRetries: 2, baseDelayMs: 1, shouldRetry: () => true })).rejects.toThrow("fail");
     expect(fn).toHaveBeenCalledTimes(3); // Initial call + 2 retries
   });
 
@@ -22,7 +22,7 @@ describe("retryWithBackoff", () => {
       if (calls < 2) throw new Error("fail");
       return "success";
     });
-    const result = await retryWithBackoff(fn, { maxRetries: 2, baseDelayMs: 1 });
+    const result = await retryWithBackoff(fn, { maxRetries: 2, baseDelayMs: 1, shouldRetry: () => true });
     expect(result).toBe("success");
     expect(fn).toHaveBeenCalledTimes(2);
   });

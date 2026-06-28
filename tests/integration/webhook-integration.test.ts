@@ -20,21 +20,25 @@ function generateSignature(timestamp: string, body: string, secret: string): str
 function createMockCtx() {
   let webhookProcessed = false;
   return {
-    runMutation: vi.fn().mockImplementation(async (ref: any, args: any) => {
+    runMutation: vi.fn().mockImplementation(async (ref: any, _args: any) => {
       let refName = "";
       if (typeof ref === "string") {
         refName = ref;
       } else if (ref && (typeof ref === "object" || typeof ref === "function")) {
-        const sym = Symbol.for("functionName");
+        // Convex function references are Proxy objects. The `has` trap may
+        // return false even when the `get` trap returns the correct value, so
+        // we skip the `in` guard and access the Symbol directly.
         try {
-          if (sym in ref && typeof ref[sym] === "string") {
-            refName = ref[sym];
-          } else if ("name" in ref && typeof ref.name === "string") {
+          const sym = Symbol.for("functionName");
+          const val = ref[sym];
+          if (typeof val === "string") {
+            refName = val;
+          } else if (typeof ref.name === "string") {
             refName = ref.name;
           } else {
             refName = Object.prototype.toString.call(ref);
           }
-        } catch (e) {
+        } catch {
           refName = "";
         }
       }

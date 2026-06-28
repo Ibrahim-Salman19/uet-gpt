@@ -56,7 +56,7 @@ export const cascadeRerank = internalAction({
     topK: v.optional(v.number()),
   },
   returns: v.array(v.object({ text: v.string(), score: v.number(), index: v.number() })),
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<Array<{ text: string; score: number; index: number }>> => {
     const docs = args.documents;
     const topK = args.topK ?? docs.length;
     if (docs.length === 0) return [];
@@ -125,11 +125,11 @@ export const cascadeRerank = internalAction({
 
     // ── Tier 2b: Groq lightweight reranker (free, no extra infra) ──
     try {
-      const groqResult = await ctx.runAction(internal.reranking.groqRerank.groqRerank, {
+      const groqResult = (await ctx.runAction(internal.reranking.groqRerank.groqRerank, {
         query: args.query,
         documents: tier2Candidates.map((d) => ({ text: d.text, id: d.id })),
         topK: Math.min(topK, tier2Candidates.length),
-      });
+      })) as Array<{ text: string; score: number; index: number }>;
       if (groqResult.length > 0) {
         // groqResult[i].index is a position into tier2Candidates, NOT the
         // caller's original document order. Remap to originalIndex (and pull

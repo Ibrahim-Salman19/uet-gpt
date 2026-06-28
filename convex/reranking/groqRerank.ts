@@ -15,7 +15,7 @@ export const groqRerank = internalAction({
     topK: v.optional(v.number()),
   },
   returns: v.array(v.object({ text: v.string(), score: v.number(), index: v.number() })),
-  handler: async (_ctx, args) => {
+  handler: async (_ctx, args): Promise<Array<{ text: string; score: number; index: number }>> => {
     if (!process.env.GROQ_API_KEY) {
       const topK = args.topK ?? args.documents.length;
       return args.documents.slice(0, topK).map((d, i) => ({

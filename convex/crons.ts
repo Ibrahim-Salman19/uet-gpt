@@ -65,18 +65,19 @@ crons.daily(
 );
 
 // Phase 5: Observability — check document staleness daily
-crons.daily(
-  "staleness-check",
-  { hourUTC: 4, minuteUTC: 0 },
-  internal.observability.staleness.checkStaleness,
-);
+// DISABLED: This does full table scans using internalQuery with paginate loops
+// which hits DB IO limits. 
+// crons.daily(
+//   "staleness-check",
+//   { hourUTC: 4, minuteUTC: 0 },
+//   internal.observability.staleness.checkStaleness,
+// );
 
 // STATS-001: Pre-compute dashboard statistics hourly.
-// Was every 5 min (288 runs/day) and full-scanned five whole tables — including
-// the embedding-heavy semanticCache — which was the dominant DB-bandwidth driver
-// (cost scaled O(cacheRows × embeddingSize) × 288/day). An admin count dashboard
-// does not need 5-minute freshness; computeDashboardStats additionally re-counts
-// the heavy semanticCache only ~4×/day. See convex/admin/stats.ts.
-crons.interval("compute-dashboard-stats", { hours: 1 }, internal.admin.stats.computeDashboardStats);
+// DISABLED: This cron performs a full table scan over documents, users, feedback, crawlJobs,
+// and semanticCache using manual pagination inside a single transaction. This completely
+// exhausts the Convex Free Tier Database IO limits and leads to backend lockouts.
+// Needs refactoring to use incremental counters or internal actions before re-enabling.
+// crons.interval("compute-dashboard-stats", { hours: 1 }, internal.admin.stats.computeDashboardStats);
 
 export default crons;

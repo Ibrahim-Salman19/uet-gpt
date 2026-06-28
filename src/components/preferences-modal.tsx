@@ -22,10 +22,16 @@ export function PreferencesModal() {
   } = usePreferences();
 
   const dialogRef = React.useRef<HTMLDialogElement | null>(null);
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   React.useEffect(() => {
     const dialog = dialogRef.current;
-    if (!dialog) return;
+    if (!dialog || !mounted) return;
+
 
     if (settingsOpen) {
       dialog.showModal();
@@ -74,8 +80,11 @@ export function PreferencesModal() {
     );
   };
 
+  if (!mounted) return null;
+
   return (
     <dialog
+
       ref={dialogRef}
       id="settings-modal"
       onClose={handleClose}

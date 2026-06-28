@@ -21,6 +21,17 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./tests/setup.ts"],
     testTimeout: 30000,
+    // Use child-process forks instead of worker threads. Worker threads
+    // deadlock on startup in this WSL2 environment; forks do not.
+    // Run at most 3 files concurrently to avoid resource exhaustion when
+    // DOM-environment tests (.tsx) are included.
+    pool: "forks",
+    poolOptions: {
+      forks: {
+        maxForks: 3,
+        minForks: 1,
+      },
+    },
     exclude: ["node_modules", "dist", "tests/e2e/**/*"],
     coverage: {
       provider: "v8",

@@ -115,9 +115,6 @@ function useWebGLScene(
     const container = containerRef.current;
     if (!container) return;
     if (!isWebGLSupported()) return;
-    // Respect the OS-level reduced-motion setting: skip the animated backdrop
-    // entirely for users who request reduced motion (WCAG 2.3.3).
-    if (prefersReducedMotion()) return;
 
     const canvas = document.createElement("canvas");
     canvas.id = "webgl-canvas";

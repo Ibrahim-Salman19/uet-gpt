@@ -27,18 +27,14 @@ export const getCount = query({
   handler: async (ctx) => {
     await requireAdmin(ctx);
 
-    const [faculty, staff, admin, total] = await Promise.all([
-      countDocuments(ctx, "faculty"),
-      countDocuments(ctx, "staff"),
-      countDocuments(ctx, "admin"),
-      countDocuments(ctx, undefined),
-    ]);
-
+    // DISABLED: Full table scans using paginate() inside a single transaction
+    // hit DB IO limits. These counts should be maintained via an incremental
+    // counter or internal action. Returning 0s for now to protect database.
     return {
-      faculty,
-      admin,
-      staff,
-      total,
+      faculty: 0,
+      admin: 0,
+      staff: 0,
+      total: 0,
     };
   },
 });

@@ -42,9 +42,21 @@ export function useStableQuery<Query extends FunctionReference<"query">>(
   return undefined;
 }
 
-function getQueryName(query: FunctionReference<"query">): string {
-  // Convex function references expose a stable identifier; fall back to a
-  // string coercion if the internal field is unavailable.
-  const name = (query as { _name?: string })._name;
-  return name ?? String(query);
+import { getFunctionName } from "convex/server";
+
+function getQueryName(query: any): string {
+  if (typeof query === "string") return query;
+  try {
+    return getFunctionName(query);
+  } catch (e) {
+    if (query && typeof query === "object") {
+      if ("_name" in query && typeof query._name === "string") return query._name;
+      if ("name" in query && typeof query.name === "string") return query.name;
+    }
+    try {
+      return String(query);
+    } catch (err) {
+      return "unknown-query";
+    }
+  }
 }
