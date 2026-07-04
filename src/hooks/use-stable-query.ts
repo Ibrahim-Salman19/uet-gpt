@@ -1,9 +1,14 @@
 "use client";
 
 import { useQuery } from "convex/react";
-import { getFunctionName } from "convex/server";
 import type { FunctionReference } from "convex/server";
 import { useRef } from "react";
+
+const functionNameSymbol = Symbol.for("functionName");
+
+function getQueryName(query: FunctionReference<"query">): string {
+  return (query as any)[functionNameSymbol] as string;
+}
 
 export function useStableQuery<Query extends FunctionReference<"query">>(
   query: Query,
@@ -13,7 +18,7 @@ export function useStableQuery<Query extends FunctionReference<"query">>(
 
   const cache = useRef<{ key: string; value: Query["_returnType"] } | undefined>(undefined);
 
-  const key = `${getFunctionName(query)}|${JSON.stringify(args)}`;
+  const key = `${getQueryName(query)}|${JSON.stringify(args)}`;
 
   if (result !== undefined) {
     cache.current = { key, value: result };
