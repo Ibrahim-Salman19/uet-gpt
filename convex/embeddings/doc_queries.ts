@@ -113,9 +113,9 @@ export const getDocumentsByEntryIds = internalQuery({
 
     // Step 3: Identify entryIds that need fallback (no chunk or missing doc)
     const missingEntryIds: string[] = [];
-    const chunkMap = new Map(args.entryIds.map((entryId, i) => [entryId, chunks[i]]));
+    const entryChunkMap = new Map(args.entryIds.map((entryId, i) => [entryId, chunks[i]]));
     for (const entryId of args.entryIds) {
-      const chunk = chunkMap.get(entryId);
+      const chunk = entryChunkMap.get(entryId);
       if (!chunk || !docsById.has(chunk.documentId)) {
         missingEntryIds.push(entryId);
       }
@@ -136,7 +136,7 @@ export const getDocumentsByEntryIds = internalQuery({
 
     // Step 5: Build results
     return args.entryIds.map((entryId) => {
-      const chunk = chunkMap.get(entryId);
+      const chunk = entryChunkMap.get(entryId);
       if (chunk) {
         const doc = docsById.get(chunk.documentId);
         if (doc) {

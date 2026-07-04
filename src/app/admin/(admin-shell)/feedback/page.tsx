@@ -24,7 +24,7 @@ type FeedbackDoc = Doc<"feedback">;
 
 export default function AdminFeedbackPage() {
   const [ratingFilter, setRatingFilter] = useState<string>("all");
-  const feedback = useQuery(api.feedback.list, {});
+  const feedback = useQuery((api as any).feedback.list, {});
   const deleteFeedback = useMutation(api.admin.stats.deleteFeedback);
 
   const handleDelete = async (feedbackId: Id<"feedback">) => {

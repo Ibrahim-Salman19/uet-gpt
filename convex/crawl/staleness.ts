@@ -19,12 +19,14 @@ export const markStaleDocuments = internalMutation({
 
       if (docs.length >= batchSize) hasMore = true;
 
-      for (const doc of docs) {
+      const results = await Promise.all(docs.map(async (doc) => {
         if (doc.crawlSessionId !== crawlSessionId) {
           await ctx.db.patch(doc._id, { status: "stale" });
-          marked++;
+          return 1;
         }
-      }
+        return 0;
+      }));
+      marked += results.reduce<number>((a, b) => a + b, 0);
     }
     return { marked, remaining: hasMore ? "more" : "done" };
   },
@@ -116,18 +118,19 @@ export const flagExpiredDocuments = internalMutation({
 
     const candidates = [...indexedDocs, ...activeDocs];
 
-    let flagged = 0;
-    for (const doc of candidates) {
-      if (doc.isStale) continue;
+    const results = await Promise.all(candidates.map(async (doc) => {
+      if (doc.isStale) return 0;
 
       const tier = doc.freshnessTier || "low";
       const ttl = TTLS[tier as keyof typeof TTLS] || TTLS.low;
 
       if (now - doc.crawledAt > ttl) {
         await ctx.db.patch(doc._id, { isStale: true });
-        flagged++;
+        return 1;
       }
-    }
+      return 0;
+    }));
+    const flagged = results.reduce<number>((a, b) => a + b, 0);
 
     return { flagged, remaining: candidates.length === batchSize ? "more" : "done" };
   },

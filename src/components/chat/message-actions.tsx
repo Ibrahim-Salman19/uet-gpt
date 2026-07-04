@@ -1,7 +1,7 @@
 "use client";
 
 import { Bookmark, Check, Copy, Pencil, ThumbsDown, ThumbsUp, Trash2 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { usePreferences } from "@/components/preferences-provider";
 import { Button } from "@/components/ui/button";
@@ -195,6 +195,13 @@ export function MessageActions({
 }: MessageActionsProps) {
   const [copied, setCopied] = useState(false);
   const [feedback, setFeedback] = useState<"thumbsUp" | "thumbsDown" | null>(null);
+  const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+    };
+  }, []);
 
   const { addPin, removePin, isPinned, pinnedHighlights } = usePreferences();
 
@@ -212,7 +219,8 @@ export function MessageActions({
     if (success) {
       setCopied(true);
       toast.success("Copied to clipboard");
-      setTimeout(() => setCopied(false), 2000);
+      if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+      copyTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
     } else {
       toast.error("Failed to copy");
     }

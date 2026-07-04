@@ -134,9 +134,8 @@ function RadioGroup<T extends string>({
 
     event.preventDefault();
     const next = options[nextIndex];
+    if (!next) return;
     onChange(next.value);
-    // Move focus to the newly-selected option to keep the roving tabindex
-    // in sync with the visual selection.
     const group = event.currentTarget.closest('[role="radiogroup"]');
     const target = group?.querySelector<HTMLButtonElement>(`[data-radio-value="${next.value}"]`);
     target?.focus();

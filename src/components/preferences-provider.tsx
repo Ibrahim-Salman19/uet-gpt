@@ -302,7 +302,7 @@ function useConvexPreferenceSync(
 
   React.useEffect(() => {
     syncPrefFromConvex(
-      isValidFontSize(typeof fontSize === "string" ? fontSize : null) ? fontSize : undefined,
+      isValidFontSize(typeof fontSize === "string" ? fontSize : undefined) ? fontSize : undefined,
       setFontSizeState,
       "pref-font-size",
     );

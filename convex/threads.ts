@@ -139,15 +139,16 @@ export const safeDeleteThread = internalMutation({
 
       // 2. Delete feedback records associated with those messages
       const messageIds = messagesResult.page.map((m: any) => m._id);
-      for (const msgId of messageIds) {
-        const feedbackEntries = await ctx.db
-          .query("feedback")
-          .withIndex("by_messageId", (q) => q.eq("messageId", msgId))
-          .collect();
-        for (const fb of feedbackEntries) {
-          await ctx.db.delete(fb._id);
-        }
-      }
+      const feedbackEntries = await Promise.all(
+        messageIds.map((msgId: string) =>
+          ctx.db
+            .query("feedback")
+            .withIndex("by_messageId", (q) => q.eq("messageId", msgId))
+            .collect(),
+        ),
+      );
+      const allFeedbackIds = feedbackEntries.flatMap((entries) => entries.map((fb) => fb._id));
+      await Promise.all(allFeedbackIds.map((fbId) => ctx.db.delete(fbId)));
 
       // 3. Delete thread and messages inside the agent component
       await ctx.runMutation(components.agent.threads.deleteAllForThreadIdAsync, {

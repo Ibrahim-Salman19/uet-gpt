@@ -56,7 +56,7 @@ async function diffAndDeleteStaleChunks(
     (ec) => !chunks.some((nc) => nc.contentHash === ec.contentHash),
   );
 
-  for (const staleChunk of chunksToDelete) {
+  await Promise.all(chunksToDelete.map(async (staleChunk) => {
     try {
       await rag.delete(ctx, {
         entryId: staleChunk.ragId as unknown as import("@convex-dev/rag").EntryId,
@@ -65,7 +65,7 @@ async function diffAndDeleteStaleChunks(
     } catch (err) {
       console.warn(`Failed to delete vector ${staleChunk.ragId} from RAG during re-embed:`, err);
     }
-  }
+  }));
 
   console.log(
     `Chunk Diff for ${url}: ${chunksToEmbed.length} new chunks, ${chunksToDelete.length} deleted chunks`,

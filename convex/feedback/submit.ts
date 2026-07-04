@@ -1,6 +1,7 @@
 import { ConvexError, v } from "convex/values";
 import type { Id } from "../_generated/dataModel";
 import { mutation } from "../_generated/server";
+import { components } from "../_generated/api";
 
 export const submit = mutation({
   args: {
@@ -35,6 +36,13 @@ export const submit = mutation({
     }
     if (!user.isActive) {
       throw new ConvexError("User account is inactive");
+    }
+    const [message] = await ctx.runQuery(
+      components.agent.messages.getMessagesByIds,
+      { messageIds: [args.messageId] },
+    );
+    if (!message || message.userId !== identity.subject) {
+      throw new ConvexError("Message not found or not owned by user");
     }
     const existingByUser = await ctx.db
       .query("feedback")
