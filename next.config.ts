@@ -41,7 +41,7 @@ const nextConfig: NextConfig = {
     // middleware (see cross_cutting: src/middleware.ts) because Next.js emits
     // inline bootstrap scripts; it is therefore left in place but flagged.
     const scriptSrc = [
-      "script-src 'self' https://clerk.browser.systems *.clerk.accounts.dev 'unsafe-inline'",
+      "script-src 'self' https://clerk.browser.systems *.clerk.accounts.dev https://challenges.cloudflare.com 'unsafe-inline'",
       isDev ? " 'unsafe-eval'" : "",
     ].join("");
     return [
@@ -66,6 +66,7 @@ const nextConfig: NextConfig = {
               "img-src 'self' data: blob: https://img.clerk.com https://*.convex.cloud",
               "style-src 'self' 'unsafe-inline'",
               "object-src 'none'",
+              "frame-src 'self' https://challenges.cloudflare.com",
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",
