@@ -3,11 +3,6 @@
 import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
 
-// global-error.tsx replaces the root layout when an error is thrown during
-// rendering of the root layout/template, so it must render its own <html> and
-// <body>. Errors that reach here escape every nested error boundary, so we
-// report them to Sentry explicitly (nested boundaries are reported by their
-// own handlers / Next's instrumentation).
 export default function GlobalError({
   error,
   reset,
@@ -38,7 +33,7 @@ export default function GlobalError({
           backgroundColor: "oklch(7% 0.006 95)",
         }}
       >
-        <div style={{ maxWidth: "28rem", width: "100%" }}>
+        <div style={{ maxWidth: "40rem", width: "100%" }}>
           {/* Icon */}
           <div
             style={{
@@ -80,7 +75,7 @@ export default function GlobalError({
 
           <h2
             style={{
-              fontSize: "1.1rem",
+              fontSize: "1.25rem",
               fontWeight: 600,
               marginBottom: "0.5rem",
               color: "oklch(91% 0 0)",
@@ -88,9 +83,41 @@ export default function GlobalError({
           >
             Something went wrong
           </h2>
-          <p style={{ fontSize: "0.85rem", color: "oklch(62% 0 0)", margin: 0 }}>
-            An unexpected error occurred. This has been logged automatically.
+          
+          <p style={{ fontSize: "0.85rem", color: "oklch(72% 0 0)", marginBottom: "1rem" }}>
+            An unexpected client-side error occurred:
           </p>
+
+          {/* Actual Error Message and Stack Trace */}
+          <div
+            style={{
+              textAlign: "left",
+              padding: "1rem",
+              background: "oklch(4% 0.004 95)",
+              border: "1px solid oklch(78% 0 0 / 0.15)",
+              borderRadius: 8,
+              marginBottom: "1.5rem",
+              overflowX: "auto",
+            }}
+          >
+            <div style={{ color: "oklch(58% 0.15 35)", fontWeight: "bold", fontSize: "0.85rem", marginBottom: "0.5rem" }}>
+              {error.name}: {error.message}
+            </div>
+            {error.stack && (
+              <pre
+                style={{
+                  margin: 0,
+                  fontSize: "0.7rem",
+                  color: "oklch(62% 0 0)",
+                  fontFamily: "ui-monospace, monospace",
+                  whiteSpace: "pre-wrap",
+                  lineHeight: "1.4",
+                }}
+              >
+                {error.stack}
+              </pre>
+            )}
+          </div>
 
           {error.digest && (
             <p
@@ -104,6 +131,7 @@ export default function GlobalError({
                 border: "1px solid oklch(78% 0 0 / 0.12)",
                 borderRadius: 4,
                 display: "inline-block",
+                marginBottom: "1rem",
               }}
             >
               Error ID: {error.digest}
