@@ -104,8 +104,8 @@ describe("clerk webhook POST handler", () => {
 
     expect(verifyMock).toHaveBeenCalledTimes(1);
     // First arg passed to verify must be the exact raw text we received.
-    expect(verifyMock.mock.calls[0][0]).toBe(rawBody);
-    expect(verifyMock.mock.calls[0][1]).toEqual({
+    expect(verifyMock.mock.calls[0]?.[0]).toBe(rawBody);
+    expect(verifyMock.mock.calls[0]?.[1]).toEqual({
       "svix-id": "msg_123",
       "svix-timestamp": "1700000000",
       "svix-signature": "v1,abcdef",

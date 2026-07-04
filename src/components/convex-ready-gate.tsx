@@ -3,17 +3,24 @@
 import { useUser } from "@clerk/nextjs";
 import { useConvexAuth } from "convex/react";
 import { useEffect, useState } from "react";
+import { useUserData } from "@/hooks/use-user-data";
 
 const TIMEOUT_MS = 10_000; // 10 seconds
 
 export function ConvexReadyGate({ children }: { children: React.ReactNode }) {
-  const { isLoaded: isClerkLoaded } = useUser();
+  const { isLoaded: isClerkLoaded, user } = useUser();
   const { isLoading: isConvexLoading } = useConvexAuth();
+  const { convexUser, isConvexLoaded } = useUserData();
   const [timedOut, setTimedOut] = useState(false);
   const [networkError, setNetworkError] = useState<string | null>(null);
   const [diagnosing, setDiagnosing] = useState(false);
 
-  const isReady = isClerkLoaded && !isConvexLoading;
+  // Ready when Clerk & Convex network are loaded, AND if a Clerk user exists, 
+  // their Convex user document has been successfully created and synced by UserSync.
+  const isReady =
+    isClerkLoaded &&
+    !isConvexLoading &&
+    (!user || (isConvexLoaded && convexUser !== null));
 
   const runDiagnostics = async () => {
     setDiagnosing(true);
