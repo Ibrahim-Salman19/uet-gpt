@@ -36,7 +36,17 @@ export const list = query({
   args: {},
   returns: v.array(threadValidator),
   handler: async (ctx) => {
-    const user = await requireAuth(ctx);
+    // Gracefully return [] when the user record hasn't been created yet
+    // (race window during OAuth sign-in before UserSync mutation completes).
+    // requireAuth throws ConvexError("User not found") which would crash the
+    // entire React tree. Instead, check identity + user existence manually.
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+    if (!user || !user.isActive) return [];
 
     const result = await ctx.runQuery(components.agent.threads.listThreadsByUserId, {
       userId: user.clerkId,
