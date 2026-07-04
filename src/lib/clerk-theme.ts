@@ -1,9 +1,7 @@
-import type { Appearance } from "@clerk/nextjs/server";
-
 // Safe Clerk appearance: only plain CSS properties (no &:hover / &:focus
-// pseudo-selector nesting — those can throw at runtime in Clerk v7 SSR).
+// pseudo-selector nesting — those throw at runtime in Clerk v7 SSR).
 // Hover/focus states are handled by Clerk's built-in colorPrimary theming.
-export const uetClerkAppearance: Appearance = {
+export const uetClerkAppearance = {
   variables: {
     colorPrimary: "oklch(84% 0.19 80.46)", // kinpaku-gold
     colorText: "oklch(88% 0 0)", // ks-text-warm
@@ -70,4 +68,4 @@ export const uetClerkAppearance: Appearance = {
       color: "oklch(84% 0.19 80.46)",
     },
   },
-};
+} as const;
