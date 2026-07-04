@@ -61,6 +61,7 @@ const nextConfig: NextConfig = {
             value: [
               "default-src 'self'",
               scriptSrc,
+              "worker-src 'self' blob:",
               "connect-src 'self' *.convex.cloud wss://*.convex.cloud https://clerk.browser.systems *.clerk.accounts.dev",
               "img-src 'self' data: blob: https://img.clerk.com https://*.convex.cloud",
               "style-src 'self' 'unsafe-inline'",
