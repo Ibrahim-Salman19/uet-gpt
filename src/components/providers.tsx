@@ -82,13 +82,7 @@ export function Providers({ children }: ProvidersProps) {
     return new ConvexReactClient(convexUrl);
   });
 
-  // Close the client on unmount to release the WebSocket. This is a root,
-  // app-lifetime provider so this only fires on full teardown.
-  React.useEffect(() => {
-    return () => {
-      convexClient?.close().catch((err) => console.error("Failed to close Convex client:", err));
-    };
-  }, [convexClient]);
+
 
   const content = (
     <TooltipProvider delayDuration={300} skipDelayDuration={100}>
