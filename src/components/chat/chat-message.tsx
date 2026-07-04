@@ -75,16 +75,18 @@ function useScrambleText(
     typingSoundEnabledRef.current = typingSoundEnabled;
   }, [typingSoundEnabled]);
 
+  const isStreaming = message.id === "streaming-message";
+  const shouldBypassAnimation =
+    isUser ||
+    isStreaming ||
+    !isLatest ||
+    !typingAnimEnabled ||
+    prefersReducedMotion() ||
+    animatedIdRef.current === message.id;
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: refs (animatedIdRef, *Ref) and stable setters are intentionally omitted; all reactive inputs (message.id, message.content, isUser, isLatest, typingAnimEnabled) are listed.
   React.useEffect(() => {
-    if (
-      isUser ||
-      message.id === "streaming-message" ||
-      !isLatest ||
-      !typingAnimEnabled ||
-      prefersReducedMotion() ||
-      animatedIdRef.current === message.id
-    ) {
+    if (shouldBypassAnimation) {
       setScrambleContent(message.content);
       setIsAnimating(false);
       return;
@@ -128,7 +130,7 @@ function useScrambleText(
     // that has already played its scramble animation.
   }, [message.id, message.content, isUser, isLatest, typingAnimEnabled]);
 
-  return { text: scrambleContent, isAnimating };
+  return { text: shouldBypassAnimation ? message.content : scrambleContent, isAnimating };
 }
 
 export const ChatMessageBubble = React.memo(function ChatMessageBubble({

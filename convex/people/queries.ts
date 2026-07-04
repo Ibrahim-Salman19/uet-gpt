@@ -1,38 +1,47 @@
-import { type QueryCtx, query } from "../_generated/server";
+import { v } from "convex/values";
+import { query } from "../_generated/server";
 import { requireAdmin } from "../auth";
-
-// NOTE: document classification (the FACULTY/STAFF/ADMIN pattern matching) lives
-// in convex/doc/create.ts and is persisted to `documents.personType` at create
-// time. This query reads the persisted value via the `by_personType` index, so
-// no local classifier is needed here — a former copy was dead code and removed.
-
-async function countDocuments(ctx: QueryCtx, filterType?: "faculty" | "staff" | "admin") {
-  let count = 0;
-  let cursor: string | null = null;
-  let isDone = false;
-  while (!isDone) {
-    const query = filterType
-      ? ctx.db.query("documents").withIndex("by_personType", (q) => q.eq("personType", filterType))
-      : ctx.db.query("documents");
-    const pageResult = await query.paginate({ numItems: 1000, cursor });
-    count += pageResult.page.length;
-    cursor = pageResult.continueCursor;
-    isDone = pageResult.isDone;
-  }
-  return count;
-}
 
 export const getCount = query({
   args: {},
+  returns: v.object({
+    faculty: v.number(),
+    admin: v.number(),
+    staff: v.number(),
+    total: v.number(),
+  }),
   handler: async (ctx) => {
     await requireAdmin(ctx);
 
-    const [faculty, staff, admin, total] = await Promise.all([
-      countDocuments(ctx, "faculty"),
-      countDocuments(ctx, "staff"),
-      countDocuments(ctx, "admin"),
-      countDocuments(ctx, undefined),
-    ]);
+    let faculty = 0;
+    let staff = 0;
+    let admin = 0;
+    let total = 0;
+
+    let cursor: string | null = null;
+    let isDone = false;
+
+    // Single-pass table scan to build all counts concurrently, reducing read
+    // amplification from 4x to 1x compared to running independent pagination loops.
+    while (!isDone) {
+      const pageResult = await ctx.db
+        .query("documents")
+        .paginate({ numItems: 1000, cursor });
+
+      for (const doc of pageResult.page) {
+        total++;
+        if (doc.personType === "faculty") {
+          faculty++;
+        } else if (doc.personType === "staff") {
+          staff++;
+        } else if (doc.personType === "admin") {
+          admin++;
+        }
+      }
+
+      cursor = pageResult.continueCursor;
+      isDone = pageResult.isDone;
+    }
 
     return {
       faculty,

@@ -7,22 +7,37 @@ export const getChunksByRagIds = internalQuery({
     ragIds: v.array(v.string()),
   },
   handler: async (ctx, args) => {
-    const promises = args.ragIds.map(async (ragId) => {
-      const chunk = await ctx.db
-        .query("crawledChunks")
-        .withIndex("by_ragId", (q) => q.eq("ragId", ragId))
-        .first();
+    // 1. Fetch chunks in parallel (N index queries)
+    const chunks = await Promise.all(
+      args.ragIds.map((ragId) =>
+        ctx.db
+          .query("crawledChunks")
+          .withIndex("by_ragId", (q) => q.eq("ragId", ragId))
+          .first(),
+      ),
+    );
 
-      if (!chunk) return null;
-      const doc = await ctx.db.get(chunk.documentId);
-      if (!doc) return null;
+    // Extract non-null chunks and collect unique document IDs
+    const validChunks = chunks.filter((c): c is NonNullable<typeof c> => c !== null);
+    const uniqueDocIds = Array.from(new Set(validChunks.map((c) => c.documentId)));
+
+    // 2. Batch fetch documents in parallel (Convex optimizes concurrent db.get calls)
+    const docs = await Promise.all(uniqueDocIds.map((id) => ctx.db.get(id)));
+    const docMap = new Map(
+      docs.filter((d): d is NonNullable<typeof d> => d !== null).map((d) => [d._id, d]),
+    );
+
+    // 3. Assemble results using the loaded docMap
+    const results = validChunks.map((chunk) => {
+      const doc = docMap.get(chunk.documentId);
+      if (!doc || !chunk.ragId) return null;
       return {
-        ragId,
+        ragId: chunk.ragId,
         text: chunk.text,
         url: doc.url,
       };
     });
-    const results = await Promise.all(promises);
+
     return results.filter((r): r is { ragId: string; text: string; url: string } => r !== null);
   },
 });

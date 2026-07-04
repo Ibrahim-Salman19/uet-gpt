@@ -153,30 +153,55 @@ export const contextualizeChunks = internalAction({
       );
     }
     const batch = args.chunkIds;
-    const results = await Promise.allSettled(
-      batch.map(async (chunkId) => {
-        const chunk = await ctx.runQuery(internal.embeddings.contextualize.getChunkContext, {
-          chunkId,
-        });
-        if (!chunk) return;
 
-        const contextualized = await callGeminiContextualize(
-          chunk.text,
-          chunk.title,
-          chunk.headingPath,
-        );
-
-        if (contextualized !== null) {
-          await ctx.runMutation(internal.embeddings.contextualize.saveContextualizedText, {
-            chunkId,
-            contextualizedText: contextualized,
-          });
-        }
-      }),
+    // 1. Fetch chunk contexts in parallel
+    const chunks = await Promise.all(
+      batch.map((chunkId) =>
+        ctx.runQuery(internal.embeddings.contextualize.getChunkContext, { chunkId }),
+      ),
     );
 
-    const successes = results.filter((r) => r.status === "fulfilled").length;
-    const failures = results.filter((r) => r.status === "rejected").length;
+    // 2. Call Gemini in parallel
+    const contextualizePromises = chunks.map(async (chunk, index) => {
+      const chunkId = batch[index];
+      if (!chunk || !chunkId) return null;
+      const text = await callGeminiContextualize(
+        chunk.text,
+        chunk.title,
+        chunk.headingPath,
+      );
+      return { chunkId, text };
+    });
+
+    const settledResults = await Promise.allSettled(contextualizePromises);
+
+    // 3. Serialize mutations sequentially to avoid transaction contention on
+    // concurrent database writes.
+    let successes = 0;
+    let failures = 0;
+
+    for (const res of settledResults) {
+      if (res.status === "fulfilled" && res.value !== null) {
+        const { chunkId, text } = res.value;
+        if (text !== null) {
+          try {
+            await ctx.runMutation(internal.embeddings.contextualize.saveContextualizedText, {
+              chunkId,
+              contextualizedText: text,
+            });
+            successes++;
+          } catch (err) {
+            console.error(`Failed to save contextualized text for chunk ${chunkId}:`, err);
+            failures++;
+          }
+        } else {
+          failures++;
+        }
+      } else {
+        failures++;
+      }
+    }
+
     if (failures > 0) {
       console.warn(`Contextualize batch: ${successes} ok, ${failures} failed`);
     }

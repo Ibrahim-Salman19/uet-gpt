@@ -134,6 +134,8 @@ function useCommandQuery(
   }, [query]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (filteredCommands.length === 0) return;
+
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setSelectedIndex((prev) => (prev + 1) % filteredCommands.length);

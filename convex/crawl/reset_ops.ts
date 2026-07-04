@@ -9,7 +9,7 @@ async function deleteChunksBatch(
   ctx: any,
   batchSize: number,
 ): Promise<{ deleted: number; remaining: string } | null> {
-  const chunks = await ctx.db.query("crawledChunks").withIndex("by_documentId").take(batchSize);
+  const chunks = await ctx.db.query("crawledChunks").take(batchSize);
   if (chunks.length === 0) return null;
   await Promise.all(
     chunks.map(async (chunk: any) => {
@@ -29,11 +29,9 @@ async function deleteChunksBatch(
 async function deleteTableBatch(
   ctx: any,
   table: string,
-  index: string | null,
   batchSize: number,
 ): Promise<{ deleted: number; remaining: string } | null> {
-  const query = index ? ctx.db.query(table as any).withIndex(index) : ctx.db.query(table as any);
-  const items = await query.take(batchSize);
+  const items = await ctx.db.query(table as any).take(batchSize);
   if (items.length === 0) return null;
   await Promise.all(items.map((item: any) => ctx.db.delete(item._id)));
   return { deleted: items.length, remaining: "more" };
@@ -63,11 +61,11 @@ export const resetPipelineBatch = internalMutation({
 
     const result =
       (await deleteChunksBatch(ctx, batchSize)) ??
-      (await deleteTableBatch(ctx, "documents", "by_crawledAt", batchSize)) ??
-      (await deleteTableBatch(ctx, "crawlDeadLetter", "by_status", batchSize)) ??
-      (await deleteTableBatch(ctx, "processedWebhooks", "by_expiresAt", batchSize)) ??
-      (await deleteTableBatch(ctx, "crawlJobs", "by_startedAt", batchSize)) ??
-      (await deleteTableBatch(ctx, "crawlStats", null, batchSize));
+      (await deleteTableBatch(ctx, "documents", batchSize)) ??
+      (await deleteTableBatch(ctx, "crawlDeadLetter", batchSize)) ??
+      (await deleteTableBatch(ctx, "processedWebhooks", batchSize)) ??
+      (await deleteTableBatch(ctx, "crawlJobs", batchSize)) ??
+      (await deleteTableBatch(ctx, "crawlStats", batchSize));
 
     return result ?? { deleted: 0, remaining: "done" };
   },

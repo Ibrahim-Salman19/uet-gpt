@@ -159,43 +159,46 @@ export const countAllDocuments = internalQuery({
   },
 });
 
+export const getStaleAndTotalCount = internalQuery({
+  args: { now: v.number() },
+  returns: v.object({
+    total: v.number(),
+    stale: v.number(),
+  }),
+  handler: async (ctx, args) => {
+    const threshold = args.now - 30 * 24 * 60 * 60 * 1000;
+    let total = 0;
+    let stale = 0;
+    let cursor: string | null = null;
+    let isDone = false;
+
+    // Single-pass table scan to compute both total and stale document counts.
+    // This reduces read amplification and avoids double-reading documents that
+    // have both status='stale' and are older than the freshness threshold.
+    while (!isDone) {
+      const pageResult = await ctx.db.query("documents").paginate({ numItems: 1000, cursor });
+      total += pageResult.page.length;
+      for (const d of pageResult.page) {
+        const isStaleStatus = d.status === "stale";
+        const isStaleAge = d.freshnessTier === "low" && d.crawledAt <= threshold;
+        if (isStaleStatus || isStaleAge) {
+          stale++;
+        }
+      }
+      cursor = pageResult.continueCursor;
+      isDone = pageResult.isDone;
+    }
+
+    return { total, stale };
+  },
+});
+
 export const getStaleDocumentCount = internalQuery({
   args: { now: v.number() },
   returns: v.number(),
   handler: async (ctx, args) => {
-    const threshold = args.now - 30 * 24 * 60 * 60 * 1000;
-    const seen = new Set<string>();
-
-    let cursorFlag: string | null = null;
-    let doneFlag = false;
-    while (!doneFlag) {
-      const page = await ctx.db
-        .query("documents")
-        .withIndex("by_status", (q) => q.eq("status", "stale"))
-        .paginate({ numItems: 1000, cursor: cursorFlag });
-      for (const d of page.page) {
-        seen.add(d._id);
-      }
-      cursorFlag = page.continueCursor;
-      doneFlag = page.isDone;
-    }
-
-    let cursorAge: string | null = null;
-    let doneAge = false;
-    while (!doneAge) {
-      const page = await ctx.db
-        .query("documents")
-        .withIndex("by_tier_and_crawled", (q) =>
-          q.eq("freshnessTier", "low").lte("crawledAt", threshold),
-        )
-        .paginate({ numItems: 1000, cursor: cursorAge });
-      for (const d of page.page) {
-        seen.add(d._id);
-      }
-      cursorAge = page.continueCursor;
-      doneAge = page.isDone;
-    }
-
-    return seen.size;
+    const res = await getStaleAndTotalCount.handler(ctx, args);
+    return res.stale;
   },
 });
+
