@@ -160,10 +160,10 @@ export default function ExplorePage() {
   // arg/return types (no `as unknown as FunctionReference` cast). The inactive
   // query is skipped, so only one runs at a time.
   const searchResults = useStableQuery(
-    api.doc.search,
+    (api as any).doc.search,
     isSearching ? { query: trimmedQuery, category } : "skip",
   );
-  const listResults = useStableQuery(api.doc.list, isSearching ? "skip" : { category });
+  const listResults = useStableQuery((api as any).doc.list, isSearching ? "skip" : { category });
 
   const documents = isSearching ? searchResults : listResults;
 
