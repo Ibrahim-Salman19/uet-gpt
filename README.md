@@ -20,27 +20,13 @@ full system design.
 
 - [pnpm](https://pnpm.io/) (this repo is pnpm-locked; do not mix npm/yarn — see `architecture.md` §17)
 - Node.js (version per `package.json` / `.nvmrc`)
+- Python 3.x (for the async BFS crawler and PDF ingest scripts in `scripts/`)
 - A Convex account, a Clerk application, and API keys for Groq / Gemini / Cerebras
 
 ## Environment Variables
 
 Set these in `.env.local` (Next.js) and in the Convex dashboard as appropriate.
-See `architecture.md` §8.2 for the authoritative list.
-
-```
-CONVEX_DEPLOYMENT=
-NEXT_PUBLIC_CONVEX_URL=
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
-CLERK_SECRET_KEY=
-CLERK_WEBHOOK_SECRET=
-CRAWL_WEBHOOK_SECRET=
-INTERNAL_API_SECRET=
-GROQ_API_KEY=
-GEMINI_API_KEY=
-CEREBRAS_API_KEY=
-UPSTASH_REDIS_REST_URL=
-UPSTASH_REDIS_REST_TOKEN=
-```
+See `.env.local.example` for the full list with comments, and `architecture.md` §8.2 for the authoritative descriptions.
 
 ## Getting Started
 
@@ -68,6 +54,17 @@ pnpm test:e2e    # Playwright end-to-end tests
 
 - [`architecture.md`](./architecture.md) — single source of truth for system design
 - [`AGENTS.md`](./AGENTS.md) — agent / contributor instructions
-- [`testing.md`](./testing.md) — testing strategy and plan
+- [`testing.md`](./testing.md) — testing strategy (trimmed, agent-optimized)
 - [`THREAT_MODEL.md`](./THREAT_MODEL.md) — security threat model
-- [`docs/`](./docs) — focused design notes (RAG pipeline, chunking, embedding, crawling, security)
+- [`CRONJOB.md`](./CRONJOB.md) — autonomous maintenance protocol
+- [`DESIGN.md`](./DESIGN.md) — design system (Neo Kinpaku)
+- [`PRODUCT.md`](./PRODUCT.md) — product definition
+- [`CHANGELOG.md`](./CHANGELOG.md) — engineering work log
+- [`docs/`](./docs) — focused reference docs:
+  - `docs/reference/` — API signatures, env vars, auth matrix, component inventory
+  - `docs/security.md` — security controls summary
+  - `docs/embedding-strategy.md` — embedding model + vector store
+  - `docs/agent-coordination.md` — frontend/backend agent boundary rules
+  - `docs/frontend_backend_boundaries.md` — ownership rules between src/ and convex/
+  - `docs/deployment.md` — deployment architecture
+  - `docs/crawl-robots-audit.md` — robots.txt compliance decisions

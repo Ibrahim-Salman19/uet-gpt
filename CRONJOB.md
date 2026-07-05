@@ -1,26 +1,23 @@
-# CRONJOB.md — UET Taxila RAG Pipeline Autonomous Agent
-# Hourly Maintenance Protocol | Platform: Google Antigravity 2.0 (agy CLI)
+# CRONJOB.md — UET Taxila RAG Pipeline | Hourly Maintenance | opencode (mimo-v2.5-free)
 # ─────────────────────────────────────────────────────────────────────────────
-# Research basis: official Antigravity 2.0 docs (antigravity.google), Google I/O
-# 2026 deep-dive, Antigravity Lab production guides, DataCamp CLI tutorial,
-# agy --help output, 9 autonomous agent system post-mortems (2025–2026)
+# Companion: AGENTS.md (prepended to every prompt). Scheduling: opencode loop
+# or external cron via scripts/run_agent.sh ("0 * * * *").
 # ─────────────────────────────────────────────────────────────────────────────
-#
-# DEPLOYMENT OPTIONS — THREE WAYS TO SCHEDULE THIS:
-#
-# Option A — Native Antigravity Scheduling (RECOMMENDED)
-#   From inside the agy TUI, run once:
-#   /schedule cron="0 * * * *" prompt="$(cat CRONJOB.md)"
-#   The desktop app manages scheduling natively with no external cron needed.
-#
-# Option B — External cron + agy CLI
-#   Add to crontab: 0 * * * * /path/to/scripts/run_agent.sh
-#   run_agent.sh calls: agy -p "/goal $(cat CRONJOB.md)" --print-timeout 50m
-#
-# Option C — agy schedule CLI (headless)
-#   agy schedule "$(cat CRONJOB.md)" --cron "0 * * * *"
-#
-# ─────────────────────────────────────────────────────────────────────────────
+
+## Table of Contents
+
+| Phase | Lines | Purpose |
+|-------|-------|---------|
+| Goal & Security | 24-47 | Mission statement, security contract |
+| Phase 0: Boot | 50-126 | Lock, read source files, crash recovery, budget |
+| Phase 1: Diagnose | 128-181 | Run verification suite, eval harness |
+| Phase 2: Select Task | 183-221 | Priority chain, task selection |
+| Phase 3: Execute | 223-270 | Implementation rules, commit discipline |
+| Phase 4: Verify | 272-337 | 5 verification gates |
+| Phase 5: Emergency | 339-389 | Bisect + revert protocol |
+| Phase 6: Document | 391-445 | Architecture.md + TODO.md updates |
+| Phase 7: Commit & Exit | 447-474 | Final commit + lock release |
+| Anti-Patterns | 477-505 | Production post-mortems |
 
 ---
 
@@ -56,8 +53,12 @@ SECURITY CONTRACT (non-negotiable):
 
 ### Step 0.1 — Acquire run lock
 ```bash
-LOCK_DIR=".agent/run.lock"        # directory, NOT a file — mkdir is atomic
-mkdir -p .agent
+# NOTE: .agent/ lives at workspace root, not inside uet-gpt/.
+# Resolve the path relative to the repo root (one level up).
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+AGENT_DIR="$REPO_ROOT/.agent"
+mkdir -p "$AGENT_DIR"
+LOCK_DIR="$AGENT_DIR/run.lock"    # directory, NOT a file — mkdir is atomic
 
 # mkdir succeeds for exactly one racing process and fails for the rest, so the
 # check-and-acquire is a single atomic step (no TOCTOU window).
@@ -85,31 +86,24 @@ echo "$$:$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$LOCK_DIR/owner"
 # the >2h stale-age fallback above is the real safety net — keep both.
 trap 'rm -rf "$LOCK_DIR"' EXIT
 ```
-The lock is a **directory** created with `mkdir`, which is atomic on POSIX
-filesystems, so two runs starting in the same window cannot both acquire it.
-If a fresh lock (< 2 hours) exists, exit immediately — another run is active.
-A stale lock (> 2 hours) means a previous run was SIGKILLed before its `trap`
-could clean up; reclaim it and proceed. Epoch is read from the lock's own
-`started_epoch` file to avoid GNU-only `stat -c %Y`.
+Lock is a directory (atomic mkdir). Fresh lock (< 2h) → exit. Stale lock (> 2h)
+→ reclaim. Epoch from `started_epoch` file to stay portable (no GNU `stat -c`).
 
 ### Step 0.2 — Read source of truth files (MANDATORY, every run)
 ```
 READ (full, every line): architecture.md
-READ (full):             .agent/state.md
-READ (full):             .agent/progress_log.md   (last 10 entries minimum)
+READ (full):             $AGENT_DIR/state.md        # workspace root, not uet-gpt/
+READ (full):             $AGENT_DIR/progress_log.md  # last 10 entries minimum
 ```
-`architecture.md` is the single source of truth. If it says something works a
-certain way, believe it over your training data. The previous session's work is
-in `progress_log.md` — read it before doing anything else.
+`architecture.md` is the single source of truth. Believe it over your training data.
+Previous session's work is in `progress_log.md` — read it before doing anything.
 
 ### Step 0.3 — Read relevant SKILL.md files
-Scan `.agents/skills/` and `~/.gemini/antigravity-cli/skills/`.
-Read every SKILL.md relevant to today's task BEFORE writing any code.
+Scan `.agents/skills/` and read every SKILL.md relevant to today's task BEFORE writing any code.
 This is non-negotiable — skills contain environment constraints unknown to you.
 
 ```bash
 ls .agents/skills/ 2>/dev/null || echo "No local skills yet"
-ls ~/.gemini/antigravity-cli/skills/ 2>/dev/null || echo "No global skills"
 ```
 
 ### Step 0.4 — Check for crash recovery from previous run
@@ -119,11 +113,11 @@ git log --oneline -5     # what was committed last?
 ```
 If uncommitted changes exist: understand them before starting new work.
 If correct → `git commit -m "chore(agent): recover uncommitted work"`.
-If broken → `git checkout -- .` and log the crash to `.agent/incident_log.md`.
+If broken → `git checkout -- .` and log the crash to `$AGENT_DIR/incident_log.md`.
 
 ### Step 0.5 — Budget check
 ```bash
-RUNS_TODAY=$(grep -c "$(date +%Y-%m-%d)" .agent/progress_log.md 2>/dev/null || echo 0)
+RUNS_TODAY=$(grep -c "$(date +%Y-%m-%d)" "$AGENT_DIR/progress_log.md" 2>/dev/null || echo 0)
 echo "Runs today: $RUNS_TODAY"
 ```
 If `$RUNS_TODAY > 20`: enter **lightweight mode** — run eval harness only,
@@ -138,18 +132,16 @@ document findings in state.md, make zero code changes. Exit after reporting.
 Run the full verification suite. Record every result.
 
 ```bash
-# 1. TypeScript compilation — the real CI gate (package.json: "typecheck": "tsc --noEmit")
-# NOTE: `convex dev --dry-run` only validates Convex function deployment, not the
-# Next.js/TS program, and can start a dev process — do NOT use it as the TS gate.
+# 1. TypeScript compilation (the real CI gate — NOT convex dev --dry-run)
 pnpm typecheck 2>&1 | tail -20
 
 # 2. Python syntax check
 python -m py_compile scripts/crawler.py scripts/ingest_pdf.py \
   && echo "PY: OK" || echo "PY: ERRORS"
 
-# 3. RAG eval harness — the only metric that matters
-EVAL_FILE=".agent/eval_$(date +%Y%m%d_%H%M).json"
-LAST_EVAL=$(ls -t .agent/eval_*.json 2>/dev/null | head -1 || echo "")
+# 3. RAG eval harness
+EVAL_FILE="$AGENT_DIR/eval_$(date +%Y%m%d_%H%M).json"
+LAST_EVAL=$(ls -t "$AGENT_DIR"/eval_*.json 2>/dev/null | head -1 || echo "")
 
 python scripts/eval/run_eval.py \
   --golden scripts/eval/golden_set.jsonl \
@@ -157,30 +149,23 @@ python scripts/eval/run_eval.py \
   --top_k 5 \
   ${LAST_EVAL:+--baseline "$LAST_EVAL"} 2>&1
 EVAL_EXIT=$?
-
-# Exit code meanings from run_eval.py:
-#   0 = success (stable or improved)
-#   1 = eval itself errored (network/auth failure) → skip this run, NOT a regression
-#   2 = REGRESSION detected (recall_at_5 dropped > 0.5%) → go to Phase 5
+# 0 = stable/improved, 1 = connectivity error (skip, NOT regression), 2 = REGRESSION → Phase 5
 
 if [ "$EVAL_EXIT" -eq 1 ]; then
-  echo "WARN: Eval harness failed to connect to Convex. Skipping this run."
-  echo "This is a transient infrastructure failure, NOT a code regression."
-  # Update state.md with the connectivity failure, then exit cleanly.
-  # Do NOT treat this as a recall regression.
+  echo "WARN: Eval harness failed to connect. Transient failure, not regression."
   exit 0
 fi
 
-# 4. Dead Letter Queue size
-DLQ_SIZE=$(wc -l < scripts/dlq.jsonl 2>/dev/null || echo 0)
+# 4. DLQ size (check crawlDeadLetter table in Convex dashboard)
+DLQ_SIZE=0
 echo "DLQ URLs pending retry: $DLQ_SIZE"
 
-# 5. VLM extraction failures
-VLM_FAIL=$(wc -l < logs/vlm_failures.jsonl 2>/dev/null || echo 0)
+# 5. VLM failures (check Convex error logs)
+VLM_FAIL=0
 echo "VLM failures pending audit: $VLM_FAIL"
 ```
 
-Parse the JSON output from `$EVAL_FILE` and record in `.agent/state.md`:
+Parse the JSON output from `$EVAL_FILE` and record in `$AGENT_DIR/state.md`:
 ```yaml
 # IMPORTANT: the JSON key is "recall_at_5" (not "recall_at_k")
 last_eval_recall_at_5: X.XX       # from eval JSON: .recall_at_5
@@ -189,12 +174,9 @@ last_eval_timestamp: ISO8601
 failing_categories: [list]         # from eval JSON: .per_category keys where recall < 0.5
 ```
 
-**STOP if eval exit code is 2 (REGRESSION detected).**
-Do not start new work. Go directly to Phase 5 (Emergency Protocol).
-A regression means a previous run broke something. Find it. Fix it. Only that.
+**STOP if eval exit code is 2 (REGRESSION).** Go to Phase 5. Do not start new work.
 
-**If eval exit code is 1 (connectivity error): write a note to state.md and exit cleanly.**
-Do not treat infrastructure failures as code regressions.
+**If eval exit code is 1:** write a note to state.md and exit cleanly (not a regression).
 
 ---
 
@@ -226,7 +208,7 @@ One task. Not two. Pick the highest-priority task where:
   3. Has a clear acceptance criterion
   4. All its declared dependencies are `[DONE]`
 
-### Before proceeding, record the selected task in `.agent/state.md`:
+### Before proceeding, record the selected task in `$AGENT_DIR/state.md`:
 ```yaml
 current_task_id: TASK-XXX
 current_task_name: "..."
@@ -272,7 +254,7 @@ WIP commits are correct. Silent crashes with 2 hours of uncommitted work are not
 Every commit is a recoverable checkpoint. The git log is your audit trail.
 
 **Rule 5 — State assumptions explicitly.**
-Before writing code, append to `.agent/state.md`:
+Before writing code, append to `$AGENT_DIR/state.md`:
 ```yaml
 assumptions: "crawledChunks.text is the vector field, confirmed from webhook.ts:L47"
 ```
@@ -282,7 +264,7 @@ If wrong, this one line tells the human exactly what to verify and fix.
 After each logical sub-step:
 1. Run fast verification: `pnpm typecheck && python -m py_compile scripts/*.py`
 2. If passes: WIP commit
-3. Update `current_task_progress` in `.agent/state.md`
+3. Update `current_task_progress` in `$AGENT_DIR/state.md`
 4. Continue
 
 ---
@@ -316,8 +298,8 @@ No new failures. New features require a new test.
 
 ### Gate 4 — Eval harness (the non-negotiable gate)
 ```bash
-PRE_EVAL=$(ls -t .agent/eval_*.json 2>/dev/null | head -1 || echo "")
-POST_EVAL=".agent/eval_post_$(date +%Y%m%d_%H%M).json"
+PRE_EVAL=$(ls -t "$AGENT_DIR"/eval_*.json 2>/dev/null | head -1 || echo "")
+POST_EVAL="$AGENT_DIR/eval_post_$(date +%Y%m%d_%H%M).json"
 
 python scripts/eval/run_eval.py \
   --golden scripts/eval/golden_set.jsonl \
@@ -348,7 +330,7 @@ python scripts/eval/run_eval.py \
 
 **If any gate fails:**
 1. `git stash` — do not commit broken state
-2. Write failure to `.agent/state.md` under `last_failure`
+2. Write failure to `$AGENT_DIR/state.md` under `last_failure`
 3. Mark task `[BLOCKED: gate N failed — reason]` in TODO.md
 4. Go to Phase 5
 
@@ -368,14 +350,14 @@ git stash push -m "emergency-stash-$(date +%H%M)"
 git log --oneline -15
 
 # 2. Find when eval metric was last passing (check progress log)
-grep "recall_at_5" .agent/progress_log.md | tail -10
+grep "recall_at_5" "$AGENT_DIR/progress_log.md" | tail -10
 
 # 3. Bisect: test each commit, do NOT revert yet — just eval
 # For each candidate commit SHA:
 git checkout <SHA> -- .   # check out only the changed files, not HEAD
 python scripts/eval/run_eval.py \
   --golden scripts/eval/golden_set.jsonl \
-  --output .agent/bisect_$(date +%H%M).json \
+  --output "$AGENT_DIR/bisect_$(date +%H%M).json" \
   --top_k 5
 # If recall improved → that commit was the culprit.
 
@@ -388,11 +370,11 @@ git revert <CULPRIT_SHA> --no-edit
 # 6. Verify the revert fixed the regression
 python scripts/eval/run_eval.py \
   --golden scripts/eval/golden_set.jsonl \
-  --output .agent/post_revert_$(date +%H%M).json \
+  --output "$AGENT_DIR/post_revert_$(date +%H%M).json" \
   --top_k 5
 ```
 
-Append to `.agent/incident_log.md`:
+Append to `$AGENT_DIR/incident_log.md`:
 ```markdown
 ## Incident: YYYY-MM-DD HH:MM UTC
 - Trigger: recall_at_5 dropped from X to Y
@@ -402,7 +384,7 @@ Append to `.agent/incident_log.md`:
 ```
 
 After resolution: this run ends. Do not attempt the original task.
-Write one summary line to `.agent/progress_log.md` and exit.
+Write one summary line to `$AGENT_DIR/progress_log.md` and exit.
 
 ---
 
@@ -413,8 +395,7 @@ Write one summary line to `.agent/progress_log.md` and exit.
 This phase is mandatory. Not optional. Not skippable.
 
 ### Step 6.1 — Update architecture.md (source of truth)
-Find the relevant section. Update it to reflect the current system state.
-Add to the changelog section:
+Find the relevant section. Update to reflect current state. Add changelog:
 ```markdown
 ## Changelog
 ### [YYYY-MM-DD] Run #N — <task name>
@@ -427,29 +408,19 @@ Add to the changelog section:
 ```
 
 ### Step 6.2 — Update TODO.md
-Mark completed task: `[DONE: YYYY-MM-DD]`.
-Add any newly discovered issues as new tasks with:
-- Priority level (P0/P1/P2/P3)
-- Acceptance criterion (what "done" looks like exactly)
-- `[DEPENDS ON: TASK-XXX]` if it has prerequisites
-- Exact file scope
+Mark completed task `[DONE: YYYY-MM-DD]`. Add newly discovered issues with:
+priority (P0-P3), acceptance criterion, `[DEPENDS ON: TASK-XXX]` if needed, file scope.
 
-### Step 6.3 — Append to .agent/progress_log.md
+### Step 6.3 — Append to progress_log.md
 ```markdown
----
-run_id: YYYY-MM-DD-HH
-timestamp_utc: ISO8601
-task: "TASK-XXX: [name]"
-files_modified: [list]
-eval_before: {recall_at_5: X.XX, fragment_hit: X.XX}
-eval_after:  {recall_at_5: Y.YY, fragment_hit: Y.YY}
-delta:       {recall_at_5: +0.07, fragment_hit: +0.03}
-git_commits: [SHA1, SHA2]
-assumptions: "..."
-issues_discovered: "..." (or "none")
+run_id: YYYY-MM-DD-HH | timestamp: ISO8601
+task: "TASK-XXX: [name]" | files: [list]
+eval: before {recall_at_5: X, frag: X} → after {recall_at_5: Y, frag: Y}
+delta: {recall_at_5: ±Z, frag: ±Z} | commits: [SHAs]
+assumptions: "..." | issues: "..." (or "none")
 ```
 
-### Step 6.4 — Reset .agent/state.md for next run
+### Step 6.4 — Reset $AGENT_DIR/state.md for next run
 ```yaml
 last_updated: YYYY-MM-DD HH:MM UTC
 
@@ -480,7 +451,7 @@ system_health:
 ```bash
 # Stage ONLY declared-scope files — never git add -A
 git add [exact files from current_task.files_in_scope]
-git add .agent/state.md .agent/progress_log.md architecture.md TODO.md
+git add "$AGENT_DIR/state.md" "$AGENT_DIR/progress_log.md" architecture.md TODO.md
 
 # Conventional commit with eval delta in footer
 git commit -m "feat(chunker): raise maxChunkSize 2000→3000 + 300-char overlap
@@ -496,7 +467,7 @@ Ref: architecture.md §4.3 | Research: 4 independent 2026 deployments"
 # git push and PR creation are human-only actions — never run them here.
 
 # Release lock (directory lock from Step 0.1)
-rm -rf .agent/run.lock
+rm -rf "$LOCK_DIR"
 
 echo "=== RUN COMPLETE $(date -u +%Y-%m-%dT%H:%M:%SZ) ==="
 ```
@@ -532,118 +503,5 @@ remember. Architecture.md must record it with the benchmark citation.
 
 ---
 
-## ════════════════════════════════════════════════════════════
-## TODO.md — INITIAL TASK QUEUE
-## (Place this in a separate TODO.md file at project root)
-## ════════════════════════════════════════════════════════════
-
-```markdown
-# TODO.md — UET Taxila RAG Pipeline
-# Format: - [STATUS] TASK-NNN: Name | P0-P3 | Depends: NNN
-# STATUS: [ ] pending | [WIP] in progress | [DONE: date] | [BLOCKED: reason]
-
-## P0 — Prerequisites
-- [ ] TASK-000: Build eval harness (golden_set.jsonl 75 pairs + run_eval.py) | P0
-
-## P1 — Security (before any feature work)
-- [ ] TASK-S01: PDF metadata sanitization + injection pattern blocklist | P1 | Depends: 000
-- [ ] TASK-S02: Convex rate-limiter (10msg/min/user, 100k tokens/min global) | P1 | Depends: 000
-- [ ] TASK-S03: Pre-retrieval query injection scanner in actions.ts | P1 | Depends: 000
-- [ ] TASK-S04: Source domain allowlist in webhook.ts (*.uettaxila.edu.pk only) | P1 | Depends: 000
-
-## P2 — Critical bug fixes (1–5 lines each, very high impact)
-- [ ] TASK-B01: Change RRF k from 10 → 60 in retrieval/search.ts | P2 | Depends: 000
-- [ ] TASK-B02: Lower semantic cache threshold 0.98 → 0.92 | P2 | Depends: 000
-- [ ] TASK-B03: Add cache TTL matching freshnessTier to semanticCache | P2 | Depends: B02
-- [ ] TASK-B04: Add decay floor Math.max(0.20, ...) to exponential decay | P2 | Depends: 000
-
-## P3 — Pipeline enhancements (ordered by impact/effort)
-- [ ] TASK-E01: Raise maxChunkSize 2000→3000 chars + 300-char prose overlap | P3 | Depends: 000
-- [ ] TASK-E02: Hybrid search via hybridRank (vector + BM25, k=20 fused → 8) | P3 | Depends: E01
-- [ ] TASK-E03: FlashRank reranker k=8→4 via cross-encoder/ms-marco-MiniLM-L-6-v2 | P3 | Depends: E02
-- [ ] TASK-E04: TTL tiered freshness (high=7d, medium=30d, low=90d) + isStale | P3 | Depends: 000
-- [ ] TASK-E05: Anti-hallucination tiers: <0.2 refuse, 0.2-0.4 hedge, 0.4-0.6 cite | P3 | Depends: 000
-- [ ] TASK-E06: Parent-child chunking (child 200tok embed, parent 1500tok return) | P3 | Depends: E01
-- [ ] TASK-E07: Gemini VLM verification pass + retry on table structure failure | P3 | Depends: 000
-- [ ] TASK-E08: Roman Urdu pre-query translation via Gemini 3.5 Flash | P3 | Depends: E02
-- [ ] TASK-E09: Contextual embeddings at ingestion time (Gemini context sentence) | P3 | Depends: E06
-- [ ] TASK-E10: HyDE query enhancement for queries < 15 words | P3 | Depends: E02
-```
-
----
-
-## ════════════════════════════════════════════════════════════
-## PLATFORM REFERENCE — Antigravity 2.0 (agy CLI)
-## ════════════════════════════════════════════════════════════
-
-### Key CLI flags (from official agy --help output)
-```bash
-agy -p "prompt"                        # non-interactive single run (--print)
-agy --print-timeout 50m                # override default 5m timeout (critical!)
-agy --continue                         # resume most recent conversation
-agy --add-dir ./path                   # add directory to workspace
-agy --sandbox                          # run with terminal/network sandbox restrictions (cron mode)
-```
-> SECURITY: `--dangerously-skip-permissions` (auto-approve ALL tool calls with
-> no sandbox) is intentionally omitted. For unattended cron, always run with
-> `--sandbox` + `proceed-in-sandbox`. Never use a skip-permissions / full-FS mode
-> for an agent that ingests untrusted external content (RAG corpus) — that is a
-> prime indirect-prompt-injection target (OWASP LLM01).
-
-### Permission modes (set in ~/.gemini/antigravity-cli/settings.json)
-```json
-{
-  "toolPermission": "proceed-in-sandbox"
-}
-```
-- `request-review` (default) — prompts before write/bash/web (interactive use)
-- `proceed-in-sandbox` — auto-proceeds inside isolated container (safe cron)
-- `always-proceed` — never prompts, full autonomy (trusted repos only)
-- `strict` — read-only without prompts (audit mode)
-
-For cron jobs: ALWAYS use `proceed-in-sandbox` (auto-proceeds only inside the
-isolated container, with restricted filesystem and network egress). Do NOT use
-`always-proceed` or `--dangerously-skip-permissions` for this unattended agent —
-they grant full autonomy with no sandbox, which is unsafe for an agent that
-ingests untrusted external content. The marginal speed gain is not worth the
-indirect-prompt-injection / secret-exfiltration risk.
-
-### Slash commands (used as prompt prefixes)
-- `/goal` — run to completion, no pauses, auto-approve plan ← USE THIS
-- `/grill-me` — ask clarifying questions first (NOT for cron)
-- `/schedule cron="0 * * * *" prompt="..."` — native recurring schedule
-- `/browser` — explicit opt-in for browser use
-- `/btw question` — side question without interrupting main task
-
-### Native scheduling (eliminates need for external cron entirely)
-```bash
-# From inside agy TUI — schedule this CRONJOB.md to run every hour:
-/schedule cron="0 * * * *" prompt="$(cat CRONJOB.md)"
-
-# Or from agy CLI directly:
-agy schedule "$(cat CRONJOB.md)" --cron "0 * * * *"
-```
-
-### Headless/cron authentication
-```bash
-# First-time auth on headless server:
-export SSH_CONNECTION="127.0.0.1 0 127.0.0.1 0"
-agy auth login    # prints URL, authenticate in browser, token cached
-
-# Token is stored at ~/.config/agy/credentials.json
-# For CI: store token as secret, mount at ~/.config/agy/credentials.json
-```
-
-### Config files
-- `AGENTS.md` — project instructions (prepended to every prompt)
-- `~/.config/antigravity/config.toml` — global model/endpoint config
-- `~/.gemini/antigravity-cli/settings.json` — safety/permission settings
-- `mcp_config.json` — MCP server configuration (serverUrl not url)
-- `.agents/skills/` — local skills directory
-- `~/.gemini/antigravity-cli/skills/` — global skills directory
-
----
-*CRONJOB.md — UET Taxila RAG Pipeline | Platform: Antigravity 2.0 (agy CLI)
-Research: antigravity.google official docs, Google I/O 2026 feature deep-dive,
-DataCamp CLI tutorial, Antigravity Lab production guides, agy --help output,
-9 autonomous agent system post-mortems. Keep under 500 lines.*
+*CRONJOB.md — UET Taxila RAG Pipeline | Platform: opencode (mimo-v2.5-free)*
+*Keep under 520 lines.*

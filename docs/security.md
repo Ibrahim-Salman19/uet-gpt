@@ -1,10 +1,10 @@
 # Security
 
 > Current security overview. Detailed implementation lives in `architecture.md` §7
-> (Security) and the threat model in `THREAT_MODEL.md`. This doc summarizes the
+> (Security) and the threat model in `../THREAT_MODEL.md`. This doc summarizes the
 > *implemented* controls — keep it in sync when the posture changes.
 
-Last reviewed: 2026-06-25
+Last reviewed: 2026-07-05
 
 ## Auth
 
@@ -17,7 +17,7 @@ Last reviewed: 2026-06-25
 ## Webhook Verification
 
 - **Clerk events:** signature verified over the **raw** request body
-  (env `CLERK_WEBHOOK_SECRET`).
+  (env `CLERK_SIGNING_SECRET`).
 - **Crawl / ingest:** secret verified with constant-time comparison
   (`constantTimeCompare` in `convex/crawl/utils.ts`, env `CRAWL_WEBHOOK_SECRET`);
   `processedWebhooks` provides replay/idempotency protection.
@@ -39,13 +39,13 @@ Last reviewed: 2026-06-25
 - API keys stored as environment variables, read server-side only (never exposed to client).
 - **Admin audit logging (implemented):** privileged operations recorded in the
   `adminAuditLog` table (architecture.md §4.5).
-- **Semantic cache TTLs (tiered):** freshness-based, not a flat 24h — high ~12h,
-  medium ~24h, low ~5d (`convex/cache/set.ts`; architecture.md §6.6 / §11).
+- **Semantic cache TTLs (tiered):** freshness-based, not a flat 24h — high 7d,
+  medium 2d, low 1d (`convex/cache/set.ts`; architecture.md §6.6 / §11).
 
 ## Open Items
 
-- [ ] Document a webhook secret rotation policy (`CLERK_WEBHOOK_SECRET`,
-      `CRAWL_WEBHOOK_SECRET`, `INTERNAL_API_SECRET`).
+- [ ] Document a webhook secret rotation policy (`CLERK_SIGNING_SECRET`,
+      `CLERK_WEBHOOK_SECRET`, `CRAWL_WEBHOOK_SECRET`, `INTERNAL_API_SECRET`).
 - [ ] Define an explicit fail-closed vs fail-open policy for the Upstash rate
       limiter during Redis outages.
-- [ ] Strengthen prompt-injection and crawler SSRF defenses (see `THREAT_MODEL.md` §5).
+- [ ] Strengthen prompt-injection and crawler SSRF defenses (see `../THREAT_MODEL.md` §5).

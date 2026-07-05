@@ -1,57 +1,18 @@
 # AGENTS.md — UET Taxila RAG Pipeline
-# ─────────────────────────────────────────────────────────────────────────────
-# Version: 15.1 (2026-06-06) — All §21 architectural caveats resolved.
-# Platform: Google Antigravity 2.0 (agy CLI)
-# This file is prepended to EVERY prompt the agent processes in this project.
-# Keep it under 200 lines — every byte here costs tokens on every run.
-# Companion file: CRONJOB.md (the full hourly operational protocol)
-# ─────────────────────────────────────────────────────────────────────────────
+Companion file: CRONJOB.md (full hourly operational protocol)
+
+## Table of Contents
+1. Project Identity (line 12)
+2. Absolute Forbidden Operations (line 16)
+3. Quality Gate (line 32)
+4. Key Build Commands (line 39)
+5. Critical Files (line 56)
+6. Coding Standards (line 84)
 
 ## Project Identity
 UET Taxila GPT — autonomous RAG pipeline maintenance agent.
 Stack: Python crawler (curl_cffi, trafilatura) → Convex webhooks →
 TypeScript chunker (chunkMarkdown) → vector embeddings → @convex-dev/agent.
-
-## Directory Map
-```
-scripts/
-  crawler.py            ← async BFS crawler
-  ingest_pdf.py         ← pymupdf4llm primary, Gemini VLM fallback
-  crawl_config.json     ← single source of truth for seed URLs
-src/lib/
-  prompt.ts             ← shared buildSystemPrompt/extractText (used by route.ts + tests)
-  rate-limit.ts         ← tiered rate limiter (10/50/200 req/hr for anon/user/admin)
-  llm-models.ts         ← LLM_FALLBACK_CHAIN (single source of truth for model IDs)
-convex/
-  clerk/
-    webhook.ts          ← Clerk user webhook HTTP action (header-based auth)
-  crawl/
-    webhook.ts          ← ingest endpoint + chunkMarkdown()
-    actions.ts          ← embedSingleChunk + query handler
-    queries.ts          ← full-text search
-    jobs.ts             ← scheduled freshness nightly job
-  rag/
-    retrieval.ts        ← RRF + reranking + anti-hallucination
-  schema.ts             ← DATABASE SCHEMA
-scripts/eval/
-  golden_set.jsonl      ← 50-pair evaluation dataset (verified by wc -l)
-  run_eval.py           ← evaluation harness
-.agent/
-  state.md              ← hot state (<4KB), read and written every run
-  progress_log.md       ← append-only run history
-  incident_log.md       ← regressions and crashes only
-```
-
-## Architecture Source of Truth
-`architecture.md` is the single source of truth for this system.
-Read it fully before implementing any task. Update it before every run ends.
-A change not documented in architecture.md did not happen.
-
-## Skill Files
-Before writing code for any task, scan `.agents/skills/` and
-`~/.gemini/antigravity-cli/skills/` and read every relevant SKILL.md.
-Skills encode environment constraints not available in training data.
-Never skip this step even for simple tasks.
 
 ## Absolute Forbidden Operations (never violate, ever)
 - `convex/schema.ts` filter field names on vector indexes → changing them
@@ -64,46 +25,61 @@ Never skip this step even for simple tasks.
 - `git add -A` → never (use explicit file paths or `git add -p`)
 - Commits directly to `main` or `master` → always use `agent/YYYY-MM-DD`
 
-## Coding Standards
-- Python: type hints on all signatures, docstrings on public functions
-- TypeScript: strict mode, no `any`, explicit return types on exports
-- Conventional commit format: `type(scope): description`
-- Tests: run `python scripts/eval/run_eval.py` after every pipeline change
-- No print debugging in commits — use logger, not stdout
-
-## Build Commands
-```bash
-# Python dependency install
-pip install -r scripts/requirements.txt --break-system-packages
-
-# Run crawler
-python scripts/crawler.py --seed https://www.uettaxila.edu.pk
-
-# Ingest a PDF
-python scripts/ingest_pdf.py path/to/file.pdf
-
-# Run full eval harness
-python scripts/eval/run_eval.py --golden scripts/eval/golden_set.jsonl
-
-# Run all tests (pnpm is the ONLY supported package manager — never mix npm/yarn)
-pnpm vitest run
-
-# Run specific test file
-pnpm vitest run tests/integration/chat-api.test.ts
-
-# Convex dev + deploy
-pnpm convex dev
-pnpm convex deploy
-```
-
-> **Package manager:** This repo is pnpm-only (see the `packageManager` field in
-> `package.json`; enable it with `corepack enable`). Do **not** run npm/yarn/bun
-> against the pnpm-managed `node_modules` — `architecture.md §17` documents this as a
-> known breakage source.
-
 ## Quality Gate (must pass before any commit)
-1. `npx convex dev --dry-run` → zero TypeScript errors
+1. `pnpm typecheck` → zero TypeScript errors
 2. `python -m py_compile scripts/*.py` → zero syntax errors
 3. `python scripts/eval/run_eval.py` → recall_at_5 not regressed vs last run
-4. `npx vitest run` → all tests pass
-5. `architecture.md §21` — verify no new open bugs introduced
+4. `pnpm vitest run` → all tests pass
+
+## Key Build Commands
+```
+pnpm typecheck                              # TypeScript check
+pnpm vitest run                             # All tests
+pnpm convex dev                             # Local Convex devserver
+python scripts/eval/run_eval.py             # Eval harness (recall_at_5)
+```
+> pnpm is the ONLY supported package manager. Never use npm/yarn/bun —
+> see architecture.md §17 for breakage details. Enable with `corepack enable`.
+
+## Critical Files
+High-frequency edit targets. Full directory map: architecture.md §3.
+
+```
+convex/
+  schema.ts             ← DATABASE SCHEMA (all tables + indexes)
+  crons.ts              ← cron definitions (cleanup, DLQ retry)
+  auth.ts               ← permission matrix + requireAuth/requireAdmin
+  http.ts               ← HTTP router + CORS config
+  clerk/webhook.ts      ← Clerk user webhook HTTP action
+  crawl/
+    webhook.ts          ← ingest endpoint + HMAC auth + chunkMarkdown()
+    chunking.ts         ← markdown chunking + freshness tier assignment
+    mutations.ts        ← document/chunk lifecycle mutations + DLQ retry
+    actions.ts          ← Crawl4AI fetch + sitemap parsing + RAG upsert
+  rag/
+    retrieval.ts        ← RRF + reranking + CRAG + anti-hallucination pipeline
+    prompts.ts          ← SYSTEM_PROMPT + FEW_SHOT_EXAMPLES
+    context.ts          ← Sandwich Strategy context builder
+    routing.ts          ← intent classification + query routing
+    crag.ts             ← CRAG LLM judge (Groq) for low-confidence results
+  embeddings/
+    generate.ts         ← Gemini embedding-2 with multi-key rotation
+    search.ts           ← hybrid vector + BM25 + FAQ search with RRF fusion
+    contextualize.ts    ← chunk context enrichment via LLM
+  reranking/
+    rerank.ts           ← multi-tier reranker (external → Groq → word overlap)
+src/lib/
+  prompt.ts             ← shared buildSystemPrompt/extractText + injection fence
+  chat/pipeline.ts      ← Next.js chat API route orchestration
+scripts/
+  crawler.py            ← async BFS crawler with SSRF hardening
+  eval/run_eval.py      ← evaluation harness
+  crawl_config.json     ← single source of truth for seed URLs
+```
+
+## Coding Standards
+- Python: type hints on all signatures, docstrings on public functions.
+  TypeScript: strict mode, no `any`, explicit return types on exports.
+- Run `python scripts/eval/run_eval.py` after every pipeline change.
+- Conventional commit format: `type(scope): description`.
+- No print debugging — use logger, not stdout.

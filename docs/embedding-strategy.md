@@ -16,6 +16,8 @@
 - **Resilience:** multi-key rotation across the configured Gemini API keys plus
   fallback handling, with 3× retry and exponential backoff + jitter
   (`convex/embeddings/generate.ts`). Batch API used for ≥2 texts.
+- **Key rotation order:** `GEMINI_API_KEY` → `GEMINI_API_KEY_1` → `GEMINI_API_KEY_2` → `GOOGLE_GENERATIVE_AI_API_KEY`. First success wins; all fail → `ConvexError`. No cross-provider fallback (would break vector space compatibility).
+- **Batch threshold:** `BATCH_THRESHOLD = 2` — texts below this use the single-call API; at or above use the batch API (50% discount).
 
 ## Vector Store
 
