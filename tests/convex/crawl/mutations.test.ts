@@ -250,9 +250,13 @@ describe("queueChunksForEmbedding", () => {
     handler = mod.queueChunksForEmbedding;
   });
 
-  const defaultChunks = [
-    { text: "Chunk one content here with enough words.", contentHash: "hash-c1" },
-    { text: "Chunk two content here for testing.", contentHash: "hash-c2" },
+  const defaultParents = [
+    { contentHash: "parent-hash-1", text: "Parent block one for context." },
+    { contentHash: "parent-hash-2", text: "Parent block two for context." },
+  ];
+  const defaultChildren = [
+    { text: "Chunk one content here with enough words.", contentHash: "hash-c1", parentContentHash: "parent-hash-1" },
+    { text: "Chunk two content here for testing.", contentHash: "hash-c2", parentContentHash: "parent-hash-2" },
   ];
 
   it("returns unchanged when document content hash matches", async () => {
@@ -265,7 +269,8 @@ describe("queueChunksForEmbedding", () => {
       title: "Test",
       contentHash: "same-hash",
       jobId: "job-1",
-      chunks: defaultChunks,
+      parents: defaultParents,
+      children: defaultChildren,
     });
 
     expect(result).toEqual({ status: "unchanged", chunksQueued: 0 });
@@ -285,7 +290,8 @@ describe("queueChunksForEmbedding", () => {
       title: "Test",
       contentHash: "same-hash",
       jobId: "job-1",
-      chunks: [],
+      parents: [],
+      children: [],
       etag: "\"abc123\"",
       lastModified: "Wed, 30 May 2026 12:00:00 GMT",
     });
@@ -305,7 +311,8 @@ describe("queueChunksForEmbedding", () => {
       title: "New Page",
       contentHash: "new-hash",
       jobId: "job-2",
-      chunks: defaultChunks,
+      parents: defaultParents,
+      children: defaultChildren,
     });
 
     expect(result.status).toBe("updated");
@@ -329,7 +336,8 @@ describe("queueChunksForEmbedding", () => {
       title: "Updated Page",
       contentHash: "new-hash",
       jobId: "job-3",
-      chunks: defaultChunks,
+      parents: defaultParents,
+      children: defaultChildren,
     });
 
     expect(db.patch).toHaveBeenCalledWith("doc-existing", expect.objectContaining({
@@ -346,9 +354,9 @@ describe("queueChunksForEmbedding", () => {
     const db = createMockDb({ documents: existingDoc, crawledChunks: existingChunks });
     const ctx = { db, auth: { getUserIdentity: vi.fn() }, runMutation: vi.fn(), runQuery: vi.fn(), runAction: vi.fn() };
 
-    const newChunks = [
-      { text: "Chunk one (unchanged)", contentHash: "hash-c1" },
-      { text: "Chunk three (new)", contentHash: "hash-c3" },
+    const newChildren = [
+      { text: "Chunk one (unchanged)", contentHash: "hash-c1", parentContentHash: "parent-hash-1" },
+      { text: "Chunk three (new)", contentHash: "hash-c3", parentContentHash: "parent-hash-1" },
     ];
 
     await (handler as any).handler(ctx, {
@@ -356,7 +364,8 @@ describe("queueChunksForEmbedding", () => {
       title: "Test",
       contentHash: "new-hash",
       jobId: "job-4",
-      chunks: newChunks,
+      parents: [defaultParents[0]],
+      children: newChildren,
     });
 
     // enqueueActionBatch called once with only the new chunk (hash-c3)
@@ -379,7 +388,8 @@ describe("queueChunksForEmbedding", () => {
       title: "Test",
       contentHash: "new-hash",
       jobId: "job-5",
-      chunks: [],
+      parents: [],
+      children: [],
     });
 
     expect(ragModule.rag.delete).toHaveBeenCalledWith(ctx, { entryId: "rag-stale" });
@@ -395,7 +405,8 @@ describe("queueChunksForEmbedding", () => {
       title: "Empty",
       contentHash: "empty-hash",
       jobId: "job-6",
-      chunks: [],
+      parents: [],
+      children: [],
     });
 
     expect(result.status).toBe("updated");
@@ -424,14 +435,14 @@ describe("saveEmbedding", () => {
       chunkText: "This is the chunk text.",
       contentHash: "hash-save-1",
       ragId: "rag-save-1",
-      parentText: "Parent block text.",
+      parentId: "parent-save-1" as any,
     });
 
     expect(db.insert).toHaveBeenCalledWith("crawledChunks", expect.objectContaining({
       documentId: "doc-save",
       contentHash: "hash-save-1",
       ragId: "rag-save-1",
-      parentText: "Parent block text.",
+      parentId: "parent-save-1",
     }));
   });
 
@@ -643,16 +654,18 @@ describe("enqueueDocumentChunks", () => {
     const db = createMockDb();
     const ctx = { db, auth: { getUserIdentity: vi.fn() }, runMutation: vi.fn(), runQuery: vi.fn(), runAction: vi.fn() };
 
-    const chunks = [
-      { text: "Chunk A", contentHash: "hash-a" },
-      { text: "Chunk B", contentHash: "hash-b" },
-      { text: "Chunk C", contentHash: "hash-c" },
+    const parents = [{ contentHash: "parent-hash-a", text: "Parent A block." }];
+    const children = [
+      { text: "Chunk A", contentHash: "hash-a", parentContentHash: "parent-hash-a" },
+      { text: "Chunk B", contentHash: "hash-b", parentContentHash: "parent-hash-a" },
+      { text: "Chunk C", contentHash: "hash-c", parentContentHash: "parent-hash-a" },
     ];
 
     await (handler as any).handler(ctx, {
       documentId: "doc-enqueue" as any,
       url: "https://web.uettaxila.edu.pk/page",
-      chunks,
+      parents,
+      children,
     });
 
     // enqueueActionBatch is called once with all chunks as a batch
@@ -666,7 +679,8 @@ describe("enqueueDocumentChunks", () => {
     await (handler as any).handler(ctx, {
       documentId: "doc-count" as any,
       url: "https://web.uettaxila.edu.pk/page",
-      chunks: [{ text: "Single chunk", contentHash: "hash-single" }],
+      parents: [{ contentHash: "parent-single", text: "Parent block." }],
+      children: [{ text: "Single chunk", contentHash: "hash-single", parentContentHash: "parent-single" }],
     });
 
     expect(db.patch).toHaveBeenCalledWith("doc-count", expect.objectContaining({
@@ -681,7 +695,8 @@ describe("enqueueDocumentChunks", () => {
     await (handler as any).handler(ctx, {
       documentId: "doc-empty" as any,
       url: "https://web.uettaxila.edu.pk/page",
-      chunks: [],
+      parents: [],
+      children: [],
     });
 
     expect(db.patch).toHaveBeenCalledWith("doc-empty", expect.objectContaining({
@@ -1031,8 +1046,15 @@ describe("edge cases", () => {
       title: "Brand New",
       contentHash: "brand-new-hash",
       jobId: "job-new",
-      chunks: [
-        { text: "Brand new chunk content here with enough meaningful words.", contentHash: "brand-c1" },
+      parents: [
+        { contentHash: "parent-hash-1", text: "Parent block of content for the new page." },
+      ],
+      children: [
+        {
+          text: "Brand new chunk content here with enough meaningful words.",
+          contentHash: "brand-c1",
+          parentContentHash: "parent-hash-1",
+        },
       ],
     });
 

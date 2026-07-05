@@ -3,6 +3,7 @@
 import { ConvexError, v } from "convex/values";
 import { internalAction } from "../_generated/server";
 import { recordTiming } from "../observability/metrics";
+import { EMBEDDING_DIMENSION } from "./dimension";
 
 // gemini-embedding-2 — stable as of May 2026
 // Dimensions: 768 (MRL supports 768/1536/3072)
@@ -110,7 +111,7 @@ async function embedNativeGemini(texts: string[], apiKey: string): Promise<numbe
         content: {
           parts: [{ text: texts[0] }],
         },
-        outputDimensionality: 768,
+        outputDimensionality: EMBEDDING_DIMENSION,
       }),
     });
     if (!response.ok) {
@@ -140,7 +141,7 @@ async function embedNativeGemini(texts: string[], apiKey: string): Promise<numbe
           content: {
             parts: [{ text }],
           },
-          outputDimensionality: 768,
+          outputDimensionality: EMBEDDING_DIMENSION,
         })),
       }),
     });
@@ -229,8 +230,10 @@ export const generate = internalAction({
         textLength: args.text.length,
       });
       const emb = embeddings[0];
-      if (!emb || emb.length !== 768) {
-        throw new ConvexError(`Invalid embedding dimension: expected 768, got ${emb?.length}`);
+      if (!emb || emb.length !== EMBEDDING_DIMENSION) {
+        throw new ConvexError(
+          `Invalid embedding dimension: expected ${EMBEDDING_DIMENSION}, got ${emb?.length}`,
+        );
       }
       return emb;
     } catch (error: unknown) {

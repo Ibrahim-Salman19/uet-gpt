@@ -335,39 +335,55 @@ export async function generateContextSummary(text: string): Promise<string | nul
   }
 }
 
+// A parent chunk, stored ONCE in the chunkParents table (WS-1). contentHash lets
+// the caller dedup identical parents within a document instead of re-inserting.
+export type ParentChunk = {
+  contentHash: string;
+  text: string;
+};
+
+// A child chunk. Carries parentContentHash (resolved to parentId by the caller
+// mutation after the parent is upserted) instead of the full parentText — this
+// removes the previous K× duplication of parent text across siblings.
+export type ChildChunk = {
+  text: string;
+  contentHash: string;
+  parentContentHash: string;
+  headingPath?: string[];
+};
+
+export type GenerateChunksResult = {
+  parents: ParentChunk[];
+  children: ChildChunk[];
+};
+
 export async function generateChunks(
   normalized: string,
   contextPrefix: string,
-): Promise<
-  {
-    text: string;
-    contentHash: string;
-    parentText: string;
-    headingPath?: string[];
-  }[]
-> {
+): Promise<GenerateChunksResult> {
   const parentChunks = chunkMarkdown(normalized, 3000, 300);
-  const chunks: {
-    text: string;
-    contentHash: string;
-    parentText: string;
-    headingPath?: string[];
-  }[] = [];
+  const parents: ParentChunk[] = [];
+  const children: ChildChunk[] = [];
 
   for (const parentChunk of parentChunks) {
+    // Store each parent ONCE. Compute its hash once and reuse for all children
+    // so siblings share a single chunkParents row (caller dedups by hash).
+    const parentContentHash = await sha256(parentChunk.text);
+    parents.push({ contentHash: parentContentHash, text: parentChunk.text });
+
     const childChunks = chunkMarkdown(parentChunk.text, 800, 100, parentChunk.headingPath);
     for (const childChunk of childChunks) {
       const baseText = contextPrefix + childChunk.text;
       const guardedParts = guardChunkSize(baseText);
       for (const part of guardedParts) {
-        chunks.push({
+        children.push({
           text: part,
           contentHash: await sha256(part),
-          parentText: parentChunk.text,
+          parentContentHash,
           headingPath: childChunk.headingPath,
         });
       }
     }
   }
-  return chunks;
+  return { parents, children };
 }

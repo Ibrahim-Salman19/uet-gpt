@@ -212,12 +212,18 @@ export const searchDocumentsAction = internalAction({
 
     const searchLimit = 20;
 
-    // Run vector search
+    // Run vector search. Stage-1 candidate generation needs only the matched
+    // chunk's ID + score for RRF fusion; neighbor expansion (before/after) was
+    // pulling up to 3× the result count in full chunk text from the vector index
+    // for candidates that get discarded by fusion. {before:0, after:0} keeps the
+    // candidate set to exactly `searchLimit` chunks. Full content is fetched
+    // later only for the post-fusion top-K via batchFetchDocMeta. If a retrieval
+    // eval shows a recall regression, restore {before:1, after:0} as a middle ground.
     const vectorRes = await rag.search(ctx, {
       namespace: "uet-global",
       query: args.queryEmbedding ?? finalQueryText,
       limit: searchLimit,
-      chunkContext: { before: 2, after: 1 },
+      chunkContext: { before: 0, after: 0 },
       ...(args.category ? { filters: [{ name: "category", value: args.category }] } : {}),
     });
 

@@ -370,7 +370,7 @@ export const embedSingleChunk = internalAction({
     chunkText: v.string(),
     contentHash: v.string(),
     jobId: v.string(),
-    parentText: v.optional(v.string()),
+    parentId: v.optional(v.id("chunkParents")),
     headingPath: v.optional(v.array(v.string())),
     namespaceId: v.string(),
   },
@@ -427,7 +427,7 @@ export const embedSingleChunk = internalAction({
         contentHash: args.contentHash,
         ragId: result.entryId,
         jobId: args.jobId,
-        parentText: args.parentText,
+        parentId: args.parentId,
         headingPath: args.headingPath,
       });
 

@@ -618,7 +618,7 @@ describe("ingestWebhook", () => {
     expect(upsertCalls[0][1].url).toBe("https://web.uettaxila.edu.pk/academics");
     expect(upsertCalls[0][1].freshnessTier).toBe("high");
     const enqueueCalls = mockCtx.runMutation.mock.calls.filter(
-      (c: any[]) => c[1] && Array.isArray(c[1].chunks),
+      (c: any[]) => c[1] && Array.isArray(c[1].children),
     );
     expect(enqueueCalls.length).toBeGreaterThanOrEqual(1);
   });

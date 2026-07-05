@@ -11,12 +11,15 @@ const crons = cronJobs();
 //   internal.crawl.workflow.kickoffDailyCrawl,
 // );
 
-// Daily cleanup for expired cache items (semantic queries/webhook logs)
-crons.daily(
-  "daily-cleanup-expired-cache",
-  { hourUTC: 1, minuteUTC: 0 },
+// Cleanup for expired cache items (semantic queries/webhook logs). Runs every
+// 12h (was daily) with a 500-row batch (was 100) so expired rows don't outpace
+// deletion — semanticCache stores full responses + 768-dim embeddings per row,
+// making it the primary storage consumer that must stay bounded.
+crons.interval(
+  "cleanup-expired-cache",
+  { hours: 12 },
   internal.crawl.tasks.cleanupExpiredCache,
-  {},
+  { limit: 500 },
 );
 
 // Retry dead letter queue every 4 hours
@@ -36,12 +39,35 @@ crons.interval(
 // Every 2 hours: detect crawl jobs stuck in "running" state for >2 hours (reduced from 30min)
 crons.interval("fail-stuck-crawl-jobs", { hours: 2 }, internal.crawl.workflow.failStuckJobs);
 
-// Weekly cleanup of old abandoned DLQ entries and completed/failed/cancelled crawl jobs
+// Weekly cleanup of old abandoned DLQ entries and completed/failed/cancelled crawl jobs.
+// WS-3: cleanupOldRecords now also purges resolved (indexed) DLQ rows and stale
+// pending/processing rows that were never previously cleaned — the primary DLQ
+// storage-growth fix.
 crons.weekly(
   "cleanup-old-records",
   { dayOfWeek: "sunday", hourUTC: 2, minuteUTC: 0 },
   internal.crawl.jobs.cleanupOldRecords,
-  { limit: 100 },
+  { limit: 200 },
+);
+
+// WS-3: weekly orphan-chunk compaction — removes crawledChunks + their RAG
+// vectors whose parent document no longer exists (cascade from chunkParents).
+// Defensive against legacy orphans from the now-closed TOCTOU window.
+crons.weekly(
+  "compact-orphaned-chunks",
+  { dayOfWeek: "sunday", hourUTC: 2, minuteUTC: 30 },
+  internal.crawl.jobs.compactOrphans,
+  { limit: 200 },
+);
+
+// WS-3: weekly trim of dead chunkText payloads from resolved/abandoned DLQ rows.
+// Keeps the failure audit trail (reason/status/timestamps) but reclaims the
+// duplicated chunk body storage.
+crons.weekly(
+  "trim-dlq-payloads",
+  { dayOfWeek: "sunday", hourUTC: 2, minuteUTC: 45 },
+  internal.crawl.jobs.trimDlqPayloads,
+  { limit: 200 },
 );
 
 // Run weekly thread cleanup

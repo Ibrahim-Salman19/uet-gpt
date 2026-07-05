@@ -288,7 +288,7 @@ async function processSinglePage(
     const summary = await generateContextSummary(normalized);
     if (summary) contextPrefix += `Context: ${summary}\n\n`;
 
-    const chunks = await generateChunks(normalized, contextPrefix);
+    const { parents, children } = await generateChunks(normalized, contextPrefix);
 
     const freshnessTier = assignFreshnessTier(info.canonicalUrl);
     await ctx.runMutation(internal.crawl.mutations.queueChunksForEmbedding, {
@@ -297,7 +297,8 @@ async function processSinglePage(
       contentHash,
       freshnessTier,
       jobId: taskId,
-      chunks,
+      parents,
+      children,
       ...(info.etag !== undefined && { etag: info.etag }),
       ...(info.lastModified !== undefined && { lastModified: info.lastModified }),
     });
@@ -515,12 +516,13 @@ async function processIngestContent(
   const summary = await generateContextSummary(normalized);
   if (summary) contextPrefix += `Context: ${summary}\n\n`;
 
-  const chunks = await generateChunks(normalized, contextPrefix);
+  const { parents, children } = await generateChunks(normalized, contextPrefix);
 
   await ctx.runMutation(internal.crawl.mutations.enqueueDocumentChunks, {
     documentId: result.documentId,
     url,
-    chunks,
+    parents,
+    children,
   });
 }
 

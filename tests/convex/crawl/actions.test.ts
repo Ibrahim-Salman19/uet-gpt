@@ -260,7 +260,7 @@ describe("embedSingleChunk", () => {
     chunkText: "This is a chunk of text from the academics page that gets embedded into the vector database.",
     contentHash: "hash-chunk-1",
     jobId: "job-123",
-    parentText: "Parent text block for context.",
+    parentId: "parent123" as any,
     namespaceId: "mock-namespace-id",
   };
 
@@ -293,7 +293,7 @@ describe("embedSingleChunk", () => {
         chunkText: defaultArgs.chunkText,
         contentHash: defaultArgs.contentHash,
         ragId: "rag-entry-1",
-        parentText: defaultArgs.parentText,
+        parentId: defaultArgs.parentId,
       }),
     );
   });

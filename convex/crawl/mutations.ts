@@ -5,7 +5,7 @@ import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
 import { internalMutation, internalQuery } from "../_generated/server";
 import { rag } from "../rag/instance";
-import { isPdfVirtualUrl } from "./chunking";
+import { isPdfVirtualUrl, sha256 } from "./chunking";
 import { embeddingPool } from "./workpools";
 
 async function getAllChunksByDocumentId(
@@ -40,9 +40,70 @@ function buildMetadataPatch(
 type ChunkInput = {
   text: string;
   contentHash: string;
-  parentText?: string;
+  parentContentHash?: string;
+  parentId?: Id<"chunkParents">;
   headingPath?: string[];
 };
+
+type ParentInput = {
+  contentHash: string;
+  text: string;
+};
+
+// WS-1: upsert each distinct parent ONCE into chunkParents (dedup by
+// documentId + contentHash) and resolve each child's parentContentHash → parentId.
+// Returns a map from parent contentHash → chunkParents id so children can be
+// built with a normalized reference instead of duplicated parentText.
+async function upsertParentsAndResolve(
+  ctx: MutationCtx,
+  docId: Id<"documents">,
+  parents: ParentInput[],
+): Promise<Map<string, Id<"chunkParents">>> {
+  const parentIdByHash = new Map<string, Id<"chunkParents">>();
+  // Dedup parents by contentHash within this call (a doc may repeat parents).
+  const distinct = new Map<string, string>(parents.map((p) => [p.contentHash, p.text]));
+  for (const [contentHash, text] of distinct) {
+    const existing = await ctx.db
+      .query("chunkParents")
+      .withIndex("by_documentId_and_contentHash", (q) =>
+        q.eq("documentId", docId).eq("contentHash", contentHash),
+      )
+      .first();
+    if (existing) {
+      parentIdByHash.set(contentHash, existing._id);
+    } else {
+      const id = await ctx.db.insert("chunkParents", {
+        documentId: docId,
+        contentHash,
+        text,
+      });
+      parentIdByHash.set(contentHash, id);
+    }
+  }
+  return parentIdByHash;
+}
+
+// WS-1: delete chunkParents rows whose contentHash no longer appears in any
+// new child for this document (i.e. the parent itself was dropped on re-crawl).
+// Scoped by documentId so it stays cheap. Called after the child diff.
+async function deleteStaleParents(
+  ctx: MutationCtx,
+  docId: Id<"documents">,
+  survivingParentHashes: Set<string>,
+): Promise<number> {
+  let deleted = 0;
+  const existingParents = await ctx.db
+    .query("chunkParents")
+    .withIndex("by_documentId", (q) => q.eq("documentId", docId))
+    .collect();
+  for (const parent of existingParents) {
+    if (!survivingParentHashes.has(parent.contentHash)) {
+      await ctx.db.delete(parent._id);
+      deleted++;
+    }
+  }
+  return deleted;
+}
 
 async function diffAndDeleteStaleChunks(
   ctx: MutationCtx,
@@ -51,10 +112,11 @@ async function diffAndDeleteStaleChunks(
   url: string,
 ): Promise<{ chunksToEmbed: ChunkInput[]; chunksToDelete: Doc<"crawledChunks">[] }> {
   const existingHashSet = new Set(existingChunks.map((c) => c.contentHash));
+  const newHashSet = new Set(chunks.map((c) => c.contentHash));
   const chunksToEmbed = chunks.filter((nc) => !existingHashSet.has(nc.contentHash));
-  const chunksToDelete = existingChunks.filter(
-    (ec) => !chunks.some((nc) => nc.contentHash === ec.contentHash),
-  );
+  // O(n) lookup via the newHashSet instead of the previous O(n×m) `.some()` scan;
+  // matters on documents with many chunks during a re-crawl diff.
+  const chunksToDelete = existingChunks.filter((ec) => !newHashSet.has(ec.contentHash));
 
   await Promise.all(chunksToDelete.map(async (staleChunk) => {
     try {
@@ -94,7 +156,7 @@ async function enqueueNewChunks(
     chunkText: chunk.text,
     contentHash: chunk.contentHash,
     jobId,
-    parentText: chunk.parentText,
+    parentId: chunk.parentId,
     headingPath: chunk.headingPath,
     namespaceId: namespaceIdStr,
   }));
@@ -208,17 +270,25 @@ export const queueChunksForEmbedding = internalMutation({
     jobId: v.string(),
     etag: v.optional(v.string()),
     lastModified: v.optional(v.string()),
-    chunks: v.array(
+    // WS-1: generateChunks now returns parents (stored once) + children (carry
+    // parentContentHash). The mutation resolves parentContentHash → parentId.
+    parents: v.array(
+      v.object({
+        contentHash: v.string(),
+        text: v.string(),
+      }),
+    ),
+    children: v.array(
       v.object({
         text: v.string(),
         contentHash: v.string(),
-        parentText: v.optional(v.string()),
+        parentContentHash: v.string(),
         headingPath: v.optional(v.array(v.string())),
       }),
     ),
   },
   handler: async (ctx, args) => {
-    const { url, title, contentHash, freshnessTier, etag, lastModified, chunks } = args;
+    const { url, title, contentHash, freshnessTier, etag, lastModified, parents, children } = args;
 
     const existing = await ctx.db
       .query("documents")
@@ -248,18 +318,34 @@ export const queueChunksForEmbedding = internalMutation({
       existing,
     );
 
+    // WS-1: upsert each parent ONCE, resolve parentContentHash → parentId.
+    const parentIdByHash = await upsertParentsAndResolve(ctx, docId, parents);
+    const resolvedChildren: ChunkInput[] = children.map((c) => ({
+      text: c.text,
+      contentHash: c.contentHash,
+      parentContentHash: c.parentContentHash,
+      parentId: parentIdByHash.get(c.parentContentHash),
+      headingPath: c.headingPath,
+    }));
+
     const existingChunks = existing ? await getAllChunksByDocumentId(ctx, existing._id) : [];
     const { chunksToEmbed, chunksToDelete } = await diffAndDeleteStaleChunks(
       ctx,
       existingChunks,
-      chunks,
+      resolvedChildren,
       url,
     );
 
     await enqueueNewChunks(ctx, docId, url, chunksToEmbed, args.jobId);
 
+    // WS-1: drop parents whose contentHash no longer appears among surviving children.
+    const survivingParentHashes = new Set(
+      resolvedChildren.map((c) => c.parentContentHash).filter((h): h is string => !!h),
+    );
+    await deleteStaleParents(ctx, docId, survivingParentHashes);
+
     await ctx.db.patch(docId, {
-      chunkCount: chunks.length,
+      chunkCount: children.length,
       status: chunksToEmbed.length === 0 ? "indexed" : "processing",
     });
 
@@ -278,7 +364,7 @@ export const saveEmbedding = internalMutation({
     contentHash: v.string(),
     ragId: v.string(),
     jobId: v.optional(v.string()),
-    parentText: v.optional(v.string()),
+    parentId: v.optional(v.id("chunkParents")),
     headingPath: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
@@ -293,13 +379,39 @@ export const saveEmbedding = internalMutation({
       return;
     }
 
+    // TOCTOU guard: a concurrent retry of this same chunk may have already won
+    // the rag.add() race in actions.ts (embedSingleChunk) and created a SECOND
+    // vector with the SAME ragId before this mutation committed. If a row for
+    // this ragId already exists, this run lost the race — delete the duplicate
+    // vector we just created in rag.add() so it doesn't linger as an orphan
+    // (paid storage, never queried). This makes saveEmbedding idempotent across
+    // the action/mutation boundary regardless of retry interleaving.
+    const existingByRagId = await ctx.db
+      .query("crawledChunks")
+      .withIndex("by_ragId", (q) => q.eq("ragId", args.ragId))
+      .first();
+    if (existingByRagId) {
+      console.warn(
+        `Duplicate vector detected for ragId ${args.ragId} (contentHash ${args.contentHash}); ` +
+          "deleting the duplicate vector created by this retry to prevent an orphan.",
+      );
+      try {
+        await rag.delete(ctx, {
+          entryId: args.ragId as unknown as import("@convex-dev/rag").EntryId,
+        });
+      } catch (err) {
+        console.warn(`Failed to delete duplicate vector ${args.ragId}:`, err);
+      }
+      return;
+    }
+
     await ctx.db.insert("crawledChunks", {
       documentId: args.documentId,
       contentHash: args.contentHash,
       text: args.chunkText,
       ragId: args.ragId,
       embeddingModel: "gemini-embedding-2",
-      parentText: args.parentText,
+      parentId: args.parentId,
       headingPath: args.headingPath,
     });
 
@@ -762,31 +874,40 @@ export const enqueueDocumentChunks = internalMutation({
   args: {
     documentId: v.id("documents"),
     url: v.string(),
-    chunks: v.array(
+    parents: v.array(
+      v.object({
+        contentHash: v.string(),
+        text: v.string(),
+      }),
+    ),
+    children: v.array(
       v.object({
         text: v.string(),
         contentHash: v.string(),
-        parentText: v.optional(v.string()),
+        parentContentHash: v.string(),
         headingPath: v.optional(v.array(v.string())),
       }),
     ),
   },
   handler: async (ctx, args) => {
-    const { documentId, url, chunks } = args;
+    const { documentId, url, parents, children } = args;
 
-    if (chunks.length > 0) {
+    // WS-1: upsert parents once + resolve parentId for each child.
+    const parentIdByHash = await upsertParentsAndResolve(ctx, documentId, parents);
+
+    if (children.length > 0) {
       const { namespaceId } = await rag.getOrCreateNamespace(ctx, {
         namespace: "uet-global",
       });
       const namespaceIdStr = namespaceId as unknown as string;
 
-      const argsArray = chunks.map((chunk) => ({
+      const argsArray = children.map((chunk) => ({
         documentId,
         url,
         chunkText: chunk.text,
         contentHash: chunk.contentHash,
         jobId: "ingest-job",
-        parentText: chunk.parentText,
+        parentId: parentIdByHash.get(chunk.parentContentHash),
         headingPath: chunk.headingPath,
         namespaceId: namespaceIdStr,
       }));
@@ -803,8 +924,75 @@ export const enqueueDocumentChunks = internalMutation({
     }
 
     await ctx.db.patch(documentId, {
-      chunkCount: chunks.length,
-      status: chunks.length === 0 ? "indexed" : "processing",
+      chunkCount: children.length,
+      status: children.length === 0 ? "indexed" : "processing",
     });
+  },
+});
+
+/**
+ * WS-1f migration: normalize legacy crawledChunks.parentText into the
+ * chunkParents table, then clear the duplicated inline parentText to reclaim
+ * storage. Run ONCE manually after deploy (admin-triggered); repeat-safe.
+ *
+ * For each chunk that still carries inline `parentText` (pre-WS-1 rows) and has
+ * no `parentId` yet: hash the parent text, upsert into chunkParents (dedup by
+ * documentId + contentHash so siblings share one row), set the chunk's parentId,
+ * then clear parentText. Bounded per call via `limit` (default 500); the caller
+ * re-invokes until `remaining === "done"`.
+ *
+ * This is the ONLY way to reclaim the already-stored parentText duplication —
+ * new writes already use parentId (WS-1), but existing rows keep their inline
+ * copy until this runs. Retrieval is unchanged throughout (doc_queries.ts
+ * resolves parentText via parentId when present, falling back to the inline
+ * field), so this can run lazily without a maintenance window.
+ */
+export const migrateParentTextToTable = internalMutation({
+  args: { limit: v.optional(v.number()) },
+  returns: v.object({
+    migrated: v.number(),
+    remaining: v.string(),
+  }),
+  handler: async (ctx, args) => {
+    const limit = args.limit ?? 500;
+    // Chunks that still have inline parentText and no parentId reference yet.
+    // There is no index on parentText (it's an optional string field), so this
+    // scans via the table order; bounded by `limit`. Re-running picks up the
+    // next batch until none remain.
+    const chunks = await ctx.db
+      .query("crawledChunks")
+      .filter((q) =>
+        q.and(q.eq(q.field("parentId"), undefined), q.neq(q.field("parentText"), undefined)),
+      )
+      .take(limit);
+
+    let migrated = 0;
+    for (const chunk of chunks) {
+      const parentText = chunk.parentText;
+      if (!parentText) continue;
+      const contentHash = await sha256(parentText);
+      const existing = await ctx.db
+        .query("chunkParents")
+        .withIndex("by_documentId_and_contentHash", (q) =>
+          q.eq("documentId", chunk.documentId).eq("contentHash", contentHash),
+        )
+        .first();
+      const parentId = existing
+        ? existing._id
+        : await ctx.db.insert("chunkParents", {
+            documentId: chunk.documentId,
+            contentHash,
+            text: parentText,
+          });
+      // Set parentId then clear the inline copy in one patch — reclaims the
+      // duplicated storage immediately for this row.
+      await ctx.db.patch(chunk._id, { parentId, parentText: undefined });
+      migrated++;
+    }
+
+    return {
+      migrated,
+      remaining: chunks.length === limit ? "more" : "done",
+    };
   },
 });

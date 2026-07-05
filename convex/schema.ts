@@ -1,5 +1,11 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+// NOTE: the vectorIndex `dimensions: 768` literal below MUST equal
+// EMBEDDING_DIMENSION in convex/embeddings/dimension.ts. A schema vectorIndex
+// dimension requires a static numeric literal (not a runtime import), so the
+// two are kept in sync by tests/embeddings/dimension.test.ts rather than by a
+// shared import. Changing either without the other corrupts the live vector
+// index (AGENTS.md forbidden operation).
 
 export default defineSchema({
   users: defineTable({
@@ -155,24 +161,11 @@ export default defineSchema({
     .index("by_createdAt", ["createdAt"])
     .index("by_userId", ["userId"]),
 
-  // DEPRECATED: notifications table is unused — no code reads or writes to it.
-  // Kept for schema backward compatibility; can be removed in a future migration.
-  notifications: defineTable({
-    userId: v.id("users"),
-    title: v.string(),
-    body: v.string(),
-    type: v.union(
-      v.literal("info"),
-      v.literal("success"),
-      v.literal("warning"),
-      v.literal("error"),
-    ),
-    isRead: v.boolean(),
-    link: v.optional(v.string()),
-    createdAt: v.number(),
-  })
-    .index("by_userId", ["userId"])
-    .index("by_isRead", ["isRead"]),
+  // WS-5: the deprecated `notifications` table was removed. It had zero
+  // read/write code; the "notifications" string in the admin settings UI is an
+  // appSettings section key, unrelated to this table. Convex drops the empty
+  // table definition on the next deploy without affecting data (the table held
+  // no rows). No vectorIndex was defined on it, so removal is safe per AGENTS.md.
 
   documents: defineTable({
     url: v.string(),
@@ -263,7 +256,8 @@ export default defineSchema({
     text: v.string(),
     ragId: v.string(),
     embeddingModel: v.optional(v.string()),
-    parentText: v.optional(v.string()), // TASK-E06: Parent-child chunking context
+    parentText: v.optional(v.string()), // TASK-E06: Parent-child chunking context (LEGACY — new rows use parentId; kept for back-compat until migrateParentTextToTable runs)
+    parentId: v.optional(v.id("chunkParents")), // Normalized parent reference (WS-1): replaces per-child parentText duplication
     headingPath: v.optional(v.array(v.string())), // R-7: Section heading hierarchy (e.g. ["Admissions", "Fee Structure"])
     contextualizedText: v.optional(v.string()), // R-9: Gemini-contextualized version of chunk text
   })
@@ -272,6 +266,21 @@ export default defineSchema({
     .index("by_ragId", ["ragId"])
     .index("by_contextualizedText", ["contextualizedText"])
     .searchIndex("search_text", { searchField: "text" }),
+
+  // WS-1: Normalized parent storage. The parent chunk text used to be duplicated
+  // onto every child via crawledChunks.parentText (K× duplication per parent,
+  // ~5× source bloat). Now each parent is stored ONCE here and children reference
+  // it via parentId. Storage-normalized design (Anthropic Contextual Retrieval +
+  // hierarchical chunking best practice: "store parent documents separately keyed
+  // by ID; index children only"). Hydrated into the retrieval path by
+  // batchFetchDocMeta for the post-fusion top-K only, so no query-bandwidth cost.
+  chunkParents: defineTable({
+    documentId: v.id("documents"),
+    contentHash: v.string(), // sha256(parent text) → dedup identical parents within a doc
+    text: v.string(),
+  })
+    .index("by_documentId", ["documentId"])
+    .index("by_documentId_and_contentHash", ["documentId", "contentHash"]),
 
   crawlStats: defineTable({
     statsId: v.string(), // singleton e.g., 'global'

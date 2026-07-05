@@ -13,7 +13,7 @@ export const cleanupExpiredCache = internalMutation({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const maxToDelete = args.limit ?? 100;
+    const maxToDelete = args.limit ?? 500;
     const now = Date.now();
     let deletedCount = 0;
 
