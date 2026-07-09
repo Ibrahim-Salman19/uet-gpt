@@ -146,8 +146,8 @@ describe("cleanupExpiredCache", () => {
     expect(result).toBe(50);
   });
 
-  it("uses default limit of 100 when not provided", async () => {
-    const manyEntries = Array.from({ length: 150 }, (_, i) =>
+  it("uses default limit of 500 when not provided", async () => {
+    const manyEntries = Array.from({ length: 550 }, (_, i) =>
       makeCacheEntry({ _id: `many-${i}` }),
     );
     const db = createMockDb({ semanticCache: manyEntries, processedWebhooks: manyEntries.slice(0, 0) });
@@ -155,7 +155,7 @@ describe("cleanupExpiredCache", () => {
 
     const result = await (handler as any).handler(ctx, {});
 
-    expect(result).toBe(100);
+    expect(result).toBe(500);
   });
 
   it("returns 0 when no expired entries exist", async () => {

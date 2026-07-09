@@ -1,4 +1,5 @@
 {
+  "_comment_seedUrls": "Depth-0 seeds. The 3 UET domains below plus departmentFacultyUrls are auto-merged into ALLOWED_DOMAINS for the crawl scope.",
   "seedUrls": [
     "https://web.uettaxila.edu.pk/",
     "https://uettaxila.edu.pk/",
@@ -32,6 +33,8 @@
     "https://web.uettaxila.edu.pk/dic/",
     "https://web.uettaxila.edu.pk/programs/"
   ],
+  "_comment_departmentFacultyRange": "Auto-generates departmentfaculty?departmentId=N seeds. Override per-URL with departmentFacultyUrls if you want explicit control. Some IDs may 404 — the crawler DLQs those and continues.",
+  "departmentFacultyRange": { "start": 1, "end": 25 },
   "maxDepth": 4,
   "concurrency": 5,
   "requestTimeout": 20,
@@ -45,6 +48,7 @@
     "*.xls", "*.xlsx", "*.zip", "*.rar", "*.exe",
     "*.jpg", "*.jpeg", "*.png", "*.gif"
   ],
+  "_comment_includePatterns": "ENFORCED: a URL must match at least one pattern (in addition to the domain allowlist). Empty array = allow all in-scope domains. These globs keep the crawl inside the 3 UET subdomains.",
   "includePatterns": [
     "https://web.uettaxila.edu.pk/**",
     "https://uettaxila.edu.pk/**",

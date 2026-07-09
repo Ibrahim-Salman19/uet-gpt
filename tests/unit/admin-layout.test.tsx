@@ -46,7 +46,7 @@ vi.mock("lucide-react", () => ({
 }));
 
 import { usePathname } from "next/navigation";
-import AdminLayout from "@/app/admin/layout";
+import AdminLayout from "@/app/admin/(admin-shell)/layout";
 
 describe("AdminLayout", () => {
   it("renders the admin panel title", () => {

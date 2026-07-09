@@ -29,8 +29,8 @@ describe("embeddings:generate", () => {
     vi.stubEnv("GEMINI_API_KEY_1", "test_gemini_key");
 
     // Production embedder uses 768-dim vectors (convex/embeddings/generate.ts
-    // requests outputDimensionality: 768; schema vectorIndex is dimensions: 768;
-    // generate.ts validates emb.length === 768). Keep this fixture in sync.
+    // requests outputDimensionality: EMBEDDING_DIMENSION=768; schema vectorIndex
+    // is dimensions: 768; generate.ts validates emb.length === 768). Keep in sync.
     const dummyEmbedding = new Array(768).fill(0.1);
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,

@@ -40,8 +40,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "pnpm run dev", // Use dev server for faster E2E test runs locally
-    url: "http://127.0.0.1:3000/api/health/heartbeat",
+    command: "npx next start -p 3000",
+    url: "http://127.0.0.1:3000/next.svg",
     reuseExistingServer: !process.env.CI,
     timeout: 180 * 1000,
   },

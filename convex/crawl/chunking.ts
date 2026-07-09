@@ -268,15 +268,22 @@ export function normalizeContent(text: string): string {
 
 export function assignFreshnessTier(url: string): "high" | "medium" | "low" {
   const lower = url.toLowerCase();
+  // Time-sensitive student-critical content gets HIGH tier: steepest decay
+  // penalty when stale + highest staleness re-crawl priority. Keep these
+  // keywords in sync with assign_tier in scripts/crawler.py so the crawler's
+  // push-time tier and the re-chunk path agree.
+  const highKeywords = [
+    "admission", "academic", "merit", "fee", "schedule", "seat",
+    "result", "exam", "deadline", "notice", "scholarship", "prospectus",
+  ];
   if (
     lower === "https://web.uettaxila.edu.pk/" ||
     lower === "https://uettaxila.edu.pk/" ||
-    lower.includes("admission") ||
-    lower.includes("academic")
+    highKeywords.some((kw) => lower.includes(kw))
   ) {
     return "high";
   }
-  if (lower.includes("department") || lower.includes("faculty")) {
+  if (lower.includes("department") || lower.includes("faculty") || lower.includes("program")) {
     return "medium";
   }
   return "low";

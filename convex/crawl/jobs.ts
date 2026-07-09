@@ -97,18 +97,19 @@ async function trimStaleDLQPayloads(ctx: any, batchSize: number, cutoff: number)
 // vector. Detect via a missing documentId and remove the chunk + its vector.
 // Batch-capped; runs weekly.
 async function compactOrphanedChunks(ctx: any, batchSize: number): Promise<number> {
-  // Walk recent chunks and probe their document existence. A full scan is too
-  // expensive; instead, sample by crawling a bounded window of documents and
-  // checking their chunks' parents. The cheaper and correct approach: iterate
-  // chunkParents whose document no longer exists (parents are far fewer than
-  // chunks) and cascade-delete their children + vectors.
+  // Detect orphaned chunks: a chunkParents row whose `documentId` no longer
+  // resolves (the document was deleted, e.g. via a re-crawl that replaced it,
+  // or the TOCTOU window that existed before the saveEmbedding fix). chunkParents
+  // is far smaller than crawledChunks, so iterating it and probing doc existence
+  // is cheaper than scanning chunks. For each orphaned parent, cascade-delete its
+  // children + their RAG vectors, then the parent itself. Batch-capped; the cron
+  // re-runs weekly until the `remaining` flag clears. .take() reads in table order
+  // (creation order) — acceptable since we only act on genuinely missing docs.
   let deleted = 0;
   const parents = await ctx.db.query("chunkParents").take(batchSize);
   for (const parent of parents) {
     const doc = await ctx.db.get(parent.documentId as Id<"documents">);
     if (!doc) {
-      // Parent's document is gone — delete the parent and any children still
-      // pointing at it, plus their RAG vectors.
       const children = await ctx.db
         .query("crawledChunks")
         .withIndex("by_documentId", (q: any) => q.eq("documentId", parent.documentId))

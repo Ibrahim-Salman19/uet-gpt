@@ -436,7 +436,7 @@ describe("crawlWebhook", () => {
     expect(res.status).toBe(200);
     expect(mockCtx.runMutation).toHaveBeenCalled();
     const upsertArgs = mockCtx.runMutation.mock.calls.filter(
-      (c: any[]) => c[1] && Array.isArray(c[1].chunks),
+      (c: any[]) => c[1] && Array.isArray(c[1].children),
     );
     expect(upsertArgs.length).toBeGreaterThanOrEqual(2);
   });

@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import type { QueryCtx } from "../_generated/server";
 import { internalMutation, internalQuery } from "../_generated/server";
 
 // Mirror of the adminAuditLog.action union in schema.ts — keep in sync.
@@ -159,45 +160,59 @@ export const countAllDocuments = internalQuery({
   },
 });
 
+// Shared staleness computation so getStaleAndTotalCount and getStaleDocumentCount
+// don't duplicate logic and don't reach into a registered query's `.handler`
+// (which isn't part of the public type and trips tsc).
+async function computeStaleness(ctx: QueryCtx, now: number): Promise<{ total: number; stale: number }> {
+  // Tier-aware staleness thresholds. Previously only `low`-tier docs could be
+  // flagged stale by age — which is backwards: HIGH-tier pages (admissions,
+  // merit lists, fees, schedules) are the MOST time-sensitive and must go
+  // stale fastest so the staleness cron prioritizes re-crawling them. Students
+  // ask "is the merit list out?" / "what's the fee deadline?" — stale answers
+  // there are far worse than a stale department-history page.
+  const DAY = 24 * 60 * 60 * 1000;
+  const tierThresholds = {
+    high: now - 14 * DAY, // 2 weeks — admissions/fees/merit/schedule
+    medium: now - 60 * DAY, // 2 months — departments/faculty/programs
+    low: now - 180 * DAY, // 6 months — about/history/contact
+  } as const;
+  let total = 0;
+  let stale = 0;
+  let cursor: string | null = null;
+  let isDone = false;
+
+  while (!isDone) {
+    const pageResult = await ctx.db.query("documents").paginate({ numItems: 1000, cursor });
+    total += pageResult.page.length;
+    for (const d of pageResult.page) {
+      const isStaleStatus = d.status === "stale";
+      const tier = (d.freshnessTier ?? "low") as keyof typeof tierThresholds;
+      const isStaleAge = d.crawledAt <= tierThresholds[tier];
+      if (isStaleStatus || isStaleAge) {
+        stale++;
+      }
+    }
+    cursor = pageResult.continueCursor;
+    isDone = pageResult.isDone;
+  }
+
+  return { total, stale };
+}
+
 export const getStaleAndTotalCount = internalQuery({
   args: { now: v.number() },
   returns: v.object({
     total: v.number(),
     stale: v.number(),
   }),
-  handler: async (ctx, args) => {
-    const threshold = args.now - 30 * 24 * 60 * 60 * 1000;
-    let total = 0;
-    let stale = 0;
-    let cursor: string | null = null;
-    let isDone = false;
-
-    // Single-pass table scan to compute both total and stale document counts.
-    // This reduces read amplification and avoids double-reading documents that
-    // have both status='stale' and are older than the freshness threshold.
-    while (!isDone) {
-      const pageResult = await ctx.db.query("documents").paginate({ numItems: 1000, cursor });
-      total += pageResult.page.length;
-      for (const d of pageResult.page) {
-        const isStaleStatus = d.status === "stale";
-        const isStaleAge = d.freshnessTier === "low" && d.crawledAt <= threshold;
-        if (isStaleStatus || isStaleAge) {
-          stale++;
-        }
-      }
-      cursor = pageResult.continueCursor;
-      isDone = pageResult.isDone;
-    }
-
-    return { total, stale };
-  },
+  handler: async (ctx, args) => computeStaleness(ctx, args.now),
 });
 
 export const getStaleDocumentCount = internalQuery({
   args: { now: v.number() },
   returns: v.number(),
   handler: async (ctx, args) => {
-    const res = await getStaleAndTotalCount.handler(ctx, args);
+    const res = await computeStaleness(ctx, args.now);
     return res.stale;
   },
 });

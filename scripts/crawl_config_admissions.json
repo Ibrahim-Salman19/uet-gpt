@@ -1,0 +1,41 @@
+{
+  "_comment": "Scoped config: admissions.uettaxila.edu.pk ONLY. Use with: python scripts/crawler.py --config scripts/crawl_config_admissions.json. Excludes the flaky web.uettaxila.edu.pk server and all department faculty pages so the highest-value student content (fees, schedule, merit lists, seats, requirements) is populated cleanly first.",
+  "seedUrls": [
+    "https://admissions.uettaxila.edu.pk/",
+    "https://admissions.uettaxila.edu.pk/Fees.php",
+    "https://admissions.uettaxila.edu.pk/ProcedureAndRequirements.php",
+    "https://admissions.uettaxila.edu.pk/Schedule.php",
+    "https://admissions.uettaxila.edu.pk/Seats_Allocation.php",
+    "https://admissions.uettaxila.edu.pk/ProspectusAvailability.php"
+  ],
+  "_comment_departmentFacultyRange": "Empty range — no department faculty pages in the admissions-only scope.",
+  "departmentFacultyRange": { "start": 1, "end": 0 },
+  "maxDepth": 4,
+  "concurrency": 3,
+  "requestTimeout": 25,
+  "maxRetries": 3,
+  "pushRetries": 3,
+  "minWordCount": 40,
+  "queueMaxSize": 200,
+  "excludePatterns": [
+    "/search*", "/print/**", "/feed/**", "/gallery/**",
+    "*.doc", "*.docx", "*.ppt", "*.pptx",
+    "*.xls", "*.xlsx", "*.zip", "*.rar", "*.exe",
+    "*.jpg", "*.jpeg", "*.png", "*.gif"
+  ],
+  "includePatterns": [
+    "https://admissions.uettaxila.edu.pk/**"
+  ],
+  "rateLimiter": {
+    "minDelay": 0.1,
+    "maxDelay": 5.0,
+    "initialDelay": 0.5,
+    "aiStep": 0.01,
+    "mdFactor": 2.0,
+    "successThreshold": 10
+  },
+  "tokenBucket": {
+    "rate": 5.0,
+    "capacity": 10.0
+  }
+}

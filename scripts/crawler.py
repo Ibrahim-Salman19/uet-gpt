@@ -62,10 +62,25 @@ if not CONVEX_AUTH_TOKEN:
     print("WARNING: CONVEX_AUTH_TOKEN not set — /ingest endpoint may reject the request")
     print("  Consider using CRAWL_WEBHOOK_SECRET instead: export CONVEX_AUTH_TOKEN=$CRAWL_WEBHOOK_SECRET")
 
-# Load crawl_config.json
-CRAWL_CONFIG_PATH = project_root / "scripts" / "crawl_config.json"
+import argparse
+
+parser = argparse.ArgumentParser(description="UET Taxila Reliable RAG Crawler")
+parser.add_argument("--limit", type=int, default=500, help="Maximum number of pages to crawl")
+parser.add_argument("--clean", action="store_true", help="Reset pipeline data before crawling")
+parser.add_argument(
+    "--config",
+    type=str,
+    default="scripts/crawl_config.json",
+    help="Path to crawl config JSON (relative to repo root). Use a scoped config "
+    "to crawl a subset of domains, e.g. scripts/crawl_config_admissions.json.",
+)
+args, unknown = parser.parse_known_args()
+
+# Load crawl config. The --config flag lets you run a targeted crawl (e.g.
+# admissions-only) without editing the default crawl_config.json.
+CRAWL_CONFIG_PATH = (project_root / args.config).resolve()
 if not CRAWL_CONFIG_PATH.exists():
-    print(f"[ERROR] crawl_config.json not found at {CRAWL_CONFIG_PATH}")
+    print(f"[ERROR] crawl config not found at {CRAWL_CONFIG_PATH}")
     sys.exit(1)
 
 with open(CRAWL_CONFIG_PATH, encoding="utf-8") as _cf:
@@ -80,17 +95,21 @@ ALLOWED_DOMAINS = frozenset(
     urllib.parse.urlparse(root).netloc for root in SITE_ROOTS
 )
 
-# Auto-generated department faculty URLs (not in config, derived from departmentId 1-25)
-DEPARTMENT_FACULTY_URLS = [
-    f"https://web.uettaxila.edu.pk/departmentfaculty?departmentId={i}" for i in range(1, 26)
+# Department faculty pages. Previously hardcoded in this file (departmentId 1-25),
+# bypassing crawl_config.json as the documented source of truth. Now read from
+# config so all seeds live in one place. Falls back to the legacy auto-generated
+# range only if the config omits the key (backward compatibility).
+_DEPT_RANGE = CONFIG.get("departmentFacultyRange", {"start": 1, "end": 25})
+DEPARTMENT_FACULTY_URLS = CONFIG.get("departmentFacultyUrls") or [
+    f"https://web.uettaxila.edu.pk/departmentfaculty?departmentId={i}"
+    for i in range(_DEPT_RANGE.get("start", 1), _DEPT_RANGE.get("end", 25) + 1)
 ]
 
-import argparse
-
-parser = argparse.ArgumentParser(description="UET Taxila Reliable RAG Crawler")
-parser.add_argument("--limit", type=int, default=500, help="Maximum number of pages to crawl")
-parser.add_argument("--clean", action="store_true", help="Reset pipeline data before crawling")
-args, unknown = parser.parse_known_args()
+# Include patterns: URLs must match at least one (if any are defined) in addition
+# to the domain allowlist. Previously defined in crawl_config.json but never read
+# — making the config misleading. Now enforced so crawl_config.json is the true
+# single source of truth for both inclusion and exclusion.
+INCLUDE_PATTERNS = CONFIG.get("includePatterns", [])
 
 MAX_PAGES       = args.limit
 MAX_DEPTH       = CONFIG.get("maxDepth", 4)
@@ -271,6 +290,48 @@ def decode_all_emails(html: str) -> str:
             tag.replace_with(decode_cf_email(raw))
     return str(soup)
 
+
+# UET Taxila site-specific non-content elements that must be removed BEFORE
+# main-content extraction, otherwise their text leaks into chunks. The old
+# web.uettaxila.edu.pk site loads a first-visit announcement popup
+# (firstvisitpopup.css) and rotating news/marquee sliders with time-sensitive
+# items (merit lists, deadlines, event dates) that go stale quickly. Stripping
+# them here means: (1) popup chrome never enters a chunk, (2) dated news items
+# are not indexed as if they were permanent page content. Real announcement
+# pages linked from these elements are still crawled normally via BFS link
+# discovery, so no information is lost — only the transient chrome is dropped.
+BOILERPLATE_SELECTORS = [
+    # First-visit announcement popup (firstvisitpopup.css on web.uettaxila.edu.pk)
+    "[id*=popup i]", "[class*=popup i]", "[class*=firstvisit i]",
+    # Generic modal/dialog overlays
+    "[class*=modal i]", "[id*=modal i]", "[class*=dialog i]",
+    "[role=dialog]", "[aria-modal=true]",
+    # Rotating news sliders / tickers / carousels — transient, high churn
+    "marquee", "[class*=news-ticker i]", "[class*=ticker i]",
+    "[class*=carousel i]", "[class*=slider i]",
+    # Cookie banners and floating notices
+    "[class*=cookie i]", "[id*=cookie i]", "[class*=floating-notice i]",
+]
+
+def strip_boilerplate_html(html: str) -> str:
+    """Remove popup/modal/news-slider/cookie chrome before content extraction.
+
+    Runs after decode_all_emails (which handles CF emails + ASP.NET ViewState)
+    and before trafilatura. Removing non-content DOM up front is the standard
+    text-extraction best practice: it prevents transient UI text from leaking
+    into the main-content extraction and keeps chunks focused on real page body.
+    """
+    try:
+        soup = BeautifulSoup(html, "lxml")
+        for selector in BOILERPLATE_SELECTORS:
+            for tag in soup.select(selector):
+                tag.decompose()
+        return str(soup)
+    except Exception:
+        # If BeautifulSoup fails, fall back to the raw HTML — trafilatura's own
+        # boilerplate detection still runs as the backstop.
+        return html
+
 _DEFAULT_PORTS = {"http": "80", "https": "443"}
 
 
@@ -302,6 +363,23 @@ def _matches_exclude(url: str) -> bool:
                 return True
     return False
 
+def _matches_include(url: str) -> bool:
+    """If INCLUDE_PATTERNS is defined, the URL must match at least one.
+    An empty list means 'allow any URL within the domain allowlist' (the
+    historical behavior), so a misconfigured/empty includePatterns never
+    accidentally blocks the whole crawl."""
+    if not INCLUDE_PATTERNS:
+        return True
+    for pattern in INCLUDE_PATTERNS:
+        if pattern.startswith("http"):
+            if fnmatch.fnmatch(url, pattern):
+                return True
+        else:
+            # Treat non-absolute patterns as path globs for convenience.
+            if fnmatch.fnmatch(urllib.parse.urlparse(url).path, pattern):
+                return True
+    return False
+
 def is_allowed_url(url: str) -> bool:
     try:
         p = urllib.parse.urlparse(url)
@@ -315,6 +393,8 @@ def is_allowed_url(url: str) -> bool:
         # they are already rejected by the scheme allowlist above. A previous
         # p.path.startswith(("mailto:", ...)) check here was dead code.
         if _matches_exclude(url):
+            return False
+        if not _matches_include(url):
             return False
         rp = _get_robot_parser(p.netloc)
         if rp is not None and not rp.can_fetch(ROBOTS_USER_AGENT, url):
@@ -636,6 +716,60 @@ token_bucket = TokenBucket(
 # FETCH & PUSH LOGIC
 # ═════════════════════════════════════════════════════════════════════════════
 
+def clean_pdf_markdown(markdown: str) -> str:
+    """Clean pymupdf4llm PDF output: drop image placeholders, repeating page
+    headers/footers, and standalone page artifacts that pollute chunks.
+
+    Problem seen on the UET Prospectus 2025 (165 pages): 760 image-placeholder
+    lines like '**==> picture [222 x 64] intentionally omitted <==' and 300+
+    repeating header/footer lines ('UG PROSPECTUS 2025', 'UET, TAXILA', bare
+    page numbers) bled into chunks as noise. A student asking 'what programs
+    are offered?' would retrieve a fragment of a degree list with no heading.
+
+    Two-pass approach:
+    1. Remove image/figure placeholders outright (they carry no text signal).
+    2. Detect lines that repeat across many pages (headers/footers) and drop
+       them when they appear as standalone lines, keeping them only when they
+       are part of a real heading line with surrounding content.
+    """
+    import re as _re
+
+    # 1. Drop image/figure placeholders entirely.
+    lines = [
+        ln for ln in markdown.split("\n")
+        if "intentionally omitted" not in ln
+        and not _re.search(r"\[=>?\s*\d+\s*[x×]\s*\d+\s*\]", ln)  # [222 x 64]
+    ]
+
+    # 2. Detect repeating page headers/footers: short lines appearing many times
+    #    AND looking like running headers (not real content sentences). A real
+    #    content paragraph repeated across pages is rare; a header like
+    #    "UG PROSPECTUS 2025" repeating 157× is an artifact. Require BOTH high
+    #    repetition (>8) AND short length (<=40 chars) AND no sentence ending
+    #    (no period) to avoid stripping legitimate repeated content.
+    from collections import Counter
+    short_lines = [
+        ln.strip() for ln in lines
+        if 0 < len(ln.strip()) <= 40 and not ln.strip().endswith(".")
+    ]
+    counts = Counter(short_lines)
+    boilerplate = {ln for ln, c in counts.items() if c > 8}
+
+    cleaned = []
+    for ln in lines:
+        if ln.strip() in boilerplate:
+            continue
+        # 3. Drop bare page numbers (digits only, possibly wrapped in markdown).
+        if _re.fullmatch(r"\s*\**\d+\**\s*", ln):
+            continue
+        cleaned.append(ln)
+
+    text = "\n".join(cleaned)
+    # Collapse excessive blank lines left by removals.
+    text = _re.sub(r"\n{3,}", "\n\n", text).strip()
+    return text
+
+
 async def fetch_and_extract(url: str, session: AsyncSession) -> tuple[str | None, str, list[str], str | None, int]:
     """Returns: (markdown, title, links, error_reason, status_code)"""
     try:
@@ -677,7 +811,10 @@ async def fetch_and_extract(url: str, session: AsyncSession) -> tuple[str | None
     if is_pdf:
         try:
             doc = fitz.open(stream=body, filetype="pdf")
-            markdown = pymupdf4llm.to_markdown(doc, table_strategy='lines')
+            markdown = pymupdf4llm.to_markdown(
+                doc, table_strategy='lines', write_images=False, show_progress=False,
+            )
+            markdown = clean_pdf_markdown(markdown)
             title = os.path.basename(urllib.parse.urlparse(url).path) or url
             return markdown, title, [], None, status
         except Exception as e:
@@ -685,8 +822,14 @@ async def fetch_and_extract(url: str, session: AsyncSession) -> tuple[str | None
 
     # Handle HTML
     raw_html = resp.text
-    clean_html = decode_all_emails(raw_html)
+    # Decode Cloudflare-obfuscated emails + strip ASP.NET ViewState, then remove
+    # popup/modal/news-slider chrome BEFORE extraction so transient UI text
+    # (announcement popups, dated news tickers) doesn't leak into chunks.
+    clean_html = strip_boilerplate_html(decode_all_emails(raw_html))
     title = extract_title(raw_html)
+    # Links are extracted from the cleaned HTML too, so we don't enqueue links
+    # that only existed inside a removed popup (those are usually close buttons
+    # or JS-driven, not crawlable content anyway).
     links = extract_links(clean_html, url)
 
     markdown = trafilatura.extract(
@@ -703,10 +846,27 @@ async def fetch_and_extract(url: str, session: AsyncSession) -> tuple[str | None
 
 
 def assign_tier(url: str) -> str:
+    """Freshness tier drives decay scoring + staleness re-crawl priority.
+
+    HIGH = churns often / students depend on it being current (admissions,
+    fees, merit lists, schedules, results, deadlines, notices). These get the
+    steepest decay penalty when stale so stale answers rank lower, and the
+    staleness cron flags them for re-crawl first.
+    MEDIUM = semi-static reference (departments, faculty, programs).
+    LOW = rarely changes (history, about, contact).
+    """
     lower = url.lower()
-    if lower in ("https://web.uettaxila.edu.pk/", "https://uettaxila.edu.pk/") or "admission" in lower or "academic" in lower:
+    # Time-sensitive student-critical content: admissions portal + keywords that
+    # appear in both paths (Merit_List.php) and the admissions subdomain itself.
+    high_keywords = (
+        "admission", "academic", "merit", "fee", "schedule", "seat",
+        "result", "exam", "deadline", "notice", "scholarship", "prospectus",
+    )
+    if lower in ("https://web.uettaxila.edu.pk/", "https://uettaxila.edu.pk/") or any(
+        kw in lower for kw in high_keywords
+    ):
         return "high"
-    elif "department" in lower or "faculty" in lower:
+    if "department" in lower or "faculty" in lower or "program" in lower:
         return "medium"
     return "low"
 
@@ -787,7 +947,11 @@ async def worker(
             await asyncio.sleep(0.5)
             continue
 
-        url, depth = item
+        # PriorityQueue items are (priority, (url, depth)) — unpack the nested
+        # payload, not the outer (priority, payload) wrapper. Previously
+        # `url, depth = item` assigned url=priority tuple and depth=(url,depth),
+        # causing every fetch to fail with "Blocked disallowed/unsafe URL".
+        _priority, (url, depth) = item
         async with active_lock: active_workers[0] += 1
 
         try:
@@ -1036,7 +1200,10 @@ async def crawl():
     pbar = atqdm(total=MAX_PAGES, desc="Crawling", unit="pg", dynamic_ncols=True, colour="green")
 
     rate_limiter.reset()
-    async with AsyncSession(impersonate="chrome", connections_limit=10) as session, \
+    # curl_cffi >=0.10 renamed connections_limit -> max_clients. CONCURRENCY (from
+    # crawl_config.json) bounds active in-flight fetches via the worker task pool;
+    # max_clients caps the underlying connection pool.
+    async with AsyncSession(impersonate="chrome", max_clients=CONCURRENCY * 2) as session, \
               AsyncSession(max_clients=10) as push_session:
         worker_tasks = [
             asyncio.create_task(worker(

@@ -14,7 +14,13 @@ describe("convex schema", () => {
     expect(tableNames).toContain("crawlJobs");
     expect(tableNames).toContain("semanticCache");
     expect(tableNames).toContain("adminAuditLog");
-    expect(tableNames).toContain("notifications");
+
+    // WS-1: normalized parent storage (replaces per-child parentText duplication)
+    expect(tableNames).toContain("chunkParents");
+
+    // WS-5: the deprecated notifications table was removed (zero read/write code;
+    // the "notifications" string in admin settings UI is an appSettings section key)
+    expect(tableNames).not.toContain("notifications");
 
     // Document metadata table (RAG entries are tracked here, chunks managed by @convex-dev/rag)
     expect(tableNames).toContain("documents");

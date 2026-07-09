@@ -5,6 +5,7 @@ import path from "path";
 const authFile = path.join(__dirname, "../../playwright/.clerk/state.json");
 
 setup("clerk auth setup", async ({ page }) => {
+  setup.setTimeout(120000);
   await clerkSetup();
   await setupClerkTestingToken({ page });
   
