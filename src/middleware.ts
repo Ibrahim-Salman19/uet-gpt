@@ -22,9 +22,12 @@ export default clerkMiddleware(async (auth, req) => {
     );
   }
 
-  if (!isPublicRoute(req)) {
-    const { userId } = await auth();
-    if (!userId) {
+  const isPublic = isPublicRoute(req);
+  const isAdmin = isAdminRoute(req);
+  const authObj = (!isPublic || isAdmin) ? await auth() : null;
+
+  if (!isPublic) {
+    if (!authObj?.userId) {
       const signInUrl = new URL("/sign-in", req.url);
       signInUrl.searchParams.set("redirect_url", req.url);
       return NextResponse.redirect(signInUrl);
@@ -32,8 +35,8 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   // Edge-level admin role check — prevents non-admins from loading admin pages
-  if (isAdminRoute(req)) {
-    const { sessionClaims } = await auth();
+  if (isAdmin) {
+    const sessionClaims = authObj?.sessionClaims;
 
     // Diagnostic: JWT template not configured → sessionClaims.metadata is undefined
     if (sessionClaims && typeof sessionClaims.metadata === "undefined") {

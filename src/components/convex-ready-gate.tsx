@@ -22,37 +22,28 @@ export function ConvexReadyGate({ children }: { children: React.ReactNode }) {
     !isConvexLoading &&
     (!user || (isConvexLoaded && convexUser !== null));
 
+  const checkReachability = async (signal: AbortSignal): Promise<string> => {
+    const url = process.env.NEXT_PUBLIC_CONVEX_URL;
+    if (!url) {
+      return "Convex URL environment variable (NEXT_PUBLIC_CONVEX_URL) is not configured.";
+    }
+    try {
+      await fetch(url, { method: "GET", mode: "no-cors", signal });
+      return "DATABASE_REACHABLE";
+    } catch (err: any) {
+      return err.name === "AbortError" ? "TIMEOUT_ERROR" : "UNREACHABLE_ERROR";
+    }
+  };
+
   const runDiagnostics = async () => {
     setDiagnosing(true);
     setNetworkError(null);
-    try {
-      const url = process.env.NEXT_PUBLIC_CONVEX_URL;
-      if (!url) {
-        setNetworkError(
-          "Convex URL environment variable (NEXT_PUBLIC_CONVEX_URL) is not configured.",
-        );
-        return;
-      }
-
-      const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), 6000);
-
-      await fetch(url, {
-        method: "GET",
-        mode: "no-cors",
-        signal: controller.signal,
-      });
-      clearTimeout(id);
-      setNetworkError("DATABASE_REACHABLE");
-    } catch (err: any) {
-      if (err.name === "AbortError") {
-        setNetworkError("TIMEOUT_ERROR");
-      } else {
-        setNetworkError("UNREACHABLE_ERROR");
-      }
-    } finally {
-      setDiagnosing(false);
-    }
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), 6000);
+    const result = await checkReachability(controller.signal);
+    clearTimeout(id);
+    setNetworkError(result);
+    setDiagnosing(false);
   };
 
   useEffect(() => {
@@ -70,23 +61,10 @@ export function ConvexReadyGate({ children }: { children: React.ReactNode }) {
     (async () => {
       setDiagnosing(true);
       setNetworkError(null);
-      try {
-        const url = process.env.NEXT_PUBLIC_CONVEX_URL;
-        if (!url) {
-          if (!cancelled)
-            setNetworkError(
-              "Convex URL environment variable (NEXT_PUBLIC_CONVEX_URL) is not configured.",
-            );
-          return;
-        }
-        await fetch(url, { method: "GET", mode: "no-cors", signal: controller.signal });
-        if (!cancelled) setNetworkError("DATABASE_REACHABLE");
-      } catch (err: any) {
-        if (!cancelled) {
-          setNetworkError(err.name === "AbortError" ? "TIMEOUT_ERROR" : "UNREACHABLE_ERROR");
-        }
-      } finally {
-        if (!cancelled) setDiagnosing(false);
+      const result = await checkReachability(controller.signal);
+      if (!cancelled) {
+        setNetworkError(result);
+        setDiagnosing(false);
       }
     })();
 

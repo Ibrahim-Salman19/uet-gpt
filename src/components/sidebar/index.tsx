@@ -1,7 +1,7 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
-import { AlertCircle, Bookmark, Settings, User, X } from "lucide-react";
+import { useClerk, useUser } from "@clerk/nextjs";
+import { AlertCircle, Bookmark, LogOut, Settings, User, X } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -143,6 +143,14 @@ function UserProfileFooter({
   } | null;
   onOpenSettings: () => void;
 }) {
+  const { signOut } = useClerk();
+
+  const handleSignOut = async () => {
+    await signOut();
+    // Force a hard navigation to clear Next.js App Router client cache
+    window.location.href = "/sign-in";
+  };
+
   return (
     <div className="p-3 border-t border-[var(--surface-5)] flex items-center justify-between gap-2 shrink-0 bg-[var(--surface-1)]/60">
       <div className="flex items-center gap-3 min-w-0">
@@ -177,13 +185,22 @@ function UserProfileFooter({
           </div>
         </button>
       </div>
-      <button
-        onClick={onOpenSettings}
-        className="p-2 text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-white/5 rounded-lg transition-all active:scale-95 shrink-0"
-        aria-label="Open Settings"
-      >
-        <Settings className="w-4 h-4 transition-colors" aria-hidden="true" />
-      </button>
+      <div className="flex items-center gap-1 shrink-0">
+        <button
+          onClick={onOpenSettings}
+          className="p-2 text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-white/5 rounded-lg transition-all active:scale-95"
+          aria-label="Open Settings"
+        >
+          <Settings className="w-4 h-4 transition-colors" aria-hidden="true" />
+        </button>
+        <button
+          onClick={handleSignOut}
+          className="p-2 text-[var(--text-muted)] hover:text-[var(--destructive)] hover:bg-red-500/10 rounded-lg transition-all active:scale-95"
+          aria-label="Sign Out"
+        >
+          <LogOut className="w-4 h-4 transition-colors" aria-hidden="true" />
+        </button>
+      </div>
     </div>
   );
 }
