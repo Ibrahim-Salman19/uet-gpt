@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "@/components/providers";
-import { APP_DESCRIPTION, APP_NAME, APP_TAGLINE } from "@/lib/constants";
+import { APP_DESCRIPTION, APP_KEYWORDS, APP_NAME, APP_TAGLINE } from "@/lib/constants";
+import { JsonLd } from "@/lib/json-ld";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -20,15 +21,42 @@ const siteUrl =
     ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
     : "http://localhost:3000");
 
+const title = `${APP_NAME} — ${APP_TAGLINE}`;
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: `${APP_NAME} — ${APP_TAGLINE}`,
+  title,
   description: APP_DESCRIPTION,
-  keywords: ["UET", "UET Taxila", "chatbot", "RAG", "AI", "university"],
+  keywords: APP_KEYWORDS,
+  authors: [{ name: "UET GPT Team" }],
+  creator: "UET GPT",
+  publisher: "UET GPT",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   openGraph: {
-    title: `${APP_NAME} — ${APP_TAGLINE}`,
-    description: APP_TAGLINE,
+    title,
+    description: APP_DESCRIPTION,
+    url: siteUrl,
+    siteName: APP_NAME,
     type: "website",
+    locale: "en_PK",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description: APP_DESCRIPTION,
+  },
+  alternates: {
+    canonical: siteUrl,
   },
 };
 
@@ -40,6 +68,9 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <JsonLd />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
         <a
           href="#main-content"

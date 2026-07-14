@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import { SignUp } from "@clerk/nextjs";
 import { uetClerkAppearance } from "@/lib/clerk-theme";
+import { APP_NAME } from "@/lib/constants";
+
+export const metadata: Metadata = {
+  title: `Sign Up — ${APP_NAME}`,
+  description: "Create your account and start using UET GPT, your AI guide to UET Taxila.",
+};
 
 export default function SignUpPage() {
   return (

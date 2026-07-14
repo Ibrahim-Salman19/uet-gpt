@@ -31,7 +31,7 @@ const nextConfig: NextConfig = {
     return config;
   },
   async redirects() {
-    return [{ source: "/", destination: "/chat", permanent: false }];
+    return [{ source: "/", destination: "/chat", permanent: true }];
   },
   async headers() {
     const isDev = process.env.NODE_ENV !== "production";

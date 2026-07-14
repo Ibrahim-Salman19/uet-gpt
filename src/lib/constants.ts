@@ -69,7 +69,22 @@ export const UET_CRAWL_CONFIG = {
 export const APP_NAME = "UET GPT";
 export const APP_TAGLINE = "Your AI Guide to UET Taxila";
 export const APP_DESCRIPTION =
-  "An intelligent assistant that answers any question about UET Taxila.";
+  "UET GPT is an intelligent AI assistant that answers any question about UET Taxila — admissions, fee structure, academic programs, departments, faculty, campus life, transport, hostels, scholarships, and more. Powered by RAG and official university data.";
+export const APP_KEYWORDS = [
+  "UET",
+  "UET Taxila",
+  "UET GPT",
+  "University of Engineering and Technology Taxila",
+  "UET admissions",
+  "UET fee structure",
+  "UET academic programs",
+  "UET chatbot",
+  "AI assistant Pakistan",
+  "university AI chatbot",
+  "UET Taxila guide",
+  "Pakistani engineering university",
+  "UET Taxila AI",
+];
 
 // fallow-ignore-next-line unused-export
 export const UET_COLORS = {

@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { APP_NAME } from "@/lib/constants";
+
+export const metadata: Metadata = {
+  title: `Access Denied — ${APP_NAME}`,
+  description: "You don't have permission to access this area.",
+};
 
 export const dynamic = "force-dynamic";
 
