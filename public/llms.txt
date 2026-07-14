@@ -11,8 +11,12 @@ UET GPT is a specialized AI chatbot for the University of Engineering and Techno
 - **RAG-Powered Answers**: Retrieves information from official UET Taxila documents and web pages
 - **Real-Time Data**: Continuously crawls and indexes UET Taxila's official website and admissions portal
 - **Multi-Model AI**: Supports Llama 4 Scout (deep reasoning) and Llama 3.1 8B (fast responses)
-- **Dark Academic Design**: Premium urushi lacquer-inspired interface with gold accents
+- **Citation Engine**: Every answer includes source references from official university materials
 - **Privacy-First**: Clerk-powered authentication with user-controlled data export and deletion
+
+## Pricing
+
+UET GPT is currently free to use. See full pricing details at https://uet-gpt.vercel.app/pricing.md
 
 ## Useful Links
 
@@ -20,7 +24,20 @@ UET GPT is a specialized AI chatbot for the University of Engineering and Techno
 - Explore indexed documents: https://uet-gpt.vercel.app/explore
 - Sign up: https://uet-gpt.vercel.app/sign-up
 - Sign in: https://uet-gpt.vercel.app/sign-in
+- Pricing: https://uet-gpt.vercel.app/pricing.md
+- GitHub: https://github.com/devhms/uet_gpt
 
 ## About UET Taxila
 
-The University of Engineering and Technology (UET) Taxila is one of Pakistan's premier engineering institutions, offering undergraduate and graduate programs across engineering, technology, and computer science disciplines.
+The University of Engineering and Technology (UET) Taxila is one of Pakistan's premier engineering institutions, offering undergraduate and graduate programs across engineering, technology, and computer science disciplines. Founded in 1975 (as a campus of UET Lahore, gained independent charter in 1993), it serves over 5,000 students across 30+ programs.
+
+## Technology Stack
+
+UET GPT is built on:
+- **Frontend**: Next.js 15, Tailwind CSS, TypeScript
+- **Backend**: Convex (real-time database and serverless functions)
+- **Auth**: Clerk
+- **AI Models**: Llama 4 Scout (Groq), Llama 3.1 8B (Groq)
+- **Vector Search**: Convex vector indexes with Gemini embedding-2
+- **Crawler**: Python (curl_cffi, trafilatura)
+- **Deployment**: Vercel
