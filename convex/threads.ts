@@ -140,26 +140,47 @@ export const safeDeleteThread = internalMutation({
       return null;
     }
     if (thread.status === "archived" && thread._creationTime < args.cutoff) {
-      // 1. Get messages in the thread to identify their message IDs
-      const messagesResult = await ctx.runQuery(components.agent.messages.listMessagesByThreadId, {
-        threadId: args.threadId,
-        order: "asc",
-        paginationOpts: { numItems: 200, cursor: null },
-      });
+      // 1. Get messages in the thread to identify all message IDs via pagination
+      let cursor = null;
+      const messageIds: string[] = [];
+      while (true) {
+        const messagesResult: any = await ctx.runQuery(components.agent.messages.listMessagesByThreadId, {
+          threadId: args.threadId,
+          order: "asc",
+          paginationOpts: { numItems: 200, cursor },
+        });
+        messageIds.push(...messagesResult.page.map((m: any) => m._id));
+        if (messagesResult.isDone) {
+          break;
+        }
+        cursor = messagesResult.continueCursor;
+      }
 
-      // 2. Delete feedback records associated with those messages. Use take(5)
-      // to avoid unbounded memory/read overhead (a message has at most 1 rating per user).
-      const messageIds = messagesResult.page.map((m: any) => m._id);
-      const feedbackEntries = await Promise.all(
-        messageIds.map((msgId: string) =>
-          ctx.db
-            .query("feedback")
-            .withIndex("by_messageId", (q) => q.eq("messageId", msgId))
-            .take(5),
-        ),
-      );
-      const allFeedbackIds = feedbackEntries.flatMap((entries) => entries.map((fb) => fb._id));
-      await Promise.all(allFeedbackIds.map((fbId) => ctx.db.delete(fbId)));
+      // 2. Delete feedback records associated with those messages. Batch queries to avoid
+      // excessive concurrent index scans.
+      const BATCH_SIZE = 50;
+      const allFeedbackIds: any[] = [];
+      for (let i = 0; i < messageIds.length; i += BATCH_SIZE) {
+        const batchIds = messageIds.slice(i, i + BATCH_SIZE);
+        const feedbackEntries = await Promise.all(
+          batchIds.map((msgId: string) =>
+            ctx.db
+              .query("feedback")
+              .withIndex("by_messageId", (q) => q.eq("messageId", msgId))
+              .take(5),
+          ),
+        );
+        for (const entries of feedbackEntries) {
+          for (const fb of entries) {
+            allFeedbackIds.push(fb._id);
+          }
+        }
+      }
+
+      for (let i = 0; i < allFeedbackIds.length; i += BATCH_SIZE) {
+        const batchDeleteIds = allFeedbackIds.slice(i, i + BATCH_SIZE);
+        await Promise.all(batchDeleteIds.map((fbId) => ctx.db.delete(fbId)));
+      }
 
       // 3. Delete thread and messages inside the agent component
       await ctx.runMutation(components.agent.threads.deleteAllForThreadIdAsync, {
@@ -173,7 +194,7 @@ export const safeDeleteThread = internalMutation({
 export const getOldArchivedUsersBatch = internalQuery({
   args: { cursor: v.union(v.string(), v.null()) },
   handler: async (ctx, { cursor }) => {
-    return await ctx.db.query("users").paginate({ numItems: 1, cursor });
+    return await ctx.db.query("users").paginate({ numItems: 100, cursor });
   },
 });
 
