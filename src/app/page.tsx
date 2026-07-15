@@ -85,26 +85,25 @@ export default function LandingPage() {
 
         {/* Sticky Glass Navigation Header */}
         <header className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)]/70 bg-[var(--surface-base)]/50 backdrop-blur-md sticky top-0 z-50 animate-[fade-in_0.3s_ease-out_both]">
-          <div className="flex items-center gap-3 select-none">
+          <Link href="/" className="flex items-center gap-3 select-none hover:opacity-90 transition-opacity" aria-label="UET GPT home">
             <div className="size-8 rounded-lg bg-gradient-to-br from-[var(--accent)] to-[var(--accent-hover)] flex items-center justify-center text-[var(--accent-fg)] shadow-[0_0_15px_rgba(202,138,4,0.18)]">
               <svg
-                className="h-4.5 w-4.5 text-[var(--accent-fg)]"
+                className="h-[18px] w-[18px] text-[var(--accent-fg)]"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                aria-label="Logo"
+                aria-hidden="true"
               >
-                <title>UET GPT Logo</title>
                 <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
                 <path d="M6 12v5c3 3 9 3 12 0v-5" />
               </svg>
             </div>
             <span className="font-semibold text-base font-mono tracking-tight">{APP_NAME}</span>
-          </div>
-          <nav className="flex items-center gap-5">
+          </Link>
+          <nav className="flex items-center gap-5" aria-label="Main navigation">
             <Link
               href="/sign-in"
               className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors font-mono font-medium tracking-wider uppercase"
@@ -122,7 +121,7 @@ export default function LandingPage() {
 
         <main id="main-content" className="flex-1">
           {/* Hero Section */}
-          <section className="px-6 pt-28 pb-20 max-w-4xl mx-auto text-center relative animate-[slide-up_0.5s_ease-out_both]">
+          <section className="px-6 pt-28 pb-20 max-w-4xl mx-auto text-center animate-[slide-up_0.5s_ease-out_both]">
             {/* AI Platform Chip */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[var(--accent)]/20 bg-[var(--accent)]/5 text-[var(--accent)] font-mono text-[9px] uppercase tracking-[0.2em] mb-6">
               <span className="relative flex h-1.5 w-1.5">
@@ -305,7 +304,7 @@ export default function LandingPage() {
                 <Link
                   key={s.prompt}
                   href="/sign-up"
-                  className="group flex flex-col items-start p-4 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/25 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-card)]/40 hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden"
+                  className="group flex flex-col items-start p-4 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/25 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-card)]/40 hover:-translate-y-0.5 transition-all duration-300"
                 >
                   <div className="flex items-center justify-between w-full mb-1">
                     <span className="font-mono text-[9px] uppercase tracking-[0.15em] text-[var(--accent)]/80 font-semibold">
@@ -356,17 +355,20 @@ export default function LandingPage() {
         <footer className="border-t border-[var(--border)] px-6 py-8 bg-[var(--surface-base)] text-[var(--text-secondary)] font-mono text-xs">
           <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             <p>&copy; {new Date().getFullYear()} UET GPT Team. All rights reserved.</p>
-            <div className="flex items-center gap-6">
+            <nav className="flex items-center gap-6" aria-label="Footer navigation">
               <Link href="/" className="hover:text-[var(--text-primary)] transition-colors">
                 Home
               </Link>
-              <Link href="/chat" className="hover:text-[var(--text-primary)] transition-colors">
-                Chat
+              <Link href="/sign-up" className="hover:text-[var(--text-primary)] transition-colors">
+                Sign Up
               </Link>
-              <Link href="/explore" className="hover:text-[var(--text-primary)] transition-colors">
-                Explore
+              <Link href="/sign-in" className="hover:text-[var(--text-primary)] transition-colors">
+                Sign In
               </Link>
-            </div>
+              <Link href="/uet-taxila" className="hover:text-[var(--text-primary)] transition-colors">
+                UET Taxila
+              </Link>
+            </nav>
           </div>
         </footer>
       </div>
