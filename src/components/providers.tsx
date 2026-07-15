@@ -96,7 +96,14 @@ export function Providers({ children }: ProvidersProps) {
   );
 
   return (
-    <ClerkProvider appearance={uetClerkAppearance}>
+    <ClerkProvider
+      appearance={{
+        ...uetClerkAppearance,
+        layout: {
+          unsafe_disableDevelopmentModeWarnings: true,
+        },
+      }}
+    >
       {convexClient ? (
         <ConvexProviderWithClerk client={convexClient} useAuth={useAuth}>
           <ThemeProvider>
