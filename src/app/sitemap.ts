@@ -1,11 +1,9 @@
 import type { MetadataRoute } from "next";
 
+const SITE_URL = "https://uet-gpt.vercel.app";
+
 export default function sitemap(): MetadataRoute.Sitemap {
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    (process.env.NEXT_PUBLIC_VERCEL_URL
-      ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-      : "http://localhost:3000");
+  const siteUrl = SITE_URL;
 
   return [
     {

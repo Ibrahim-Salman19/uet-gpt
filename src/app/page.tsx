@@ -2,11 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { APP_DESCRIPTION, APP_KEYWORDS, APP_NAME, APP_TAGLINE, DEFAULT_SUGGESTIONS } from "@/lib/constants";
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  (process.env.NEXT_PUBLIC_VERCEL_URL
-    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-    : "http://localhost:3000");
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
 export const metadata: Metadata = {
   title: `${APP_NAME} — ${APP_TAGLINE}`,
