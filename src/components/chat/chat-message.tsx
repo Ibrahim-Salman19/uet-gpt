@@ -198,7 +198,7 @@ export const ChatMessageBubble = React.memo(function ChatMessageBubble({
           </div>
         )}
 
-        <div className="flex items-center gap-4 mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <div className="flex items-center gap-4 mt-3 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
           <MessageActions
             messageId={message.id}
             content={message.content}

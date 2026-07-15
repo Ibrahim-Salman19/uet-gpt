@@ -1,4 +1,5 @@
 import { ConvexError, v } from "convex/values";
+import { internal } from "../_generated/api";
 import type { Doc } from "../_generated/dataModel";
 import { internalMutation, mutation, query } from "../_generated/server";
 import { requireAdmin } from "../auth";
@@ -369,6 +370,12 @@ export const deleteDocument = mutation({
 
     const document = await ctx.db.get(args.documentId);
     if (!document) throw new ConvexError("Document not found");
+
+    if (document.entryId) {
+      await ctx.scheduler.runAfter(0, internal.doc.remove.ragCleanupAction, {
+        entryId: document.entryId,
+      });
+    }
 
     while (true) {
       const chunks = await ctx.db

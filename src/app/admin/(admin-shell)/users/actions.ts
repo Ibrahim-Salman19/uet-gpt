@@ -41,7 +41,8 @@ async function getAuthenticatedAdmin(): Promise<{ userId: string; role: string }
     clerkId: userId,
   });
 
-  const role = convexUser?.role;
+  if (!convexUser || !convexUser.isActive) return null;
+  const role = convexUser.role;
   if (!role || !isAdminRole(role)) return null;
 
   return { userId, role };

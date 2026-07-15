@@ -107,7 +107,11 @@ export const getByClerkId = query({
         .query("users")
         .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
         .unique();
-      if (!caller || (caller.role !== "admin" && caller.role !== "superadmin")) {
+      if (
+        !caller ||
+        !caller.isActive ||
+        (caller.role !== "admin" && caller.role !== "superadmin")
+      ) {
         return null;
       }
     }
