@@ -2,7 +2,7 @@
 
 > An intelligent AI chatbot that answers any question about the University of Engineering and Technology (UET) Taxila — admissions, fee structure, academic programs, departments, faculty, campus life, transport, hostels, scholarships, and more. Powered by RAG over official UET Taxila data.
 
-**One-line description (SEO):** UET GPT is an AI chatbot that gives instant, cited answers about UET Taxila — admissions, fees, programs, faculty, and campus life — using RAG over the university's official data.
+**One-line description (SEO):** UET GPT is an AI chatbot that gives instant, cited answers about UET Taxila — admissions, fees, programs, faculty, and campus life — using RAG over the university's official data. Licensed under [AGPL-3.0](./LICENSE).
 
 UET GPT is an autonomous RAG (Retrieval-Augmented Generation) chatbot for UET Taxila. It
 answers questions about admissions, departments, fees, exams, faculty, and
@@ -20,7 +20,7 @@ Key things to know:
 - **Built for UET Taxila** — every answer is grounded in UET Taxila's official website (`web.uettaxila.edu.pk`), admissions portal (`admissions.uettaxila.edu.pk`), and ingested documents.
 - **Retrieval-Augmented Generation (RAG)** — answers are retrieved from a continuously crawled, indexed knowledge base, not hallucinated from generic model memory.
 - **Cited and verifiable** — responses link back to the official university material they came from.
-- **Open source** — the full stack is public on [GitHub](https://github.com/devhms/uet_gpt) under an open license, and is free to use.
+- **Open source** — the full stack is public on [GitHub](https://github.com/devhms/uet_gpt) under [AGPL-3.0](./LICENSE), and is free to use.
 
 UET GPT is currently free to use at [https://uet-gpt.vercel.app](https://uet-gpt.vercel.app).
 

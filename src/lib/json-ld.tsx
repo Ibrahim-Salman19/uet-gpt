@@ -65,6 +65,7 @@ export const softwareSchema = {
     priceCurrency: "USD",
   },
   author: { "@id": `${siteUrl}/#organization` },
+  license: "https://www.gnu.org/licenses/agpl-3.0.html",
 };
 
 export function JsonLd() {

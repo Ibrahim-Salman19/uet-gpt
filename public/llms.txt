@@ -64,4 +64,4 @@ UET GPT is built on:
 
 ## License and Contribution
 
-UET GPT is an open-source project. The source code is available at https://github.com/devhms/uet_gpt. (Note: the repository currently does not ship a dedicated LICENSE file or a `license` field in package.json; prospective contributors should confirm the license terms directly in the repository before reuse.)
+UET GPT is an open-source project licensed under the GNU Affero General Public License v3.0 (AGPL-3.0). The source code and full license text are available at https://github.com/devhms/uet_gpt. You may copy, distribute, and modify the software under the terms of AGPL-3.0, which requires that any modified version running as a network service must also provide its source code to users.
