@@ -165,11 +165,7 @@ export const contextualizeChunks = internalAction({
     const contextualizePromises = chunks.map(async (chunk, index) => {
       const chunkId = batch[index];
       if (!chunk || !chunkId) return null;
-      const text = await callGeminiContextualize(
-        chunk.text,
-        chunk.title,
-        chunk.headingPath,
-      );
+      const text = await callGeminiContextualize(chunk.text, chunk.title, chunk.headingPath);
       return { chunkId, text };
     });
 

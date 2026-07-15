@@ -118,16 +118,18 @@ async function diffAndDeleteStaleChunks(
   // matters on documents with many chunks during a re-crawl diff.
   const chunksToDelete = existingChunks.filter((ec) => !newHashSet.has(ec.contentHash));
 
-  await Promise.all(chunksToDelete.map(async (staleChunk) => {
-    try {
-      await rag.delete(ctx, {
-        entryId: staleChunk.ragId as unknown as import("@convex-dev/rag").EntryId,
-      });
-      await ctx.db.delete(staleChunk._id);
-    } catch (err) {
-      console.warn(`Failed to delete vector ${staleChunk.ragId} from RAG during re-embed:`, err);
-    }
-  }));
+  await Promise.all(
+    chunksToDelete.map(async (staleChunk) => {
+      try {
+        await rag.delete(ctx, {
+          entryId: staleChunk.ragId as unknown as import("@convex-dev/rag").EntryId,
+        });
+        await ctx.db.delete(staleChunk._id);
+      } catch (err) {
+        console.warn(`Failed to delete vector ${staleChunk.ragId} from RAG during re-embed:`, err);
+      }
+    }),
+  );
 
   console.log(
     `Chunk Diff for ${url}: ${chunksToEmbed.length} new chunks, ${chunksToDelete.length} deleted chunks`,
@@ -713,21 +715,26 @@ export const retryDeadLetterQueue = internalMutation({
       return true;
     });
 
-    for (const dlq of invalidDLQ) {
-      await ctx.db.patch(dlq._id, {
-        status: "abandoned",
-        failureReason: "No chunk text payload for retry (context was minimized to save bandwidth).",
-        lastAttemptAt: Date.now(),
-      });
-    }
+    await Promise.all(
+      invalidDLQ.map((dlq) =>
+        ctx.db.patch(dlq._id, {
+          status: "abandoned",
+          failureReason:
+            "No chunk text payload for retry (context was minimized to save bandwidth).",
+          lastAttemptAt: Date.now(),
+        }),
+      ),
+    );
 
     if (validDLQ.length > 0) {
-      for (const dlq of validDLQ) {
-        await ctx.db.patch(dlq._id, {
-          status: "processing",
-          lastAttemptAt: Date.now(),
-        });
-      }
+      await Promise.all(
+        validDLQ.map((dlq) =>
+          ctx.db.patch(dlq._id, {
+            status: "processing",
+            lastAttemptAt: Date.now(),
+          }),
+        ),
+      );
 
       const { namespaceId } = await rag.getOrCreateNamespace(ctx, {
         namespace: "uet-global",
@@ -814,18 +821,24 @@ export const upsertDocument = internalMutation({
       }
 
       const oldChunks = await getAllChunksByDocumentId(ctx, existing._id);
-      for (const chunk of oldChunks) {
-        try {
-          await rag.delete(ctx, {
-            entryId: chunk.ragId as unknown as import("@convex-dev/rag").EntryId,
-          });
-          await ctx.db.delete(chunk._id);
-        } catch (err) {
-          console.warn(
-            `Failed to delete vector ${chunk.ragId} from RAG during content update:`,
-            err,
-          );
-        }
+      const BATCH_SIZE = 50;
+      for (let i = 0; i < oldChunks.length; i += BATCH_SIZE) {
+        const batch = oldChunks.slice(i, i + BATCH_SIZE);
+        await Promise.all(
+          batch.map(async (chunk) => {
+            try {
+              await rag.delete(ctx, {
+                entryId: chunk.ragId as unknown as import("@convex-dev/rag").EntryId,
+              });
+              await ctx.db.delete(chunk._id);
+            } catch (err) {
+              console.warn(
+                `Failed to delete vector ${chunk.ragId} from RAG during content update:`,
+                err,
+              );
+            }
+          }),
+        );
       }
 
       await ctx.db.patch(existing._id, {

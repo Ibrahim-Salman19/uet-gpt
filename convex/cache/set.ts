@@ -56,6 +56,9 @@ export const set = internalMutation({
   },
   returns: v.id("semanticCache"),
   handler: async (ctx, args) => {
+    if (args.sourceEntryIds && args.sourceEntryIds.length > 500) {
+      throw new ConvexError("Cannot set cache with more than 500 source entry IDs");
+    }
     const ttl: number = tierToTtl(args.freshnessTier, args.ttlMs ?? FRESHNESS_TTL.medium);
 
     let maxDocUpdatedAt = args.maxDocumentUpdatedAt;

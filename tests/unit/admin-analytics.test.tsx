@@ -199,24 +199,24 @@ describe("AdminAnalyticsPage", () => {
       mockAnalyticsQueries(mockStats);
       render(<AdminAnalyticsPage />);
 
-      expect(screen.getByText("366.2 KB")).toBeDefined();
-      expect(screen.getByText("1,500 documents")).toBeDefined();
+      expect(screen.getByText("~366.2 KB")).toBeDefined();
+      expect(screen.getByText("1,500 documents · estimated")).toBeDefined();
     });
 
     it("renders Cache Storage card correctly", () => {
       mockAnalyticsQueries(mockStats);
       render(<AdminAnalyticsPage />);
 
-      expect(screen.getByText("439.5 KB")).toBeDefined();
-      expect(screen.getByText("450 cache entries")).toBeDefined();
+      expect(screen.getByText("~439.5 KB")).toBeDefined();
+      expect(screen.getByText("450 cache entries · estimated")).toBeDefined();
     });
 
     it("renders Total Storage card with combined value", () => {
       mockAnalyticsQueries(mockStats);
       render(<AdminAnalyticsPage />);
 
-      expect(screen.getByText("805.7 KB")).toBeDefined();
-      expect(screen.getByText("Combined document + cache storage")).toBeDefined();
+      expect(screen.getByText("~805.7 KB")).toBeDefined();
+      expect(screen.getByText("Estimated document + cache storage")).toBeDefined();
     });
   });
 

@@ -144,11 +144,14 @@ export const safeDeleteThread = internalMutation({
       let cursor = null;
       const messageIds: string[] = [];
       while (true) {
-        const messagesResult: any = await ctx.runQuery(components.agent.messages.listMessagesByThreadId, {
-          threadId: args.threadId,
-          order: "asc",
-          paginationOpts: { numItems: 200, cursor },
-        });
+        const messagesResult: any = await ctx.runQuery(
+          components.agent.messages.listMessagesByThreadId,
+          {
+            threadId: args.threadId,
+            order: "asc",
+            paginationOpts: { numItems: 200, cursor },
+          },
+        );
         messageIds.push(...messagesResult.page.map((m: any) => m._id));
         if (messagesResult.isDone) {
           break;

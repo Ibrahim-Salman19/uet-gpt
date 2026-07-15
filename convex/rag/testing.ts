@@ -1,6 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import { internal } from "../_generated/api";
-import { type ActionCtx, action, internalMutation } from "../_generated/server";
+import { type ActionCtx, action, internalMutation, internalQuery } from "../_generated/server";
 import { rag } from "../rag/instance";
 
 // Canonical admin authorization for actions: derive the role from the DB record
@@ -55,6 +55,23 @@ export const insertTestChunk = internalMutation({
   },
 });
 
+export const getTestDocByUrl = internalQuery({
+  args: { url: v.string() },
+  handler: async (ctx, { url }) => {
+    return await ctx.db
+      .query("documents")
+      .withIndex("by_url", (q) => q.eq("url", url))
+      .first();
+  },
+});
+
+export const deleteTestDoc = internalMutation({
+  args: { id: v.id("documents") },
+  handler: async (ctx, { id }) => {
+    await ctx.db.delete(id);
+  },
+});
+
 // --- ACTIONS ---
 export const seed = action({
   args: {},
@@ -64,6 +81,24 @@ export const seed = action({
   }),
   handler: async (ctx) => {
     await requireAdminAuth(ctx);
+
+    // Clean up any existing test document first to prevent duplicates/orphans
+    const existing = await ctx.runQuery(internal.rag.testing.getTestDocByUrl, {
+      url: "https://web.uettaxila.edu.pk/test-doc",
+    });
+    if (existing) {
+      console.log("Cleaning up existing test document...");
+      if (existing.entryId) {
+        try {
+          await rag.delete(ctx, {
+            entryId: existing.entryId as unknown as import("@convex-dev/rag").EntryId,
+          });
+        } catch (e) {
+          console.warn("Failed to delete existing RAG vector:", e);
+        }
+      }
+      await ctx.runMutation(internal.rag.testing.deleteTestDoc, { id: existing._id });
+    }
 
     console.log("Seeding test document via RAG component...");
     const content =

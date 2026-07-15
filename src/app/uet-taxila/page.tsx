@@ -64,26 +64,28 @@ export default function UetTaxilaPage() {
     <>
       <script
         type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: static schema object safe for serialization
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <div className="flex min-h-screen flex-col bg-[#070708] text-[#e1e1e2]">
-        <header className="flex items-center justify-between px-6 py-4 border-b border-[#1a1a1e]">
+      <div className="flex min-h-screen flex-col bg-[var(--surface-base)] text-[var(--text-primary)] selection:bg-[var(--accent)] selection:text-[var(--accent-fg)]">
+        {/* Navigation Header */}
+        <header className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)] bg-[var(--surface-base)]/80 backdrop-blur-md sticky top-0 z-50">
           <div className="flex items-center gap-3">
-            <div className="size-8 rounded-lg bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white font-bold text-sm">
+            <div className="size-8 rounded-lg bg-gradient-to-br from-[var(--accent)] to-[var(--accent-hover)] flex items-center justify-center text-[var(--accent-fg)] font-bold text-sm font-mono shadow-[0_0_15px_rgba(202,138,4,0.15)]">
               U
             </div>
-            <span className="font-semibold text-base">UET GPT</span>
+            <span className="font-semibold text-base font-mono tracking-tight">UET GPT</span>
           </div>
-          <nav className="flex items-center gap-4">
+          <nav className="flex items-center gap-5">
             <Link
               href="/"
-              className="text-sm text-[#a1a1aa] hover:text-[#e1e1e2] transition-colors"
+              className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors font-mono font-medium"
             >
               UET GPT Home
             </Link>
             <Link
               href="/sign-up"
-              className="text-sm px-4 py-2 rounded-lg bg-[#6366f1] text-white hover:bg-[#5558e6] transition-colors"
+              className="text-xs px-4 py-2 rounded-md bg-[var(--accent)] text-[var(--accent-fg)] hover:bg-[var(--accent-hover)] transition-all font-mono font-semibold tracking-wider uppercase active:scale-[0.97] shadow-[0_2px_10px_rgba(202,138,4,0.15)]"
             >
               Get Started
             </Link>
@@ -91,92 +93,91 @@ export default function UetTaxilaPage() {
         </header>
 
         <main id="main-content" className="flex-1">
+          {/* Hero Section */}
           <section className="px-6 pt-24 pb-16 max-w-3xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
               UET Taxila
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#6366f1] to-[#a78bfa]">
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent)] to-[var(--accent-hover)] mt-2">
                 University of Engineering and Technology, Taxila
               </span>
             </h1>
-            <p className="text-lg text-[#a1a1aa] max-w-2xl mx-auto mb-8">
-              UET Taxila is one of Pakistan&apos;s leading public engineering
-              universities. This page is the authoritative, AI-grounded guide to
-              its history, campuses, faculties, departments, admissions, and
-              campus life — brought to you by UET GPT.
+            <p className="text-base md:text-lg text-[var(--text-secondary)] max-w-2xl mx-auto mb-8 font-sans leading-relaxed">
+              UET Taxila is one of Pakistan&apos;s leading public engineering universities. This
+              page is the authoritative, AI-grounded guide to its history, campuses, faculties,
+              departments, admissions, and campus life — brought to you by UET GPT.
             </p>
-            <div className="flex items-center justify-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/"
-                className="px-6 py-3 rounded-xl bg-[#6366f1] text-white font-medium hover:bg-[#5558e6] transition-colors text-base"
+                className="w-full sm:w-auto px-6 py-3.5 rounded-md bg-[var(--accent)] text-[var(--accent-fg)] font-semibold hover:bg-[var(--accent-hover)] active:scale-[0.98] transition-all text-xs font-mono tracking-wider uppercase shadow-[0_4px_12px_rgba(202,138,4,0.2)]"
               >
                 Ask UET GPT
               </Link>
               <Link
                 href="/sign-up"
-                className="px-6 py-3 rounded-xl border border-[#27272a] text-[#a1a1aa] hover:text-[#e1e1e2] hover:border-[#3f3f46] transition-colors text-base"
+                className="w-full sm:w-auto px-6 py-3.5 rounded-md border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent)]/30 active:scale-[0.98] transition-all text-xs font-mono tracking-wider uppercase"
               >
                 Sign In
               </Link>
             </div>
           </section>
 
-          <section className="px-6 py-16 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-semibold text-center mb-4">
+          {/* About Section */}
+          <section id="about" className="px-6 py-16 max-w-4xl mx-auto">
+            <h2 className="text-xl md:text-2xl font-semibold text-center mb-2 tracking-tight text-[var(--text-primary)]">
               About UET Taxila
             </h2>
-            <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto">
-              What &quot;UET&quot; stands for, and how the Taxila campus became
-              the university it is today
+            <p className="text-[var(--text-secondary)] text-sm text-center mb-10 font-mono uppercase tracking-wider text-[10px]">
+              What &quot;UET&quot; stands for, and how the Taxila campus became the university it is
+              today
             </p>
             <div className="space-y-4">
-              <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
+              <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/40 backdrop-blur-sm hover:border-[var(--accent)]/15 transition-all">
+                <h3 className="font-semibold text-base mb-2 text-[var(--text-primary)] font-sans">
                   What does UET stand for?
                 </h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  UET stands for the University of Engineering and Technology. UET
-                  Taxila is the University of Engineering and Technology, Taxila —
-                  a public sector engineering university located in Taxila, in the
-                  Attock–Rawalpindi region of Punjab, Pakistan. Today UET Taxila
-                  enrolls more than 5,500 undergraduate and postgraduate students
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed font-sans">
+                  UET stands for the University of Engineering and Technology. UET Taxila is the
+                  University of Engineering and Technology, Taxila — a public sector engineering
+                  university located in Taxila, in the Attock–Rawalpindi region of Punjab, Pakistan.
+                  Today UET Taxila enrolls more than 5,500 undergraduate and postgraduate students
                   across 14 departments.
                 </p>
               </div>
-              <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
+
+              <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/40 backdrop-blur-sm hover:border-[var(--accent)]/15 transition-all">
+                <h3 className="font-semibold text-base mb-2 text-[var(--text-primary)] font-sans">
                   History and founding of UET Taxila
                 </h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  With the rapid industrial growth around Taxila in the 1970s — led
-                  by Heavy Industries Taxila and nearby ordnance and aeronautical
-                  complexes — the Government of the Punjab established the University
-                  College of Engineering Taxila in 1975 as a constituent college
-                  of UET Lahore. It functioned at Sahiwal for three years before
-                  shifting to its permanent campus at Taxila in 1978, and on 1
-                  October 1993 it received its charter as an independent university
-                  under the University of Engineering and Technology Taxila
-                  Ordinance 1993.
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed font-sans">
+                  With the rapid industrial growth around Taxila in the 1970s — led by Heavy
+                  Industries Taxila and nearby ordnance complexes — the Government of the Punjab
+                  established the University College of Engineering Taxila in 1975 as a constituent
+                  college of UET Lahore. It functioned at Sahiwal for three years before shifting to
+                  its permanent campus at Taxila in 1978, and on 1 October 1993 it received its
+                  charter as an independent university under the University of Engineering and
+                  Technology Taxila Ordinance 1993.
                 </p>
               </div>
-              <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
+
+              <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/40 backdrop-blur-sm hover:border-[var(--accent)]/15 transition-all">
+                <h3 className="font-semibold text-base mb-2 text-[var(--text-primary)] font-sans">
                   Campuses and location
                 </h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  UET Taxila&apos;s main campus sits at Taxila, a historic city and
-                  archaeological site roughly midway between Islamabad and the
-                  industrial belt of Wah and Taxila. The campus houses teaching and
-                  research facilities for all faculties, hostels, transport
-                  services, a central library, and student societies. The
-                  university also operates sub-campuses to extend engineering
-                  education across the region.
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed font-sans">
+                  UET Taxila&apos;s main campus sits at Taxila, a historic city and archaeological
+                  site roughly midway between Islamabad and the industrial belt of Wah and Taxila.
+                  The campus houses teaching and research facilities for all faculties, hostels,
+                  transport services, a central library, and student societies. The university also
+                  operates sub-campuses to extend engineering education across the region.
                 </p>
               </div>
             </div>
           </section>
 
-          <section className="px-6 py-16 max-w-5xl mx-auto">
-            <h2 className="text-2xl font-semibold text-center mb-12">
+          {/* Faculties Section */}
+          <section id="faculties" className="px-6 py-16 max-w-5xl mx-auto">
+            <h2 className="text-xl md:text-2xl font-semibold text-center mb-10 tracking-tight text-[var(--text-primary)]">
               Faculties &amp; Departments at UET Taxila
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -208,73 +209,77 @@ export default function UetTaxilaPage() {
               ].map((f) => (
                 <div
                   key={f.title}
-                  className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]"
+                  className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/30 hover:border-[var(--accent)]/20 hover:bg-[var(--surface-card)]/50 transition-all duration-300"
                 >
-                  <h3 className="font-semibold text-base mb-2">{f.title}</h3>
-                  <p className="text-sm text-[#a1a1aa]">{f.desc}</p>
+                  <h3 className="font-semibold text-base mb-2 text-[var(--text-primary)] font-sans">
+                    {f.title}
+                  </h3>
+                  <p className="text-sm text-[var(--text-secondary)] font-sans leading-relaxed">
+                    {f.desc}
+                  </p>
                 </div>
               ))}
             </div>
           </section>
 
-          <section className="px-6 py-16 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-semibold text-center mb-4">
+          {/* Admissions Section */}
+          <section id="admissions" className="px-6 py-16 max-w-4xl mx-auto">
+            <h2 className="text-xl md:text-2xl font-semibold text-center mb-2 tracking-tight text-[var(--text-primary)]">
               Admissions at UET Taxila
             </h2>
-            <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto">
+            <p className="text-[var(--text-secondary)] text-sm text-center mb-10 font-mono uppercase tracking-wider text-[10px]">
               How to apply, the entry test, and how merit is determined
             </p>
             <div className="space-y-4">
-              <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
+              <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/40 backdrop-blur-sm hover:border-[var(--accent)]/15 transition-all">
+                <h3 className="font-semibold text-base mb-2 text-[var(--text-primary)] font-sans">
                   Entry test and eligibility
                 </h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  Undergraduate admission to UET Taxila is based on the ECAT
-                  (Engineering College Admission Test), the designated entry test
-                  for engineering colleges in Punjab. Applicants generally need at
-                  least 60% unadjusted marks in their qualifying examination (50%
-                  for Computer Science, Mathematics, and Physics combinations).
-                  Applications are submitted online, and merit lists are published
-                  with the percentage of admitted applicants per discipline.
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed font-sans">
+                  Undergraduate admission to UET Taxila is based on the ECAT (Engineering College
+                  Admission Test), the designated entry test for engineering colleges in Punjab.
+                  Applicants generally need at least 60% unadjusted marks in their qualifying
+                  examination (50% for Computer Science, Mathematics, and Physics combinations).
+                  Applications are submitted online, and merit lists are published with the
+                  percentage of admitted applicants per discipline.
                 </p>
               </div>
-              <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
+
+              <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/40 backdrop-blur-sm hover:border-[var(--accent)]/15 transition-all">
+                <h3 className="font-semibold text-base mb-2 text-[var(--text-primary)] font-sans">
                   How merit is determined
                 </h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  Admission merit at UET Taxila is calculated from multiple
-                  components, with the ECAT entry test carrying a significant
-                  weight (around 33%) alongside previous academic qualifications.
-                  Domicile requirements, seat allocation by category, and document
-                  verification all apply. UET GPT can explain the current fee
-                  structure, schedules, and seat allocation in detail.
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed font-sans">
+                  Admission merit at UET Taxila is calculated from multiple components, with the
+                  ECAT entry test carrying a significant weight (around 33%) alongside previous
+                  academic qualifications. Domicile requirements, seat allocation by category, and
+                  document verification all apply. UET GPT can explain the current fee structure,
+                  schedules, and seat allocation in detail.
                 </p>
               </div>
-              <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
+
+              <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/40 backdrop-blur-sm hover:border-[var(--accent)]/15 transition-all">
+                <h3 className="font-semibold text-base mb-2 text-[var(--text-primary)] font-sans">
                   Programs offered
                 </h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  UET Taxila offers BS/BSc Engineering, MS/MSc Engineering, and PhD
-                  programs across its 14 departments. Disciplines range from
-                  Civil, Environmental, Electrical, Electronics, Mechanical,
-                  Mechatronics, and Industrial Engineering to Computer, Software,
-                  and Telecommunication Engineering, plus Computer Science and the
-                  basic sciences.
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed font-sans">
+                  UET Taxila offers BS/BSc Engineering, MS/MSc Engineering, and PhD programs across
+                  its 14 departments. Disciplines range from Civil, Environmental, Electrical,
+                  Electronics, Mechanical, Mechatronics, and Industrial Engineering to Computer,
+                  Software, and Telecommunication Engineering, plus Computer Science and the basic
+                  sciences.
                 </p>
               </div>
             </div>
           </section>
 
-          <section className="px-6 py-16 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-semibold text-center mb-4">
+          {/* Benefits Grid */}
+          <section id="uet-gpt" className="px-6 py-16 max-w-4xl mx-auto">
+            <h2 className="text-xl md:text-2xl font-semibold text-center mb-2 tracking-tight text-[var(--text-primary)]">
               How UET GPT Helps UET Taxila Students
             </h2>
-            <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto">
-              UET GPT is the intelligent guide to UET Taxila, built on official
-              university data
+            <p className="text-[var(--text-secondary)] text-sm text-center mb-10 font-mono uppercase tracking-wider text-[10px]">
+              UET GPT is the intelligent guide to UET Taxila, built on official university data
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
@@ -305,112 +310,121 @@ export default function UetTaxilaPage() {
               ].map((f) => (
                 <div
                   key={f.title}
-                  className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]"
+                  className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/30 hover:border-[var(--accent)]/20 hover:bg-[var(--surface-card)]/50 transition-all duration-300"
                 >
-                  <h3 className="font-semibold text-base mb-2">{f.title}</h3>
-                  <p className="text-sm text-[#a1a1aa]">{f.desc}</p>
+                  <h3 className="font-semibold text-base mb-2 text-[var(--text-primary)] font-sans">
+                    {f.title}
+                  </h3>
+                  <p className="text-sm text-[var(--text-secondary)] font-sans leading-relaxed">
+                    {f.desc}
+                  </p>
                 </div>
               ))}
             </div>
             <div className="text-center mt-12">
               <Link
                 href="/"
-                className="px-6 py-3 rounded-xl bg-[#6366f1] text-white font-medium hover:bg-[#5558e6] transition-colors text-base"
+                className="px-6 py-3.5 rounded-md bg-[var(--accent)] text-[var(--accent-fg)] font-semibold hover:bg-[var(--accent-hover)] active:scale-[0.98] transition-all text-xs font-mono tracking-wider uppercase shadow-[0_4px_12px_rgba(202,138,4,0.2)]"
               >
                 Go to UET GPT
               </Link>
             </div>
           </section>
 
+          {/* Sub Guides Section */}
           <section className="px-6 py-16 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-semibold text-center mb-4">
+            <h2 className="text-xl md:text-2xl font-semibold text-center mb-2 tracking-tight text-[var(--text-primary)]">
               Explore UET Taxila Guides
             </h2>
-            <p className="text-[#a1a1aa] text-center mb-8 max-w-2xl mx-auto">
+            <p className="text-[var(--text-secondary)] text-sm text-center mb-8 font-sans">
               Deep-dive into the topics UET GPT knows best
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Link
-                href="/uet-taxila/admissions"
-                className="p-5 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f] hover:border-[#3f3f46] transition-colors"
+                href="#admissions"
+                className="p-5 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/20 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-card)]/30 transition-all"
               >
-                <h3 className="font-semibold text-base mb-1">
+                <h3 className="font-semibold text-base mb-1 text-[var(--text-primary)]">
                   Admissions &amp; ECAT
                 </h3>
-                <p className="text-sm text-[#a1a1aa]">
+                <p className="text-sm text-[var(--text-secondary)] font-sans">
                   Eligibility, merit, entry test, and how to apply.
                 </p>
               </Link>
               <Link
-                href="/uet-taxila/programs"
-                className="p-5 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f] hover:border-[#3f3f46] transition-colors"
+                href="#faculties"
+                className="p-5 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/20 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-card)]/30 transition-all"
               >
-                <h3 className="font-semibold text-base mb-1">
+                <h3 className="font-semibold text-base mb-1 text-[var(--text-primary)]">
                   Programs &amp; Departments
                 </h3>
-                <p className="text-sm text-[#a1a1aa]">
+                <p className="text-sm text-[var(--text-secondary)] font-sans">
                   Six faculties, 14 departments, undergraduate to PhD.
                 </p>
               </Link>
               <Link
-                href="/uet-taxila/fee-structure"
-                className="p-5 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f] hover:border-[#3f3f46] transition-colors"
+                href="#admissions"
+                className="p-5 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/20 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-card)]/30 transition-all"
               >
-                <h3 className="font-semibold text-base mb-1">Fee Structure</h3>
-                <p className="text-sm text-[#a1a1aa]">
+                <h3 className="font-semibold text-base mb-1 text-[var(--text-primary)]">
+                  Fee Structure
+                </h3>
+                <p className="text-sm text-[var(--text-secondary)] font-sans">
                   Tuition, hostel, and other charges, explained.
                 </p>
               </Link>
               <Link
-                href="/uet-gpt"
-                className="p-5 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f] hover:border-[#3f3f46] transition-colors"
+                href="#uet-gpt"
+                className="p-5 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/20 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-card)]/30 transition-all"
               >
-                <h3 className="font-semibold text-base mb-1">
+                <h3 className="font-semibold text-base mb-1 text-[var(--text-primary)]">
                   What is UET GPT?
                 </h3>
-                <p className="text-sm text-[#a1a1aa]">
+                <p className="text-sm text-[var(--text-secondary)] font-sans">
                   The open-source AI guide to UET Taxila.
                 </p>
               </Link>
             </div>
           </section>
 
+          {/* FAQ Accordion Section */}
           <section className="px-6 py-16 max-w-3xl mx-auto">
-            <h2 className="text-2xl font-semibold text-center mb-4">
-              Frequently Asked Questions about UET Taxila
+            <h2 className="text-xl md:text-2xl font-semibold text-center mb-8 tracking-tight text-[var(--text-primary)]">
+              Frequently Asked Questions
             </h2>
-            <div className="space-y-4 mt-8">
+            <div className="space-y-4">
               {FAQ_ITEMS.map((faq) => (
                 <details
                   key={faq.q}
-                  className="p-4 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]"
+                  className="group p-4 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/30 [&_summary::-webkit-details-marker]:hidden transition-all"
                 >
-                  <summary className="font-medium text-sm cursor-pointer">
-                    {faq.q}
+                  <summary className="flex items-center justify-between font-medium text-sm cursor-pointer text-[var(--text-primary)] select-none">
+                    <span>{faq.q}</span>
+                    <span className="text-[var(--text-secondary)] transition-transform group-open:rotate-180 font-mono text-xs">
+                      ▼
+                    </span>
                   </summary>
-                  <p className="mt-3 text-sm text-[#a1a1aa]">{faq.a}</p>
+                  <p className="mt-3 text-sm text-[var(--text-secondary)] leading-relaxed border-t border-[var(--border)]/30 pt-3">
+                    {faq.a}
+                  </p>
                 </details>
               ))}
             </div>
           </section>
         </main>
 
-        <footer className="border-t border-[#1a1a1e] px-6 py-8">
+        {/* Footer */}
+        <footer className="border-t border-[var(--border)] px-6 py-8 bg-[var(--surface-base)] text-[var(--text-secondary)] font-mono text-xs">
           <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-[#a1a1aa]">
-              &copy; {new Date().getFullYear()} UET GPT Team. All rights reserved.
-            </p>
-            <div className="flex items-center gap-6 text-sm text-[#a1a1aa]">
-              <Link href="/" className="hover:text-[#e1e1e2] transition-colors">
+            <p>&copy; {new Date().getFullYear()} UET GPT Team. All rights reserved.</p>
+            <div className="flex items-center gap-6">
+              <Link href="/" className="hover:text-[var(--text-primary)] transition-colors">
                 UET GPT Home
               </Link>
-              <Link href="/chat" className="hover:text-[#e1e1e2] transition-colors">
+              <Link href="/chat" className="hover:text-[var(--text-primary)] transition-colors">
                 Chat
               </Link>
-              <Link
-                href="/explore"
-                className="hover:text-[#e1e1e2] transition-colors"
-              >
+              <Link href="/explore" className="hover:text-[var(--text-primary)] transition-colors">
                 Explore
               </Link>
             </div>

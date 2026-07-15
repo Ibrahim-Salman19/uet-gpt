@@ -59,9 +59,7 @@ export default function OpengraphImage() {
       >
         {APP_TAGLINE}
       </div>
-      <div style={{ fontSize: "30px", color: "#a1a1aa", maxWidth: "900px" }}>
-        {APP_DESCRIPTION}
-      </div>
+      <div style={{ fontSize: "30px", color: "#a1a1aa", maxWidth: "900px" }}>{APP_DESCRIPTION}</div>
     </div>,
     { ...size },
   );

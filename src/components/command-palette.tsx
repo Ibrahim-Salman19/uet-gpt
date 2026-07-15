@@ -221,7 +221,7 @@ function CommandPaletteContent({
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Type a command or search..."
+          placeholder="Type a command or search…"
           className="w-full bg-transparent text-xs text-zinc-100 placeholder:text-zinc-500 outline-none font-sans"
           spellCheck="false"
           autoComplete="off"

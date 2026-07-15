@@ -105,10 +105,9 @@ export default function UetTaxilaAdmissionsPage() {
               </span>
             </h1>
             <p className="text-lg text-[#a1a1aa] max-w-2xl mx-auto mb-8">
-              A complete, source-grounded guide to undergraduate admissions at
-              the University of Engineering and Technology, Taxila — the entry
-              test, who is eligible, how your merit is calculated, merit lists,
-              and the documents you need. Brought to you by UET GPT.
+              A complete, source-grounded guide to undergraduate admissions at the University of
+              Engineering and Technology, Taxila — the entry test, who is eligible, how your merit
+              is calculated, merit lists, and the documents you need. Brought to you by UET GPT.
             </p>
             <div className="flex items-center justify-center gap-4">
               <Link
@@ -131,31 +130,25 @@ export default function UetTaxilaAdmissionsPage() {
               The UET Taxila Admission Process
             </h2>
             <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto">
-              From the entry test to the final merit list — what every
-              undergraduate applicant goes through
+              From the entry test to the final merit list — what every undergraduate applicant goes
+              through
             </p>
             <ol className="space-y-4">
               <li className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
-                  1. Appear in the ECAT entry test
-                </h3>
+                <h3 className="font-semibold text-base mb-2">1. Appear in the ECAT entry test</h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  Before applying, candidates for engineering programs and BS
-                  Computer Science must appear in the ECAT (Engineering College
-                  Admission Test) — the combined entry test conducted by UET
-                  Lahore for Punjab, or another entry test for engineering
-                  programs designated as acceptable to PEC and UET Taxila.
+                  Before applying, candidates for engineering programs and BS Computer Science must
+                  appear in the ECAT (Engineering College Admission Test) — the combined entry test
+                  conducted by UET Lahore for Punjab, or another entry test for engineering programs
+                  designated as acceptable to PEC and UET Taxila.
                 </p>
               </li>
               <li className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
-                  2. Submit the online application
-                </h3>
+                <h3 className="font-semibold text-base mb-2">2. Submit the online application</h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  Applications are submitted online and should be filed as early
-                  as possible rather than waiting for the closing date. The
-                  Application Form (F-I) is accompanied by supporting documents,
-                  and applicants select their discipline and category
+                  Applications are submitted online and should be filed as early as possible rather
+                  than waiting for the closing date. The Application Form (F-I) is accompanied by
+                  supporting documents, and applicants select their discipline and category
                   preferences within the form.
                 </p>
               </li>
@@ -164,11 +157,10 @@ export default function UetTaxilaAdmissionsPage() {
                   3. Merit is computed and lists are published
                 </h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  The university calculates weighted admission marks from the
-                  ECAT, HSSC, and SSC (or equivalent) results, then prepares
-                  merit lists category-wise on the notified date and time,
-                  showing the percentage of applicants admitted in each
-                  discipline against each admission category.
+                  The university calculates weighted admission marks from the ECAT, HSSC, and SSC
+                  (or equivalent) results, then prepares merit lists category-wise on the notified
+                  date and time, showing the percentage of applicants admitted in each discipline
+                  against each admission category.
                 </p>
               </li>
               <li className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
@@ -176,11 +168,10 @@ export default function UetTaxilaAdmissionsPage() {
                   4. Document verification and joining
                 </h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  Selected candidates complete document verification and join
-                  their allotted discipline and category. Admission can be
-                  frozen, transferred to a higher preference if a seat opens, or
-                  downgraded to a lower preference — each on the prescribed form
-                  and subject to merit and seat availability.
+                  Selected candidates complete document verification and join their allotted
+                  discipline and category. Admission can be frozen, transferred to a higher
+                  preference if a seat opens, or downgraded to a lower preference — each on the
+                  prescribed form and subject to merit and seat availability.
                 </p>
               </li>
             </ol>
@@ -191,8 +182,7 @@ export default function UetTaxilaAdmissionsPage() {
               The UET Taxila ECAT Entry Test
             </h2>
             <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto">
-              Why the entry test is the single most important component of your
-              admission
+              Why the entry test is the single most important component of your admission
             </p>
             <div className="space-y-4">
               <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
@@ -200,10 +190,9 @@ export default function UetTaxilaAdmissionsPage() {
                   ECAT is mandatory for engineering and computing
                 </h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  For admission in engineering programs and BS Computer Science,
-                  the candidate must have appeared in the ECAT conducted by UET
-                  Lahore or any other entry test for engineering programs
-                  acceptable to PEC and UET Taxila. Without a valid entry-test
+                  For admission in engineering programs and BS Computer Science, the candidate must
+                  have appeared in the ECAT conducted by UET Lahore or any other entry test for
+                  engineering programs acceptable to PEC and UET Taxila. Without a valid entry-test
                   score, an applicant&apos;s merit cannot be determined.
                 </p>
               </div>
@@ -212,24 +201,20 @@ export default function UetTaxilaAdmissionsPage() {
                   ECAT carries 33% of the admission aggregate
                 </h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  In the weighted merit formula, the Entry Test contributes 33%
-                  of the admission marks for HSSC, DAE, BSc, and B.Tech
-                  applicants alike. Because it is a single standardized exam, a
-                  strong ECAT score can lift an applicant whose earlier academic
-                  percentages were modest.
+                  In the weighted merit formula, the Entry Test contributes 33% of the admission
+                  marks for HSSC, DAE, BSc, and B.Tech applicants alike. Because it is a single
+                  standardized exam, a strong ECAT score can lift an applicant whose earlier
+                  academic percentages were modest.
                 </p>
               </div>
               <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
-                  Combination of subjects matters
-                </h3>
+                <h3 className="font-semibold text-base mb-2">Combination of subjects matters</h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  Engineering programs require an HSSC combination of Mathematics,
-                  Physics and Chemistry/Computer Science (or a relevant DAE from
-                  PBTE Lahore). BS Computer Science and BS Mathematics/Physics
-                  accept any HSSC combination with Mathematics/Physics, and FSc
-                  Pre-Medical with Mathematics as an additional subject is also
-                  eligible.
+                  Engineering programs require an HSSC combination of Mathematics, Physics and
+                  Chemistry/Computer Science (or a relevant DAE from PBTE Lahore). BS Computer
+                  Science and BS Mathematics/Physics accept any HSSC combination with
+                  Mathematics/Physics, and FSc Pre-Medical with Mathematics as an additional subject
+                  is also eligible.
                 </p>
               </div>
             </div>
@@ -244,39 +229,30 @@ export default function UetTaxilaAdmissionsPage() {
             </p>
             <div className="space-y-4">
               <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
-                  Minimum marks requirement
-                </h3>
+                <h3 className="font-semibold text-base mb-2">Minimum marks requirement</h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  An applicant must have passed (or expect to pass) up to the
-                  latest annual examination with at least 60% unadjusted marks in
-                  the HSSC or equivalent examination on which they seek admission.
-                  For BS Computer Science, BS Mathematics, and BS Physics the
-                  threshold is 50% unadjusted marks.
+                  An applicant must have passed (or expect to pass) up to the latest annual
+                  examination with at least 60% unadjusted marks in the HSSC or equivalent
+                  examination on which they seek admission. For BS Computer Science, BS Mathematics,
+                  and BS Physics the threshold is 50% unadjusted marks.
                 </p>
               </div>
               <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
-                  Residency and medical standards
-                </h3>
+                <h3 className="font-semibold text-base mb-2">Residency and medical standards</h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  The applicant should be a resident of the area from which they
-                  seek admission and must meet the physique and eyesight
-                  standards set out in the medical certificate. Marks from NCC and
-                  Hifz-e-Quran count toward merit determination, not toward
+                  The applicant should be a resident of the area from which they seek admission and
+                  must meet the physique and eyesight standards set out in the medical certificate.
+                  Marks from NCC and Hifz-e-Quran count toward merit determination, not toward
                   eligibility.
                 </p>
               </div>
               <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
-                  No rounding off for eligibility
-                </h3>
+                <h3 className="font-semibold text-base mb-2">No rounding off for eligibility</h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  Rounding off a percentage figure to reach 60% (or 50% in the
-                  case of CS, Mathematics, and Physics) is not considered towards
-                  eligibility. A-Level and other foreign-qualification applicants
-                  must attach an IBCC equivalence certificate showing 60% or
-                  higher with the relevant subject combination.
+                  Rounding off a percentage figure to reach 60% (or 50% in the case of CS,
+                  Mathematics, and Physics) is not considered towards eligibility. A-Level and other
+                  foreign-qualification applicants must attach an IBCC equivalence certificate
+                  showing 60% or higher with the relevant subject combination.
                 </p>
               </div>
             </div>
@@ -291,45 +267,33 @@ export default function UetTaxilaAdmissionsPage() {
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
-                  HSSC / Pre-Engineering applicants
-                </h3>
+                <h3 className="font-semibold text-base mb-2">HSSC / Pre-Engineering applicants</h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  Entry Test (ECAT) 33% + HSSC Part-I 50% + SSC 17%. A credit of
-                  20 marks is added in the highest-qualification component for NCC
-                  training and for Hifz-e-Quran.
+                  Entry Test (ECAT) 33% + HSSC Part-I 50% + SSC 17%. A credit of 20 marks is added
+                  in the highest-qualification component for NCC training and for Hifz-e-Quran.
                 </p>
               </div>
               <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
-                  DAE holders
-                </h3>
+                <h3 className="font-semibold text-base mb-2">DAE holders</h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  Entry Test (ECAT) 33% + DAE 1st &amp; 2nd year 50% + SSC 17%,
-                  with the same 20-mark NCC / Hifz-e-Quran credit in the
-                  highest-qualification component.
+                  Entry Test (ECAT) 33% + DAE 1st &amp; 2nd year 50% + SSC 17%, with the same
+                  20-mark NCC / Hifz-e-Quran credit in the highest-qualification component.
                 </p>
               </div>
               <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
-                  Worked example
-                </h3>
+                <h3 className="font-semibold text-base mb-2">Worked example</h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  An applicant with 300/400 in ECAT, 700/1100 in SSC, 500/550 in
-                  HSSC Part-I, and a Hifz-e-Quran certificate scores [33 × (300/400)
-                  + 17 × (700/1100) + 50 × (500 + 20)/550] = 82.841% admission
-                  marks.
+                  An applicant with 300/400 in ECAT, 700/1100 in SSC, 500/550 in HSSC Part-I, and a
+                  Hifz-e-Quran certificate scores [33 × (300/400) + 17 × (700/1100) + 50 × (500 +
+                  20)/550] = 82.841% admission marks.
                 </p>
               </div>
               <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
-                  Other qualification tracks
-                </h3>
+                <h3 className="font-semibold text-base mb-2">Other qualification tracks</h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  BSc/BASc and B.Tech (Hons)/BS/BSc/Bachelors in Engineering
-                  Technology applicants use the same 33% ECAT weight with their
-                  degree result replacing HSSC Part-I (30%) and HSSC/DAE 20%.
-                  Foreign (A-Level etc.) applicants use O-Level 67% in place of
+                  BSc/BASc and B.Tech (Hons)/BS/BSc/Bachelors in Engineering Technology applicants
+                  use the same 33% ECAT weight with their degree result replacing HSSC Part-I (30%)
+                  and HSSC/DAE 20%. Foreign (A-Level etc.) applicants use O-Level 67% in place of
                   SSC/HSSC components.
                 </p>
               </div>
@@ -345,40 +309,30 @@ export default function UetTaxilaAdmissionsPage() {
             </p>
             <div className="space-y-4">
               <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
-                  Category-wise merit
-                </h3>
+                <h3 className="font-semibold text-base mb-2">Category-wise merit</h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  Seats are distributed across categories such as Open Merit (A),
-                  reserved district and minority categories, children of
-                  university alumni and graduates, disabled persons, tribal areas,
-                  and overseas Pakistanis. Eligible applicants in each category
-                  compete among themselves for the seats allocated to that
-                  category.
+                  Seats are distributed across categories such as Open Merit (A), reserved district
+                  and minority categories, children of university alumni and graduates, disabled
+                  persons, tribal areas, and overseas Pakistanis. Eligible applicants in each
+                  category compete among themselves for the seats allocated to that category.
                 </p>
               </div>
               <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
-                  Tie-breaking and list publication
-                </h3>
+                <h3 className="font-semibold text-base mb-2">Tie-breaking and list publication</h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  If two or more applicants have equal admission marks up to three
-                  decimal places, they are treated at par and all may be admitted
-                  to the last seat. Merit lists are displayed on the notified date
-                  and time showing the percentage of applicants admitted per
-                  discipline and category.
+                  If two or more applicants have equal admission marks up to three decimal places,
+                  they are treated at par and all may be admitted to the last seat. Merit lists are
+                  displayed on the notified date and time showing the percentage of applicants
+                  admitted per discipline and category.
                 </p>
               </div>
               <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
-                  Movement of unfilled seats
-                </h3>
+                <h3 className="font-semibold text-base mb-2">Movement of unfilled seats</h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  Unfilled seats in reserved categories are moved to open-merit
-                  seats over the admission cycle. Applicants may be transferred
-                  upward to a vacant higher preference, or request a one-time
-                  downgrade, depending on merit and seat availability — or freeze
-                  their selected discipline and category in writing.
+                  Unfilled seats in reserved categories are moved to open-merit seats over the
+                  admission cycle. Applicants may be transferred upward to a vacant higher
+                  preference, or request a one-time downgrade, depending on merit and seat
+                  availability — or freeze their selected discipline and category in writing.
                 </p>
               </div>
             </div>
@@ -393,15 +347,12 @@ export default function UetTaxilaAdmissionsPage() {
             </p>
             <div className="space-y-4">
               <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
-                  Domicile certificate (mandatory)
-                </h3>
+                <h3 className="font-semibold text-base mb-2">Domicile certificate (mandatory)</h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  All applicants must submit an attested photocopy of their
-                  domicile certificate; without it the application is not
-                  considered. For certain categories, a parent&apos;s domicile
-                  certificate and proof of inclusion in the electoral rolls are
-                  also required.
+                  All applicants must submit an attested photocopy of their domicile certificate;
+                  without it the application is not considered. For certain categories, a
+                  parent&apos;s domicile certificate and proof of inclusion in the electoral rolls
+                  are also required.
                 </p>
               </div>
               <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
@@ -409,21 +360,18 @@ export default function UetTaxilaAdmissionsPage() {
                   Attestation of application documents
                 </h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  All documents attached with the Application Form (F-I) must be
-                  attested by a Class-I gazetted officer of the Government or a
-                  Class-A officer of the University at the time of joining.
+                  All documents attached with the Application Form (F-I) must be attested by a
+                  Class-I gazetted officer of the Government or a Class-A officer of the University
+                  at the time of joining.
                 </p>
               </div>
               <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
-                  Equivalence and category proofs
-                </h3>
+                <h3 className="font-semibold text-base mb-2">Equivalence and category proofs</h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  A-Level and other foreign-qualification applicants attach an IBCC
-                  equivalence certificate (Pre-Engineering) with their application.
-                  Children of government servants posted outside Punjab and other
-                  specified categories submit additional forms (F-II / F-III)
-                  downloaded from the admissions portal.
+                  A-Level and other foreign-qualification applicants attach an IBCC equivalence
+                  certificate (Pre-Engineering) with their application. Children of government
+                  servants posted outside Punjab and other specified categories submit additional
+                  forms (F-II / F-III) downloaded from the admissions portal.
                 </p>
               </div>
             </div>
@@ -434,8 +382,7 @@ export default function UetTaxilaAdmissionsPage() {
               How UET GPT Helps with UET Taxila Admissions
             </h2>
             <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto">
-              Accurate, prospectus-grounded answers for every step of your
-              application
+              Accurate, prospectus-grounded answers for every step of your application
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
@@ -464,10 +411,7 @@ export default function UetTaxilaAdmissionsPage() {
                   desc: "UET GPT is free for prospective applicants, students, and faculty. Ask your admissions question on the UET GPT home page.",
                 },
               ].map((f) => (
-                <div
-                  key={f.title}
-                  className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]"
-                >
+                <div key={f.title} className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
                   <h3 className="font-semibold text-base mb-2">{f.title}</h3>
                   <p className="text-sm text-[#a1a1aa]">{f.desc}</p>
                 </div>
@@ -493,9 +437,7 @@ export default function UetTaxilaAdmissionsPage() {
                   key={faq.q}
                   className="p-4 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]"
                 >
-                  <summary className="font-medium text-sm cursor-pointer">
-                    {faq.q}
-                  </summary>
+                  <summary className="font-medium text-sm cursor-pointer">{faq.q}</summary>
                   <p className="mt-3 text-sm text-[#a1a1aa]">{faq.a}</p>
                 </details>
               ))}
@@ -509,10 +451,7 @@ export default function UetTaxilaAdmissionsPage() {
                 UET Taxila hub
               </Link>{" "}
               or go to the{" "}
-              <Link
-                href="/"
-                className="text-[#6366f1] hover:text-[#8b5cf6] transition-colors"
-              >
+              <Link href="/" className="text-[#6366f1] hover:text-[#8b5cf6] transition-colors">
                 UET GPT home page
               </Link>
               .
@@ -529,10 +468,7 @@ export default function UetTaxilaAdmissionsPage() {
               <Link href="/" className="hover:text-[#e1e1e2] transition-colors">
                 UET GPT Home
               </Link>
-              <Link
-                href="/uet-taxila"
-                className="hover:text-[#e1e1e2] transition-colors"
-              >
+              <Link href="/uet-taxila" className="hover:text-[#e1e1e2] transition-colors">
                 UET Taxila Hub
               </Link>
               <Link href="/chat" className="hover:text-[#e1e1e2] transition-colors">

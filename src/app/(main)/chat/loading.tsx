@@ -11,7 +11,7 @@ export default function ChatLoading() {
       </div>
       <div className="flex flex-col items-center gap-2">
         <span className="text-[10px] uppercase tracking-[0.2em] font-mono text-[var(--accent)] opacity-80">
-          INITIALIZING...
+          INITIALIZING…
         </span>
         <div className="h-px w-24 bg-gradient-to-r from-transparent via-[var(--accent)]/30 to-transparent animate-pulse" />
       </div>

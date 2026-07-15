@@ -5,6 +5,7 @@ import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { AlertTriangle, CheckCircle2, Clock, Globe, Loader2, Play, XCircle } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { LoadingState } from "@/components/loading-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,8 +44,10 @@ export default function AdminCrawlsPage() {
         maxPages: UET_CRAWL_CONFIG.maxPages,
         maxDepth: UET_CRAWL_CONFIG.maxDepth,
       });
+      toast.success("Crawl job triggered successfully!");
     } catch (error) {
       console.error("Failed to trigger crawl:", error);
+      toast.error("Failed to trigger crawl. Please try again.");
     } finally {
       setIsTriggering(false);
     }

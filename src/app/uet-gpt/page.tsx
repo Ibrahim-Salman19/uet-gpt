@@ -26,7 +26,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Is UET GPT affiliated with the official UET Taxila or the University of Engineering and Technology?",
-    a: "No. UET GPT is an independent, open-source project created by students. It is not affiliated with, officially connected to, or endorsed by the University of Engineering and Technology, Taxila, or any campus of the University of Engineering and Technology. The name \"UET GPT\" refers to this community-built guide, and it should not be confused with official university websites, portals, or announcements.",
+    a: 'No. UET GPT is an independent, open-source project created by students. It is not affiliated with, officially connected to, or endorsed by the University of Engineering and Technology, Taxila, or any campus of the University of Engineering and Technology. The name "UET GPT" refers to this community-built guide, and it should not be confused with official university websites, portals, or announcements.',
   },
   {
     q: "How does UET GPT work?",
@@ -64,26 +64,28 @@ export default function UetGptPage() {
     <>
       <script
         type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: static schema object safe for serialization
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <div className="flex min-h-screen flex-col bg-[#070708] text-[#e1e1e2]">
-        <header className="flex items-center justify-between px-6 py-4 border-b border-[#1a1a1e]">
+      <div className="flex min-h-screen flex-col bg-[var(--surface-base)] text-[var(--text-primary)] selection:bg-[var(--accent)] selection:text-[var(--accent-fg)]">
+        {/* Navigation Header */}
+        <header className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)] bg-[var(--surface-base)]/80 backdrop-blur-md sticky top-0 z-50">
           <div className="flex items-center gap-3">
-            <div className="size-8 rounded-lg bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white font-bold text-sm">
+            <div className="size-8 rounded-lg bg-gradient-to-br from-[var(--accent)] to-[var(--accent-hover)] flex items-center justify-center text-[var(--accent-fg)] font-bold text-sm font-mono shadow-[0_0_15px_rgba(202,138,4,0.15)]">
               U
             </div>
-            <span className="font-semibold text-base">UET GPT</span>
+            <span className="font-semibold text-base font-mono tracking-tight">UET GPT</span>
           </div>
-          <nav className="flex items-center gap-4">
+          <nav className="flex items-center gap-5">
             <Link
               href="/"
-              className="text-sm text-[#a1a1aa] hover:text-[#e1e1e2] transition-colors"
+              className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors font-mono font-medium"
             >
               UET GPT Home
             </Link>
             <Link
               href="/sign-up"
-              className="text-sm px-4 py-2 rounded-lg bg-[#6366f1] text-white hover:bg-[#5558e6] transition-colors"
+              className="text-xs px-4 py-2 rounded-md bg-[var(--accent)] text-[var(--accent-fg)] hover:bg-[var(--accent-hover)] transition-all font-mono font-semibold tracking-wider uppercase active:scale-[0.97] shadow-[0_2px_10px_rgba(202,138,4,0.15)]"
             >
               Get Started
             </Link>
@@ -91,135 +93,136 @@ export default function UetGptPage() {
         </header>
 
         <main id="main-content" className="flex-1">
+          {/* Hero Section */}
           <section className="px-6 pt-24 pb-16 max-w-3xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
               UET GPT
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#6366f1] to-[#a78bfa]">
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent)] to-[var(--accent-hover)] mt-2">
                 The AI Guide to UET Taxila
               </span>
             </h1>
-            <p className="text-lg text-[#a1a1aa] max-w-2xl mx-auto mb-8">
-              UET GPT is an open-source AI chatbot built for the students, faculty,
-              and prospective applicants of the University of Engineering and
-              Technology, Taxila. Ask anything about UET Taxila and get clear,
-              sourced answers.
+            <p className="text-base md:text-lg text-[var(--text-secondary)] max-w-2xl mx-auto mb-8 font-sans leading-relaxed">
+              UET GPT is an open-source AI chatbot built for the students, faculty, and prospective
+              applicants of the University of Engineering and Technology, Taxila. Ask anything about
+              UET Taxila and get clear, sourced answers.
             </p>
-            <div className="flex items-center justify-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/"
-                className="px-6 py-3 rounded-xl bg-[#6366f1] text-white font-medium hover:bg-[#5558e6] transition-colors text-base"
+                className="w-full sm:w-auto px-6 py-3.5 rounded-md bg-[var(--accent)] text-[var(--accent-fg)] font-semibold hover:bg-[var(--accent-hover)] active:scale-[0.98] transition-all text-xs font-mono tracking-wider uppercase shadow-[0_4px_12px_rgba(202,138,4,0.2)]"
               >
                 Ask UET GPT
               </Link>
               <Link
                 href="/uet-taxila"
-                className="px-6 py-3 rounded-xl border border-[#27272a] text-[#a1a1aa] hover:text-[#e1e1e2] hover:border-[#3f3f46] transition-colors text-base"
+                className="w-full sm:w-auto px-6 py-3.5 rounded-md border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent)]/30 active:scale-[0.98] transition-all text-xs font-mono tracking-wider uppercase"
               >
                 Guide to UET Taxila
               </Link>
             </div>
           </section>
 
+          {/* Intro Section */}
           <section className="px-6 py-16 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-semibold text-center mb-4">
+            <h2 className="text-xl md:text-2xl font-semibold text-center mb-2 tracking-tight text-[var(--text-primary)]">
               What is UET GPT?
             </h2>
-            <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto">
-              A student-built assistant that turns official UET Taxila information
-              into instant, conversational answers
+            <p className="text-[var(--text-secondary)] text-sm text-center mb-10 font-mono uppercase tracking-wider text-[10px]">
+              A student-built assistant that turns official UET Taxila information into instant,
+              conversational answers
             </p>
             <div className="space-y-4">
-              <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
+              <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/40 backdrop-blur-sm hover:border-[var(--accent)]/15 transition-all">
+                <h3 className="font-semibold text-base mb-2 text-[var(--text-primary)] font-sans">
                   The AI guide to UET Taxila
                 </h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  UET GPT is an AI chatbot designed specifically for the University
-                  of Engineering and Technology, Taxila (UET Taxila), a public
-                  engineering university in Taxila, Punjab, Pakistan. Unlike a
-                  general-purpose assistant, UET GPT is focused entirely on UET
-                  Taxila: its admissions, academics, fees, campus services, and
-                  student life. Whether you are a first-year student trying to
-                  understand your fee voucher or a prospective applicant comparing
-                  engineering disciplines, UET GPT gives you a single place to ask.
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed font-sans">
+                  UET GPT is an AI chatbot designed specifically for the University of Engineering
+                  and Technology, Taxila (UET Taxila), a public engineering university in Taxila,
+                  Punjab, Pakistan. Unlike a general-purpose assistant, UET GPT is focused entirely
+                  on UET Taxila: its admissions, academics, fees, campus services, and student life.
+                  Whether you are a first-year student trying to understand your fee voucher or a
+                  prospective applicant comparing engineering disciplines, UET GPT gives you a
+                  single place to ask.
                 </p>
               </div>
-              <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
+
+              <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/40 backdrop-blur-sm hover:border-[var(--accent)]/15 transition-all">
+                <h3 className="font-semibold text-base mb-2 text-[var(--text-primary)] font-sans">
                   Built for students, not by the university
                 </h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  UET GPT is an independent, community project created by students
-                  who wanted faster, clearer access to UET Taxila information. It
-                  is not affiliated with, endorsed by, or operated by the official
-                  University of Engineering and Technology, Taxila. It is offered
-                  as a helpful companion that points you to the right official
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed font-sans">
+                  UET GPT is an independent, community project created by students who wanted
+                  faster, clearer access to UET Taxila information. It is not affiliated with,
+                  endorsed by, or operated by the official University of Engineering and Technology,
+                  Taxila. It is offered as a helpful companion that points you to the right official
                   sources — never a replacement for them.
                 </p>
               </div>
-              <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
+
+              <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/40 backdrop-blur-sm hover:border-[var(--accent)]/15 transition-all">
+                <h3 className="font-semibold text-base mb-2 text-[var(--text-primary)] font-sans">
                   Grounded, not guessing
                 </h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  The goal of UET GPT is accurate, trustworthy answers. Instead of
-                  generating replies purely from a model&apos;s memory, UET GPT
-                  grounds its responses in retrieved official documents, so you can
-                  rely on what it tells you about deadlines, eligibility, and
-                  procedures.
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed font-sans">
+                  The goal of UET GPT is accurate, trustworthy answers. Instead of generating
+                  replies purely from a model&apos;s memory, UET GPT grounds its responses in
+                  retrieved official documents, so you can rely on what it tells you about
+                  deadlines, eligibility, and procedures.
                 </p>
               </div>
             </div>
           </section>
 
+          {/* Working Section */}
           <section className="px-6 py-16 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-semibold text-center mb-4">
+            <h2 className="text-xl md:text-2xl font-semibold text-center mb-2 tracking-tight text-[var(--text-primary)]">
               How UET GPT Works
             </h2>
-            <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto">
+            <p className="text-[var(--text-secondary)] text-sm text-center mb-10 font-mono uppercase tracking-wider text-[10px]">
               Retrieval-Augmented Generation over official UET Taxila data
             </p>
             <div className="space-y-4">
-              <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
+              <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/40 backdrop-blur-sm hover:border-[var(--accent)]/15 transition-all">
+                <h3 className="font-semibold text-base mb-2 text-[var(--text-primary)] font-sans">
                   1. Curated knowledge from official sources
                 </h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  UET GPT builds its knowledge base from official UET Taxila
-                  material — admissions policies, ECAT and merit guidance, fee
-                  schedules, department and faculty pages, notices, and campus
-                  service information. Content is structured and indexed so the
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed font-sans">
+                  UET GPT builds its knowledge base from official UET Taxila material — admissions
+                  policies, ECAT and merit guidance, fee schedules, department and faculty pages,
+                  notices, and campus service information. Content is structured and indexed so the
                   right passage can be found quickly.
                 </p>
               </div>
-              <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
+
+              <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/40 backdrop-blur-sm hover:border-[var(--accent)]/15 transition-all">
+                <h3 className="font-semibold text-base mb-2 text-[var(--text-primary)] font-sans">
                   2. Retrieval-Augmented Generation (RAG)
                 </h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  When you ask a question, UET GPT first retrieves the most
-                  relevant passages from its knowledge base, then generates a
-                  response based only on that retrieved context. This retrieval
-                  step is what keeps answers tied to official UET Taxila data and
-                  reduces hallucination.
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed font-sans">
+                  When you ask a question, UET GPT first retrieves the most relevant passages from
+                  its knowledge base, then generates a response based only on that retrieved
+                  context. This retrieval step is what keeps answers tied to official UET Taxila
+                  data and reduces hallucination.
                 </p>
               </div>
-              <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
+
+              <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/40 backdrop-blur-sm hover:border-[var(--accent)]/15 transition-all">
+                <h3 className="font-semibold text-base mb-2 text-[var(--text-primary)] font-sans">
                   3. Clear, conversational answers
                 </h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  The result is a plain-language answer you can act on — and when a
-                  detail is not covered by the official sources, UET GPT is
-                  designed to say so rather than invent an answer. That honesty is
-                  central to how UET GPT is meant to be used.
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed font-sans">
+                  The result is a plain-language answer you can act on — and when a detail is not
+                  covered by the official sources, UET GPT is designed to say so rather than invent
+                  an answer. That honesty is central to how UET GPT is meant to be used.
                 </p>
               </div>
             </div>
           </section>
 
+          {/* Features Grid */}
           <section className="px-6 py-16 max-w-5xl mx-auto">
-            <h2 className="text-2xl font-semibold text-center mb-12">
+            <h2 className="text-xl md:text-2xl font-semibold text-center mb-10 tracking-tight text-[var(--text-primary)]">
               Key Features of UET GPT
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -251,145 +254,153 @@ export default function UetGptPage() {
               ].map((f) => (
                 <div
                   key={f.title}
-                  className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]"
+                  className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/30 hover:border-[var(--accent)]/20 hover:bg-[var(--surface-card)]/50 transition-all duration-300"
                 >
-                  <h3 className="font-semibold text-base mb-2">{f.title}</h3>
-                  <p className="text-sm text-[#a1a1aa]">{f.desc}</p>
+                  <h3 className="font-semibold text-base mb-2 text-[var(--text-primary)] font-sans">
+                    {f.title}
+                  </h3>
+                  <p className="text-sm text-[var(--text-secondary)] font-sans leading-relaxed">
+                    {f.desc}
+                  </p>
                 </div>
               ))}
             </div>
           </section>
 
+          {/* GitHub & Open Source Section */}
           <section className="px-6 py-16 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-semibold text-center mb-4">
+            <h2 className="text-xl md:text-2xl font-semibold text-center mb-2 tracking-tight text-[var(--text-primary)]">
               Open Source & Community
             </h2>
-            <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto">
+            <p className="text-[var(--text-secondary)] text-sm text-center mb-8 font-sans">
               UET GPT is free, transparent, and built in the open
             </p>
-            <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-              <p className="text-sm text-[#a1a1aa]">
-                UET GPT is released as open-source software. The full source code,
-                issue tracker, and contribution guidelines are available on GitHub
-                at{" "}
+            <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/40 backdrop-blur-sm">
+              <p className="text-sm text-[var(--text-secondary)] leading-relaxed font-sans">
+                UET GPT is released as open-source software. The full source code, issue tracker,
+                and contribution guidelines are available on GitHub at{" "}
                 <Link
                   href="https://github.com/devhms/uet_gpt"
-                  className="text-[#6366f1] hover:text-[#8b5cf6] transition-colors underline"
+                  className="text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors underline font-medium"
                 >
                   github.com/devhms/uet_gpt
                 </Link>
                 . The live app runs at{" "}
                 <Link
                   href="/"
-                  className="text-[#6366f1] hover:text-[#8b5cf6] transition-colors underline"
+                  className="text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors underline font-medium"
                 >
                   uet-gpt.vercel.app
                 </Link>
-                . Because the project is student-built and community-maintained,
-                anyone can suggest improvements, report inaccuracies, or help
-                expand coverage of UET Taxila topics.
+                . Because the project is student-built and community-maintained, anyone can suggest
+                improvements, report inaccuracies, or help expand coverage of UET Taxila topics.
               </p>
             </div>
           </section>
 
+          {/* Disclaimer Section */}
           <section className="px-6 py-16 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-semibold text-center mb-4">
+            <h2 className="text-xl md:text-2xl font-semibold text-center mb-2 tracking-tight text-[var(--text-primary)]">
               Not Affiliated With the Official UET
             </h2>
-            <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto">
+            <p className="text-[var(--text-secondary)] text-sm text-center mb-8 font-sans">
               An important distinction for anyone searching for &quot;UET GPT&quot;
             </p>
-            <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-              <p className="text-sm text-[#a1a1aa]">
+            <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/40 backdrop-blur-sm">
+              <p className="text-sm text-[var(--text-secondary)] leading-relaxed font-sans">
                 UET GPT is an independent project and is{" "}
-                <span className="text-[#e1e1e2] font-medium">
+                <span className="text-[var(--text-primary)] font-medium">
                   not affiliated with, endorsed by, or operated by
                 </span>{" "}
-                the University of Engineering and Technology, Taxila, or any campus
-                of the University of Engineering and Technology. The name
-                &quot;UET GPT&quot; refers specifically to this open-source
-                guide. It is not an official university portal, and for binding,
-                authoritative decisions — admissions results, fee deadlines, and
-                official notices — you should always consult the official UET
-                Taxila channels. UET GPT is a helpful companion that points you to
-                the right official sources.
+                the University of Engineering and Technology, Taxila, or any campus of the
+                University of Engineering and Technology. The name &quot;UET GPT&quot; refers
+                specifically to this open-source guide. It is not an official university portal, and
+                for binding, authoritative decisions — admissions results, fee deadlines, and
+                official notices — you should always consult the official UET Taxila channels. UET
+                GPT is a helpful companion that points you to the right official sources.
               </p>
             </div>
           </section>
 
+          {/* Links Row */}
           <section className="px-6 py-16 max-w-5xl mx-auto">
-            <h2 className="text-2xl font-semibold text-center mb-4">
+            <h2 className="text-xl md:text-2xl font-semibold text-center mb-2 tracking-tight text-[var(--text-primary)]">
               Explore UET Taxila with UET GPT
             </h2>
-            <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto">
+            <p className="text-[var(--text-secondary)] text-sm text-center mb-8 font-sans">
               Start asking, or read the broader guide to the university
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Link
                 href="/"
-                className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f] hover:border-[#3f3f46] transition-colors"
+                className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/20 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-card)]/30 transition-all"
               >
-                <h3 className="font-semibold text-base mb-2 text-[#e1e1e2]">
+                <h3 className="font-semibold text-base mb-2 text-[var(--text-primary)]">
                   UET GPT Home
                 </h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  Open the chatbot and start asking questions about UET Taxila
-                  admissions, fees, departments, and campus life.
+                <p className="text-sm text-[var(--text-secondary)] font-sans">
+                  Open the chatbot and start asking questions about UET Taxila admissions, fees,
+                  departments, and campus life.
                 </p>
               </Link>
               <Link
                 href="/uet-taxila"
-                className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f] hover:border-[#3f3f46] transition-colors"
+                className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/20 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-card)]/30 transition-all"
               >
-                <h3 className="font-semibold text-base mb-2 text-[#e1e1e2]">
+                <h3 className="font-semibold text-base mb-2 text-[var(--text-primary)]">
                   Guide to UET Taxila
                 </h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  Read the authoritative, AI-grounded guide to UET Taxila — its
-                  history, campuses, faculties, departments, and admissions.
+                <p className="text-sm text-[var(--text-secondary)] font-sans">
+                  Read the authoritative, AI-grounded guide to UET Taxila — its history, campuses,
+                  faculties, departments, and admissions.
                 </p>
               </Link>
             </div>
           </section>
 
+          {/* FAQ Accordion Section */}
           <section className="px-6 py-16 max-w-3xl mx-auto">
-            <h2 className="text-2xl font-semibold text-center mb-4">
-              Frequently Asked Questions about UET GPT
+            <h2 className="text-xl md:text-2xl font-semibold text-center mb-8 tracking-tight text-[var(--text-primary)]">
+              Frequently Asked Questions
             </h2>
-            <div className="space-y-4 mt-8">
+            <div className="space-y-4">
               {FAQ_ITEMS.map((faq) => (
                 <details
                   key={faq.q}
-                  className="p-4 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]"
+                  className="group p-4 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/30 [&_summary::-webkit-details-marker]:hidden transition-all"
                 >
-                  <summary className="font-medium text-sm cursor-pointer">
-                    {faq.q}
+                  <summary className="flex items-center justify-between font-medium text-sm cursor-pointer text-[var(--text-primary)] select-none">
+                    <span>{faq.q}</span>
+                    <span className="text-[var(--text-secondary)] transition-transform group-open:rotate-180 font-mono text-xs">
+                      ▼
+                    </span>
                   </summary>
-                  <p className="mt-3 text-sm text-[#a1a1aa]">{faq.a}</p>
+                  <p className="mt-3 text-sm text-[var(--text-secondary)] leading-relaxed border-t border-[var(--border)]/30 pt-3">
+                    {faq.a}
+                  </p>
                 </details>
               ))}
             </div>
           </section>
         </main>
 
-        <footer className="border-t border-[#1a1a1e] px-6 py-8">
+        {/* Footer */}
+        <footer className="border-t border-[var(--border)] px-6 py-8 bg-[var(--surface-base)] text-[var(--text-secondary)] font-mono text-xs">
           <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-[#a1a1aa]">
-              &copy; {new Date().getFullYear()} UET GPT Team. All rights reserved.
-            </p>
-            <div className="flex items-center gap-6 text-sm text-[#a1a1aa]">
-              <Link href="/" className="hover:text-[#e1e1e2] transition-colors">
+            <p>&copy; {new Date().getFullYear()} UET GPT Team. All rights reserved.</p>
+            <div className="flex items-center gap-6">
+              <Link href="/" className="hover:text-[var(--text-primary)] transition-colors">
                 UET GPT Home
               </Link>
               <Link
                 href="/uet-taxila"
-                className="hover:text-[#e1e1e2] transition-colors"
+                className="hover:text-[var(--text-primary)] transition-colors"
               >
                 UET Taxila
               </Link>
               <Link
                 href="https://github.com/devhms/uet_gpt"
-                className="hover:text-[#e1e1e2] transition-colors"
+                className="hover:text-[var(--text-primary)] transition-colors"
               >
                 GitHub
               </Link>

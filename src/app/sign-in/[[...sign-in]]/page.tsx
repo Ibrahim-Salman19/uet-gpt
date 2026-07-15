@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { SignIn } from "@clerk/nextjs";
+import type { Metadata } from "next";
 import { uetClerkAppearance } from "@/lib/clerk-theme";
 import { APP_NAME } from "@/lib/constants";
 

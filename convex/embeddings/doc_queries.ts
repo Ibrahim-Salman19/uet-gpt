@@ -140,9 +140,7 @@ export const getDocumentsByEntryIds = internalQuery({
       .filter((id): id is NonNullable<typeof id> => id !== undefined);
     const uniqueParentIds = [...new Set(parentIds)];
     const parentDocs = await Promise.all(uniqueParentIds.map((id) => ctx.db.get(id)));
-    const parentsById = new Map(
-      parentDocs.filter(Boolean).map((p) => [p!._id, p!] as const),
-    );
+    const parentsById = new Map(parentDocs.filter(Boolean).map((p) => [p!._id, p!] as const));
 
     // Step 3: Identify entryIds that need fallback (no chunk or missing doc)
     const missingEntryIds: string[] = [];
@@ -173,23 +171,21 @@ export const getDocumentsByEntryIds = internalQuery({
       if (chunk) {
         const doc = docsById.get(chunk.documentId);
         if (doc) {
-            return {
-              entryId,
-              doc: {
-                url: doc.url,
-                title: doc.title,
-                category: doc.category,
-                crawledAt: doc.crawledAt ?? undefined,
-                freshnessTier: doc.freshnessTier ?? undefined,
-                // WS-1: prefer normalized chunkParents text, fall back to legacy
-                // per-child parentText for pre-migration rows.
-                parentText: chunk.parentId
-                  ? parentsById.get(chunk.parentId)?.text
-                  : chunk.parentText,
-                headingPath: chunk.headingPath,
-                contextualizedText: chunk.contextualizedText,
-              },
-            };
+          return {
+            entryId,
+            doc: {
+              url: doc.url,
+              title: doc.title,
+              category: doc.category,
+              crawledAt: doc.crawledAt ?? undefined,
+              freshnessTier: doc.freshnessTier ?? undefined,
+              // WS-1: prefer normalized chunkParents text, fall back to legacy
+              // per-child parentText for pre-migration rows.
+              parentText: chunk.parentId ? parentsById.get(chunk.parentId)?.text : chunk.parentText,
+              headingPath: chunk.headingPath,
+              contextualizedText: chunk.contextualizedText,
+            },
+          };
         }
       }
       // Fallback: documents table by entryId

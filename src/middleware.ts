@@ -30,7 +30,7 @@ export default clerkMiddleware(async (auth, req) => {
 
   const isPublic = isPublicRoute(req);
   const isAdmin = isAdminRoute(req);
-  const authObj = (!isPublic || isAdmin) ? await auth() : null;
+  const authObj = !isPublic || isAdmin ? await auth() : null;
 
   if (!isPublic) {
     if (!authObj?.userId) {

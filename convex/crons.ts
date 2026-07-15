@@ -15,12 +15,9 @@ const crons = cronJobs();
 // 12h (was daily) with a 500-row batch (was 100) so expired rows don't outpace
 // deletion — semanticCache stores full responses + 768-dim embeddings per row,
 // making it the primary storage consumer that must stay bounded.
-crons.interval(
-  "cleanup-expired-cache",
-  { hours: 12 },
-  internal.crawl.tasks.cleanupExpiredCache,
-  { limit: 500 },
-);
+crons.interval("cleanup-expired-cache", { hours: 12 }, internal.crawl.tasks.cleanupExpiredCache, {
+  limit: 500,
+});
 
 // Retry dead letter queue every 4 hours
 crons.interval("retry-dead-letter", { hours: 4 }, internal.crawl.mutations.retryDeadLetterQueue, {

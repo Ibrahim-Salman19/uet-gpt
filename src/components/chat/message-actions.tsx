@@ -238,7 +238,7 @@ export function MessageActions({
     }
     // Store a short human-readable label as the pin's `query` (shown in the
     // sidebar); pin identity/dedup is keyed on content.
-    const label = trimmed.slice(0, 40) + (trimmed.length > 40 ? "..." : "");
+    const label = trimmed.slice(0, 40) + (trimmed.length > 40 ? "…" : "");
     addPin(label, content);
   }, [content, pinForMessage, addPin, removePin]);
 

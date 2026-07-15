@@ -25,9 +25,9 @@ interface ChatMessagesProps {
 function ErrorBanner({ error, onRetry }: { error: string; onRetry?: () => void }) {
   return (
     <div className="mx-4 mb-4 flex items-start gap-3 rounded-[var(--radius-md)] border border-[var(--destructive)]/30 bg-[var(--destructive)]/5 p-4">
-      <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[var(--destructive)]" />
+      <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[oklch(75%_0.14_35)]" />
       <div className="flex-1">
-        <p className="text-sm font-medium text-[var(--destructive)]">Something went wrong</p>
+        <p className="text-sm font-medium text-[oklch(75%_0.14_35)]">Something went wrong</p>
         <p className="mt-0.5 text-xs text-[var(--text-secondary)]">{error}</p>
       </div>
       {onRetry && (
@@ -88,17 +88,25 @@ function LoadingContent({ className }: { className?: string }) {
 
 function AwaitingReplyIndicator() {
   return (
-    <div className="flex items-start gap-3 px-4 py-3" role="status">
+    <div
+      className="flex items-start gap-4 lg:gap-6 px-4 py-5 md:px-6 md:py-6 lg:px-8 lg:py-7 xl:px-10 w-full bg-[var(--surface-base)]/20"
+      role="status"
+    >
       <span className="sr-only">Generating response…</span>
-      <div className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--primary-muted)]">
-        <span className="text-xs font-semibold text-[var(--primary)]" aria-hidden="true">
-          AI
-        </span>
+      <div className="flex h-8 w-8 items-center justify-center shrink-0 rounded-[10px] bg-[var(--surface-elevated)] text-[var(--accent)] border border-[var(--accent)]/10 shadow-inner select-none font-semibold text-[10px] tracking-widest font-mono">
+        UG
       </div>
-      <div className="flex items-center gap-1.5 pt-2" aria-hidden="true">
-        <span className="h-2 w-2 animate-[pulse-dot_1.4s_ease-in-out_infinite] rounded-full bg-[var(--primary)]" />
-        <span className="h-2 w-2 animate-[pulse-dot_1.4s_ease-in-out_0.2s_infinite] rounded-full bg-[var(--primary)]" />
-        <span className="h-2 w-2 animate-[pulse-dot_1.4s_ease-in-out_0.4s_infinite] rounded-full bg-[var(--primary)]" />
+      <div className="flex flex-1 flex-col gap-2 items-start min-w-0">
+        <div className="flex items-center gap-2 font-mono text-[10px] tracking-[0.15em] text-[var(--text-muted)] uppercase select-none mb-0.5">
+          <span className="text-[var(--accent)] font-medium">UETGPT // RESPONSE</span>
+          <span className="opacity-30">//</span>
+          <span className="opacity-70 animate-pulse">THINKING</span>
+        </div>
+        <div className="flex items-center gap-1.5 py-2" aria-hidden="true">
+          <span className="h-2 w-2 animate-[pulse-dot_1.4s_ease-in-out_infinite] rounded-full bg-[var(--accent)]" />
+          <span className="h-2 w-2 animate-[pulse-dot_1.4s_ease-in-out_0.2s_infinite] rounded-full bg-[var(--accent)]" />
+          <span className="h-2 w-2 animate-[pulse-dot_1.4s_ease-in-out_0.4s_infinite] rounded-full bg-[var(--accent)]" />
+        </div>
       </div>
     </div>
   );

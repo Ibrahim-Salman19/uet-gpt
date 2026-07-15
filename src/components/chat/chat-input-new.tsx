@@ -205,7 +205,7 @@ export function ChatInputNew({
 
       {/* Telemetry footer. The accuracy disclaimer is exposed to assistive tech;
           only the decorative GENERATING/IDLE state is hidden. */}
-      <div className="hidden md:flex justify-between items-center px-2 text-[9px] font-mono text-[var(--text-muted)] select-none">
+      <div className="hidden md:flex justify-between items-center px-2 text-[11px] font-mono text-[var(--text-muted)] font-medium select-none">
         <span>UET GPT may produce inaccurate information. Verify critical details.</span>
         <span
           className={cn(

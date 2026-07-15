@@ -147,9 +147,9 @@ export default function UetTaxilaProgramsPage() {
               </span>
             </h1>
             <p className="text-lg text-[#a1a1aa] max-w-2xl mx-auto mb-8">
-              14 departments across 6 faculties, offering undergraduate, graduate, and
-              PhD degrees in engineering, computing, and the basic sciences — the
-              complete map of what UET Taxila teaches, brought to you by UET GPT.
+              14 departments across 6 faculties, offering undergraduate, graduate, and PhD degrees
+              in engineering, computing, and the basic sciences — the complete map of what UET
+              Taxila teaches, brought to you by UET GPT.
             </p>
             <div className="flex items-center justify-center gap-4">
               <Link
@@ -176,10 +176,7 @@ export default function UetTaxilaProgramsPage() {
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {FACULTIES.map((f) => (
-                <div
-                  key={f.title}
-                  className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]"
-                >
+                <div key={f.title} className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
                   <h3 className="font-semibold text-base mb-3">{f.title}</h3>
                   <ul className="mb-3 space-y-1">
                     {f.departments.map((d) => (
@@ -193,11 +190,10 @@ export default function UetTaxilaProgramsPage() {
               ))}
             </div>
             <p className="text-sm text-[#a1a1aa] text-center mt-8 max-w-3xl mx-auto">
-              In total, UET Taxila&apos;s 14 departments are: Civil, Environmental,
-              Electrical, Electronics, Mechanical, Mechatronics, Industrial, Computer,
-              Software, and Telecommunication Engineering, together with Computer
-              Science and the Mathematical Sciences, Physical Sciences, and Humanities
-              &amp; Social Sciences departments.
+              In total, UET Taxila&apos;s 14 departments are: Civil, Environmental, Electrical,
+              Electronics, Mechanical, Mechatronics, Industrial, Computer, Software, and
+              Telecommunication Engineering, together with Computer Science and the Mathematical
+              Sciences, Physical Sciences, and Humanities &amp; Social Sciences departments.
             </p>
           </section>
 
@@ -214,36 +210,30 @@ export default function UetTaxilaProgramsPage() {
                   Undergraduate (BSc Engineering &amp; BS)
                 </h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  UET Taxila offers four-year BSc Engineering degrees in Civil,
-                  Environmental, Electrical, Electronics, Mechanical, Mechatronics,
-                  Industrial, Computer, Software, and Telecommunication Engineering, plus
-                  BS programs in Computer Science and the basic sciences (Mathematics and
-                  Physics). Computing offerings additionally include the BS Artificial
-                  Intelligence degree program. Undergraduate engineering and computing
-                  admissions are based on the ECAT entry test.
+                  UET Taxila offers four-year BSc Engineering degrees in Civil, Environmental,
+                  Electrical, Electronics, Mechanical, Mechatronics, Industrial, Computer, Software,
+                  and Telecommunication Engineering, plus BS programs in Computer Science and the
+                  basic sciences (Mathematics and Physics). Computing offerings additionally include
+                  the BS Artificial Intelligence degree program. Undergraduate engineering and
+                  computing admissions are based on the ECAT entry test.
                 </p>
               </div>
               <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
-                  Graduate (MS / MSc / MPhil)
-                </h3>
+                <h3 className="font-semibold text-base mb-2">Graduate (MS / MSc / MPhil)</h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  Most departments offer graduate study through MS/MSc Engineering and
-                  MPhil programs. These build advanced, research-oriented expertise in
-                  each discipline&apos;s core and emerging areas, preparing students for
-                  specialized industry roles or further doctoral work.
+                  Most departments offer graduate study through MS/MSc Engineering and MPhil
+                  programs. These build advanced, research-oriented expertise in each
+                  discipline&apos;s core and emerging areas, preparing students for specialized
+                  industry roles or further doctoral work.
                 </p>
               </div>
               <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
-                  Doctoral (PhD)
-                </h3>
+                <h3 className="font-semibold text-base mb-2">Doctoral (PhD)</h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  UET Taxila awards PhD degrees in engineering, computing, and basic
-                  science disciplines. Doctoral candidates work alongside faculty in the
-                  university&apos;s laboratories and research centers, contributing
-                  original research in their field. Eligibility and entry requirements
-                  are set by each department.
+                  UET Taxila awards PhD degrees in engineering, computing, and basic science
+                  disciplines. Doctoral candidates work alongside faculty in the university&apos;s
+                  laboratories and research centers, contributing original research in their field.
+                  Eligibility and entry requirements are set by each department.
                 </p>
               </div>
             </div>
@@ -254,8 +244,8 @@ export default function UetTaxilaProgramsPage() {
               How UET GPT Helps You Choose a Program
             </h2>
             <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto">
-              Choosing the right department is the first real decision of your UET
-              Taxila journey — UET GPT makes it easier
+              Choosing the right department is the first real decision of your UET Taxila journey —
+              UET GPT makes it easier
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
@@ -284,10 +274,7 @@ export default function UetTaxilaProgramsPage() {
                   desc: "UET GPT uses Retrieval-Augmented Generation over official UET Taxila documents, so guidance stays accurate.",
                 },
               ].map((f) => (
-                <div
-                  key={f.title}
-                  className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]"
-                >
+                <div key={f.title} className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
                   <h3 className="font-semibold text-base mb-2">{f.title}</h3>
                   <p className="text-sm text-[#a1a1aa]">{f.desc}</p>
                 </div>
@@ -313,9 +300,7 @@ export default function UetTaxilaProgramsPage() {
                   key={faq.q}
                   className="p-4 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]"
                 >
-                  <summary className="font-medium text-sm cursor-pointer">
-                    {faq.q}
-                  </summary>
+                  <summary className="font-medium text-sm cursor-pointer">{faq.q}</summary>
                   <p className="mt-3 text-sm text-[#a1a1aa]">{faq.a}</p>
                 </details>
               ))}
@@ -340,10 +325,7 @@ export default function UetTaxilaProgramsPage() {
               <Link href="/" className="hover:text-[#e1e1e2] transition-colors">
                 UET GPT Home
               </Link>
-              <Link
-                href="/uet-taxila"
-                className="hover:text-[#e1e1e2] transition-colors"
-              >
+              <Link href="/uet-taxila" className="hover:text-[#e1e1e2] transition-colors">
                 UET Taxila Hub
               </Link>
               <Link href="/chat" className="hover:text-[#e1e1e2] transition-colors">

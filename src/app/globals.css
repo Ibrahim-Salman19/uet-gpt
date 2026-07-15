@@ -274,10 +274,10 @@
     *,
     *::before,
     *::after {
-      animation-duration: 0.01ms;
-      animation-iteration-count: 1;
-      transition-duration: 0.01ms;
-      scroll-behavior: auto;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
     }
   }
 
@@ -521,9 +521,9 @@
 }
 
 @media (pointer: coarse) {
-  button,
-  [role="button"],
-  a,
+  button:not(.no-target),
+  [role="button"]:not(.no-target),
+  a:not(p a):not(span a):not(.no-target),
   input[type="submit"] {
     min-height: 44px;
     min-width: 44px;

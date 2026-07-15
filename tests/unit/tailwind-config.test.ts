@@ -1,23 +1,12 @@
 import { describe, expect, it } from "vitest";
-import config from "../../tailwind.config";
+import fs from "node:fs";
+import path from "node:path";
 
-interface TailwindTheme {
-  extend?: {
-    colors?: Record<string, string>;
-  };
-}
-
-interface TailwindConfig {
-  darkMode?: string | string[];
-  theme?: TailwindTheme;
-}
-
-describe("tailwind config", () => {
-  it("defines UET brand colors and darkMode class", () => {
-    expect(config).toHaveProperty("darkMode");
-    expect(config.darkMode).toBe("class");
-    const theme = (config as unknown as TailwindConfig).theme;
-    expect(theme?.extend?.colors?.uetPrimary).toBeDefined();
-    expect(theme?.extend?.colors?.uetGold).toBeDefined();
+describe("tailwind config css theme", () => {
+  it("defines Kinpaku Gold brand accent", () => {
+    const cssPath = path.resolve(__dirname, "../../src/app/globals.css");
+    const cssContent = fs.readFileSync(cssPath, "utf-8");
+    expect(cssContent).toContain("kinpaku-gold");
+    expect(cssContent).toContain("--accent");
   });
 });

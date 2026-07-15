@@ -15,12 +15,10 @@ export function ConvexReadyGate({ children }: { children: React.ReactNode }) {
   const [networkError, setNetworkError] = useState<string | null>(null);
   const [diagnosing, setDiagnosing] = useState(false);
 
-  // Ready when Clerk & Convex network are loaded, AND if a Clerk user exists, 
+  // Ready when Clerk & Convex network are loaded, AND if a Clerk user exists,
   // their Convex user document has been successfully created and synced by UserSync.
   const isReady =
-    isClerkLoaded &&
-    !isConvexLoading &&
-    (!user || (isConvexLoaded && convexUser !== null));
+    isClerkLoaded && !isConvexLoading && (!user || (isConvexLoaded && convexUser !== null));
 
   const checkReachability = async (signal: AbortSignal): Promise<string> => {
     const url = process.env.NEXT_PUBLIC_CONVEX_URL;
@@ -90,10 +88,10 @@ export function ConvexReadyGate({ children }: { children: React.ReactNode }) {
   if (isReady) return <>{children}</>;
 
   const loadingTexts = [
-    "SYS // ESTABLISHING HANDSHAKE...",
-    "AUTH // RESOLVING CLERK IDENTITY...",
-    "CONVEX // SYNCHRONIZING REALTIME ENGINE...",
-    "RAG // INITIALIZING VECTOR WORKSPACE...",
+    "SYS // ESTABLISHING HANDSHAKE…",
+    "AUTH // RESOLVING CLERK IDENTITY…",
+    "CONVEX // SYNCHRONIZING REALTIME ENGINE…",
+    "RAG // INITIALIZING VECTOR WORKSPACE…",
   ];
 
   // Timed out — show retry UI instead of infinite blank
@@ -124,21 +122,21 @@ export function ConvexReadyGate({ children }: { children: React.ReactNode }) {
             <div className="flex justify-between items-center">
               <span className="text-zinc-500">Clerk Auth:</span>
               <span className={isClerkLoaded ? "text-emerald-400" : "text-zinc-400"}>
-                {isClerkLoaded ? "LOADED" : "PENDING..."}
+                {isClerkLoaded ? "LOADED" : "PENDING…"}
               </span>
             </div>
 
             <div className="flex justify-between items-center">
               <span className="text-zinc-500">Convex Dev Sync:</span>
               <span className={isConvexLoading ? "text-amber-400" : "text-emerald-400"}>
-                {isConvexLoading ? "CONNECTING..." : "CONNECTED"}
+                {isConvexLoading ? "CONNECTING…" : "CONNECTED"}
               </span>
             </div>
 
             <div className="flex justify-between items-center border-t border-zinc-900 pt-2">
               <span className="text-zinc-500">Server Reachability:</span>
               {diagnosing ? (
-                <span className="text-zinc-400 animate-pulse">TESTING...</span>
+                <span className="text-zinc-400 animate-pulse">TESTING…</span>
               ) : networkError === "DATABASE_REACHABLE" ? (
                 <span className="text-emerald-400">HOST REACHABLE (TCP/TLS)</span>
               ) : networkError === "TIMEOUT_ERROR" ? (

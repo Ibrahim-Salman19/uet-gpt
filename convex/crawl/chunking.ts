@@ -273,8 +273,18 @@ export function assignFreshnessTier(url: string): "high" | "medium" | "low" {
   // keywords in sync with assign_tier in scripts/crawler.py so the crawler's
   // push-time tier and the re-chunk path agree.
   const highKeywords = [
-    "admission", "academic", "merit", "fee", "schedule", "seat",
-    "result", "exam", "deadline", "notice", "scholarship", "prospectus",
+    "admission",
+    "academic",
+    "merit",
+    "fee",
+    "schedule",
+    "seat",
+    "result",
+    "exam",
+    "deadline",
+    "notice",
+    "scholarship",
+    "prospectus",
   ];
   if (
     lower === "https://web.uettaxila.edu.pk/" ||

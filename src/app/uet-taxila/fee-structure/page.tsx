@@ -81,7 +81,11 @@ const feeRows = [
   { item: "Recreation Charges (per semester)", subsidized: "3,000", partial: "3,000" },
   { item: "Smart & Safe Campus Charges (per semester)", subsidized: "3,000", partial: "3,000" },
   { item: "Digital Library Charges (per semester)", subsidized: "500", partial: "500" },
-  { item: "Survey Camp Charges — Civil Engg only (per semester)", subsidized: "10,000", partial: "10,000" },
+  {
+    item: "Survey Camp Charges — Civil Engg only (per semester)",
+    subsidized: "10,000",
+    partial: "10,000",
+  },
   { item: "Bus Fare — Non-Resident (per semester)", subsidized: "22,000", partial: "22,000" },
   { item: "Bus Fare — Resident (per semester)", subsidized: "10,000", partial: "10,000" },
   { item: "SAP Charges (per semester)", subsidized: "1,800", partial: "1,800" },
@@ -143,10 +147,9 @@ export default function UetTaxilaFeeStructurePage() {
               </span>
             </h1>
             <p className="text-lg text-[#a1a1aa] max-w-2xl mx-auto mb-8">
-              A clear breakdown of the undergraduate fee schedule at the
-              University of Engineering and Technology, Taxila — grounded in the
-              official UET Taxila undergraduate prospectus and explained the way
-              UET GPT delivers it.
+              A clear breakdown of the undergraduate fee schedule at the University of Engineering
+              and Technology, Taxila — grounded in the official UET Taxila undergraduate prospectus
+              and explained the way UET GPT delivers it.
             </p>
             <div className="flex items-center justify-center gap-4">
               <Link
@@ -169,8 +172,7 @@ export default function UetTaxilaFeeStructurePage() {
               Overview of the UET Taxila Fee Structure
             </h2>
             <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto">
-              How the university organizes fees into non-recurring and
-              recurring charges
+              How the university organizes fees into non-recurring and recurring charges
             </p>
             <div className="space-y-4">
               <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
@@ -178,12 +180,11 @@ export default function UetTaxilaFeeStructurePage() {
                   Non-recurring charges (paid at admission)
                 </h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  These are charged once, when a student is admitted. They
-                  include admission charges, re-admission charges, the student
-                  identity card, the document verification fee, and the
-                  refundable library security deposit. Together with the first
-                  semester&apos;s recurring charges, they make up the amount due
-                  at the start of the program.
+                  These are charged once, when a student is admitted. They include admission
+                  charges, re-admission charges, the student identity card, the document
+                  verification fee, and the refundable library security deposit. Together with the
+                  first semester&apos;s recurring charges, they make up the amount due at the start
+                  of the program.
                 </p>
               </div>
               <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
@@ -191,27 +192,23 @@ export default function UetTaxilaFeeStructurePage() {
                   Recurring charges (paid per semester)
                 </h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  These are charged every semester (Fall or Spring) and include
-                  registration, tuition, sports, magazine, medical, laboratory,
-                  examination, book bank rent, instructional tour, recreation,
-                  Smart &amp; Safe Campus, and digital library charges. Survey
-                  camp charges apply to Civil Engineering students, and bus fares
-                  apply to students using university transport. The recurring
-                  total for the first semester is Rs. 101,800 for subsidized
-                  students and Rs. 256,800 for partial-subsidized students.
+                  These are charged every semester (Fall or Spring) and include registration,
+                  tuition, sports, magazine, medical, laboratory, examination, book bank rent,
+                  instructional tour, recreation, Smart &amp; Safe Campus, and digital library
+                  charges. Survey camp charges apply to Civil Engineering students, and bus fares
+                  apply to students using university transport. The recurring total for the first
+                  semester is Rs. 101,800 for subsidized students and Rs. 256,800 for
+                  partial-subsidized students.
                 </p>
               </div>
               <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
-                  Why the two totals differ
-                </h3>
+                <h3 className="font-semibold text-base mb-2">Why the two totals differ</h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  The large gap between the subsidized and partial-subsidized
-                  first-semester totals comes almost entirely from admission
-                  charges (Rs. 7,000 vs Rs. 300,000) and per-semester tuition
-                  (Rs. 38,000 vs Rs. 130,000). All other recurring components are
-                  identical across categories. The full schedule is published in
-                  Table 30.1 of the UET Taxila undergraduate prospectus.
+                  The large gap between the subsidized and partial-subsidized first-semester totals
+                  comes almost entirely from admission charges (Rs. 7,000 vs Rs. 300,000) and
+                  per-semester tuition (Rs. 38,000 vs Rs. 130,000). All other recurring components
+                  are identical across categories. The full schedule is published in Table 30.1 of
+                  the UET Taxila undergraduate prospectus.
                 </p>
               </div>
             </div>
@@ -222,35 +219,24 @@ export default function UetTaxilaFeeStructurePage() {
               Undergraduate Fee Schedule (Table 30.1)
             </h2>
             <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto">
-              Amounts in Pakistani Rupees. Subsidized vs partial-subsidized
-              (Category S and Category X)
+              Amounts in Pakistani Rupees. Subsidized vs partial-subsidized (Category S and Category
+              X)
             </p>
             <div className="overflow-x-auto rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-[#1a1a1e] text-left">
                     <th className="p-4 font-semibold">Fee Component</th>
-                    <th className="p-4 font-semibold text-right">
-                      Subsidized
-                    </th>
-                    <th className="p-4 font-semibold text-right">
-                      Partial-Subsidized
-                    </th>
+                    <th className="p-4 font-semibold text-right">Subsidized</th>
+                    <th className="p-4 font-semibold text-right">Partial-Subsidized</th>
                   </tr>
                 </thead>
                 <tbody>
                   {feeRows.map((row) => (
-                    <tr
-                      key={row.item}
-                      className="border-b border-[#141417] last:border-0"
-                    >
+                    <tr key={row.item} className="border-b border-[#141417] last:border-0">
                       <td className="p-4 text-[#e1e1e2]">{row.item}</td>
-                      <td className="p-4 text-right text-[#a1a1aa]">
-                        {row.subsidized}
-                      </td>
-                      <td className="p-4 text-right text-[#a1a1aa]">
-                        {row.partial}
-                      </td>
+                      <td className="p-4 text-right text-[#a1a1aa]">{row.subsidized}</td>
+                      <td className="p-4 text-right text-[#a1a1aa]">{row.partial}</td>
                     </tr>
                   ))}
                   <tr className="border-t-2 border-[#1a1a1e] font-medium">
@@ -262,34 +248,27 @@ export default function UetTaxilaFeeStructurePage() {
               </table>
             </div>
             <p className="text-xs text-[#a1a1aa] mt-4">
-              Source: UET Taxila Undergraduate Prospectus 2025, Table 30.1.
-              Bus fares, electricity, and gas charges are revised each semester
-              based on government-fixed fuel, electricity, and gas rates, and the
-              university may change fees without prior notice. UET GPT provides
-              the current figures.
+              Source: UET Taxila Undergraduate Prospectus 2025, Table 30.1. Bus fares, electricity,
+              and gas charges are revised each semester based on government-fixed fuel, electricity,
+              and gas rates, and the university may change fees without prior notice. UET GPT
+              provides the current figures.
             </p>
           </section>
 
           <section className="px-6 py-16 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-semibold text-center mb-4">
-              Hostel &amp; Other Charges
-            </h2>
+            <h2 className="text-2xl font-semibold text-center mb-4">Hostel &amp; Other Charges</h2>
             <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto">
               Additional charges paid by students residing in UET Taxila hostels
             </p>
             <div className="space-y-4">
               <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
-                  Hostel resident charges
-                </h3>
+                <h3 className="font-semibold text-base mb-2">Hostel resident charges</h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  In addition to tuition and semester dues, hostel residents pay
-                  hostel and mess securities (both refundable) plus per-semester
-                  services &amp; contingencies, room rent, masjid fund,
-                  electricity, and Sui gas charges. For the first semester the
-                  non-refundable hostel charges total Rs. 24,000, with refundable
-                  hostel and mess securities of Rs. 8,000 each also collected at
-                  admission.
+                  In addition to tuition and semester dues, hostel residents pay hostel and mess
+                  securities (both refundable) plus per-semester services &amp; contingencies, room
+                  rent, masjid fund, electricity, and Sui gas charges. For the first semester the
+                  non-refundable hostel charges total Rs. 24,000, with refundable hostel and mess
+                  securities of Rs. 8,000 each also collected at admission.
                 </p>
               </div>
               <div className="overflow-x-auto rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
@@ -302,36 +281,25 @@ export default function UetTaxilaFeeStructurePage() {
                   </thead>
                   <tbody>
                     {hostelRows.map((row) => (
-                      <tr
-                        key={row.item}
-                        className="border-b border-[#141417] last:border-0"
-                      >
+                      <tr key={row.item} className="border-b border-[#141417] last:border-0">
                         <td className="p-4 text-[#e1e1e2]">{row.item}</td>
-                        <td className="p-4 text-right text-[#a1a1aa]">
-                          {row.amount}
-                        </td>
+                        <td className="p-4 text-right text-[#a1a1aa]">{row.amount}</td>
                       </tr>
                     ))}
                     <tr className="border-t-2 border-[#1a1a1e] font-medium">
-                      <td className="p-4">
-                        Total for First Semester (Resident, non-refundable)
-                      </td>
+                      <td className="p-4">Total for First Semester (Resident, non-refundable)</td>
                       <td className="p-4 text-right text-[#e1e1e2]">24,000</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
               <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
-                  Refundable securities
-                </h3>
+                <h3 className="font-semibold text-base mb-2">Refundable securities</h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  Library security, hostel security, and mess security are
-                  refundable. They are returned on clearance when a student
-                  leaves the university or hostel, subject to deduction of
-                  outstanding dues — provided the claim is made within two years,
-                  after which unclaimed securities lapse to the university
-                  Welfare Fund.
+                  Library security, hostel security, and mess security are refundable. They are
+                  returned on clearance when a student leaves the university or hostel, subject to
+                  deduction of outstanding dues — provided the claim is made within two years, after
+                  which unclaimed securities lapse to the university Welfare Fund.
                 </p>
               </div>
             </div>
@@ -350,27 +318,21 @@ export default function UetTaxilaFeeStructurePage() {
                   Subsidized vs partial-subsidized (S and X)
                 </h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  Most UET Taxila seats are subsidized. Category S (All Pakistan)
-                  and Category X (children of overseas Pakistanis) are
-                  partial-subsidized. Fees are subsidized for all categories
-                  except S and X, and there is no relaxation, concession, or
-                  waiver in fee for the S and X categories. The difference shows
-                  up in admission charges (Rs. 7,000 vs Rs. 300,000) and
-                  per-semester tuition (Rs. 38,000 vs Rs. 130,000).
+                  Most UET Taxila seats are subsidized. Category S (All Pakistan) and Category X
+                  (children of overseas Pakistanis) are partial-subsidized. Fees are subsidized for
+                  all categories except S and X, and there is no relaxation, concession, or waiver
+                  in fee for the S and X categories. The difference shows up in admission charges
+                  (Rs. 7,000 vs Rs. 300,000) and per-semester tuition (Rs. 38,000 vs Rs. 130,000).
                 </p>
               </div>
               <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
-                  Program-specific charges
-                </h3>
+                <h3 className="font-semibold text-base mb-2">Program-specific charges</h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  Civil Engineering students pay survey camp charges (Rs. 10,000
-                  per semester) with the fee of the 2nd, 3rd, and 4th semesters.
-                  Students using university transport pay bus fares that differ
-                  for residents and non-residents, and these — along with
-                  electricity and gas charges — depend on prevailing
-                  government-fixed rates and are set each semester by the
-                  Vice Chancellor on the Treasurer&apos;s and PD&apos;s
+                  Civil Engineering students pay survey camp charges (Rs. 10,000 per semester) with
+                  the fee of the 2nd, 3rd, and 4th semesters. Students using university transport
+                  pay bus fares that differ for residents and non-residents, and these — along with
+                  electricity and gas charges — depend on prevailing government-fixed rates and are
+                  set each semester by the Vice Chancellor on the Treasurer&apos;s and PD&apos;s
                   recommendations.
                 </p>
               </div>
@@ -386,42 +348,32 @@ export default function UetTaxilaFeeStructurePage() {
             </p>
             <div className="space-y-4">
               <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
-                  When fees are due
-                </h3>
+                <h3 className="font-semibold text-base mb-2">When fees are due</h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  Regular semester fees are payable before the start of every
-                  semester. The Treasurer notifies the schedule about one month
-                  ahead, and registration plus fee submission must be completed
-                  ten days before the semester begins. The last date for
-                  semester registration is the last date for fee submission.
+                  Regular semester fees are payable before the start of every semester. The
+                  Treasurer notifies the schedule about one month ahead, and registration plus fee
+                  submission must be completed ten days before the semester begins. The last date
+                  for semester registration is the last date for fee submission.
                 </p>
               </div>
               <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
-                  Late payment and extensions
-                </h3>
+                <h3 className="font-semibold text-base mb-2">Late payment and extensions</h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  A late registration fine of Rs. 100 per day applies up to one
-                  month after classes commence. A department chairman may grant a
-                  need-based extension (up to 30 days) or allow payment in two
-                  installments; the late fee fine itself generally cannot be
-                  waived. Persistent non-payment can lead to suspension or
-                  cancellation of admission.
+                  A late registration fine of Rs. 100 per day applies up to one month after classes
+                  commence. A department chairman may grant a need-based extension (up to 30 days)
+                  or allow payment in two installments; the late fee fine itself generally cannot be
+                  waived. Persistent non-payment can lead to suspension or cancellation of
+                  admission.
                 </p>
               </div>
               <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
-                  Fee refund policy
-                </h3>
+                <h3 className="font-semibold text-base mb-2">Fee refund policy</h3>
                 <p className="text-sm text-[#a1a1aa]">
-                  On admission withdrawal, UET Taxila applies the National Level
-                  Fee-Refund Policy: 100% of applicable fee refunded up to the
-                  7th day of commencement of classes, 50% from the 8th to the
-                  15th day, and 0% from the 16th day onward. The percentage
-                  applies to all components except security and admission
-                  charges, and the timeline runs continuously across weekdays and
-                  weekends.
+                  On admission withdrawal, UET Taxila applies the National Level Fee-Refund Policy:
+                  100% of applicable fee refunded up to the 7th day of commencement of classes, 50%
+                  from the 8th to the 15th day, and 0% from the 16th day onward. The percentage
+                  applies to all components except security and admission charges, and the timeline
+                  runs continuously across weekdays and weekends.
                 </p>
               </div>
             </div>
@@ -461,10 +413,7 @@ export default function UetTaxilaFeeStructurePage() {
                   desc: "UET GPT is free for all UET Taxila students, faculty, and prospective applicants. Start on the UET GPT home page.",
                 },
               ].map((f) => (
-                <div
-                  key={f.title}
-                  className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]"
-                >
+                <div key={f.title} className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
                   <h3 className="font-semibold text-base mb-2">{f.title}</h3>
                   <p className="text-sm text-[#a1a1aa]">{f.desc}</p>
                 </div>
@@ -490,9 +439,7 @@ export default function UetTaxilaFeeStructurePage() {
                   key={faq.q}
                   className="p-4 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]"
                 >
-                  <summary className="font-medium text-sm cursor-pointer">
-                    {faq.q}
-                  </summary>
+                  <summary className="font-medium text-sm cursor-pointer">{faq.q}</summary>
                   <p className="mt-3 text-sm text-[#a1a1aa]">{faq.a}</p>
                 </details>
               ))}
@@ -517,19 +464,13 @@ export default function UetTaxilaFeeStructurePage() {
               <Link href="/" className="hover:text-[#e1e1e2] transition-colors">
                 UET GPT Home
               </Link>
-              <Link
-                href="/uet-taxila"
-                className="hover:text-[#e1e1e2] transition-colors"
-              >
+              <Link href="/uet-taxila" className="hover:text-[#e1e1e2] transition-colors">
                 UET Taxila
               </Link>
               <Link href="/chat" className="hover:text-[#e1e1e2] transition-colors">
                 Chat
               </Link>
-              <Link
-                href="/explore"
-                className="hover:text-[#e1e1e2] transition-colors"
-              >
+              <Link href="/explore" className="hover:text-[#e1e1e2] transition-colors">
                 Explore
               </Link>
             </div>

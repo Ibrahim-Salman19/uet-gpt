@@ -163,7 +163,10 @@ export const countAllDocuments = internalQuery({
 // Shared staleness computation so getStaleAndTotalCount and getStaleDocumentCount
 // don't duplicate logic and don't reach into a registered query's `.handler`
 // (which isn't part of the public type and trips tsc).
-async function computeStaleness(ctx: QueryCtx, now: number): Promise<{ total: number; stale: number }> {
+async function computeStaleness(
+  ctx: QueryCtx,
+  now: number,
+): Promise<{ total: number; stale: number }> {
   // Tier-aware staleness thresholds. Previously only `low`-tier docs could be
   // flagged stale by age — which is backwards: HIGH-tier pages (admissions,
   // merit lists, fees, schedules) are the MOST time-sensitive and must go
@@ -216,4 +219,3 @@ export const getStaleDocumentCount = internalQuery({
     return res.stale;
   },
 });
-

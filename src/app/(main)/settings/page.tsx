@@ -4,7 +4,7 @@ import { UserButton, useUser } from "@clerk/nextjs";
 import { api } from "convex/_generated/api";
 import { useMutation } from "convex/react";
 import { ChevronRight, Download, Info, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -164,15 +164,19 @@ export default function SettingsPage() {
   const updatePreferences = useMutation(api.users.updatePreferences);
   const [fontSize, setFontSize] = useState<string>("medium");
   const [model, setModel] = useState<string>("llama-3.1-8b");
+  const initializedRef = useRef(false);
 
   useEffect(() => {
-    if (userData?.preferences?.fontSize) {
-      setFontSize(userData.preferences.fontSize);
+    if (userData && !initializedRef.current) {
+      if (userData.preferences?.fontSize) {
+        setFontSize(userData.preferences.fontSize);
+      }
+      if (userData.preferences?.model) {
+        setModel(userData.preferences.model);
+      }
+      initializedRef.current = true;
     }
-    if (userData?.preferences?.model) {
-      setModel(userData.preferences.model);
-    }
-  }, [userData?.preferences?.fontSize, userData?.preferences?.model]);
+  }, [userData]);
 
   const handleFontSizeChange = async (value: string) => {
     const previous = fontSize;

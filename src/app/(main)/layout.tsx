@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ErrorBoundary } from "react-error-boundary";
 import { AmbientGlow } from "@/components/ambient-glow";
 import { BackdropWrapper } from "@/components/backdrop-wrapper";
 import { CommandPalette } from "@/components/command-palette";
@@ -22,9 +23,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       {/* WebGL with graceful fallback if it crashes */}
       <BackdropWrapper />
 
-      <AmbientGlow />
+      <ErrorBoundary fallback={null}>
+        <AmbientGlow />
+      </ErrorBoundary>
 
-      <ConnectionStatus />
+      <ErrorBoundary fallback={null}>
+        <ConnectionStatus />
+      </ErrorBoundary>
 
       {/* Branded loading/timeout gate */}
       <ConvexReadyGate>
@@ -33,9 +38,17 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       </ConvexReadyGate>
 
       {/* Modals & Palettes System */}
-      <CommandPalette />
-      <PreferencesModal />
-      <VoiceModalWrapper />
+      <ErrorBoundary fallback={null}>
+        <CommandPalette />
+      </ErrorBoundary>
+
+      <ErrorBoundary fallback={null}>
+        <PreferencesModal />
+      </ErrorBoundary>
+
+      <ErrorBoundary fallback={null}>
+        <VoiceModalWrapper />
+      </ErrorBoundary>
     </div>
   );
 }

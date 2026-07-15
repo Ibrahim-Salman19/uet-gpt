@@ -83,7 +83,7 @@ export default function GlobalError({
           >
             Something went wrong
           </h2>
-          
+
           <p style={{ fontSize: "0.85rem", color: "oklch(72% 0 0)", marginBottom: "1rem" }}>
             An unexpected client-side error occurred:
           </p>
@@ -100,7 +100,14 @@ export default function GlobalError({
               overflowX: "auto",
             }}
           >
-            <div style={{ color: "oklch(58% 0.15 35)", fontWeight: "bold", fontSize: "0.85rem", marginBottom: "0.5rem" }}>
+            <div
+              style={{
+                color: "oklch(58% 0.15 35)",
+                fontWeight: "bold",
+                fontSize: "0.85rem",
+                marginBottom: "0.5rem",
+              }}
+            >
               {error.name}: {error.message}
             </div>
             {error.stack && (
@@ -139,7 +146,9 @@ export default function GlobalError({
           )}
         </div>
 
-        <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", justifyContent: "center" }}>
+        <div
+          style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", justifyContent: "center" }}
+        >
           <button
             type="button"
             onClick={() => reset()}

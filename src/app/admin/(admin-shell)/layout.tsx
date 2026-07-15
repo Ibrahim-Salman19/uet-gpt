@@ -41,8 +41,11 @@ function ClientOnly({ children }: { children: React.ReactNode }) {
   }, []);
   if (!mounted) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <p className="text-sm text-muted-foreground">Loading admin panel...</p>
+      <div className="flex h-full flex-col items-center justify-center gap-3 select-none pointer-events-none">
+        <span className="font-mono text-[10px] tracking-[0.2em] text-[var(--accent)] animate-pulse uppercase">
+          {"ADMIN // INITIALIZING…"}
+        </span>
+        <div className="h-px w-24 bg-gradient-to-r from-transparent via-[var(--accent)]/30 to-transparent animate-pulse" />
       </div>
     );
   }
@@ -104,7 +107,8 @@ export default function AdminShellLayout({ children }: { children: React.ReactNo
         <div className="flex flex-1 flex-col overflow-hidden min-w-0 bg-[var(--surface-base)]">
           <header className="flex h-14 items-center border-b border-[var(--surface-5)] px-6 shrink-0 bg-[var(--surface-1)]/60 backdrop-blur-md">
             <h1 className="text-sm font-semibold text-zinc-100 font-sans tracking-tight">
-              {navItems.find((i) => i.href === pathname)?.label ?? "Admin"}
+              {navItems.find((i) => pathname === i.href || pathname.startsWith(i.href + "/"))
+                ?.label ?? "Admin"}
             </h1>
           </header>
           <main className="flex-1 overflow-auto p-6 bg-transparent">

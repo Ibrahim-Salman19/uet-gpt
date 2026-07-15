@@ -55,6 +55,27 @@ function mockOverviewQueries(stats: any) {
     const sym = Symbol.for("functionName");
     const queryName = typeof query === "string" ? query : (query[sym] || query.name || "");
     if (typeof queryName !== "string") return undefined;
+    if (queryName.includes("getOverviewData")) {
+      return {
+        documentStats: {
+          total: stats.totalDocuments,
+          indexed: stats.indexedDocuments,
+          pending: stats.pendingDocuments,
+          failed: stats.failedDocuments,
+        },
+        userStats: {
+          activeLast24h: stats.activeUsersLast24h,
+          total: stats.totalUsers,
+        },
+        feedbackCount: stats.totalFeedback,
+        crawlCount: stats.totalCrawlJobs,
+        cacheStats: {
+          total: stats.totalCacheEntries,
+        },
+        recentCrawls: stats.recentCrawls,
+        recentFeedback: stats.recentFeedback,
+      };
+    }
     if (queryName.includes("documentStats")) {
       return {
         total: stats.totalDocuments,

@@ -117,117 +117,112 @@ function AdminOverviewSkeleton() {
   return (
     <div className="space-y-6 animate-pulse">
       {/* Header Skeleton */}
-      <div className="flex items-center justify-between pb-2 border-b border-white/[0.04]">
-        <div className="h-4 w-28 bg-white/5 rounded" />
+      <div className="flex items-center justify-between pb-2 border-b border-[var(--ks-rule)]">
+        <h2 className="font-mono text-[10px] tracking-widest text-[var(--ks-champagne)] uppercase select-none">
+          {"ADMIN // SYSTEM_OVERVIEW"}
+        </h2>
       </div>
 
       {/* Primary Bento Row: 2 + 1 + 1 */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div className="lg:col-span-2 rounded-xl border border-white/5 bg-[var(--surface-3)]/40 p-5 space-y-4 relative overflow-hidden">
-          <div className="flex justify-between items-center">
-            <div className="h-3 w-24 bg-white/5 rounded" />
-            <div className="h-4 w-4 bg-white/5 rounded" />
+        <div className="lg:col-span-2 rounded-xl border border-[var(--ks-rule)] bg-[var(--surface-0)] p-5 space-y-4 relative overflow-hidden">
+          <div className="flex justify-between items-center font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
+            <span>CRAWL_ACTIVITY_METRICS</span>
+            <span className="text-[var(--accent)] animate-pulse">LIVE</span>
           </div>
-          <div className="h-8 w-32 bg-white/10 rounded" />
-          <div className="h-2 w-full bg-white/5 rounded-full" />
+          <div className="font-mono text-xl text-[var(--ks-champagne)]">00.00 // SYNC</div>
+          <div className="h-[1px] bg-white/10 w-full relative overflow-hidden">
+            <div className="absolute top-0 bottom-0 left-0 w-1/3 bg-[var(--ks-kinpaku-gold)] animate-progress" />
+          </div>
         </div>
-        <div className="rounded-xl border border-white/5 bg-[var(--surface-3)]/40 p-5 space-y-4">
-          <div className="flex justify-between items-center">
-            <div className="h-3 w-24 bg-white/5 rounded" />
-            <div className="h-4 w-4 bg-white/5 rounded" />
+        <div className="rounded-xl border border-[var(--ks-rule)] bg-[var(--surface-0)] p-5 space-y-4">
+          <div className="flex justify-between items-center font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
+            <span>DOCUMENT_COUNT</span>
           </div>
-          <div className="h-8 w-16 bg-white/10 rounded" />
+          <div className="font-mono text-xl text-[var(--ks-champagne)]">-- // --</div>
         </div>
-        <div className="rounded-xl border border-white/5 bg-[var(--surface-3)]/40 p-5 space-y-4">
-          <div className="flex justify-between items-center">
-            <div className="h-3 w-20 bg-white/5 rounded" />
-            <div className="h-4 w-4 bg-white/5 rounded" />
+        <div className="rounded-xl border border-[var(--ks-rule)] bg-[var(--surface-0)] p-5 space-y-4">
+          <div className="flex justify-between items-center font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
+            <span>ACTIVE_JOBS</span>
           </div>
-          <div className="h-8 w-16 bg-white/10 rounded" />
+          <div className="font-mono text-xl text-[var(--ks-champagne)]">-- // --</div>
         </div>
       </div>
 
       {/* Secondary Bento Row: 1 + 1 + 2 */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-xl border border-white/5 bg-[var(--surface-3)]/40 p-5 space-y-4">
-          <div className="flex justify-between items-center">
-            <div className="h-3 w-20 bg-white/5 rounded" />
-            <div className="h-4 w-4 bg-white/5 rounded" />
+        <div className="rounded-xl border border-[var(--ks-rule)] bg-[var(--surface-0)] p-5 space-y-4">
+          <div className="flex justify-between items-center font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
+            <span>SYSTEM_CPU</span>
           </div>
-          <div className="h-8 w-16 bg-white/10 rounded" />
+          <div className="font-mono text-xl text-[var(--ks-champagne)]">-- // --</div>
         </div>
-        <div className="rounded-xl border border-white/5 bg-[var(--surface-3)]/40 p-5 space-y-4">
-          <div className="flex justify-between items-center">
-            <div className="h-3 w-24 bg-white/5 rounded" />
-            <div className="h-4 w-4 bg-white/5 rounded" />
+        <div className="rounded-xl border border-[var(--ks-rule)] bg-[var(--surface-0)] p-5 space-y-4">
+          <div className="flex justify-between items-center font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
+            <span>MEMORY_POOL</span>
           </div>
-          <div className="h-8 w-20 bg-white/10 rounded" />
+          <div className="font-mono text-xl text-[var(--ks-champagne)]">-- // --</div>
         </div>
-        <div className="lg:col-span-2 rounded-xl border border-white/5 bg-[var(--surface-3)]/40 p-5 space-y-4 relative overflow-hidden">
-          <div className="flex justify-between items-center">
-            <div className="h-3 w-28 bg-white/5 rounded" />
-            <div className="h-4 w-4 bg-white/5 rounded" />
+        <div className="lg:col-span-2 rounded-xl border border-[var(--ks-rule)] bg-[var(--surface-0)] p-5 space-y-4 relative overflow-hidden">
+          <div className="flex justify-between items-center font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
+            <span>VECTOR_INDEX_LOAD</span>
+            <span className="text-[var(--ks-verdigris-patina)]">RESOLVING</span>
           </div>
-          <div className="h-8 w-24 bg-white/10 rounded" />
-          <div className="h-3 w-40 bg-white/5 rounded" />
+          <div className="font-mono text-xl text-[var(--ks-champagne)]">CALCULATING...</div>
+          <div className="h-[1px] bg-white/10 w-full relative overflow-hidden">
+            <div className="absolute top-0 bottom-0 left-0 w-1/3 bg-[var(--ks-kinpaku-gold)] animate-progress" />
+          </div>
         </div>
       </div>
 
       {/* Breakdown and Jobs Row */}
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="border border-white/5 rounded-2xl bg-[var(--surface-3)]/40 p-6 space-y-4">
-          <div className="pb-3 border-b border-white/5">
-            <div className="h-3.5 w-32 bg-white/10 rounded" />
+        <div className="border border-[var(--ks-rule)] rounded-xl bg-[var(--surface-0)] p-6 space-y-4">
+          <div className="pb-3 border-b border-[var(--ks-rule)]">
+            <div className="font-mono text-[9px] text-[var(--ks-champagne)] uppercase">
+              DATABASE_BREAKDOWN
+            </div>
           </div>
           <div className="space-y-4">
-            {["bd-1", "bd-2", "bd-3"].map((id) => (
+            {["bd-1", "bd-2", "bd-3"].map((id, index) => (
               <div key={id} className="flex items-center justify-between">
-                <div className="h-3 w-16 bg-white/5 rounded" />
+                <div className="font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
+                  SEC_0{index + 1}
+                </div>
                 <div className="flex items-center gap-3">
-                  <div className="h-1.5 w-32 bg-white/5 rounded-full" />
-                  <div className="h-3 w-8 bg-white/5 rounded" />
+                  <div className="h-[1px] bg-white/10 w-24 relative overflow-hidden">
+                    <div className="absolute top-0 bottom-0 left-0 w-1/3 bg-[var(--ks-kinpaku-gold)] animate-progress" />
+                  </div>
+                  <div className="font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
+                    --
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="border border-white/5 rounded-2xl bg-[var(--surface-3)]/40 p-6 space-y-4">
-          <div className="pb-3 border-b border-white/5">
-            <div className="h-3.5 w-36 bg-white/10 rounded" />
+        <div className="border border-[var(--ks-rule)] rounded-xl bg-[var(--surface-0)] p-6 space-y-4">
+          <div className="pb-3 border-b border-[var(--ks-rule)]">
+            <div className="font-mono text-[9px] text-[var(--ks-champagne)] uppercase">
+              CRAWLER_TELEMETRY
+            </div>
           </div>
           <div className="space-y-4">
-            {["job-1", "job-2", "job-3"].map((id) => (
+            {["job-1", "job-2", "job-3"].map((id, index) => (
               <div key={id} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="h-4 w-12 bg-white/10 rounded" />
-                  <div className="h-3 w-20 bg-white/5 rounded" />
+                  <span className="font-mono text-[9px] text-[var(--ks-kinpaku-gold)] uppercase">
+                    [PENDING]
+                  </span>
+                  <span className="font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
+                    NODE_0{index + 1}
+                  </span>
                 </div>
-                <div className="h-3 w-16 bg-white/5 rounded" />
+                <div className="font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">--</div>
               </div>
             ))}
           </div>
-        </div>
-      </div>
-
-      {/* Recent Feedback */}
-      <div className="border border-white/5 rounded-2xl bg-[var(--surface-3)]/40 p-6 space-y-4">
-        <div className="pb-3 border-b border-white/5">
-          <div className="h-3.5 w-28 bg-white/10 rounded" />
-        </div>
-        <div className="space-y-2">
-          {["fb-1", "fb-2"].map((id) => (
-            <div
-              key={id}
-              className="flex items-center justify-between p-3 border border-white/5 rounded-xl bg-zinc-950/20"
-            >
-              <div className="flex items-center gap-3">
-                <div className="h-4.5 w-4.5 bg-white/10 rounded-full" />
-                <div className="h-4 w-16 bg-white/5 rounded" />
-              </div>
-              <div className="h-3 w-24 bg-white/5 rounded" />
-            </div>
-          ))}
         </div>
       </div>
     </div>
@@ -238,50 +233,46 @@ function AdminListSkeleton() {
   return (
     <div className="space-y-6 animate-pulse">
       {/* Header Skeleton */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between border-b border-[var(--ks-rule)] pb-4">
         <div className="space-y-2">
-          <div className="h-5 w-32 bg-white/10 rounded" />
-          <div className="h-3.5 w-56 bg-white/5 rounded" />
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="h-8 w-20 bg-white/10 rounded" />
-          <div className="h-8 w-24 bg-white/10 rounded" />
+          <h2 className="font-mono text-[10px] tracking-widest text-[var(--ks-champagne)] uppercase select-none">
+            {"ADMIN // DOCUMENT_LIST"}
+          </h2>
+          <p className="font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
+            RETRIEVING FILES FROM CONVEX
+          </p>
         </div>
       </div>
 
       {/* Filter controls */}
       <div className="flex items-center gap-4">
-        <div className="h-9 w-64 bg-white/5 border border-white/5 rounded" />
-        <div className="h-9 w-32 bg-white/5 border border-white/5 rounded" />
-        <div className="h-9 w-36 bg-white/5 border border-white/5 rounded" />
+        <div className="h-9 w-64 border border-[var(--ks-rule)] bg-[var(--surface-0)] rounded-[2px]" />
+        <div className="h-9 w-32 border border-[var(--ks-rule)] bg-[var(--surface-0)] rounded-[2px]" />
       </div>
 
       <div className="h-[1px] bg-white/5" />
 
       {/* High-density rows */}
-      <div className="space-y-px bg-white/5 border border-white/5 rounded-xl overflow-hidden">
-        {["row-1", "row-2", "row-3", "row-4", "row-5"].map((id) => (
+      <div className="space-y-px border border-[var(--ks-rule)] bg-[var(--surface-0)] rounded-xl overflow-hidden">
+        {["row-1", "row-2", "row-3", "row-4", "row-5"].map((id, index) => (
           <div
             key={id}
-            className="flex items-center justify-between p-4 bg-[var(--surface-3)]/40 relative overflow-hidden"
+            className="flex items-center justify-between p-4 bg-[var(--surface-0)] relative overflow-hidden border-b border-[var(--ks-rule)] last:border-0"
           >
             {/* Shimmer overlay line */}
             <div className="absolute top-0 bottom-0 left-0 w-[2px] bg-[var(--accent)]/30 animate-pulse" />
             <div className="flex-1 min-w-0 space-y-2">
               <div className="flex items-center gap-2">
-                <div className="h-4 w-16 bg-white/10 rounded" />
-                <div className="h-4 w-20 bg-white/5 rounded" />
+                <span className="font-mono text-[9px] text-[var(--accent)] uppercase">
+                  DOC_0{index + 1}
+                </span>
+                <span className="font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
+                  // SCANNING_INDEX...
+                </span>
               </div>
-              <div className="h-4 w-[60%] bg-white/5 rounded" />
-              <div className="flex items-center gap-2">
-                <div className="h-3.5 w-[30%] bg-white/5 rounded" />
-                <div className="h-3.5 w-3 bg-white/5 rounded-full" />
-                <div className="h-3.5 w-16 bg-white/5 rounded" />
+              <div className="h-[1px] bg-white/10 w-2/3 relative overflow-hidden">
+                <div className="absolute top-0 bottom-0 left-0 w-1/3 bg-[var(--ks-kinpaku-gold)] animate-progress" />
               </div>
-            </div>
-            <div className="flex items-center gap-2 ml-4">
-              <div className="h-8 w-8 bg-white/5 rounded" />
-              <div className="h-8 w-8 bg-white/5 rounded" />
             </div>
           </div>
         ))}
@@ -294,14 +285,14 @@ function AdminSettingsSkeleton() {
   return (
     <div className="space-y-6 animate-pulse">
       {/* Header Skeleton */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between border-b border-[var(--ks-rule)] pb-4">
         <div className="space-y-2">
-          <div className="h-5 w-36 bg-white/10 rounded" />
-          <div className="h-3.5 w-60 bg-white/5 rounded" />
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="h-8 w-20 bg-white/10 rounded" />
-          <div className="h-8 w-24 bg-white/10 rounded" />
+          <h2 className="font-mono text-[10px] tracking-widest text-[var(--ks-champagne)] uppercase select-none">
+            {"ADMIN // SYSTEM_CONFIG"}
+          </h2>
+          <p className="font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
+            RETRIEVING ENVIRONMENTAL PARAMS
+          </p>
         </div>
       </div>
 
@@ -309,29 +300,34 @@ function AdminSettingsSkeleton() {
 
       {/* Split panes settings skeletons */}
       <div className="space-y-8">
-        {["sec-1", "sec-2", "sec-3"].map((sectionId) => (
+        {["sec-1", "sec-2", "sec-3"].map((sectionId, secIndex) => (
           <div
             key={sectionId}
-            className="grid grid-cols-1 lg:grid-cols-3 gap-8 py-6 border-b border-white/5"
+            className="grid grid-cols-1 lg:grid-cols-3 gap-8 py-6 border-b border-[var(--ks-rule)] last:border-0"
           >
             {/* Left Column: Info */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <div className="h-6 w-6 bg-white/10 rounded" />
-                <div className="h-4.5 w-24 bg-white/10 rounded" />
+                <span className="font-mono text-[9px] text-[var(--accent)] uppercase">
+                  [PARAM_GROUP_{secIndex + 1}]
+                </span>
               </div>
-              <div className="h-3.5 w-48 bg-white/5 rounded" />
+              <div className="font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
+                RESOLVING_DEPENDENCIES...
+              </div>
             </div>
 
             {/* Right Column: Fields (spans 2) */}
             <div className="lg:col-span-2 space-y-4">
-              {["field-1", "field-2", "field-3"].map((fieldId) => (
+              {["field-1", "field-2"].map((fieldId, fIndex) => (
                 <div
                   key={`${sectionId}-${fieldId}`}
                   className="flex items-center justify-between py-2 border-b border-white/[0.02] last:border-0"
                 >
-                  <div className="h-4 w-32 bg-white/5 rounded" />
-                  <div className="h-8 w-[180px] bg-white/10 rounded" />
+                  <div className="font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
+                    KEY_VAR_{secIndex + 1}_0{fIndex + 1}
+                  </div>
+                  <div className="h-8 w-[180px] border border-[var(--ks-rule)] bg-[var(--surface-0)] rounded-[2px]" />
                 </div>
               ))}
             </div>

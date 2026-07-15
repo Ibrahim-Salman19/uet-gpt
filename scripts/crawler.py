@@ -32,6 +32,8 @@ import trafilatura
 from trafilatura.settings import use_config
 import fitz
 import pymupdf4llm
+import base64
+import httpx
 from dotenv import load_dotenv
 
 if sys.platform == "win32":
@@ -716,6 +718,208 @@ token_bucket = TokenBucket(
 # FETCH & PUSH LOGIC
 # ═════════════════════════════════════════════════════════════════════════════
 
+# ── PDF Image Extraction ──────────────────────────────────────────────────
+# PDFs like the UET Prospectus contain 760+ images: fee tables, campus maps,
+# org charts, program diagrams. pymupdf4llm replaces these with useless
+# "==> picture [WxH] intentionally omitted <==" placeholders. Instead, we
+# extract significant images, describe each via Gemini Vision, and inline the
+# descriptions so image content becomes searchable text in the vector DB.
+#
+# Bandwidth-aware design (1GB/month constraint):
+#   - Skip tiny images (<10KB or <100x100px) — they're logos/bullets/spacers
+#   - Cap at MAX_IMAGES_PER_PDF (default 40) — the most information-rich images
+#   - Use gemini-2.5-flash (cheapest vision model, free tier)
+#   - Batch Gemini calls with concurrency limiting
+
+
+async def describe_image_with_gemini(
+    image_bytes: bytes,
+    mime_type: str,
+    page_num: int,
+    api_key: str,
+) -> str | None:
+    """Send an image to Gemini Vision and get a concise text description.
+
+    Returns a description like 'Fee structure table: BS Computer Science costs
+    Rs. 45,000/semester, total program fee Rs. 360,000' — text that becomes
+    searchable in the vector DB. Returns None on failure (caller skips).
+    """
+    if not api_key:
+        return None
+    b64 = base64.b64encode(image_bytes).decode("utf-8")
+    url = (
+        "https://generativelanguage.googleapis.com/v1beta/models/"
+        "gemini-2.5-flash:generateContent"
+    )
+    payload = {
+        "contents": [{
+            "parts": [
+                {"text": (
+                    "This image is from page " + str(page_num) + " of a university "
+                    "prospectus. Describe what information it contains in 1-3 "
+                    "sentences. Focus on DATA (numbers, names, dates, fees, "
+                    "program names, deadlines) not decoration. If it's a table, "
+                    "list the key values. If it's a diagram/map, describe what "
+                    "it shows. If it's a logo or decorative image with no "
+                    "information, reply 'decorative'."
+                )},
+                {"inline_data": {"mime_type": mime_type, "data": b64}},
+            ],
+        }],
+        "generationConfig": {"temperature": 0.1, "maxOutputTokens": 200},
+    }
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            resp = await client.post(
+                url, json=payload, headers={"x-goog-api-key": api_key},
+            )
+            if resp.status_code != 200:
+                return None
+            data = resp.json()
+            text = (
+                data.get("candidates", [{}])[0]
+                .get("content", {})
+                .get("parts", [{}])[0]
+                .get("text", "")
+                .strip()
+            )
+            if text.lower() == "decorative" or not text:
+                return None
+            return text
+    except Exception:
+        return None
+
+
+async def extract_and_describe_pdf_images(
+    doc: fitz.Document,
+    page_markdowns: dict[int, str],
+) -> dict[int, list[str]]:
+    """Extract significant images from each PDF page and describe them via Gemini.
+
+    Returns a map of page_number -> list of image descriptions to inline.
+    Skips tiny/decorative images. Caps total images per the bandwidth budget.
+    """
+    api_key = (
+        os.environ.get("GEMINI_API_KEY")
+        or os.environ.get("GEMINI_API_KEY_1")
+        or os.environ.get("GEMINI_API_KEY_2")
+        or os.environ.get("GOOGLE_GENERATIVE_AI_API_KEY")
+    )
+    if not api_key:
+        log.warning("No Gemini API key — skipping image description (images will be omitted)")
+        return {}
+
+    MAX_IMAGES_PER_PDF = 40
+    MIN_IMAGE_BYTES = 10_000       # 10KB — skip logos/bullets/spacers
+    MIN_DIMENSION = 100             # 100px — skip tiny icons
+    CONCURRENCY = 3                 # gentle on Gemini free tier (60 RPM)
+
+    image_tasks: list[tuple[int, asyncio.Task]] = []
+    images_found = 0
+
+    for page in doc:
+        page_num = page.number + 1  # 1-indexed
+        image_list = page.get_images(full=True)
+        for img_info in image_list:
+            if images_found >= MAX_IMAGES_PER_PDF:
+                break
+            xref = img_info[0]
+            try:
+                base_image = doc.extract_image(xref)
+                img_bytes = base_image["image"]
+                width = base_image.get("width", 0)
+                height = base_image.get("height", 0)
+                # Skip tiny images (logos, bullets, spacers, decorative shapes)
+                if len(img_bytes) < MIN_IMAGE_BYTES:
+                    continue
+                if width < MIN_DIMENSION or height < MIN_DIMENSION:
+                    continue
+                mime = base_image.get("ext", "png")
+                mime_type = "image/jpeg" if mime in ("jpg", "jpeg") else f"image/{mime}"
+                task = asyncio.create_task(
+                    describe_image_with_gemini(img_bytes, mime_type, page_num, api_key)
+                )
+                image_tasks.append((page_num, task))
+                images_found += 1
+            except Exception:
+                continue
+        if images_found >= MAX_IMAGES_PER_PDF:
+            break
+
+    if not image_tasks:
+        log.info(f"PDF: no significant images found (all < {MIN_IMAGE_BYTES}B or {MIN_DIMENSION}px)")
+        return {}
+
+    log.info(f"PDF: describing {len(image_tasks)} images via Gemini Vision (max {MAX_IMAGES_PER_PDF})...")
+
+    # Process in small concurrent batches to respect Gemini rate limits
+    descriptions: dict[int, list[str]] = {}
+    sem = asyncio.Semaphore(CONCURRENCY)
+
+    async def run_with_sem(task: asyncio.Task) -> str | None:
+        async with sem:
+            return await task
+
+    for page_num, task in image_tasks:
+        desc = await run_with_sem(task)
+        if desc:
+            descriptions.setdefault(page_num, []).append(desc)
+
+    total_descs = sum(len(v) for v in descriptions.values())
+    log.info(f"PDF: {total_descs}/{len(image_tasks)} images described successfully")
+    return descriptions
+
+
+def inline_image_descriptions(
+    markdown: str,
+    descriptions: dict[int, list[str]],
+) -> str:
+    """Inline Gemini-generated image descriptions into the markdown text.
+
+    pymupdf4llm produces '==> picture [WxH] intentionally omitted <==' markers.
+    We replace these with [Figure: description] blocks so the image content
+    becomes part of the searchable text. Descriptions are placed near the page
+    marker they belong to.
+    """
+    if not descriptions:
+        return markdown
+
+    lines = markdown.split("\n")
+    result: list[str] = []
+    current_page = 1
+    pending_descs: list[str] = []
+
+    for line in lines:
+        # Track page number from pymupdf4llm page markers
+        page_match = re.match(r"^(?:#{1,3}\s*)?(?:Page|pg\.?)\s*(\d+)", line, re.I)
+        if page_match:
+            # Flush any pending descriptions for the previous page
+            for d in pending_descs:
+                result.append(f"[Figure: {d}]")
+            pending_descs = []
+            current_page = int(page_match.group(1))
+
+        # Replace image placeholder lines with descriptions
+        if "intentionally omitted" in line or re.search(r"\[=>?\s*\d+\s*[x×]\s*\d+\s*\]", line):
+            descs = descriptions.get(current_page, [])
+            if descs:
+                result.append(f"\n[Figure: {descs.pop(0)}]\n")
+            # Skip the placeholder itself
+            continue
+
+        result.append(line)
+
+    # Flush any remaining descriptions
+    for d in pending_descs:
+        result.append(f"[Figure: {d}]")
+    # Also flush any descriptions that didn't get placed (append at end of their page section)
+    for page_num, descs in sorted(descriptions.items()):
+        for d in descs:
+            result.append(f"\n[Figure (page {page_num}): {d}]\n")
+
+    return "\n".join(result)
+
+
 def clean_pdf_markdown(markdown: str) -> str:
     """Clean pymupdf4llm PDF output: drop image placeholders, repeating page
     headers/footers, and standalone page artifacts that pollute chunks.
@@ -772,10 +976,18 @@ def clean_pdf_markdown(markdown: str) -> str:
 
 async def fetch_and_extract(url: str, session: AsyncSession) -> tuple[str | None, str, list[str], str | None, int]:
     """Returns: (markdown, title, links, error_reason, status_code)"""
+    # PDFs are large, high-value documents (prospectuses, fee schedules, past
+    # papers). The UET servers are slow serving these (16-27MB over a sluggish
+    # link), so give PDFs a longer timeout and a higher byte cap than HTML pages.
+    # HTML pages stay fast-timedout so a hung connection doesn't stall the crawl.
+    is_pdf_url = url.lower().endswith(".pdf")
+    fetch_timeout = REQUEST_TIMEOUT * 3 if is_pdf_url else REQUEST_TIMEOUT  # 60s for PDFs, 20s for HTML
+    pdf_max_bytes = MAX_RESPONSE_BYTES * 2  # 50MB for PDFs (was 25MB — the PG prospectus is 26.5MB)
+
     try:
         resp = await asyncio.wait_for(
-            safe_get(session, url, timeout=REQUEST_TIMEOUT),
-            timeout=REQUEST_TIMEOUT + 5
+            safe_get(session, url, timeout=fetch_timeout),
+            timeout=fetch_timeout + 10
         )
     except asyncio.TimeoutError:
         return None, "", [], "timeout", 0
@@ -792,20 +1004,21 @@ async def fetch_and_extract(url: str, session: AsyncSession) -> tuple[str | None
 
     # Reject oversized responses up front via Content-Length, and cap the
     # buffered body to guard against decompression bombs / multi-GB downloads
-    # exhausting memory.
+    # exhausting memory. PDFs get a higher cap (prospectuses can be 26MB+).
     declared_len = resp.headers.get("Content-Length") or resp.headers.get("content-length")
-    if declared_len and declared_len.isdigit() and int(declared_len) > MAX_RESPONSE_BYTES:
+    effective_max = pdf_max_bytes if is_pdf_url else MAX_RESPONSE_BYTES
+    if declared_len and declared_len.isdigit() and int(declared_len) > effective_max:
         return None, "", [], f"response too large ({declared_len} bytes)", status
 
-    is_pdf = "application/pdf" in content_type or url.lower().endswith(".pdf")
+    is_pdf = "application/pdf" in content_type or is_pdf_url
     # Content-Type allowlist: only HTML and PDF are parseable here. Anything
     # else (octet-stream, video, etc.) is rejected before buffering/parsing.
     if not is_pdf and "text/html" not in content_type and "application/xhtml" not in content_type:
         return None, "", [], f"unsupported content-type: {content_type or 'unknown'}", status
 
     body = resp.content
-    if body is not None and len(body) > MAX_RESPONSE_BYTES:
-        return None, "", [], f"response body exceeds {MAX_RESPONSE_BYTES} bytes", status
+    if body is not None and len(body) > effective_max:
+        return None, "", [], f"response body exceeds {effective_max} bytes", status
 
     # Handle PDF
     if is_pdf:

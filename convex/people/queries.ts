@@ -24,9 +24,7 @@ export const getCount = query({
     // Single-pass table scan to build all counts concurrently, reducing read
     // amplification from 4x to 1x compared to running independent pagination loops.
     while (!isDone) {
-      const pageResult = await ctx.db
-        .query("documents")
-        .paginate({ numItems: 1000, cursor });
+      const pageResult = await ctx.db.query("documents").paginate({ numItems: 1000, cursor });
 
       for (const doc of pageResult.page) {
         total++;

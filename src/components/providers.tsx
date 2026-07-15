@@ -10,8 +10,8 @@ import { PreferencesProvider } from "@/components/preferences-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { retryWithBackoff } from "@/lib/retry";
 import { uetClerkAppearance } from "@/lib/clerk-theme";
+import { retryWithBackoff } from "@/lib/retry";
 
 const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
 
@@ -81,8 +81,6 @@ export function Providers({ children }: ProvidersProps) {
     if (!convexUrl) return null;
     return new ConvexReactClient(convexUrl);
   });
-
-
 
   const content = (
     <TooltipProvider delayDuration={300} skipDelayDuration={100}>
