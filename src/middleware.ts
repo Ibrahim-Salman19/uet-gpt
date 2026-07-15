@@ -1,16 +1,22 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-const isPublicRoute = createRouteMatcher([
+const PUBLIC_PATHS = [
   "/",
   "/unauthorized",
-  "/sign-in(.*)",
-  "/sign-up(.*)",
-  "/api/webhooks/clerk(.*)",
-  "/api/webhooks(.*)",
-  "/api/health(.*)",
-  "/api/cron(.*)",
-]);
+  "/robots.txt",
+  "/sitemap.xml",
+  "/llms.txt",
+  "/pricing.md",
+  "/favicon.ico",
+  "/sign-in",
+  "/sign-up",
+  "/api/webhooks",
+  "/api/health",
+  "/api/cron",
+];
+
+const isPublicRoute = createRouteMatcher(PUBLIC_PATHS.map((p) => `${p}(.*)`));
 
 const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
 
@@ -62,7 +68,7 @@ export default clerkMiddleware(async (auth, req) => {
 export const config = {
   matcher: [
     // Skip Next.js internals and all static files
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest|txt|xml)).*)",
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest|txt|xml|md)).*)",
     // Always run for API routes
     "/(api|trpc)(.*)",
     // Clerk Frontend API proxy routes
