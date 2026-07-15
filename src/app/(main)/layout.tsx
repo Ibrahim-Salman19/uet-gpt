@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { AmbientGlow } from "@/components/ambient-glow";
 import { BackdropWrapper } from "@/components/backdrop-wrapper";
 import { CommandPalette } from "@/components/command-palette";
@@ -8,6 +9,12 @@ import { PreferencesModal } from "@/components/preferences-modal";
 import { VoiceModalWrapper } from "@/components/voice-modal-wrapper";
 
 export const dynamic = "force-dynamic";
+
+// App routes are auth-gated, client-rendered shells with no crawlable content.
+// Keep them out of the index (child layouts inherit this unless overridden).
+export const metadata: Metadata = {
+  robots: { index: false, follow: true },
+};
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (

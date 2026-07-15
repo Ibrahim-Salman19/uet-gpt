@@ -15,51 +15,40 @@ export const metadata: Metadata = {
   },
 };
 
+const FAQ_ITEMS = [
+  {
+    q: "What is UET GPT?",
+    a: "UET GPT is an AI-powered assistant that answers questions about UET Taxila — admissions, fee structure, academic programs, departments, faculty, campus life, transport, hostels, scholarships, and more. It uses RAG (Retrieval-Augmented Generation) to provide accurate answers from official university data.",
+  },
+  {
+    q: "Is UET GPT free to use?",
+    a: "Yes, UET GPT is completely free for all UET Taxila students, faculty, and prospective applicants.",
+  },
+  {
+    q: "What can I ask UET GPT about?",
+    a: "You can ask about UET Taxila admissions, BS and MS fee structures, academic programs and departments, faculty information, hostel accommodation, transport routes, scholarship opportunities, campus facilities, examination schedules, and general university information.",
+  },
+  {
+    q: "How does UET GPT get its information?",
+    a: "UET GPT uses Retrieval-Augmented Generation (RAG) to pull information from official UET Taxila documents, including the university prospectus, fee schedules, departmental pages, and admission guidelines. All answers are grounded in verified university data.",
+  },
+  {
+    q: "Does UET GPT work for UET Lahore or other UET campuses?",
+    a: "UET GPT is currently focused on UET Taxila (University of Engineering and Technology, Taxila). It has been trained on official UET Taxila data including admissions information, fee structures, academic programs, and campus facilities specific to the Taxila campus.",
+  },
+] as const;
+
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
-  mainEntity: [
-    {
-      "@type": "Question",
-      name: "What is UET GPT?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "UET GPT is an AI-powered assistant that answers questions about UET Taxila — admissions, fee structure, academic programs, departments, faculty, campus life, transport, hostels, scholarships, and more. It uses RAG (Retrieval-Augmented Generation) to provide accurate answers from official university data.",
-      },
+  mainEntity: FAQ_ITEMS.map((item) => ({
+    "@type": "Question",
+    name: item.q,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: item.a,
     },
-    {
-      "@type": "Question",
-      name: "Is UET GPT free to use?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Yes, UET GPT is completely free for all UET Taxila students, faculty, and prospective applicants.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "What can I ask UET GPT about?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "You can ask about UET Taxila admissions, BS and MS fee structures, academic programs and departments, faculty information, hostel accommodation, transport routes, scholarship opportunities, campus facilities, examination schedules, and general university information.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "How does UET GPT get its information?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "UET GPT uses Retrieval-Augmented Generation (RAG) to pull information from official UET Taxila documents, including the university prospectus, fee schedules, departmental pages, and admission guidelines. All answers are grounded in verified university data.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "Does UET GPT work for UET Lahore or other UET campuses?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "UET GPT is currently focused on UET Taxila (University of Engineering and Technology, Taxila). It has been trained on official UET Taxila data including admissions information, fee structures, academic programs, and campus facilities specific to the Taxila campus.",
-      },
-    },
-  ],
+  })),
 };
 
 export default function LandingPage() {
@@ -93,7 +82,7 @@ export default function LandingPage() {
           </nav>
         </header>
 
-        <main className="flex-1">
+        <main id="main-content" className="flex-1">
           <section className="px-6 pt-24 pb-16 max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
               {APP_NAME}
@@ -169,13 +158,7 @@ export default function LandingPage() {
               Frequently Asked Questions
             </h2>
             <div className="space-y-4 mt-8">
-              {[
-                { q: "What is UET GPT?", a: "UET GPT is an AI-powered assistant that answers questions about UET Taxila — admissions, fee structure, academic programs, departments, faculty, campus life, transport, hostels, scholarships, and more. It uses RAG (Retrieval-Augmented Generation) to provide accurate answers from official university data." },
-                { q: "Is UET GPT free?", a: "Yes, UET GPT is completely free for all UET Taxila students, faculty, and prospective applicants." },
-                { q: "What can I ask about?", a: "Admissions, BS/MS fee structures, academic programs, departments, faculty, hostel accommodation, transport, scholarships, campus facilities, examination schedules, and more." },
-                { q: "How does UET GPT get its information?", a: "UET GPT uses RAG to pull information from official UET Taxila documents including the prospectus, fee schedules, departmental pages, and admission guidelines." },
-                { q: "Does it work for other UET campuses?", a: "Currently focused on UET Taxila. It has been trained on official UET Taxila data including admissions, fee structures, programs, and facilities specific to the Taxila campus." },
-              ].map((faq) => (
+              {FAQ_ITEMS.map((faq) => (
                 <details
                   key={faq.q}
                   className="p-4 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]"

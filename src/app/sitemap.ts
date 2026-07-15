@@ -1,46 +1,18 @@
 import type { MetadataRoute } from "next";
 
-const SITE_URL = "https://uet-gpt.vercel.app";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const siteUrl = SITE_URL;
-
+  // Only list publicly indexable, content-rich, canonical URLs. The app routes
+  // (/chat, /explore, /settings) are auth-gated client-rendered shells with no
+  // crawlable content, and the auth pages are thin — all excluded to avoid
+  // thin-content / soft-404 signals.
   return [
     {
-      url: siteUrl,
+      url: SITE_URL,
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 1,
-    },
-    {
-      url: `${siteUrl}/chat`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${siteUrl}/explore`,
-      lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 0.8,
-    },
-    {
-      url: `${siteUrl}/settings`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.3,
-    },
-    {
-      url: `${siteUrl}/sign-in`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.2,
-    },
-    {
-      url: `${siteUrl}/sign-up`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.2,
     },
   ];
 }

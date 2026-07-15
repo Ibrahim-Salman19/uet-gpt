@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const SITE_URL = "https://uet-gpt.vercel.app";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
 export default function robots(): MetadataRoute.Robots {
   const siteUrl = SITE_URL;
