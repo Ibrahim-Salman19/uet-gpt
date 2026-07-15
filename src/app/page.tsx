@@ -78,10 +78,10 @@ export default function LandingPage() {
         // biome-ignore lint/security/noDangerouslySetInnerHtml: static schema object safe for serialization
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <div className="flex min-h-screen flex-col bg-[var(--surface-base)] text-[var(--text-primary)] selection:bg-[var(--accent)] selection:text-[var(--accent-fg)] relative overflow-x-hidden">
+      <div className="flex min-h-screen flex-col bg-[var(--surface-base)] text-[var(--text-primary)] selection:bg-[var(--accent)] selection:text-[var(--accent-fg)]">
         {/* Background Mesh Overlay & Ambient Glow */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.008)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.008)_1px,transparent_1px)] bg-[size:36px_36px] pointer-events-none -z-10" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[640px] bg-[radial-gradient(circle_at_top,rgba(202,138,4,0.08)_0%,transparent_65%)] pointer-events-none -z-10" />
+        <div className="fixed inset-0 bg-[linear-gradient(rgba(255,255,255,0.008)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.008)_1px,transparent_1px)] bg-[size:36px_36px] pointer-events-none -z-10" aria-hidden="true" />
+        <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[640px] bg-[radial-gradient(circle_at_top,rgba(202,138,4,0.08)_0%,transparent_65%)] pointer-events-none -z-10" aria-hidden="true" />
 
         {/* Sticky Glass Navigation Header */}
         <header className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)]/70 bg-[var(--surface-base)]/50 backdrop-blur-md sticky top-0 z-50 animate-[fade-in_0.3s_ease-out_both]">
@@ -159,8 +159,7 @@ export default function LandingPage() {
           </section>
 
           {/* About Section */}
-          <section className="px-6 py-16 max-w-4xl mx-auto border-t border-[var(--border)]/30 relative">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-[radial-gradient(circle,rgba(202,138,4,0.035)_0%,transparent_70%)] pointer-events-none -z-10" />
+          <section className="px-6 py-16 max-w-4xl mx-auto border-t border-[var(--border)]/30">
 
             <h2 className="text-xl md:text-2xl font-bold text-center mb-2 tracking-tight text-[var(--text-primary)] font-mono uppercase">
               [ UET TAXILA OVERVIEW ]
