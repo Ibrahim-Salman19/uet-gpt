@@ -322,6 +322,59 @@ export default function UetTaxilaPage() {
             </div>
           </section>
 
+          <section className="px-6 py-16 max-w-4xl mx-auto">
+            <h2 className="text-2xl font-semibold text-center mb-4">
+              Explore UET Taxila Guides
+            </h2>
+            <p className="text-[#a1a1aa] text-center mb-8 max-w-2xl mx-auto">
+              Deep-dive into the topics UET GPT knows best
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Link
+                href="/uet-taxila/admissions"
+                className="p-5 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f] hover:border-[#3f3f46] transition-colors"
+              >
+                <h3 className="font-semibold text-base mb-1">
+                  Admissions &amp; ECAT
+                </h3>
+                <p className="text-sm text-[#a1a1aa]">
+                  Eligibility, merit, entry test, and how to apply.
+                </p>
+              </Link>
+              <Link
+                href="/uet-taxila/programs"
+                className="p-5 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f] hover:border-[#3f3f46] transition-colors"
+              >
+                <h3 className="font-semibold text-base mb-1">
+                  Programs &amp; Departments
+                </h3>
+                <p className="text-sm text-[#a1a1aa]">
+                  Six faculties, 14 departments, undergraduate to PhD.
+                </p>
+              </Link>
+              <Link
+                href="/uet-taxila/fee-structure"
+                className="p-5 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f] hover:border-[#3f3f46] transition-colors"
+              >
+                <h3 className="font-semibold text-base mb-1">Fee Structure</h3>
+                <p className="text-sm text-[#a1a1aa]">
+                  Tuition, hostel, and other charges, explained.
+                </p>
+              </Link>
+              <Link
+                href="/uet-gpt"
+                className="p-5 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f] hover:border-[#3f3f46] transition-colors"
+              >
+                <h3 className="font-semibold text-base mb-1">
+                  What is UET GPT?
+                </h3>
+                <p className="text-sm text-[#a1a1aa]">
+                  The open-source AI guide to UET Taxila.
+                </p>
+              </Link>
+            </div>
+          </section>
+
           <section className="px-6 py-16 max-w-3xl mx-auto">
             <h2 className="text-2xl font-semibold text-center mb-4">
               Frequently Asked Questions about UET Taxila
