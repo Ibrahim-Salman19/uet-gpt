@@ -12,15 +12,6 @@ interface ThemeContextType {
 
 const ThemeContext = React.createContext<ThemeContextType | null>(null);
 
-function getInitialTheme(): Theme {
-  if (typeof window !== "undefined") {
-    const stored = localStorage.getItem("theme");
-    if (stored === "dark" || stored === "light") return stored;
-    if (window.matchMedia("(prefers-color-scheme: dark)").matches) return "dark";
-  }
-  return "dark";
-}
-
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Always start with "dark" on both server and client to prevent hydration mismatch.
   // localStorage is read only after mount via useEffect below.
