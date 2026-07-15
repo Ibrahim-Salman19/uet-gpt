@@ -378,8 +378,19 @@ export const crawlWebhook = httpAction(async (ctx, request) => {
     let failedPages = 0;
     let skippedPages = 0;
 
-    for (const result of results) {
-      const outcome = await processSinglePage(result, url, taskId, ctx);
+    const CONCURRENCY_LIMIT = 8;
+    const outcomes: ("success" | "skip" | "fail")[] = [];
+    const activeTaskId = taskId!;
+
+    for (let i = 0; i < results.length; i += CONCURRENCY_LIMIT) {
+      const batch = results.slice(i, i + CONCURRENCY_LIMIT);
+      const batchOutcomes = await Promise.all(
+        batch.map((result: any) => processSinglePage(result, url, activeTaskId, ctx)),
+      );
+      outcomes.push(...batchOutcomes);
+    }
+
+    for (const outcome of outcomes) {
       if (outcome === "success") successfulPages++;
       else if (outcome === "fail") failedPages++;
       else skippedPages++;

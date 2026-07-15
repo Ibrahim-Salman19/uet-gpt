@@ -1,4 +1,4 @@
-import { timingSafeEqual } from "node:crypto";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { api } from "convex/_generated/api";
 import { ConvexHttpClient } from "convex/browser";
 import { headers } from "next/headers";
@@ -50,8 +50,12 @@ async function executeCronTask(
   if (task === "daily" || task === "all") {
     try {
       const cronSecret = process.env.CRON_SECRET || "";
+      const timestamp = Math.floor(Date.now() / 1000);
+      const signature = createHmac("sha256", cronSecret).update(`${timestamp}`).digest("hex");
+
       await convex.mutation(api.crawl.tasks.runStatsAggregation, {
-        secret: cronSecret,
+        timestamp,
+        signature,
       });
       results.dailyStats = { status: "ok" };
     } catch (error) {

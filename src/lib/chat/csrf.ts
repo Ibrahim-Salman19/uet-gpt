@@ -54,8 +54,9 @@ export function checkCsrf(req: NextRequest): NextResponse | null {
   if (secFetchSite === "same-origin" || secFetchSite === "none") {
     return null;
   }
-  // Any cross-site signal is a hard reject for this state-changing POST.
-  if (secFetchSite === "cross-site" || secFetchSite === "same-site") {
+  // Reject cross-site signals for state-changing POST requests. same-site is allowed
+  // to proceed to the Origin/Referer checks to respect multi-subdomain configurations.
+  if (secFetchSite === "cross-site") {
     return new NextResponse("Forbidden: CSRF check failed (sec-fetch-site)", { status: 403 });
   }
 

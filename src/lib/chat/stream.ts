@@ -1,4 +1,5 @@
 import { type LanguageModel, type ModelMessage, streamText } from "ai";
+import { LLM_FALLBACK_CHAIN } from "@/lib/llm-models";
 
 type StreamConfig = {
   system: string;
@@ -136,16 +137,16 @@ function streamWithStrippedThinking(
 }
 
 // Reasoning models require temperature 1.0 (they reject/ignore lower values).
-// Keyed on canonical model ids from the fallback chain. NOTE: this still matches
-// by id string; a fuller fix would carry an `isReasoning` flag on the model
-// registry (see models.ts / llm-models.ts) — tracked as a cross-cutting change.
-const REASONING_MODEL_IDS = new Set<string>(["gpt-oss-120b"]);
 const REASONING_TEMPERATURE = 1.0;
+
+function isReasoningModel(modelId: string): boolean {
+  return LLM_FALLBACK_CHAIN.some((c) => c.id === modelId && c.isReasoning);
+}
 
 function resolveTemperature(model: LanguageModel, defaultTemp: number): number {
   const m = model as { modelId?: string; model?: string };
   const id = m.modelId ?? m.model;
-  return id && REASONING_MODEL_IDS.has(id) ? REASONING_TEMPERATURE : defaultTemp;
+  return id && isReasoningModel(id) ? REASONING_TEMPERATURE : defaultTemp;
 }
 
 async function tryModelWithFallback(model: LanguageModel, config: StreamConfig) {

@@ -57,6 +57,11 @@ export async function searchUsers(query: string): Promise<{
     return { users: [], error: "Not authorized" };
   }
 
+  const rateCheck = await checkAdminActionRateLimit(admin.userId);
+  if (rateCheck && !rateCheck.success) {
+    return { users: [], error: "Rate limit exceeded. Try again later." };
+  }
+
   if (!query || query.trim().length < 2) {
     return { users: [], error: "Search query must be at least 2 characters" };
   }

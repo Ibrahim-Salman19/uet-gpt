@@ -104,7 +104,11 @@ export const insert = mutation({
       ],
     });
 
-    return result.messages[0]?._id as string;
+    const inserted = result.messages[0];
+    if (!inserted) {
+      throw new ConvexError("Failed to insert message: no message returned from agent component");
+    }
+    return inserted._id;
   },
 });
 

@@ -96,6 +96,10 @@ export const recordLatencySample = internalMutation({
   args: { latencyMs: v.number() },
   returns: v.null(),
   handler: async (ctx, args) => {
+    // NOTE: This is a read-then-write on a JSON array stored inside a single
+    // document, which risks lost updates under concurrent mutations. This is acceptable
+    // here because latency metrics are for approximate performance distribution, and
+    // the overhead of more complex transactional structures is not justified.
     const existing = await ctx.db
       .query("appSettings")
       .withIndex("by_key", (q) => q.eq("key", "observability_latency_samples"))

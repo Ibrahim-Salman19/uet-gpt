@@ -80,12 +80,22 @@ export default function LandingPage() {
       />
       <div className="flex min-h-screen flex-col bg-[var(--surface-base)] text-[var(--text-primary)] selection:bg-[var(--accent)] selection:text-[var(--accent-fg)]">
         {/* Background Mesh Overlay & Ambient Glow */}
-        <div className="fixed inset-0 bg-[linear-gradient(rgba(255,255,255,0.008)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.008)_1px,transparent_1px)] bg-[size:36px_36px] pointer-events-none -z-10" aria-hidden="true" />
-        <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[640px] bg-[radial-gradient(circle_at_top,rgba(202,138,4,0.08)_0%,transparent_65%)] pointer-events-none -z-10" aria-hidden="true" />
+        <div
+          className="fixed inset-0 bg-[linear-gradient(rgba(255,255,255,0.008)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.008)_1px,transparent_1px)] bg-[size:36px_36px] pointer-events-none -z-10"
+          aria-hidden="true"
+        />
+        <div
+          className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[640px] bg-[radial-gradient(circle_at_top,rgba(202,138,4,0.08)_0%,transparent_65%)] pointer-events-none -z-10"
+          aria-hidden="true"
+        />
 
         {/* Sticky Glass Navigation Header */}
         <header className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)]/70 bg-[var(--surface-base)]/50 backdrop-blur-md sticky top-0 z-50 animate-[fade-in_0.3s_ease-out_both]">
-          <Link href="/" className="flex items-center gap-3 select-none hover:opacity-90 transition-opacity" aria-label="UET GPT home">
+          <Link
+            href="/"
+            className="flex items-center gap-3 select-none hover:opacity-90 transition-opacity"
+            aria-label="UET GPT home"
+          >
             <div className="size-8 rounded-lg bg-gradient-to-br from-[var(--accent)] to-[var(--accent-hover)] flex items-center justify-center text-[var(--accent-fg)] shadow-[0_0_15px_rgba(202,138,4,0.18)]">
               <svg
                 className="h-[18px] w-[18px] text-[var(--accent-fg)]"
@@ -159,7 +169,6 @@ export default function LandingPage() {
 
           {/* About Section */}
           <section className="px-6 py-16 max-w-4xl mx-auto border-t border-[var(--border)]/30">
-
             <h2 className="text-xl md:text-2xl font-bold text-center mb-2 tracking-tight text-[var(--text-primary)] font-mono uppercase">
               [ UET TAXILA OVERVIEW ]
             </h2>
@@ -365,7 +374,10 @@ export default function LandingPage() {
               <Link href="/sign-in" className="hover:text-[var(--text-primary)] transition-colors">
                 Sign In
               </Link>
-              <Link href="/uet-taxila" className="hover:text-[var(--text-primary)] transition-colors">
+              <Link
+                href="/uet-taxila"
+                className="hover:text-[var(--text-primary)] transition-colors"
+              >
                 UET Taxila
               </Link>
             </nav>

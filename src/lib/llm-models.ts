@@ -12,11 +12,12 @@ export type LlmProvider = keyof typeof PROVIDER_ENV_KEYS;
 interface ModelConfig {
   id: string;
   provider: LlmProvider;
+  isReasoning?: boolean;
 }
 
 export const LLM_FALLBACK_CHAIN: ModelConfig[] = [
   { id: "meta-llama/llama-4-scout-17b-16e-instruct", provider: "groq" },
-  { id: "gpt-oss-120b", provider: "cerebras" },
+  { id: "gpt-oss-120b", provider: "cerebras", isReasoning: true },
   { id: "llama-3.1-8b-instant", provider: "groq" },
   { id: "gemini-2.5-flash", provider: "google" },
 ];

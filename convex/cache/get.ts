@@ -123,20 +123,22 @@ async function findMatchingCacheEntry(
   const cached = await getCachedEntry(ctx, queryEmbedding);
   if (!cached) return null;
 
-  const isStale = await checkSourceStaleness(ctx, cached.entry);
+  const [isStale, sourceExistsResult] = await Promise.all([
+    checkSourceStaleness(ctx, cached.entry),
+    cached.entry.sourceEntryIds && cached.entry.sourceEntryIds.length > 0
+      ? ctx.runQuery(internal.cache.internal_queries.chunksExistByRagIds, {
+          ragIds: cached.entry.sourceEntryIds,
+        })
+      : Promise.resolve(null),
+  ]);
+
   if (isStale) return null;
 
-  // Defensive: verify source chunks still exist (orphaned by document deletion)
-  if (cached.entry.sourceEntryIds && cached.entry.sourceEntryIds.length > 0) {
-    const sourceExists = await ctx.runQuery(internal.cache.internal_queries.chunksExistByRagIds, {
-      ragIds: cached.entry.sourceEntryIds,
+  if (sourceExistsResult && !sourceExistsResult.every(Boolean)) {
+    await ctx.runMutation(internal.cache.internal_queries.deleteCacheEntry, {
+      id: cached.entryId,
     });
-    if (!sourceExists.every(Boolean)) {
-      await ctx.runMutation(internal.cache.internal_queries.deleteCacheEntry, {
-        id: cached.entryId,
-      });
-      return null;
-    }
+    return null;
   }
 
   await ctx.runMutation(internal.cache.internal_queries.incrementHits, { id: cached.entryId });

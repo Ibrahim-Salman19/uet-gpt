@@ -108,7 +108,11 @@ export const aggregateDailyStats = internalMutation({
 });
 
 export const runStatsAggregation = mutation({
-  args: { secret: v.optional(v.string()) },
+  args: {
+    secret: v.optional(v.string()),
+    timestamp: v.optional(v.number()),
+    signature: v.optional(v.string()),
+  },
   returns: v.null(),
   handler: async (ctx, args) => {
     // SECURITY: only ONE purpose-specific secret (CRON_SECRET) may authorize this
@@ -117,6 +121,39 @@ export const runStatsAggregation = mutation({
     // primitive in ./utils) instead of `===` to avoid a timing side-channel on the
     // shared secret, matching how the webhook handlers compare secrets.
     const cronSecret = process.env.CRON_SECRET;
+
+    if (args.timestamp && args.signature && cronSecret) {
+      // 1. Time-window validation (must be within last 5 minutes / 300 seconds)
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      const timeDiff = Math.abs(nowSeconds - args.timestamp);
+      if (timeDiff <= 300) {
+        try {
+          const encoder = new TextEncoder();
+          const key = await crypto.subtle.importKey(
+            "raw",
+            encoder.encode(cronSecret),
+            { name: "HMAC", hash: "SHA-256" },
+            false,
+            ["sign"],
+          );
+          const signatureBuffer = await crypto.subtle.sign(
+            "HMAC",
+            key,
+            encoder.encode(`${args.timestamp}`),
+          );
+          const expectedSignature = Array.from(new Uint8Array(signatureBuffer))
+            .map((b) => b.toString(16).padStart(2, "0"))
+            .join("");
+
+          if (constantTimeCompare(args.signature, expectedSignature)) {
+            await ctx.runMutation(internal.crawl.tasks.aggregateDailyStats);
+            return null;
+          }
+        } catch (err) {
+          console.error("Cron signature generation failed:", err);
+        }
+      }
+    }
 
     if (args.secret && cronSecret && constantTimeCompare(args.secret, cronSecret)) {
       await ctx.runMutation(internal.crawl.tasks.aggregateDailyStats);
@@ -135,6 +172,6 @@ export const runStatsAggregation = mutation({
       }
     }
 
-    throw new ConvexError("Unauthorized: admin or valid secret required");
+    throw new ConvexError("Unauthorized: admin or valid secret/signature required");
   },
 });
