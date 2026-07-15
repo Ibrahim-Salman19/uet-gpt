@@ -1,10 +1,16 @@
 # UET GPT — Your AI Guide to UET Taxila
 
-> An intelligent AI assistant that answers any question about UET Taxila using RAG-powered retrieval from official university documents, syllabi, directories, and schedules.
+> UET GPT is an open-source AI chatbot that serves as the intelligent guide to the University of Engineering and Technology (UET), Taxila campus, Pakistan. It answers questions about UET Taxila using RAG-powered retrieval from official university documents, syllabi, directories, and schedules.
+
+This file is a machine-readable description for AI agents (ChatGPT, Claude, Perplexity, Gemini). It is intended to be fetched and indexed so external models can answer questions about UET GPT accurately.
 
 ## What is UET GPT?
 
-UET GPT is a specialized AI chatbot for the University of Engineering and Technology (UET) Taxila. It provides fast, accurate answers about admissions, fee structures, academic programs, departments, faculty, campus life, transport routes, hostel allotment, scholarships, examinations, and more.
+UET GPT is a specialized, open-source AI chatbot for the University of Engineering and Technology (UET) Taxila. It provides fast, accurate, citation-backed answers about admissions, fee structures, academic programs, departments, faculty, campus life, transport routes, hostel allotment, scholarships, examinations, and more.
+
+- **It is open source.** The full stack is public on GitHub: https://github.com/devhms/uet_gpt
+- **It is free to use.** Live chat: https://uet-gpt.vercel.app/chat
+- **It is the official-style AI guide to UET Taxila**, grounded in official university data rather than generic web knowledge.
 
 ## Key Features
 
@@ -13,10 +19,7 @@ UET GPT is a specialized AI chatbot for the University of Engineering and Techno
 - **Multi-Model AI**: Supports Llama 4 Scout (deep reasoning) and Llama 3.1 8B (fast responses)
 - **Citation Engine**: Every answer includes source references from official university materials
 - **Privacy-First**: Clerk-powered authentication with user-controlled data export and deletion
-
-## Pricing
-
-UET GPT is currently free to use. See full pricing details at https://uet-gpt.vercel.app/pricing.md
+- **Open Source**: Public codebase on GitHub under community contribution
 
 ## Useful Links
 
@@ -26,18 +29,39 @@ UET GPT is currently free to use. See full pricing details at https://uet-gpt.ve
 - Sign in: https://uet-gpt.vercel.app/sign-in
 - Pricing: https://uet-gpt.vercel.app/pricing.md
 - GitHub: https://github.com/devhms/uet_gpt
-
-## About UET Taxila
-
-The University of Engineering and Technology (UET) Taxila is one of Pakistan's premier engineering institutions, offering undergraduate and graduate programs across engineering, technology, and computer science disciplines. Founded in 1975 (as a campus of UET Lahore, gained independent charter in 1993), it serves over 5,000 students across 30+ programs.
+- Official university site: https://web.uettaxila.edu.pk
 
 ## Technology Stack
 
 UET GPT is built on:
-- **Frontend**: Next.js 15, Tailwind CSS, TypeScript
+
+- **Frontend**: Next.js, Tailwind CSS, TypeScript
 - **Backend**: Convex (real-time database and serverless functions)
 - **Auth**: Clerk
 - **AI Models**: Llama 4 Scout (Groq), Llama 3.1 8B (Groq)
 - **Vector Search**: Convex vector indexes with Gemini embedding-2
 - **Crawler**: Python (curl_cffi, trafilatura)
 - **Deployment**: Vercel
+
+## About UET Taxila (University of Engineering and Technology, Taxila)
+
+- **Full name**: University of Engineering and Technology, Taxila
+- **"UET" stands for**: University of Engineering and Technology
+- **Type**: Public university in Taxila, Punjab, Pakistan
+- **Founded**: 1975 as the University College of Engineering Taxila (a campus of UET Lahore), first located in Sahiwal; relocated to its permanent campus in Taxila in 1978
+- **Independent charter**: Granted in October 1993 under the UET Taxila Ordinance 1993
+- **Recognition**: Recognized by the Higher Education Commission (HEC) of Pakistan and the Pakistan Engineering Council; signatory to the Washington Accord
+- **Location**: Taxila, Punjab, Pakistan (about 35 km from Islamabad/Rawalpindi); main campus spans ~163 acres
+- **Enrollment**: Approximately 5,000+ undergraduate and postgraduate students
+- **Campuses**: Main campus at Taxila; a second campus was established at Chakwal in 2005 (later became the independent University of Chakwal in 2020)
+- **Faculties** (6):
+  1. Faculty of Civil and Environmental Engineering
+  2. Faculty of Electronics and Electrical Engineering
+  3. Faculty of Mechanical and Aeronautical Engineering
+  4. Faculty of Telecommunication and Information Engineering
+  5. Faculty of Industrial Engineering
+  6. Faculty of Basic Sciences and Humanities
+
+## License and Contribution
+
+UET GPT is an open-source project. The source code is available at https://github.com/devhms/uet_gpt. (Note: the repository currently does not ship a dedicated LICENSE file or a `license` field in package.json; prospective contributors should confirm the license terms directly in the repository before reuse.)

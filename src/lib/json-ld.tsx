@@ -1,6 +1,6 @@
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
-const organizationSchema = {
+export const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
   "@id": `${siteUrl}/#organization`,
@@ -14,12 +14,16 @@ const organizationSchema = {
     "@type": "Organization",
     name: "UET GPT Team",
   },
-  sameAs: [
-    "https://github.com/devhms/uet_gpt",
-  ],
+  sameAs: ["https://github.com/devhms/uet_gpt"],
+  logo: {
+    "@type": "ImageObject",
+    url: `${siteUrl}/uet-logo.jpg`,
+    width: 512,
+    height: 512,
+  },
 };
 
-const websiteSchema = {
+export const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
   "@id": `${siteUrl}/#website`,
@@ -39,16 +43,22 @@ const websiteSchema = {
   },
 };
 
-const softwareSchema = {
+export const softwareSchema = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "@id": `${siteUrl}/#software`,
   name: "UET GPT",
   operatingSystem: "Web",
-  applicationCategory: "EducationalApplication",
+  applicationCategory: "Utilities",
+  applicationSubCategory: "Chatbot",
   description:
-    "An intelligent AI assistant that answers any question about UET Taxila using RAG-powered retrieval from official university documents.",
+    "An AI assistant and chatbot for UET Taxila students that answers questions about admissions, fee structure, academic programs, departments, faculty, and campus life using RAG-powered retrieval from official university documents.",
   url: siteUrl,
+  about: {
+    "@type": "CollegeOrUniversity",
+    name: "University of Engineering and Technology, Taxila",
+    url: "https://web.uettaxila.edu.pk",
+  },
   offers: {
     "@type": "Offer",
     price: "0",

@@ -1,9 +1,28 @@
-# UET Taxila GPT
+# UET GPT — Your AI Guide to UET Taxila
 
-An autonomous RAG (Retrieval-Augmented Generation) chatbot for UET Taxila. It
+> An intelligent AI chatbot that answers any question about the University of Engineering and Technology (UET) Taxila — admissions, fee structure, academic programs, departments, faculty, campus life, transport, hostels, scholarships, and more. Powered by RAG over official UET Taxila data.
+
+**One-line description (SEO):** UET GPT is an AI chatbot that gives instant, cited answers about UET Taxila — admissions, fees, programs, faculty, and campus life — using RAG over the university's official data.
+
+UET GPT is an autonomous RAG (Retrieval-Augmented Generation) chatbot for UET Taxila. It
 answers questions about admissions, departments, fees, exams, faculty, and
 campus life using a hybrid search + LLM generation pipeline over a corpus of
 crawled university web pages and ingested PDFs.
+
+Live app: [https://uet-gpt.vercel.app](https://uet-gpt.vercel.app) · Source: [github.com/devhms/uet_gpt](https://github.com/devhms/uet_gpt) · [Press kit](https://uet-gpt.vercel.app/press-kit.md)
+
+## What is UET GPT?
+
+UET GPT is a specialized AI assistant for the University of Engineering and Technology (UET), Taxila — one of Pakistan's premier engineering institutions, founded as a UET Lahore campus in 1975 and granted its independent charter in 1993, now serving 5,000+ students across 30+ programs. Instead of digging through scattered university web pages and PDFs, students, applicants, parents, and faculty ask UET GPT in plain language and get fast, accurate answers backed by citations from official UET Taxila sources.
+
+Key things to know:
+
+- **Built for UET Taxila** — every answer is grounded in UET Taxila's official website (`web.uettaxila.edu.pk`), admissions portal (`admissions.uettaxila.edu.pk`), and ingested documents.
+- **Retrieval-Augmented Generation (RAG)** — answers are retrieved from a continuously crawled, indexed knowledge base, not hallucinated from generic model memory.
+- **Cited and verifiable** — responses link back to the official university material they came from.
+- **Open source** — the full stack is public on [GitHub](https://github.com/devhms/uet_gpt) under an open license, and is free to use.
+
+UET GPT is currently free to use at [https://uet-gpt.vercel.app](https://uet-gpt.vercel.app).
 
 ## Stack
 

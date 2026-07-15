@@ -21,7 +21,10 @@ const title = `${APP_NAME} — ${APP_TAGLINE}`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title,
+  title: {
+    default: title,
+    template: `%s | ${APP_NAME}`,
+  },
   description: APP_DESCRIPTION,
   keywords: APP_KEYWORDS,
   authors: [{ name: "UET GPT Team" }],
