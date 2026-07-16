@@ -5,7 +5,7 @@ import { internalAction } from "../_generated/server";
 import { recordTiming } from "../observability/metrics";
 import { EMBEDDING_DIMENSION } from "./dimension";
 
-// gemini-embedding-2 — stable as of May 2026
+// gemini-embedding-2 - stable as of May 2026
 // Dimensions: 768 (MRL supports 768/1536/3072)
 // Context: 8192 tokens
 // Free tier: ~60 RPM, ~1500 RPD (post-Dec 2025 cuts)

@@ -42,7 +42,7 @@ try {
     // SECURITY: write the secret to a temp file that is ALWAYS removed via the
     // finally block below, so an exception mid-loop can never leave a plaintext
     // secrets file (_temp_env_val.txt) on disk. The value is passed to Vercel
-    // over stdin redirection — never via --value (process-table exposure).
+    // over stdin redirection - never via --value (process-table exposure).
     try {
       fs.writeFileSync(tempFilePath, value, { encoding: 'utf8', mode: 0o600 });
 

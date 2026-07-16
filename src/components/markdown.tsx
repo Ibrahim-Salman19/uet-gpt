@@ -21,9 +21,9 @@ const SAFE_URL_SCHEMES = new Set(["http:", "https:", "mailto:", "tel:"]);
 function isSafeHref(href: string | undefined): href is string {
   if (!href) return false;
   const trimmed = href.trim();
-  // Relative or fragment/query links have no scheme — treat as safe.
+  // Relative or fragment/query links have no scheme - treat as safe.
   if (/^(#|\/|\.\/|\.\.\/|\?)/.test(trimmed)) return true;
-  // No scheme at all (e.g. "example.com/path") — safe.
+  // No scheme at all (e.g. "example.com/path") - safe.
   if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(trimmed)) return true;
   try {
     const scheme = new URL(trimmed, "https://example.invalid").protocol;

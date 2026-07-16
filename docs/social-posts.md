@@ -1,4 +1,4 @@
-# UET GPT — Social & Outreach Post Drafts
+# UET GPT - Social & Outreach Post Drafts
 
 Ready-to-post drafts for sharing UET GPT with students, the Pakistani tech/education community, and developers. Each post features **UET GPT** and **UET Taxila** naturally and includes relevant hashtags.
 
@@ -8,11 +8,11 @@ Ready-to-post drafts for sharing UET GPT with students, the Pakistani tech/educa
 
 ## LinkedIn
 
-**Post 1 — Launch / introduction**
+**Post 1 - Launch / introduction**
 
-> Heads up, UET Taxila students and applicants: we built **UET GPT** — an open-source AI chatbot that answers any question about **UET Taxila** using official university data.
+> Heads up, UET Taxila students and applicants: we built **UET GPT** - an open-source AI chatbot that answers any question about **UET Taxila** using official university data.
 >
-> Ask it about admissions, fee structures, academic programs, departments, hostels, transport, scholarships, or exams — and get a citation-backed answer instead of digging through scattered PDFs.
+> Ask it about admissions, fee structures, academic programs, departments, hostels, transport, scholarships, or exams - and get a citation-backed answer instead of digging through scattered PDFs.
 >
 > It's free to use and the code is fully open source.
 >
@@ -21,7 +21,7 @@ Ready-to-post drafts for sharing UET GPT with students, the Pakistani tech/educa
 >
 > #UET #UETTaxila #AI #EdTech #Pakistan #Engineering #OpenSource
 
-**Post 2 — Admissions season angle**
+**Post 2 - Admissions season angle**
 
 > Admissions season at **UET Taxila** is stressful enough. **UET GPT** turns the prospectus, fee schedules, and merit lists into plain-English answers.
 >
@@ -39,9 +39,9 @@ Ready-to-post drafts for sharing UET GPT with students, the Pakistani tech/educa
 
 **Post 1**
 
-> Introducing **UET GPT** — an open-source AI chatbot for **UET Taxila** students and applicants.
+> Introducing **UET GPT** - an open-source AI chatbot for **UET Taxila** students and applicants.
 >
-> Admissions, fees, departments, hostels, transport, scholarships — all answered from official UET Taxila data, with citations.
+> Admissions, fees, departments, hostels, transport, scholarships - all answered from official UET Taxila data, with citations.
 >
 > Free + open source: https://uet-gpt.vercel.app
 > Code: https://github.com/devhms/uet_gpt
@@ -52,7 +52,7 @@ Ready-to-post drafts for sharing UET GPT with students, the Pakistani tech/educa
 
 > We built an AI guide for **UET Taxila** 🧵
 >
-> **UET GPT** answers questions from official university sources — no more hunting through PDFs.
+> **UET GPT** answers questions from official university sources - no more hunting through PDFs.
 >
 > → RAG over web.uettaxila.edu.pk + admissions portal
 > → Every answer cited
@@ -67,7 +67,7 @@ Ready-to-post drafts for sharing UET GPT with students, the Pakistani tech/educa
 
 **r/Pakistan**
 
-> **Title:** I built UET GPT — a free, open-source AI chatbot that answers questions about UET Taxila
+> **Title:** I built UET GPT - a free, open-source AI chatbot that answers questions about UET Taxila
 >
 > **Body:**
 > Salam everyone. I'm a dev and I built **UET GPT**, an open-source AI chatbot that helps current and prospective **UET Taxila** students get fast, accurate answers about admissions, fee structures, departments, faculty, hostels, transport, and scholarships.
@@ -84,7 +84,7 @@ Ready-to-post drafts for sharing UET GPT with students, the Pakistani tech/educa
 
 **UET-specific subreddit (e.g., r/UETTaxila or relevant Facebook/WhatsApp groups)**
 
-> **Title:** UET GPT — ask anything about UET Taxila, get cited answers
+> **Title:** UET GPT - ask anything about UET Taxila, get cited answers
 >
 > **Body:**
 > Hey folks 👋 I made **UET GPT**, a free AI chatbot trained on official **UET Taxila** data. Great for quick lookups on fees, exam schedules, transport routes, hostel allotment, and admissions.
@@ -105,13 +105,13 @@ Ready-to-post drafts for sharing UET GPT with students, the Pakistani tech/educa
 
 **Outline:**
 
-1. **Intro** — The problem: UET Taxila info is scattered across web pages and PDFs. Who this helps (students, applicants, parents).
-2. **What is UET GPT?** — A plain-language definition; the "Your AI Guide to UET Taxila" positioning.
-3. **Architecture overview** — Next.js + Convex + Clerk; Vercel AI SDK multi-model fallback; Python async crawler; vector search + Gemini embeddings.
-4. **The RAG pipeline** — Crawl → chunk → embed → retrieve (hybrid vector + BM25) → rerank → generate with citations.
-5. **Why citations matter** — Anti-hallucination and grounding in official UET Taxila sources.
-6. **Open source & what's next** — Link the GitHub repo, call for contributors, and the roadmap.
-7. **Try it / links** — Live app, GitHub, press kit.
+1. **Intro** - The problem: UET Taxila info is scattered across web pages and PDFs. Who this helps (students, applicants, parents).
+2. **What is UET GPT?** - A plain-language definition; the "Your AI Guide to UET Taxila" positioning.
+3. **Architecture overview** - Next.js + Convex + Clerk; Vercel AI SDK multi-model fallback; Python async crawler; vector search + Gemini embeddings.
+4. **The RAG pipeline** - Crawl → chunk → embed → retrieve (hybrid vector + BM25) → rerank → generate with citations.
+5. **Why citations matter** - Anti-hallucination and grounding in official UET Taxila sources.
+6. **Open source & what's next** - Link the GitHub repo, call for contributors, and the roadmap.
+7. **Try it / links** - Live app, GitHub, press kit.
 
 **Suggested tags:** `#ai #rag #typescript #nextjs #pakistan #edtech #opensource`
 

@@ -39,7 +39,7 @@ const crawlValidator = v.object({
 });
 
 /**
- * Document stats — reads from precomputed dashboardStats table.
+ * Document stats - reads from precomputed dashboardStats table.
  */
 export const documentStats = query({
   args: {},
@@ -60,7 +60,7 @@ export const documentStats = query({
 });
 
 /**
- * User stats — reads from precomputed dashboardStats table.
+ * User stats - reads from precomputed dashboardStats table.
  */
 export const userStats = query({
   args: { refTime: v.optional(v.number()) },
@@ -79,7 +79,7 @@ export const userStats = query({
 });
 
 /**
- * Feedback stats — uses ONE .take() for recent 10 feedback items.
+ * Feedback stats - uses ONE .take() for recent 10 feedback items.
  */
 export const feedbackStats = query({
   args: {},
@@ -108,7 +108,7 @@ export const feedbackStats = query({
 });
 
 /**
- * Feedback count — reads from precomputed dashboardStats table.
+ * Feedback count - reads from precomputed dashboardStats table.
  */
 export const feedbackCount = query({
   args: {},
@@ -124,7 +124,7 @@ export const feedbackCount = query({
 });
 
 /**
- * Crawl stats — uses ONE .take() for recent 5.
+ * Crawl stats - uses ONE .take() for recent 5.
  */
 export const crawlStats = query({
   args: {},
@@ -154,7 +154,7 @@ export const crawlStats = query({
 });
 
 /**
- * Crawl count — reads from precomputed dashboardStats table.
+ * Crawl count - reads from precomputed dashboardStats table.
  */
 export const crawlCount = query({
   args: {},
@@ -170,7 +170,7 @@ export const crawlCount = query({
 });
 
 /**
- * Cache stats — reads from precomputed dashboardStats.
+ * Cache stats - reads from precomputed dashboardStats.
  */
 export const cacheStats = query({
   args: {},
@@ -186,7 +186,7 @@ export const cacheStats = query({
 });
 
 /**
- * Consolidated dashboard overview data — fetches all metrics in a single request.
+ * Consolidated dashboard overview data - fetches all metrics in a single request.
  */
 export const getOverviewData = query({
   args: {},
@@ -306,7 +306,7 @@ export const computeDashboardStats = internalMutation({
       crawlCursor = page.continueCursor;
     }
 
-    // 5. Compute cacheStats — semanticCache rows are large (each carries a 768-float
+    // 5. Compute cacheStats - semanticCache rows are large (each carries a 768-float
     // queryEmbedding + optional alternateEmbeddings + full response), so scanning the
     // whole table is the dominant DB-bandwidth cost and grows O(cacheRows). Re-count it
     // at most ~4×/day (every 6th UTC hour) and reuse the last known count otherwise; the

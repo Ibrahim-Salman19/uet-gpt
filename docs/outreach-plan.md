@@ -1,8 +1,8 @@
-# UET GPT — Discoverability & Outreach Plan
+# UET GPT - Discoverability & Outreach Plan
 
 > Goal: earn high-authority backlinks + citations so UET GPT (https://uet-gpt.vercel.app) ranks for "UET Taxila", "UET GPT", "UET admissions", and gets cited by AI agents (ChatGPT / Perplexity / Claude).
 > Repo: https://github.com/devhms/uet_gpt · Live: https://uet-gpt.vercel.app
-> Current GitHub description: *"UET GPT — AI-powered RAG chatbot for University of Engineering and Technology, Taxila. Get instant answers about admissions, fees, programs, faculty, and campus life."*
+> Current GitHub description: *"UET GPT - AI-powered RAG chatbot for University of Engineering and Technology, Taxila. Get instant answers about admissions, fees, programs, faculty, and campus life."*
 
 ---
 
@@ -21,7 +21,7 @@ Priority = expected SEO/citation value × relevance × effort. P1 = do first.
 | 7 | P2 | **BetaList** | betalist.com/submit | Startup early-access listing | Account (free, review queue) | Dofollow |
 | 8 | P2 | **AlternativeTo** | alternativeto.net | List as alternative to "Google / university site search"; tag open-source | Account (free) | Dofollow |
 | 9 | P2 | **uNeed** | uneed.best | AI tool submit | Account (free) | Dofollow |
-| 10 | P2 | **dev.to** | dev.to | Publish "How we built UET GPT — an open-source RAG chatbot for UET Taxila" (links back) | Account (free) | Dofollow |
+| 10 | P2 | **dev.to** | dev.to | Publish "How we built UET GPT - an open-source RAG chatbot for UET Taxila" (links back) | Account (free) | Dofollow |
 | 11 | P2 | **Hashnode** | hashnode.com | Same article cross-posted, canonical to dev.to | Account (free) | Dofollow |
 | 12 | P3 | **AIToolsRecap** | aitoolsrecap.com | Tool submit for editorial coverage | Form/email (free) | Dofollow |
 | 13 | P3 | **Submit AI Tools** | submitaitools.org/submit-your-ai-tool | Free AI directory listing | Form (free) | Dofollow |
@@ -41,17 +41,17 @@ Priority = expected SEO/citation value × relevance × effort. P1 = do first.
 
 ## 2. Ready-to-paste copy
 
-### SHORT description (~160 chars — use for Product Hunt tagline, directory one-liners, HN title support)
+### SHORT description (~160 chars - use for Product Hunt tagline, directory one-liners, HN title support)
 
 > UET GPT is a free, open-source AI chatbot for UET Taxila that answers questions on admissions, fees, programs, faculty, and campus life using official university data.
 
 (159 chars)
 
-### LONG description (~600 chars — use for directory "about" fields, dev.to intro, LinkedIn/Reddit body)
+### LONG description (~600 chars - use for directory "about" fields, dev.to intro, LinkedIn/Reddit body)
 
 > UET GPT is a free, open-source AI chatbot built as the intelligent guide to the University of Engineering and Technology (UET), Taxila, Pakistan. It uses a Retrieval-Augmented Generation (RAG) pipeline that crawls and indexes official UET Taxila web pages and documents, then answers student questions in plain language with source citations.
 >
-> Students can ask about admissions, fee structures, academic programs, departments, faculty, transport routes, hostels, scholarships, and examinations — and get instant, citation-backed answers instead of digging through PDFs. The stack is Next.js + Convex (vector search) + Clerk auth, with a multi-model LLM fallback chain (Groq → Cerebras → Gemini).
+> Students can ask about admissions, fee structures, academic programs, departments, faculty, transport routes, hostels, scholarships, and examinations - and get instant, citation-backed answers instead of digging through PDFs. The stack is Next.js + Convex (vector search) + Clerk auth, with a multi-model LLM fallback chain (Groq → Cerebras → Gemini).
 >
 > Try it free at https://uet-gpt.vercel.app or explore the open-source code at https://github.com/devhms/uet_gpt.
 
@@ -59,7 +59,7 @@ Priority = expected SEO/citation value × relevance × effort. P1 = do first.
 
 ### Show HN post body (paste after title `Show HN: UET GPT – open-source RAG chatbot for UET Taxila`)
 
-> Hi HN! I built UET GPT, an open-source RAG chatbot that answers questions about UET Taxila (a major engineering university in Pakistan) — admissions, fees, programs, faculty, hostels, scholarships.
+> Hi HN! I built UET GPT, an open-source RAG chatbot that answers questions about UET Taxila (a major engineering university in Pakistan) - admissions, fees, programs, faculty, hostels, scholarships.
 >
 > It continuously crawls official university pages/PDFs, chunks them, and retrieves with hybrid vector + BM25 search + reranking, then generates citation-backed answers. Stack: Next.js, Convex (vector index), Clerk, Vercel AI SDK with a Groq→Cerebras→Gemini fallback.
 >
@@ -72,7 +72,7 @@ Priority = expected SEO/citation value × relevance × effort. P1 = do first.
 
 **Description (replace current):**
 ```
-UET GPT — open-source RAG chatbot & intelligent guide to UET Taxila (Pakistan). Instant, citation-backed answers on admissions, fees, programs, faculty, and campus life.
+UET GPT - open-source RAG chatbot & intelligent guide to UET Taxila (Pakistan). Instant, citation-backed answers on admissions, fees, programs, faculty, and campus life.
 ```
 
 **Topics to set** (add the missing ones; keep existing relevant tags):
@@ -82,10 +82,10 @@ education, edtech, pakistan, student-help, retrieval-augmented-generation,
 nextjs, convex, clerk, vector-search, open-source
 ```
 
-**Run by user** (these mutate the repo — DO NOT run automatically):
+**Run by user** (these mutate the repo - DO NOT run automatically):
 ```bash
 gh repo edit devhms/uet_gpt \
-  --description "UET GPT — open-source RAG chatbot & intelligent guide to UET Taxila (Pakistan). Instant, citation-backed answers on admissions, fees, programs, faculty, and campus life."
+  --description "UET GPT - open-source RAG chatbot & intelligent guide to UET Taxila (Pakistan). Instant, citation-backed answers on admissions, fees, programs, faculty, and campus life."
 
 gh repo edit devhms/uet_gpt \
   --add-topic uet-gpt --add-topic uet-taxila --add-topic uet \
@@ -110,10 +110,10 @@ gh repo edit devhms/uet_gpt \
 - Writing + publishing the dev.to / Hashnode article (can be drafted by AI, must be posted by you).
 - Reddit posts (need an aged account; value-first, not spam).
 - LinkedIn / Facebook posts to university communities.
-- **Official UET Taxila link request** — email ORIC/webmaster (highest-value backlink; purely manual outreach).
+- **Official UET Taxila link request** - email ORIC/webmaster (highest-value backlink; purely manual outreach).
 
 **Automatable / scriptable (by an agent, no account risk):**
-- Running the `gh repo edit` commands above (owner-authed, read-only-safe mutation of your own repo) — flagged "run by user" but trivially automatable once you approve.
+- Running the `gh repo edit` commands above (owner-authed, read-only-safe mutation of your own repo) - flagged "run by user" but trivially automatable once you approve.
 - Generating the submission kit assets: logo (512px), 3 screenshots, 60-char tagline, 150-word description (already provided above).
 - Drafting the dev.to/Hashnode article and Reddit/LinkedIn post text.
 - Maintaining a tracking spreadsheet (directory, date, listing URL, free/paid).

@@ -28,10 +28,10 @@ Set up a working Convex project as fast as possible.
 2. If new project, pick a template and scaffold with `npm create convex@latest`
 3. If existing app, install `convex` and wire up the provider
 4. Run `npx convex dev --once` to provision a local anonymous deployment, push
-   the current `convex/` code, typecheck it, and regenerate types — all in one
+   the current `convex/` code, typecheck it, and regenerate types - all in one
    shot, exiting cleanly. The output tells the agent whether the schema and
    functions are valid.
-5. Ask the user (or, for cloud agents, start in the background) `npm run dev` —
+5. Ask the user (or, for cloud agents, start in the background) `npm run dev` -
    Convex templates wire the watcher and the frontend into a single command. If
    the project has no combined dev script, use `npx convex dev` for the watcher
    and run the frontend separately.
@@ -86,7 +86,7 @@ npm install
 
 ### Provision the deployment and push code
 
-Run this yourself — it is a one-shot command that exits cleanly:
+Run this yourself - it is a one-shot command that exits cleanly:
 
 ```bash
 npx convex dev --once
@@ -117,7 +117,7 @@ loop while the user-launched `npm run dev` is not in use.
 If the template's `package.json` defines a `predev` script (Convex Auth
 templates and similar do), `npm run predev` runs `convex init` plus any one-time
 setup (e.g. minting auth keys). Use it _in addition to_ `convex dev --once` when
-present — `predev` handles the one-time setup, `convex dev --once` pushes and
+present - `predev` handles the one-time setup, `convex dev --once` pushes and
 validates the code.
 
 ### Start the dev loop
@@ -130,9 +130,9 @@ the Next.js equivalent). That is what the user should run.
 npm run dev
 ```
 
-If the project does not have a combined `dev` script — e.g. the `bare` template,
+If the project does not have a combined `dev` script - e.g. the `bare` template,
 or an existing app where you haven't wired the frontend dev server into Convex's
-`--start` flag — the user can run the Convex watcher directly:
+`--start` flag - the user can run the Convex watcher directly:
 
 ```bash
 npx convex dev
@@ -198,16 +198,16 @@ typecheck it. This is one-shot and exits:
 npx convex dev --once
 ```
 
-The output tells you whether the schema and functions are valid — use it as your
+The output tells you whether the schema and functions are valid - use it as your
 feedback loop while iterating.
 
 Then ask the user to start the watcher (or, for cloud/headless agents, start it
 in the background). You have two options:
 
-- **Wire Convex into `npm run dev`** — change the existing app's `dev` script to
+- **Wire Convex into `npm run dev`** - change the existing app's `dev` script to
   `convex dev --start '<existing dev command>'`. That's the standard pattern
   Convex templates use; the user then runs a single `npm run dev` to start both.
-- **Run them separately** — leave `npm run dev` for the frontend and tell the
+- **Run them separately** - leave `npm run dev` for the frontend and tell the
   user to run `npx convex dev` in a second terminal for the Convex watcher.
 
 See "Start the dev loop" above for why the agent should not run the watcher in
@@ -444,7 +444,7 @@ This pushes to the production deployment, which is separate from dev. Do not use
 - [ ] If existing app: installed `convex` and wired up the provider
 - [ ] Agent ran `npx convex dev --once`: deployment provisioned, code pushed,
       typecheck clean
-- [ ] `npm run dev` (or `npx convex dev` for the watcher alone) is running —
+- [ ] `npm run dev` (or `npx convex dev` for the watcher alone) is running -
       user-launched terminal, or background for cloud agents
 - [ ] `convex/_generated/` directory exists with types
 - [ ] `.env.local` has the deployment URL

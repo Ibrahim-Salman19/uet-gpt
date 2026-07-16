@@ -32,12 +32,12 @@ This is a **Reference** document in the Diátaxis sense: information-oriented, d
 
 **Companion docs (read these first if you don't already know):**
 
-- [`architecture.md`](../../architecture.md) — narrative system architecture. This reference *agrees* with it; if you find a contradiction, architecture.md wins and this doc is stale.
-- [`frontend_backend_boundaries.md`](../frontend_backend_boundaries.md) — *what you're allowed to do and where*. The reference tells you *what exists*; the boundary doc tells you *what you may safely change*.
+- [`architecture.md`](../../architecture.md) - narrative system architecture. This reference *agrees* with it; if you find a contradiction, architecture.md wins and this doc is stale.
+- [`frontend_backend_boundaries.md`](../frontend_backend_boundaries.md) - *what you're allowed to do and where*. The reference tells you *what exists*; the boundary doc tells you *what you may safely change*.
 
-**Forbidden actions in this repo** (from `AGENTS.md` system reminder — applies to all reference material, not just boundary doc):
+**Forbidden actions in this repo** (from `AGENTS.md` system reminder - applies to all reference material, not just boundary doc):
 
-- Do **not** change `embeddingDimension: 768` or `filterNames: ["category", "source"]` in the RAG config (`convex/rag/instance.ts`) — re-embedding the entire corpus is required if you do. Note: `crawledChunks` has NO `vectorIndex` in `convex/schema.ts`; the RAG component owns the vectors.
+- Do **not** change `embeddingDimension: 768` or `filterNames: ["category", "source"]` in the RAG config (`convex/rag/instance.ts`) - re-embedding the entire corpus is required if you do. Note: `crawledChunks` has NO `vectorIndex` in `convex/schema.ts`; the RAG component owns the vectors.
 - Do **not** weaken HMAC verification on the crawl webhook (`convex/crawl/webhook.ts`).
 - Do **not** skip `requireAuth` / `requireAdmin` in any new Convex function that touches user data.
 - Do **not** run `git push --force`, `git add -A`, or commit directly to `main`.
@@ -107,7 +107,7 @@ UETGPT is a **Retrieval-Augmented Generation chatbot for the University of Engin
 | **Crawl** | Sitemap merge → crawl4ai fetch → chunk → embed → store | `convex/crawl/*` (**17 files**: 13 base + `backfill.ts`, `deduplication.ts`, `reset_ops.ts`, `staleness.ts`) |
 | **Rate limit** | **Two layers**: (1) Upstash sliding-window in `src/lib/rate-limit.ts` (Next.js), (2) Convex-native sliding in `convex/rateLimit.ts` (`rateLimits` table) | `src/lib/rate-limit.ts`, `convex/rateLimit.ts` |
 | **Admin** | Settings (appSettings), stats, audit log, reset, eval scaffolds | `convex/admin/*`, `convex/emergencyStop.ts` (batch mutator on `documents`+`crawlJobs`; `stopAll` is also the default export), `convex/eval/*` (2 stubs); legacy `convex/eval.ts` has real working `getChunksByRagIds` + `evaluateSearch` |
-| **Cron** | 10 active cron jobs (1 disabled: crawl — Crawl4AI unreachable; cleanup, retry, stuck-DLQ-reset, fail-stuck, cleanup-old-records, thread-purge, rate-limit-clear, contextualize, staleness, dashboard-stats) | `convex/crons.ts` |
+| **Cron** | 10 active cron jobs (1 disabled: crawl - Crawl4AI unreachable; cleanup, retry, stuck-DLQ-reset, fail-stuck, cleanup-old-records, thread-purge, rate-limit-clear, contextualize, staleness, dashboard-stats) | `convex/crons.ts` |
 | **Observability** | Sentry (FE + BE only); ~~Vercel Analytics~~ **NOT INTEGRATED**; Convex dashboard | `src/sentry.*.config.ts` (Sentry wrap), `convex/...` (ctx.logger) |
 | **Health** | WebSocket heartbeat (25s interval), backend health checks, connection monitoring | `convex/health.ts`, `src/components/ConvexConnectionMonitor.tsx`, `src/app/api/health/heartbeat/route.ts` |
 
@@ -144,7 +144,7 @@ UETGPT is a **Retrieval-Augmented Generation chatbot for the University of Engin
 | Workpools | @convex-dev/workpool | 0.4.6 | `crawlWorkpool`, `embeddingWorkpool` |
 | LLM SDK | Vercel AI SDK | 6.x | `streamText` for chat |
 | Embedding model | gemini-embedding-2 | Google Generative AI | 768-dim, batch threshold 2 |
-| Primary chat models | Groq llama-4-scout, Cerebras gpt-oss-120b, Groq llama-3.1-8b, Gemini 2.5 Flash | — | See [fallback chain](#llm-fallback-chain) |
+| Primary chat models | Groq llama-4-scout, Cerebras gpt-oss-120b, Groq llama-3.1-8b, Gemini 2.5 Flash | - | See [fallback chain](#llm-fallback-chain) |
 | Rate limit | **2 layers**: (1) Upstash Redis sliding window (Next.js), (2) Convex `rateLimits` table sliding window | latest | `src/lib/rate-limit.ts` + `convex/rateLimit.ts` |
 | Observability | Sentry (real init in `sentry.{client,server,edge}.config.ts`; `instrumentation.ts` is a thin `register()` wrapper) | latest | FE wrap via `next.config.ts` (withSentryConfig); BE via Convex logger |
 | **Offline tooling (Python)** | `curl_cffi` + `trafilatura` (crawler), `pymupdf4llm` (PDF), custom eval harness | Python 3.x | `scripts/crawler.py`, `scripts/ingest_pdf.py`, `scripts/eval/run_eval.py` |
@@ -188,11 +188,11 @@ UETGPT/
 ```
 convex/
 ├── _generated/                        # DO NOT EDIT (gitignored, regenerated)
-├── schema.ts                          # Sacred — vector index dim/filter names frozen
+├── schema.ts                          # Sacred - vector index dim/filter names frozen
 ├── auth.config.ts                     # Clerk JWT provider config
 ├── auth.ts                            # requireAuth, requireAdmin, getUserId, isAdmin
 ├── http.ts                            # 3 unique paths / 6 routes (POST+OPTIONS per path) + start-up env guard
-├── crons.ts                           # 10 active cron jobs (1 disabled: crawl — Crawl4AI unreachable)
+├── crons.ts                           # 10 active cron jobs (1 disabled: crawl - Crawl4AI unreachable)
 ├── convex.config.ts                   # Registers 5 components
 ├── constants.ts                       # CACHE_SIMILARITY_THRESHOLD = 0.92 (ONLY export)
 ├── rateLimit.ts                       # Convex sliding-window (10 msg/min/user, 100k tokens/min global)
@@ -233,7 +233,7 @@ convex/
 ├── crawl/                             # Crawl pipeline (17 files)
 │   ├── webhook.ts                     # 3 httpActions: crawlWebhook (HMAC + state-change routing; DO NOT WEAKEN HMAC), resetWebhook, ingestWebhook (uses shared generateChunks + generateContextSummary)
 │   ├── workflow.ts                    # 4 internal mutations: kickoffDailyCrawl, updateJobState, completeJobByTaskId, failStuckJobs
-│   ├── actions.ts                     # "use node" — executeCrawlJob, embedSingleChunk, resetPipelineAction, runDeduplication (4 internal actions)
+│   ├── actions.ts                     # "use node" - executeCrawlJob, embedSingleChunk, resetPipelineAction, runDeduplication (4 internal actions)
 │   ├── workpools.ts                   # 2 Workpools: embeddingPool (p=3, r=5, 4s×2) + crawlPool (p=3, r=3, 5m×3)
 │   ├── chunking.ts                    # 11 exports: 7 markdown helpers (guardChunkSize, isQualityChunk, chunkMarkdown, assignFreshnessTier, canonicalizeUrl, normalizeContent, isPdfVirtualUrl) + 4 shared pipeline helpers (buildContextPrefix, sha256, generateContextSummary, generateChunks) used by both webhook.ts and actions.ts
 │   ├── jobs.ts                        # cleanupOldRecords (DLQ >7d, jobs >30d)
@@ -268,7 +268,7 @@ convex/
 │
 ├── health.ts                          # Heartbeat query + health check (WebSocket keepalive)
 │
-├── eval/                              # Eval subsystem (2 STUBS only — NO getChunksByRagIds.ts, NO evaluateSearch.ts in this dir)
+├── eval/                              # Eval subsystem (2 STUBS only - NO getChunksByRagIds.ts, NO evaluateSearch.ts in this dir)
     ├── run.ts                         # public action stub: returns `{ id, status: "pending", ... }`, no DB writes
     └── results.ts                     # public query stub: returns `{ status: "completed", score: 0, details: {} }`, no DB reads
 # NOTE: Legacy convex/eval.ts (top-level) contains REAL functions: getChunksByRagIds (internalQuery) + evaluateSearch (action calling rag.search). Registered in _generated/api.d.ts.
@@ -288,12 +288,12 @@ src/
 │   │   │   ├── page.tsx               # NEW-THREAD landing (client, calls api.threads.create)
 │   │   │   └── [threadId]/
 │   │   │       ├── page.tsx           # Server: unwraps async params, renders <ChatThreadClient>
-│   │   │       └── client.tsx         # Client: ChatThreadClient — actual chat thread UI
+│   │   │       └── client.tsx         # Client: ChatThreadClient - actual chat thread UI
 │   │   ├── explore/page.tsx           # Browse index
 │   │   └── settings/page.tsx          # User settings
 │   ├── admin/                         # Admin route group (role-gated)
-│   │   ├── layout.tsx                 # Admin guard (requireAdmin) — CLIENT component w/ ClientOnly
-│   │   ├── page.tsx                   # Admin overview dashboard (6 StatCards — 3 primary + 3 secondary) — CLIENT
+│   │   ├── layout.tsx                 # Admin guard (requireAdmin) - CLIENT component w/ ClientOnly
+│   │   ├── page.tsx                   # Admin overview dashboard (6 StatCards - 3 primary + 3 secondary) - CLIENT
 │   │   ├── analytics/page.tsx
 │   │   ├── crawls/page.tsx            # NOTE plural
 │   │   ├── documents/page.tsx
@@ -334,7 +334,7 @@ src/
 │
 ├── lib/                               # Frontend utilities
 │   ├── auth.ts                        # requireUser/requireAdmin/getUserRole (Clerk server)
-│   ├── convex.ts                      # [DELETED June 2026] — was Convex client setup; consumers create their own inline
+│   ├── convex.ts                      # [DELETED June 2026] - was Convex client setup; consumers create their own inline
 │   ├── rate-limit.ts                  # Upstash sliding window (user 50/hr, admin 200/hr, anon 10/hr)
 │   ├── constants.ts                   # UET_CRAWL_CONFIG (23 seedUrls, maxPages=500, maxDepth=5) + CACHE_SIMILARITY_THRESHOLD
 │   ├── types.ts                       # Plain-TS type mirrors
@@ -372,7 +372,7 @@ tests/
 
 ## 5. End-to-End Data Flows
 
-Five canonical flows. Each is a *trace*, not a tutorial — it shows the message, the file that handles it, and what that file may do.
+Five canonical flows. Each is a *trace*, not a tutorial - it shows the message, the file that handles it, and what that file may do.
 
 ### 5.1 Chat (the most-traveled path)
 
@@ -400,7 +400,7 @@ src/app/api/chat/route.ts (POST)
         │     ├─ Optional reranker (if RERANKER_URL set)       [convex/reranking/rerank.ts]
         │     └─ Sandwich context assembly                     [convex/rag/context.ts]
         │
-        ├─ (NOT WIRED — convex/rateLimit.ts exists with         [convex/rateLimit.ts]
+        ├─ (NOT WIRED - convex/rateLimit.ts exists with         [convex/rateLimit.ts]
         │     per-user 10 msg/min, global 100K tokens/min,
         │     but chat route only uses Upstash rate limit above)
         │
@@ -509,7 +509,7 @@ Convex mutation (calls `convex/users.ts::getOrCreate` for user.created/user.upda
 ### 5.4 Cron (the housekeeping path)
 
 ```
-convex/crons.ts schedules 10 active jobs (1 disabled: crawl — Crawl4AI unreachable)
+convex/crons.ts schedules 10 active jobs (1 disabled: crawl - Crawl4AI unreachable)
         │
         ├─ Sun 00:00 UTC weekly-uet-webcrawl [DISABLED]
         │     └─ kickoffDailyCrawl [convex/crawl/workflow.ts] (weekly instead of daily)
@@ -570,7 +570,7 @@ stopAll (internalAction) loops stopBatch (internalMutation):
 
 ### 6.1 File-to-purpose index
 
-> Format: **`path`** — purpose. RBAC: `pub` (public) · `auth` (authed) · `admin` · `cron` · `webhook` · `internal` (Convex-internal only).
+> Format: **`path`** - purpose. RBAC: `pub` (public) · `auth` (authed) · `admin` · `cron` · `webhook` · `internal` (Convex-internal only).
 > Full signatures in `backend.md` §3 or `frontend.md` §3.
 
 #### Backend Convex files (most-frequently-asked-about)
@@ -581,7 +581,7 @@ stopAll (internalAction) loops stopBatch (internalMutation):
 | `convex/auth.ts` | `requireAuth`, `requireAdmin`, `getUserId`, `isAuthenticated`, `isAdmin` | internal |
 | `convex/auth.config.ts` | Clerk JWT provider registration (`applicationID: "uet-gpt"`) | internal |
 | `convex/http.ts` | HTTP routes: `/api/webhook/crawl` (HMAC), `/ingest`, `/api/reset`, OPTIONS | mixed |
-| `convex/crons.ts` | 10 active cron jobs (1 disabled: crawl — Crawl4AI unreachable) | cron |
+| `convex/crons.ts` | 10 active cron jobs (1 disabled: crawl - Crawl4AI unreachable) | cron |
 | `convex/clerk/webhook.ts` | Clerk user webhook HTTP action (header-based auth) | webhook |
 | `convex/convex.config.ts` | Registers: agent, rag, crawlWorkflow, embeddingWorkpool, crawlWorkpool | internal |
 | `convex/constants.ts` | `CACHE_SIMILARITY_THRESHOLD=0.92` (ONLY export) | internal |
@@ -592,7 +592,7 @@ stopAll (internalAction) loops stopBatch (internalMutation):
 | `convex/faq.ts` | `addFaq`/`removeFaq` (admin) + `listFaqs` + `searchFaqs` (internal) | mixed |
 | `convex/feedback/{submit,list}.ts` | Submit feedback (thumbs/comment) + admin list | auth |
 | `convex/emergencyStop.ts` | Batch mutator: `stopBatch` (internalMutation) + `stopAll` (internalAction loops; also default export) | internal |
-| `convex/eval.ts` | **REAL functions**: `getChunksByRagIds` (internalQuery) + `evaluateSearch` (action calls `rag.search`) — NOT a stub | mixed |
+| `convex/eval.ts` | **REAL functions**: `getChunksByRagIds` (internalQuery) + `evaluateSearch` (action calls `rag.search`) - NOT a stub | mixed |
 | `convex/doc/*` | **7 files**: `index` (barrel), `create` (internalMutation), `get`/`getByUrl` (query), `list` (query, cursor arg ignored), `remove` (admin mutation), `search` (query), `validator` (7-status validator) | auth/admin |
 | `convex/rag/retrieval.ts` | Hybrid search + INJECTION_RE scanner | internal |
 | `convex/rag/routing.ts` | 7-way intent classification via Groq llama-3.1-8b | internal |
@@ -602,7 +602,7 @@ stopAll (internalAction) loops stopBatch (internalMutation):
 | `convex/rag/testing.ts` | RAG seed data | internal |
 | `convex/embeddings/generate.ts` | gemini-embedding-2 batch + single | internal |
 | `convex/embeddings/search.ts` | Hybrid RRF (vector + keyword) | internal |
-| `convex/embeddings/doc_queries.ts` | `getDocumentByEntryId` (internalQuery) — joins chunks→docs | internal |
+| `convex/embeddings/doc_queries.ts` | `getDocumentByEntryId` (internalQuery) - joins chunks→docs | internal |
 | `convex/crawl/backfill.ts` | One-shot migration: populate `chunksEmbedded` | internal |
 | `convex/crawl/reset_ops.ts` | 4 INTERNAL mutations: `resetAbandonedDLQ`, `resetPipelineBatch`, `resetFailedDocuments`, `reembedPendingBatch` | internal |
 | `convex/reranking/rerank.ts` | Optional HTTP rerank w/ positional fallback | internal |
@@ -630,8 +630,8 @@ stopAll (internalAction) loops stopBatch (internalMutation):
 | `convex/feedback/list.ts` | List feedback | admin |
 | `convex/doc/validator.ts` | Document-level validators | internal |
 | `convex/messages/validator.ts` | Message-level validators | internal |
-| `convex/eval/results.ts` | [DELETED Jun 2026] Eval results stub — removed as dead code | — |
-| `convex/eval/run.ts` | [DELETED Jun 2026] Eval run stub — removed as dead code | — |
+| `convex/eval/results.ts` | [DELETED Jun 2026] Eval results stub - removed as dead code | - |
+| `convex/eval/run.ts` | [DELETED Jun 2026] Eval run stub - removed as dead code | - |
 | `convex/lib/db_helpers.ts` | `fastCount` (unstable Convex API) | internal |
 
 #### Frontend files (most-frequently-asked-about)
@@ -667,7 +667,7 @@ stopAll (internalAction) loops stopBatch (internalMutation):
 
 ### 6.2 Symbol index (most-called)
 
-> Format: **`name`** — file:line — RBAC — one-liner.
+> Format: **`name`** - file:line - RBAC - one-liner.
 
 #### Convex functions
 
@@ -754,7 +754,7 @@ stopAll (internalAction) loops stopBatch (internalMutation):
 | `CRAWL4AI_BASE_URL` | `convex/crawl/actions.ts` (fallback if CRAWL4AI_URL unset) | Default `http://localhost:11235` |
 | `ADMIN_EMAILS` | **NOT READ by any code** (placeholder in `.env.local.example` only) | Was intended for admin bootstrap; admin role determined solely by Clerk user metadata |
 | `SENTRY_DSN` / `NEXT_PUBLIC_SENTRY_DSN` | `src/sentry.{server,client,edge}.config.ts` | Sentry |
-| `NEXT_PUBLIC_CONVEX_URL` | `src/lib/convex.ts` (removed — consumers create their own `ConvexHttpClient` inline) | Convex public URL |
+| `NEXT_PUBLIC_CONVEX_URL` | `src/lib/convex.ts` (removed - consumers create their own `ConvexHttpClient` inline) | Convex public URL |
 | `NEXT_PUBLIC_APP_URL` | `src/app/api/chat/route.ts` (CSRF origin check) | Public base URL |
 
 ### 6.4 Error behavior (no structured error codes)
@@ -793,12 +793,12 @@ stopAll (internalAction) loops stopBatch (internalMutation):
 | **ApplicationID** | Clerk JWT template identifier. Must match between Clerk dashboard and `convex/auth.config.ts`. Currently `"uet-gpt"`. |
 | **ApplicationID mismatch** | When the JWT template name in Clerk ≠ the `applicationID` in `convex/auth.config.ts`. Causes "`Authentication required`" error on every Convex call. |
 | **Cache tier** | TTL category: `high` (7d), `medium` (2d), `low` (1d). Selected by `freshnessTier` derived from URL pattern (admission/academic → high, department/faculty → medium, other → low). |
-| **Crawled chunks** | Markdown segments stored in the `@convex-dev/rag` component (NOT in `crawledChunks` with a `by_embedding` vector index — verified `convex/schema.ts` has NO vector index on `crawledChunks`). Vectors are owned by the rag component. |
+| **Crawled chunks** | Markdown segments stored in the `@convex-dev/rag` component (NOT in `crawledChunks` with a `by_embedding` vector index - verified `convex/schema.ts` has NO vector index on `crawledChunks`). Vectors are owned by the rag component. |
 | **Crawl job** | A row in `crawlJobs` representing one crawl run. State machine: `pending → running → (completed \| failed \| cancelled)`. Has `trigger: manual\|scheduled\|webhook`, `startedBy`, `duration`. |
 | **Content hash** | SHA-256 of chunk text. Used to dedupe identical content across crawls. |
 | **Crawl workflow** | The `@convex-dev/workflow` instance kicked off in `convex/crawl/workflow.ts::kickoffDailyCrawl`. Idempotency: no pending/running, no completed <23h. |
 | **Diátaxis** | Documentation framework: Tutorial (learning), How-to (goal-oriented), Reference (information), Explanation (understanding). This is Reference. |
-| **Embedding dimension** | The size of the vector produced by the embedding 768** (gemini-embedding-2). Set in `convex/rag/instance.ts` as `embeddingDimension: 768` (NOT in `convex/schema.ts` — there is no vector index on `crawledChunks`). |
+| **Embedding dimension** | The size of the vector produced by the embedding 768** (gemini-embedding-2). Set in `convex/rag/instance.ts` as `embeddingDimension: 768` (NOT in `convex/schema.ts` - there is no vector index on `crawledChunks`). |
 | **Emergency stop** | The `convex/emergencyStop.ts` batch mutator (`stopAll`→`stopBatch`) that flips `documents.processing`→`failed` and `crawlJobs.running`→`cancelled` in 500-row batches. NOT a flag check; invoke directly from Convex dashboard. |
 | **LLM fall-through chain** | The 4-entry `LLM_FALLBACK_CHAIN` list in `src/lib/llm-models.ts` (static, no env reads). `src/app/api/chat/route.ts::getAvailableModels` rotates preferred+chain. |
 | **Filter names** | The two metadata fields allowed for vector index filtering: `category` and `source`. Set in `convex/rag/instance.ts::rag` config (`filterNames: ["category", "source"]`), NOT in `convex/schema.ts`. |

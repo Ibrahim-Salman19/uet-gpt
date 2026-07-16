@@ -1,4 +1,4 @@
-# Pricing — UET GPT
+# Pricing - UET GPT
 
 ## Free (Current Tier)
 - Price: $0/month

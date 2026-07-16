@@ -1,4 +1,4 @@
-# Agent Coordination — Testing Infrastructure
+# Agent Coordination - Testing Infrastructure
 
 **Purpose:** This document defines the boundary between the backend/testing agent and the frontend agent. Both agents operate on the same codebase and have stepped on each other's changes. Read this before making any change to `vitest.config.ts`, `tests/`, or any test file.
 
@@ -23,7 +23,7 @@ Current `vitest.config.ts` (verified working):
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
-// Portable absolute paths — resolved from this config file's own location,
+// Portable absolute paths - resolved from this config file's own location,
 // so the config works on any checkout (Windows, WSL, CI) without edits.
 const root = fileURLToPath(new URL(".", import.meta.url));
 
@@ -44,9 +44,9 @@ export default defineConfig({
 ```
 
 Critical details:
-- `environment: "node"` — NOT jsdom. If changed to jsdom, ALL tests hang.
-- `resolve.alias` — must use **absolute** paths, derived portably via `fileURLToPath(import.meta.url)` (never a hard-coded `/mnt/c/...` or another machine's home directory).
-- `exclude: ["tests/unit/**/*.test.tsx"]` — 12 tsx files excluded because they need a DOM.
+- `environment: "node"` - NOT jsdom. If changed to jsdom, ALL tests hang.
+- `resolve.alias` - must use **absolute** paths, derived portably via `fileURLToPath(import.meta.url)` (never a hard-coded `/mnt/c/...` or another machine's home directory).
+- `exclude: ["tests/unit/**/*.test.tsx"]` - 12 tsx files excluded because they need a DOM.
 
 ### 1.3 Rewritten Tests
 
@@ -64,19 +64,19 @@ Two test files were rewritten to avoid importing framework modules that hang:
 > **Test counts below are a historical snapshot, not the current baseline.** Other
 > docs cite different totals (`testing.md`, `architecture.md §17.3`) because they
 > were captured at different points. Do not treat any hard-coded number here as the
-> regression gate — derive the current count from a real `pnpm test` run.
+> regression gate - derive the current count from a real `pnpm test` run.
 
 | Group | Count | Status | Environment Needed |
 |-------|-------|--------|-------------------|
 | `.test.ts` files | 19 files, 282 tests | **ALL PASS** | `node` |
 | `.test.tsx` files | 12 files, ~? tests | **EXCLUDED** | DOM (`happy-dom` or `jsdom`) |
-| **Total** | 31 files | 19 pass, 12 excluded | — |
+| **Total** | 31 files | 19 pass, 12 excluded | - |
 
 ### 1.5 Mock Infrastructure
 
-- `tests/setup.ts` — imports `@testing-library/jest-dom/vitest` matchers; mocks `global.fetch`
-- `tests/helpers/convex-mock.ts` — `createMockConvexCtx()` with auth/scheduler/storage stubs
-- Convex tests use `vi.mock("convex/_generated/server")` to expose `.handler` — the `_handler` cast pattern is DEPRECATED
+- `tests/setup.ts` - imports `@testing-library/jest-dom/vitest` matchers; mocks `global.fetch`
+- `tests/helpers/convex-mock.ts` - `createMockConvexCtx()` with auth/scheduler/storage stubs
+- Convex tests use `vi.mock("convex/_generated/server")` to expose `.handler` - the `_handler` cast pattern is DEPRECATED
 
 ---
 
@@ -89,7 +89,7 @@ On this WSL environment (`/mnt/c/...` on Ubuntu/Debian under WSL2), jsdom 29.1.1
 1. vitest detects `environment: "jsdom"` and tries to set up a DOM
 2. jsdom 29.1.1 initializes an HTML document, Window, etc.
 3. Some combination of WSL filesystem latency + jsdom's HTML parser + vitest's worker pool causes an infinite hang
-4. No timeout helps — the process never returns
+4. No timeout helps - the process never returns
 
 **jsdom is installed** (see `package.json` devDependencies). It just does not work at runtime. `happy-dom` is expected to work because it is lighter-weight and does not use the same initialization path.
 
@@ -110,7 +110,7 @@ On this WSL environment (`/mnt/c/...` on Ubuntu/Debian under WSL2), jsdom 29.1.1
 
 ## 3. What the Frontend Agent Must NOT Do
 
-### BLOCKED — Config Changes That Break Everything
+### BLOCKED - Config Changes That Break Everything
 
 | Action | Consequence |
 |--------|------------|
@@ -121,7 +121,7 @@ On this WSL environment (`/mnt/c/...` on Ubuntu/Debian under WSL2), jsdom 29.1.1
 | Remove the exclude pattern without installing happy-dom first | tsx tests hang |
 | Re-introduce `_handler` casts in Convex tests | Deprecated pattern; use `vi.mock("convex/_generated/server")` instead |
 
-### BLOCKED — Import Patterns That Hang
+### BLOCKED - Import Patterns That Hang
 
 | Import | Where It Hangs | Safe Alternative |
 |--------|---------------|-----------------|
@@ -130,7 +130,7 @@ On this WSL environment (`/mnt/c/...` on Ubuntu/Debian under WSL2), jsdom 29.1.1
 | `import "next/headers"` | Requires Next.js runtime | Never import in unit tests |
 | `import "svix"` | Requires network/WebAssembly | Mock at module boundary |
 
-### BLOCKED — Direct Edits to These Files
+### BLOCKED - Direct Edits to These Files
 
 | File | Why | Who Owns It |
 |------|-----|------------|
@@ -203,7 +203,7 @@ The 9 admin `.tsx` test files have a known anti-pattern documented in `testing.m
 **The Problem:** Tests assert on **mock existence** instead of **component behavior**.
 
 ```tsx
-// BAD — tests mock existence, not real component behavior
+// BAD - tests mock existence, not real component behavior
 vi.mock("lucide-react", () => ({
   TrendingUp: () => <div data-testid="icon-trending-up">TrendingUp</div>,
 }));
@@ -246,10 +246,10 @@ Each test file must start with `// @vitest-environment happy-dom`.
 
 ### 4.7 Pattern for Mocking Next.js in TSX Tests
 
-The 12 existing `.tsx` test files already use this pattern — preserve it:
+The 12 existing `.tsx` test files already use this pattern - preserve it:
 
 ```tsx
-// Mock next/navigation (not next/headers — that hangs)
+// Mock next/navigation (not next/headers - that hangs)
 vi.mock("next/navigation", () => ({
   usePathname: vi.fn(() => "/admin"),
   useRouter: vi.fn(() => ({ refresh: vi.fn() })),
@@ -262,7 +262,7 @@ vi.mock("convex/react", () => ({
 }));
 ```
 
-**Never mock `next/headers`** — importing it in mock or real code causes a hang.
+**Never mock `next/headers`** - importing it in mock or real code causes a hang.
 
 ---
 

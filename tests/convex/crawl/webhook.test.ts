@@ -419,7 +419,7 @@ describe("crawlWebhook", () => {
     const payload = {
       task_id: "task-multi",
       status: "completed",
-      // Use payload.results — the webhook reads: payload.data?.results || payload.results || ...
+      // Use payload.results - the webhook reads: payload.data?.results || payload.results || ...
       results: [
         {
           url: "https://web.uettaxila.edu.pk/page1",
@@ -591,7 +591,7 @@ describe("ingestWebhook", () => {
       sourceType: "html",
     });
     const res = await ingestWebhook(mockCtx, req);
-    // The ingestWebhook requires auth token to always be configured — returns 500 if missing
+    // The ingestWebhook requires auth token to always be configured - returns 500 if missing
     expect(res.status).toBe(500);
   });
 

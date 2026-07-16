@@ -4,14 +4,14 @@ import Link from "next/link";
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
 export const metadata: Metadata = {
-  title: "UET Taxila — University of Engineering and Technology, Taxila",
+  title: "UET Taxila - University of Engineering and Technology, Taxila",
   description:
-    "UET Taxila (University of Engineering and Technology, Taxila) — history, campuses, faculties, departments, admissions, and how UET GPT helps students. The authoritative guide to UET Taxila.",
+    "UET Taxila (University of Engineering and Technology, Taxila) - history, campuses, faculties, departments, admissions, and how UET GPT helps students. The authoritative guide to UET Taxila.",
   alternates: {
     canonical: `${siteUrl}/uet-taxila`,
   },
   openGraph: {
-    title: "UET Taxila — University of Engineering and Technology, Taxila",
+    title: "UET Taxila - University of Engineering and Technology, Taxila",
     description:
       "History, campuses, faculties, departments, and admissions of UET Taxila, plus how UET GPT helps students navigate the university.",
     url: `${siteUrl}/uet-taxila`,
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 const FAQ_ITEMS = [
   {
     q: "What does UET stand for?",
-    a: "UET stands for the University of Engineering and Technology. UET Taxila is the University of Engineering and Technology, Taxila — a public engineering university in Taxila, Punjab, Pakistan. It began in 1975 as a constituent college of UET Lahore and became an independent, chartered university in 1993.",
+    a: "UET stands for the University of Engineering and Technology. UET Taxila is the University of Engineering and Technology, Taxila - a public engineering university in Taxila, Punjab, Pakistan. It began in 1975 as a constituent college of UET Lahore and became an independent, chartered university in 1993.",
   },
   {
     q: "When was UET Taxila established?",
@@ -42,7 +42,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "How can UET GPT help UET Taxila students and applicants?",
-    a: "UET GPT is the AI guide to UET Taxila. It answers questions about admissions, ECAT and merit, BS and MS fee structures, academic programs, departments and faculty, hostel accommodation, transport routes, scholarships, and campus life — all grounded in official UET Taxila data. It is free for students, faculty, and prospective applicants. Visit the UET GPT home page to start asking.",
+    a: "UET GPT is the AI guide to UET Taxila. It answers questions about admissions, ECAT and merit, BS and MS fee structures, academic programs, departments and faculty, hostel accommodation, transport routes, scholarships, and campus life - all grounded in official UET Taxila data. It is free for students, faculty, and prospective applicants. Visit the UET GPT home page to start asking.",
   },
 ] as const;
 
@@ -104,7 +104,7 @@ export default function UetTaxilaPage() {
             <p className="text-base md:text-lg text-[var(--text-secondary)] max-w-2xl mx-auto mb-8 font-sans leading-relaxed">
               UET Taxila is one of Pakistan&apos;s leading public engineering universities. This
               page is the authoritative, AI-grounded guide to its history, campuses, faculties,
-              departments, admissions, and campus life — brought to you by UET GPT.
+              departments, admissions, and campus life - brought to you by UET GPT.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
@@ -138,7 +138,7 @@ export default function UetTaxilaPage() {
                 </h3>
                 <p className="text-sm text-[var(--text-secondary)] leading-relaxed font-sans">
                   UET stands for the University of Engineering and Technology. UET Taxila is the
-                  University of Engineering and Technology, Taxila — a public sector engineering
+                  University of Engineering and Technology, Taxila - a public sector engineering
                   university located in Taxila, in the Attock–Rawalpindi region of Punjab, Pakistan.
                   Today UET Taxila enrolls more than 5,500 undergraduate and postgraduate students
                   across 14 departments.
@@ -150,8 +150,8 @@ export default function UetTaxilaPage() {
                   History and founding of UET Taxila
                 </h3>
                 <p className="text-sm text-[var(--text-secondary)] leading-relaxed font-sans">
-                  With the rapid industrial growth around Taxila in the 1970s — led by Heavy
-                  Industries Taxila and nearby ordnance complexes — the Government of the Punjab
+                  With the rapid industrial growth around Taxila in the 1970s - led by Heavy
+                  Industries Taxila and nearby ordnance complexes - the Government of the Punjab
                   established the University College of Engineering Taxila in 1975 as a constituent
                   college of UET Lahore. It functioned at Sahiwal for three years before shifting to
                   its permanent campus at Taxila in 1978, and on 1 October 1993 it received its
@@ -184,19 +184,19 @@ export default function UetTaxilaPage() {
               {[
                 {
                   title: "Civil and Environmental Engineering",
-                  desc: "Department of Civil Engineering and Department of Environmental Engineering — structures, geotechnics, water, and environmental systems.",
+                  desc: "Department of Civil Engineering and Department of Environmental Engineering - structures, geotechnics, water, and environmental systems.",
                 },
                 {
                   title: "Electronics and Electrical Engineering",
-                  desc: "Department of Electrical Engineering and Department of Electronics Engineering — power, control, electronics, and embedded systems.",
+                  desc: "Department of Electrical Engineering and Department of Electronics Engineering - power, control, electronics, and embedded systems.",
                 },
                 {
                   title: "Mechanical and Aeronautical Engineering",
-                  desc: "Department of Mechanical Engineering and Department of Mechatronics Engineering — thermal, manufacturing, robotics, and automation.",
+                  desc: "Department of Mechanical Engineering and Department of Mechatronics Engineering - thermal, manufacturing, robotics, and automation.",
                 },
                 {
                   title: "Industrial Engineering",
-                  desc: "Department of Industrial Engineering — operations, manufacturing systems, quality, and supply-chain management.",
+                  desc: "Department of Industrial Engineering - operations, manufacturing systems, quality, and supply-chain management.",
                 },
                 {
                   title: "Telecommunication and Information Engineering",
@@ -289,7 +289,7 @@ export default function UetTaxilaPage() {
                 },
                 {
                   title: "Fee Structure",
-                  desc: "Understand BS and MS fee breakdowns, hostel charges, and dues — grounded in official UET Taxila records.",
+                  desc: "Understand BS and MS fee breakdowns, hostel charges, and dues - grounded in official UET Taxila records.",
                 },
                 {
                   title: "Departments & Faculty",

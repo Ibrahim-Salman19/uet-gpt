@@ -1,6 +1,6 @@
-# UET Taxila GPT — Architecture
+# UET Taxila GPT - Architecture
 
-**Single Source of Truth** — Read this file fully before implementing any task.
+**Single Source of Truth** - Read this file fully before implementing any task.
 A change not documented here did not happen.
 
 ---
@@ -10,7 +10,7 @@ A change not documented here did not happen.
 - **What**: Autonomous RAG chatbot for UET Taxila (Next.js 16 + Convex + Clerk + Python crawler)
 - **Stack**: TypeScript (frontend + API), Python (crawler), Convex (DB + serverless)
 - **Key files**: `convex/schema.ts` (DB), `convex/rag/retrieval.ts` (RAG), `src/app/api/chat/route.ts` (chat API)
-- **Critical invariant**: 768-dim embeddings — never change without full re-embed
+- **Critical invariant**: 768-dim embeddings - never change without full re-embed
 - **Full architecture**: Read this file section by section as needed
 
 ---
@@ -56,7 +56,7 @@ UET Taxila GPT is an autonomous RAG pipeline chatbot for UET Taxila. It answers 
 |-------|-----------|
 | **Frontend** | Next.js 16.2.6 (App Router, Turbopack), React 19.2.4, Tailwind CSS 4, Radix UI |
 | **Backend** | Convex (cloud-hosted real-time DB + serverless functions) |
-| **Auth** | Clerk (`@clerk/nextjs` v7.3.7) — session management, RBAC (user/admin/superadmin) |
+| **Auth** | Clerk (`@clerk/nextjs` v7.3.7) - session management, RBAC (user/admin/superadmin) |
 | **LLM Orchestration** | Vercel AI SDK (`ai` v6, `@ai-sdk/react`, `@ai-sdk/groq`, `@ai-sdk/google`, `@ai-sdk/cerebras`) |
 | **Vector DB** | Convex native `vectorIndex` (768 dimensions for semantic cache and RAG) |
 | **Caching** | Convex `semanticCache` table with cosine similarity + Upstash Redis (`@upstash/ratelimit`) |
@@ -137,10 +137,10 @@ UET Taxila GPT is an autonomous RAG pipeline chatbot for UET Taxila. It answers 
 │   ├── auth.ts                      #   Auth helpers: getUserId, isAuthenticated, isAdmin, requireAuth, requireAdmin
 │   ├── constants.ts                 #   CACHE_SIMILARITY_THRESHOLD = 0.92
 │   ├── convex.config.ts             #   Convex app config (RAG, agent, workpool, workflow components)
-│   ├── crons.ts                     #   10 active cron jobs (crawl cron disabled — Crawl4AI unreachable)
+│   ├── crons.ts                     #   10 active cron jobs (crawl cron disabled - Crawl4AI unreachable)
 │   ├── http.ts                      #   HTTP router (3 routes: crawl, ingest, reset)
 │   ├── lib/db_helpers.ts            #   fastCount (thin wrapper around internal .count() API)
-│   ├── emergencyStop.ts             #   stopAll / stopBatch — drains in-flight processing jobs
+│   ├── emergencyStop.ts             #   stopAll / stopBatch - drains in-flight processing jobs
 │   ├── schema.ts                    #   DATABASE SCHEMA (16 tables, plus 2 component-managed)
 │   └── threads.ts                   #   Thread actions
 ├── src/
@@ -160,7 +160,7 @@ UET Taxila GPT is an autonomous RAG pipeline chatbot for UET Taxila. It answers 
 │   ├── middleware.ts                 # Next.js middleware (Clerk auth, CSP headers, route protection)
 │   └── instrumentation.ts           # Sentry instrumentation
 ├── scripts/                         # Python crawler + admin scripts
-│   ├── crawler.py                   # Async BFS crawler (curl_cffi, trafilatura, markdownify) — pushes to /ingest
+│   ├── crawler.py                   # Async BFS crawler (curl_cffi, trafilatura, markdownify) - pushes to /ingest
 │   ├── ingest_pdf.py                # PDF ingestion (pymupdf4llm primary, Gemini VLM fallback)
 │   ├── run_agent.sh                 # Cron entry point for opencode
 │   ├── boot_lock.ps1                # Windows lock file for boot safety
@@ -177,7 +177,7 @@ UET Taxila GPT is an autonomous RAG pipeline chatbot for UET Taxila. It answers 
 │   └── setup.ts                     # Test setup (jest-dom, global fetch mock)
 ├── docs/
 │   ├── anti-pattern-audit-report.md # Test anti-pattern audit
-│   ├── chunking-strategy.md         # Chunking design (dimension 768 — matches schema.ts / instance.ts)
+│   ├── chunking-strategy.md         # Chunking design (dimension 768 - matches schema.ts / instance.ts)
 │   ├── crawling-strategy.md
 │   ├── deployment.md
 │   ├── embedding-strategy.md
@@ -189,7 +189,7 @@ UET Taxila GPT is an autonomous RAG pipeline chatbot for UET Taxila. It answers 
 ├── CRONJOB.md                       # Hourly autonomous maintenance protocol
 ├── TODO.md                          # Task queue
 ├── CLAUDE.md                        # Claude Code config
-└── architecture.md                  # THIS FILE — single source of truth
+└── architecture.md                  # THIS FILE - single source of truth
 ```
 
 ---
@@ -231,7 +231,7 @@ The schema is defined in `convex/schema.ts`. Tables `threads` and `messages` are
 | `trigger` | `"manual" \| "scheduled" \| "webhook"` | Indexed: `by_trigger` |
 | `startedBy` | `Id<"users">?` | |
 | `status` | `"pending" \| "running" \| "completed" \| "failed" \| "cancelled"` | Indexed: `by_status` |
-| `providerJobId` | `string?` | External crawl4AI task ID — Indexed: `by_providerJobId` |
+| `providerJobId` | `string?` | External crawl4AI task ID - Indexed: `by_providerJobId` |
 | `config` | `{ maxPages, maxDepth, includePaths, excludePaths, allowExternalLinks }` | |
 | `stats` | `{ totalPages, successfulPages, failedPages, skippedPages, totalChunks, totalTokens, bytesProcessed }` | |
 | `error` | `string?` | |
@@ -289,11 +289,11 @@ Actions: `user.login`, `user.logout`, `user.create`, `thread.create`, `thread.de
 |-------|------|-------|
 | `url` | `string` | Indexed: `by_url` |
 | `title` | `string` | searchIndex: `search_title` |
-| `entryId` | `string?` | RAG entry ID — Indexed: `by_entryId` |
-| `contentHash` | `string?` | SHA-256 — Indexed: `by_contentHash` |
+| `entryId` | `string?` | RAG entry ID - Indexed: `by_entryId` |
+| `contentHash` | `string?` | SHA-256 - Indexed: `by_contentHash` |
 | `crawlSessionId` | `string?` | Indexed: `by_session` |
-| `source` | `string` | Hostname or `"pdf"` — Indexed: `by_source_category` |
-| `category` | `string` | Typically `"crawled"` — Indexed: `by_category` |
+| `source` | `string` | Hostname or `"pdf"` - Indexed: `by_source_category` |
+| `category` | `string` | Typically `"crawled"` - Indexed: `by_category` |
 | `subcategory` | `string?` | |
 | `metadata` | `{ lastModified?, author?, wordCount?, language?, etag?, sourceType? }` | |
 | `status` | `"pending" \| "processing" \| "indexed" \| "failed" \| "stale" \| "active" \| "pending_embed"` | Indexed: `by_status` |
@@ -348,11 +348,11 @@ Stores evaluation run results for regression tracking.
 | `documentId` | `Id<"documents">` | Indexed: `by_documentId`, compound: `by_documentId_and_contentHash` |
 | `contentHash` | `string` | |
 | `text` | `string` | searchIndex: `search_text` |
-| `ragId` | `string` | RAG component entry ID — Indexed: `by_ragId` |
+| `ragId` | `string` | RAG component entry ID - Indexed: `by_ragId` |
 | `embeddingModel` | `string?` | e.g. `"gemini-embedding-2"` |
 | `parentText` | `string?` | Parent-child chunking context |
 | `headingPath` | `string[]?` | Section heading hierarchy |
-| `contextualizedText` | `string?` | Gemini-contextualized version of chunk text — Indexed: `by_contextualizedText` |
+| `contextualizedText` | `string?` | Gemini-contextualized version of chunk text - Indexed: `by_contextualizedText` |
 
 ### 4.12 `crawlStats`
 
@@ -360,7 +360,7 @@ Singleton stats counter.
 
 | Field | Type | Notes |
 |-------|------|-------|
-| `statsId` | `string` | e.g. `"global"` — Indexed: `by_statsId` |
+| `statsId` | `string` | e.g. `"global"` - Indexed: `by_statsId` |
 | `totalDocuments` | `number` | |
 | `indexedDocuments` | `number` | |
 | `processingDocuments` | `number` | |
@@ -396,8 +396,8 @@ Convex-native sliding window rate limiter state.
 
 | Field | Type | Notes |
 |-------|------|-------|
-| `key` | `string` | clerkUserId or `"global"` — Indexed: `by_key` |
-| `windowStart` | `number` | Epoch ms — start of current 1-minute window |
+| `key` | `string` | clerkUserId or `"global"` - Indexed: `by_key` |
+| `windowStart` | `number` | Epoch ms - start of current 1-minute window |
 | `count` | `number` | Requests (per-user) or tokens (global) in window |
 
 ### 4.16 `dashboardStats`
@@ -406,7 +406,7 @@ Singleton stats counter for admin dashboard overview. Updated by `dashboardStats
 
 | Field | Type | Notes |
 |-------|------|-------|
-| `statsId` | `string` | e.g. `"global"` — Indexed: `by_statsId` |
+| `statsId` | `string` | e.g. `"global"` - Indexed: `by_statsId` |
 | `documentStats` | `{ total, indexed, pending, failed }` | Document counts by status |
 | `userStats` | `{ total, activeLast24h }` | User counts |
 | `feedbackCount` | `number` | Total feedback entries |
@@ -449,7 +449,7 @@ Model IDs are the single source of truth; they live in `src/lib/llm-models.ts` (
 
 ### 5.3 System Prompt
 
-Defined in `convex/rag/prompts.ts` — template with `{context}` placeholder. Core rules: cite-only-UET-content, source citation via markdown links, language matching (English/Urdu/Roman Urdu), Pakistani English spellings, prompt injection guardrails. Includes 2 few-shot examples (BS CS fee structure, admissions timing).
+Defined in `convex/rag/prompts.ts` - template with `{context}` placeholder. Core rules: cite-only-UET-content, source citation via markdown links, language matching (English/Urdu/Roman Urdu), Pakistani English spellings, prompt injection guardrails. Includes 2 few-shot examples (BS CS fee structure, admissions timing).
 
 ---
 
@@ -459,7 +459,7 @@ Defined in `convex/rag/prompts.ts` — template with `{context}` placeholder. Co
 
 Two independent crawl paths feed into the same ingest pipeline:
 
-**Path A — Python BFS Crawler (Primary)**:
+**Path A - Python BFS Crawler (Primary)**:
 ```
 scripts/crawler.py (curl_cffi + trafilatura)
   → POST /ingest (Bearer token auth)
@@ -468,7 +468,7 @@ scripts/crawler.py (curl_cffi + trafilatura)
         → RAG component embed + index (768d) → crawledChunks table
 ```
 
-**Path B — External crawl4AI Service (Secondary)**:
+**Path B - External crawl4AI Service (Secondary)**:
 ```
 External crawl4AI instance
   → POST /api/webhook/crawl (HMAC-SHA256 auth)
@@ -477,7 +477,7 @@ External crawl4AI instance
         → RAG component embed + index (768d) → crawledChunks table
 ```
 
-**Path C — Reset Pipeline**:
+**Path C - Reset Pipeline**:
 ```
 Any caller
   → POST /api/reset (Bearer token auth)
@@ -566,7 +566,7 @@ Cache TTLs apply to `semanticCache` entries. Document expiry TTLs apply to `docu
 
 > **Defense-in-depth caveat:** `src/middleware.ts` (the Clerk middleware) is an
 > *intercept-only* layer for redirects and is **not** a sufficient authorization
-> boundary on its own — middleware can be bypassed (cf. CVE-2025-29927). Every
+> boundary on its own - middleware can be bypassed (cf. CVE-2025-29927). Every
 > privileged operation must **also** enforce authZ server-side in Convex functions
 > (`requireAuth` / `requireAdmin` / `requirePermission` in `convex/auth.ts`) and in
 > route handlers. Treat middleware as UX routing, not as the gate.
@@ -617,13 +617,13 @@ Cache TTLs apply to `semanticCache` entries. Document expiry TTLs apply to `docu
 
 ### 7.6 Forbidden Operations (Never Violate)
 
-1. **schema.ts filter field names on vector indexes** — changing them corrupts the live vector index and requires full re-embed
-2. **HMAC auth guard in webhook.ts** — the timestamp + signature check block must never be removed
-3. **embeddingDimension** in any RAG config — dimension mismatch silently breaks all similarity scores
-4. **Synchronous embedding inside HTTP webhook handler** — hits Convex 1MB limit
-5. **`git push --force`** — never
-6. **`git add -A`** — always use explicit file paths or `git add -p`
-7. **Commits directly to `main` or `master`** — always use `agent/YYYY-MM-DD`
+1. **schema.ts filter field names on vector indexes** - changing them corrupts the live vector index and requires full re-embed
+2. **HMAC auth guard in webhook.ts** - the timestamp + signature check block must never be removed
+3. **embeddingDimension** in any RAG config - dimension mismatch silently breaks all similarity scores
+4. **Synchronous embedding inside HTTP webhook handler** - hits Convex 1MB limit
+5. **`git push --force`** - never
+6. **`git add -A`** - always use explicit file paths or `git add -p`
+7. **Commits directly to `main` or `master`** - always use `agent/YYYY-MM-DD`
 
 ---
 
@@ -655,18 +655,18 @@ Cache TTLs apply to `semanticCache` entries. Document expiry TTLs apply to `docu
 | `GOOGLE_GENERATIVE_AI_API_KEY` | No | Gemini key rotation #3 |
 | `CEREBRAS_API_KEY` | Yes | Cerebras LLM API |
 | `CRAWL_WEBHOOK_SECRET` | Yes | HMAC secret for crawl webhooks |
-| `CRAWL_WEBHOOK_SECRET_NEW` | No | Secondary HMAC secret (key rotation) — NOT YET CONFIGURED |
+| `CRAWL_WEBHOOK_SECRET_NEW` | No | Secondary HMAC secret (key rotation) - NOT YET CONFIGURED |
 | `CONVEX_AUTH_TOKEN` | Yes | Bearer token for `/ingest` and `/api/reset` webhooks |
 | `CONVEX_SITE_URL` | Yes | Convex site URL for webhook callbacks |
 | `SENTRY_DSN` | Yes | Sentry DSN (replaces SENTRY_ORG/SENTRY_PROJECT) |
 | `CRAWL4AI_BASE_URL` | No | Crawl4AI service URL (default: `http://localhost:11235`) |
 | `NEXT_PUBLIC_APP_URL` | Yes | Frontend app URL for CSRF checks |
 | `CRON_SECRET` | Yes | API route cron authentication |
-| `OPENROUTER_API_KEY` | No | OpenRouter (presence guard only — embedding fallback removed to prevent vector space incompatibility) |
-| `RERANKER_URL` | No | External FlashRank reranker endpoint — OPTIONAL |
+| `OPENROUTER_API_KEY` | No | OpenRouter (presence guard only - embedding fallback removed to prevent vector space incompatibility) |
+| `RERANKER_URL` | No | External FlashRank reranker endpoint - OPTIONAL |
 | `UPSTASH_REDIS_REST_URL` | Yes | Upstash Redis REST URL for rate limiting |
 | `UPSTASH_REDIS_REST_TOKEN` | Yes | Upstash Redis REST token for rate limiting |
-| `WEBHOOK_SECRET` | No | Clerk webhook secret (legacy — use `CLERK_SIGNING_SECRET`) |
+| `WEBHOOK_SECRET` | No | Clerk webhook secret (legacy - use `CLERK_SIGNING_SECRET`) |
 | `ADMIN_BOOTSTRAP_EMAIL` | No | Auto-promote first user with this email to admin |
 | `CONVEX_DEPLOY_KEY` | No | Convex deploy key for CI |
 
@@ -678,7 +678,7 @@ Defined in `convex/crons.ts`:
 
 | Name | Schedule | Handler | Purpose |
 |------|----------|---------|---------|
-| `weekly-uet-webcrawl` | **DISABLED** (was Sun 00:00 UTC) | `internal.crawl.workflow.kickoffDailyCrawl` | Trigger UET website crawl — disabled because Crawl4AI Docker unreachable from Convex cloud |
+| `weekly-uet-webcrawl` | **DISABLED** (was Sun 00:00 UTC) | `internal.crawl.workflow.kickoffDailyCrawl` | Trigger UET website crawl - disabled because Crawl4AI Docker unreachable from Convex cloud |
 | `daily-cleanup-expired-cache` | Daily 01:00 UTC | `internal.crawl.tasks.cleanupExpiredCache` | Remove expired cache entries |
 | `retry-dead-letter` | Every 4 hours | `internal.crawl.mutations.retryDeadLetterQueue` | Retry DLQ items (limit: 100) |
 | `reset-stuck-dlq-entries` | Every 30 minutes | `internal.crawl.mutations.resetStuckDLQEntries` | Reset DLQ entries stuck in "processing" state (worker crash recovery) |
@@ -703,15 +703,15 @@ Defined in `convex/crons.ts`:
 | **Context** | 8192 tokens |
 | **Free tier** | ~60 RPM, ~1500 RPD |
 | **Paid Tier 1** | 3000 RPM, 1M TPM |
-| **Batch API** | 50% discount ($0.10/M vs $0.20/M) — used for ≥2 texts |
+| **Batch API** | 50% discount ($0.10/M vs $0.20/M) - used for ≥2 texts |
 
 ### 10.2 Key Rotation
 
-Keys tried in order: `GEMINI_API_KEY` → `GEMINI_API_KEY_1` → `GEMINI_API_KEY_2` → `GOOGLE_GENERATIVE_AI_API_KEY`. First success wins. All fail → `ConvexError`. The `OPENROUTER_API_KEY` is read for a presence guard only (no actual fallback — removed to prevent vector space incompatibility).
+Keys tried in order: `GEMINI_API_KEY` → `GEMINI_API_KEY_1` → `GEMINI_API_KEY_2` → `GOOGLE_GENERATIVE_AI_API_KEY`. First success wins. All fail → `ConvexError`. The `OPENROUTER_API_KEY` is read for a presence guard only (no actual fallback - removed to prevent vector space incompatibility).
 
 ### 10.3 Resilient Embedding Model
 
-Defined in `rag/instance.ts` — custom `EmbeddingModel` wrapping `generateEmbeddingsInternal`:
+Defined in `rag/instance.ts` - custom `EmbeddingModel` wrapping `generateEmbeddingsInternal`:
 - `maxEmbeddingsPerCall: 2048`
 - `supportsParallelCalls: true`
 - `modelId: "gemini-embedding-2"`
@@ -726,7 +726,7 @@ Defined in `rag/instance.ts` — custom `EmbeddingModel` wrapping `generateEmbed
 | Property | Value | File |
 |----------|-------|------|
 | **Similarity threshold** | 0.92 (cosine) | `convex/constants.ts` |
-| **Vector index dimensions** | 768 | `schema.ts` — `vectorIndex("by_queryEmbedding", ...)` |
+| **Vector index dimensions** | 768 | `schema.ts` - `vectorIndex("by_queryEmbedding", ...)` |
 | **Search method** | `ctx.vectorSearch` on `semanticCache` table | `cache/get.ts` |
 | **Cache TTL tiers** | High=7d, Medium=2d, Low=1d | `cache/set.ts` |
 | **Write trigger** | Async via `after()` after successful LLM generation | `cache/set.ts`, `chat/route.ts` |
@@ -744,23 +744,23 @@ Defined in `rag/instance.ts` — custom `EmbeddingModel` wrapping `generateEmbed
 |------|---------|---------|
 | Vitest | 4.1.7 | Unit + integration tests |
 | Playwright | 1.60 | E2E browser tests |
-| Testing Library | — | Component testing (React) |
+| Testing Library | - | Component testing (React) |
 
 ### 12.2 Configuration
 
 | Config | Value |
 |--------|-------|
-| `vitest.config.ts` | `node` env, `testTimeout: 30000` (WSL needs it — setup can take 30s+), `resolve.alias` for `@/` and `convex/` |
-| `playwright.config.ts` | Chrome desktop + mobile (Pixel 5) — Firefox and WebKit not configured |
+| `vitest.config.ts` | `node` env, `testTimeout: 30000` (WSL needs it - setup can take 30s+), `resolve.alias` for `@/` and `convex/` |
+| `playwright.config.ts` | Chrome desktop + mobile (Pixel 5) - Firefox and WebKit not configured |
 
 ### 12.3 Test Distribution
 
 Tests under `tests/` organized into:
-- `convex/` — Convex function tests (webhook, mutations, tasks, users, actions)
-- `unit/` — Unit tests (admin components, rate-limit, llm-models, search, feedback, embeddings, RAG context)
-- `integration/` — Integration tests (RAG pipeline, webhook, embeddings, chat API)
-- `e2e/` — Playwright E2E (auth, chat, admin, home flows)
-- `helpers/` — Test utilities (`convex-mock.ts`)
+- `convex/` - Convex function tests (webhook, mutations, tasks, users, actions)
+- `unit/` - Unit tests (admin components, rate-limit, llm-models, search, feedback, embeddings, RAG context)
+- `integration/` - Integration tests (RAG pipeline, webhook, embeddings, chat API)
+- `e2e/` - Playwright E2E (auth, chat, admin, home flows)
+- `helpers/` - Test utilities (`convex-mock.ts`)
 
 See `testing.md` for detailed test plan (12 phases) and `docs/archive/anti-pattern-audit-report.md` for known issues.
 
@@ -780,7 +780,7 @@ Per `AGENTS.md`, every commit must pass:
 
 | Component | Location | Description |
 |-----------|----------|-------------|
-| Golden set | `scripts/eval/golden_set.jsonl` | 50 QA pairs across categories (admissions, fees, exams, departments, etc.) — confirmed by `wc -l` |
+| Golden set | `scripts/eval/golden_set.jsonl` | 50 QA pairs across categories (admissions, fees, exams, departments, etc.) - confirmed by `wc -l` |
 | Runner | `scripts/eval/run_eval.py` | Computes `recall_at_5` (primary metric) and `fragment_hit_rate` |
 | Convex eval action | `convex/eval.ts:evaluateSearch` | Runs `rag.search()` on "uet-global" namespace and hydrates chunk results |
 
@@ -789,8 +789,8 @@ Per `AGENTS.md`, every commit must pass:
 | Code | Meaning |
 |------|---------|
 | 0 | Success (stable or improved recall) |
-| 1 | Eval errored (network/auth) — transient, not a regression |
-| 2 | REGRESSION — recall_at_5 dropped > 0.5% → trigger emergency protocol |
+| 1 | Eval errored (network/auth) - transient, not a regression |
+| 2 | REGRESSION - recall_at_5 dropped > 0.5% → trigger emergency protocol |
 
 ---
 
@@ -856,7 +856,7 @@ The admin interface at `/admin(.*)` provides:
 
 ### 16.0 Admin Stats Queries (Per-Query Read-Limit Compliance)
 
-**Constraint:** Convex enforces per-function transaction limits — a single query/mutation may read at most ~16,384 documents / ~8 MiB and is subject to overall execution-time limits (see the Convex "Limits" docs). There is **no** "one paginated call per function" rule; `.collect()`/`.take()`/`.paginate()` may be called multiple times. The real risk is that one monolithic `dashboardStats` summing every table in a single transaction can exceed the document-read / scan limit as data grows.
+**Constraint:** Convex enforces per-function transaction limits - a single query/mutation may read at most ~16,384 documents / ~8 MiB and is subject to overall execution-time limits (see the Convex "Limits" docs). There is **no** "one paginated call per function" rule; `.collect()`/`.take()`/`.paginate()` may be called multiple times. The real risk is that one monolithic `dashboardStats` summing every table in a single transaction can exceed the document-read / scan limit as data grows.
 
 **Solution:** Split monolithic `dashboardStats` into 7 independent queries so each stays comfortably under the per-query read limit and can page large tables with a cursor loop. The client uses parallel `useQuery()` hooks to fetch them concurrently.
 
@@ -878,10 +878,10 @@ The admin interface at `/admin(.*)` provides:
 
 | Component | File | Role check |
 |-----------|------|------------|
-| Edge middleware | `src/middleware.ts` | `sessionClaims.metadata.role` — redirects non-admins from `/admin(.*)` |
+| Edge middleware | `src/middleware.ts` | `sessionClaims.metadata.role` - redirects non-admins from `/admin(.*)` |
 | Admin layout | `src/app/admin/layout.tsx` | `AuthGuard` with `isAdmin` from Clerk session claims |
-| Server-side | `convex/auth.ts` | `isAdmin()`, `requireAdmin()`, `requirePermission()` — queries `users.role` from Convex DB |
-| Client-side | `src/lib/clerk-claims.ts` | `isAdminRole()`, `getRoleFromClaims()` — reads JWT claims |
+| Server-side | `convex/auth.ts` | `isAdmin()`, `requireAdmin()`, `requirePermission()` - queries `users.role` from Convex DB |
+| Client-side | `src/lib/clerk-claims.ts` | `isAdminRole()`, `getRoleFromClaims()` - reads JWT claims |
 | Permissions | `src/lib/permissions.ts` | Centralized `ROLE_PERMISSIONS` matrix, `hasPermission()` |
 
 **Roles:** `user` → `admin` → `superadmin` (hierarchical, higher includes lower permissions).
@@ -922,7 +922,7 @@ The admin interface at `/admin(.*)` provides:
 | **Ownership** | Windows owns `node_modules` and all `pnpm install` / `pnpm dev` / `pnpm build` commands |
 | **WSL forbids `pnpm install`** | Never run `pnpm install` from WSL on the shared directory |
 | **WSL test execution** | Run tests via `pnpm exec vitest` from WSL pointing at `/mnt/c/...` path, but only if node_modules is in a consistent (Windows-created) state |
-| **Clean install for WSL only** | If WSL needs its own node_modules, clone into a WSL-native path (e.g. `~/uetgpt-test/`) — never touch the Windows-owned copy |
+| **Clean install for WSL only** | If WSL needs its own node_modules, clone into a WSL-native path (e.g. `~/uetgpt-test/`) - never touch the Windows-owned copy |
 | **Config files** | `vitest.config.ts` uses `fileURLToPath(new URL(...))` for cross-platform path resolution. Do not revert to `__dirname` patterns. |
 
 ### 17.3 Test Execution Preference
@@ -932,7 +932,7 @@ Tests pass reliably on Windows (55 test files, 197+ individual test cases, front
 ### 17.4 If node_modules Must Be Rebuilt
 
 1. Only the **Windows agent** initiates the rebuild: `pnpm install` from Windows PowerShell
-2. After rebuild, WSL may need `@rolldown/binding-linux-x64-gnu` symlink recreated in `node_modules/.pnpm/rolldown@1.0.1/node_modules/@rolldown/` and `node_modules/@rolldown/` — the Windows install does not include the linux binding. Use absolute symlinks (`ln -sf /absolute/path`) — WSL's `/mnt/c/` mount does not reliably follow relative symlinks across file systems.
+2. After rebuild, WSL may need `@rolldown/binding-linux-x64-gnu` symlink recreated in `node_modules/.pnpm/rolldown@1.0.1/node_modules/@rolldown/` and `node_modules/@rolldown/` - the Windows install does not include the linux binding. Use absolute symlinks (`ln -sf /absolute/path`) - WSL's `/mnt/c/` mount does not reliably follow relative symlinks across file systems.
 
 ---
 
@@ -953,7 +953,7 @@ Tests pass reliably on Windows (55 test files, 197+ individual test cases, front
 
 All components live under `src/components/`. Grouped by folder with one-line descriptions.
 
-### 19.1 `chat/` — Chat Interface (9 components)
+### 19.1 `chat/` - Chat Interface (9 components)
 
 | Component | File | Description |
 |-----------|------|-------------|
@@ -967,7 +967,7 @@ All components live under `src/components/`. Grouped by folder with one-line des
 | `MessageActions` | `message-actions.tsx` | Copy, thumbs up/down feedback, pin, and delete actions per message |
 | `GlassPortal` | `glass-portal.tsx` | Frosted-glass container overlay with grid texture for visual depth |
 
-### 19.2 `sidebar/` — Sidebar Navigation (4 components)
+### 19.2 `sidebar/` - Sidebar Navigation (4 components)
 
 | Component | File | Description |
 |-----------|------|-------------|
@@ -976,7 +976,7 @@ All components live under `src/components/`. Grouped by folder with one-line des
 | `SidebarSearch` | `search.tsx` | Thread search input with keyboard shortcut to open command palette |
 | `NewChatButton` | `new-chat-button.tsx` | Creates a new thread via Convex mutation and navigates to it |
 
-### 19.3 `shared/` — Shared Layout Components (4 components)
+### 19.3 `shared/` - Shared Layout Components (4 components)
 
 | Component | File | Description |
 |-----------|------|-------------|
@@ -985,13 +985,13 @@ All components live under `src/components/`. Grouped by folder with one-line des
 | `LoadingSpinner` | `loading-spinner.tsx` | Animated spinner with sm/md/lg/xl size variants |
 | `ErrorView` | `error-view.tsx` | Error display with heading, message, digest, and reset button |
 
-### 19.4 `auth/` — Authentication (1 component)
+### 19.4 `auth/` - Authentication (1 component)
 
 | Component | File | Description |
 |-----------|------|-------------|
 | `AuthGuard` | `auth-guard.tsx` | Clerk auth gate with optional `requireAdmin` role check and redirect |
 
-### 19.5 `ui/` — Primitive UI Components (13 components)
+### 19.5 `ui/` - Primitive UI Components (13 components)
 
 | Component | File | Description |
 |-----------|------|-------------|
@@ -1099,7 +1099,7 @@ export const streamRegistry = new StreamRegistry();
 
 | Concern | Solution |
 |---------|----------|
-| Multiple listeners per thread | Uses `Set<StreamCallback>` per threadId — transient double-mounts during navigation or React StrictMode never clobber each other |
+| Multiple listeners per thread | Uses `Set<StreamCallback>` per threadId - transient double-mounts during navigation or React StrictMode never clobber each other |
 | Thread key | Thread Convex `_id` as string key |
 | Source delivery | Optional `sources` parameter delivered once with the first chunk; hooks extract and attach to message |
 | Cleanup | `unregister()` removes the callback and cleans up empty Sets |
@@ -1126,9 +1126,9 @@ export const streamRegistry = new StreamRegistry();
 | **Integration** | 4 | Vitest | `tests/integration/*.test.ts` |
 | **Convex** | 5 | Vitest | `tests/convex/**/*.test.ts` |
 | **E2E** | 12 | Playwright | `tests/e2e/*.spec.ts` |
-| **Total** | **55** | — | — |
+| **Total** | **55** | - | - |
 
-Plus 1 load test (`tests/load-test.ts`) — not CI-integrated, run manually.
+Plus 1 load test (`tests/load-test.ts`) - not CI-integrated, run manually.
 
 ### 21.2 Unit Tests (34 files)
 
@@ -1222,7 +1222,7 @@ Plus 1 load test (`tests/load-test.ts`) — not CI-integrated, run manually.
 
 ### 22.1 GitHub Actions Workflows
 
-#### `ci.yml` — Continuous Integration
+#### `ci.yml` - Continuous Integration
 
 Triggers on: push to `main`, PRs to `main`.
 
@@ -1241,14 +1241,14 @@ Triggers on: push to `main`, PRs to `main`.
 
 **Security:** All checkout steps use `persist-credentials: false`. Actions are pinned to commit SHAs (not tags).
 
-#### `deploy.yml` — Production Deployment
+#### `deploy.yml` - Production Deployment
 
 Triggers on: push to `main` (paths-ignore: docs, markdown, LICENSE), `workflow_dispatch` (environment: production/preview).
 
 | Job | Runner | Timeout | Depends On | Purpose |
 |-----|--------|---------|------------|---------|
-| **build** | ubuntu-24.04 | 30m | — | Build frontend as gate |
-| **deploy-convex** | ubuntu-24.04 | 20m | build | `npx convex deploy` — deploys backend + cron jobs |
+| **build** | ubuntu-24.04 | 30m | - | Build frontend as gate |
+| **deploy-convex** | ubuntu-24.04 | 20m | build | `npx convex deploy` - deploys backend + cron jobs |
 | **deploy-frontend** | ubuntu-24.04 | 20m | deploy-convex | Vercel CLI: pull → build → deploy (prebuilt) |
 
 **Order:** build → deploy-convex → deploy-frontend (sequential, convex first so frontend can immediately use new backend).
@@ -1267,7 +1267,7 @@ Triggers on: push to `main` (paths-ignore: docs, markdown, LICENSE), `workflow_d
 | Default function maxDuration | 60s |
 | Health route memory | 256 MB, 10s timeout |
 | Webhook routes memory | 256 MB, 30s timeout |
-| Vercel cron | `/api/cron` — daily at midnight UTC |
+| Vercel cron | `/api/cron` - daily at midnight UTC |
 | GitHub integration | `silent: true`, `autoJobCancelation: true` |
 
 ### 22.3 Deployment Flow Diagram
@@ -1276,7 +1276,7 @@ Triggers on: push to `main` (paths-ignore: docs, markdown, LICENSE), `workflow_d
 Push to main
   ├─ ci.yml: lint → typecheck → test → audit → e2e → build (all must pass)
   └─ deploy.yml:
-       1. build (gate — Next.js production build)
-       2. deploy-convex (convex deploy — backend + crons + schema)
+       1. build (gate - Next.js production build)
+       2. deploy-convex (convex deploy - backend + crons + schema)
        3. deploy-frontend (vercel pull → build → deploy --prebuilt)
 ```

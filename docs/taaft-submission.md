@@ -1,12 +1,12 @@
 # TAAFT Submission Draft
 
-**Directory**: [There's An AI For That](https://theresanaiforthat.com) — largest AI tool directory, 3M+ monthly visitors, dofollow backlinks.
+**Directory**: [There's An AI For That](https://theresanaiforthat.com) - largest AI tool directory, 3M+ monthly visitors, dofollow backlinks.
 
 ## Submission Details
 
 - **Name**: UET GPT
 - **URL**: https://uet-gpt.vercel.app
-- **Description**: UET GPT is an open-source AI chatbot that answers questions about UET Taxila — admissions, fees, programs, faculty, and campus life — using RAG over official university documents. Free to use.
+- **Description**: UET GPT is an open-source AI chatbot that answers questions about UET Taxila - admissions, fees, programs, faculty, and campus life - using RAG over official university documents. Free to use.
 - **Category**: Education, Chatbot, Student Tools
 - **Tags**: education, chatbot, rag, university, pakistan, uet, student-assistant, ai-assistant
 - **Pricing**: Free

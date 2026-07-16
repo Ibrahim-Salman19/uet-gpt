@@ -25,7 +25,7 @@ export const LLM_FALLBACK_CHAIN: ModelConfig[] = [
 /**
  * Returns the ids of fallback models whose provider API key is configured.
  *
- * May return an empty array when NO provider key is set — in that case there is
+ * May return an empty array when NO provider key is set - in that case there is
  * no LLM available at all. We emit a distinct warning so the empty result is
  * observable; callers must still handle `[]` with a clear "no model configured"
  * error rather than silently iterating an empty chain.
@@ -36,7 +36,7 @@ export function getModelPriorities(): string[] {
   );
   if (ids.length === 0) {
     console.warn(
-      "[LLM] No provider API keys configured (GROQ_API_KEY / GEMINI_API_KEY / CEREBRAS_API_KEY) — no model available.",
+      "[LLM] No provider API keys configured (GROQ_API_KEY / GEMINI_API_KEY / CEREBRAS_API_KEY) - no model available.",
     );
   }
   return ids;

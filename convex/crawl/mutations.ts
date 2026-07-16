@@ -384,7 +384,7 @@ export const saveEmbedding = internalMutation({
     // TOCTOU guard: a concurrent retry of this same chunk may have already won
     // the rag.add() race in actions.ts (embedSingleChunk) and created a SECOND
     // vector with the SAME ragId before this mutation committed. If a row for
-    // this ragId already exists, this run lost the race — delete the duplicate
+    // this ragId already exists, this run lost the race - delete the duplicate
     // vector we just created in rag.add() so it doesn't linger as an orphan
     // (paid storage, never queried). This makes saveEmbedding idempotent across
     // the action/mutation boundary regardless of retry interleaving.
@@ -586,7 +586,7 @@ async function checkDocumentForFailure(
         }
       } else {
         console.warn(
-          `Chunk ${failedCount}/${chunkCount} failed for ${url} — document stays in processing`,
+          `Chunk ${failedCount}/${chunkCount} failed for ${url} - document stays in processing`,
         );
       }
     }
@@ -696,7 +696,7 @@ export const retryDeadLetterQueue = internalMutation({
     // "pending_retry" rows below and atomically flip each to "processing" within this
     // transaction before enqueuing. Convex mutations are serializable, so a concurrent
     // run cannot re-grab the same rows. We therefore do NOT gate the whole queue on the
-    // existence of any single "processing" row — one permanently-stuck entry would
+    // existence of any single "processing" row - one permanently-stuck entry would
     // otherwise stall recovery of every other failed chunk for up to 30 minutes
     // (resetStuckDLQEntries still recovers genuinely stuck "processing" rows on its own
     // cron cycle).
@@ -708,7 +708,7 @@ export const retryDeadLetterQueue = internalMutation({
     const invalidDLQ: (typeof pendingDLQ)[number][] = [];
     const validDLQ = pendingDLQ.filter((dlq) => {
       if (!dlq.payload?.chunkText) {
-        console.warn(`Skipping DLQ entry ${dlq._id} — no chunk text available for retry.`);
+        console.warn(`Skipping DLQ entry ${dlq._id} - no chunk text available for retry.`);
         invalidDLQ.push(dlq);
         return false;
       }
@@ -954,7 +954,7 @@ export const enqueueDocumentChunks = internalMutation({
  * then clear parentText. Bounded per call via `limit` (default 500); the caller
  * re-invokes until `remaining === "done"`.
  *
- * This is the ONLY way to reclaim the already-stored parentText duplication —
+ * This is the ONLY way to reclaim the already-stored parentText duplication -
  * new writes already use parentId (WS-1), but existing rows keep their inline
  * copy until this runs. Retrieval is unchanged throughout (doc_queries.ts
  * resolves parentText via parentId when present, falling back to the inline
@@ -997,7 +997,7 @@ export const migrateParentTextToTable = internalMutation({
             contentHash,
             text: parentText,
           });
-      // Set parentId then clear the inline copy in one patch — reclaims the
+      // Set parentId then clear the inline copy in one patch - reclaims the
       // duplicated storage immediately for this row.
       await ctx.db.patch(chunk._id, { parentId, parentText: undefined });
       migrated++;

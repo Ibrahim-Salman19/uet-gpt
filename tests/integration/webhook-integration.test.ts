@@ -184,7 +184,7 @@ describe("Crawl Webhook Integration & Load Testing", () => {
     );
     expect(queuedCall).toBeDefined();
 
-    // Second webhook delivery — mark-first pattern prevents race condition
+    // Second webhook delivery - mark-first pattern prevents race condition
     ctx.runQuery.mockResolvedValue(null);
     ctx.runMutation.mockResolvedValue(undefined);
 
@@ -197,7 +197,7 @@ describe("Crawl Webhook Integration & Load Testing", () => {
   }, 30000);
 
   it("enforces the domain allowlist: off-domain pages are skipped, not ingested", async () => {
-    // SECURITY (OWASP LLM01 — ingestion poisoning): crawlWebhook must NOT
+    // SECURITY (OWASP LLM01 - ingestion poisoning): crawlWebhook must NOT
     // chunk/embed pages from domains outside uettaxila.edu.pk, even when the
     // signature is valid. The job is still acknowledged (200), but no chunks
     // are queued for the off-domain page. This pins the allowlist contract so a

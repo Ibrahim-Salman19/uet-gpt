@@ -86,7 +86,7 @@ export const evaluateChunks = internalAction({
       } catch (error) {
         // Fail OPEN: on a transient LLM failure (rate limit/timeout) keep the
         // chunks the search + rerank cascade already vetted, rather than marking
-        // them NOT relevant — which would strip good context and could force a
+        // them NOT relevant - which would strip good context and could force a
         // spurious "refuse" exactly when upstream retrieval succeeded. Reserve
         // "not relevant" for explicit model judgments. Use a low-but-nonzero
         // confidence so callers can still distinguish unjudged from confident.

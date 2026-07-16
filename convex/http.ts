@@ -11,7 +11,7 @@ const http = httpRouter();
  *
  * These routes are server-to-server webhooks (auth is enforced via tokens/HMAC),
  * so CORS is largely irrelevant. We only ever reflect an origin that is an exact
- * match in the allow-list — we never echo an arbitrary/non-allowlisted origin and
+ * match in the allow-list - we never echo an arbitrary/non-allowlisted origin and
  * never emit a placeholder origin. When nothing matches we return null and the
  * caller omits the header entirely.
  */

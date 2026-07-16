@@ -1,4 +1,4 @@
-# UETGPT Testing — Quick Reference
+# UETGPT Testing - Quick Reference
 
 **Last updated:** 2026-06-06 | **Baseline:** 111 pass, 4 fail (Vitest 4.1.7)
 
@@ -26,10 +26,10 @@
 | `tests/convex/` | Vitest | 5 | ~60 | webhook, users, tasks, actions, mutations |
 | `tests/unit/` | Vitest | 34 | ~55 | admin components, utils, rate-limit, llm-models, search, feedback, embeddings, RAG context |
 | `tests/integration/` | Vitest | 4 | ~40 | RAG pipeline, chat API, embeddings, webhook |
-| `tests/e2e/` | Playwright | 12 | 8 | Minimal — no auth tests working |
-| `tests/helpers/` | — | 2 | — | `convex-mock.ts`, `README.md` |
-| `tests/load-test.ts` | Manual | 1 | — | NOT CI-integrated |
-| **Total** | — | **55+** | **~115** | 111 pass, 4 fail |
+| `tests/e2e/` | Playwright | 12 | 8 | Minimal - no auth tests working |
+| `tests/helpers/` | - | 2 | - | `convex-mock.ts`, `README.md` |
+| `tests/load-test.ts` | Manual | 1 | - | NOT CI-integrated |
+| **Total** | - | **55+** | **~115** | 111 pass, 4 fail |
 
 ---
 
@@ -61,7 +61,7 @@
 
 ```typescript
 // vitest.config.ts (summary)
-environment: "node"        // NOTE: jsdom hangs — see Phase 1.1.2
+environment: "node"        // NOTE: jsdom hangs - see Phase 1.1.2
 testTimeout: 30000         // WSL needs 30s+ for setup
 globals: true
 setupFiles: ["./tests/setup.ts"]  // jest-dom + global fetch mock
@@ -96,11 +96,11 @@ projects: [
 |------|------|-----------|
 | `webhook-integration.test.ts` | rejects payloads >1MB | Expects 413, Convex returns 400 |
 | `webhook.test.ts` | crawlWebhook > rejects payload >1MB with 413 | Same 413→400 mismatch |
-| `clerk-webhook.test.ts` | exports POST handler | Timeout (7320ms > 5000ms) — Svix mock hangs |
-| `clerk-webhook.test.ts` | POST is async function | Timeout (22136ms > 5000ms) — same Svix mock issue |
+| `clerk-webhook.test.ts` | exports POST handler | Timeout (7320ms > 5000ms) - Svix mock hangs |
+| `clerk-webhook.test.ts` | POST is async function | Timeout (22136ms > 5000ms) - same Svix mock issue |
 
 **Other issues:**
-- TypeScript errors: 26 (all in test files — branded Convex types not satisfied by mocks)
+- TypeScript errors: 26 (all in test files - branded Convex types not satisfied by mocks)
 - Lint errors: 9 (3 auto-fixable, 6 formatting)
 
 ---

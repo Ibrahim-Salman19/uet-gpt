@@ -8,7 +8,7 @@
     "https://admissions.uettaxila.edu.pk/Seats_Allocation.php",
     "https://admissions.uettaxila.edu.pk/ProspectusAvailability.php"
   ],
-  "_comment_departmentFacultyRange": "Empty range — no department faculty pages in the admissions-only scope.",
+  "_comment_departmentFacultyRange": "Empty range - no department faculty pages in the admissions-only scope.",
   "departmentFacultyRange": { "start": 1, "end": 0 },
   "maxDepth": 4,
   "concurrency": 3,

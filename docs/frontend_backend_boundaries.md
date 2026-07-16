@@ -8,13 +8,13 @@
 
 ---
 
-## 1. Ownership Map — Who Owns What
+## 1. Ownership Map - Who Owns What
 
-### 1.1 Backend (`convex/`) — Owned by the Backend Agent
+### 1.1 Backend (`convex/`) - Owned by the Backend Agent
 
 | Concern | File(s) | Notes |
 |---|---|---|
-| Database schema, indexes, vector indexes | `convex/schema.ts` | **Sacred — filter field names on `vectorIndex` and `embeddingDimension` are FORBIDDEN to change.** |
+| Database schema, indexes, vector indexes | `convex/schema.ts` | **Sacred - filter field names on `vectorIndex` and `embeddingDimension` are FORBIDDEN to change.** |
 | Queries, mutations, actions | `convex/**/*.ts` | All public surface lives behind generated `api`/`internal` |
 | Cron jobs | `convex/crons.ts` | 7 scheduled jobs; cron bodies are pure Convex |
 | HTTP actions (webhooks) | `convex/http.ts`, `convex/crawl/webhook.ts` | HMAC + bearer auth are FORBIDDEN to weaken |
@@ -22,7 +22,7 @@
 | RBAC enforcement on data | every mutation/query | `await requireAdmin(ctx)` or `requireAuth(ctx)` first thing |
 | Rate limiting (Convex side) | `convex/rateLimit.ts` (`rateLimits` table) | 10 msg/user/min, 100K tokens global/min |
 | RAG orchestration | `convex/rag/**` | `instance.ts` (768d), `retrieval.ts` (orchestrator), `routing.ts`, `context.ts`, `prompts.ts` |
-| Embedding generation | `convex/embeddings/generate.ts` | Gemini `gemini-embedding-2` (768d) only — no other model |
+| Embedding generation | `convex/embeddings/generate.ts` | Gemini `gemini-embedding-2` (768d) only - no other model |
 | Search / reranking | `convex/embeddings/search.ts`, `convex/reranking/rerank.ts` | RRF (k=60), FlashRank rerank (topK=4) |
 | Cache get/set/cleanup | `convex/cache/**` | Cosine threshold `0.92` from `convex/constants.ts` |
 | Crawl pipeline | `convex/crawl/**` | Webhook + mutations + actions + workpools + workflow |
@@ -30,7 +30,7 @@
 | Feedback, threads, messages, users, FAQ, settings | `convex/feedback/**`, `convex/threads.ts`, `convex/messages.ts`, `convex/users.ts`, `convex/faq.ts`, `convex/admin/**` | |
 | Emergency stop | `convex/emergencyStop.ts` | Draining in-flight jobs |
 
-### 1.2 Frontend (`src/`) — Owned by the Frontend Agent
+### 1.2 Frontend (`src/`) - Owned by the Frontend Agent
 
 | Concern | File(s) | Notes |
 |---|---|---|
@@ -45,7 +45,7 @@
 | Convex client wiring | `src/lib/convex.ts`, `src/components/providers.tsx` | |
 | Middleware (route protection, CSP) | `src/middleware.ts` | `clerkMiddleware` + per-request CSP nonce |
 | API routes (Next.js, not Convex HTTP) | `src/app/api/**` | `/api/chat` streams LLM, `/api/cron` proxies to Convex, `/api/webhooks/clerk` ingests Clerk events |
-| LLM model fallback chain | `src/lib/llm-models.ts` | `LLM_FALLBACK_CHAIN` (Groq → Cerebras → Groq → Gemini) — frontend owns which SDK to call |
+| LLM model fallback chain | `src/lib/llm-models.ts` | `LLM_FALLBACK_CHAIN` (Groq → Cerebras → Groq → Gemini) - frontend owns which SDK to call |
 | LLM streaming, prompt assembly | `src/app/api/chat/route.ts` | The actual `streamText` happens here, never inside Convex |
 | Sentry instrumentation | `src/instrumentation.ts`, `sentry.*.config.ts` | |
 | Next config (headers, redirects, image hosts) | `next.config.ts` | |
@@ -62,13 +62,13 @@
 
 ---
 
-## 2. The Line — What Each Side May NEVER Do
+## 2. The Line - What Each Side May NEVER Do
 
 ### 2.1 The Frontend Agent Must NOT
 
 | # | Forbidden | Reason |
 |---|---|---|
-| F-1 | Import from `convex/values`, `convex/server`, `convex/_generated/server`, or any non-API/internal generated module in client-shipped code | These are server-only Convex Isolate APIs — bundling them crashes the client. Use only `api` from `_generated/api`. |
+| F-1 | Import from `convex/values`, `convex/server`, `convex/_generated/server`, or any non-API/internal generated module in client-shipped code | These are server-only Convex Isolate APIs - bundling them crashes the client. Use only `api` from `_generated/api`. |
 | F-2 | Call `ctx.db.*`, `ctx.runQuery`, `ctx.runMutation`, `ctx.vectorSearch`, `ctx.auth.getUserIdentity`, or any Convex `ctx` API from anywhere in `src/` | These APIs exist only inside Convex functions. The frontend must use `useQuery` / `useMutation` / `ConvexHttpClient` or call the Next.js API routes. |
 | F-3 | Define new tables or add fields to `convex/schema.ts` | Schema is backend-owned. If a UI change needs new data, **ask the backend agent** to add it. |
 | F-4 | Run embeddings, vector search, or RAG orchestration | All of this is in `convex/rag/**` and `convex/embeddings/**`. The frontend only calls `api.rag.retrieval.retrieveContext`. |
@@ -86,7 +86,7 @@
 | # | Forbidden | Reason |
 |---|---|---|
 | B-1 | Import from `next/*`, `next/server`, `@clerk/nextjs`, or anything from `src/app` or `src/components` | Convex functions run in V8 Isolate or Node, not in the Next.js runtime. Cross-boundary imports break deployment. |
-| B-2 | Use the `ai` SDK's `streamText` / `generateText` directly inside a Convex action for the user-facing chat | Streaming + headers + cache write are coordinated in `src/app/api/chat/route.ts`. Convex provides retrieval + cache lookup only. (Exception: the LLM calls in `convex/crawl/webhook.ts` for chunk contextualisation — those are for embedding, not user chat.) |
+| B-2 | Use the `ai` SDK's `streamText` / `generateText` directly inside a Convex action for the user-facing chat | Streaming + headers + cache write are coordinated in `src/app/api/chat/route.ts`. Convex provides retrieval + cache lookup only. (Exception: the LLM calls in `convex/crawl/webhook.ts` for chunk contextualisation - those are for embedding, not user chat.) |
 | B-3 | Validate a Clerk session by calling `auth()` from `@clerk/nextjs` | Use `ctx.auth.getUserIdentity()` plus the helpers in `convex/auth.ts`. Clerk JWT validation is wired via `convex/auth.config.ts`. |
 | B-4 | Use Upstash Redis | That's the frontend's HTTP-API rate-limit store. Inside Convex, the `rateLimits` table is the only rate-limit source. |
 | B-5 | Mutate the `threads` or `messages` tables directly | They are owned by the `@convex-dev/agent` component. Always go through `components.agent.threads.*` and `components.agent.messages.*`. |
@@ -94,7 +94,7 @@
 | B-7 | Change `embeddingDimension` or `filterNames` on the RAG instance | Mismatched dimensions silently break every cached embedding and every live query. |
 | B-8 | Remove or weaken the HMAC timestamp+signature guard in `convex/crawl/webhook.ts`, the Svix verification in `src/app/api/webhooks/clerk/route.ts`, the Bearer-token check in `crawl/ingest` and `crawl/reset`, or the `convex/http.ts` startup guard that requires at least one of `CONVEX_AUTH_TOKEN` / `CRAWL_WEBHOOK_SECRET` | Any of these is a security boundary. Removing them is a P0 incident. |
 | B-9 | Emit UI markup (JSX, HTML strings) from a Convex function | Convex returns plain data. Render on the frontend. |
-| B-10 | Store provider secrets in `convex/schema.ts`, hard-coded constants, or string literals | All secrets come from `process.env`. The `convex/http.ts` startup throws if neither webhook secret is set — do not turn that off. |
+| B-10 | Store provider secrets in `convex/schema.ts`, hard-coded constants, or string literals | All secrets come from `process.env`. The `convex/http.ts` startup throws if neither webhook secret is set - do not turn that off. |
 | B-11 | Write to `users.preferences.model` from anywhere except the user's own session | The user picks the model; the chat route reads it. No cross-user write. |
 | B-12 | Add new environment variables without listing them in `architecture.md` §8.2 and updating `.env.example` | If a feature needs a new secret, both docs move together. |
 
@@ -112,20 +112,20 @@
 
 ---
 
-## 3. Contract Rules — How the Two Sides Talk
+## 3. Contract Rules - How the Two Sides Talk
 
 ### 3.1 The only legal ways for `src/` to reach `convex/`
 
-1. **`useQuery(api.x.y, args)` / `useMutation(api.x.y)` / `useAction(api.x.y)`** — reactive client glue. Generated `api` is the only legal import path. (`src/hooks/use-admin.ts`, `src/hooks/use-messages.ts`, etc.)
-2. **`ConvexHttpClient` (`src/lib/convex.ts`)** — server-side, in Next.js API routes, when you need to call Convex from a route handler that itself is invoked via HTTP. (`src/app/api/cron/route.ts`, `src/app/api/webhooks/clerk/route.ts`, `src/app/api/chat/route.ts`.)
-3. **Convex HTTP webhooks** (`/api/webhook/crawl`, `/ingest`, `/api/reset`) — server-to-server only. Never call these from a browser.
-4. **Internal cross-table Convex calls** — only inside `convex/`, via `internal.<module>.<func>` (e.g. `internal.cache.internal_queries.getCacheEntry`). Never expose `internal.*` to the frontend.
+1. **`useQuery(api.x.y, args)` / `useMutation(api.x.y)` / `useAction(api.x.y)`** - reactive client glue. Generated `api` is the only legal import path. (`src/hooks/use-admin.ts`, `src/hooks/use-messages.ts`, etc.)
+2. **`ConvexHttpClient` (`src/lib/convex.ts`)** - server-side, in Next.js API routes, when you need to call Convex from a route handler that itself is invoked via HTTP. (`src/app/api/cron/route.ts`, `src/app/api/webhooks/clerk/route.ts`, `src/app/api/chat/route.ts`.)
+3. **Convex HTTP webhooks** (`/api/webhook/crawl`, `/ingest`, `/api/reset`) - server-to-server only. Never call these from a browser.
+4. **Internal cross-table Convex calls** - only inside `convex/`, via `internal.<module>.<func>` (e.g. `internal.cache.internal_queries.getCacheEntry`). Never expose `internal.*` to the frontend.
 
 ### 3.2 The only legal ways for `convex/` to reach `src/`-side concerns
 
-1. **Auth identity** — Convex reads `ctx.auth.getUserIdentity()` which is populated from the Clerk JWT validated by `convex/auth.config.ts`. There is no other auth channel.
-2. **Component APIs** — Convex uses `components.agent.*` and `components.rag.*`. The agent component is the only writer for `threads` and `messages`.
-3. **External services** — Groq, Cerebras, Google (Gemini), and the reranker endpoint are called from Convex actions where they belong (`convex/rag/routing.ts`, `convex/embeddings/generate.ts`, `convex/reranking/rerank.ts`). The Next.js chat route calls Groq/Cerebras/Google directly for streaming — these two sets of LLM calls do not overlap and must not.
+1. **Auth identity** - Convex reads `ctx.auth.getUserIdentity()` which is populated from the Clerk JWT validated by `convex/auth.config.ts`. There is no other auth channel.
+2. **Component APIs** - Convex uses `components.agent.*` and `components.rag.*`. The agent component is the only writer for `threads` and `messages`.
+3. **External services** - Groq, Cerebras, Google (Gemini), and the reranker endpoint are called from Convex actions where they belong (`convex/rag/routing.ts`, `convex/embeddings/generate.ts`, `convex/reranking/rerank.ts`). The Next.js chat route calls Groq/Cerebras/Google directly for streaming - these two sets of LLM calls do not overlap and must not.
 
 ### 3.3 Public API contract checklist (use this when adding a new function)
 
@@ -142,14 +142,14 @@ When the backend agent adds a new `query`, `mutation`, or `action`:
 When the frontend agent adds a new call to Convex:
 
 - [ ] The hook / call site imports only `api` from `convex/_generated/api`.
-- [ ] All arg keys are exactly the validator names. (The linter will catch a mismatch — do not bypass it with `as any`.)
+- [ ] All arg keys are exactly the validator names. (The linter will catch a mismatch - do not bypass it with `as any`.)
 - [ ] The UI handles `undefined` (loading) and the `ConvexError` rejection (failure) states.
-- [ ] If the call may return data the UI must render but the schema doesn't cover, **ask the backend agent** to add the field — never widen a returned value client-side.
+- [ ] If the call may return data the UI must render but the schema doesn't cover, **ask the backend agent** to add the field - never widen a returned value client-side.
 
 ### 3.4 Type mirroring rules
 
 - `convex/schema.ts` is authoritative for shapes. The `v.*` validators there are the contract.
-- `src/lib/types.ts` mirrors the **publicly visible** subset (e.g. `Source`, `ChatMessage`, `Thread`) as plain TypeScript interfaces. Do not import Convex `Doc<>` types into `src/` — they leak `Id<"…">` strings and confuse the bundler.
+- `src/lib/types.ts` mirrors the **publicly visible** subset (e.g. `Source`, `ChatMessage`, `Thread`) as plain TypeScript interfaces. Do not import Convex `Doc<>` types into `src/` - they leak `Id<"…">` strings and confuse the bundler.
 - If `convex/messages/validator.ts` (the `messageValidator`, `sourcesValidator`, `tokenCountValidator`) changes, regenerate the mirrors in `src/lib/types.ts` in the same PR.
 
 ### 3.5 Auth boundary matrix (who checks what, where)
@@ -161,7 +161,7 @@ When the frontend agent adds a new call to Convex:
 | `/api/chat` | `src/app/api/chat/route.ts` | `const { userId } = await auth()` then 401 on null |
 | `/api/cron` | `src/app/api/cron/route.ts` | `CRON_SECRET` Bearer header or `?cron_secret=` |
 | `/api/webhooks/clerk` | `src/app/api/webhooks/clerk/route.ts` | Svix signature via `svix` |
-| `/api/webhooks/convex*` (none today) | n/a | — |
+| `/api/webhooks/convex*` (none today) | n/a | - |
 | `/ingest` (Convex) | `convex/crawl/webhook.ts` | `Authorization: Bearer CONVEX_AUTH_TOKEN` |
 | `/api/webhook/crawl` (Convex) | `convex/crawl/webhook.ts` | HMAC-SHA256 + 5-minute timestamp skew |
 | `/api/reset` (Convex) | `convex/crawl/webhook.ts` | `Authorization: Bearer CONVEX_AUTH_TOKEN` |
@@ -208,7 +208,7 @@ useChat.sendMessage()
 
 Key boundary points:
 1. **LLM call lives in `src/app/api/chat/route.ts`**, not Convex. Convex only does retrieval + cache lookup.
-2. **Cache write** happens in Next.js (`after()` callback) — but uses the Convex `cache.set.set` action.
+2. **Cache write** happens in Next.js (`after()` callback) - but uses the Convex `cache.set.set` action.
 3. **Rate limit is enforced twice**: Upstash in the API route, Convex `enforceRateLimit` in `messages.insert`. They protect different layers.
 4. **`useChat.handleSend` is the only place** that calls `fetch /api/chat`. Do not duplicate this fetch elsewhere.
 
@@ -244,7 +244,7 @@ The frontend never participates in crawl ingestion.
        └─ useAdminFeedback()                ── api.feedback.list, api.admin.stats.deleteFeedback
 ```
 
-**Invariant:** the Convex query/mutation is the authoritative gate. The middleware UI check is cosmetic — the Convex function must independently call `requireAdmin(ctx)` and throw on failure.
+**Invariant:** the Convex query/mutation is the authoritative gate. The middleware UI check is cosmetic - the Convex function must independently call `requireAdmin(ctx)` and throw on failure.
 
 ---
 
@@ -254,7 +254,7 @@ The frontend never participates in crawl ingestion.
 
 | Env var | Read by | Never read by |
 |---|---|---|
-| `NEXT_PUBLIC_CONVEX_URL` | Frontend (browser), `src/lib/convex.ts`, `src/app/api/**`, `src/components/providers.tsx` | — (frontend-only) |
+| `NEXT_PUBLIC_CONVEX_URL` | Frontend (browser), `src/lib/convex.ts`, `src/app/api/**`, `src/components/providers.tsx` | - (frontend-only) |
 | `NEXT_PUBLIC_APP_URL` | `src/app/api/chat/route.ts` (CSRF) | Backend |
 | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | `src/components/providers.tsx`, `src/middleware.ts` | Backend |
 | `CLERK_SECRET_KEY` | `src/middleware.ts`, `src/lib/auth.ts`, `src/lib/clerk-claims.ts` | Backend |
@@ -266,9 +266,9 @@ The frontend never participates in crawl ingestion.
 | `CRON_SECRET` | `src/app/api/cron/route.ts` | Backend |
 | `WEBHOOK_SECRET` | `src/app/api/webhooks/clerk/route.ts` → passed as `secret` to `users:getOrCreate` | Anywhere else |
 | `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | `src/lib/rate-limit.ts` | Backend |
-| `GROQ_API_KEY` | `src/app/api/chat/route.ts`, `convex/rag/routing.ts` | — |
-| `GEMINI_API_KEY` (and `_1`, `_2`) | `src/app/api/chat/route.ts`, `convex/crawl/webhook.ts` (contextual summary), `convex/embeddings/generate.ts` | — |
-| `GOOGLE_GENERATIVE_AI_API_KEY` | `convex/embeddings/generate.ts` (key rotation #3), `convex/crawl/webhook.ts` | — |
+| `GROQ_API_KEY` | `src/app/api/chat/route.ts`, `convex/rag/routing.ts` | - |
+| `GEMINI_API_KEY` (and `_1`, `_2`) | `src/app/api/chat/route.ts`, `convex/crawl/webhook.ts` (contextual summary), `convex/embeddings/generate.ts` | - |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | `convex/embeddings/generate.ts` (key rotation #3), `convex/crawl/webhook.ts` | - |
 | `CEREBRAS_API_KEY` | `src/app/api/chat/route.ts` | Backend |
 | `RERANKER_URL` | `convex/reranking/rerank.ts` | Frontend |
 | `SENTRY_ORG`, `SENTRY_PROJECT` | `next.config.ts` (`withSentryConfig`) | Backend |
@@ -280,10 +280,10 @@ The frontend never participates in crawl ingestion.
 - **Frontend errors** → `console.error` + Sentry (browser). Toast via `sonner` for user-visible errors.
 - **Next.js API route errors** → `console.error` + return shaped `Response` (`{ error: "..." }`). Sentry captures uncaught.
 - **Convex function errors** → `console.error` / `console.warn` + throw `ConvexError` for user-facing failures. Sentry captures uncaught Convex errors automatically.
-- **Prompt-injection events** → `console.warn("[SECURITY] …")` inside `convex/rag/retrieval.ts:scanForInjection`. Do not change the log prefix — alerts may key on it.
-- **Cache hit events** → `console.log("Semantic Cache Hit!")` — keep the exact string for log greps.
+- **Prompt-injection events** → `console.warn("[SECURITY] …")` inside `convex/rag/retrieval.ts:scanForInjection`. Do not change the log prefix - alerts may key on it.
+- **Cache hit events** → `console.log("Semantic Cache Hit!")` - keep the exact string for log greps.
 
-### 5.3 Rate limiting — pick one layer, do not mix
+### 5.3 Rate limiting - pick one layer, do not mix
 
 | Layer | When to use it | How |
 |---|---|---|
@@ -294,7 +294,7 @@ The frontend never participates in crawl ingestion.
 
 Do not call `enforceRateLimit` from a frontend component. Do not call `checkChatRateLimit` from a Convex function.
 
-### 5.4 Adding a new feature — checklist
+### 5.4 Adding a new feature - checklist
 
 1. **Read `architecture.md` first.** Find the section that owns the change.
 2. **Decide which side owns it.** If it stores, mutates, or queries data, it belongs backend. If it renders, navigates, or streams, it belongs frontend. If it does both, split along the seam.
@@ -318,7 +318,7 @@ These are the patterns that have already caused bugs or near-misses in this proj
 | AP-3 | Both sides implement the same `assignTier` / `assignFreshnessTier` (this exists today) | The function in `convex/crawl/chunking.ts` and the one in `src/app/api/chat/route.ts` must stay in sync | If you must keep two copies, add a single test in `tests/unit/` that asserts they return the same value for the same URL. Otherwise, move both to a shared helper. |
 | AP-4 | Frontend mutation call missing `await` | React 19 surfaces these as silent failures | Always `await` mutations. Use `useMutation` with a wrapper that logs and toasts on rejection. |
 | AP-5 | `convex/action` that performs multiple writes via `ctx.runMutation` | Actions are not transactional; partial failure is possible | Use a `mutation` for any multi-write flow. Actions are for: external API calls, long-running work, `workpool` tasks. |
-| AP-6 | Reading from `convex/_generated/api` in a way that hard-codes a function name as a string (e.g. `client.mutation("users:getOrCreate", …)`) | The `api` object already provides the function reference; the string is fragile | Use `client.mutation(api.users.getOrCreate, {…})`. The Clerk webhook route is the one historical exception — it is acceptable there. |
+| AP-6 | Reading from `convex/_generated/api` in a way that hard-codes a function name as a string (e.g. `client.mutation("users:getOrCreate", …)`) | The `api` object already provides the function reference; the string is fragile | Use `client.mutation(api.users.getOrCreate, {…})`. The Clerk webhook route is the one historical exception - it is acceptable there. |
 | AP-7 | Reading `process.env` at module top-level in a Convex file | Convex deploys isolate the runtime; some env vars aren't set until the first call | Read env vars inside the handler, or guard with a clear startup assertion (see `convex/http.ts` for the pattern). |
 | AP-8 | Adding a custom Convex HTTP route to handle something the frontend could do with `useMutation` | Adds an unnecessary auth surface | Use `useMutation(api.x.y, args)` for user-driven writes. Reserve `convex/http.ts` for external integrations (crawlers, webhooks). |
 | AP-9 | Wrapping a Convex query in a Next.js API route just to add a header | Doubles the network hop, doubles the failure modes | Call the Convex query from the client directly; add the header at the call site if needed. |
@@ -329,7 +329,7 @@ These are the patterns that have already caused bugs or near-misses in this proj
 
 ---
 
-## 7. Quick Decision Tree — Where Does This Code Go?
+## 7. Quick Decision Tree - Where Does This Code Go?
 
 ```
 Is it React / JSX / Tailwind / Next.js routing / streaming / browser-only?

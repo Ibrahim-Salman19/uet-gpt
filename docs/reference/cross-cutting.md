@@ -31,10 +31,10 @@
 
 | If you want to… | Jump to |
 | --- | --- |
-| Add or rename an env var | §2 (Env Vars) — both sides + docs |
-| Change who can call what | §3 (Auth Matrix) — check both Clerk role AND Convex role |
-| Add a union type used on both sides | §4 (Type Mirrors) — must change in 3 places |
-| Standardize error responses | §5 (Error Handling) — codes + shapes |
+| Add or rename an env var | §2 (Env Vars) - both sides + docs |
+| Change who can call what | §3 (Auth Matrix) - check both Clerk role AND Convex role |
+| Add a union type used on both sides | §4 (Type Mirrors) - must change in 3 places |
+| Standardize error responses | §5 (Error Handling) - codes + shapes |
 | Add a new log destination | §6 (Logging) |
 | Decide which rate limit layer to use | §7 (Layer Picker) |
 | Add a new cache layer or change TTL | §8 (Caching) |
@@ -52,37 +52,37 @@
 | `NEXT_PUBLIC_CONVEX_URL` | FE | providers.tsx (inline ConvexReactClient) + chat/route.ts (inline ConvexHttpClient) | platform | yes | build + runtime |
 | `CONVEX_SITE_URL` | BE + Python | `convex/crawl/actions.ts:92` + `scripts/crawler.py`, `scripts/ingest_pdf.py` | platform | yes | runtime |
 | `CONVEX_DEPLOYMENT` | BE | Convex CLI | platform | yes | deploy (NOT `CONVEX_DEPLOY_KEY`; `.env.local` uses `CONVEX_DEPLOY_KEY=dev:fleet-kingfisher-646` literally) |
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | FE | `src/app/api/health/route.ts:131` + `<ClerkProvider>` (auto-reads `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` from env) | platform | yes | build + runtime (NOT an alias of `CLERK_PUBLISHABLE_KEY` — that var is not referenced anywhere) |
-| `CLERK_SECRET_KEY` | FE server | Implicitly read by `@clerk/nextjs/server` `auth()` / `currentUser()` (NOT by `src/lib/auth.ts` — that file does not import it) | platform | yes | runtime |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | FE | `src/app/api/health/route.ts:131` + `<ClerkProvider>` (auto-reads `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` from env) | platform | yes | build + runtime (NOT an alias of `CLERK_PUBLISHABLE_KEY` - that var is not referenced anywhere) |
+| `CLERK_SECRET_KEY` | FE server | Implicitly read by `@clerk/nextjs/server` `auth()` / `currentUser()` (NOT by `src/lib/auth.ts` - that file does not import it) | platform | yes | runtime |
 | `CLERK_JWT_ISSUER` | BE | `convex/auth.config.ts:4` | platform | yes | runtime (NOT `CLERK_JWT_KEY`) |
 | `CLERK_SIGNING_SECRET` | FE | `src/app/api/webhooks/clerk/route.ts:6` (svix) | platform | yes | runtime (NOT `CLERK_WEBHOOK_SECRET`) |
 | `CRAWL_WEBHOOK_SECRET` | BE | `convex/crawl/webhook.ts:89` + `convex/crawl/actions.ts:108` (HMAC primary) | platform | yes | runtime |
-| `CRAWL_WEBHOOK_SECRET_NEW` | BE | `convex/crawl/webhook.ts:90` + `convex/crawl/actions.ts:109` (HMAC secondary, for key rotation; NOT in `.env.local.example` — docs only) | platform | optional | runtime |
-| `CRAWL4AI_URL` | BE | `convex/crawl/actions.ts:99` (PRIMARY — `CRAWL4AI_BASE_URL` is the fallback) | platform | optional | runtime |
+| `CRAWL_WEBHOOK_SECRET_NEW` | BE | `convex/crawl/webhook.ts:90` + `convex/crawl/actions.ts:109` (HMAC secondary, for key rotation; NOT in `.env.local.example` - docs only) | platform | optional | runtime |
+| `CRAWL4AI_URL` | BE | `convex/crawl/actions.ts:99` (PRIMARY - `CRAWL4AI_BASE_URL` is the fallback) | platform | optional | runtime |
 | `CRAWL4AI_BASE_URL` | BE | `convex/crawl/actions.ts:99` (fallback for `CRAWL4AI_URL`; throws if neither set; default `http://localhost:11235` is in `.env.local.example` only, not in code) | platform | yes | runtime |
 | `CRAWL4AI_JWT_TOKEN` | BE | `convex/crawl/actions.ts:119` (sets `Authorization` header on Crawl4AI requests when present) | platform | optional | runtime |
 | `CONVEX_AUTH_TOKEN` | BE | `convex/http.ts:7` (start guard) + `convex/crawl/webhook.ts:299,334` (Bearer for `/ingest`, `/api/reset`) | platform | yes | runtime |
 | `WEBHOOK_SECRET` | BE + FE | `convex/users.ts:18` (dual auth on getOrCreate) + `src/app/api/webhooks/clerk/route.ts:50` | platform | yes | runtime (shared secret for Clerk→Convex user sync) |
 | `CRON_SECRET` | FE | `src/app/api/cron/route.ts:9` + `health/route.ts:51` (Bearer) | platform | yes | runtime |
-| `GROQ_API_KEY` | FE server | `src/app/api/chat/route.ts:34,51` (NOT in `src/lib/llm-models.ts` — that file is static) | platform | yes | runtime |
+| `GROQ_API_KEY` | FE server | `src/app/api/chat/route.ts:34,51` (NOT in `src/lib/llm-models.ts` - that file is static) | platform | yes | runtime |
 | `CEREBRAS_API_KEY` | FE server | `src/app/api/chat/route.ts:39,53` | platform | yes | runtime |
 | `GEMINI_API_KEY` | FE server + BE | `src/app/api/chat/route.ts:36,55` (Gemini step 4) + `convex/embeddings/generate.ts:105` (primary in 4-key rotation) | platform | yes | runtime |
-| `GOOGLE_GENERATIVE_AI_API_KEY` | BE | `convex/embeddings/generate.ts:108` (rotation fallback — 4th key) + `convex/crawl/webhook.ts:171,400` (AI document summarization during ingest) — **NOT** read by `chat/route.ts` (that file uses only `GEMINI_API_KEY`) | platform | yes | runtime |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | BE | `convex/embeddings/generate.ts:108` (rotation fallback - 4th key) + `convex/crawl/webhook.ts:171,400` (AI document summarization during ingest) - **NOT** read by `chat/route.ts` (that file uses only `GEMINI_API_KEY`) | platform | yes | runtime |
 | `GEMINI_API_KEY_1` | BE | `convex/embeddings/generate.ts:106` (rotation key 2) | platform | yes | runtime |
 | `GEMINI_API_KEY_2` | BE | `convex/embeddings/generate.ts:107` (rotation key 3) | platform | yes | runtime |
 | `UPSTASH_REDIS_REST_URL` | FE server | `src/lib/rate-limit.ts:14` | platform | yes | runtime |
 | `UPSTASH_REDIS_REST_TOKEN` | FE server | `src/lib/rate-limit.ts:15` | platform | yes | runtime |
 | `RERANKER_URL` | BE | `convex/reranking/rerank.ts:15` (graceful fallback to position-based) | platform | optional | runtime |
-| `OPENROUTER_API_KEY` | BE | `convex/embeddings/generate.ts:111` (read for presence check only — actual OpenRouter fallback was removed to prevent vector space incompatibility) | platform | optional | runtime |
+| `OPENROUTER_API_KEY` | BE | `convex/embeddings/generate.ts:111` (read for presence check only - actual OpenRouter fallback was removed to prevent vector space incompatibility) | platform | optional | runtime |
 | `SENTRY_DSN` | FE server | `src/sentry.server.config.ts:3` (NOT `instrumentation.ts`) | platform | optional | runtime |
 | `NEXT_PUBLIC_SENTRY_DSN` | FE client | `src/sentry.client.config.ts:3` (with `SENTRY_DSN` fallback) + `src/sentry.edge.config.ts:3` (NOT in `.env.local.example`) | platform | optional | build + runtime |
 | `NEXT_PUBLIC_APP_URL` | FE server | `src/app/api/chat/route.ts:265` (CSRF origin check; NOT in `src/lib/constants.ts`) | platform | yes | runtime |
 
-> **`ADMIN_BOOTSTRAP_EMAIL`** is referenced in `convex/users.ts` (both `getOrCreate` and `upsertFromWebhook`). On first user creation, if the user's email matches this env var, they are auto-promoted to `admin`. Bootstrap only applies on creation — deliberate demotion is NOT reverted. There is **NO** `ADMIN_EMAILS` env var in code; `.env.local.example` uses `ADMIN_BOOTSTRAP_EMAIL` (singular).
+> **`ADMIN_BOOTSTRAP_EMAIL`** is referenced in `convex/users.ts` (both `getOrCreate` and `upsertFromWebhook`). On first user creation, if the user's email matches this env var, they are auto-promoted to `admin`. Bootstrap only applies on creation - deliberate demotion is NOT reverted. There is **NO** `ADMIN_EMAILS` env var in code; `.env.local.example` uses `ADMIN_BOOTSTRAP_EMAIL` (singular).
 
 > **The 4-key Gemini rotation** in `convex/embeddings/generate.ts` reads: `GEMINI_API_KEY` → `GEMINI_API_KEY_1` → `GEMINI_API_KEY_2` → `GOOGLE_GENERATIVE_AI_API_KEY` (as last-resort fallback). All four MUST be set for production.
 
-> ⚠️ **The boundary doc has caveats** around `GEMINI_API_KEY` — the code reads `GEMINI_API_KEY` for the primary embedding key, but `.env.local.example` and the 4-key rotation also use `GEMINI_API_KEY_1`, `GEMINI_API_KEY_2`, and `GOOGLE_GENERATIVE_AI_API_KEY` (as last-resort fallback). For production, set ALL FOUR. See `convex/embeddings/generate.ts` for the rotation order.
+> ⚠️ **The boundary doc has caveats** around `GEMINI_API_KEY` - the code reads `GEMINI_API_KEY` for the primary embedding key, but `.env.local.example` and the 4-key rotation also use `GEMINI_API_KEY_1`, `GEMINI_API_KEY_2`, and `GOOGLE_GENERATIVE_AI_API_KEY` (as last-resort fallback). For production, set ALL FOUR. See `convex/embeddings/generate.ts` for the rotation order.
 
 ### 2.5 Python tooling env vars (separate from Next.js/Convex)
 
@@ -102,12 +102,12 @@ The Python scripts in `scripts/` (`crawler.py`, `ingest_pdf.py`, `run_eval.py`) 
 
 #### Platform (deployment-level)
 
-- All `CLERK_*` — set once, used everywhere
-- All `CONVEX_*` — Convex dashboard
-- `GROQ_API_KEY`, `CEREBRAS_API_KEY`, `GEMINI_API_KEY` — provider dashboards
-- `UPSTASH_*` — Upstash console
-- `SENTRY_DSN` — Sentry project settings
-- `CRAWL_WEBHOOK_SECRET`, `CONVEX_AUTH_TOKEN`, `CRON_SECRET` — generated by ops
+- All `CLERK_*` - set once, used everywhere
+- All `CONVEX_*` - Convex dashboard
+- `GROQ_API_KEY`, `CEREBRAS_API_KEY`, `GEMINI_API_KEY` - provider dashboards
+- `UPSTASH_*` - Upstash console
+- `SENTRY_DSN` - Sentry project settings
+- `CRAWL_WEBHOOK_SECRET`, `CONVEX_AUTH_TOKEN`, `CRON_SECRET` - generated by ops
 
 #### Per-developer (for local dev)
 
@@ -132,7 +132,7 @@ The Python scripts in `scripts/` (`crawler.py`, `ingest_pdf.py`, `run_eval.py`) 
 2. **Update `.env.local.example`** with a placeholder and a comment.
 3. **Document the owner** in the table above.
 4. **Add a start-up check** for required server-only vars (fail fast).
-5. **Update `reference.cross-cutting.md`** (this file) — not just one side.
+5. **Update `reference.cross-cutting.md`** (this file) - not just one side.
 
 ---
 
@@ -207,7 +207,7 @@ Convex generates `Doc<"tableName">` and `Id<"tableName">` types in `convex/_gene
 
 | Mirror | Convex source | File | Notes |
 | --- | --- | --- | --- |
-| `Id<T>` | branded string `string & { __tableName: T }` | `src/lib/types.ts:1` | NOT a `ConvexId<T>` re-export — no such symbol exists |
+| `Id<T>` | branded string `string & { __tableName: T }` | `src/lib/types.ts:1` | NOT a `ConvexId<T>` re-export - no such symbol exists |
 | `UserRole` | `users.role` union | `src/lib/types.ts:3` | 3 values: `user`/`admin`/`superadmin` |
 | `DocumentStatus` | `documents.status` | `src/lib/types.ts:5` | Mirror now has 7 values (added `active`, `pending_embed`); in sync with validator |
 | `CrawlStatus` | `crawlJobs.status` | `src/lib/types.ts:7` | matches `schema.ts:57-63` |
@@ -217,13 +217,13 @@ Convex generates `Doc<"tableName">` and `Id<"tableName">` types in `convex/_gene
 | `MessageRole` | `messages.role` | `src/lib/types.ts:15` | 2 values: `user`/`assistant` (NO `system`) |
 | `QueryCategory` | 7-way intent enum | `src/lib/types.ts:17-24` | |
 | `Source` | `sourceValidator` | `src/lib/types.ts:26-44` | Mirror uses `relevanceScore` (not `score`), matching the validator. Extra fields: `id`, `type`, `sourceType`, `providerOptions`. |
-| `TokenCount` | `{ prompt, completion, total }` object | `src/lib/types.ts:46-50` | **NOT a `number` alias** — it's a 3-field object |
+| `TokenCount` | `{ prompt, completion, total }` object | `src/lib/types.ts:46-50` | **NOT a `number` alias** - it's a 3-field object |
 | `CrawlConfig` | `UET_CRAWL_CONFIG` | `src/lib/types.ts:52-58` | matches `src/lib/constants.ts:1-42` |
 | `CrawlStats` | `crawlStats` row | `src/lib/types.ts:60-68` | Shape now matches schema: `statsId`/`totalDocuments`/`indexedDocuments`/`processingDocuments`/`failedDocuments`/`pendingDocuments`/`lastUpdatedAt` |
 | `ChatMessage` | custom interface | `src/lib/types.ts:70-78` | `{ role, content }` (NOT a Vercel AI SDK `UIMessage` literal shape) |
 | `Thread` | hand-rolled shape | `src/lib/types.ts:80-86` | `{ _id, userId, title, createdAt, updatedAt }` (NOT a literal `Doc<"agent.threads">`) |
 
-> **Do NOT exist in `src/lib/types.ts`:** `ChatRequest`, `ChatRequestSchema`. The chat route does NOT use zod — it does manual `JSON.parse` + `Array.isArray` + length checks.
+> **Do NOT exist in `src/lib/types.ts`:** `ChatRequest`, `ChatRequestSchema`. The chat route does NOT use zod - it does manual `JSON.parse` + `Array.isArray` + length checks.
 
 ### 4.3 Sync rules
 
@@ -234,13 +234,13 @@ Convex generates `Doc<"tableName">` and `Id<"tableName">` types in `convex/_gene
 | Add literal to `users.role` | Add to `UserRole` |
 | Add status to `crawlJobs` | Add to `CrawlStatus` |
 | Add field to `crawledChunks` | Add to `Source` (if it appears in source shape) |
-| Change `embeddingDimension` | N/A (no mirror — but see below) |
+| Change `embeddingDimension` | N/A (no mirror - but see below) |
 
 **`embeddingDimension` change** triggers:
 
-1. `convex/rag/instance.ts` config change (the RAG component owns the vector index — `convex/schema.ts` does NOT have a vector index on `crawledChunks`; only `semanticCache` has one at `schema.ts:120`).
+1. `convex/rag/instance.ts` config change (the RAG component owns the vector index - `convex/schema.ts` does NOT have a vector index on `crawledChunks`; only `semanticCache` has one at `schema.ts:120`).
 2. Re-embed the corpus (crawl all docs).
-3. ~~Update `EMBEDDING_DIM` constant in `convex/constants.ts`~~ — **DOES NOT EXIST.** `convex/constants.ts` has only one line: `export const CACHE_SIMILARITY_THRESHOLD = 0.92`.
+3. ~~Update `EMBEDDING_DIM` constant in `convex/constants.ts`~~ - **DOES NOT EXIST.** `convex/constants.ts` has only one line: `export const CACHE_SIMILARITY_THRESHOLD = 0.92`.
 4. Update `embeddingDimension` in `convex/rag/instance.ts:20`.
 5. Update `outputDimensionality: 768` in `convex/embeddings/generate.ts:57,82` (NOT a field named `dimensions`).
 6. No FE mirror change (the dimension is server-side).
@@ -250,7 +250,7 @@ Convex generates `Doc<"tableName">` and `Id<"tableName">` types in `convex/_gene
 - **Convex functions** import from `convex/_generated/dataModel` directly. No mirror needed.
 - **FE lib utilities** use mirrors (avoid pulling `_generated` into non-Convex files).
 - **FE components** use mirrors; pass IDs as `Id<"users">` (mirror) so component code reads naturally.
-- **API responses** — JSON over the wire. Convex serializes Doc/Id; FE re-parses via `Doc<>` from `convex/react` or via the mirror.
+- **API responses** - JSON over the wire. Convex serializes Doc/Id; FE re-parses via `Doc<>` from `convex/react` or via the mirror.
 
 ---
 
@@ -282,7 +282,7 @@ Convex generates `Doc<"tableName">` and `Id<"tableName">` types in `convex/_gene
 
 > **There is no `CRAWL_NOT_FOUND`, `SETTINGS_LOCKED`, `WORKFLOW_NOT_FOUND`, or `EMBEDDING_FAILED` error code.** These were fabricated. The closest analogs are plain string `throw new Error(...)` calls with no machine-readable code.
 
-### 5.2 HTTP status codes (FE route handlers — actual)
+### 5.2 HTTP status codes (FE route handlers - actual)
 
 | Status | When (verified) |
 | --- | --- |
@@ -290,7 +290,7 @@ Convex generates `Doc<"tableName">` and `Id<"tableName">` types in `convex/_gene
 | `400` | Invalid JSON body, webhook timestamp skew (Crawl4AI HMAC) |
 | `401` | Svix/HMAC signature fail, missing CRON_SECRET bearer |
 | `403` | CSRF origin mismatch on `/api/chat` |
-| `429` | Upstash rate limit (NOT in-memory — there is no in-memory layer) |
+| `429` | Upstash rate limit (NOT in-memory - there is no in-memory layer) |
 | `500` | Convex unconfigured, no AI providers, generic catch |
 
 > **There is no `503` path in the code.** The "Emergency stop" toggle is `convex/emergencyStop.ts::stopAll` which mutates rows (see §11.4), not a flag that returns 503.
@@ -302,7 +302,7 @@ Convex generates `Doc<"tableName">` and `Id<"tableName">` types in `convex/_gene
 - `new Response(JSON.stringify(obj), { status: ..., headers: { "Content-Type": "application/json" } })` (for dedup ack, sometimes)
 - `new Response(stream, { status: 200, headers })` (chat success)
 
-**There is NO canonical `{ error, code, details }` shape** — string-only.
+**There is NO canonical `{ error, code, details }` shape** - string-only.
 
 **Convex functions** throw `new ConvexError(stringOrTemplate)` or `new Error(string)`. **There is NO object-form `ConvexError({ code, message, details })`** anywhere in the codebase.
 
@@ -334,7 +334,7 @@ try {
 }
 ```
 
-**Log first, throw second.** Don't leak raw error messages to clients — they may include stack traces or internal details.
+**Log first, throw second.** Don't leak raw error messages to clients - they may include stack traces or internal details.
 
 ---
 
@@ -385,9 +385,9 @@ This surfaces in Convex dashboard as searchable JSON.
 ### 6.5 Sampling
 
 - **Sentry server:** `tracesSampleRate: 0.1` prod / `1.0` dev (10% / 100%)
-- **Sentry client:** `tracesSampleRate: 0.1` prod (10%) — **NOT 0.05** (the earlier doc had this wrong)
+- **Sentry client:** `tracesSampleRate: 0.1` prod (10%) - **NOT 0.05** (the earlier doc had this wrong)
 - **Sentry client replays:** `replaysSessionSampleRate: 0.1` (10%) / `replaysOnErrorSampleRate: 1.0` (100%)
-- **Vercel Analytics:** ~~automatic, ~10% of events~~ — **NOT INTEGRATED**; the line is a stale carryover from the planned observability stack
+- **Vercel Analytics:** ~~automatic, ~10% of events~~ - **NOT INTEGRATED**; the line is a stale carryover from the planned observability stack
 
 **Bump sampling for incident debugging**, but revert when done. Long-term high-sampling = Sentry bill.
 
@@ -413,7 +413,7 @@ Request → [Upstash] → [Convex] → Backend
 | `user` | 50 / 1h | Default for authed user |
 | `admin` | 200 / 1h | Admin role |
 
-**Failure mode:** `checkChatRateLimit` returns `null` if Upstash is unavailable (i.e. **fails open** — the request continues and the Convex layer applies). The chat route treats `null` as pass-through (does NOT 429 on null). There is no `safeLimit` symbol in the codebase.
+**Failure mode:** `checkChatRateLimit` returns `null` if Upstash is unavailable (i.e. **fails open** - the request continues and the Convex layer applies). The chat route treats `null` as pass-through (does NOT 429 on null). There is no `safeLimit` symbol in the codebase.
 
 **Use for:** global per-user limits across pods.
 
@@ -426,7 +426,7 @@ Request → [Upstash] → [Convex] → Backend
 | Per-user | 10 msg / 60s sliding (per `enforceRateLimit` default `tokenEstimate=1000`) |
 | Global token | 100K tokens / 60s sliding |
 | Storage | `rateLimits` table |
-| Failure | Throws plain-string `new ConvexError(\`Rate limit exceeded: ...\`)` (NO `RATE_LIMITED` code — see §5.1) |
+| Failure | Throws plain-string `new ConvexError(\`Rate limit exceeded: ...\`)` (NO `RATE_LIMITED` code - see §5.1) |
 
 **Use for:** the authoritative per-user + global cap, visible to Convex.
 
@@ -436,11 +436,11 @@ Don't. Two is enough. If you need a third constraint (e.g. per-feature), add a k
 
 ### 7.4 Bypass rules
 
-- **`/api/chat`** — both layers apply.
-- **`/api/cron`** — no rate limit (CRON_SECRET is the auth).
-- **`/api/webhooks/*`** — no rate limit (signature is the auth).
-- **Admin functions** — Layer 1 admin tier, Layer 2 still applies.
-- **Health probe** — no rate limit.
+- **`/api/chat`** - both layers apply.
+- **`/api/cron`** - no rate limit (CRON_SECRET is the auth).
+- **`/api/webhooks/*`** - no rate limit (signature is the auth).
+- **Admin functions** - Layer 1 admin tier, Layer 2 still applies.
+- **Health probe** - no rate limit.
 
 ---
 
@@ -499,11 +499,11 @@ Chat request
 
 - **Force fresh LLM response:** add a per-request nonce, or check `cache-control: no-store` on the FE.
 - **Force fresh Convex query:** call the query with a different key.
-- **Clear semantic cache:** `admin/reset` mutation (DESTRUCTIVE — see below).
+- **Clear semantic cache:** `admin/reset` mutation (DESTRUCTIVE - see below).
 
 ### 8.5 Destructive: cache reset
 
-**There is NO `api.crawl.reset` (admin) function** in the verified code. The destructive reset is exposed at `convex/crawl/reset.ts::resetDLQ` (public, cap 500 — see `reference.backend.md` §5 and `reference.backend.md` §10) and `convex/crawl/reset_ops.ts::resetAbandonedDLQ` (internal, paginated, for cron). Neither wipes the semantic cache or processed webhooks.
+**There is NO `api.crawl.reset` (admin) function** in the verified code. The destructive reset is exposed at `convex/crawl/reset.ts::resetDLQ` (public, cap 500 - see `reference.backend.md` §5 and `reference.backend.md` §10) and `convex/crawl/reset_ops.ts::resetAbandonedDLQ` (internal, paginated, for cron). Neither wipes the semantic cache or processed webhooks.
 
 **To wipe state for a full re-crawl scenario:** do it manually via the Convex dashboard. Partial cache reset is not exposed via a public mutation.
 
@@ -519,8 +519,8 @@ Chat request
 | --- | --- | --- |
 | Sentry (server) | FE route handlers, server actions | `src/sentry.server.config.ts` (NOT `instrumentation.ts`) |
 | Sentry (client) | Browser errors, perf | `src/sentry.client.config.ts` (NOT `instrumentation-client.ts`) |
-| ~~Vercel Analytics~~ | ~~Page views, custom events~~ | **NOT INTEGRATED** — `src/lib/analytics.ts` is a `console.log` shim only |
-| ~~Vercel Speed Insights~~ | ~~Web Vitals~~ | **NOT INTEGRATED** — `<SpeedInsights />` is not rendered |
+| ~~Vercel Analytics~~ | ~~Page views, custom events~~ | **NOT INTEGRATED** - `src/lib/analytics.ts` is a `console.log` shim only |
+| ~~Vercel Speed Insights~~ | ~~Web Vitals~~ | **NOT INTEGRATED** - `<SpeedInsights />` is not rendered |
 | Convex dashboard | All Convex functions + logger | Auto |
 | Vercel logs | FE server logs | Auto |
 
@@ -568,14 +568,14 @@ export async function register() {
 
 **Sampling rationale:** server is 10% prod / 100% dev (we trust the BE more); client adds replays (session 0.1, error 1.0) for bug reports.
 
-### 9.3 Vercel Analytics events — **NOT INTEGRATED** (verified)
+### 9.3 Vercel Analytics events - **NOT INTEGRATED** (verified)
 
 > ⚠️ **The actual `src/lib/analytics.ts` does NOT import from `@vercel/analytics`.** It is a 73-line dev-only `console.log` shim. The "real" implementation shown below is a **template** for when (or if) the integration is added. See `reference.frontend.md` §7.9 for the verified signatures.
 
 **Template (when integration is added):**
 
 ```ts
-// NOT YET in the codebase — add when integrating Vercel Analytics
+// NOT YET in the codebase - add when integrating Vercel Analytics
 import { track } from "@vercel/analytics";
 
 export function trackEvent(name: string, props?: Record<string, string | number | boolean>) {
@@ -606,7 +606,7 @@ ctx.logger.error("error", { err });
 | Convex function failure | Convex dashboard | Dev on-call |
 | Emergency stop toggle | Sentry + Convex | Admin |
 
-**Don't set up alerts in this repo** — they're operator-configured in dashboards.
+**Don't set up alerts in this repo** - they're operator-configured in dashboards.
 
 ### 9.6 Debugging steps (canonical order)
 
@@ -649,7 +649,7 @@ ctx.logger.error("error", { err });
         ┌──────────────┐
         │   pending    │ ←── trigger (admin) | kickoffDailyCrawl (cron)
         └──────┬───────┘
-               │ executeCrawlJob (action) — there is NO `startCrawl` or `enqueueCrawlJob` symbol
+               │ executeCrawlJob (action) - there is NO `startCrawl` or `enqueueCrawlJob` symbol
                ▼
         ┌──────────────┐
         │   running    │ ←── updates processedUrls, failedUrls
@@ -698,7 +698,7 @@ user (default, on first sign-in) → admin (via /admin/users UI → Clerk Backen
 ### 11.4 Emergency stop
 
 ```
-N/A — there is NO `appSettings.emergencyStop` flag
+N/A - there is NO `appSettings.emergencyStop` flag
 ```
 
 > `convex/emergencyStop.ts` is a **batch mutator** (not a flag check). `stopAll` is an `internalAction` that loops `stopBatch`, which mutates `documents.processing`→`failed` and `crawlJobs.running`→`cancelled` in 500-row batches. Invoke it directly from the Convex dashboard to stop running work.
@@ -711,7 +711,7 @@ N/A — there is NO `appSettings.emergencyStop` flag
 
 | # | Caveat | Files affected |
 | --- | --- | --- |
-| 21.1 | Don't change `embeddingDimension: 768` | `convex/rag/instance.ts` (RAG component config — `convex/schema.ts` does NOT have a vector index on `crawledChunks`) |
+| 21.1 | Don't change `embeddingDimension: 768` | `convex/rag/instance.ts` (RAG component config - `convex/schema.ts` does NOT have a vector index on `crawledChunks`) |
 | 21.2 | Don't change `filterNames: ["category", "source"]` | `convex/rag/instance.ts` (NOT `convex/schema.ts`) |
 | 21.3 | Clerk `applicationID` must match | `convex/auth.config.ts`, Clerk dashboard |
 | 21.4 | Don't weaken HMAC verify | `convex/crawl/webhook.ts` |
@@ -735,20 +735,20 @@ N/A — there is NO `appSettings.emergencyStop` flag
 | 21.22 | Reranker URL is optional (graceful fallback to position-based) | `convex/reranking/rerank.ts` |
 | 21.23 | `maxParallelism=3` for `embeddingWorkpool` | verify Gemini quota |
 | 21.24 | Public matcher in `src/middleware.ts` must include `/sign-in(.*)`, `/sign-up(.*)`, `/api/webhooks(.*)` | auth reachability |
-| 21.25 | **REMOVED** — there is no `appSettings.emergencyStop` flag in the verified code; use `convex/emergencyStop.ts::stopAll` instead | n/a |
+| 21.25 | **REMOVED** - there is no `appSettings.emergencyStop` flag in the verified code; use `convex/emergencyStop.ts::stopAll` instead | n/a |
 | 21.26 | Real Sentry init is in `src/sentry.{client,server,edge}.config.ts`; `src/instrumentation.ts` is a thin `register()` wrapper | observability |
 | 21.27 | The Python `scripts/` directory is the **offline tooling** layer (crawler, PDF ingest, eval harness) | not a Next.js concern; `AGENTS.md` mentions it |
-| 21.28 | `convex/eval/` subdirectory has only stubs — BUT the legacy top-level `convex/eval.ts` (55 lines) DOES contain real `getChunksByRagIds` (internalQuery) and `evaluateSearch` (public action). Both are registered in `convex/_generated/api.d.ts:47,114`. | eval is partially implemented |
+| 21.28 | `convex/eval/` subdirectory has only stubs - BUT the legacy top-level `convex/eval.ts` (55 lines) DOES contain real `getChunksByRagIds` (internalQuery) and `evaluateSearch` (public action). Both are registered in `convex/_generated/api.d.ts:47,114`. | eval is partially implemented |
 | 21.29 | The eval harness (`scripts/eval/run_eval.py`) calls the real `api.eval.evaluateSearch` (registered in the legacy `convex/eval.ts`). It does NOT fail with `Function not found`. The harness output keys are `recall_at_5` (primary), `fragment_hit_rate`, `recall_at_k` (alias), `top_k`, `total_pairs`, `elapsed_seconds`, `per_category`, `failures`, `eval_error`. | eval works for the legacy path |
 | 21.30 | Eval regression threshold: `recall_at_5` drop > 0.5% (`delta < -0.005`) → exit code 2 (regression); `delta > 0.005` → "improved"; else "stable" | `scripts/eval/run_eval.py` |
 | 21.31 | The golden set is 50 pairs (NOT 75 as AGENTS.md states, NOT 100 as architecture.md §20.2 states). `state.md` and `progress_log.md` both confirm 50 | per `wc -l scripts/eval/golden_set.jsonl` |
 | 21.32 | The eval harness reads `CONVEX_URL` (NOT `NEXT_PUBLIC_CONVEX_URL`). The Python tooling does NOT read `NEXT_PUBLIC_CONVEX_SITE_URL`; it reads `CONVEX_SITE_URL` | env var mismatch |
 | 21.33 | Test status as of 2026-05-30: 297/515 pass, 218 fail. Test suite was broken due to jsdom/vitest config issues; emergency protocol invoked | per `.agent/state.md` |
-| 21.34 | `.gitignore` DOES exist in the monorepo (verified at `uet-gpt/.gitignore`) — the earlier claim of it being missing was wrong. | hygiene |
-| 21.35 | `src/lib/analytics.ts` is a dev-only `console.log` shim — there is NO Vercel Analytics or Speed Insights integration in the codebase | no telemetry today |
+| 21.34 | `.gitignore` DOES exist in the monorepo (verified at `uet-gpt/.gitignore`) - the earlier claim of it being missing was wrong. | hygiene |
+| 21.35 | `src/lib/analytics.ts` is a dev-only `console.log` shim - there is NO Vercel Analytics or Speed Insights integration in the codebase | no telemetry today |
 | 21.36 | `src/app/(main)/chat/page.tsx` is the NEW-THREAD landing page (not a thin wrapper around `ChatThreadClient`); it calls `api.threads.create` and navigates to `/chat/[threadId]?q=...` | routing |
 | 21.37 | `convex/crawl/reset.ts::resetDLQ` (public, cap 500) and `convex/crawl/reset_ops.ts::resetAbandonedDLQ` (internal, paginated) overlap in purpose but are not duplicates | the public one is for the admin UI button; the internal one is for cron |
-| 21.38 | `convex/doc/list.ts` declares `cursor` arg but IGNORES it — pagination is not actually implemented | known gap |
+| 21.38 | `convex/doc/list.ts` declares `cursor` arg but IGNORES it - pagination is not actually implemented | known gap |
 | 21.39 | `convex/doc/validator.ts` has 7 status literals and `convex/doc/create.ts::updateStatus` now accepts all 7 (added `"active"` and `"pending_embed"`) | validator/mutator now in sync |
 
 When in doubt, the boundary doc wins. The reference docs may lag.

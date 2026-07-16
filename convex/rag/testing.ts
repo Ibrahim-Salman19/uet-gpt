@@ -19,7 +19,7 @@ async function requireAdminAuth(ctx: ActionCtx) {
   }
 }
 
-// --- MUTATIONS (internal only — not callable from client) ---
+// --- MUTATIONS (internal only - not callable from client) ---
 export const insertTestChunk = internalMutation({
   args: {
     url: v.string(),

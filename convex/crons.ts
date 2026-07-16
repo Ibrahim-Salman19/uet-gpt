@@ -3,7 +3,7 @@ import { internal } from "./_generated/api";
 
 const crons = cronJobs();
 
-// DISABLED: Crawl4AI Docker not deployed — localhost:11235 unreachable from Convex cloud.
+// DISABLED: Crawl4AI Docker not deployed - localhost:11235 unreachable from Convex cloud.
 // Re-enable when CRAWL4AI_URL is set to a publicly accessible endpoint.
 // crons.weekly(
 //   "weekly-uet-webcrawl",
@@ -13,7 +13,7 @@ const crons = cronJobs();
 
 // Cleanup for expired cache items (semantic queries/webhook logs). Runs every
 // 12h (was daily) with a 500-row batch (was 100) so expired rows don't outpace
-// deletion — semanticCache stores full responses + 768-dim embeddings per row,
+// deletion - semanticCache stores full responses + 768-dim embeddings per row,
 // making it the primary storage consumer that must stay bounded.
 crons.interval("cleanup-expired-cache", { hours: 12 }, internal.crawl.tasks.cleanupExpiredCache, {
   limit: 500,
@@ -25,7 +25,7 @@ crons.interval("retry-dead-letter", { hours: 4 }, internal.crawl.mutations.retry
 });
 
 // Reset DLQ entries stuck in "processing" state (worker crash recovery)
-// Runs every 30 minutes — entries stuck for >30min are reset to "pending_retry"
+// Runs every 30 minutes - entries stuck for >30min are reset to "pending_retry"
 crons.interval(
   "reset-stuck-dlq-entries",
   { minutes: 30 },
@@ -38,7 +38,7 @@ crons.interval("fail-stuck-crawl-jobs", { hours: 2 }, internal.crawl.workflow.fa
 
 // Weekly cleanup of old abandoned DLQ entries and completed/failed/cancelled crawl jobs.
 // WS-3: cleanupOldRecords now also purges resolved (indexed) DLQ rows and stale
-// pending/processing rows that were never previously cleaned — the primary DLQ
+// pending/processing rows that were never previously cleaned - the primary DLQ
 // storage-growth fix.
 crons.weekly(
   "cleanup-old-records",
@@ -47,7 +47,7 @@ crons.weekly(
   { limit: 200 },
 );
 
-// WS-3: weekly orphan-chunk compaction — removes crawledChunks + their RAG
+// WS-3: weekly orphan-chunk compaction - removes crawledChunks + their RAG
 // vectors whose parent document no longer exists (cascade from chunkParents).
 // Defensive against legacy orphans from the now-closed TOCTOU window.
 crons.weekly(
@@ -78,7 +78,7 @@ crons.weekly(
 // Hourly cleanup for stale rate limit tracking
 crons.interval("clear-stale-rate-limits", { hours: 1 }, internal.rateLimit.clearStaleRateLimits);
 
-// Phase 2: Contextual retrieval — daily backfill of raw chunks via Gemini Flash free tier
+// Phase 2: Contextual retrieval - daily backfill of raw chunks via Gemini Flash free tier
 // Runs at 3:00 UTC, after daily crawl completes at 0:00 UTC, before staleness check at 4:00 UTC
 // Processes up to 10 chunks/day (reduced from 50 to save bandwidth & respect 250 RPD free tier)
 crons.daily(
@@ -87,7 +87,7 @@ crons.daily(
   internal.embeddings.contextualizeCron.contextualizeCron,
 );
 
-// Phase 5: Observability — check document staleness daily
+// Phase 5: Observability - check document staleness daily
 crons.daily(
   "staleness-check",
   { hourUTC: 4, minuteUTC: 0 },
@@ -95,8 +95,8 @@ crons.daily(
 );
 
 // STATS-001: Pre-compute dashboard statistics hourly.
-// Was every 5 min (288 runs/day) and full-scanned five whole tables — including
-// the embedding-heavy semanticCache — which was the dominant DB-bandwidth driver
+// Was every 5 min (288 runs/day) and full-scanned five whole tables - including
+// the embedding-heavy semanticCache - which was the dominant DB-bandwidth driver
 // (cost scaled O(cacheRows × embeddingSize) × 288/day). An admin count dashboard
 // does not need 5-minute freshness; computeDashboardStats additionally re-counts
 // the heavy semanticCache only ~4×/day. See convex/admin/stats.ts.

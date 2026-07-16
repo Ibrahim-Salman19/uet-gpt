@@ -1,14 +1,14 @@
 /**
- * rateLimit.ts — TASK-S02: Native Convex sliding-window rate limiter.
+ * rateLimit.ts - TASK-S02: Native Convex sliding-window rate limiter.
  *
  * Limits:
  *   Per-user:  10 messages per minute (sliding 60s window)
  *   Global:    100,000 tokens per minute across all users
  *
- * Design: Pure Convex — no external Redis. Each limit is a single row in the
+ * Design: Pure Convex - no external Redis. Each limit is a single row in the
  * `rateLimits` table keyed by userId or "global". The row stores the window
  * start time and the count for that window. All reads and writes happen inside
- * the caller's mutation transaction, so they are atomic — no double-counting.
+ * the caller's mutation transaction, so they are atomic - no double-counting.
  *
  * Usage (inside a mutation):
  *   import { enforceRateLimit } from "./rateLimit";
@@ -44,7 +44,7 @@ const WINDOW_MS = 60 * 1000;
  * Reads the current sliding window for `key`, increments by `amount`,
  * and returns `true` if the resulting count would EXCEED `limit`.
  *
- * Side-effect: upserts the rateLimits row — caller must be inside a mutation.
+ * Side-effect: upserts the rateLimits row - caller must be inside a mutation.
  */
 async function checkWindow(
   ctx: MutationCtx,
@@ -110,7 +110,7 @@ async function checkWindow(
     if (amount > limit) {
       return { exceeded: true, current: 0 };
     }
-    // Window expired (or first request) — start a fresh window
+    // Window expired (or first request) - start a fresh window
     if (existing) {
       await ctx.db.patch(existing._id, { windowStart: now, count: amount });
     } else {
@@ -119,7 +119,7 @@ async function checkWindow(
     return { exceeded: false, current: amount };
   }
 
-  // Window is still active — check before writing
+  // Window is still active - check before writing
   const projected = existing.count + amount;
   if (projected > limit) {
     return { exceeded: true, current: existing.count };
@@ -156,7 +156,7 @@ export async function enforceRateLimit(
 ): Promise<void> {
   const msgLimit = isAdmin ? PER_ADMIN_MSG_LIMIT : PER_USER_MSG_LIMIT;
 
-  // 1. Per-user message rate limit — only counts logical user turns.
+  // 1. Per-user message rate limit - only counts logical user turns.
   if (countMessage) {
     const userCheck = await checkWindow(ctx, userId, 1, msgLimit);
     if (userCheck.exceeded) {

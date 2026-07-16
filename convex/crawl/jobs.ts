@@ -28,14 +28,14 @@ async function deleteAbandonedDLQ(
 // are successfully-retried chunks that were never cleaned up on the success path
 // (a chunk can succeed after its sibling failed in the same batch). They carry
 // no useful state and grow the table monotonically. Also sweep stale
-// `pending_retry`/`processing` rows older than the cutoff — these are chunks
+// `pending_retry`/`processing` rows older than the cutoff - these are chunks
 // that will never be retried (the workpool already exhausted its attempts) and
 // whose payload text is pure storage overhead.
 async function deleteResolvedDLQ(ctx: any, batchSize: number, cutoff: number): Promise<number> {
   const now = Date.now();
   let totalDeleted = 0;
 
-  // 1) `indexed` rows: successfully retried — delete unconditionally (capped).
+  // 1) `indexed` rows: successfully retried - delete unconditionally (capped).
   const indexed = await ctx.db
     .query("crawlDeadLetter")
     .withIndex("by_status", (q: any) => q.eq("status", "indexed"))
@@ -104,7 +104,7 @@ async function compactOrphanedChunks(ctx: any, batchSize: number): Promise<numbe
   // is cheaper than scanning chunks. For each orphaned parent, cascade-delete its
   // children + their RAG vectors, then the parent itself. Batch-capped; the cron
   // re-runs weekly until the `remaining` flag clears. .take() reads in table order
-  // (creation order) — acceptable since we only act on genuinely missing docs.
+  // (creation order) - acceptable since we only act on genuinely missing docs.
   let deleted = 0;
   const parents = await ctx.db.query("chunkParents").take(batchSize);
   for (const parent of parents) {
@@ -173,7 +173,7 @@ export const cleanupOldRecords = internalMutation({
     const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
     const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
-    // WS-3: resolve/expire DLQ rows FIRST — this is the biggest storage win
+    // WS-3: resolve/expire DLQ rows FIRST - this is the biggest storage win
     // (indexed/succeeded rows were previously never purged).
     let totalDeleted = await deleteResolvedDLQ(ctx, batchSize, SEVEN_DAYS_MS);
     totalDeleted += await deleteAbandonedDLQ(ctx, batchSize, now, SEVEN_DAYS_MS);

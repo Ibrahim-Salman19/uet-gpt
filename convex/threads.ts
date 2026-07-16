@@ -18,7 +18,7 @@ export const create = mutation({
   returns: v.string(),
   handler: async (ctx, args) => {
     // requireAuth enforces identity, user existence, and isActive.
-    // Provisioning is handled by getOrCreate/webhook — do not auto-insert here,
+    // Provisioning is handled by getOrCreate/webhook - do not auto-insert here,
     // so a deactivated user cannot resurrect their own row by creating a thread.
     const user = await requireAuth(ctx);
 

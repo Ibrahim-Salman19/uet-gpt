@@ -3,7 +3,7 @@ import Link from "next/link";
 import { APP_NAME } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: `Access Denied — ${APP_NAME}`,
+  title: `Access Denied - ${APP_NAME}`,
   description: "You don't have permission to access this area.",
 };
 

@@ -595,7 +595,7 @@ export function MainShell({ children }: MainShellProps) {
         </main>
       </div>
 
-      {/* Mobile bottom navigation — hidden on lg+ screens */}
+      {/* Mobile bottom navigation - hidden on lg+ screens */}
       <MobileBottomNav visible={!inputFocused && !isChatThread} />
     </div>
   );

@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import type { QueryCtx } from "../_generated/server";
 import { internalMutation, internalQuery } from "../_generated/server";
 
-// Mirror of the adminAuditLog.action union in schema.ts — keep in sync.
+// Mirror of the adminAuditLog.action union in schema.ts - keep in sync.
 const auditActionValidator = v.union(
   v.literal("user.login"),
   v.literal("user.logout"),
@@ -23,7 +23,7 @@ const auditActionValidator = v.union(
   v.literal("role.change"),
 );
 
-// Mirror of the documents.status union in schema.ts — keep in sync.
+// Mirror of the documents.status union in schema.ts - keep in sync.
 const documentStatusValidator = v.union(
   v.literal("pending"),
   v.literal("processing"),
@@ -168,16 +168,16 @@ async function computeStaleness(
   now: number,
 ): Promise<{ total: number; stale: number }> {
   // Tier-aware staleness thresholds. Previously only `low`-tier docs could be
-  // flagged stale by age — which is backwards: HIGH-tier pages (admissions,
+  // flagged stale by age - which is backwards: HIGH-tier pages (admissions,
   // merit lists, fees, schedules) are the MOST time-sensitive and must go
   // stale fastest so the staleness cron prioritizes re-crawling them. Students
-  // ask "is the merit list out?" / "what's the fee deadline?" — stale answers
+  // ask "is the merit list out?" / "what's the fee deadline?" - stale answers
   // there are far worse than a stale department-history page.
   const DAY = 24 * 60 * 60 * 1000;
   const tierThresholds = {
-    high: now - 14 * DAY, // 2 weeks — admissions/fees/merit/schedule
-    medium: now - 60 * DAY, // 2 months — departments/faculty/programs
-    low: now - 180 * DAY, // 6 months — about/history/contact
+    high: now - 14 * DAY, // 2 weeks - admissions/fees/merit/schedule
+    medium: now - 60 * DAY, // 2 months - departments/faculty/programs
+    low: now - 180 * DAY, // 6 months - about/history/contact
   } as const;
   let total = 0;
   let stale = 0;

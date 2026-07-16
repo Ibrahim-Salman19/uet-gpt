@@ -1,8 +1,8 @@
 /**
- * Client-side permission matrix — mirror of convex/auth.ts (canonical source).
+ * Client-side permission matrix - mirror of convex/auth.ts (canonical source).
  * Keep in sync with convex/auth.ts when adding/modifying permissions.
  *
- * Roles: user → admin → superadmin (hierarchical — higher roles include lower permissions)
+ * Roles: user → admin → superadmin (hierarchical - higher roles include lower permissions)
  *
  * Usage:
  *   import { hasPermission } from "@/lib/permissions";
@@ -28,7 +28,7 @@ export type Permission =
 
 // Permissions granted *additionally* at each level. Roles are composed
 // hierarchically below so higher roles always include lower-role permissions
-// by construction — the lists cannot drift relative to each other.
+// by construction - the lists cannot drift relative to each other.
 //
 // NOTE: this must stay in sync with the canonical matrix in convex/auth.ts
 // across the trust boundary. See the CI diff test recommendation in the audit.

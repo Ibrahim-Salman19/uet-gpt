@@ -116,7 +116,7 @@ export const runStatsAggregation = mutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     // SECURITY: only ONE purpose-specific secret (CRON_SECRET) may authorize this
-    // cron-style operation — a webhook secret must NOT grant cron access (over-broad
+    // cron-style operation - a webhook secret must NOT grant cron access (over-broad
     // blast radius). Compare with constantTimeCompare (the codebase's timing-safe
     // primitive in ./utils) instead of `===` to avoid a timing side-channel on the
     // shared secret, matching how the webhook handlers compare secrets.

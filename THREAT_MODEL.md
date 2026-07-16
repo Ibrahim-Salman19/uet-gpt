@@ -1,4 +1,4 @@
-# UET Taxila GPT — Threat Model
+# UET Taxila GPT - Threat Model
 
 > Scope: this is a paper threat model for the UET Taxila GPT RAG application.
 > It enumerates assets, trust boundaries, and threats (STRIDE + OWASP LLM Top 10)
@@ -23,10 +23,10 @@ Last reviewed: 2026-06-25
 
 ## 2. Trust Boundaries
 
-- **Browser ↔ Next.js / Convex** — authenticated via Clerk session JWT; Convex functions re-verify identity.
-- **Public webhooks ↔ backend** — Clerk events (`/api/webhooks/clerk`, `convex/clerk/webhook.ts`) and crawl/ingest (`convex/http.ts`, `convex/crawl/webhook.ts`). Unauthenticated network origin; trust established only by signature/secret.
-- **Backend ↔ third-party AI providers** — outbound; keys held server-side only.
-- **Crawler ↔ public web** — inbound untrusted content (SSRF + prompt-injection source).
+- **Browser ↔ Next.js / Convex** - authenticated via Clerk session JWT; Convex functions re-verify identity.
+- **Public webhooks ↔ backend** - Clerk events (`/api/webhooks/clerk`, `convex/clerk/webhook.ts`) and crawl/ingest (`convex/http.ts`, `convex/crawl/webhook.ts`). Unauthenticated network origin; trust established only by signature/secret.
+- **Backend ↔ third-party AI providers** - outbound; keys held server-side only.
+- **Crawler ↔ public web** - inbound untrusted content (SSRF + prompt-injection source).
 
 ## 3. STRIDE Enumeration
 

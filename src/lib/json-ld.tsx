@@ -8,7 +8,7 @@ export const organizationSchema = {
   alternateName: "UET GPT Team",
   url: siteUrl,
   description:
-    "An intelligent AI assistant that answers any question about UET Taxila — admissions, fee structure, academic programs, departments, faculty, campus life, and more.",
+    "An intelligent AI assistant that answers any question about UET Taxila - admissions, fee structure, academic programs, departments, faculty, campus life, and more.",
   foundingDate: "2025",
   founder: {
     "@type": "Organization",
@@ -30,7 +30,7 @@ export const websiteSchema = {
   name: "UET GPT",
   url: siteUrl,
   description:
-    "Your AI Guide to UET Taxila — ask anything about admissions, programs, campus life, faculty, departments, and more.",
+    "Your AI Guide to UET Taxila - ask anything about admissions, programs, campus life, faculty, departments, and more.",
   inLanguage: "en",
   publisher: { "@id": `${siteUrl}/#organization` },
   potentialAction: {

@@ -41,7 +41,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   // gate working even when the Clerk Dashboard template is missing.
   const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
   if (!convexUrl) {
-    // No way to verify role server-side — fail closed.
+    // No way to verify role server-side - fail closed.
     redirect("/");
   }
 

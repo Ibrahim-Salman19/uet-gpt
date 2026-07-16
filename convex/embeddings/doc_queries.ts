@@ -114,7 +114,7 @@ export const getDocumentsByEntryIds = internalQuery({
     if (args.entryIds.length > 100)
       throw new ConvexError("Cannot query more than 100 entry IDs at a time");
 
-    // Step 1: Parallel indexed lookups — O(k) instead of O(n) full table scan
+    // Step 1: Parallel indexed lookups - O(k) instead of O(n) full table scan
     const chunks = await Promise.all(
       args.entryIds.map((entryId) =>
         ctx.db

@@ -36,7 +36,7 @@ test.describe("Error Recovery", () => {
     await page.context().setOffline(true);
     await expect(banner).toContainText(/you are offline/i, { timeout: 10000 });
 
-    // Come back online — the "Reconnected" state is shown briefly (auto-dismiss
+    // Come back online - the "Reconnected" state is shown briefly (auto-dismiss
     // after ~3s in the component), so poll with margin.
     await page.context().setOffline(false);
     await expect(banner).toContainText(/reconnected/i, { timeout: 10000 });

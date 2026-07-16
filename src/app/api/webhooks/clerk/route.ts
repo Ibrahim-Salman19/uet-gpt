@@ -14,13 +14,13 @@ async function forwardWebhookToConvex(evt: {
 }): Promise<Response> {
   const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
   if (!webhookSecret) {
-    console.error("Missing CLERK_WEBHOOK_SECRET — server misconfigured");
+    console.error("Missing CLERK_WEBHOOK_SECRET - server misconfigured");
     return new Response("Server configuration error", { status: 500 });
   }
 
   const siteUrl = convexSiteUrl();
   if (!siteUrl) {
-    console.error("Missing NEXT_PUBLIC_CONVEX_URL — server misconfigured");
+    console.error("Missing NEXT_PUBLIC_CONVEX_URL - server misconfigured");
     return new Response("Server configuration error", { status: 500 });
   }
 

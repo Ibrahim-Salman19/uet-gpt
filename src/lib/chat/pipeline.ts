@@ -18,7 +18,7 @@ function resolveClientRole(sessionClaims: Record<string, unknown>): "admin" | "u
 
 // NOTE: rate limiting is per-account (userId) only. A per-IP dimension was
 // intentionally NOT wired here because the only available client IP source is
-// the spoofable `x-forwarded-for`/`x-real-ip` header — trusting it without a
+// the spoofable `x-forwarded-for`/`x-real-ip` header - trusting it without a
 // trusted edge that overwrites it would give a false sense of IP throttling.
 // Adding a real per-IP limiter requires a trusted edge header + a change to the
 // rate-limit module (out of this bucket's scope).

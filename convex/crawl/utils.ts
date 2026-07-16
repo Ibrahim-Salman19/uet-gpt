@@ -1,6 +1,6 @@
 /**
  * Constant-time string comparison to prevent timing attacks.
- * Never returns early on length mismatch — always performs a full comparison
+ * Never returns early on length mismatch - always performs a full comparison
  * and negates on mismatch. This prevents leaking the secret's length through timing.
  */
 export function constantTimeCompare(a: string, b: string): boolean {

@@ -1,4 +1,4 @@
-# UET GPT — Your AI Guide to UET Taxila
+# UET GPT - Your AI Guide to UET Taxila
 
 > UET GPT is an open-source AI chatbot that serves as the intelligent guide to the University of Engineering and Technology (UET), Taxila campus, Pakistan. It answers questions about UET Taxila using RAG-powered retrieval from official university documents, syllabi, directories, and schedules.
 

@@ -2,10 +2,10 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "UET GPT — Your AI Guide to UET Taxila",
+    name: "UET GPT - Your AI Guide to UET Taxila",
     short_name: "UET GPT",
     description:
-      "An intelligent AI assistant that answers any question about UET Taxila — admissions, programs, campus life, faculty, departments, and more.",
+      "An intelligent AI assistant that answers any question about UET Taxila - admissions, programs, campus life, faculty, departments, and more.",
     start_url: "/chat",
     display: "standalone",
     background_color: "#070708",

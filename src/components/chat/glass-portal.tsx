@@ -20,10 +20,10 @@ function GridOverlay() {
 }
 
 /**
- * GlassPortal — the premium frosted glass container that holds the chat UI.
+ * GlassPortal - the premium frosted glass container that holds the chat UI.
  *
  * Responsive strategy:
- * - Mobile: Full width/height, no border/padding — feels native
+ * - Mobile: Full width/height, no border/padding - feels native
  * - Tablet (md): Centered with horizontal padding, partial max-height
  * - Desktop (lg+): Floating glass card, 90dvh, max-w-4xl
  * - Large screens (2xl+): Wider max-w-5xl to use screen real estate

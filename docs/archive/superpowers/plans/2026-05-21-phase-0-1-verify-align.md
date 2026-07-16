@@ -2,8 +2,8 @@
 
 > **⚠️ HISTORICAL / SUPERSEDED (2026-05-21).** This implementation plan is a
 > point-in-time artifact and is **not** current guidance. Its core architectural
-> step — "replace manual `documents/chunks/threads/messages` schema definitions
-> with component-managed tables" — was only partially carried out: `documents` and
+> step - "replace manual `documents/chunks/threads/messages` schema definitions
+> with component-managed tables" - was only partially carried out: `documents` and
 > `crawledChunks` remain **manually defined** in `convex/schema.ts`. Do **not**
 > delete those tables. See `architecture.md` §4 for the authoritative schema. Kept
 > for historical context only.
@@ -21,8 +21,8 @@
 ## File Structure (Planned Changes)
 
 **Create**
-- `uet-gpt/tailwind.config.ts` — Tailwind v4 config and theme tokens
-- `uet-gpt/docs/crawl-robots-audit.md` — robots.txt audit
+- `uet-gpt/tailwind.config.ts` - Tailwind v4 config and theme tokens
+- `uet-gpt/docs/crawl-robots-audit.md` - robots.txt audit
 - `uet-gpt/docs/architecture.md`
 - `uet-gpt/docs/crawling-strategy.md`
 - `uet-gpt/docs/chunking-strategy.md`

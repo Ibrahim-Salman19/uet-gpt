@@ -20,7 +20,7 @@ ${answer}
 
 Identify any claims in the answer that are NOT supported by ANY of the sources above.
 A claim is unsupported if it cannot be found or reasonably inferred from the sources.
-Do not penalize the answer for omitting information — only penalize it for ADDING information not present in sources.`;
+Do not penalize the answer for omitting information - only penalize it for ADDING information not present in sources.`;
 }
 
 /**

@@ -11,10 +11,10 @@
 
 ## Harness (implemented)
 
-- **Golden set:** `scripts/eval/golden_set.jsonl` — 50 QA pairs across categories
+- **Golden set:** `scripts/eval/golden_set.jsonl` - 50 QA pairs across categories
   (admissions, fees, exams, departments, etc.).
-- **Runner:** `scripts/eval/run_eval.py` — computes `recall_at_5` and `fragment_hit_rate`.
-- **Convex eval action:** `convex/eval.ts:evaluateSearch` — runs `rag.search()` and hydrates chunk results.
+- **Runner:** `scripts/eval/run_eval.py` - computes `recall_at_5` and `fragment_hit_rate`.
+- **Convex eval action:** `convex/eval.ts:evaluateSearch` - runs `rag.search()` and hydrates chunk results.
 
 ## Open Items
 

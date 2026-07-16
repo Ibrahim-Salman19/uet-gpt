@@ -1,6 +1,6 @@
 # Futurepedia Submission Draft
 
-**Directory**: [Futurepedia](https://futurepedia.io) — top AI tool directory, 2M+ monthly visitors, dofollow backlinks.
+**Directory**: [Futurepedia](https://futurepedia.io) - top AI tool directory, 2M+ monthly visitors, dofollow backlinks.
 
 ## Submission Details
 

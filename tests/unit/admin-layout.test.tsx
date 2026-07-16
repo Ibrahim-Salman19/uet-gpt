@@ -88,7 +88,7 @@ describe("AdminLayout", () => {
   it("displays the current page name in the header", () => {
     vi.mocked(usePathname).mockReturnValue("/admin/analytics");
     render(<AdminLayout><div>Content</div></AdminLayout>);
-    // Header and sidebar both show "Analytics" — check it appears at least once
+    // Header and sidebar both show "Analytics" - check it appears at least once
     expect(screen.getAllByText("Analytics").length).toBe(2);
   });
 

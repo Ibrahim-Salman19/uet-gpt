@@ -2,7 +2,7 @@
 
 > **⚠️ HISTORICAL / SUPERSEDED (2026-05-21).** This design is a point-in-time
 > planning artifact and is **not** current guidance. Key decisions here were
-> reversed during implementation — notably, `documents` and `crawledChunks` are
+> reversed during implementation - notably, `documents` and `crawledChunks` are
 > **manually defined** in `convex/schema.ts` (only `threads`/`messages` are
 > component-managed), and the embedding dimension is **not** 768. Do **not** follow
 > the "remove manual `documents`/`chunks` tables" or "confirm dimensions are 768"
@@ -32,22 +32,22 @@
 
 ## Design Decisions
 
-### D1 — Path A Free‑Tier Constraints
+### D1 - Path A Free‑Tier Constraints
 - All rate limits and fallbacks assume **Groq free tier (no card)**.
 - Binding constraint: **1,000 RPD** on Groq Scout/70B.
 - Semantic cache is mandatory; degrade gracefully on rate limits.
 
-### D2 — Schema: Component‑Managed Tables
+### D2 - Schema: Component‑Managed Tables
 - `documents` + `chunks` are **owned by `@convex-dev/rag`**.
 - `threads` + `messages` are **owned by `@convex-dev/agent`**.
 - No manual definitions or indexes for those tables in `convex/schema.ts`.
 - Extend with custom fields via component configuration only.
 
-### D3 — Vector Search in Actions Only
+### D3 - Vector Search in Actions Only
 - All calls to `ctx.vectorSearch` remain in **actions** only.
 - Queries use `searchIndex` where applicable; cross‑table enrichment via internal queries.
 
-### D4 — Providers Pattern
+### D4 - Providers Pattern
 - Existing provider wrapper (`src/components/providers.tsx`) is retained.
 - If `src/providers/*` is required by the todo, introduce thin wrappers that delegate to existing provider component to avoid duplication.
 

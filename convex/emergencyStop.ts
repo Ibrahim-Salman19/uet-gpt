@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { internalAction, internalMutation } from "./_generated/server";
-// Note: Internal-only functions — no auth check needed.
+// Note: Internal-only functions - no auth check needed.
 // Callers (cron/admin mutations) must guard access before invoking.
 // See: requirePermission(ctx, "emergency:stop") on external entry points.
 

@@ -27,7 +27,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
       setThemeState("dark");
     }
-    // If no preference is stored and system is dark, "dark" is already set — no update needed.
+    // If no preference is stored and system is dark, "dark" is already set - no update needed.
   }, []); // Run once on mount
 
   React.useLayoutEffect(() => {

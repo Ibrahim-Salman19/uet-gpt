@@ -53,13 +53,13 @@ Implement Expo / React Native auth with prebuilt @clerk/expo native components (
   ```tsx
   import { AuthView, UserButton, UserProfileView } from '@clerk/expo/native';
   ```
-- The only public props on `AuthView` are `mode` and `isDismissable`. Do not pass `onAuthEvent` or other handlers — react to completion from `useAuth()` / `useUser()` / `useSession()` inside a `useEffect` instead.
+- The only public props on `AuthView` are `mode` and `isDismissable`. Do not pass `onAuthEvent` or other handlers - react to completion from `useAuth()` / `useUser()` / `useSession()` inside a `useEffect` instead.
 
 5. Auth presentation pattern
 - Default signed-out UI: `<AuthView />`. It renders inline in the parent container, so place it directly in your view hierarchy where you want the auth UI.
 - Keep `mode="signInOrUp"` (the default combined behavior).
 - Do not pass `mode="signIn"` or `mode="signUp"` unless the developer explicitly requests separate flows.
-- Do not pair `<AuthView />` with `useSignInWithGoogle()` or `useSignInWithApple()` — `AuthView` handles Google and Apple sign-in automatically when those providers are enabled. The Clerk docs are explicit about this.
+- Do not pair `<AuthView />` with `useSignInWithGoogle()` or `useSignInWithApple()` - `AuthView` handles Google and Apple sign-in automatically when those providers are enabled. The Clerk docs are explicit about this.
 
 6. Signed-in entry pattern
 - Default signed-in entry: `<UserButton />` (avatar + native profile modal).

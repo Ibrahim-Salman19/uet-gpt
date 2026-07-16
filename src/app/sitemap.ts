@@ -5,7 +5,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app
 export default function sitemap(): MetadataRoute.Sitemap {
   // Only list publicly indexable, content-rich, canonical URLs. The app routes
   // (/chat, /explore, /settings) are auth-gated client-rendered shells with no
-  // crawlable content, and the auth pages are thin — all excluded to avoid
+  // crawlable content, and the auth pages are thin - all excluded to avoid
   // thin-content / soft-404 signals.
   return [
     {

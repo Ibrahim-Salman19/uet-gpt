@@ -4,16 +4,16 @@ import Link from "next/link";
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
 export const metadata: Metadata = {
-  title: "UET Taxila Fee Structure — Undergraduate Tuition, Hostel & Other Charges",
+  title: "UET Taxila Fee Structure - Undergraduate Tuition, Hostel & Other Charges",
   description:
-    "UET Taxila fee structure explained: subsidized and partial-subsidized (S and X) undergraduate tuition, hostel and other charges, payment schedules, and the admission fee refund policy — with how UET GPT provides current figures.",
+    "UET Taxila fee structure explained: subsidized and partial-subsidized (S and X) undergraduate tuition, hostel and other charges, payment schedules, and the admission fee refund policy - with how UET GPT provides current figures.",
   alternates: {
     canonical: `${siteUrl}/uet-taxila/fee-structure`,
   },
   openGraph: {
-    title: "UET Taxila Fee Structure — Undergraduate Tuition, Hostel & Other Charges",
+    title: "UET Taxila Fee Structure - Undergraduate Tuition, Hostel & Other Charges",
     description:
-      "Undergraduate tuition, hostel and other charges at UET Taxila, the payment schedule, and the fee refund policy — grounded in the official UET Taxila prospectus.",
+      "Undergraduate tuition, hostel and other charges at UET Taxila, the payment schedule, and the fee refund policy - grounded in the official UET Taxila prospectus.",
     url: `${siteUrl}/uet-taxila/fee-structure`,
     type: "website",
   },
@@ -22,11 +22,11 @@ export const metadata: Metadata = {
 const FAQ_ITEMS = [
   {
     q: "What is included in the UET Taxila fee structure?",
-    a: "The UET Taxila undergraduate fee structure is split into non-recurring charges (payable once at admission) and recurring charges (payable per semester). Non-recurring charges include admission charges, re-admission charges, the student identity card, document verification fee, and refundable library security. Recurring per-semester charges include registration, tuition, sports, magazine, medical, laboratory, examination, book bank rent, instructional tour, recreation, Smart & Safe Campus, digital library, and — where applicable — bus fares and survey camp charges. Hostel residents pay additional hostel, mess, and utility charges. Full figures are published in Table 30.1 of the UET Taxila undergraduate prospectus.",
+    a: "The UET Taxila undergraduate fee structure is split into non-recurring charges (payable once at admission) and recurring charges (payable per semester). Non-recurring charges include admission charges, re-admission charges, the student identity card, document verification fee, and refundable library security. Recurring per-semester charges include registration, tuition, sports, magazine, medical, laboratory, examination, book bank rent, instructional tour, recreation, Smart & Safe Campus, digital library, and - where applicable - bus fares and survey camp charges. Hostel residents pay additional hostel, mess, and utility charges. Full figures are published in Table 30.1 of the UET Taxila undergraduate prospectus.",
   },
   {
     q: "How much is the tuition fee at UET Taxila?",
-    a: "For the subsidized category, the per-semester tuition fee is Rs. 38,000. For the partial-subsidized categories (Category S — All Pakistan, and Category X — children of overseas Pakistanis), the per-semester tuition fee is Rs. 130,000. Admission charges also differ sharply: Rs. 7,000 for subsidized students versus Rs. 300,000 for partial-subsidized students. Bus fares, electricity, and gas charges can change each semester based on government-fixed fuel, electricity, and gas rates, so UET GPT provides the current figures rather than fixed numbers.",
+    a: "For the subsidized category, the per-semester tuition fee is Rs. 38,000. For the partial-subsidized categories (Category S - All Pakistan, and Category X - children of overseas Pakistanis), the per-semester tuition fee is Rs. 130,000. Admission charges also differ sharply: Rs. 7,000 for subsidized students versus Rs. 300,000 for partial-subsidized students. Bus fares, electricity, and gas charges can change each semester based on government-fixed fuel, electricity, and gas rates, so UET GPT provides the current figures rather than fixed numbers.",
   },
   {
     q: "What are the hostel charges at UET Taxila?",
@@ -46,7 +46,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "How does UET GPT explain current UET Taxila fees?",
-    a: "UET GPT is the AI guide to UET Taxila and answers fee questions grounded in official university documents, including the undergraduate prospectus. Because several charges — such as bus fares, electricity, and gas — are revised each semester based on government-fixed rates, and because the university may change fees without prior notice, UET GPT provides the current figures and cites the official source rather than presenting outdated numbers. Ask UET GPT about any fee component, category, or refund scenario for an up-to-date, sourced answer.",
+    a: "UET GPT is the AI guide to UET Taxila and answers fee questions grounded in official university documents, including the undergraduate prospectus. Because several charges - such as bus fares, electricity, and gas - are revised each semester based on government-fixed rates, and because the university may change fees without prior notice, UET GPT provides the current figures and cites the official source rather than presenting outdated numbers. Ask UET GPT about any fee component, category, or refund scenario for an up-to-date, sourced answer.",
   },
 ] as const;
 
@@ -82,12 +82,12 @@ const feeRows = [
   { item: "Smart & Safe Campus Charges (per semester)", subsidized: "3,000", partial: "3,000" },
   { item: "Digital Library Charges (per semester)", subsidized: "500", partial: "500" },
   {
-    item: "Survey Camp Charges — Civil Engg only (per semester)",
+    item: "Survey Camp Charges - Civil Engg only (per semester)",
     subsidized: "10,000",
     partial: "10,000",
   },
-  { item: "Bus Fare — Non-Resident (per semester)", subsidized: "22,000", partial: "22,000" },
-  { item: "Bus Fare — Resident (per semester)", subsidized: "10,000", partial: "10,000" },
+  { item: "Bus Fare - Non-Resident (per semester)", subsidized: "22,000", partial: "22,000" },
+  { item: "Bus Fare - Resident (per semester)", subsidized: "10,000", partial: "10,000" },
   { item: "SAP Charges (per semester)", subsidized: "1,800", partial: "1,800" },
 ];
 
@@ -148,7 +148,7 @@ export default function UetTaxilaFeeStructurePage() {
             </h1>
             <p className="text-lg text-[#a1a1aa] max-w-2xl mx-auto mb-8">
               A clear breakdown of the undergraduate fee schedule at the University of Engineering
-              and Technology, Taxila — grounded in the official UET Taxila undergraduate prospectus
+              and Technology, Taxila - grounded in the official UET Taxila undergraduate prospectus
               and explained the way UET GPT delivers it.
             </p>
             <div className="flex items-center justify-center gap-4">
@@ -298,7 +298,7 @@ export default function UetTaxilaFeeStructurePage() {
                 <p className="text-sm text-[#a1a1aa]">
                   Library security, hostel security, and mess security are refundable. They are
                   returned on clearance when a student leaves the university or hostel, subject to
-                  deduction of outstanding dues — provided the claim is made within two years, after
+                  deduction of outstanding dues - provided the claim is made within two years, after
                   which unclaimed securities lapse to the university Welfare Fund.
                 </p>
               </div>
@@ -330,8 +330,8 @@ export default function UetTaxilaFeeStructurePage() {
                 <p className="text-sm text-[#a1a1aa]">
                   Civil Engineering students pay survey camp charges (Rs. 10,000 per semester) with
                   the fee of the 2nd, 3rd, and 4th semesters. Students using university transport
-                  pay bus fares that differ for residents and non-residents, and these — along with
-                  electricity and gas charges — depend on prevailing government-fixed rates and are
+                  pay bus fares that differ for residents and non-residents, and these - along with
+                  electricity and gas charges - depend on prevailing government-fixed rates and are
                   set each semester by the Vice Chancellor on the Treasurer&apos;s and PD&apos;s
                   recommendations.
                 </p>
@@ -384,7 +384,7 @@ export default function UetTaxilaFeeStructurePage() {
               How UET GPT Explains Current UET Taxila Fees
             </h2>
             <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto">
-              Accurate, sourced, and always current — that is how UET GPT answers fee questions
+              Accurate, sourced, and always current - that is how UET GPT answers fee questions
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
@@ -398,7 +398,7 @@ export default function UetTaxilaFeeStructurePage() {
                 },
                 {
                   title: "Any fee component",
-                  desc: "Ask about tuition, admission charges, hostel dues, refunds, category differences, or payment deadlines — UET GPT breaks it down clearly.",
+                  desc: "Ask about tuition, admission charges, hostel dues, refunds, category differences, or payment deadlines - UET GPT breaks it down clearly.",
                 },
                 {
                   title: "Category clarity",

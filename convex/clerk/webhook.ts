@@ -14,7 +14,7 @@ function getAuthToken(request: Request): string | null {
 // arrive out of order; the upstream Next.js route forwards svix's unique message
 // id so replays of the same delivery can be detected and dropped. Falls back to
 // the non-prefixed `webhook-id` header for resilience. Returns null when no key
-// is available (dedup is then skipped — never blocks a legitimate delivery).
+// is available (dedup is then skipped - never blocks a legitimate delivery).
 function getIdempotencyKey(request: Request): string | null {
   const id =
     request.headers.get("svix-id") ??
@@ -32,9 +32,9 @@ function checkWebhookMethod(request: Request): Response | null {
 
 function getExpectedWebhookToken(): string {
   const token = process.env.CLERK_WEBHOOK_SECRET || "";
-  // Reject whitespace-only tokens — they pass truthiness checks but are not valid secrets
+  // Reject whitespace-only tokens - they pass truthiness checks but are not valid secrets
   if (token.trim().length === 0 && token.length > 0) {
-    console.error("Webhook secret is whitespace-only — rejecting as invalid configuration");
+    console.error("Webhook secret is whitespace-only - rejecting as invalid configuration");
     return "";
   }
   return token;
@@ -62,7 +62,7 @@ function parseWebhookPayloadSafe(
   } catch {
     return new Response("Invalid JSON body", { status: 400 });
   }
-  // Runtime shape validation — never trust the parsed body's type.
+  // Runtime shape validation - never trust the parsed body's type.
   // A malformed/forged-but-authorized payload must be rejected, not coerced
   // via `as` casts into the users table.
   if (typeof parsed !== "object" || parsed === null) {
@@ -85,7 +85,7 @@ function extractWebhookEmail(data: Record<string, unknown>): string {
   return typeof first?.email_address === "string" ? first.email_address : "";
 }
 
-// Validate the Clerk user id before it reaches the users table — a missing or
+// Validate the Clerk user id before it reaches the users table - a missing or
 // non-string `id` must never be coerced via `as string` into a corrupt row.
 function extractClerkId(data: Record<string, unknown>): string | null {
   const id = data.id;
@@ -106,7 +106,7 @@ async function handleUserCreatedOrUpdated(
   const email = extractWebhookEmail(data);
   const imageUrl = asOptionalString(data.image_url);
 
-  // Never trust publicMetadata.role from Clerk — roles must only be set via admin mutations
+  // Never trust publicMetadata.role from Clerk - roles must only be set via admin mutations
   await ctx.runMutation(internal.users.upsertFromWebhook, {
     clerkId,
     name,
@@ -170,7 +170,7 @@ export const userWebhook = httpAction(async (ctx, request) => {
       jobId: `clerk:${idempotencyKey}`,
     });
     if (!isNew) {
-      // Already processed — acknowledge so Clerk stops retrying.
+      // Already processed - acknowledge so Clerk stops retrying.
       return okResponse();
     }
   }
@@ -188,7 +188,7 @@ export const userWebhook = httpAction(async (ctx, request) => {
     }
   } catch (err) {
     // Processing threw (e.g. OCC conflict, cascade-delete failure). Roll back the
-    // dedup marker (best-effort) and re-throw so Clerk receives a 5xx and retries —
+    // dedup marker (best-effort) and re-throw so Clerk receives a 5xx and retries -
     // otherwise the already-committed marker turns the retry into a silent no-op and
     // the user.created/updated/deleted event is permanently dropped.
     if (idempotencyKey) {

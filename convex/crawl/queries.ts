@@ -3,7 +3,7 @@ import { internalQuery, query } from "../_generated/server";
 import { requireAdmin } from "../auth";
 
 /**
- * fullTextSearch — internal query for BM25 exact match on chunks.
+ * fullTextSearch - internal query for BM25 exact match on chunks.
  */
 export const fullTextSearch = internalQuery({
   args: { query: v.string(), limit: v.number() },
@@ -48,7 +48,7 @@ export const getChunkByHash = internalQuery({
 });
 
 /**
- * getDocumentCountByStatus — returns count of documents for one specific status.
+ * getDocumentCountByStatus - returns count of documents for one specific status.
  * Call multiple times with different statuses to build a full picture.
  */
 export const getDocumentCountByStatus = query({
@@ -84,7 +84,7 @@ export const getDocumentCountByStatus = query({
 });
 
 /**
- * getRecentDocs — returns the N most recently crawled documents with metadata.
+ * getRecentDocs - returns the N most recently crawled documents with metadata.
  * Use this to spot-check freshness and formatting quality.
  */
 export const getRecentDocs = query({
@@ -108,7 +108,7 @@ export const getRecentDocs = query({
 });
 
 /**
- * getDLQSample — returns dead-letter items for review/retry.
+ * getDLQSample - returns dead-letter items for review/retry.
  */
 export const getDLQSample = query({
   args: {},
@@ -122,7 +122,7 @@ export const getDLQSample = query({
 });
 
 /**
- * searchByUrl — look up any document by exact URL for spot checking.
+ * searchByUrl - look up any document by exact URL for spot checking.
  */
 export const searchByUrl = query({
   args: { url: v.string() },
@@ -159,7 +159,7 @@ export const searchByUrl = query({
 });
 
 /**
- * getFailedDocs — lists documents stuck in failed status.
+ * getFailedDocs - lists documents stuck in failed status.
  */
 export const getFailedDocs = query({
   args: {},
@@ -174,7 +174,7 @@ export const getFailedDocs = query({
 });
 
 /**
- * getPendingEmbedDocs — lists documents waiting to be embedded.
+ * getPendingEmbedDocs - lists documents waiting to be embedded.
  */
 export const getPendingEmbedDocs = query({
   args: {},
@@ -189,7 +189,7 @@ export const getPendingEmbedDocs = query({
 });
 
 /**
- * getDocsBySource — returns documents from a specific domain, bounded.
+ * getDocsBySource - returns documents from a specific domain, bounded.
  */
 export const getDocsBySource = query({
   args: { source: v.string(), limit: v.optional(v.number()) },
@@ -204,7 +204,7 @@ export const getDocsBySource = query({
 });
 
 /**
- * getJobById — returns a crawl job by its internal ID (for crash recovery / resume).
+ * getJobById - returns a crawl job by its internal ID (for crash recovery / resume).
  */
 export const getJobById = internalQuery({
   args: { jobId: v.id("crawlJobs") },
@@ -214,7 +214,7 @@ export const getJobById = internalQuery({
 });
 
 /**
- * getChunksForDoc — returns chunks for a given document ID.
+ * getChunksForDoc - returns chunks for a given document ID.
  */
 export const getChunksForDoc = query({
   args: { documentId: v.id("documents") },

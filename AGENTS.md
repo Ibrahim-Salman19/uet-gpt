@@ -1,4 +1,4 @@
-# AGENTS.md — UET Taxila RAG Pipeline
+# AGENTS.md - UET Taxila RAG Pipeline
 Companion file: CRONJOB.md (full hourly operational protocol)
 
 ## Table of Contents
@@ -10,7 +10,7 @@ Companion file: CRONJOB.md (full hourly operational protocol)
 6. Coding Standards (line 84)
 
 ## Project Identity
-UET Taxila GPT — autonomous RAG pipeline maintenance agent.
+UET Taxila GPT - autonomous RAG pipeline maintenance agent.
 Stack: Python crawler (curl_cffi, trafilatura) → Convex webhooks →
 TypeScript chunker (chunkMarkdown) → vector embeddings → @convex-dev/agent.
 
@@ -38,7 +38,7 @@ pnpm vitest run                             # All tests
 pnpm convex dev                             # Local Convex devserver
 python scripts/eval/run_eval.py             # Eval harness (recall_at_5)
 ```
-> pnpm is the ONLY supported package manager. Never use npm/yarn/bun —
+> pnpm is the ONLY supported package manager. Never use npm/yarn/bun -
 > see architecture.md §17 for breakage details. Enable with `corepack enable`.
 
 ## Critical Files
@@ -82,4 +82,4 @@ scripts/
   TypeScript: strict mode, no `any`, explicit return types on exports.
 - Run `python scripts/eval/run_eval.py` after every pipeline change.
 - Conventional commit format: `type(scope): description`.
-- No print debugging — use logger, not stdout.
+- No print debugging - use logger, not stdout.

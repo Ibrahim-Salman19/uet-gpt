@@ -40,7 +40,7 @@ export default clerkMiddleware(async (auth, req) => {
     }
   }
 
-  // Edge-level admin role check — prevents non-admins from loading admin pages
+  // Edge-level admin role check - prevents non-admins from loading admin pages
   if (isAdmin) {
     const sessionClaims = authObj?.sessionClaims;
 

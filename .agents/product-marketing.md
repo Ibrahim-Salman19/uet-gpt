@@ -1,10 +1,10 @@
 # Product Marketing Context
 
 ## Product
-**UET GPT** — An intelligent AI-powered RAG chatbot for the University of Engineering and Technology (UET) Taxila.
+**UET GPT** - An intelligent AI-powered RAG chatbot for the University of Engineering and Technology (UET) Taxila.
 
 ## Value Proposition
-The only AI assistant that provides accurate, real-time answers about UET Taxila — admissions, fee structures, academic programs, faculty directories, campus life, transport, hostels, scholarships, and more — powered by direct retrieval from official university documents and web pages.
+The only AI assistant that provides accurate, real-time answers about UET Taxila - admissions, fee structures, academic programs, faculty directories, campus life, transport, hostels, scholarships, and more - powered by direct retrieval from official university documents and web pages.
 
 ## Target Audience
 - **Primary**: Students, staff, and faculty of UET Taxila

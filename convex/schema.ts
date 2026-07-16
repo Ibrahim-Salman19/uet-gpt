@@ -256,7 +256,7 @@ export default defineSchema({
     text: v.string(),
     ragId: v.string(),
     embeddingModel: v.optional(v.string()),
-    parentText: v.optional(v.string()), // TASK-E06: Parent-child chunking context (LEGACY — new rows use parentId; kept for back-compat until migrateParentTextToTable runs)
+    parentText: v.optional(v.string()), // TASK-E06: Parent-child chunking context (LEGACY - new rows use parentId; kept for back-compat until migrateParentTextToTable runs)
     parentId: v.optional(v.id("chunkParents")), // Normalized parent reference (WS-1): replaces per-child parentText duplication
     headingPath: v.optional(v.array(v.string())), // R-7: Section heading hierarchy (e.g. ["Admissions", "Fee Structure"])
     contextualizedText: v.optional(v.string()), // R-9: Gemini-contextualized version of chunk text
@@ -312,13 +312,13 @@ export default defineSchema({
     .index("by_key", ["key"])
     .index("by_section", ["section"]),
 
-  // TASK-S02: Rate limiter state — sliding window per user + global token budget.
+  // TASK-S02: Rate limiter state - sliding window per user + global token budget.
   // Each row is either keyed by clerkUserId (per-user msg limit) or "global" (token budget).
   // windowStart: epoch ms of the start of the current 1-minute window.
   // count: number of requests (per-user) or total tokens (global) in this window.
   rateLimits: defineTable({
     key: v.string(), // clerkUserId OR "global"
-    windowStart: v.number(), // epoch ms — start of current 1-minute window
+    windowStart: v.number(), // epoch ms - start of current 1-minute window
     count: v.number(), // requests (per-user) or tokens (global) in window
   })
     .index("by_key", ["key"])

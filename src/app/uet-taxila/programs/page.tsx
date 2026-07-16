@@ -4,16 +4,16 @@ import Link from "next/link";
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
 export const metadata: Metadata = {
-  title: "UET Taxila Programs & Departments — Undergraduate, Graduate, PhD",
+  title: "UET Taxila Programs & Departments - Undergraduate, Graduate, PhD",
   description:
-    "Explore UET Taxila programs and UET Taxila departments: 14 departments across 6 faculties offering undergraduate, graduate (MS/MPhil), and PhD degrees — and how UET GPT helps you choose.",
+    "Explore UET Taxila programs and UET Taxila departments: 14 departments across 6 faculties offering undergraduate, graduate (MS/MPhil), and PhD degrees - and how UET GPT helps you choose.",
   alternates: {
     canonical: `${siteUrl}/uet-taxila/programs`,
   },
   openGraph: {
-    title: "UET Taxila Programs & Departments — Undergraduate, Graduate, PhD",
+    title: "UET Taxila Programs & Departments - Undergraduate, Graduate, PhD",
     description:
-      "The 14 departments and 6 faculties of UET Taxila, plus its undergraduate, graduate, and PhD programs — and how UET GPT helps students choose the right path.",
+      "The 14 departments and 6 faculties of UET Taxila, plus its undergraduate, graduate, and PhD programs - and how UET GPT helps students choose the right path.",
     url: `${siteUrl}/uet-taxila/programs`,
     type: "website",
   },
@@ -38,7 +38,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "How can UET GPT help me choose the right UET Taxila program?",
-    a: "UET GPT is the AI guide to UET Taxila. It explains each department and faculty, compares undergraduate, graduate, and PhD programs, clarifies ECAT and merit requirements, and answers questions about specializations, research areas, fee structures, and career outlook — all grounded in official UET Taxila data. Ask UET GPT before you apply so you can match your interests and strengths to the right department.",
+    a: "UET GPT is the AI guide to UET Taxila. It explains each department and faculty, compares undergraduate, graduate, and PhD programs, clarifies ECAT and merit requirements, and answers questions about specializations, research areas, fee structures, and career outlook - all grounded in official UET Taxila data. Ask UET GPT before you apply so you can match your interests and strengths to the right department.",
   },
   {
     q: "What is the admission process for UET Taxila programs?",
@@ -73,7 +73,7 @@ const FACULTIES = [
   {
     title: "Mechanical and Aeronautical Engineering",
     departments: ["Department of Mechanical Engineering", "Department of Mechatronics Engineering"],
-    desc: "Thermal, manufacturing, robotics, and automation — including the Swarm Robotics lab under NCRA.",
+    desc: "Thermal, manufacturing, robotics, and automation - including the Swarm Robotics lab under NCRA.",
   },
   {
     title: "Industrial Engineering",
@@ -148,7 +148,7 @@ export default function UetTaxilaProgramsPage() {
             </h1>
             <p className="text-lg text-[#a1a1aa] max-w-2xl mx-auto mb-8">
               14 departments across 6 faculties, offering undergraduate, graduate, and PhD degrees
-              in engineering, computing, and the basic sciences — the complete map of what UET
+              in engineering, computing, and the basic sciences - the complete map of what UET
               Taxila teaches, brought to you by UET GPT.
             </p>
             <div className="flex items-center justify-center gap-4">
@@ -244,7 +244,7 @@ export default function UetTaxilaProgramsPage() {
               How UET GPT Helps You Choose a Program
             </h2>
             <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto">
-              Choosing the right department is the first real decision of your UET Taxila journey —
+              Choosing the right department is the first real decision of your UET Taxila journey -
               UET GPT makes it easier
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

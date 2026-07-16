@@ -42,7 +42,7 @@ export function AuthGuard({
     );
   }
 
-  // Not signed in — show prompt
+  // Not signed in - show prompt
   if (!isSignedIn) {
     return (
       <div className="flex items-center justify-center min-h-[400px] p-8">

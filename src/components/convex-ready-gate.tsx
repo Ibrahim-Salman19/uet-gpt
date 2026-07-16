@@ -94,7 +94,7 @@ export function ConvexReadyGate({ children }: { children: React.ReactNode }) {
     "RAG // INITIALIZING VECTOR WORKSPACE…",
   ];
 
-  // Timed out — show retry UI instead of infinite blank
+  // Timed out - show retry UI instead of infinite blank
   if (timedOut) {
     return (
       <div className="flex h-full w-full flex-col items-center justify-center gap-6 px-6 text-center bg-[var(--surface-0)] overflow-y-auto py-10">
@@ -202,7 +202,7 @@ export function ConvexReadyGate({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Still loading — show branded loading screen
+  // Still loading - show branded loading screen
   return (
     <div className="flex h-full w-full flex-col items-center justify-center bg-[var(--ks-lacquer-black, #070708)] text-zinc-100">
       <div className="relative flex flex-col items-center gap-12 p-8 w-full max-w-sm">

@@ -6,11 +6,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.hoisted(() => {
   const buildAdminMocks = (globalThis as any).buildAdminMocks;
   if (!buildAdminMocks) {
-    // Fail loudly instead of silently no-op'ing — a missing global here means
+    // Fail loudly instead of silently no-op'ing - a missing global here means
     // the shared admin test setup did not load, which would otherwise surface
     // as confusing "cannot read property of undefined" errors below.
     throw new Error(
-      "buildAdminMocks global is not defined — admin test setup did not run (check tests/setup).",
+      "buildAdminMocks global is not defined - admin test setup did not run (check tests/setup).",
     );
   }
   (globalThis as any).currentAdminMocks = buildAdminMocks({

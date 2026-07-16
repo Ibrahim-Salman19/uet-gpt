@@ -342,7 +342,7 @@ export default function AdminSettingsPage() {
                       </Label>
                       {field.notEnforced && (
                         <span
-                          title="Stored for future use — this value is not yet read by the running pipeline and does not change behavior."
+                          title="Stored for future use - this value is not yet read by the running pipeline and does not change behavior."
                           className="text-[8px] font-mono uppercase tracking-wider text-amber-400/90 bg-amber-500/10 border border-amber-500/20 rounded px-1.5 py-0.5"
                         >
                           NOT ENFORCED

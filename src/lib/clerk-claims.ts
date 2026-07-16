@@ -14,7 +14,7 @@
  * SECURITY NOTE: the role read here is only as trustworthy as the JWT
  * template and is ADVISORY. It is safe for UX gating and for selecting a
  * rate-limit tier, but it MUST NOT be the sole authority for privileged
- * operations — a stale token (e.g. after a demotion) keeps the old role
+ * operations - a stale token (e.g. after a demotion) keeps the old role
  * until it expires. All privileged operations must be re-checked against
  * the authoritative Convex users table (see convex/auth.ts).
  *

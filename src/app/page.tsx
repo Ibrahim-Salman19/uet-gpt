@@ -24,11 +24,11 @@ import { JsonLd } from "@/lib/json-ld";
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
 export const metadata: Metadata = {
-  title: `${APP_NAME} — ${APP_TAGLINE}`,
+  title: `${APP_NAME} - ${APP_TAGLINE}`,
   description: APP_DESCRIPTION,
   keywords: APP_KEYWORDS,
   openGraph: {
-    title: `${APP_NAME} — ${APP_TAGLINE}`,
+    title: `${APP_NAME} - ${APP_TAGLINE}`,
     description: APP_DESCRIPTION,
     url: siteUrl,
   },
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
 const FAQ_ITEMS = [
   {
     q: "What is UET GPT?",
-    a: "UET GPT is an AI-powered assistant that answers questions about UET Taxila — admissions, fee structure, academic programs, departments, faculty, campus life, transport, hostels, scholarships, and more. It uses RAG (Retrieval-Augmented Generation) to provide accurate answers from official university data.",
+    a: "UET GPT is an AI-powered assistant that answers questions about UET Taxila - admissions, fee structure, academic programs, departments, faculty, campus life, transport, hostels, scholarships, and more. It uses RAG (Retrieval-Augmented Generation) to provide accurate answers from official university data.",
   },
   {
     q: "Is UET GPT free to use?",
@@ -212,8 +212,8 @@ export default async function LandingPage() {
                   </h3>
                 </div>
                 <p className="text-sm text-[var(--text-secondary)] leading-relaxed font-sans pl-9">
-                  UET stands for the University of Engineering and Technology. UET Taxila — the
-                  University of Engineering and Technology, Taxila — is one of Pakistan&apos;s
+                  UET stands for the University of Engineering and Technology. UET Taxila - the
+                  University of Engineering and Technology, Taxila - is one of Pakistan&apos;s
                   leading public engineering universities, located in Taxila, Punjab. Established as
                   a constituent college of UET Lahore in 1975, UET Taxila became an independent,
                   chartered university in 1993 and today enrolls more than 5,500 undergraduate and
@@ -231,7 +231,7 @@ export default async function LandingPage() {
                   </h3>
                 </div>
                 <p className="text-sm text-[var(--text-secondary)] leading-relaxed font-sans pl-9">
-                  UET Taxila offers a wide range of BS, MS, and PhD programs through six faculties —
+                  UET Taxila offers a wide range of BS, MS, and PhD programs through six faculties -
                   Civil and Environmental Engineering, Electronics and Electrical Engineering,
                   Mechanical and Aeronautical Engineering, Industrial Engineering, Telecommunication
                   and Information Engineering, and Basic Sciences and Humanities. From Civil and
@@ -247,14 +247,14 @@ export default async function LandingPage() {
                     <Sparkles className="h-4 w-4" />
                   </div>
                   <h3 className="font-semibold text-base text-[var(--text-primary)] font-sans">
-                    UET GPT — your AI guide to UET Taxila
+                    UET GPT - your AI guide to UET Taxila
                   </h3>
                 </div>
                 <p className="text-sm text-[var(--text-secondary)] leading-relaxed font-sans pl-9">
                   UET GPT is the intelligent, AI-powered guide to UET Taxila. Whether you are a
                   prospective applicant, a current student, or a faculty member, UET GPT answers
                   questions about UET Taxila admissions, fee structures, departments, faculty,
-                  hostels, transport, and scholarships — grounded in official university data.{" "}
+                  hostels, transport, and scholarships - grounded in official university data.{" "}
                   <Link
                     href="/uet-taxila"
                     className="text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors underline font-medium"

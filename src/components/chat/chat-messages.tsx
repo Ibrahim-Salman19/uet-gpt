@@ -134,7 +134,7 @@ export function ChatMessages({
     return <LoadingContent className={className} />;
   }
 
-  // No messages yet but a request failed — show the error explicitly instead of
+  // No messages yet but a request failed - show the error explicitly instead of
   // falling through to an empty scroll area.
   if (messages.length === 0 && hasError) {
     return (

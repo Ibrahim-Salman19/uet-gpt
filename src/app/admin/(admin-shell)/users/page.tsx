@@ -70,7 +70,7 @@ export default function AdminUsersPage() {
     const result = await removeUserRole(userId);
     if (result.success) {
       setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, role: "user" } : u)));
-      toast.success("Role removed — user downgraded to regular user");
+      toast.success("Role removed - user downgraded to regular user");
     } else {
       toast.error(result.error ?? "Failed to remove role");
     }

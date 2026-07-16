@@ -150,7 +150,7 @@ export default function AdminDocumentsPage() {
 
       {documents && documents.length >= 100 && (
         <p className="text-[10px] text-amber-400/90 font-mono tracking-wide">
-          Showing the first 100 documents. Text search only matches within this window — narrow by
+          Showing the first 100 documents. Text search only matches within this window - narrow by
           status or category to reach the rest.
         </p>
       )}

@@ -103,7 +103,7 @@ export default function AdminShellLayout({ children }: { children: React.ReactNo
           </div>
         </aside>
 
-        {/* Main Content — wrapped in ClientOnly to prevent Convex SSR errors */}
+        {/* Main Content - wrapped in ClientOnly to prevent Convex SSR errors */}
         <div className="flex flex-1 flex-col overflow-hidden min-w-0 bg-[var(--surface-base)]">
           <header className="flex h-14 items-center border-b border-[var(--surface-5)] px-6 shrink-0 bg-[var(--surface-1)]/60 backdrop-blur-md">
             <h1 className="text-sm font-semibold text-zinc-100 font-sans tracking-tight">

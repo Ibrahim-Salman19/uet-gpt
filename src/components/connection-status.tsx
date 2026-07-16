@@ -55,7 +55,7 @@ export function ConnectionStatus() {
       role="status"
       aria-live="polite"
     >
-      {isOnline ? "Reconnected" : "You are offline — messages will be sent when you reconnect"}
+      {isOnline ? "Reconnected" : "You are offline - messages will be sent when you reconnect"}
     </div>
   );
 }

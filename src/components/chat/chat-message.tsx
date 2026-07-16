@@ -44,7 +44,7 @@ function prefersReducedMotion(): boolean {
  * Drives the one-shot "typewriter" scramble for the freshly-settled assistant
  * message. Returns both the (plain-text) animation frame and a flag indicating
  * whether the animation is still running. The caller renders plain text while
- * animating and only mounts <Markdown> once the animation settles — this keeps
+ * animating and only mounts <Markdown> once the animation settles - this keeps
  * the heavy Markdown + highlight.js pipeline off the per-frame render path and
  * prevents transient markdown corruption / random garbage from being shown.
  *
@@ -100,7 +100,7 @@ function useScrambleText(
     setIsAnimating(true);
 
     const interval = setInterval(() => {
-      // Scramble plain text only — Markdown is rendered once on completion.
+      // Scramble plain text only - Markdown is rendered once on completion.
       setScrambleContent(
         targetText
           .split("")

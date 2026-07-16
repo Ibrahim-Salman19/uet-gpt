@@ -36,7 +36,7 @@ function isAllowedSitemapHost(url: string): boolean {
 }
 
 /**
- * A-3: Sitemap pre-seeding — merges sitemap URLs into the crawl seed list.
+ * A-3: Sitemap pre-seeding - merges sitemap URLs into the crawl seed list.
  * Fetches standard sitemap XML, extracts <loc> URLs, and filters through include/exclude patterns.
  * Improves coverage by catching pages not explicitly listed as seed URLs.
  *
@@ -68,7 +68,7 @@ async function fetchSitemapUrls(
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-    // redirect: "error" — do NOT silently follow redirects to other (possibly internal) hosts.
+    // redirect: "error" - do NOT silently follow redirects to other (possibly internal) hosts.
     const response = await fetch(sitemapUrl, { signal: controller.signal, redirect: "error" });
     clearTimeout(timeoutId);
 
@@ -164,7 +164,7 @@ function validateCrawlEnvironment() {
   return { convexSiteUrl, crawlUrl, webhookUrl, primarySecret, secondarySecret, headers };
 }
 
-// A-3: Sitemap pre-seeding — fetch sitemap URLs and merge with seed list
+// A-3: Sitemap pre-seeding - fetch sitemap URLs and merge with seed list
 async function mergeSitemapUrls(): Promise<string[]> {
   const mergedUrls: string[] = [...UET_CRAWL_CONFIG.seedUrls];
   try {
@@ -252,7 +252,7 @@ function signCrawlPayload(
   const timestamp = Date.now().toString();
 
   // SECURITY: the HMAC must bind the EXACT transmitted body (not a constant string),
-  // so the receiver — which verifies over `timestamp + "." + rawBody` — actually
+  // so the receiver - which verifies over `timestamp + "." + rawBody` - actually
   // authenticates the payload and rejects any tampering. We set only the timestamp
   // header, serialize the body, then sign `timestamp + "." + body` over that exact
   // string. The signature is sent as a separate transport header (NOT inside the
@@ -377,7 +377,7 @@ export const embedSingleChunk = internalAction({
   returns: v.any(),
   handler: async (ctx, args) => {
     try {
-      // Safe source extraction — handles both https:// and pdf:// virtual URLs
+      // Safe source extraction - handles both https:// and pdf:// virtual URLs
       let sourceHost: string;
       try {
         sourceHost = isPdfVirtualUrl(args.url) ? "pdf" : new URL(args.url).hostname;

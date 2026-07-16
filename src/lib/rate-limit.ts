@@ -78,7 +78,7 @@ function deniedResult(): RateLimitResult {
  *
  * @param identifier - Unique user identifier (userId or IP)
  * @param role - User role for limit tier
- * @returns Rate limit result — denies requests when rate limiting is unavailable
+ * @returns Rate limit result - denies requests when rate limiting is unavailable
  */
 export async function checkChatRateLimit(
   identifier: string,
@@ -92,35 +92,35 @@ export async function checkChatRateLimit(
         : userLimiter;
 
   if (!limiter) {
-    console.warn("[RATE-LIMIT] Rate limiting not configured — denying for safety");
+    console.warn("[RATE-LIMIT] Rate limiting not configured - denying for safety");
     return deniedResult();
   }
 
   try {
     return await limiter.limit(identifier);
   } catch (error) {
-    console.error("[RATE-LIMIT] Redis error — denying for safety:", error);
+    console.error("[RATE-LIMIT] Redis error - denying for safety:", error);
     return deniedResult();
   }
 }
 
-// Admin action rate limiter — 30 actions/minute
+// Admin action rate limiter - 30 actions/minute
 const adminActionLimiter = redis ? createRatelimit(redis, 30, 60000, "admin/action") : null;
 
 /**
  * Check rate limit for admin actions (role changes, etc.).
  * @param identifier - Admin user identifier
- * @returns Rate limit result — denies when rate limiting is unavailable
+ * @returns Rate limit result - denies when rate limiting is unavailable
  */
 export async function checkAdminActionRateLimit(identifier: string): Promise<RateLimitResult> {
   if (!adminActionLimiter) {
-    console.warn("[RATE-LIMIT] Admin rate limiter not configured — denying for safety");
+    console.warn("[RATE-LIMIT] Admin rate limiter not configured - denying for safety");
     return deniedResult();
   }
   try {
     return await adminActionLimiter.limit(identifier);
   } catch (error) {
-    console.error("[RATE-LIMIT] Admin rate limit error — denying for safety:", error);
+    console.error("[RATE-LIMIT] Admin rate limit error - denying for safety:", error);
     return deniedResult();
   }
 }
@@ -136,7 +136,7 @@ export type RateLimitRemaining =
   | { configured: false };
 
 /**
- * Get remaining requests for a user — used to show in UI.
+ * Get remaining requests for a user - used to show in UI.
  */
 export async function getChatRateLimitRemaining(
   identifier: string,

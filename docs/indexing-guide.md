@@ -28,7 +28,7 @@ Also submit `https://uet-gpt.vercel.app/sitemap.xml` under **Sitemaps**.
 4. Submit `https://uet-gpt.vercel.app/sitemap.xml`
 5. Use **URL Submission** to request indexing for each URL above
 
-Bing also supports **IndexNow** — if you have an IndexNow API key, ping:
+Bing also supports **IndexNow** - if you have an IndexNow API key, ping:
 ```
 POST https://api.indexnow.org/IndexNow
 {

@@ -30,7 +30,7 @@ export const list = query({
 
     let baseQuery;
     if (status && category) {
-      // Compound index: status + category — most selective
+      // Compound index: status + category - most selective
       baseQuery = ctx.db
         .query("documents")
         .withIndex("by_status_and_category", (q) =>

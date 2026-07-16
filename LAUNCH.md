@@ -1,4 +1,4 @@
-# UET GPT — Launch & Distribution Playbook
+# UET GPT - Launch & Distribution Playbook
 
 ## Positioning Copy (Use Across All Directories)
 
@@ -6,12 +6,12 @@
 > The AI assistant that knows UET Taxila.
 
 ### One-Liner
-UET GPT is an AI-powered RAG chatbot that gives instant, accurate answers about UET Taxila — admissions, fees, programs, faculty, campus life, and more.
+UET GPT is an AI-powered RAG chatbot that gives instant, accurate answers about UET Taxila - admissions, fees, programs, faculty, campus life, and more.
 
 ### Long Description (Startup/Launch Directories)
 UET GPT is the easiest way to get accurate information about UET Taxila. Built for students who waste hours searching through scattered PDFs and official websites, UET GPT removes the friction by answering any UET-related question instantly with citations from official sources.
 
-Unlike generic AI assistants, UET GPT is grounded in real university documents via RAG (retrieval-augmented generation). You can ask about admission requirements in under a second, compare fee structures across programs, get hostel and transport details, find faculty contact info, and explore scholarship opportunities — all without leaving the chat.
+Unlike generic AI assistants, UET GPT is grounded in real university documents via RAG (retrieval-augmented generation). You can ask about admission requirements in under a second, compare fee structures across programs, get hostel and transport details, find faculty contact info, and explore scholarship opportunities - all without leaving the chat.
 
 We built UET GPT because every student at UET Taxila has experienced the frustration of hunting through 500-page prospectuses and outdated website pages for basic information. It's now being used by students and faculty to access academic information in seconds instead of hours.
 
@@ -21,26 +21,26 @@ Try it free at https://uet-gpt.vercel.app. No credit card needed.
 UET GPT is an AI-powered educational chatbot that delivers precise answers about UET Taxila through retrieval-augmented generation (RAG). It uses Llama 4 Scout (Groq) for deep reasoning and Llama 3.1 8B for speed, combined with vector embeddings from Gemini embedding-2 to retrieve context from official university documents.
 
 What makes it AI-first:
-• RAG pipeline — retrieves from official UET documents, not generic web search
-• Multi-model — switches between reasoning (Llama 4 Scout) and speed (Llama 3.1 8B)
-• Real-time crawling — automatically updates from UET Taxila's website and admission portal
-• Citation-backed — every answer includes source references from university materials
+• RAG pipeline - retrieves from official UET documents, not generic web search
+• Multi-model - switches between reasoning (Llama 4 Scout) and speed (Llama 3.1 8B)
+• Real-time crawling - automatically updates from UET Taxila's website and admission portal
+• Citation-backed - every answer includes source references from university materials
 
 UET GPT is built on Convex (real-time backend), Next.js 15, and Clerk Auth. Use cases: admission guidance, fee/comparison queries, faculty research, campus information, scholarship discovery.
 
 Free tier available. No API keys required.
 
 ### Long Description (SaaS Directories)
-UET GPT is an AI-powered alternative to manually searching UET Taxila's website and prospectus — built for students, faculty, and applicants who need fast, accurate answers about the university.
+UET GPT is an AI-powered alternative to manually searching UET Taxila's website and prospectus - built for students, faculty, and applicants who need fast, accurate answers about the university.
 
-Where UET Taxila's official website requires navigating scattered pages and PDFs, UET GPT answers instantly. You get citation-backed answers about admissions, fees, programs, faculty, hostels, transport, scholarships, and campus events — all in one conversation.
+Where UET Taxila's official website requires navigating scattered pages and PDFs, UET GPT answers instantly. You get citation-backed answers about admissions, fees, programs, faculty, hostels, transport, scholarships, and campus events - all in one conversation.
 
 Key features:
-• RAG-powered Q&A — answers grounded in official university documents
-• Real-time crawling — always up-to-date with UET Taxila's website
-• Multi-model AI — Llama 4 Scout for depth, Llama 3.1 8B for speed
-• Citation engine — every answer includes sources you can verify
-• Privacy-first — Clerk authentication, user-controlled data
+• RAG-powered Q&A - answers grounded in official university documents
+• Real-time crawling - always up-to-date with UET Taxila's website
+• Multi-model AI - Llama 4 Scout for depth, Llama 3.1 8B for speed
+• Citation engine - every answer includes sources you can verify
+• Privacy-first - Clerk authentication, user-controlled data
 
 Trusted by UET Taxila students and faculty. Start free at https://uet-gpt.vercel.app.
 
@@ -51,14 +51,14 @@ AI chatbot, UET Taxila, educational AI, RAG chatbot, university assistant, Pakis
 
 ## Tier Priority & Submission Links
 
-### NOW — Wikidata, Crunchbase, LinkedIn
+### NOW - Wikidata, Crunchbase, LinkedIn
 | Platform | Link | Status |
 |---|---|---|
 | **Wikidata** | https://www.wikidata.org/wiki/Special:NewItem | Create account → New Item |
 | **Crunchbase** | https://www.crunchbase.com/add/organization | Create account → Add org |
 | **LinkedIn** | https://www.linkedin.com/company/setup/new/ | Need account → Company page |
 
-### Week 1 — Tier 1 Launch Directories
+### Week 1 - Tier 1 Launch Directories
 | Directory | Link | DR |
 |---|---|---|
 | BetaList | https://betalist.com/submit | 64 |
@@ -74,7 +74,7 @@ AI chatbot, UET Taxila, educational AI, RAG chatbot, university assistant, Pakis
 | Tiny Launch | https://tinylaunch.com/submit | ~20 |
 | Best of Web | https://bestofweb.io/submit | ~30 |
 
-### Week 1 — Tier 3 AI Directories
+### Week 1 - Tier 3 AI Directories
 | Directory | Link | DR/Traffic |
 |---|---|---|
 | TAAFT | https://theresanaiforthat.com/submit/ | DR 76, 2M/mo |
@@ -87,7 +87,7 @@ AI chatbot, UET Taxila, educational AI, RAG chatbot, university assistant, Pakis
 | TopAI.tools | https://topai.tools/submit | ~60 |
 | AI Pedia Hub | https://aipediahub.com/submit | ~40 |
 
-### Week 1-2 — Tier 2 SaaS Directories
+### Week 1-2 - Tier 2 SaaS Directories
 | Directory | Link | DR |
 |---|---|---|
 | SaaSHub | https://www.saashub.com/services/submit | 77 |
@@ -98,7 +98,7 @@ AI chatbot, UET Taxila, educational AI, RAG chatbot, university assistant, Pakis
 | F6S | https://www.f6s.com/product/add | 65 |
 | SideProjectors | https://www.sideprojectors.com | ~35 |
 
-### Week 2-3 — Tier 8 Profile Backlinks
+### Week 2-3 - Tier 8 Profile Backlinks
 | Platform | Link | DR |
 |---|---|---|
 | GitHub (profile) | https://github.com/devhms/uet_gpt | 98 |

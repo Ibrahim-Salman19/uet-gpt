@@ -83,7 +83,7 @@ const baseInsertArgs = {
   tokenCount: undefined,
 };
 
-describe("messages api — authorization & ownership", () => {
+describe("messages api - authorization & ownership", () => {
   it("insert rejects when there is no authenticated identity", async () => {
     const { ctx } = makeCtx({ identity: null, user: null });
     await expect(handler(insert)(ctx, baseInsertArgs)).rejects.toThrow(/auth/i);

@@ -12,7 +12,7 @@ type Permission =
   | "users:manage"
   | "emergency:stop";
 
-// CANONICAL permission matrix — server-side source of truth.
+// CANONICAL permission matrix - server-side source of truth.
 // Client-side mirror at src/lib/permissions.ts must be kept in sync.
 // When adding permissions, update both files.
 type Role = "user" | "admin" | "superadmin";

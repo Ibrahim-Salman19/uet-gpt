@@ -33,7 +33,7 @@
     "https://web.uettaxila.edu.pk/dic/",
     "https://web.uettaxila.edu.pk/programs/"
   ],
-  "_comment_departmentFacultyRange": "Auto-generates departmentfaculty?departmentId=N seeds. Override per-URL with departmentFacultyUrls if you want explicit control. Some IDs may 404 — the crawler DLQs those and continues.",
+  "_comment_departmentFacultyRange": "Auto-generates departmentfaculty?departmentId=N seeds. Override per-URL with departmentFacultyUrls if you want explicit control. Some IDs may 404 - the crawler DLQs those and continues.",
   "departmentFacultyRange": { "start": 1, "end": 25 },
   "maxDepth": 4,
   "concurrency": 5,

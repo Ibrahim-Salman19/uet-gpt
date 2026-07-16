@@ -6,12 +6,12 @@ import { constantTimeCompare } from "../crawl/utils";
 
 const DAY = 24 * 60 * 60 * 1000;
 const FRESHNESS_TTL = {
-  high: 12 * 60 * 60 * 1000, // 12 hours — data refreshes often
+  high: 12 * 60 * 60 * 1000, // 12 hours - data refreshes often
   medium: 1 * DAY, // 24 hours
-  low: 5 * DAY, // 5 days — rarely changes
+  low: 5 * DAY, // 5 days - rarely changes
 } as const;
 
-const MAX_CACHE_ENTRY_BYTES = 900_000; // 900KB — leaves margin for Convex ~1MB doc limit
+const MAX_CACHE_ENTRY_BYTES = 900_000; // 900KB - leaves margin for Convex ~1MB doc limit
 
 function estimateDocSize(obj: unknown): number {
   return Buffer.byteLength(JSON.stringify(obj), "utf-8");
@@ -66,7 +66,7 @@ export const set = internalMutation({
     // If caller didn't provide maxDocumentUpdatedAt, derive it from ALL source
     // documents. The denormalized value is trusted by the read fast-path
     // (get.ts checkSourceStaleness) for the entire entry, so it must cover every
-    // source — sampling only a prefix would let updates to later sources go
+    // source - sampling only a prefix would let updates to later sources go
     // undetected and serve stale answers. Resolve ragId -> chunk in batches of
     // 100 to bound the concurrent query fan-out.
     if (maxDocUpdatedAt === undefined && args.sourceEntryIds && args.sourceEntryIds.length > 0) {
@@ -130,7 +130,7 @@ export const set = internalMutation({
 });
 
 /**
- * Public action wrapper for cache set — validates caller is server-side.
+ * Public action wrapper for cache set - validates caller is server-side.
  * Only callable from trusted server contexts (Next.js API routes, cron jobs).
  */
 export const setFromServer = action({

@@ -130,7 +130,7 @@ function SystemMetricsSection({
 }) {
   return (
     <div className="space-y-4">
-      <SectionHeader title="System Metrics" subtitle="[ STORAGE: DATA CORE — ESTIMATED ]" />
+      <SectionHeader title="System Metrics" subtitle="[ STORAGE: DATA CORE - ESTIMATED ]" />
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="rounded-xl border border-white/5 bg-[var(--surface-3)]/40 p-5 hover:border-[var(--accent)]/20 transition-all duration-300">
           <div className="flex items-center justify-between">

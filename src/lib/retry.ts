@@ -2,7 +2,7 @@
  * Decide whether an error is worth retrying. By default we only retry
  * TRANSIENT failures (network/timeout/connection resets, and Convex
  * optimistic-concurrency conflicts) and bail immediately on permanent ones
- * such as validation, authorization, or business-rule (ConvexError) failures —
+ * such as validation, authorization, or business-rule (ConvexError) failures -
  * retrying those just wastes backoff time and, for non-idempotent work, risks
  * double-applying side effects.
  *
@@ -13,7 +13,7 @@
  */
 function isTransientError(error: unknown): boolean {
   // Convex business/validation/authorization failures are surfaced as
-  // ConvexError and are NOT transient — do not retry them.
+  // ConvexError and are NOT transient - do not retry them.
   if (error instanceof Error && error.name === "ConvexError") return false;
 
   const message = error instanceof Error ? error.message : typeof error === "string" ? error : "";

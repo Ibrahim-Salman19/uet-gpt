@@ -4,16 +4,16 @@ import Link from "next/link";
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
 export const metadata: Metadata = {
-  title: "UET Taxila Admissions 2025 — ECAT, Eligibility & Merit",
+  title: "UET Taxila Admissions 2025 - ECAT, Eligibility & Merit",
   description:
     "UET Taxila admissions guide: UET Taxila ECAT entry test, 60%/50% eligibility, how merit is calculated (ECAT 33%, HSSC 50%, SSC 17%), merit lists, required documents, and how UET GPT helps applicants.",
   alternates: {
     canonical: `${siteUrl}/uet-taxila/admissions`,
   },
   openGraph: {
-    title: "UET Taxila Admissions 2025 — ECAT, Eligibility & Merit",
+    title: "UET Taxila Admissions 2025 - ECAT, Eligibility & Merit",
     description:
-      "How UET Taxila admissions work: the UET Taxila ECAT entry test, eligibility marks, the merit formula, merit lists, and required documents — explained with UET GPT.",
+      "How UET Taxila admissions work: the UET Taxila ECAT entry test, eligibility marks, the merit formula, merit lists, and required documents - explained with UET GPT.",
     url: `${siteUrl}/uet-taxila/admissions`,
     type: "website",
   },
@@ -38,11 +38,11 @@ const FAQ_ITEMS = [
   },
   {
     q: "What documents are required for UET Taxila admission?",
-    a: "Every applicant must submit an attested photocopy of their domicile certificate, without which the application is not considered. Documents attached with the Application Form (F-I) must be attested by a Class-I gazetted officer or a Class-A officer of the University. Depending on domicile and category, additional documents may be required — for example, a parent's domicile certificate and proof of inclusion in the electoral rolls for certain categories, or an IBCC equivalence certificate for A-Level and other foreign qualifications.",
+    a: "Every applicant must submit an attested photocopy of their domicile certificate, without which the application is not considered. Documents attached with the Application Form (F-I) must be attested by a Class-I gazetted officer or a Class-A officer of the University. Depending on domicile and category, additional documents may be required - for example, a parent's domicile certificate and proof of inclusion in the electoral rolls for certain categories, or an IBCC equivalence certificate for A-Level and other foreign qualifications.",
   },
   {
     q: "How can UET GPT help with UET Taxila admissions?",
-    a: "UET GPT is the AI guide to UET Taxila. It answers admissions questions grounded in the official UET Taxila prospectus — the ECAT entry test, eligibility marks for each program, how the merit formula works, expected merit ranges, seat categories, required documents, and deadlines — so prospective students can plan their application with accurate, sourced information. It is free for applicants, students, and faculty. Start on the UET GPT home page.",
+    a: "UET GPT is the AI guide to UET Taxila. It answers admissions questions grounded in the official UET Taxila prospectus - the ECAT entry test, eligibility marks for each program, how the merit formula works, expected merit ranges, seat categories, required documents, and deadlines - so prospective students can plan their application with accurate, sourced information. It is free for applicants, students, and faculty. Start on the UET GPT home page.",
   },
 ] as const;
 
@@ -106,7 +106,7 @@ export default function UetTaxilaAdmissionsPage() {
             </h1>
             <p className="text-lg text-[#a1a1aa] max-w-2xl mx-auto mb-8">
               A complete, source-grounded guide to undergraduate admissions at the University of
-              Engineering and Technology, Taxila — the entry test, who is eligible, how your merit
+              Engineering and Technology, Taxila - the entry test, who is eligible, how your merit
               is calculated, merit lists, and the documents you need. Brought to you by UET GPT.
             </p>
             <div className="flex items-center justify-center gap-4">
@@ -130,7 +130,7 @@ export default function UetTaxilaAdmissionsPage() {
               The UET Taxila Admission Process
             </h2>
             <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto">
-              From the entry test to the final merit list — what every undergraduate applicant goes
+              From the entry test to the final merit list - what every undergraduate applicant goes
               through
             </p>
             <ol className="space-y-4">
@@ -138,7 +138,7 @@ export default function UetTaxilaAdmissionsPage() {
                 <h3 className="font-semibold text-base mb-2">1. Appear in the ECAT entry test</h3>
                 <p className="text-sm text-[#a1a1aa]">
                   Before applying, candidates for engineering programs and BS Computer Science must
-                  appear in the ECAT (Engineering College Admission Test) — the combined entry test
+                  appear in the ECAT (Engineering College Admission Test) - the combined entry test
                   conducted by UET Lahore for Punjab, or another entry test for engineering programs
                   designated as acceptable to PEC and UET Taxila.
                 </p>
@@ -170,7 +170,7 @@ export default function UetTaxilaAdmissionsPage() {
                 <p className="text-sm text-[#a1a1aa]">
                   Selected candidates complete document verification and join their allotted
                   discipline and category. Admission can be frozen, transferred to a higher
-                  preference if a seat opens, or downgraded to a lower preference — each on the
+                  preference if a seat opens, or downgraded to a lower preference - each on the
                   prescribed form and subject to merit and seat availability.
                 </p>
               </li>
@@ -332,7 +332,7 @@ export default function UetTaxilaAdmissionsPage() {
                   Unfilled seats in reserved categories are moved to open-merit seats over the
                   admission cycle. Applicants may be transferred upward to a vacant higher
                   preference, or request a one-time downgrade, depending on merit and seat
-                  availability — or freeze their selected discipline and category in writing.
+                  availability - or freeze their selected discipline and category in writing.
                 </p>
               </div>
             </div>

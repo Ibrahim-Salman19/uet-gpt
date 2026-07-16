@@ -5,17 +5,17 @@
 
 ## Pipelines
 
-- **Primary: Python async BFS crawler** (`scripts/crawler.py`) — uses `curl_cffi`,
+- **Primary: Python async BFS crawler** (`scripts/crawler.py`) - uses `curl_cffi`,
   `trafilatura`, and `markdownify`; pushes extracted content to the `/ingest`
   webhook. This is the path that runs in production.
-- **Secondary (disabled): Crawl4AI** — an external Crawl4AI/Flask service posting
+- **Secondary (disabled): Crawl4AI** - an external Crawl4AI/Flask service posting
   to `/api/webhook/crawl`. The Crawl4AI cron is **DISABLED** (service unreachable),
   so treat it as optional/secondary.
 
 ## Scope
 
 Seed URLs and path scope are defined in `scripts/crawl_config.json` (the single
-source of truth — do not hard-code counts in prose). Primary target:
+source of truth - do not hard-code counts in prose). Primary target:
 `https://web.uettaxila.edu.pk/`.
 
 - Admission pages (programs, fee structures, schedules)

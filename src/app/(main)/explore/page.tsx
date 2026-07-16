@@ -151,7 +151,7 @@ export default function ExplorePage() {
     setDebounced(searchQuery);
   }, [searchQuery, setDebounced]);
 
-  // Pass category to backend when filtered — avoids the 50-doc client-side truncation bug
+  // Pass category to backend when filtered - avoids the 50-doc client-side truncation bug
   const category = activeCategory === "all" ? undefined : activeCategory;
   const trimmedQuery = debouncedQuery.trim();
   const isSearching = trimmedQuery.length > 0;

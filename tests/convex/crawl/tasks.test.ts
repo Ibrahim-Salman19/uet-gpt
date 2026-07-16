@@ -176,7 +176,7 @@ describe("cleanupExpiredCache", () => {
     // which should exclude non-expired entries. In our mock, all entries in the resultMap
     // are returned by collect/take. Since validEntry.expiresAt is in the future, the real
     // mutation would not return it via the index. We simulate this by not including it
-    // in the resultMap — the mock returns nothing to delete.
+    // in the resultMap - the mock returns nothing to delete.
     const db = createMockDb({ semanticCache: [], processedWebhooks: [] });
     const ctx = { db, auth: { getUserIdentity: vi.fn() } };
 

@@ -4,14 +4,14 @@ import Link from "next/link";
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
 export const metadata: Metadata = {
-  title: "UET GPT — AI Guide to UET Taxila",
+  title: "UET GPT - AI Guide to UET Taxila",
   description:
-    "UET GPT is the AI guide to UET Taxila, built for students of the University of Engineering and Technology, Taxila. Ask about admissions, ECAT, merit, fees, departments, and campus life — grounded in official UET Taxila data.",
+    "UET GPT is the AI guide to UET Taxila, built for students of the University of Engineering and Technology, Taxila. Ask about admissions, ECAT, merit, fees, departments, and campus life - grounded in official UET Taxila data.",
   alternates: {
     canonical: `${siteUrl}/uet-gpt`,
   },
   openGraph: {
-    title: "UET GPT — AI Guide to UET Taxila",
+    title: "UET GPT - AI Guide to UET Taxila",
     description:
       "UET GPT is the AI guide to UET Taxila, built for students of the University of Engineering and Technology, Taxila. Ask about admissions, ECAT, merit, fees, and campus life.",
     url: `${siteUrl}/uet-gpt`,
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 const FAQ_ITEMS = [
   {
     q: "What is UET GPT?",
-    a: "UET GPT is the AI guide to UET Taxila — an open-source chatbot built for the students, faculty, and prospective applicants of the University of Engineering and Technology, Taxila (UET Taxila) in Pakistan. It answers questions about admissions, ECAT, merit, fee structures, departments, faculty, hostels, transport, scholarships, and campus life using Retrieval-Augmented Generation over official university data. It is a student-built project and is not affiliated with, endorsed by, or operated by the official UET Taxila or the University of Engineering and Technology.",
+    a: "UET GPT is the AI guide to UET Taxila - an open-source chatbot built for the students, faculty, and prospective applicants of the University of Engineering and Technology, Taxila (UET Taxila) in Pakistan. It answers questions about admissions, ECAT, merit, fee structures, departments, faculty, hostels, transport, scholarships, and campus life using Retrieval-Augmented Generation over official university data. It is a student-built project and is not affiliated with, endorsed by, or operated by the official UET Taxila or the University of Engineering and Technology.",
   },
   {
     q: "Is UET GPT affiliated with the official UET Taxila or the University of Engineering and Technology?",
@@ -30,7 +30,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "How does UET GPT work?",
-    a: "UET GPT uses Retrieval-Augmented Generation (RAG). When you ask a question, it retrieves the most relevant passages from a curated knowledge base built from official UET Taxila sources — including admissions policies, fee schedules, department pages, and notices — and then generates a clear, sourced answer grounded in that retrieved content. This keeps answers accurate and reduces hallucination compared with a general-purpose model answering from memory.",
+    a: "UET GPT uses Retrieval-Augmented Generation (RAG). When you ask a question, it retrieves the most relevant passages from a curated knowledge base built from official UET Taxila sources - including admissions policies, fee schedules, department pages, and notices - and then generates a clear, sourced answer grounded in that retrieved content. This keeps answers accurate and reduces hallucination compared with a general-purpose model answering from memory.",
   },
   {
     q: "What can I ask UET GPT?",
@@ -156,7 +156,7 @@ export default function UetGptPage() {
                   faster, clearer access to UET Taxila information. It is not affiliated with,
                   endorsed by, or operated by the official University of Engineering and Technology,
                   Taxila. It is offered as a helpful companion that points you to the right official
-                  sources — never a replacement for them.
+                  sources - never a replacement for them.
                 </p>
               </div>
 
@@ -188,7 +188,7 @@ export default function UetGptPage() {
                   1. Curated knowledge from official sources
                 </h3>
                 <p className="text-sm text-[var(--text-secondary)] leading-relaxed font-sans">
-                  UET GPT builds its knowledge base from official UET Taxila material — admissions
+                  UET GPT builds its knowledge base from official UET Taxila material - admissions
                   policies, ECAT and merit guidance, fee schedules, department and faculty pages,
                   notices, and campus service information. Content is structured and indexed so the
                   right passage can be found quickly.
@@ -212,7 +212,7 @@ export default function UetGptPage() {
                   3. Clear, conversational answers
                 </h3>
                 <p className="text-sm text-[var(--text-secondary)] leading-relaxed font-sans">
-                  The result is a plain-language answer you can act on — and when a detail is not
+                  The result is a plain-language answer you can act on - and when a detail is not
                   covered by the official sources, UET GPT is designed to say so rather than invent
                   an answer. That honesty is central to how UET GPT is meant to be used.
                 </p>
@@ -233,7 +233,7 @@ export default function UetGptPage() {
                 },
                 {
                   title: "Fee Structure",
-                  desc: "Understand BS and MS fee breakdowns, hostel charges, and dues — grounded in official UET Taxila records.",
+                  desc: "Understand BS and MS fee breakdowns, hostel charges, and dues - grounded in official UET Taxila records.",
                 },
                 {
                   title: "Departments & Faculty",
@@ -249,7 +249,7 @@ export default function UetGptPage() {
                 },
                 {
                   title: "Open Source",
-                  desc: "UET GPT is open-source on GitHub at devhms/uet_gpt — read the code, report issues, or contribute.",
+                  desc: "UET GPT is open-source on GitHub at devhms/uet_gpt - read the code, report issues, or contribute.",
                 },
               ].map((f) => (
                 <div
@@ -315,8 +315,8 @@ export default function UetGptPage() {
                 the University of Engineering and Technology, Taxila, or any campus of the
                 University of Engineering and Technology. The name &quot;UET GPT&quot; refers
                 specifically to this open-source guide. It is not an official university portal, and
-                for binding, authoritative decisions — admissions results, fee deadlines, and
-                official notices — you should always consult the official UET Taxila channels. UET
+                for binding, authoritative decisions - admissions results, fee deadlines, and
+                official notices - you should always consult the official UET Taxila channels. UET
                 GPT is a helpful companion that points you to the right official sources.
               </p>
             </div>
@@ -351,7 +351,7 @@ export default function UetGptPage() {
                   Guide to UET Taxila
                 </h3>
                 <p className="text-sm text-[var(--text-secondary)] font-sans">
-                  Read the authoritative, AI-grounded guide to UET Taxila — its history, campuses,
+                  Read the authoritative, AI-grounded guide to UET Taxila - its history, campuses,
                   faculties, departments, and admissions.
                 </p>
               </Link>

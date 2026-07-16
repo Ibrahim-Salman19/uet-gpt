@@ -85,7 +85,7 @@ function makeCtx(opts: { identity: Identity | null; user: UserRow | null; thread
 const handler = <A>(fn: unknown) =>
   (fn as { handler: (ctx: unknown, args: A) => Promise<unknown> }).handler;
 
-describe("threads api — authorization & ownership", () => {
+describe("threads api - authorization & ownership", () => {
   it("create rejects when there is no authenticated identity", async () => {
     const { ctx } = makeCtx({ identity: null, user: null });
     await expect(handler(create)(ctx, { title: "Test" })).rejects.toThrow(/auth/i);

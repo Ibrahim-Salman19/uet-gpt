@@ -112,7 +112,7 @@ describe("AdminFeedbackPage", () => {
       vi.mocked(useQuery).mockReturnValue([]);
       render(<AdminFeedbackPage />);
 
-      // Multiple "0" values exist (total, positive, negative) — getAllByText
+      // Multiple "0" values exist (total, positive, negative) - getAllByText
       const zeros = screen.getAllByText("0");
       expect(zeros.length).toBeGreaterThanOrEqual(1);
     });
@@ -129,7 +129,7 @@ describe("AdminFeedbackPage", () => {
       vi.mocked(useQuery).mockReturnValue(allPositive);
       render(<AdminFeedbackPage />);
 
-      // Both total and positive count show "5" — use getAllByText
+      // Both total and positive count show "5" - use getAllByText
       const fives = screen.getAllByText("5");
       expect(fives.length).toBe(2); // total card + positive card
     });

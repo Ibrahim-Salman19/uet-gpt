@@ -9,7 +9,7 @@ import { EMBEDDING_DIMENSION } from "../../convex/embeddings/dimension";
  * re-embed. The value 768 is duplicated as a numeric literal in schema.ts
  * (vectorIndex dimensions cannot import a runtime constant) and used in
  * generate.ts. This test asserts all three sites agree and that the value stays
- * 768 — catching an accidental divergence before it ships.
+ * 768 - catching an accidental divergence before it ships.
  */
 describe("embedding dimension consistency", () => {
   it("exports 768 (gemini-embedding-2 fixed dimension)", () => {

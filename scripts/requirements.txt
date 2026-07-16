@@ -2,7 +2,7 @@
 # environment are pinned to exact (==) versions; packages not present in that
 # environment are bounded with compatible-release (~=) on their known-good floor.
 # A fully hashed lockfile (pip-tools/uv, --require-hashes) is still recommended
-# — see owner_actions.
+# - see owner_actions.
 curl_cffi~=0.7.0
 trafilatura~=1.6.0
 beautifulsoup4==4.14.2

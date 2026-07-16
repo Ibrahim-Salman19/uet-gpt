@@ -48,7 +48,7 @@ interface PreferencesContextType {
   removePin: (id: string) => void;
   isPinned: (query: string) => boolean;
 
-  // Voice transcript callback — set by active ChatInput to receive voice text
+  // Voice transcript callback - set by active ChatInput to receive voice text
   voiceTranscriptCallback: ((text: string) => void) | null;
   setVoiceTranscriptCallback: (fn: ((text: string) => void) | null) => void;
 
@@ -133,7 +133,7 @@ function safeSetItem(key: string, value: string): void {
   try {
     localStorage.setItem(key, value);
   } catch (err) {
-    // Private mode / quota exceeded — persistence is best-effort.
+    // Private mode / quota exceeded - persistence is best-effort.
     console.error(`Failed to persist "${key}":`, err);
   }
 }

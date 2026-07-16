@@ -360,7 +360,7 @@ export type ParentChunk = {
 };
 
 // A child chunk. Carries parentContentHash (resolved to parentId by the caller
-// mutation after the parent is upserted) instead of the full parentText — this
+// mutation after the parent is upserted) instead of the full parentText - this
 // removes the previous K× duplication of parent text across siblings.
 export type ChildChunk = {
   text: string;

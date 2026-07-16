@@ -47,7 +47,7 @@ function createDbQueryResult(result: any) {
 
   const chain: any = {};
 
-  // withIndex may receive a constraint builder function — we call it with a spy
+  // withIndex may receive a constraint builder function - we call it with a spy
   // that captures eq("status", X) calls to enable status-based filtering.
   chain.withIndex = vi.fn((_indexName: string, constraintFn?: Function) => {
     if (constraintFn) {
@@ -371,7 +371,7 @@ describe("queueChunksForEmbedding", () => {
     // enqueueActionBatch called once with only the new chunk (hash-c3)
     expect(embeddingPoolModule.embeddingPool.enqueueActionBatch).toHaveBeenCalledTimes(1);
     const enqueuedArgs = embeddingPoolModule.embeddingPool.enqueueActionBatch.mock.calls[0];
-    // enqueuedArgs[2] is the argsArray passed to enqueueActionBatch — check the first item's contentHash
+    // enqueuedArgs[2] is the argsArray passed to enqueueActionBatch - check the first item's contentHash
     expect(enqueuedArgs[2][0].contentHash).toBe("hash-c3");
   });
 
@@ -631,7 +631,7 @@ describe("upsertDocument", () => {
       contentHash: "new-hash-graceful",
     });
 
-    // When rag.delete fails, we catch the error and continue — the operation still returns "updated"
+    // When rag.delete fails, we catch the error and continue - the operation still returns "updated"
     // db.delete is NOT called because it's inside the try block after rag.delete
     expect(result.action).toBe("updated");
     expect(db.delete).not.toHaveBeenCalled();

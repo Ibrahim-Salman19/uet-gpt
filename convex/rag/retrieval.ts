@@ -14,7 +14,7 @@ function scanForInjection(query: string): string {
     );
   }
   if (INJECTION_RE.test(query)) {
-    console.warn("[SECURITY] Injection pattern detected in query — request blocked.");
+    console.warn("[SECURITY] Injection pattern detected in query - request blocked.");
     throw new ConvexError(
       "Your query contains patterns that cannot be processed. Please rephrase your question.",
     );
@@ -32,7 +32,7 @@ function determineConfidenceTier(results: { relevanceScore: number }[]): {
       instruction:
         "SYSTEM INSTRUCTION TO AI: No relevant information was found for this query. " +
         "You MUST respond exactly with: " +
-        "'I don't have verified information about this — please check uettaxila.edu.pk directly.' " +
+        "'I don't have verified information about this - please check uettaxila.edu.pk directly.' " +
         "Do not attempt to guess or hallucinate an answer.\n\n",
     };
   }
@@ -40,9 +40,9 @@ function determineConfidenceTier(results: { relevanceScore: number }[]): {
 
   if (topScore < 0.2) {
     // We DID retrieve content here (results is non-empty); only the top reranker score
-    // is very low. Reranker scores are NOT calibrated across the cascade tiers — the
+    // is very low. Reranker scores are NOT calibrated across the cascade tiers - the
     // word-overlap fallback and RRF fusion produce low numbers even for genuinely good
-    // matches — so a low score does NOT reliably mean "irrelevant". The CRAG relevance
+    // matches - so a low score does NOT reliably mean "irrelevant". The CRAG relevance
     // judge is the authoritative irrelevance gate (and it is not skipped at low scores).
     // Therefore HEDGE (answer strictly from context, with a strong qualifier) instead of
     // hard-refusing, so the bot stops replying "I don't have verified information" when it
@@ -52,10 +52,10 @@ function determineConfidenceTier(results: { relevanceScore: number }[]): {
       instruction:
         "SYSTEM INSTRUCTION TO AI: The retrieved documents have low confidence scores. " +
         "Answer ONLY from the provided context. Prefix your answer with " +
-        "'Based on limited information available — ' and end with " +
+        "'Based on limited information available - ' and end with " +
         "'For authoritative details, please verify at uettaxila.edu.pk.' " +
         "If the provided context genuinely does not contain the answer, respond exactly with: " +
-        "'I don't have verified information about this — please check uettaxila.edu.pk directly.' " +
+        "'I don't have verified information about this - please check uettaxila.edu.pk directly.' " +
         "Never invent facts beyond the provided context.\n\n",
     };
   }
@@ -64,7 +64,7 @@ function determineConfidenceTier(results: { relevanceScore: number }[]): {
       tier: "hedge",
       instruction:
         "SYSTEM INSTRUCTION TO AI: Retrieved documents have low relevance (score 0.20–0.40). " +
-        "You MUST prefix your answer with: 'Based on limited information available — ' " +
+        "You MUST prefix your answer with: 'Based on limited information available - ' " +
         "and end with: 'For authoritative details, please verify at uettaxila.edu.pk.' " +
         "Do not present uncertain information as fact.\n\n",
     };
@@ -404,7 +404,7 @@ async function buildResponseContext(
   }
 
   if (overrideTier === "refuse") {
-    // CRAG judged the chunks irrelevant — use the genuine empty-retrieval refuse
+    // CRAG judged the chunks irrelevant - use the genuine empty-retrieval refuse
     // instruction (determineConfidenceTier no longer hard-refuses on a low score alone).
     const { instruction } = determineConfidenceTier([]);
     if (instruction) context = instruction + context;

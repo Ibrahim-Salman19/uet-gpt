@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
-const title = `${APP_NAME} — ${APP_TAGLINE}`;
+const title = `${APP_NAME} - ${APP_TAGLINE}`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

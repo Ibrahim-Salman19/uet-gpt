@@ -86,7 +86,7 @@ export async function runLoadTest(config: LoadTestConfig): Promise<void> {
   const { convexSiteUrl, webhookSecret, safeMode = false } = config;
 
   if (safeMode) {
-    console.log("Running in SAFE MODE — no real HTTP calls will be made");
+    console.log("Running in SAFE MODE - no real HTTP calls will be made");
     const originalFetch = globalThis.fetch;
     globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
       console.log(`  [MOCK] ${init?.method ?? "GET"} ${input}`);

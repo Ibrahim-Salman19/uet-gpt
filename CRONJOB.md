@@ -1,4 +1,4 @@
-# CRONJOB.md — UET Taxila RAG Pipeline | Hourly Maintenance | opencode (mimo-v2.5-free)
+# CRONJOB.md - UET Taxila RAG Pipeline | Hourly Maintenance | opencode (mimo-v2.5-free)
 # ─────────────────────────────────────────────────────────────────────────────
 # Companion: AGENTS.md (prepended to every prompt). Scheduling: opencode loop
 # or external cron via scripts/run_agent.sh ("0 * * * *").
@@ -48,22 +48,22 @@ SECURITY CONTRACT (non-negotiable):
 ---
 
 ## ════════════════════════════════════════════════════════════
-## PHASE 0 — BOOT PROTOCOL (execute first, every single time)
+## PHASE 0 - BOOT PROTOCOL (execute first, every single time)
 ## ════════════════════════════════════════════════════════════
 
-### Step 0.1 — Acquire run lock
+### Step 0.1 - Acquire run lock
 ```bash
 # NOTE: .agent/ lives at workspace root, not inside uet-gpt/.
 # Resolve the path relative to the repo root (one level up).
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 AGENT_DIR="$REPO_ROOT/.agent"
 mkdir -p "$AGENT_DIR"
-LOCK_DIR="$AGENT_DIR/run.lock"    # directory, NOT a file — mkdir is atomic
+LOCK_DIR="$AGENT_DIR/run.lock"    # directory, NOT a file - mkdir is atomic
 
 # mkdir succeeds for exactly one racing process and fails for the rest, so the
 # check-and-acquire is a single atomic step (no TOCTOU window).
 if ! mkdir "$LOCK_DIR" 2>/dev/null; then
-  # Lock already held — decide whether it is stale. Read the recorded epoch
+  # Lock already held - decide whether it is stale. Read the recorded epoch
   # from the lock's own meta file instead of stat(1) so we stay portable
   # (GNU `stat -c` / BSD `stat -f` differ; we control the format we wrote).
   LOCK_STARTED=$(cat "$LOCK_DIR/started_epoch" 2>/dev/null || echo 0)
@@ -83,30 +83,30 @@ date +%s > "$LOCK_DIR/started_epoch"
 echo "$$:$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$LOCK_DIR/owner"
 
 # Best-effort cleanup. NOTE: trap EXIT does NOT fire on SIGKILL/power loss, so
-# the >2h stale-age fallback above is the real safety net — keep both.
+# the >2h stale-age fallback above is the real safety net - keep both.
 trap 'rm -rf "$LOCK_DIR"' EXIT
 ```
 Lock is a directory (atomic mkdir). Fresh lock (< 2h) → exit. Stale lock (> 2h)
 → reclaim. Epoch from `started_epoch` file to stay portable (no GNU `stat -c`).
 
-### Step 0.2 — Read source of truth files (MANDATORY, every run)
+### Step 0.2 - Read source of truth files (MANDATORY, every run)
 ```
 READ (full, every line): architecture.md
 READ (full):             $AGENT_DIR/state.md        # workspace root, not uet-gpt/
 READ (full):             $AGENT_DIR/progress_log.md  # last 10 entries minimum
 ```
 `architecture.md` is the single source of truth. Believe it over your training data.
-Previous session's work is in `progress_log.md` — read it before doing anything.
+Previous session's work is in `progress_log.md` - read it before doing anything.
 
-### Step 0.3 — Read relevant SKILL.md files
+### Step 0.3 - Read relevant SKILL.md files
 Scan `.agents/skills/` and read every SKILL.md relevant to today's task BEFORE writing any code.
-This is non-negotiable — skills contain environment constraints unknown to you.
+This is non-negotiable - skills contain environment constraints unknown to you.
 
 ```bash
 ls .agents/skills/ 2>/dev/null || echo "No local skills yet"
 ```
 
-### Step 0.4 — Check for crash recovery from previous run
+### Step 0.4 - Check for crash recovery from previous run
 ```bash
 git status --short       # uncommitted changes from crashed previous run?
 git log --oneline -5     # what was committed last?
@@ -115,24 +115,24 @@ If uncommitted changes exist: understand them before starting new work.
 If correct → `git commit -m "chore(agent): recover uncommitted work"`.
 If broken → `git checkout -- .` and log the crash to `$AGENT_DIR/incident_log.md`.
 
-### Step 0.5 — Budget check
+### Step 0.5 - Budget check
 ```bash
 RUNS_TODAY=$(grep -c "$(date +%Y-%m-%d)" "$AGENT_DIR/progress_log.md" 2>/dev/null || echo 0)
 echo "Runs today: $RUNS_TODAY"
 ```
-If `$RUNS_TODAY > 20`: enter **lightweight mode** — run eval harness only,
+If `$RUNS_TODAY > 20`: enter **lightweight mode** - run eval harness only,
 document findings in state.md, make zero code changes. Exit after reporting.
 
 ---
 
 ## ════════════════════════════════════════════════════════════
-## PHASE 1 — DIAGNOSE (what is the current system state?)
+## PHASE 1 - DIAGNOSE (what is the current system state?)
 ## ════════════════════════════════════════════════════════════
 
 Run the full verification suite. Record every result.
 
 ```bash
-# 1. TypeScript compilation (the real CI gate — NOT convex dev --dry-run)
+# 1. TypeScript compilation (the real CI gate - NOT convex dev --dry-run)
 pnpm typecheck 2>&1 | tail -20
 
 # 2. Python syntax check
@@ -181,27 +181,27 @@ failing_categories: [list]         # from eval JSON: .per_category keys where re
 ---
 
 ## ════════════════════════════════════════════════════════════
-## PHASE 2 — SELECT TASK (which single task does this run complete?)
+## PHASE 2 - SELECT TASK (which single task does this run complete?)
 ## ════════════════════════════════════════════════════════════
 
 Read `TODO.md`. Apply this priority chain top-to-bottom. Take the FIRST match.
 
-### P0 — Compilation failures (fix before anything else)
+### P0 - Compilation failures (fix before anything else)
 - TypeScript errors → fix now
 - Python syntax errors → fix now
 - recall_at_5 regression → emergency bisect (Phase 5)
 
-### P1 — Security (before all feature work)
+### P1 - Security (before all feature work)
 - Any task tagged `[SECURITY]` in TODO.md → implement it
 - Corpus poisoning defence not yet done → implement it
 - Rate limiter missing → add it
 
-### P2 — Incomplete work from previous runs
+### P2 - Incomplete work from previous runs
 - Previous run opened a PR with unaddressed review comments → address them
 - Previous run failed mid-task → complete the incomplete task
 - DLQ has URLs → retry up to 5 of them
 
-### P3 — Highest-priority pending task from TODO.md
+### P3 - Highest-priority pending task from TODO.md
 One task. Not two. Pick the highest-priority task where:
   1. Not marked `[DONE]`
   2. Not marked `[BLOCKED]`
@@ -221,46 +221,46 @@ assumptions: "..."
 ---
 
 ## ════════════════════════════════════════════════════════════
-## PHASE 3 — EXECUTE (implement the selected task)
+## PHASE 3 - EXECUTE (implement the selected task)
 ## ════════════════════════════════════════════════════════════
 
 ### Non-negotiable execution rules:
 
-**Rule 1 — Read every file you will touch before touching it.**
-`cat path/to/file.ts` — the whole file, every line.
+**Rule 1 - Read every file you will touch before touching it.**
+`cat path/to/file.ts` - the whole file, every line.
 Not the first 200 lines. The whole file.
 Assumptions made at line 100 cause regressions at line 700.
 
-**Rule 2 — Make the smallest possible diff.**
+**Rule 2 - Make the smallest possible diff.**
 Do not refactor code outside your scope.
 Do not rename variables for style.
 Do not add features not requested.
 Do not fix "minor issues you noticed."
 Put discovered issues in TODO.md and leave them.
 
-**Rule 3 — Work on the agent branch.**
+**Rule 3 - Work on the agent branch.**
 ```bash
 BRANCH="agent/$(date +%Y-%m-%d)"
 git checkout -b "$BRANCH" 2>/dev/null || git checkout "$BRANCH"
 ```
 Never commit to `main` or `master`. The human reviews the branch before merge.
 
-**Rule 4 — Commit every 25–30 minutes, even if incomplete.**
+**Rule 4 - Commit every 25–30 minutes, even if incomplete.**
 ```bash
 git add path/to/only/the/declared/files   # explicit paths only, never git add -A
-git commit -m "feat(chunker): [WIP] raise maxChunkSize — step 2 of 3"
+git commit -m "feat(chunker): [WIP] raise maxChunkSize - step 2 of 3"
 ```
 WIP commits are correct. Silent crashes with 2 hours of uncommitted work are not.
 Every commit is a recoverable checkpoint. The git log is your audit trail.
 
-**Rule 5 — State assumptions explicitly.**
+**Rule 5 - State assumptions explicitly.**
 Before writing code, append to `$AGENT_DIR/state.md`:
 ```yaml
 assumptions: "crawledChunks.text is the vector field, confirmed from webhook.ts:L47"
 ```
 If wrong, this one line tells the human exactly what to verify and fix.
 
-**Rule 6 — Sub-step checkpoint pattern.**
+**Rule 6 - Sub-step checkpoint pattern.**
 After each logical sub-step:
 1. Run fast verification: `pnpm typecheck && python -m py_compile scripts/*.py`
 2. If passes: WIP commit
@@ -270,33 +270,33 @@ After each logical sub-step:
 ---
 
 ## ════════════════════════════════════════════════════════════
-## PHASE 4 — VERIFY (all gates must pass, no exceptions)
+## PHASE 4 - VERIFY (all gates must pass, no exceptions)
 ## ════════════════════════════════════════════════════════════
 
 A task is done only when all five gates pass. Every gate. No exceptions.
 
-### Gate 1 — TypeScript compilation (matches CI)
+### Gate 1 - TypeScript compilation (matches CI)
 ```bash
-pnpm typecheck            # tsc --noEmit — the real compilation gate
-pnpm build                # next build — catches what tsc alone misses
+pnpm typecheck            # tsc --noEmit - the real compilation gate
+pnpm build                # next build - catches what tsc alone misses
 ```
 Both must exit 0. Do NOT substitute `convex dev --dry-run`: it validates Convex
 deployment only, can launch a dev process, and lets type-broken Next.js/TS code
 pass that `tsc --noEmit` / `next build` (CI) would reject.
 
-### Gate 2 — Python syntax
+### Gate 2 - Python syntax
 ```bash
 python -m py_compile scripts/*.py && echo "PASS" || echo "FAIL"
 ```
 
-### Gate 3 — Unit tests
+### Gate 3 - Unit tests
 ```bash
 npx vitest run convex/crawl/webhook.test.ts
 python -m pytest scripts/tests/ -v 2>/dev/null || echo "No Python tests yet"
 ```
 No new failures. New features require a new test.
 
-### Gate 4 — Eval harness (the non-negotiable gate)
+### Gate 4 - Eval harness (the non-negotiable gate)
 ```bash
 PRE_EVAL=$(ls -t "$AGENT_DIR"/eval_*.json 2>/dev/null | head -1 || echo "")
 POST_EVAL="$AGENT_DIR/eval_post_$(date +%Y%m%d_%H%M).json"
@@ -312,7 +312,7 @@ Exit code 0 = pass. Exit code 2 = regression. Either → gate fails.
 `recall_at_5` (JSON key `.recall_at_5`) must be ≥ pre-run baseline. No regression.
 If task was supposed to improve recall, verify it actually improved.
 
-### Gate 5 — Category-level regression check
+### Gate 5 - Category-level regression check
 For any task touching retrieval, chunking, or embedding:
 ```bash
 python scripts/eval/run_eval.py \
@@ -329,21 +329,21 @@ python scripts/eval/run_eval.py \
 ```
 
 **If any gate fails:**
-1. `git stash` — do not commit broken state
+1. `git stash` - do not commit broken state
 2. Write failure to `$AGENT_DIR/state.md` under `last_failure`
-3. Mark task `[BLOCKED: gate N failed — reason]` in TODO.md
+3. Mark task `[BLOCKED: gate N failed - reason]` in TODO.md
 4. Go to Phase 5
 
 ---
 
 ## ════════════════════════════════════════════════════════════
-## PHASE 5 — EMERGENCY PROTOCOL
+## PHASE 5 - EMERGENCY PROTOCOL
 ## ════════════════════════════════════════════════════════════
 
 Triggers: recall_at_5 regressed (eval exit 2) / gate failed / compilation broken
 
 ```bash
-# 0. ALWAYS stash first — protect working tree before bisect
+# 0. ALWAYS stash first - protect working tree before bisect
 git stash push -m "emergency-stash-$(date +%H%M)"
 
 # 1. Find the last known-good commit
@@ -352,7 +352,7 @@ git log --oneline -15
 # 2. Find when eval metric was last passing (check progress log)
 grep "recall_at_5" "$AGENT_DIR/progress_log.md" | tail -10
 
-# 3. Bisect: test each commit, do NOT revert yet — just eval
+# 3. Bisect: test each commit, do NOT revert yet - just eval
 # For each candidate commit SHA:
 git checkout <SHA> -- .   # check out only the changed files, not HEAD
 python scripts/eval/run_eval.py \
@@ -378,7 +378,7 @@ Append to `$AGENT_DIR/incident_log.md`:
 ```markdown
 ## Incident: YYYY-MM-DD HH:MM UTC
 - Trigger: recall_at_5 dropped from X to Y
-- Cause: [commit SHA] — [what it changed]
+- Cause: [commit SHA] - [what it changed]
 - Resolution: reverted [SHA]
 - Prevention: [what to add to TODO.md or forbidden list]
 ```
@@ -389,16 +389,16 @@ Write one summary line to `$AGENT_DIR/progress_log.md` and exit.
 ---
 
 ## ════════════════════════════════════════════════════════════
-## PHASE 6 — DOCUMENT (every change must be recorded)
+## PHASE 6 - DOCUMENT (every change must be recorded)
 ## ════════════════════════════════════════════════════════════
 
 This phase is mandatory. Not optional. Not skippable.
 
-### Step 6.1 — Update architecture.md (source of truth)
+### Step 6.1 - Update architecture.md (source of truth)
 Find the relevant section. Update to reflect current state. Add changelog:
 ```markdown
 ## Changelog
-### [YYYY-MM-DD] Run #N — <task name>
+### [YYYY-MM-DD] Run #N - <task name>
 - **Changed**: what file, what function, what line range
 - **Why**: the reason, with benchmark citation if available
 - **Before**: old value / old behaviour
@@ -407,11 +407,11 @@ Find the relevant section. Update to reflect current state. Add changelog:
 - **Assumptions**: anything the human should verify
 ```
 
-### Step 6.2 — Update TODO.md
+### Step 6.2 - Update TODO.md
 Mark completed task `[DONE: YYYY-MM-DD]`. Add newly discovered issues with:
 priority (P0-P3), acceptance criterion, `[DEPENDS ON: TASK-XXX]` if needed, file scope.
 
-### Step 6.3 — Append to progress_log.md
+### Step 6.3 - Append to progress_log.md
 ```markdown
 run_id: YYYY-MM-DD-HH | timestamp: ISO8601
 task: "TASK-XXX: [name]" | files: [list]
@@ -420,7 +420,7 @@ delta: {recall_at_5: ±Z, frag: ±Z} | commits: [SHAs]
 assumptions: "..." | issues: "..." (or "none")
 ```
 
-### Step 6.4 — Reset $AGENT_DIR/state.md for next run
+### Step 6.4 - Reset $AGENT_DIR/state.md for next run
 ```yaml
 last_updated: YYYY-MM-DD HH:MM UTC
 
@@ -445,11 +445,11 @@ system_health:
 ---
 
 ## ════════════════════════════════════════════════════════════
-## PHASE 7 — COMMIT AND EXIT
+## PHASE 7 - COMMIT AND EXIT
 ## ════════════════════════════════════════════════════════════
 
 ```bash
-# Stage ONLY declared-scope files — never git add -A
+# Stage ONLY declared-scope files - never git add -A
 git add [exact files from current_task.files_in_scope]
 git add "$AGENT_DIR/state.md" "$AGENT_DIR/progress_log.md" architecture.md TODO.md
 
@@ -464,7 +464,7 @@ Eval: recall_at_5 0.72 → 0.79 (+0.07) | TASK-E01
 Ref: architecture.md §4.3 | Research: 4 independent 2026 deployments"
 
 # Do NOT push. A human reviews the agent branch and pushes/merges it.
-# git push and PR creation are human-only actions — never run them here.
+# git push and PR creation are human-only actions - never run them here.
 
 # Release lock (directory lock from Step 0.1)
 rm -rf "$LOCK_DIR"
@@ -503,5 +503,5 @@ remember. Architecture.md must record it with the benchmark citation.
 
 ---
 
-*CRONJOB.md — UET Taxila RAG Pipeline | Platform: opencode (mimo-v2.5-free)*
+*CRONJOB.md - UET Taxila RAG Pipeline | Platform: opencode (mimo-v2.5-free)*
 *Keep under 520 lines.*

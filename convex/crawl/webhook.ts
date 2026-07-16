@@ -90,7 +90,7 @@ function logCompletionAlert(
 function handleStateChange(request: Request): Response | null {
   const isStateChange = new URL(request.url).searchParams.get("type") === "state";
   if (isStateChange) {
-    console.log("State change notification received — acknowledging without processing.");
+    console.log("State change notification received - acknowledging without processing.");
     return new Response(JSON.stringify({ ok: true, state: true }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
@@ -471,7 +471,7 @@ async function parseAndValidateIngestRequest(
   const expectedToken = process.env.CONVEX_AUTH_TOKEN;
 
   if (!expectedToken) {
-    console.error("/ingest misconfigured: CONVEX_AUTH_TOKEN not set — rejecting all requests");
+    console.error("/ingest misconfigured: CONVEX_AUTH_TOKEN not set - rejecting all requests");
     return new Response("Server configuration error", { status: 500 });
   }
 

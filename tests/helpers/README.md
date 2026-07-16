@@ -2,10 +2,10 @@
 
 ## Why `_handler` is an Anti-Pattern
 
-Convex functions (`query`, `mutation`, `action`) wrap your implementation in an internal object. Accessing the private `_handler` property is fragile — it depends on Convex internals that could change between versions.
+Convex functions (`query`, `mutation`, `action`) wrap your implementation in an internal object. Accessing the private `_handler` property is fragile - it depends on Convex internals that could change between versions.
 
 ```ts
-// ❌ ANTI-PATTERN — fragile, relies on private internals
+// ❌ ANTI-PATTERN - fragile, relies on private internals
 const result = await (myAction as unknown as {
   _handler: (ctx: MockCtx, args: MyArgs) => Promise<MyResult>;
 })._handler(mockCtx, args);

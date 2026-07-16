@@ -6,16 +6,16 @@
 
 ## Stages
 
-1. **Intent Classification** — Is the query on-topic (UET)?
-2. **Query Rewriting** — Expand/refine the query for better retrieval
-3. **HyDE** — Generate hypothetical document to improve embedding similarity
-4. **Embedding** — Convert query → vector via the resilient Gemini embedding model
+1. **Intent Classification** - Is the query on-topic (UET)?
+2. **Query Rewriting** - Expand/refine the query for better retrieval
+3. **HyDE** - Generate hypothetical document to improve embedding similarity
+4. **Embedding** - Convert query → vector via the resilient Gemini embedding model
    (`gemini-embedding-2`, 768-d; multi-key rotation with 3x retry + exponential backoff)
-5. **Semantic Cache** — Check for exact/similar previous queries (cosine threshold)
-6. **Hybrid Search** — Vector search + full-text (BM25) → RRF fusion (k=60) + freshness decay + FAQ boost
-7. **Context Assembly** — Sandwich strategy (high relevance → medium → low)
-8. **LLM Generation** — Stream response via the fallback chain (Groq → Cerebras → Groq → Gemini)
-9. **Cache Update** — Store response in the semantic cache (tiered TTL)
+5. **Semantic Cache** - Check for exact/similar previous queries (cosine threshold)
+6. **Hybrid Search** - Vector search + full-text (BM25) → RRF fusion (k=60) + freshness decay + FAQ boost
+7. **Context Assembly** - Sandwich strategy (high relevance → medium → low)
+8. **LLM Generation** - Stream response via the fallback chain (Groq → Cerebras → Groq → Gemini)
+9. **Cache Update** - Store response in the semantic cache (tiered TTL)
 
 ## Fallback Chain
 

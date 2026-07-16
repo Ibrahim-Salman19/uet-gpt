@@ -487,7 +487,7 @@ describe("documentValidator", () => {
       expect(j.value.url.fieldType.minLength).toBeUndefined();
       expect(j.value.url.fieldType.maxLength).toBeUndefined();
       expect(j.value.url.fieldType.pattern).toBeUndefined();
-      // A malformed URL would pass string validation — valid but worth documenting
+      // A malformed URL would pass string validation - valid but worth documenting
     });
 
     it("title string has no constraints", () => {

@@ -6,9 +6,9 @@ Source: https://web.uettaxila.edu.pk/robots.txt
 
 - **Standard robot exclusion rules:** None found. No `User-agent`, `Disallow`, or `Allow` directives exist.
 - **Content signals present:** The file exclusively contains content-signal directives (search, ai-input, ai-train), each defaulting to no explicit permission (neither grants nor restricts).
-  - `search:` — not explicitly set (neither yes nor no)
-  - `ai-input:` — not explicitly set
-  - `ai-train:` — not explicitly set
+  - `search:` - not explicitly set (neither yes nor no)
+  - `ai-input:` - not explicitly set
+  - `ai-train:` - not explicitly set
 - **Format:** Uses the emerging content-signal standard for AI/data collection permissions.
 - The absence of `Disallow` directives means standard crawlers (Googlebot, Bingbot, etc.) are implicitly allowed to crawl the entire domain under standard protocol.
 

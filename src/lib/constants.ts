@@ -3,7 +3,7 @@ export const UET_CRAWL_CONFIG = {
   seedUrls: [
     "https://web.uettaxila.edu.pk/",
     // Admissions content (fees, procedure, schedule, seats, merit lists) lives on
-    // this SEPARATE subdomain — must be seeded or it is never crawled.
+    // this SEPARATE subdomain - must be seeded or it is never crawled.
     "https://admissions.uettaxila.edu.pk/",
     "https://admissions.uettaxila.edu.pk/Fees.php",
     "https://admissions.uettaxila.edu.pk/ProcedureAndRequirements.php",
@@ -69,7 +69,7 @@ export const UET_CRAWL_CONFIG = {
 export const APP_NAME = "UET GPT";
 export const APP_TAGLINE = "Your AI Guide to UET Taxila";
 export const APP_DESCRIPTION =
-  "UET GPT is an intelligent AI assistant that answers any question about UET Taxila — admissions, fee structure, academic programs, departments, faculty, campus life, transport, hostels, scholarships, and more. Powered by RAG and official university data.";
+  "UET GPT is an intelligent AI assistant that answers any question about UET Taxila - admissions, fee structure, academic programs, departments, faculty, campus life, transport, hostels, scholarships, and more. Powered by RAG and official university data.";
 export const APP_KEYWORDS = [
   "UET",
   "UET Taxila",

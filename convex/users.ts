@@ -207,7 +207,7 @@ export const upsertFromWebhook = internalMutation({
       .unique();
 
     if (existing) {
-      // Webhook only syncs identity fields — role is never touched here
+      // Webhook only syncs identity fields - role is never touched here
       await ctx.db.patch(existing._id, {
         name: args.name,
         email: args.email,

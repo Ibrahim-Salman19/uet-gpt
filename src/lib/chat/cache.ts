@@ -68,7 +68,7 @@ export function buildCacheWriteCallback(
     const secret = process.env.INTERNAL_API_SECRET;
     if (!secret) {
       console.error(
-        "INTERNAL_API_SECRET is not set — skipping semantic cache write (server-trust required).",
+        "INTERNAL_API_SECRET is not set - skipping semantic cache write (server-trust required).",
       );
       return;
     }

@@ -4,7 +4,7 @@ import { uetClerkAppearance } from "@/lib/clerk-theme";
 import { APP_NAME } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: `Sign In — ${APP_NAME}`,
+  title: `Sign In - ${APP_NAME}`,
   description: "Sign in to UET GPT, your AI guide to UET Taxila.",
   robots: { index: false, follow: true },
 };

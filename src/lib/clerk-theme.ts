@@ -1,5 +1,5 @@
 // Safe Clerk appearance: only plain CSS properties (no &:hover / &:focus
-// pseudo-selector nesting — those throw at runtime in Clerk v7 SSR).
+// pseudo-selector nesting - those throw at runtime in Clerk v7 SSR).
 // Hover/focus states are handled by Clerk's built-in colorPrimary theming.
 export const uetClerkAppearance = {
   variables: {

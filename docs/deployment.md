@@ -8,7 +8,7 @@
 - **Frontend:** Vercel (Next.js standalone output)
 - **Backend:** Convex (cloud-hosted)
 - **Crawler:** Python async BFS crawler (`scripts/crawler.py`), run out-of-band
-  (Crawl4AI is secondary and currently disabled — see `docs/crawling-strategy.md`)
+  (Crawl4AI is secondary and currently disabled - see `docs/crawling-strategy.md`)
 - **AI Providers:** Groq, Google Gemini, Cerebras (third-party APIs)
 
 ## Environment Variables
@@ -45,5 +45,5 @@ UPSTASH_REDIS_REST_TOKEN=
 - [ ] Add Vercel configuration in `.vercel/project.json`
 - [ ] Configure Convex CI/CD deployment
 - [ ] Add a health check endpoint to the deploy verification
-- [ ] Set up monitoring (errors, latency, costs) — Sentry is wired (architecture.md §2)
+- [ ] Set up monitoring (errors, latency, costs) - Sentry is wired (architecture.md §2)
 - [ ] Document rollback procedure

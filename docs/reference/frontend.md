@@ -31,14 +31,14 @@
 
 | If you want to… | Jump to |
 | --- | --- |
-| Add a new page | §3 (App Router) — copy an existing pattern |
-| Add a new API route | §4 (Route Handlers) — copy a protected or webhook route |
-| Add a new client component | §5 (Components) — read providers.tsx first |
-| Add a new hook | §6 (Hooks) — keep server/client boundaries clean |
-| Add a new lib helper | §7 (Lib) — decide server vs client vs mixed |
-| Change auth/redirect rules | §8 (Middleware) — public matcher list |
+| Add a new page | §3 (App Router) - copy an existing pattern |
+| Add a new API route | §4 (Route Handlers) - copy a protected or webhook route |
+| Add a new client component | §5 (Components) - read providers.tsx first |
+| Add a new hook | §6 (Hooks) - keep server/client boundaries clean |
+| Add a new lib helper | §7 (Lib) - decide server vs client vs mixed |
+| Change auth/redirect rules | §8 (Middleware) - public matcher list |
 | Add a webpack/turbopack alias | §9 (Build Config) |
-| Change theme/colors | §10 (Styling & Theme) — CSS variables, not JS |
+| Change theme/colors | §10 (Styling & Theme) - CSS variables, not JS |
 | Add observability | §11 (Sentry only; no Vercel Analytics integration) |
 
 **Conventions:**
@@ -57,7 +57,7 @@ uet-gpt/
 ├── next.config.ts                  # Aliases, Sentry wrap, security headers, images
 ├── tsconfig.json                   # TS paths, strict mode
 ├── postcss.config.mjs              # Tailwind 4 PostCSS plugin
-├── tailwind.config.ts              # Tailwind 4 config (exists — not minimal/missing)
+├── tailwind.config.ts              # Tailwind 4 config (exists - not minimal/missing)
 ├── .gitignore                      # Standard Next.js gitignore (verified)
 │
 ├── src/
@@ -66,29 +66,29 @@ uet-gpt/
 │   │   ├── globals.css             # Tailwind 4 + CSS variables (theme)
 │   │   ├── page.tsx                # Server component: `redirect("/chat")` (NOTE: redirects here, NOT only in next.config.ts)
 │   │   ├── (main)/                 # **Authed route group**
-│   │   │   ├── layout.tsx          # App shell (sidebar + main) — NO auth() call (middleware handles it)
+│   │   │   ├── layout.tsx          # App shell (sidebar + main) - NO auth() call (middleware handles it)
 │   │   │   ├── chat/
 │   │   │   │   ├── page.tsx        # NEW-THREAD landing (creates thread + navigates to [threadId]?q=...)
 │   │   │   │   ├── error.tsx
 │   │   │   │   ├── loading.tsx
 │   │   │   │   └── [threadId]/
 │   │   │   │       ├── page.tsx    # Server: unwraps async params, renders <ChatThreadClient>
-│   │   │   │       ├── client.tsx  # Client: ChatThreadClient — actual chat thread UI
+│   │   │   │       ├── client.tsx  # Client: ChatThreadClient - actual chat thread UI
 │   │   │   │       ├── error.tsx
 │   │   │   │       └── loading.tsx
 │   │   │   ├── explore/
-│   │   │   │   ├── page.tsx        # CLIENT ("use client") — browse index
+│   │   │   │   ├── page.tsx        # CLIENT ("use client") - browse index
 │   │   │   │   ├── error.tsx
 │   │   │   │   └── loading.tsx
 │   │   │   └── settings/
-│   │   │       ├── page.tsx        # CLIENT ("use client") — user settings
+│   │   │       ├── page.tsx        # CLIENT ("use client") - user settings
 │   │   │       ├── error.tsx
 │   │   │       └── loading.tsx
 │   │   ├── admin/                  # Admin route group (role-gated)
-│   │   │   ├── layout.tsx          # CLIENT ("use client") — has internal ClientOnly wrapper; does NOT call requireAdmin
-│   │   │   ├── page.tsx            # CLIENT ("use client") — Overview dashboard (6 StatCards + recent jobs/feedback)
+│   │   │   ├── layout.tsx          # CLIENT ("use client") - has internal ClientOnly wrapper; does NOT call requireAdmin
+│   │   │   ├── page.tsx            # CLIENT ("use client") - Overview dashboard (6 StatCards + recent jobs/feedback)
 │   │   │   ├── analytics/page.tsx  # CLIENT ("use client")
-│   │   │   ├── crawls/page.tsx     # CLIENT ("use client") — NOTE plural
+│   │   │   ├── crawls/page.tsx     # CLIENT ("use client") - NOTE plural
 │   │   │   ├── documents/page.tsx  # CLIENT ("use client")
 │   │   │   ├── feedback/page.tsx   # CLIENT ("use client")
 │   │   │   └── settings/page.tsx   # CLIENT ("use client")
@@ -96,7 +96,7 @@ uet-gpt/
 │   │   ├── sign-up/[[...sign-up]]/page.tsx
 │   │   ├── unauthorized/page.tsx
 │   │   └── api/
-│   │       ├── chat/route.ts       # LLM streaming (POST) — auth-protected, ConvexHttpClient + LLM_FALLBACK_CHAIN
+│   │       ├── chat/route.ts       # LLM streaming (POST) - auth-protected, ConvexHttpClient + LLM_FALLBACK_CHAIN
 │   │       ├── cron/route.ts       # verifyCronSecret (Bearer OR ?cron_secret=); calls crawl/tasks:aggregateDailyStats
 │   │       ├── health/route.ts     # CRON_SECRET bearer, checks Convex/Groq/Gemini/Cerebras/Clerk
 │   │       └── webhooks/clerk/route.ts  # svix Webhook.verify signature
@@ -121,12 +121,12 @@ uet-gpt/
 │   │
 │   ├── lib/
 │   │   ├── auth.ts                 # requireUser/requireAdmin/getUserRole (Clerk server; throws Error)
-│   │   ├── convex.ts               # [DELETED June 2026] — was ConvexReactClient + ConvexHttpClient; nothing imported them
+│   │   ├── convex.ts               # [DELETED June 2026] - was ConvexReactClient + ConvexHttpClient; nothing imported them
 │   │   ├── rate-limit.ts           # Upstash sliding window; checkChatRateLimit(identifier, role)
 │   │   ├── constants.ts            # UET_CRAWL_CONFIG (23 seedUrls, maxPages=500, maxDepth=5) + re-exports CACHE_SIMILARITY_THRESHOLD
 │   │   ├── types.ts                # Plain-TS type mirrors
 │   │   ├── llm-models.ts           # LLM_FALLBACK_CHAIN (4 entries, no env reads)
-│   │   ├── retry.ts                # **retryWithBackoff** (NOT `withRetry`) — exponential backoff
+│   │   ├── retry.ts                # **retryWithBackoff** (NOT `withRetry`) - exponential backoff
 │   │   ├── utils.ts                # cn() helper
 │   │   ├── analytics.ts            # Intentional no-op stubs (see architecture.md §21.15)
 │   │   ├── prompt.ts               # buildSystemPrompt + extractText (shared by route.ts + tests)
@@ -161,8 +161,8 @@ Next.js 16 App Router. Each page is a Server Component by default. Client island
 | File | Type | RBAC | Purpose |
 | --- | --- | --- | --- |
 | `src/app/layout.tsx` | layout (server) | public | HTML shell, fonts, `<Providers>` |
-| `src/app/page.tsx` | page (server, `dynamic="force-dynamic"`) | public | 7-line `redirect("/chat")` (one of TWO redirect layers — also in `next.config.ts` `redirects()`) |
-| `src/app/globals.css` | stylesheet | — | Tailwind 4 + CSS vars (theme tokens) |
+| `src/app/page.tsx` | page (server, `dynamic="force-dynamic"`) | public | 7-line `redirect("/chat")` (one of TWO redirect layers - also in `next.config.ts` `redirects()`) |
+| `src/app/globals.css` | stylesheet | - | Tailwind 4 + CSS vars (theme tokens) |
 | `src/app/unauthorized/page.tsx` | page (server, `dynamic="force-dynamic"`) | public | "Access Denied" card with shield SVG + links to `/chat` and `/` |
 
 **`layout.tsx` is the only place to add `<html>`/`<body>`** and the provider tree.
@@ -171,10 +171,10 @@ Next.js 16 App Router. Each page is a Server Component by default. Client island
 
 | File | Type | RBAC | Purpose |
 | --- | --- | --- | --- |
-| `src/app/(main)/layout.tsx` | layout (server) | auth (via middleware) | App shell (sidebar + main) — **does NOT call `auth()` or `redirect("/sign-in")`**; middleware does the gate. Layout is just `BackdropWrapper` + `AmbientGlow` + `ConnectionStatus` + `ConvexReadyGate` + `MainShell` + `CommandPalette` + `PreferencesModal` + `VoiceModalWrapper`. |
-| `src/app/(main)/chat/page.tsx` | page (**client**, `"use client"`) | auth | **NEW-THREAD landing** — welcome screen with 4 default suggestion chips; calls `api.threads.create`, waits 150ms, then `router.push(\`/chat/${threadId}?q=...\`)` |
+| `src/app/(main)/layout.tsx` | layout (server) | auth (via middleware) | App shell (sidebar + main) - **does NOT call `auth()` or `redirect("/sign-in")`**; middleware does the gate. Layout is just `BackdropWrapper` + `AmbientGlow` + `ConnectionStatus` + `ConvexReadyGate` + `MainShell` + `CommandPalette` + `PreferencesModal` + `VoiceModalWrapper`. |
+| `src/app/(main)/chat/page.tsx` | page (**client**, `"use client"`) | auth | **NEW-THREAD landing** - welcome screen with 4 default suggestion chips; calls `api.threads.create`, waits 150ms, then `router.push(\`/chat/${threadId}?q=...\`)` |
 | `src/app/(main)/chat/[threadId]/page.tsx` | page (server, async) | auth | Unwraps `params` + `searchParams` promises, renders `<ChatThreadClient threadId={threadId} initialMessage={q} />` |
-| `src/app/(main)/chat/[threadId]/client.tsx` | client component | auth | **ChatThreadClient** — actual thread UI; uses `useMessages` + `useChat`; auto-fires `initialMessage` once via `useRef` guard |
+| `src/app/(main)/chat/[threadId]/client.tsx` | client component | auth | **ChatThreadClient** - actual thread UI; uses `useMessages` + `useChat`; auto-fires `initialMessage` once via `useRef` guard |
 | `src/app/(main)/explore/page.tsx` | page (**client**, `"use client"`) | auth | Browse index |
 | `src/app/(main)/settings/page.tsx` | page (**client**, `"use client"`) | auth | User settings (fontSize, model) |
 
@@ -196,14 +196,14 @@ export default clerkMiddleware((auth, req) => {
 | File | Type | RBAC | Purpose |
 | --- | --- | --- | --- |
 | `src/app/admin/layout.tsx` | layout (**client**, `"use client"`) | admin | Has internal `ClientOnly` wrapper; sidebar with 6 nav items; **does NOT call `requireAdmin()`** (verified) |
-| `src/app/admin/page.tsx` | page (**client**, `"use client"`) | admin | **Overview dashboard** — **6** `StatCard`s (3 primary: Total Documents / Active Users Today / Crawl Jobs; 3 secondary: Total Feedback / Cache Entries / Document Issues), document status progress bars, recent crawl jobs + feedback lists |
+| `src/app/admin/page.tsx` | page (**client**, `"use client"`) | admin | **Overview dashboard** - **6** `StatCard`s (3 primary: Total Documents / Active Users Today / Crawl Jobs; 3 secondary: Total Feedback / Cache Entries / Document Issues), document status progress bars, recent crawl jobs + feedback lists |
 | `src/app/admin/analytics/page.tsx` | page (**client**, `"use client"`) | admin | Analytics dashboard (uses `useQuery` from hooks) |
 | `src/app/admin/crawls/page.tsx` | page (**client**, `"use client"`) | admin | Crawl jobs (NOTE plural: `crawls`, not `crawl`) |
 | `src/app/admin/documents/page.tsx` | page (**client**, `"use client"`) | admin | Document browser |
 | `src/app/admin/feedback/page.tsx` | page (**client**, `"use client"`) | admin | Feedback list |
 | `src/app/admin/settings/page.tsx` | page (**client**, `"use client"`) | admin | appSettings editor |
 
-**`requireAdmin` is in `src/lib/auth.ts`** — see §7.1. **The admin layout does NOT actually call it.** There is no admin route in the codebase that calls `requireAdmin()`. The middleware lets authed users reach `/admin/*`; the BE Convex functions re-check with `requireAdmin`. This is a **known gap** — if a non-admin authed user navigates to `/admin/*`, they will see the layout but data calls will fail with `FORBIDDEN` from Convex.
+**`requireAdmin` is in `src/lib/auth.ts`** - see §7.1. **The admin layout does NOT actually call it.** There is no admin route in the codebase that calls `requireAdmin()`. The middleware lets authed users reach `/admin/*`; the BE Convex functions re-check with `requireAdmin`. This is a **known gap** - if a non-admin authed user navigates to `/admin/*`, they will see the layout but data calls will fail with `FORBIDDEN` from Convex.
 
 ### 3.4 `/sign-in`, `/sign-up`, `/unauthorized`
 
@@ -211,11 +211,11 @@ Clerk catch-all routes. Read by `[[...sign-in]]` and `[[...sign-up]]`.
 
 | File | Purpose |
 | --- | --- |
-| `src/app/sign-in/[[...sign-in]]/page.tsx` | Wraps `<SignIn />` from `@clerk/nextjs` — passes `appearance={uetClerkAppearance}` (from `src/lib/clerk-theme.ts`) |
+| `src/app/sign-in/[[...sign-in]]/page.tsx` | Wraps `<SignIn />` from `@clerk/nextjs` - passes `appearance={uetClerkAppearance}` (from `src/lib/clerk-theme.ts`) |
 | `src/app/sign-up/[[...sign-up]]/page.tsx` | Wraps `<SignUp />` |
 | `src/app/unauthorized/page.tsx` | Custom 403 page (e.g. for non-admins hitting `/admin/*`) |
 
-**`src/lib/clerk-theme.ts` IS the source of truth** for Clerk appearance, and `sign-in/page.tsx` imports + passes it (`appearance={uetClerkAppearance}` at line 30). The earlier "Don't pass appearance props here" advice was self-contradictory — the file does pass it. Edit `clerk-theme.ts` to change Clerk's look; sign-in/page.tsx consumes that export.
+**`src/lib/clerk-theme.ts` IS the source of truth** for Clerk appearance, and `sign-in/page.tsx` imports + passes it (`appearance={uetClerkAppearance}` at line 30). The earlier "Don't pass appearance props here" advice was self-contradictory - the file does pass it. Edit `clerk-theme.ts` to change Clerk's look; sign-in/page.tsx consumes that export.
 
 ### 3.5 `/api/*` (route handlers)
 
@@ -225,7 +225,7 @@ See §4.
 
 ## 4. Route Handlers (`src/app/api/*`)
 
-### 4.1 `POST /api/chat` — LLM streaming (verified)
+### 4.1 `POST /api/chat` - LLM streaming (verified)
 
 **File:** `src/app/api/chat/route.ts` · RBAC: **auth** (Clerk session required; `if (!userId) return 401` at line 297–300). NOT public.
 
@@ -247,15 +247,15 @@ The route uses `ConvexHttpClient` (NOT Convex hooks) for the RAG retrieval call,
 
 1. CSRF origin check (403 on fail)
 2. Body size + content length check
-3. `auth()` — return 401 if no Clerk session
-4. `checkChatRateLimit(identifier, role)` (Upstash sliding window) — see §4.1.1; returns 429 on hit, fails open on null
-5. **Single** Convex call: `convex.action(api.rag.retrieval.retrieveContext, { question })` (line 367) — this is the cache lookup + RAG retrieval + injection scan, all in one (NOT split into 3 separate steps)
+3. `auth()` - return 401 if no Clerk session
+4. `checkChatRateLimit(identifier, role)` (Upstash sliding window) - see §4.1.1; returns 429 on hit, fails open on null
+5. **Single** Convex call: `convex.action(api.rag.retrieval.retrieveContext, { question })` (line 367) - this is the cache lookup + RAG retrieval + injection scan, all in one (NOT split into 3 separate steps)
 6. `streamText` against `LLM_FALLBACK_CHAIN`
 7. On success, write sources into `X-Sources` response header (base64-encoded JSON)
 8. Stream back to client via `use-chat.ts::handleSend`
 
-> **The user message is inserted via `use-chat.ts`** (line 59–63) using `useMutation(api.messages.insert)` — NOT from this route. The route only streams the assistant response.
-> **The Convex `enforceRateLimit` is NOT called from this route** — it lives in `convex/rateLimit.ts` and is invoked from `convex/messages.ts` (called by the messages insert on the BE).
+> **The user message is inserted via `use-chat.ts`** (line 59–63) using `useMutation(api.messages.insert)` - NOT from this route. The route only streams the assistant response.
+> **The Convex `enforceRateLimit` is NOT called from this route** - it lives in `convex/rateLimit.ts` and is invoked from `convex/messages.ts` (called by the messages insert on the BE).
 
 **Response:** Server-Sent Events via Vercel AI SDK `streamText`. Each chunk is a token delta. Sources are in the `X-Sources` header (NOT in the stream body).
 
@@ -269,45 +269,45 @@ The route uses `ConvexHttpClient` (NOT Convex hooks) for the RAG retrieval call,
 | `429` | Upstash rate limit hit (returns `{ error: "Rate limit exceeded" }`) |
 | `500` | Convex unconfigured (no URL), no AI providers configured, all-providers-failed (caught and re-thrown as "An unexpected error occurred"), or any other unhandled error |
 
-#### 4.1.1 Upstash rate limit (FE layer — only one Next.js layer)
+#### 4.1.1 Upstash rate limit (FE layer - only one Next.js layer)
 
-`src/lib/rate-limit.ts` — Upstash sliding window (`Ratelimit.slidingWindow`, `analytics: true`). Tiers: `user=50/h`, `admin=200/h`, `anon=10/h`. **There is no in-memory rate limit layer in the verified code.**
+`src/lib/rate-limit.ts` - Upstash sliding window (`Ratelimit.slidingWindow`, `analytics: true`). Tiers: `user=50/h`, `admin=200/h`, `anon=10/h`. **There is no in-memory rate limit layer in the verified code.**
 
 **API (verified):**
-- `checkChatRateLimit(identifier: string, role: "user" | "admin" | "superadmin" | "anonymous"): Promise<RatelimitResponse | null>` — returns the response, or `null` if Upstash is unreachable (fails open).
-- `getChatRateLimitRemaining(identifier, role): Promise<number | null>` — for UI display.
+- `checkChatRateLimit(identifier: string, role: "user" | "admin" | "superadmin" | "anonymous"): Promise<RatelimitResponse | null>` - returns the response, or `null` if Upstash is unreachable (fails open).
+- `getChatRateLimitRemaining(identifier, role): Promise<number | null>` - for UI display.
 
-`checkChatRateLimit` returns `null` if Upstash is unavailable (i.e. **fails open** — the request continues and the Convex layer applies). The chat route treats `null` as pass-through (no 429 on null). There is **no `safeLimit` symbol** in the codebase.
+`checkChatRateLimit` returns `null` if Upstash is unavailable (i.e. **fails open** - the request continues and the Convex layer applies). The chat route treats `null` as pass-through (no 429 on null). There is **no `safeLimit` symbol** in the codebase.
 
-### 4.2 `GET /api/cron` — Vercel cron entry
+### 4.2 `GET /api/cron` - Vercel cron entry
 
 **File:** `src/app/api/cron/route.ts` · RBAC: cron
 
-Auth: `Authorization: Bearer ${CRON_SECRET}` header **OR** `?cron_secret=${CRON_SECRET}` query (verified, line 23 — NOT `?secret=`).
+Auth: `Authorization: Bearer ${CRON_SECRET}` header **OR** `?cron_secret=${CRON_SECRET}` query (verified, line 23 - NOT `?secret=`).
 
-**The route is NOT a health check / ack** — it actually invokes work: `convex/crawl/tasks.ts::aggregateDailyStats` (line 52). It is the FE entry point for daily aggregation work. Convex-internal crons (in `convex/crons.ts`) run separately; this route is for Vercel cron.
+**The route is NOT a health check / ack** - it actually invokes work: `convex/crawl/tasks.ts::aggregateDailyStats` (line 52). It is the FE entry point for daily aggregation work. Convex-internal crons (in `convex/crons.ts`) run separately; this route is for Vercel cron.
 
-### 4.3 `GET /api/health` — Health probe
+### 4.3 `GET /api/health` - Health probe
 
 **File:** `src/app/api/health/route.ts` · RBAC: internal
 
 Auth: `Authorization: Bearer ${CRON_SECRET}` header (verified, line 51). Does NOT check `?cron_secret=` query param (unlike cron).
 
-Returns 200 with service status JSON (or 503 when all 5 services are unreachable — "error" overall status). Pings **5 services**: Convex, Groq, Gemini, Cerebras, Clerk (NOT 3 as the earlier draft said). Used by:
+Returns 200 with service status JSON (or 503 when all 5 services are unreachable - "error" overall status). Pings **5 services**: Convex, Groq, Gemini, Cerebras, Clerk (NOT 3 as the earlier draft said). Used by:
 
 - Vercel uptime monitor
 - Internal canary checks
 - Sentry release health
 
-### 4.4 `POST /api/webhooks/clerk` — Clerk lifecycle
+### 4.4 `POST /api/webhooks/clerk` - Clerk lifecycle
 
 **File:** `src/app/api/webhooks/clerk/route.ts` · RBAC: webhook
 
 Auth: svix signature (`CLERK_SIGNING_SECRET`, NOT `CLERK_WEBHOOK_SECRET`).
 
-Handles events: `user.created` and `user.updated` ONLY (verified, line 35). **No `user.deleted` handler** — if a user is deleted in Clerk, the Convex `users` row is orphaned.
+Handles events: `user.created` and `user.updated` ONLY (verified, line 35). **No `user.deleted` handler** - if a user is deleted in Clerk, the Convex `users` row is orphaned.
 
-On success calls Convex `users:getOrCreate` via `client.mutation("users:getOrCreate", ...)` (line 58, using a string reference — functionally equivalent to `api.users.getOrCreate`). The shared `WEBHOOK_SECRET` is passed as a secret arg.
+On success calls Convex `users:getOrCreate` via `client.mutation("users:getOrCreate", ...)` (line 58, using a string reference - functionally equivalent to `api.users.getOrCreate`). The shared `WEBHOOK_SECRET` is passed as a secret arg.
 
 **There is NO admin role bootstrap** in this handler. `ADMIN_EMAILS` is not referenced. The code does NOT call `clerkClient.users.updateUserMetadata`. Admin role is a manual two-step process (Convex dashboard + Clerk dashboard); see `reference.cross-cutting.md` §3.3.
 
@@ -317,13 +317,13 @@ On success calls Convex `users:getOrCreate` via `client.mutation("users:getOrCre
 
 ## 5. Components
 
-### 5.1 `src/components/providers.tsx` — the orchestrator
+### 5.1 `src/components/providers.tsx` - the orchestrator
 
 The single most important client component. Wraps every other page in the provider tree.
 
 > **Earlier drafts of this section had an inaccurate code block.** The verified file is more nuanced:
-> - `ConvexReactClient` is constructed **inline** in `useState` (line 58–61), NOT imported from `src/lib/convex.ts`. `src/lib/convex.ts` was deleted in June 2026 — it was dead code (nothing imported its exports).
-> - If `convexClient` is `null` (URL missing), the `Providers` function returns ONLY `ThemeProvider > PreferencesProvider > content` (line 76–82) — no `ClerkProvider`, no `ConvexProviderWithClerk`, no `UserSync`. This is a fallback render path.
+> - `ConvexReactClient` is constructed **inline** in `useState` (line 58–61), NOT imported from `src/lib/convex.ts`. `src/lib/convex.ts` was deleted in June 2026 - it was dead code (nothing imported its exports).
+> - If `convexClient` is `null` (URL missing), the `Providers` function returns ONLY `ThemeProvider > PreferencesProvider > content` (line 76–82) - no `ClerkProvider`, no `ConvexProviderWithClerk`, no `UserSync`. This is a fallback render path.
 > - The mutation variable is `createUser`, not `getOrCreate`.
 > - The mutation args are `{ clerkId, name, email, imageUrl }` (flat shape), NOT `{ clerkUser: { id, email, name } }` (nested).
 > - The actual provider order is `ClerkProvider > ConvexProviderWithClerk > ThemeProvider > PreferencesProvider > UserSync > content > TooltipProvider > Toaster` (ThemeProvider and PreferencesProvider order swapped from earlier drafts).
@@ -331,20 +331,20 @@ The single most important client component. Wraps every other page in the provid
 
 **Provider order (top → bottom, verified):**
 
-1. `ClerkProvider` — session
-2. `ConvexProviderWithClerk` — passes Clerk auth to Convex
-3. `ThemeProvider` — light/dark (BEFORE PreferencesProvider in actual code)
-4. `PreferencesProvider` — user prefs (theme, accent, etc.)
-5. `UserSync` — sync Clerk user to Convex (inside the provider tree)
-6. `TooltipProvider` — Radix tooltips
-7. `Toaster` — notifications
-8. `{children}` — app
+1. `ClerkProvider` - session
+2. `ConvexProviderWithClerk` - passes Clerk auth to Convex
+3. `ThemeProvider` - light/dark (BEFORE PreferencesProvider in actual code)
+4. `PreferencesProvider` - user prefs (theme, accent, etc.)
+5. `UserSync` - sync Clerk user to Convex (inside the provider tree)
+6. `TooltipProvider` - Radix tooltips
+7. `Toaster` - notifications
+8. `{children}` - app
 
 **`UserSync` (inline, not exported):**
 
 - Mutation variable: `createUser = useMutation(api.users.getOrCreate)`
 - Args shape: `{ clerkId: user.id, name, email, imageUrl }` (FLAT, not nested)
-- Retry: 3 attempts, exponential backoff (1s, 2s, 4s) via inline `1000 * 2 ** attempt` (verified lines 27–49; does **NOT** use `retryWithBackoff` from `src/lib/retry.ts` — that helper exists but is unused in the codebase).
+- Retry: 3 attempts, exponential backoff (1s, 2s, 4s) via inline `1000 * 2 ** attempt` (verified lines 27–49; does **NOT** use `retryWithBackoff` from `src/lib/retry.ts` - that helper exists but is unused in the codebase).
 - If all fail, error surfaces to Sentry; next mount retries.
 
 ### 5.2 Component directory guide (verified)
@@ -404,13 +404,13 @@ Convex's `useQuery` and `useMutation` are the data layer. Custom hooks wrap them
 | `useThreads()` | `src/hooks/use-threads.ts` | List user's threads + create/delete/rename | `{ threads, isLoading, error, createThread, deleteThread, renameThread }` |
 | `useStableQuery` | `src/hooks/use-stable-query.ts` | Wraps `useQuery` with a stable ref to prevent re-render churn | data from `useQuery` |
 
-> **`api.users.currentUser` does NOT exist** — there is no `convex/users.ts::currentUser` (see backend reference §4.2). The auth helper `requireUser` is server-only and reads Clerk's `auth()` directly.
+> **`api.users.currentUser` does NOT exist** - there is no `convex/users.ts::currentUser` (see backend reference §4.2). The auth helper `requireUser` is server-only and reads Clerk's `auth()` directly.
 >
 > The streaming state is exposed through a `streamRegistry` (subscribable) that is shared between `use-chat.ts` and the message list component.
 
 **`use-chat.ts` (verified)**: uses `fetch("/api/chat", { signal: abortController.signal })`, parses `X-Sources` header (base64-decoded JSON), accumulates text via `decoder.decode`, and writes the final assistant message back via `api.messages.insert`. Auto-aborts after `CHAT_TIMEOUT_MS = 45_000` ms. On the first user message of a thread, it automatically renames the thread based on the first 40 characters of the message content.
 
-**`use-threads.ts` (verified)**: uses `useStableQuery(api.threads.list, {})` with an 8s timeout → "Unable to load conversations". `rename` uses `api.threads.rename` directly (no `as any` cast needed — the generated `api.d.ts` includes it via `typeof threads`).
+**`use-threads.ts` (verified)**: uses `useStableQuery(api.threads.list, {})` with an 8s timeout → "Unable to load conversations". `rename` uses `api.threads.rename` directly (no `as any` cast needed - the generated `api.d.ts` includes it via `typeof threads`).
 
 **Convex query pattern:**
 
@@ -441,15 +441,15 @@ export function useFoo(id: Id<"foos">) {
 
 ## 7. Lib Utilities
 
-### 7.1 `src/lib/auth.ts` — server auth (verified)
+### 7.1 `src/lib/auth.ts` - server auth (verified)
 
 | Function | Args | Returns | Throws |
 | --- | --- | --- | --- |
-| `requireUser()` | — | `string` (userId) | `Error("Unauthorized")` if no userId |
-| `requireAdmin()` | — | `string` (userId) | `Error("Unauthorized")` or `Error("Forbidden")` |
-| `getUserRole()` | — | `string \| null` (`"user" \| "admin" \| "superadmin"`) | — |
+| `requireUser()` | - | `string` (userId) | `Error("Unauthorized")` if no userId |
+| `requireAdmin()` | - | `string` (userId) | `Error("Unauthorized")` or `Error("Forbidden")` |
+| `getUserRole()` | - | `string \| null` (`"user" \| "admin" \| "superadmin"`) | - |
 
-**Server-only.** These call `@clerk/nextjs/server`'s `auth()` and `currentUser()`. **They do NOT use `redirect()`** — they `throw new Error(...)`. Caller must catch (or the error will propagate to the nearest error boundary).
+**Server-only.** These call `@clerk/nextjs/server`'s `auth()` and `currentUser()`. **They do NOT use `redirect()`** - they `throw new Error(...)`. Caller must catch (or the error will propagate to the nearest error boundary).
 
 ```ts
 // src/lib/auth.ts (verified)
@@ -473,7 +473,7 @@ export async function requireAdmin() {
 
 **Don't call these from client components.** Use `useUser` from `@clerk/nextjs` instead.
 
-### 7.2 `src/lib/convex.ts` — [DELETED June 2026]
+### 7.2 `src/lib/convex.ts` - [DELETED June 2026]
 
 Deleted because nothing imported its exports. Each consumer creates its own client:
 - `providers.tsx`: `new ConvexReactClient(convexUrl)` in `useState` (line 59)
@@ -483,7 +483,7 @@ Deleted because nothing imported its exports. Each consumer creates its own clie
 
 > Historical note: the file exported `convexClient` (ConvexReactClient) and `convexHttpClient` (ConvexHttpClient) but both were zero-import.
 
-### 7.3 `src/lib/rate-limit.ts` — Upstash sliding window
+### 7.3 `src/lib/rate-limit.ts` - Upstash sliding window
 
 > ⚠️ **Earlier exports `rateLimit` and `rateLimitByKey` do NOT exist.** The actual exports are `checkChatRateLimit(identifier, role)` and `getChatRateLimitRemaining(identifier, role)`.
 
@@ -512,29 +512,29 @@ export async function checkChatRateLimit(identifier: string, role: "user" | "adm
 
 **Fails open** if Upstash is unreachable. The chat route treats `null` as pass-through (no 429 on null). Don't tighten this without a fallback.
 
-### 7.4 `src/lib/constants.ts` — shared constants (verified)
+### 7.4 `src/lib/constants.ts` - shared constants (verified)
 
 ```ts
 export const UET_CRAWL_CONFIG = {
-  seedUrls: [...],   // **23 entries** — all `web.uettaxila.edu.pk/*` paths
+  seedUrls: [...],   // **23 entries** - all `web.uettaxila.edu.pk/*` paths
   maxPages: 500,
   maxDepth: 5,
   allowExternalLinks: false,
   baseUrl: "https://web.uettaxila.edu.pk",  // also present
-  includePaths: [...],  // 8 entries — also present
+  includePaths: [...],  // 8 entries - also present
   excludePaths: [...],  // also present
 };
 
 export { CACHE_SIMILARITY_THRESHOLD } from "../../convex/constants";
 ```
 
-> The verified file also exports `EVAL_ENABLED`, `APP_NAME`, `APP_TAGLINE`, `APP_DESCRIPTION`, `UET_COLORS`, `TASTE_BASELINE`, `SPACING`, `ELEVATION`, `DURATION` — earlier drafts that said "only exports UET_CRAWL_CONFIG" were wrong.
+> The verified file also exports `EVAL_ENABLED`, `APP_NAME`, `APP_TAGLINE`, `APP_DESCRIPTION`, `UET_COLORS`, `TASTE_BASELINE`, `SPACING`, `ELEVATION`, `DURATION` - earlier drafts that said "only exports UET_CRAWL_CONFIG" were wrong.
 
-> **`MAX_QUERY_LEN` is NOT exported from this file** — it is local to `convex/rag/retrieval.ts`. The verified file only exports `UET_CRAWL_CONFIG` and re-exports `CACHE_SIMILARITY_THRESHOLD` from the BE.
+> **`MAX_QUERY_LEN` is NOT exported from this file** - it is local to `convex/rag/retrieval.ts`. The verified file only exports `UET_CRAWL_CONFIG` and re-exports `CACHE_SIMILARITY_THRESHOLD` from the BE.
 
 **All numbers here are re-exports from `convex/constants.ts`** when they exist on the BE. Don't duplicate literal values.
 
-### 7.5 `src/lib/types.ts` — type mirrors
+### 7.5 `src/lib/types.ts` - type mirrors
 
 > ⚠️ **Several rows in earlier drafts do NOT exist in `src/lib/types.ts`.** Specifically `Id<T>` is NOT a `ConvexId<T>` re-export (no such symbol exists), `TokenCount` is NOT a `number` alias (it's a 3-field object), `ChatRequest` and `ChatRequestSchema` do NOT exist (the route does manual `JSON.parse` + length checks, no zod).
 
@@ -549,7 +549,7 @@ export { CACHE_SIMILARITY_THRESHOLD } from "../../convex/constants";
 | `FeedbackCategory` | `feedback.category` | |
 | `MessageRole` | `messages.role` | 2 values: `user`/`assistant` (NO `system`) |
 | `QueryCategory` | one of 7 intents | |
-| `Source` | `{ id?, type?, sourceType?, url, title, documentId?, chunkId?, relevanceScore, excerpt, providerOptions? }` | **NOT** `{ documentId, chunkId, title, url, score, excerpt }` — uses `relevanceScore` (not `score`) and has extra fields. Mirror shape differs from `convex/messages/validator.ts` `sourcesValidator`. |
+| `Source` | `{ id?, type?, sourceType?, url, title, documentId?, chunkId?, relevanceScore, excerpt, providerOptions? }` | **NOT** `{ documentId, chunkId, title, url, score, excerpt }` - uses `relevanceScore` (not `score`) and has extra fields. Mirror shape differs from `convex/messages/validator.ts` `sourcesValidator`. |
 | `TokenCount` | `{ prompt, completion, total }` object | **NOT** a `number` alias |
 | `CrawlConfig` | subset of `UET_CRAWL_CONFIG` | |
 | `CrawlStats` | `crawlStats` row | Matches schema: `statsId`/`totalDocuments`/`indexedDocuments`/`processingDocuments`/`failedDocuments`/`pendingDocuments`/`lastUpdatedAt` |
@@ -560,7 +560,7 @@ export { CACHE_SIMILARITY_THRESHOLD } from "../../convex/constants";
 
 **Sync rule:** if you change a Convex validator, update the mirror here in the same PR. See `reference.cross-cutting.md` §4.2 for the full mirror table.
 
-### 7.6 `src/lib/llm-models.ts` — LLM fallback chain (verified)
+### 7.6 `src/lib/llm-models.ts` - LLM fallback chain (verified)
 
 ```ts
 // src/lib/llm-models.ts (verified, 6 lines)
@@ -578,7 +578,7 @@ export const LLM_FALLBACK_CHAIN = [
 
 **Don't remove a step** unless the underlying provider is permanently gone.
 
-### 7.7 `src/lib/retry.ts` — exponential backoff (verified)
+### 7.7 `src/lib/retry.ts` - exponential backoff (verified)
 
 ```ts
 // src/lib/retry.ts (verified, ~30 lines)
@@ -593,11 +593,11 @@ export async function retryWithBackoff<T>(
 ): Promise<T>
 ```
 
-> **The export is `retryWithBackoff` — NOT `withRetry`.** Any prior reference to `withRetry` from this module is **wrong**.
+> **The export is `retryWithBackoff` - NOT `withRetry`.** Any prior reference to `withRetry` from this module is **wrong**.
 
-> **Used by** any client-side fetch wrapper that opts in. **`UserSync` does NOT use this helper** — it has its own inline retry loop (`1000 * 2 ** attempt`, lines 27–49 of `providers.tsx`). `retryWithBackoff` is currently unused in the codebase.
+> **Used by** any client-side fetch wrapper that opts in. **`UserSync` does NOT use this helper** - it has its own inline retry loop (`1000 * 2 ** attempt`, lines 27–49 of `providers.tsx`). `retryWithBackoff` is currently unused in the codebase.
 
-### 7.8 `src/lib/utils.ts` — `cn()`
+### 7.8 `src/lib/utils.ts` - `cn()`
 
 ```ts
 import { type ClassValue, clsx } from "clsx";
@@ -610,7 +610,7 @@ export function cn(...inputs: ClassValue[]) {
 
 **Use everywhere** you concatenate Tailwind classes. Avoids specificity bugs from `tailwind-merge`.
 
-### 7.9 `src/lib/analytics.ts` — dev-only console.log wrappers (verified)
+### 7.9 `src/lib/analytics.ts` - dev-only console.log wrappers (verified)
 
 > ⚠️ **No real Vercel Analytics integration exists.** Despite the JSDoc claim of "Vercel Web Analytics", the file (verified, ~73 lines) only does `console.log` in `NODE_ENV === "development"` and silently returns in production. There is **no `import { track } from "@vercel/analytics"`** anywhere in the codebase. `src/app/layout.tsx` does **NOT** render `<Analytics />`.
 
@@ -623,9 +623,9 @@ export function cn(...inputs: ClassValue[]) {
 | `trackCrawlEvent` | `(action: "start" \| "complete" \| "error" \| "cancel", properties?) => void` | dev: `console.log`; prod: no-op |
 | `trackError` | `(errorType: string, properties?) => void` | dev: `console.log`; prod: no-op |
 
-**Don't put PII in event props** — even though they're dev-only now, future integration may retain.
+**Don't put PII in event props** - even though they're dev-only now, future integration may retain.
 
-### 7.10 `src/lib/clerk-claims.ts` — ClerkSessionClaims helpers (verified)
+### 7.10 `src/lib/clerk-claims.ts` - ClerkSessionClaims helpers (verified)
 
 ```ts
 // src/lib/clerk-claims.ts (verified, 53 lines)
@@ -647,7 +647,7 @@ export function getRoleFromClaims(
   sessionClaims: Record<string, unknown> | null | undefined
 ): string | undefined {
   return (sessionClaims?.metadata as { role?: string } | undefined)?.role;
-  // ↑ only reads metadata.role. The doc comment "walks sub → metadata → org_role fallback" is INCORRECT — the code does NOT walk sub or fallback to org_role.
+  // ↑ only reads metadata.role. The doc comment "walks sub → metadata → org_role fallback" is INCORRECT - the code does NOT walk sub or fallback to org_role.
 }
 ```
 
@@ -656,7 +656,7 @@ export function getRoleFromClaims(
 
 **Read `role` from `sessionClaims.metadata.role`** (Clerk public metadata). Don't trust client-side checks for server decisions.
 
-### 7.11 `src/lib/clerk-theme.ts` — Clerk appearance
+### 7.11 `src/lib/clerk-theme.ts` - Clerk appearance
 
 Exports a `ClerkAppearance` object applied to all `<ClerkProvider>` instances. Includes:
 
@@ -699,18 +699,18 @@ export const config = {
 
 **Public routes (no Clerk gate):**
 
-- `/sign-in(.*)` — Clerk sign-in
-- `/sign-up(.*)` — Clerk sign-up
-- `/api/webhooks(.*)` — Clerk + crawl webhooks (their own auth)
+- `/sign-in(.*)` - Clerk sign-in
+- `/sign-up(.*)` - Clerk sign-up
+- `/api/webhooks(.*)` - Clerk + crawl webhooks (their own auth)
 
 **Protected by default.** Anything not in the public list requires a Clerk session.
 
 **Admin protection** is three-layer defense-in-depth:
-1. **Edge middleware** (`src/middleware.ts:23-29`) — checks `sessionClaims.metadata.role` before `/admin(.*)` routes load. Redirects non-admins to `/`. Logs a warning if the Clerk JWT template is not configured (metadata undefined).
-2. **Client layout** (`src/app/admin/layout.tsx`) — `AuthGuard` component checks `getRoleFromClaims(sessionClaims)`.
-3. **Server-side conventions** — all admin Convex functions call `requireAdmin(ctx)` which reads `users.role` from the DB (not Clerk claims).
+1. **Edge middleware** (`src/middleware.ts:23-29`) - checks `sessionClaims.metadata.role` before `/admin(.*)` routes load. Redirects non-admins to `/`. Logs a warning if the Clerk JWT template is not configured (metadata undefined).
+2. **Client layout** (`src/app/admin/layout.tsx`) - `AuthGuard` component checks `getRoleFromClaims(sessionClaims)`.
+3. **Server-side conventions** - all admin Convex functions call `requireAdmin(ctx)` which reads `users.role` from the DB (not Clerk claims).
 
-**`/api/chat`, `/api/cron`, `/api/health`** are *not* in the public matcher. Cron/health use `CRON_SECRET` bearer; chat uses Clerk session via `auth().protect()` (or anon tier if you add anon support later). This is intentional — the public matcher is for routes that must be reachable without auth.
+**`/api/chat`, `/api/cron`, `/api/health`** are *not* in the public matcher. Cron/health use `CRON_SECRET` bearer; chat uses Clerk session via `auth().protect()` (or anon tier if you add anon support later). This is intentional - the public matcher is for routes that must be reachable without auth.
 
 **Adding a new public route:** add to `isPublicRoute`. Be sure the route has its own auth (webhooks do; sign-in does).
 
@@ -787,8 +787,8 @@ Both `turbopack.resolveAlias` and `webpack` resolver alias the same three paths 
 
 ### 9.3 Remote image patterns
 
-- `**.convex.cloud` — Convex file storage URLs
-- `img.clerk.com` — Clerk profile pictures
+- `**.convex.cloud` - Convex file storage URLs
+- `img.clerk.com` - Clerk profile pictures
 
 **Adding a new image source:** append to `images.remotePatterns`. Required for `<Image src={...}>` to work.
 
@@ -796,8 +796,8 @@ Both `turbopack.resolveAlias` and `webpack` resolver alias the same three paths 
 
 `withSentryConfig(nextConfig, ...)` wraps the entire config. Sentry injects:
 
-- Server init via **`src/sentry.server.config.ts`** (NOT `instrumentation.ts` — that file is a thin `register()` wrapper)
-- Client init via **`src/sentry.client.config.ts`** (NOT `instrumentation-client.ts` — that file does not exist; this is the canonical Next.js 16 location)
+- Server init via **`src/sentry.server.config.ts`** (NOT `instrumentation.ts` - that file is a thin `register()` wrapper)
+- Client init via **`src/sentry.client.config.ts`** (NOT `instrumentation-client.ts` - that file does not exist; this is the canonical Next.js 16 location)
 - Edge init via **`src/sentry.edge.config.ts`**
 - Source map upload on build
 - Performance tracing on `/api/*`
@@ -820,7 +820,7 @@ export async function register() {
 
 ### 9.5 `allowedDevOrigins`
 
-`["127.0.0.1"]` — Next.js 16 dev origin allowlist. Required because Vercel preview deployments and other origins are blocked by default.
+`["127.0.0.1"]` - Next.js 16 dev origin allowlist. Required because Vercel preview deployments and other origins are blocked by default.
 
 ---
 
@@ -828,7 +828,7 @@ export async function register() {
 
 ### 10.1 Tailwind 4
 
-CSS-first config with CSS `@theme` blocks in `src/app/globals.css` that override/extend the JS config. A `tailwind.config.ts` IS present (84 lines) with theme tokens (colors, spacing, fonts, animations). Both files define theme tokens — edits should keep them in sync:
+CSS-first config with CSS `@theme` blocks in `src/app/globals.css` that override/extend the JS config. A `tailwind.config.ts` IS present (84 lines) with theme tokens (colors, spacing, fonts, animations). Both files define theme tokens - edits should keep them in sync:
 
 ```css
 @import "tailwindcss";
@@ -848,12 +848,12 @@ CSS-first config with CSS `@theme` blocks in `src/app/globals.css` that override
 }
 ```
 
-**Don't use JS to switch colors** — use CSS variables. The `ThemeProvider` just toggles a `data-theme="light|dark"` attribute on `<html>`.
+**Don't use JS to switch colors** - use CSS variables. The `ThemeProvider` just toggles a `data-theme="light|dark"` attribute on `<html>`.
 
 ### 10.2 Theme switching
 
 ```tsx
-// src/components/theme-provider.tsx (verified path — NO theme/ subdirectory)
+// src/components/theme-provider.tsx (verified path - NO theme/ subdirectory)
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
 
@@ -893,7 +893,7 @@ export function Button({ className, variant, size, ...props }) {
 }
 ```
 
-**Always use `cn()` to merge classes** — never template-string them.
+**Always use `cn()` to merge classes** - never template-string them.
 
 ### 10.4 Aesthetic Standards & Anti-Slop Guidelines
 
@@ -906,11 +906,11 @@ Consult these directories and `impeccable/skill/reference/anti-slop.md` before f
 
 ---
 
-## 11. Observability (Sentry only — Vercel Analytics is NOT integrated)
+## 11. Observability (Sentry only - Vercel Analytics is NOT integrated)
 
 ### 11.1 Sentry (verified)
 
-**Real init lives in `src/sentry.{client,server,edge}.config.ts`** — these are the canonical Next.js 16 Sentry init locations. `src/instrumentation.ts` is a thin `register()` wrapper that conditionally imports them.
+**Real init lives in `src/sentry.{client,server,edge}.config.ts`** - these are the canonical Next.js 16 Sentry init locations. `src/instrumentation.ts` is a thin `register()` wrapper that conditionally imports them.
 
 **Server init:** `src/sentry.server.config.ts`
 
@@ -964,13 +964,13 @@ export async function register() {
 - Client: `Sentry.startTransaction` or React Error Boundary.
 - Convex: `ctx.logger` writes to Convex dashboard (not Sentry). Bridge via Sentry transport if needed.
 
-### 11.2 Vercel Analytics — **NOT INTEGRATED** (verified)
+### 11.2 Vercel Analytics - **NOT INTEGRATED** (verified)
 
 > ⚠️ **The codebase does NOT use Vercel Web Analytics or Speed Insights.** Despite the file's JSDoc claim, `src/lib/analytics.ts` only `console.log`s in development and `src/app/layout.tsx` does **NOT** render `<Analytics />` or `<SpeedInsights />`. If you need real analytics, add `@vercel/analytics` to `package.json` and render `<Analytics />` in `src/app/layout.tsx`.
 
-**What exists** is `src/lib/analytics.ts` — a dev-only `console.log` shim with 5 functions (`trackPageView`, `trackEvent`, `trackChatEvent`, `trackCrawlEvent`, `trackError`). All are no-ops in production. See §7.9 for the full signature table.
+**What exists** is `src/lib/analytics.ts` - a dev-only `console.log` shim with 5 functions (`trackPageView`, `trackEvent`, `trackChatEvent`, `trackCrawlEvent`, `trackError`). All are no-ops in production. See §7.9 for the full signature table.
 
-**Don't put PII in event props** — even though they're dev-only now, future integration may retain.
+**Don't put PII in event props** - even though they're dev-only now, future integration may retain.
 
 ---
 
@@ -1008,7 +1008,7 @@ The FE reads these env vars directly. For server-only vars, see `reference.cross
 
 > **`ADMIN_EMAILS` is NOT referenced anywhere in the codebase** (verified by grep). The Clerk webhook does NOT bootstrap admin role. See `reference.cross-cutting.md` §3.3 for the manual two-step admin promotion.
 
-> **Missing from this table but present in `.env.local.example`:** `CRAWL_WEBHOOK_SECRET`, `CONVEX_AUTH_TOKEN` (BE only — see `reference.cross-cutting.md` §2.1 for full BE table).
+> **Missing from this table but present in `.env.local.example`:** `CRAWL_WEBHOOK_SECRET`, `CONVEX_AUTH_TOKEN` (BE only - see `reference.cross-cutting.md` §2.1 for full BE table).
 
 **`NEXT_PUBLIC_*`** vars are exposed to the client. They are public by definition. The rest are server-only and must never be imported into a client component (Next.js will throw at build).
 

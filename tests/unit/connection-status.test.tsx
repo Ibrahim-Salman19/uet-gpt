@@ -31,7 +31,7 @@ describe("ConnectionStatus", () => {
     });
 
     expect(
-      screen.getByText(/You are offline — messages will be sent when you reconnect/i)
+      screen.getByText(/You are offline - messages will be sent when you reconnect/i)
     ).toBeInTheDocument();
   });
 
