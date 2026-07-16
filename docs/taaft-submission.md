@@ -11,7 +11,6 @@
 - **Tags**: education, chatbot, rag, university, pakistan, uet, student-assistant, ai-assistant
 - **Pricing**: Free
 - **Open Source**: Yes (AGPL-3.0)
-- **GitHub**: https://github.com/devhms/uet_gpt
 
 ## How to Submit
 

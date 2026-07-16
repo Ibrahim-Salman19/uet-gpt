@@ -9,7 +9,7 @@ UET GPT is an open-source AI chatbot that answers any question about UET Taxila 
 Ask it about admissions, fees, programs, faculty, campus life - get instant, cited answers grounded in the university's own data.
 
 🔗 Live: https://uet-gpt.vercel.app
-📦 Source: https://github.com/devhms/uet_gpt
+📦 Source: https://uet-gpt.vercel.app
 📜 License: AGPL-3.0
 
 ## Maker Comment
@@ -28,7 +28,7 @@ If you're building something similar for your campus, I'd love to connect!
 # Show HN: UET GPT - Open-source AI chatbot for a Pakistani engineering university
 
 **URL**: https://uet-gpt.vercel.app
-**GitHub**: https://github.com/devhms/uet_gpt
+**GitHub**: https://uet-gpt.vercel.app
 
 ## Post Body
 

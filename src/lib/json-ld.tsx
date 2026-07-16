@@ -57,8 +57,10 @@ export const softwareSchema = {
   url: siteUrl,
   about: {
     "@type": "CollegeOrUniversity",
+    "@id": "https://web.uettaxila.edu.pk/#university",
     name: "University of Engineering and Technology, Taxila",
     url: "https://web.uettaxila.edu.pk",
+    dateModified: "2026-07-16",
   },
   offers: {
     "@type": "Offer",

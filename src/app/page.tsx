@@ -19,7 +19,7 @@ import {
   APP_TAGLINE,
   DEFAULT_SUGGESTIONS,
 } from "@/lib/constants";
-import { JsonLd } from "@/lib/json-ld";
+
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
@@ -60,6 +60,7 @@ const FAQ_ITEMS = [
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  dateModified: "2026-07-16",
   mainEntity: FAQ_ITEMS.map((item) => ({
     "@type": "Question",
     name: item.q,
@@ -75,7 +76,6 @@ export default async function LandingPage() {
   const isSignedIn = !!userId;
   return (
     <>
-      <JsonLd />
       <script
         type="application/ld+json"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: static schema object safe for serialization

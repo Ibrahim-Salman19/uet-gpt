@@ -1,7 +1,7 @@
 # UET GPT - Discoverability & Outreach Plan
 
 > Goal: earn high-authority backlinks + citations so UET GPT (https://uet-gpt.vercel.app) ranks for "UET Taxila", "UET GPT", "UET admissions", and gets cited by AI agents (ChatGPT / Perplexity / Claude).
-> Repo: https://github.com/devhms/uet_gpt · Live: https://uet-gpt.vercel.app
+> Repo: https://uet-gpt.vercel.app · Live: https://uet-gpt.vercel.app
 > Current GitHub description: *"UET GPT - AI-powered RAG chatbot for University of Engineering and Technology, Taxila. Get instant answers about admissions, fees, programs, faculty, and campus life."*
 
 ---
@@ -12,7 +12,7 @@ Priority = expected SEO/citation value × relevance × effort. P1 = do first.
 
 | # | Priority | Site | URL | What to submit | Account needed? | Link type |
 |---|----------|------|-----|----------------|-----------------|-----------|
-| 1 | P1 | **GitHub topics optimization** | github.com/devhms/uet_gpt | Add repo topics + description (see §3) | GitHub login (you own repo) | n/a (repo is the asset) |
+| 1 | P1 | **GitHub topics optimization** | uet-gpt.vercel.app | Add repo topics + description (see §3) | GitHub login (you own repo) | n/a (repo is the asset) |
 | 2 | P1 | **Product Hunt** | producthunt.com/posts/new | "UET GPT" launch: tagline, link, 3 screenshots, first-comment hunt | Account (free) | Dofollow |
 | 3 | P1 | **Show HN (Hacker News)** | news.ycombinator.com/submit | Title: `Show HN: UET GPT – open-source RAG chatbot for UET Taxila`; URL + honest technical blurb | HN account (free) | Nofollow |
 | 4 | P1 | **There's An AI For That** | theresanaiforthat.com/submit | Free tool listing, category "Education / Student Help", link | Account (free) | Dofollow |
@@ -53,7 +53,7 @@ Priority = expected SEO/citation value × relevance × effort. P1 = do first.
 >
 > Students can ask about admissions, fee structures, academic programs, departments, faculty, transport routes, hostels, scholarships, and examinations - and get instant, citation-backed answers instead of digging through PDFs. The stack is Next.js + Convex (vector search) + Clerk auth, with a multi-model LLM fallback chain (Groq → Cerebras → Gemini).
 >
-> Try it free at https://uet-gpt.vercel.app or explore the open-source code at https://github.com/devhms/uet_gpt.
+> Try it free at https://uet-gpt.vercel.app or explore the open-source code at https://uet-gpt.vercel.app.
 
 (~600 chars)
 
@@ -63,7 +63,7 @@ Priority = expected SEO/citation value × relevance × effort. P1 = do first.
 >
 > It continuously crawls official university pages/PDFs, chunks them, and retrieves with hybrid vector + BM25 search + reranking, then generates citation-backed answers. Stack: Next.js, Convex (vector index), Clerk, Vercel AI SDK with a Groq→Cerebras→Gemini fallback.
 >
-> Live: https://uet-gpt.vercel.app · Code: https://github.com/devhms/uet_gpt
+> Live: https://uet-gpt.vercel.app · Code: https://uet-gpt.vercel.app
 > Would love feedback on the retrieval/reranking approach and hallucination guard.
 
 ---
@@ -84,10 +84,10 @@ nextjs, convex, clerk, vector-search, open-source
 
 **Run by user** (these mutate the repo - DO NOT run automatically):
 ```bash
-gh repo edit devhms/uet_gpt \
+gh repo edit uet-gpt \
   --description "UET GPT - open-source RAG chatbot & intelligent guide to UET Taxila (Pakistan). Instant, citation-backed answers on admissions, fees, programs, faculty, and campus life."
 
-gh repo edit devhms/uet_gpt \
+gh repo edit uet-gpt \
   --add-topic uet-gpt --add-topic uet-taxila --add-topic uet \
   --add-topic uet-pakistan --add-topic ai-chatbot --add-topic rag \
   --add-topic rag-chatbot --add-topic education --add-topic edtech \

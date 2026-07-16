@@ -9,7 +9,7 @@ answers questions about admissions, departments, fees, exams, faculty, and
 campus life using a hybrid search + LLM generation pipeline over a corpus of
 crawled university web pages and ingested PDFs.
 
-Live app: [https://uet-gpt.vercel.app](https://uet-gpt.vercel.app) · Source: [github.com/devhms/uet_gpt](https://github.com/devhms/uet_gpt) · [Press kit](https://uet-gpt.vercel.app/press-kit.md)
+Live app: [https://uet-gpt.vercel.app](https://uet-gpt.vercel.app) · [Press kit](https://uet-gpt.vercel.app/press-kit.md)
 
 ## What is UET GPT?
 
@@ -20,7 +20,7 @@ Key things to know:
 - **Built for UET Taxila** - every answer is grounded in UET Taxila's official website (`web.uettaxila.edu.pk`), admissions portal (`admissions.uettaxila.edu.pk`), and ingested documents.
 - **Retrieval-Augmented Generation (RAG)** - answers are retrieved from a continuously crawled, indexed knowledge base, not hallucinated from generic model memory.
 - **Cited and verifiable** - responses link back to the official university material they came from.
-- **Open source** - the full stack is public on [GitHub](https://github.com/devhms/uet_gpt) under [AGPL-3.0](./LICENSE), and is free to use.
+- **Open source** - the full stack is released under [AGPL-3.0](./LICENSE) and is free to use.
 
 UET GPT is currently free to use at [https://uet-gpt.vercel.app](https://uet-gpt.vercel.app).
 

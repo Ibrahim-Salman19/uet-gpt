@@ -1,7 +1,7 @@
 # Content Cluster Brief - UET GPT (uet-gpt.vercel.app)
 
 **Subject:** UET GPT - open-source AI chatbot, the intelligent guide to UET Taxila (Taxila campus, Pakistan).
-**Live:** https://uet-gpt.vercel.app · **Code:** https://github.com/devhms/uet_gpt
+**Live:** https://uet-gpt.vercel.app · **Code:** https://uet-gpt.vercel.app
 **Brief date:** 2026-07-15 · **Built on:** `docs/serp-gap-analysis.md`
 **Method:** Live `websearch` per target long-tail query (infsh CLI unavailable).
 
@@ -20,8 +20,8 @@ Verdicts: **W** = Winnable (no intent-matched conversational result) · **C** = 
 | 5 | UET Taxila student chatbot | Admissions FAQ; DSA/societies; Facebook "UET Taxila Help Desk" | **No** student-life bot | **W** |
 | 6 | UET Taxila programs chatbot | Official `Programs.aspx`; **blog.maqsad.io "Full Guide on UET Taxila Programs 2026"** (rival) | List only, no AI explorer | **W** (modifier) |
 | 7 | UET Taxila fee structure chatbot | `admissions.../Fees.php`; **gotest, maqsad/uet-fee-structure, paklearningspot, result.pk, ilmkidunya** | Tables/PDFs, no chat | **C** bare / **W** modifier |
-| 8 | open source UET Taxila chatbot | UmerAbbasi658, HaseebQaisar145, adeebamubarak, Areeba391391 repos; generic RAG articles | devhms/uet_gpt **not** ranking | **W** (phrase) |
-| 9 | UET GPT (brand) | Hamas-ur-Rehman/UETGPT, tahirmanj398-byte/the-uet-gpt, MuhammadQasim111/UETGPT, ChatGPT | devhms **absent** | **B** |
+| 8 | open source UET Taxila chatbot | UmerAbbasi658, HaseebQaisar145, adeebamubarak, Areeba391391 repos; generic RAG articles | uet-gpt **not** ranking | **W** (phrase) |
+| 9 | UET GPT (brand) | Hamas-ur-Rehman/UETGPT, tahirmanj398-byte/the-uet-gpt, MuhammadQasim111/UETGPT, ChatGPT | UET GPT Team **absent** | **B** |
 | 10 | UET Taxila hostel/transport chatbot | Official `Hostels.aspx`, `Transport.aspx`; AlishbaMudassar "Ayesha Hall" repo | PDFs/pages, no bot | **W** |
 | 11 | UET Taxila vs UET Lahore | **blog.maqsad.io** 3-way comparison table; separate Wikipedia pages | No neutral comparison page | **W** |
 | 12 | ask UET Taxila anything / Q&A AI | Generic Ask-AI tools (edusolver, easyai, piax); official ContactUs | **No** Taxila-specific AI | **W** |
@@ -41,7 +41,7 @@ Verdicts: **W** = Winnable (no intent-matched conversational result) · **C** = 
 - Primary: `UET GPT Taxila` · Secondary: `UET Taxila AI chatbot`, `UET Taxila AI assistant`
 - FAQ: What is UET GPT? · Is it officially affiliated with UET Taxila? · What can I ask? · Is it free/open source? · How accurate are answers? · How is my data handled?
 - Links: `/`, `/uet-taxila`, `/uet-taxila/ai-chatbot`, `/uet-gpt/open-source`
-- Winnable: "UET GPT" SERP contested by 3+ unrelated repos + ChatGPT; devhms unindexed. A brand+campus page captures the exact query.
+- Winnable: "UET GPT" SERP contested by 3+ unrelated repos + ChatGPT; UET GPT Team unindexed. A brand+campus page captures the exact query.
 
 **2. `/uet-taxila/ai-chatbot`**
 - Title: *UET Taxila AI Chatbot - Ask Anything About the Campus* · H1: *UET Taxila AI Chatbot*

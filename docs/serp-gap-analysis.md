@@ -1,7 +1,7 @@
 # SERP Gap Analysis - UET GPT (uet-gpt.vercel.app)
 
 **Subject:** UET GPT - open-source AI chatbot, the intelligent guide to the University of Engineering & Technology (UET), Taxila campus, Pakistan.
-**Live:** https://uet-gpt.vercel.app · **Code:** https://github.com/devhms/uet_gpt
+**Live:** https://uet-gpt.vercel.app · **Code:** https://uet-gpt.vercel.app
 **Analysis date:** 2026-07-15 · **Method:** Live `websearch` queries (infsh CLI broken; used built-in websearch).
 
 ---
@@ -30,10 +30,10 @@ A disambiguation war. Top results:
 ### "UET GPT" (brand query)
 Contested by **several unrelated projects also named "UET GPT"**:
 - `github.com/Hamas-ur-Rehman/UETGPT` - "AI-powered text generation model" (text-gen, not Taxila-specific).
-- `github.com/tahirmanj398-byte/the-uet-gpt.` - "Vercel Edition" ChatGPT-style app (different from devhms's).
+- `github.com/tahirmanj398-byte/the-uet-gpt.` - "Vercel Edition" ChatGPT-style app (different from UET GPT Team's).
 - `github.com/MuhammadQasim111/UETGPT` - Streamlit teaching assistant; `youtube.com/watch?v=zwXviDydMoY` "UET GPT+".
 - `gpt.builders` "Universal Enlightenment Thinker (UET)" and `chatgpt.com` dilute the brand.
-- **The real `devhms/uet_gpt` + uet-gpt.vercel.app is effectively unindexed** for this query → brand capture is achievable but must outrank the other "UET GPT" repos via README SEO + the live site.
+- **The real `uet-gpt` + uet-gpt.vercel.app is effectively unindexed** for this query → brand capture is achievable but must outrank the other "UET GPT" repos via README SEO + the live site.
 
 ### "UET AI assistant" / "UET chatbot" / "UET student chatbot"
 - Mostly noise: `uetailab.github.io` (Vietnam UET AI lab), `huggingface.co/iaiuet`, academic "UetBot" (European Univ. of Tirana) papers, "Feasibility of Chatbot for Mehran UET" (MUET Jamshoro).
@@ -94,10 +94,10 @@ Content rules: embed the live chat widget; use the exact target phrase in `<titl
 
 ## 4. Prioritized off-site signals
 
-1. **Wikidata entity** - propose a Wikidata item for "UET GPT" (instance of: AI chatbot; official website uet-gpt.vercel.app; source repo github.com/devhms/uet_gpt). Highest-leverage signal; feeds knowledge panels.
+1. **Wikidata entity** - propose a Wikidata item for "UET GPT" (instance of: AI chatbot; official website uet-gpt.vercel.app; source repo uet-gpt.vercel.app). Highest-leverage signal; feeds knowledge panels.
 2. **Wikipedia mention** - request a one-line note on the `University of Engineering and Technology, Taxila` page ("An open-source AI chatbot, UET GPT, provides conversational access to prospectus and admission data"). High trust transfer.
 3. **UET-community backlinks** - earn links from UET Taxila CS/SE dept pages, student-society sites (AICP chapter), and the HudaRaja/HaseebQaisar145/adeebamubarak chatbot authors (complementary, not rivals). A backlink from `uettaxila.edu.pk` / a `.edu.pk` subdomain is gold.
-4. **GitHub topics & README SEO** - add topics `chatbot`, `rag`, `llm`, `uet-taxila`, `pakistan`, `education`, `open-source` to `devhms/uet_gpt`; write a README with the phrase "UET Taxila AI chatbot" and a link to the live site. Critically, **differentiate from the other "UET GPT" repos** in the README/title so brand search resolves to this project.
+4. **GitHub topics & README SEO** - add topics `chatbot`, `rag`, `llm`, `uet-taxila`, `pakistan`, `education`, `open-source` to `uet-gpt`; write a README with the phrase "UET Taxila AI chatbot" and a link to the live site. Critically, **differentiate from the other "UET GPT" repos** in the README/title so brand search resolves to this project.
 5. **Directory / project listings** - submit to OSS/AI directories (Product Hunt, AlternativeTo, There's An AI For That) using exact brand + target keywords.
 6. **Structured data + community sharing** - `SoftwareApplication` schema on the hub; share the live tool in Pakistan edtech/developer communities (Reddit r/Pakistan, LinkedIn, dev forums) to earn natural links and brand queries (brand-query volume boosts rankings).
 
@@ -117,7 +117,7 @@ Even "UET Taxila" is dominated by `uettaxila.edu.pk` (official .edu.pk) and the 
 ### Evidence log (queries run)
 - `UET` → uet.edu.pk, Wikipedia UET disambig, uet.vnu.edu.vn, uet.edu.al, github redpointgames/uet
 - `UET Taxila` → uettaxila.edu.pk (home/AboutUs/Programs/Prospectus), admissions portal, Wikipedia UET Taxila, Maqsad blog
-- `UET GPT` → Hamas-ur-Rehman/UETGPT, tahirmanj398-byte/the-uet-gpt, MuhammadQasim111/UETGPT, gpt.builders, ChatGPT (real devhms project absent)
+- `UET GPT` → Hamas-ur-Rehman/UETGPT, tahirmanj398-byte/the-uet-gpt, MuhammadQasim111/UETGPT, gpt.builders, ChatGPT (real UET GPT Team project absent)
 - `UET AI assistant` → uetailab (Vietnam), huggingface iaiuet, UT Verse, Glean, UetBot (Tirana) paper
 - `UET chatbot` → bqcuong/uetchat (Vietnam), UET Lahore Roman-Urdu paper (Wiley 2025), UET Peshawar RAG chatbot, Mehran UET paper
 - `UET Taxila AI` → uettaxila CS/CPED dept AI pages, MS AI program, AICP chapter, Agentic AI Summit

@@ -101,7 +101,6 @@ AI chatbot, UET Taxila, educational AI, RAG chatbot, university assistant, Pakis
 ### Week 2-3 - Tier 8 Profile Backlinks
 | Platform | Link | DR |
 |---|---|---|
-| GitHub (profile) | https://github.com/devhms/uet_gpt | 98 |
 | Dev.to | https://dev.to/ | 90 |
 | Substack | https://substack.com/ | 93 |
 | SlideShare | https://www.slideshare.net/ | 95 |
@@ -156,7 +155,6 @@ AI chatbot, UET Taxila, educational AI, RAG chatbot, university assistant, Pakis
 | Inception (P571) | 21 May 2026 |
 | Developer (P178) | UET GPT Team |
 | Programming language (P277) | TypeScript (Q23757187) |
-| Source code repo (P1324) | https://github.com/devhms/uet_gpt |
 | Genre (P136) | chatbot (Q363045), educational software (Q952151) |
 | LinkedIn ID (P4264) | (after creating page) |
 | Crunchbase ID (P2088) | (after creating profile) |

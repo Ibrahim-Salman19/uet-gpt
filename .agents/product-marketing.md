@@ -1,32 +1,49 @@
-# Product Marketing Context
+# Product Marketing Context — UET GPT
 
-## Product
-**UET GPT** - An intelligent AI-powered RAG chatbot for the University of Engineering and Technology (UET) Taxila.
+_Living doc read by all marketing skills. Last updated: 2026-07-16_
 
-## Value Proposition
-The only AI assistant that provides accurate, real-time answers about UET Taxila - admissions, fee structures, academic programs, faculty directories, campus life, transport, hostels, scholarships, and more - powered by direct retrieval from official university documents and web pages.
+## What is UET GPT?
+UET GPT is a free, open-source AI chatbot that serves as the intelligent guide to the University of Engineering and Technology (UET), Taxila, Pakistan. It answers questions about admissions, fee structure, academic programs, departments, faculty, campus life, transport, hostels, and scholarships using RAG-powered retrieval from official university documents.
 
-## Target Audience
-- **Primary**: Students, staff, and faculty of UET Taxila
-- **Secondary**: Prospective students researching UET Taxila admissions
-- **Tertiary**: Anyone seeking information about Pakistani engineering universities
+## Who is it for?
+- **Prospective students** of UET Taxila (undergrad engineering / BS Computing applicants)
+- **Current students** (date sheets, transport, hostel, academic info)
+- **Parents** evaluating the university
+- Secondary: general public searching "UET", "UET Taxila", "UET GPT"
 
-## Key Differentiators
-- RAG-powered accuracy from official UET documents (not generic AI knowledge)
-- Real-time crawling of UET Taxila's official website and admissions portal
-- Premium dark academic design (urushi lacquer aesthetic with gold accents)
-- Multi-model AI support (Llama 4 Scout for deep reasoning, Llama 3.1 8B for speed)
-- Privacy-first with Clerk authentication and user-controlled data
+## Positioning
+"The only AI guide built on official UET Taxila data — free and open source."
+ vs. generic chatbots (ChatGPT) that hallucinate about specific university facts, and vs. scattered/unofficial Facebook groups.
 
-## Keywords
-UET, UET Taxila, UET GPT, UET Taxila chatbot, AI assistant Pakistan, university AI chatbot, UET admissions, UET fee structure, UET academic programs, Pakistani engineering university, UET Taxila guide
+## Key Features
+- RAG answers from official UET Taxila docs + live crawling
+- Multi-model (Llama 4 Scout, Llama 3.1 8B via Groq)
+- Citation engine (every answer sourced)
+- Privacy-first (Clerk auth, data export/deletion)
+- Free, open source (AGPL-3.0), self-hostable
 
-## Competitors
-- Generic ChatGPT (not specific to UET Taxila)
-- UET Taxila official website (hard to navigate, no Q&A)
-- Google search (not curated, no guarantee of accuracy)
+## Pricing
+- Free tier: $0, unlimited UET Taxila queries
+- Planned: Pro (priority models, API), Enterprise (institutional, white-label) — TBD
 
-## SEO Goals
-1. Rank #1 for "UET" and "UET Taxila" related searches
-2. Get cited by AI engines (ChatGPT, Perplexity, Claude, Google AI Overviews)
-3. Build authority as the definitive UET Taxila information resource
+## Competitors / Alternatives
+- Generic AI chatbots (ChatGPT, Gemini) — not UET-specific, hallucinate
+- Unofficial Facebook/WhatsApp UET groups — unstructured, unreliable
+- University's own website — hard to navigate, no Q&A
+- Paid ed-tech (no direct UET Taxila competitor)
+
+## Channels
+- Owned: website (uet-gpt.vercel.app), llms.txt, GitHub (uet-gpt), dev.to
+- Earned: Reddit (r/UET, r/Islamabad), Wikidata, free AI directories
+- AI-native: ChatGPT, Perplexity, Claude, Gemini (via llms.txt + schema)
+
+## Goals (this quarter)
+1. Get all 6 core pages indexed on Google.
+2. Rank #1 for "UET GPT", top 3 for "UET Taxila AI".
+3. Earn AI citations for "UET Taxila" queries.
+4. Build authority via Wikidata, directories, GitHub, dev.to.
+
+## Brand Voice
+- Clear, specific, helpful. No em dashes in published copy.
+- Grounded in facts; cite official sources.
+- Friendly to students; never condescending.

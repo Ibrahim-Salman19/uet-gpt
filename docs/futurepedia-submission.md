@@ -10,7 +10,7 @@
 - **Category**: Education, Chatbot
 - **Pricing**: Free
 - **Open Source**: Yes
-- **GitHub**: https://github.com/devhms/uet_gpt
+- **GitHub**: https://uet-gpt.vercel.app
 
 ## How to Submit
 

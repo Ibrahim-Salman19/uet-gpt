@@ -38,7 +38,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Where can I find the UET GPT source code?",
-    a: "UET GPT is open source. The project lives on GitHub at https://github.com/devhms/uet_gpt, where you can read the code, report issues, suggest improvements, or contribute. The live app is available at https://uet-gpt.vercel.app.",
+    a: "UET GPT is open source and free to use. The live app is available at https://uet-gpt.vercel.app, where you can ask anything about UET Taxila admissions, fees, programs, and campus life.",
   },
   {
     q: "Is UET GPT free to use?",
@@ -49,6 +49,7 @@ const FAQ_ITEMS = [
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  dateModified: "2026-07-16",
   mainEntity: FAQ_ITEMS.map((item) => ({
     "@type": "Question",
     name: item.q,
@@ -249,7 +250,7 @@ export default function UetGptPage() {
                 },
                 {
                   title: "Open Source",
-                  desc: "UET GPT is open-source on GitHub at devhms/uet_gpt - read the code, report issues, or contribute.",
+                  desc: "UET GPT is open-source and free for everyone - ask anything about UET Taxila.",
                 },
               ].map((f) => (
                 <div
@@ -267,7 +268,7 @@ export default function UetGptPage() {
             </div>
           </section>
 
-          {/* GitHub & Open Source Section */}
+          {/* Open Source & Community Section */}
           <section className="px-6 py-16 max-w-4xl mx-auto">
             <h2 className="text-xl md:text-2xl font-semibold text-center mb-2 tracking-tight text-[var(--text-primary)]">
               Open Source & Community
@@ -277,15 +278,7 @@ export default function UetGptPage() {
             </p>
             <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/40 backdrop-blur-sm">
               <p className="text-sm text-[var(--text-secondary)] leading-relaxed font-sans">
-                UET GPT is released as open-source software. The full source code, issue tracker,
-                and contribution guidelines are available on GitHub at{" "}
-                <Link
-                  href="https://github.com/devhms/uet_gpt"
-                  className="text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors underline font-medium"
-                >
-                  github.com/devhms/uet_gpt
-                </Link>
-                . The live app runs at{" "}
+                UET GPT is released as open-source software and runs free for everyone at{" "}
                 <Link
                   href="/"
                   className="text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors underline font-medium"
@@ -397,12 +390,6 @@ export default function UetGptPage() {
                 className="hover:text-[var(--text-primary)] transition-colors"
               >
                 UET Taxila
-              </Link>
-              <Link
-                href="https://github.com/devhms/uet_gpt"
-                className="hover:text-[var(--text-primary)] transition-colors"
-              >
-                GitHub
               </Link>
             </div>
           </div>

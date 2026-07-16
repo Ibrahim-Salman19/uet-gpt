@@ -17,7 +17,6 @@ Ready-to-post drafts for sharing UET GPT with students, the Pakistani tech/educa
 > It's free to use and the code is fully open source.
 >
 > Try it: https://uet-gpt.vercel.app
-> Source: https://github.com/devhms/uet_gpt
 >
 > #UET #UETTaxila #AI #EdTech #Pakistan #Engineering #OpenSource
 
@@ -44,7 +43,6 @@ Ready-to-post drafts for sharing UET GPT with students, the Pakistani tech/educa
 > Admissions, fees, departments, hostels, transport, scholarships - all answered from official UET Taxila data, with citations.
 >
 > Free + open source: https://uet-gpt.vercel.app
-> Code: https://github.com/devhms/uet_gpt
 >
 > #UET #UETTaxila #AI #EdTech #Pakistan
 
@@ -74,9 +72,8 @@ Ready-to-post drafts for sharing UET GPT with students, the Pakistani tech/educa
 >
 > It uses Retrieval-Augmented Generation over official UET Taxila sources (web.uettaxila.edu.pk and the admissions portal), so answers come with citations back to the original material rather than from a model's memory.
 >
-> It's free to use and the full codebase is on GitHub:
+> It's free to use and the full codebase is open source:
 > - Live: https://uet-gpt.vercel.app
-> - Source: https://github.com/devhms/uet_gpt
 >
 > Feedback and contributions welcome. Happy to answer questions.
 >
@@ -91,7 +88,6 @@ Ready-to-post drafts for sharing UET GPT with students, the Pakistani tech/educa
 >
 > Every answer links back to the official source. Open source too.
 > Try it: https://uet-gpt.vercel.app
-> Contribute: https://github.com/devhms/uet_gpt
 >
 > #UET #UETTaxila #AI #EdTech #Pakistan
 
@@ -110,8 +106,8 @@ Ready-to-post drafts for sharing UET GPT with students, the Pakistani tech/educa
 3. **Architecture overview** - Next.js + Convex + Clerk; Vercel AI SDK multi-model fallback; Python async crawler; vector search + Gemini embeddings.
 4. **The RAG pipeline** - Crawl → chunk → embed → retrieve (hybrid vector + BM25) → rerank → generate with citations.
 5. **Why citations matter** - Anti-hallucination and grounding in official UET Taxila sources.
-6. **Open source & what's next** - Link the GitHub repo, call for contributors, and the roadmap.
-7. **Try it / links** - Live app, GitHub, press kit.
+6. **Open source & what's next** - Call for contributors and the roadmap.
+7. **Try it / links** - Live app and press kit.
 
 **Suggested tags:** `#ai #rag #typescript #nextjs #pakistan #edtech #opensource`
 

@@ -21,7 +21,7 @@ Rather than searching through scattered pages and PDFs, users get grounded answe
 - **Multi-Model AI** - Routes across models (e.g., Llama 4 Scout for deep reasoning, Llama 3.1 8B for fast responses) with a fallback chain.
 - **Citation Engine** - Every answer includes source references from official university materials.
 - **Privacy-First** - Clerk-powered authentication with user-controlled data export and deletion.
-- **Open Source** - The full codebase is public on GitHub and free to use.
+- **Open Source** - The full codebase is community-maintained and free to use.
 
 ## Who is it for?
 
@@ -44,7 +44,6 @@ Rather than searching through scattered pages and PDFs, users get grounded answe
 
 - **Live app:** https://uet-gpt.vercel.app
 - **Chat:** https://uet-gpt.vercel.app/chat
-- **GitHub (source):** https://github.com/devhms/uet_gpt
 - **About UET Taxila:** https://uet-gpt.vercel.app/about
 - **Press kit:** https://uet-gpt.vercel.app/press-kit.md
 
@@ -56,7 +55,7 @@ The University of Engineering and Technology (UET) Taxila is one of Pakistan's p
 
 *Feel free to copy and publish the paragraph below:*
 
-> UET GPT is an open-source AI chatbot that acts as an intelligent guide to the University of Engineering and Technology (UET) Taxila in Pakistan. Built on Retrieval-Augmented Generation over official university data, it answers questions about admissions, fee structures, academic programs, departments, faculty, campus life, transport, hostels, and scholarships - with citations back to official UET Taxila sources. It is free to use at https://uet-gpt.vercel.app and open source at https://github.com/devhms/uet_gpt.
+> UET GPT is an open-source AI chatbot that acts as an intelligent guide to the University of Engineering and Technology (UET) Taxila in Pakistan. Built on Retrieval-Augmented Generation over official university data, it answers questions about admissions, fee structures, academic programs, departments, faculty, campus life, transport, hostels, and scholarships - with citations back to official UET Taxila sources. It is free to use at https://uet-gpt.vercel.app and released as open-source software.
 
 ## One-Line Description
 
