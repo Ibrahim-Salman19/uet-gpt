@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BreadcrumbJsonLd } from "@/lib/json-ld";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
@@ -49,6 +50,7 @@ const FAQ_ITEMS = [
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  dateModified: "2026-07-16",
   mainEntity: FAQ_ITEMS.map((item) => ({
     "@type": "Question",
     name: item.q,
@@ -62,6 +64,13 @@ const faqSchema = {
 export default function UetTaxilaAdmissionsPage() {
   return (
     <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", url: siteUrl },
+          { name: "UET Taxila", url: `${siteUrl}/uet-taxila` },
+          { name: "Admissions", url: `${siteUrl}/uet-taxila/admissions` },
+        ]}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
@@ -449,10 +458,18 @@ export default function UetTaxilaAdmissionsPage() {
                 className="text-[#6366f1] hover:text-[#8b5cf6] transition-colors"
               >
                 UET Taxila hub
-              </Link>{" "}
-              or go to the{" "}
+              </Link>
+              {" "}or go to the{" "}
               <Link href="/" className="text-[#6366f1] hover:text-[#8b5cf6] transition-colors">
                 UET GPT home page
+              </Link>
+              . For detailed term explanations, see{" "}
+              <Link href="/learn/ecat" className="text-[#6366f1] hover:text-[#8b5cf6] transition-colors">
+                ECAT explained
+              </Link>
+              {" "}and{" "}
+              <Link href="/learn/merit-formula" className="text-[#6366f1] hover:text-[#8b5cf6] transition-colors">
+                merit formula
               </Link>
               .
             </p>
@@ -470,6 +487,9 @@ export default function UetTaxilaAdmissionsPage() {
               </Link>
               <Link href="/uet-taxila" className="hover:text-[#e1e1e2] transition-colors">
                 UET Taxila Hub
+              </Link>
+              <Link href="/learn" className="hover:text-[#e1e1e2] transition-colors">
+                Glossary
               </Link>
               <Link href="/chat" className="hover:text-[#e1e1e2] transition-colors">
                 Chat

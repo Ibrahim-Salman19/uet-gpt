@@ -15,7 +15,7 @@ I built **UET GPT** to fix that. It's an open-source AI chatbot that answers any
 UET Taxila has:
 - **14 departments** across 6 faculties
 - **5,000+ students** with constant questions about admissions, fees, programs, and campus life
-- **Official data** locked in PDFs, static HTML pages, and a2000s-era admissions portal
+- **Official data** locked in PDFs, static HTML pages, and a 2000s-era admissions portal
 
 Students resort to WhatsApp groups, Facebook pages, and outdated blog posts. The information is there, but it's not accessible in a modern, conversational way.
 
@@ -90,13 +90,13 @@ After launching to a small group of UET Taxila students:
 
 1. **Start with the prospectus** - it's the single most comprehensive source. The crawler spent days on pages that duplicated info already in the PDF.
 2. **FAQ extraction is gold** - the university's FAQ pages (if they exist) are the highest-value content to ingest. Every question there is a real student question.
-3. **Don't underestimate old URLs** - UET Taxila's site uses `.asp` pages from the early2000s. The crawler needed special handling for these.
+3. **Don't underestimate old URLs** - UET Taxila's site uses `.asp` pages from the early 2000s. The crawler needed special handling for these.
 
 ## Try It
 
-🔗 **Live**: [uet-gpt.vercel.app](https://uet-gpt.vercel.app)
-📦 **Source**: [github.com/devhms/uet_gpt](https://github.com/devhms/uet_gpt)
-📜 **License**: AGPL-3.0
+Live: [uet-gpt.vercel.app](https://uet-gpt.vercel.app)
+Source: [uet-gpt.vercel.app](https://uet-gpt.vercel.app)
+License: AGPL-3.0
 
 If you're building something similar for your university, I'd love to hear about it. The architecture is generalizable - swap the seed URLs and corpus and you have a campus chatbot for any institution.
 

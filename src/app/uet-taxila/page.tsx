@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BreadcrumbJsonLd } from "@/lib/json-ld";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
@@ -49,6 +50,7 @@ const FAQ_ITEMS = [
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  dateModified: "2026-07-16",
   mainEntity: FAQ_ITEMS.map((item) => ({
     "@type": "Question",
     name: item.q,
@@ -62,9 +64,14 @@ const faqSchema = {
 export default function UetTaxilaPage() {
   return (
     <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", url: siteUrl },
+          { name: "UET Taxila", url: `${siteUrl}/uet-taxila` },
+        ]}
+      />
       <script
         type="application/ld+json"
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: static schema object safe for serialization
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <div className="flex min-h-screen flex-col bg-[var(--surface-base)] text-[var(--text-primary)] selection:bg-[var(--accent)] selection:text-[var(--accent-fg)]">
@@ -420,6 +427,9 @@ export default function UetTaxilaPage() {
             <div className="flex items-center gap-6">
               <Link href="/" className="hover:text-[var(--text-primary)] transition-colors">
                 UET GPT Home
+              </Link>
+              <Link href="/learn" className="hover:text-[var(--text-primary)] transition-colors">
+                Glossary
               </Link>
               <Link href="/chat" className="hover:text-[var(--text-primary)] transition-colors">
                 Chat
