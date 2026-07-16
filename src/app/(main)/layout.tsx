@@ -4,7 +4,7 @@ import { AmbientGlow } from "@/components/ambient-glow";
 import { BackdropWrapper } from "@/components/backdrop-wrapper";
 import { CommandPalette } from "@/components/command-palette";
 import { ConnectionStatus } from "@/components/connection-status";
-import { ConvexReadyGate } from "@/components/convex-ready-gate";
+import { ConvexReadyGate, ConvexReconnectBanner } from "@/components/convex-ready-gate";
 import { MainShell } from "@/components/main-shell";
 import { PreferencesModal } from "@/components/preferences-modal";
 import { VoiceModalWrapper } from "@/components/voice-modal-wrapper";
@@ -29,6 +29,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
       <ErrorBoundary fallback={null}>
         <ConnectionStatus />
+      </ErrorBoundary>
+
+      <ErrorBoundary fallback={null}>
+        <ConvexReconnectBanner />
       </ErrorBoundary>
 
       {/* Branded loading/timeout gate */}
