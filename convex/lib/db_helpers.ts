@@ -5,19 +5,19 @@
 import type { GenericDatabaseReader, GenericDataModel } from "convex/server";
 
 export async function fastCount<DataModel extends GenericDataModel>(
-  db: GenericDatabaseReader<DataModel>,
-  tableName: string,
+	db: GenericDatabaseReader<DataModel>,
+	tableName: string,
 ): Promise<number> {
-  let count = 0;
-  let cursor: string | null = null;
-  let done = false;
-  while (!done) {
-    const page = await db.query(tableName).paginate({ numItems: 1000, cursor });
-    count += page.page.length;
-    done = page.isDone;
-    cursor = page.continueCursor;
-  }
-  return count;
+	let count = 0;
+	let cursor: string | null = null;
+	let done = false;
+	while (!done) {
+		const page = await db.query(tableName).paginate({ numItems: 1000, cursor });
+		count += page.page.length;
+		done = page.isDone;
+		cursor = page.continueCursor;
+	}
+	return count;
 }
 
 /**
@@ -25,21 +25,21 @@ export async function fastCount<DataModel extends GenericDataModel>(
  * @param queryFn - Function that returns a query with filters applied
  */
 export async function fastFilteredCount(
-  queryFn: () => {
-    paginate: (opts: {
-      numItems: number;
-      cursor: string | null;
-    }) => Promise<{ page: unknown[]; isDone: boolean; continueCursor: string }>;
-  },
+	queryFn: () => {
+		paginate: (opts: {
+			numItems: number;
+			cursor: string | null;
+		}) => Promise<{ page: unknown[]; isDone: boolean; continueCursor: string }>;
+	},
 ): Promise<number> {
-  let count = 0;
-  let cursor: string | null = null;
-  let done = false;
-  while (!done) {
-    const page = await queryFn().paginate({ numItems: 1000, cursor });
-    count += page.page.length;
-    done = page.isDone;
-    cursor = page.continueCursor;
-  }
-  return count;
+	let count = 0;
+	let cursor: string | null = null;
+	let done = false;
+	while (!done) {
+		const page = await queryFn().paginate({ numItems: 1000, cursor });
+		count += page.page.length;
+		done = page.isDone;
+		cursor = page.continueCursor;
+	}
+	return count;
 }
