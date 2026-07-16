@@ -1,3 +1,4 @@
+import { auth } from "@clerk/nextjs/server";
 import {
   ArrowRight,
   Award,
@@ -69,7 +70,9 @@ const faqSchema = {
   })),
 };
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const { userId } = await auth();
+  const isSignedIn = !!userId;
   return (
     <>
       <JsonLd />
@@ -114,18 +117,29 @@ export default function LandingPage() {
             <span className="font-semibold text-base font-mono tracking-tight">{APP_NAME}</span>
           </Link>
           <nav className="flex items-center gap-5" aria-label="Main navigation">
-            <Link
-              href="/sign-in"
-              className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors font-mono font-medium tracking-wider uppercase"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/sign-up"
-              className="text-[10px] px-3.5 py-2 rounded bg-[var(--accent)] text-[var(--accent-fg)] hover:bg-[var(--accent-hover)] transition-all font-mono font-bold tracking-widest uppercase active:scale-[0.97] shadow-[0_2px_10px_rgba(202,138,4,0.12)]"
-            >
-              Get Started
-            </Link>
+            {!isSignedIn ? (
+              <>
+                <Link
+                  href="/sign-in"
+                  className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors font-mono font-medium tracking-wider uppercase"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/sign-up"
+                  className="text-[10px] px-3.5 py-2 rounded bg-[var(--accent)] text-[var(--accent-fg)] hover:bg-[var(--accent-hover)] transition-all font-mono font-bold tracking-widest uppercase active:scale-[0.97] shadow-[0_2px_10px_rgba(202,138,4,0.12)]"
+                >
+                  Get Started
+                </Link>
+              </>
+            ) : (
+              <Link
+                href="/chat"
+                className="text-[10px] px-3.5 py-2 rounded bg-[var(--accent)] text-[var(--accent-fg)] hover:bg-[var(--accent-hover)] transition-all font-mono font-bold tracking-widest uppercase active:scale-[0.97] shadow-[0_2px_10px_rgba(202,138,4,0.12)]"
+              >
+                Go to Chat
+              </Link>
+            )}
           </nav>
         </header>
 
@@ -151,19 +165,31 @@ export default function LandingPage() {
               {APP_DESCRIPTION}
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link
-                href="/sign-up"
-                className="group w-full sm:w-auto px-6 py-3.5 rounded-md bg-[var(--accent)] text-[var(--accent-fg)] font-bold hover:bg-[var(--accent-hover)] active:scale-[0.98] transition-all text-[11px] font-mono tracking-widest uppercase shadow-[0_4px_15px_rgba(202,138,4,0.22)] flex items-center justify-center gap-2"
-              >
-                <span>Start Asking Questions</span>
-                <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
-              </Link>
-              <Link
-                href="/sign-in"
-                className="w-full sm:w-auto px-6 py-3.5 rounded-md border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent)]/30 active:scale-[0.98] transition-all text-[11px] font-mono tracking-widest uppercase"
-              >
-                Sign In
-              </Link>
+              {!isSignedIn ? (
+                <>
+                  <Link
+                    href="/sign-up"
+                    className="group w-full sm:w-auto px-6 py-3.5 rounded-md bg-[var(--accent)] text-[var(--accent-fg)] font-bold hover:bg-[var(--accent-hover)] active:scale-[0.98] transition-all text-[11px] font-mono tracking-widest uppercase shadow-[0_4px_15px_rgba(202,138,4,0.22)] flex items-center justify-center gap-2"
+                  >
+                    <span>Start Asking Questions</span>
+                    <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+                  </Link>
+                  <Link
+                    href="/sign-in"
+                    className="w-full sm:w-auto px-6 py-3.5 rounded-md border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent)]/30 active:scale-[0.98] transition-all text-[11px] font-mono tracking-widest uppercase"
+                  >
+                    Sign In
+                  </Link>
+                </>
+              ) : (
+                <Link
+                  href="/chat"
+                  className="group w-full sm:w-auto px-6 py-3.5 rounded-md bg-[var(--accent)] text-[var(--accent-fg)] font-bold hover:bg-[var(--accent-hover)] active:scale-[0.98] transition-all text-[11px] font-mono tracking-widest uppercase shadow-[0_4px_15px_rgba(202,138,4,0.22)] flex items-center justify-center gap-2"
+                >
+                  <span>Go to Chat</span>
+                  <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+              )}
             </div>
           </section>
 
@@ -309,25 +335,45 @@ export default function LandingPage() {
               Sign in to get instant, authenticated answers about UET Taxila
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-              {DEFAULT_SUGGESTIONS.map((s) => (
-                <Link
-                  key={s.prompt}
-                  href="/sign-up"
-                  className="group flex flex-col items-start p-4 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/25 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-card)]/40 hover:-translate-y-0.5 transition-all duration-300"
-                >
-                  <div className="flex items-center justify-between w-full mb-1">
-                    <span className="font-mono text-[9px] uppercase tracking-[0.15em] text-[var(--accent)]/80 font-semibold">
-                      {s.label}
-                    </span>
-                    <span className="text-[9px] text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-colors font-mono tracking-wider">
-                      {"ASK //"}
-                    </span>
-                  </div>
-                  <span className="text-xs md:text-sm text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors font-sans leading-relaxed text-left">
-                    &ldquo;{s.prompt}&rdquo;
-                  </span>
-                </Link>
-              ))}
+              {!isSignedIn
+                ? DEFAULT_SUGGESTIONS.map((s) => (
+                    <Link
+                      key={s.prompt}
+                      href="/sign-up"
+                      className="group flex flex-col items-start p-4 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/25 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-card)]/40 hover:-translate-y-0.5 transition-all duration-300"
+                    >
+                      <div className="flex items-center justify-between w-full mb-1">
+                        <span className="font-mono text-[9px] uppercase tracking-[0.15em] text-[var(--accent)]/80 font-semibold">
+                          {s.label}
+                        </span>
+                        <span className="text-[9px] text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-colors font-mono tracking-wider">
+                          {"ASK //"}
+                        </span>
+                      </div>
+                      <span className="text-xs md:text-sm text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors font-sans leading-relaxed text-left">
+                        &ldquo;{s.prompt}&rdquo;
+                      </span>
+                    </Link>
+                  ))
+                : DEFAULT_SUGGESTIONS.map((s) => (
+                    <Link
+                      key={s.prompt}
+                      href={`/chat?q=${encodeURIComponent(s.prompt)}`}
+                      className="group flex flex-col items-start p-4 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/25 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-card)]/40 hover:-translate-y-0.5 transition-all duration-300"
+                    >
+                      <div className="flex items-center justify-between w-full mb-1">
+                        <span className="font-mono text-[9px] uppercase tracking-[0.15em] text-[var(--accent)]/80 font-semibold">
+                          {s.label}
+                        </span>
+                        <span className="text-[9px] text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-colors font-mono tracking-wider">
+                          {"ASK //"}
+                        </span>
+                      </div>
+                      <span className="text-xs md:text-sm text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors font-sans leading-relaxed text-left">
+                        &ldquo;{s.prompt}&rdquo;
+                      </span>
+                    </Link>
+                  ))}
             </div>
           </section>
 
