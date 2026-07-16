@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { LEARN_TERMS } from "@/lib/learn-terms";
 import { BreadcrumbJsonLd } from "@/lib/json-ld";
+import { LEARN_TERMS } from "@/lib/learn-terms";
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
 export const metadata: Metadata = {
   title: "UET Taxila Glossary - Learn Key Terms - UET GPT",
@@ -48,6 +47,7 @@ export default function LearnIndexPage() {
       />
       <script
         type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: static schema object safe for serialization
         dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionSchema) }}
       />
 
@@ -92,8 +92,8 @@ export default function LearnIndexPage() {
               </span>
             </h1>
             <p className="text-lg text-[#a1a1aa] max-w-2xl mx-auto mb-8">
-              Key terms every UET Taxila applicant and student should know — explained
-              clearly and sourced from the official 2025 undergraduate prospectus.
+              Key terms every UET Taxila applicant and student should know — explained clearly and
+              sourced from the official 2025 undergraduate prospectus.
             </p>
             <Link
               href="/"
@@ -128,13 +128,11 @@ export default function LearnIndexPage() {
 
           {/* CTA */}
           <section className="px-6 py-16 max-w-3xl mx-auto text-center border-t border-[#1a1a1e]">
-            <h2 className="text-xl font-semibold mb-3">
-              Can&apos;t find your answer?
-            </h2>
+            <h2 className="text-xl font-semibold mb-3">Can&apos;t find your answer?</h2>
             <p className="text-sm text-[#a1a1aa] mb-6">
-              UET GPT answers any question about UET Taxila — admissions, programs,
-              fees, campus life, scholarships — using official university documents.
-              Free for every student and applicant.
+              UET GPT answers any question about UET Taxila — admissions, programs, fees, campus
+              life, scholarships — using official university documents. Free for every student and
+              applicant.
             </p>
             <Link
               href="/"
@@ -158,7 +156,10 @@ export default function LearnIndexPage() {
               <Link href="/uet-taxila" className="hover:text-[#e1e1e2] transition-colors">
                 UET Taxila Hub
               </Link>
-              <Link href="/uet-taxila/admissions" className="hover:text-[#e1e1e2] transition-colors">
+              <Link
+                href="/uet-taxila/admissions"
+                className="hover:text-[#e1e1e2] transition-colors"
+              >
                 Admissions
               </Link>
             </div>

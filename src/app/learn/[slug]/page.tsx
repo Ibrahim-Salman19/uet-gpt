@@ -1,11 +1,10 @@
-import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getTermBySlug, getAllSlugs, LEARN_TERMS } from "@/lib/learn-terms";
+import { notFound } from "next/navigation";
 import { BreadcrumbJsonLd } from "@/lib/json-ld";
+import { getAllSlugs, getTermBySlug, LEARN_TERMS } from "@/lib/learn-terms";
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
 // ── Static generation ────────────────────────────────────────────────────────
 
@@ -41,11 +40,7 @@ export async function generateMetadata({
 
 // ── Page ─────────────────────────────────────────────────────────────────────
 
-export default async function LearnTermPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function LearnTermPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const term = getTermBySlug(slug);
   if (!term) notFound();
@@ -106,10 +101,12 @@ export default async function LearnTermPage({
       />
       <script
         type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: static schema object safe for serialization
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
       />
       <script
         type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: static schema object safe for serialization
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
@@ -148,20 +145,23 @@ export default async function LearnTermPage({
           {/* Hero */}
           <section className="px-6 pt-20 pb-10 max-w-3xl mx-auto">
             {/* Breadcrumb trail (visible) */}
-            <nav aria-label="Breadcrumb" className="text-xs text-[#71717a] mb-6 flex items-center gap-1">
-              <Link href="/" className="hover:text-[#a1a1aa] transition-colors">Home</Link>
+            <nav
+              aria-label="Breadcrumb"
+              className="text-xs text-[#71717a] mb-6 flex items-center gap-1"
+            >
+              <Link href="/" className="hover:text-[#a1a1aa] transition-colors">
+                Home
+              </Link>
               <span>/</span>
-              <Link href="/learn" className="hover:text-[#a1a1aa] transition-colors">Learn</Link>
+              <Link href="/learn" className="hover:text-[#a1a1aa] transition-colors">
+                Learn
+              </Link>
               <span>/</span>
               <span className="text-[#a1a1aa]">{term.title}</span>
             </nav>
 
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
-              {term.title}
-            </h1>
-            <p className="text-base text-[#a1a1aa] leading-relaxed mb-8">
-              {term.lead}
-            </p>
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">{term.title}</h1>
+            <p className="text-base text-[#a1a1aa] leading-relaxed mb-8">{term.lead}</p>
 
             <div className="flex flex-wrap gap-3">
               {term.hubLinks.map((link) => (
@@ -180,11 +180,10 @@ export default async function LearnTermPage({
           <section className="px-6 pb-12 max-w-3xl mx-auto space-y-10">
             {term.sections.map((section) => (
               <div key={section.heading}>
-                <h2 className="text-xl font-semibold mb-4 text-[#e1e1e2]">
-                  {section.heading}
-                </h2>
+                <h2 className="text-xl font-semibold mb-4 text-[#e1e1e2]">{section.heading}</h2>
                 <div className="space-y-3">
                   {section.paragraphs.map((para, i) => (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: static list of paragraphs that never reorders
                     <p key={i} className="text-sm text-[#a1a1aa] leading-relaxed">
                       {para}
                     </p>
@@ -196,9 +195,7 @@ export default async function LearnTermPage({
 
           {/* FAQ */}
           <section className="px-6 py-12 max-w-3xl mx-auto">
-            <h2 className="text-xl font-semibold mb-6">
-              Frequently Asked Questions
-            </h2>
+            <h2 className="text-xl font-semibold mb-6">Frequently Asked Questions</h2>
             <div className="space-y-4">
               {term.faqs.map((faq) => (
                 <details
@@ -235,13 +232,10 @@ export default async function LearnTermPage({
 
           {/* CTA */}
           <section className="px-6 py-16 max-w-3xl mx-auto text-center">
-            <h2 className="text-xl font-semibold mb-3">
-              Still have questions about UET Taxila?
-            </h2>
+            <h2 className="text-xl font-semibold mb-3">Still have questions about UET Taxila?</h2>
             <p className="text-sm text-[#a1a1aa] mb-6">
-              UET GPT is the AI guide to UET Taxila. Ask anything about admissions,
-              programs, fees, campus life, and more — grounded in official sources,
-              free for every student.
+              UET GPT is the AI guide to UET Taxila. Ask anything about admissions, programs, fees,
+              campus life, and more — grounded in official sources, free for every student.
             </p>
             <Link
               href="/"

@@ -89,15 +89,14 @@ export const collegeSchema = {
   },
   foundingDate: "1975",
   dateModified: "2026-07-16",
-  sameAs: [
-    "https://en.wikipedia.org/wiki/University_of_Engineering_and_Technology,_Taxila",
-  ],
+  sameAs: ["https://en.wikipedia.org/wiki/University_of_Engineering_and_Technology,_Taxila"],
 };
 
 export function JsonLd() {
   return (
     <script
       type="application/ld+json"
+      // biome-ignore lint/security/noDangerouslySetInnerHtml: static schema object safe for serialization
       dangerouslySetInnerHTML={{
         __html: JSON.stringify({
           "@context": "https://schema.org",
@@ -108,11 +107,7 @@ export function JsonLd() {
   );
 }
 
-export function BreadcrumbJsonLd({
-  items,
-}: {
-  items: { name: string; url: string }[];
-}) {
+export function BreadcrumbJsonLd({ items }: { items: { name: string; url: string }[] }) {
   const schema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -126,6 +121,7 @@ export function BreadcrumbJsonLd({
   return (
     <script
       type="application/ld+json"
+      // biome-ignore lint/security/noDangerouslySetInnerHtml: static schema object safe for serialization
       dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
     />
   );

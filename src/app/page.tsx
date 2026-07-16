@@ -20,7 +20,6 @@ import {
   DEFAULT_SUGGESTIONS,
 } from "@/lib/constants";
 
-
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
 export const metadata: Metadata = {

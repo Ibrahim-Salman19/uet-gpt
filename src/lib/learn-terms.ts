@@ -31,8 +31,7 @@ export interface LearnTerm {
   dateModified: string;
 }
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
 export const LEARN_TERMS: LearnTerm[] = [
   {
@@ -411,7 +410,10 @@ export const LEARN_TERMS: LearnTerm[] = [
       },
     ],
     hubLinks: [
-      { label: "UET Taxila Fee Structure (Full Page)", href: `${siteUrl}/uet-taxila/fee-structure` },
+      {
+        label: "UET Taxila Fee Structure (Full Page)",
+        href: `${siteUrl}/uet-taxila/fee-structure`,
+      },
       { label: "UET Taxila Hub", href: `${siteUrl}/uet-taxila` },
       { label: "Ask UET GPT", href: siteUrl },
     ],
