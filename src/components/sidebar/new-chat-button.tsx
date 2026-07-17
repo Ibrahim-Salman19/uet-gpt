@@ -23,9 +23,10 @@ export function NewChatButton({ onCreateThread }: NewChatButtonProps) {
       try {
         const threadId = await onCreateThread();
         if (threadId) {
-          // Keep the button disabled while navigation completes; the component
-          // unmounts on route change so no manual reset is needed on success.
           router.push(`/chat/${threadId}`);
+          // Reset state since layout components do not unmount on navigation
+          creatingRef.current = false;
+          setIsCreating(false);
         } else {
           creatingRef.current = false;
           setIsCreating(false);
