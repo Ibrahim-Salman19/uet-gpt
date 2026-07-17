@@ -73,12 +73,13 @@ export default function UetTaxilaAdmissionsPage() {
       />
       <script
         type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: Needed for JSON-LD schema
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <div className="flex min-h-screen flex-col bg-[#070708] text-[#e1e1e2]">
-        <header className="flex items-center justify-between px-6 py-4 border-b border-[#1a1a1e]">
+      <div className="flex min-h-screen flex-col bg-[var(--surface-base)] text-zinc-100">
+        <header className="flex items-center justify-between px-6 py-4 border-b border-[var(--surface-divider)]">
           <div className="flex items-center gap-3">
-            <div className="size-8 rounded-lg bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white font-bold text-sm">
+            <div className="size-8 rounded-lg bg-[var(--accent)] flex items-center justify-center text-white font-bold text-sm">
               U
             </div>
             <span className="font-semibold text-base">UET GPT</span>
@@ -86,7 +87,7 @@ export default function UetTaxilaAdmissionsPage() {
           <nav className="flex items-center gap-4">
             <Link
               href="/"
-              className="text-sm text-[#a1a1aa] hover:text-[#e1e1e2] transition-colors"
+              className="text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
             >
               UET GPT Home
             </Link>

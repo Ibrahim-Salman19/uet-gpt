@@ -199,10 +199,14 @@ export function ConvexReadyGate({ children }: { children: React.ReactNode }) {
       `Server Reachability: ${networkError ?? "UNKNOWN"}`,
       `URL: ${process.env.NEXT_PUBLIC_CONVEX_URL ?? "not set"}`,
     ].join("\n");
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch((err) => {
+        console.error("Failed to copy diagnostics:", err);
+      });
   };
 
   // -------------------------------------------------------------------------

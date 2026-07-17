@@ -149,6 +149,26 @@ async function dispatchWebhookEvent(
   return true;
 }
 
+const MAX_BODY_BYTES = 1_048_576; // 1MB
+
+function checkPayloadSize(request: Request): Response | null {
+  const contentLength = request.headers.get("content-length");
+  if (contentLength && Number(contentLength) > MAX_BODY_BYTES) {
+    console.warn(`Clerk Webhook payload too large (content-length): ${contentLength} bytes`);
+    return new Response("Payload too large", { status: 413 });
+  }
+  return null;
+}
+
+async function readBodyWithSizeCheck(request: Request): Promise<string | Response> {
+  const buffer = await request.arrayBuffer();
+  if (buffer.byteLength > MAX_BODY_BYTES) {
+    console.warn(`Clerk Webhook payload too large (actual): ${buffer.byteLength} bytes`);
+    return new Response("Payload too large", { status: 413 });
+  }
+  return new TextDecoder().decode(buffer);
+}
+
 export const userWebhook = httpAction(async (ctx, request) => {
   const methodErr = checkWebhookMethod(request);
   if (methodErr) return methodErr;
@@ -156,7 +176,12 @@ export const userWebhook = httpAction(async (ctx, request) => {
   const authErr = authenticateWebhook(request);
   if (authErr) return authErr;
 
-  const rawBody = await request.text();
+  const sizeErr = checkPayloadSize(request);
+  if (sizeErr) return sizeErr;
+
+  const rawBody = await readBodyWithSizeCheck(request);
+  if (rawBody instanceof Response) return rawBody;
+
   const payload = parseWebhookPayloadSafe(rawBody);
   if (payload instanceof Response) return payload;
 

@@ -115,17 +115,23 @@ export const insert = mutation({
 export const list = query({
   args: { threadId: v.string() },
   handler: async (ctx, args) => {
-    const user = await requireAuth(ctx);
+    // Gracefully handle unauthenticated or unauthorized states to prevent client crashes
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+    if (!user?.isActive) return null;
 
     const thread = await ctx.runQuery(components.agent.threads.getThread, {
       threadId: args.threadId,
     });
-    if (!thread) {
-      throw new ConvexError("Thread not found");
-    }
+    if (!thread) return null;
 
     if (thread.userId !== user.clerkId) {
-      throw new ConvexError("Not authorized");
+      return null;
     }
 
     const result = await ctx.runQuery(components.agent.messages.listMessagesByThreadId, {

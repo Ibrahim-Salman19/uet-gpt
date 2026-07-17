@@ -13,7 +13,12 @@ interface AuthGuardProps {
   children: React.ReactNode;
   /** Optional admin role requirement */
   requireAdmin?: boolean;
-  /** Optional admin check function that uses Convex */
+  /** 
+   * Optional admin check function that uses Convex.
+   * NOTE: We pass this as a prop because Clerk JWT session claims 
+   * (e.g. sessionClaims.metadata.role) do NOT update instantly on the client side 
+   * when mutated on the server. They require a session reload/new JWT.
+   */
   isAdmin?: boolean;
   /** Whether the admin check is still loading */
   isAdminLoading?: boolean;

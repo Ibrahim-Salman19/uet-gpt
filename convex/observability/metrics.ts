@@ -6,12 +6,12 @@ const MAX_ID_PREVIEW = 8;
 
 export function truncateQuery(text: string): string {
   if (text.length <= MAX_QUERY_PREVIEW) return text;
-  return text.slice(0, MAX_QUERY_PREVIEW) + "...";
+  return `${text.slice(0, MAX_QUERY_PREVIEW)}...`;
 }
 
 export function truncateEntityId(id: string): string {
   if (id.length <= MAX_ID_PREVIEW) return id;
-  return id.slice(0, MAX_ID_PREVIEW) + "...";
+  return `${id.slice(0, MAX_ID_PREVIEW)}...`;
 }
 
 export function recordTiming(): { end: () => number; lap: (label: string) => number } {
@@ -61,13 +61,23 @@ export const setMetricValue = internalMutation({
   args: { key: v.string(), value: v.union(v.string(), v.number(), v.boolean()) },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const existing = await ctx.db
+    const existingList = await ctx.db
       .query("appSettings")
       .withIndex("by_key", (q) => q.eq("key", args.key))
-      .first();
+      .collect();
 
-    if (existing) {
-      await ctx.db.patch(existing._id, { value: args.value, updatedAt: Date.now() });
+    if (existingList.length > 0) {
+      const existing = existingList[0];
+      if (existing) {
+        await ctx.db.patch(existing._id, { value: args.value, updatedAt: Date.now() });
+        // Self-heal: Delete any duplicate settings entries created by concurrent insert races
+        for (let i = 1; i < existingList.length; i++) {
+          const dup = existingList[i];
+          if (dup) {
+            await ctx.db.delete(dup._id);
+          }
+        }
+      }
     } else {
       await ctx.db.insert("appSettings", {
         key: args.key,
@@ -100,10 +110,12 @@ export const recordLatencySample = internalMutation({
     // document, which risks lost updates under concurrent mutations. This is acceptable
     // here because latency metrics are for approximate performance distribution, and
     // the overhead of more complex transactional structures is not justified.
-    const existing = await ctx.db
+    const existingList = await ctx.db
       .query("appSettings")
       .withIndex("by_key", (q) => q.eq("key", "observability_latency_samples"))
-      .first();
+      .collect();
+
+    const existing = existingList[0] ?? null;
 
     let samples: number[] = [];
     if (existing && typeof existing.value === "string") {
@@ -123,6 +135,13 @@ export const recordLatencySample = internalMutation({
     const serialized = JSON.stringify(samples);
     if (existing) {
       await ctx.db.patch(existing._id, { value: serialized, updatedAt: Date.now() });
+      // Self-heal: Delete any duplicate latency sample entries created by concurrent insert races
+      for (let i = 1; i < existingList.length; i++) {
+        const dup = existingList[i];
+        if (dup) {
+          await ctx.db.delete(dup._id);
+        }
+      }
     } else {
       await ctx.db.insert("appSettings", {
         key: "observability_latency_samples",
