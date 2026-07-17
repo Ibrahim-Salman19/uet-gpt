@@ -46,6 +46,7 @@ export function NewChatButton({ onCreateThread }: NewChatButtonProps) {
   return (
     <div className="p-4 md:p-5 pb-3">
       <button
+        type="button"
         onClick={handleClick}
         disabled={isCreating}
         className="group relative flex w-full items-center justify-start gap-2.5 rounded-[12px] border border-white/10 bg-white/[0.02] px-4 py-3 text-sm font-medium text-[var(--text-secondary)] transition-all duration-300 ease-[var(--ease-spring)] hover:border-[var(--accent)]/40 hover:bg-[var(--accent)]/5 hover:text-[var(--accent)] hover:shadow-[0_0_12px_rgba(212,168,74,0.1)] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] disabled:opacity-50 min-h-[44px]"
