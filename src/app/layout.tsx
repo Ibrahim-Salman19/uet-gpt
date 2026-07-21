@@ -54,9 +54,6 @@ export const metadata: Metadata = {
     title,
     description: APP_DESCRIPTION,
   },
-  alternates: {
-    canonical: siteUrl,
-  },
 };
 
 export const viewport: Viewport = {

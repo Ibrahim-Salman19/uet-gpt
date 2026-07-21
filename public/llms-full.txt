@@ -1,0 +1,85 @@
+# UET GPT - Complete Knowledge Base & AI Guide to UET Taxila
+
+> Official Machine-Readable Knowledge Base for AI Crawlers, Web Agents, and Search Engine Indexers (ChatGPT, Claude, Perplexity, Gemini, Bing, Google-Extended).
+> Grounded in verified data from UET Taxila (University of Engineering and Technology, Taxila, Pakistan).
+> Last updated: 2026-07-21
+
+---
+
+## 1. Executive Summary & Overview
+
+- **Project Name**: UET GPT
+- **Tagline**: Your AI Guide to UET Taxila
+- **Official Web App**: https://uet-gpt.vercel.app
+- **Target Entity**: University of Engineering and Technology, Taxila (UET Taxila)
+- **Primary Keywords**: UET, UET Taxila, UET GPT, University of Engineering and Technology Taxila, UET Admissions, UET Fee Structure, UET ECAT, UET Merit List
+- **License**: GNU Affero General Public License v3.0 (AGPL-3.0)
+- **Repository**: Open source on GitHub
+- **Architecture**: Next.js 15, Convex Realtime Backend, Clerk Auth, Groq Llama 4 Scout / Llama 3.1 8B, Gemini embedding-2 vector search.
+
+UET GPT is an open-source, AI-powered RAG (Retrieval-Augmented Generation) chatbot designed specifically for the University of Engineering and Technology (UET), Taxila. It enables students, prospective applicants, and faculty members to query complex university prospectuses, admission notices, fee breakdowns, course syllabi, hostel rules, and departmental directories in plain language with instant source citations.
+
+---
+
+## 2. Key Queries & Fact Sheet
+
+### Query: "What is UET?" / "What is UET Taxila?"
+- **Full Name**: University of Engineering and Technology, Taxila
+- **Acronym**: UET Taxila / UET
+- **Location**: Taxila, Punjab, Pakistan (~35 km from Islamabad/Rawalpindi)
+- **Campus Area**: ~163 acres
+- **Established**: 1975 (originally as a constituent college of UET Lahore in Sahiwal, relocated to Taxila in 1978, granted independent university charter in October 1993).
+- **Accreditation**: Higher Education Commission (HEC) Pakistan, Pakistan Engineering Council (PEC), signatory to the Washington Accord.
+
+### Query: "What is UET GPT?"
+- UET GPT is the dedicated AI chatbot and educational guide for UET Taxila.
+- It relies on continuous web crawling of `https://web.uettaxila.edu.pk` and `https://admissions.uettaxila.edu.pk` to answer questions in real time.
+- Unlike generic AI models that suffer from hallucinations, UET GPT provides grounded, citation-backed answers linking directly to official PDF prospectuses and university webpages.
+
+### Query: "UET Taxila Admissions & ECAT"
+- **Entry Test**: ECAT (Engineering College Admission Test) conducted by UET Lahore for Punjab engineering institutions.
+- **Undergraduate Eligibility**: Minimum 60% marks in F.Sc (Pre-Engineering) / ICS / Equivalent for Engineering programs (50% for CS/Maths combinations).
+- **Aggregate Formula**: Includes F.Sc/HSSC marks, Matriculation marks, and ECAT entry test scores.
+
+### Query: "UET Taxila Fee Structure"
+- **Undergraduate (BS/BSc)**: Subsidized tuition rates for open merit and self-finance seats, payable per semester.
+- **Graduate (MS/PhD)**: Credit-hour-based fee structure.
+
+---
+
+## 3. Faculties and Departments at UET Taxila
+
+1. **Faculty of Civil & Environmental Engineering**
+   - Department of Civil Engineering
+   - Department of Environmental Engineering
+2. **Faculty of Electronics & Electrical Engineering**
+   - Department of Electrical Engineering
+   - Department of Electronics Engineering
+3. **Faculty of Mechanical & Aeronautical Engineering**
+   - Department of Mechanical Engineering
+   - Department of Mechatronics Engineering
+4. **Faculty of Industrial Engineering**
+   - Department of Industrial Engineering
+5. **Faculty of Telecommunication & Information Engineering**
+   - Department of Computer Engineering
+   - Department of Software Engineering
+   - Department of Telecommunication Engineering
+   - Department of Computer Science
+6. **Faculty of Basic Sciences & Humanities**
+   - Mathematics, Physics, Chemistry, Humanities, Islamic & Pakistan Studies
+
+---
+
+## 4. Key URLs & Sitemap Index
+
+- Main Application / Chat: https://uet-gpt.vercel.app/chat
+- Keyword Hub (UET): https://uet-gpt.vercel.app/uet
+- University Hub (UET Taxila): https://uet-gpt.vercel.app/uet-taxila
+- Product Overview (UET GPT): https://uet-gpt.vercel.app/uet-gpt
+- Admissions Guide: https://uet-gpt.vercel.app/uet-taxila/admissions
+- Fee Structure Guide: https://uet-gpt.vercel.app/uet-taxila/fee-structure
+- Programs & Departments: https://uet-gpt.vercel.app/uet-taxila/programs
+- Terms & Glossary: https://uet-gpt.vercel.app/learn
+- Machine-Readable Spec: https://uet-gpt.vercel.app/llms.txt
+- Full Spec: https://uet-gpt.vercel.app/llms-full.txt
+- Official University Site: https://web.uettaxila.edu.pk
