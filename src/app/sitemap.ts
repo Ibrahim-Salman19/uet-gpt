@@ -1,6 +1,11 @@
 import type { MetadataRoute } from "next";
 import { getAllSlugs } from "@/lib/learn-terms";
 
+// Force dynamic rendering so Vercel CDN never serves a stale cached copy.
+// A cached sitemap.xml with old CSP headers causes GSC "could not be read" errors.
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
 export default function sitemap(): MetadataRoute.Sitemap {
