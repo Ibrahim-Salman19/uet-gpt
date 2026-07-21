@@ -45,6 +45,8 @@ const nextConfig: NextConfig = {
       // ─── Crawler / SEO files ─────────────────────────────────────────────
       // These files must NOT receive X-Frame-Options or CSP with frame-ancestors
       // because Google Search Console's sitemap fetcher rejects such responses.
+      // X-Robots-Tag: noindex prevents search engines from indexing the sitemap
+      // itself (only the URLs within it should be indexed).
       {
         source: "/(sitemap\\.xml|robots\\.txt|llms\\.txt|llms-full\\.txt)",
         headers: [
@@ -53,7 +55,8 @@ const nextConfig: NextConfig = {
             key: "Strict-Transport-Security",
             value: "max-age=63072000; includeSubDomains; preload",
           },
-          { key: "Cache-Control", value: "public, max-age=3600, must-revalidate" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+          { key: "Cache-Control", value: "no-cache, must-revalidate" },
         ],
       },
       // ─── All other routes (excluding crawler files above) ─────────────────
@@ -107,4 +110,4 @@ const sentryOptions: SentryBuildOptions = {
   automaticVercelMonitors: true,
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, sentryOptions);
