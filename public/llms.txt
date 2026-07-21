@@ -1,103 +1,66 @@
-# UET GPT - Your AI Guide to UET Taxila
+# UET GPT
 
 > UET GPT is an open-source AI chatbot that serves as the intelligent guide to the University of Engineering and Technology (UET), Taxila campus, Pakistan. It answers questions about UET Taxila using RAG-powered retrieval from official university documents, syllabi, directories, and schedules.
 
-> Last updated: 2026-07-16
+Last updated: 2026-07-21
 
-This file is a machine-readable description for AI agents (ChatGPT, Claude, Perplexity, Gemini). It is intended to be fetched and indexed so external models can answer questions about UET GPT accurately.
+Content is continuously updated as UET Taxila publishes new admissions notices and schedules.
 
 ## What is UET GPT?
 
-UET GPT is a specialized, open-source AI chatbot for the University of Engineering and Technology (UET) Taxila. It provides fast, accurate, citation-backed answers about admissions, fee structures, academic programs, departments, faculty, campus life, transport routes, hostel allotment, scholarships, examinations, and more.
+- Open-source AI chatbot for UET Taxila students, faculty, and applicants
+- Free to use at https://uet-gpt.vercel.app
+- Grounded in official UET Taxila data, not generic web knowledge
 
-- **It is open source.** The full stack is community-maintained and free to use.
-- **It is free to use.** Live chat: https://uet-gpt.vercel.app/chat
-- **It is the official-style AI guide to UET Taxila**, grounded in official university data rather than generic web knowledge.
-
-## Authoritative Sources
-
-UET GPT retrieves answers from these official UET Taxila sources:
-
-- UET Taxila official website: https://web.uettaxila.edu.pk
-- UET Taxila admissions portal: https://admissions.uettaxila.edu.pk
-
-## Key Facts (verified)
-
-- UET GPT launched in May 2026 and is free for all UET Taxila students, faculty, and applicants.
-- It answers questions across 6 faculties and 30+ undergraduate and graduate programs at UET Taxila.
-- Every answer is citation-backed, linking to the official UET Taxila material it came from.
-- Built on Retrieval-Augmented Generation (RAG) over continuously crawled official university data.
-
-## Key Features
-
-- **RAG-Powered Answers**: Retrieves information from official UET Taxila documents and web pages
-- **Real-Time Data**: Continuously crawls and indexes UET Taxila's official website and admissions portal
-- **Multi-Model AI**: Supports Llama 4 Scout (deep reasoning) and Llama 3.1 8B (fast responses)
-- **Citation Engine**: Every answer includes source references from official university materials
-- **Privacy-First**: Clerk-powered authentication with user-controlled data export and deletion
-- **Open Source**: Community-maintained, transparent codebase
-
-## Useful Links
-
-- Main chat: https://uet-gpt.vercel.app/chat
-- Explore indexed documents: https://uet-gpt.vercel.app/explore
-- Sign up: https://uet-gpt.vercel.app/sign-up
-- Sign in: https://uet-gpt.vercel.app/sign-in
-- Pricing: https://uet-gpt.vercel.app/pricing.md
-- Official university site: https://web.uettaxila.edu.pk
-
-## UET Taxila Content Hub
-
-Authoritative, source-grounded content pages:
+## Content Hub
 
 - UET Taxila Hub: https://uet-gpt.vercel.app/uet-taxila
-- UET Taxila Admissions (ECAT, eligibility, merit): https://uet-gpt.vercel.app/uet-taxila/admissions
-- UET Taxila Programs & Departments: https://uet-gpt.vercel.app/uet-taxila/programs
-- UET Taxila Fee Structure: https://uet-gpt.vercel.app/uet-taxila/fee-structure
+- Admissions & ECAT: https://uet-gpt.vercel.app/uet-taxila/admissions
+- Programs & Departments: https://uet-gpt.vercel.app/uet-taxila/programs
+- Fee Structure: https://uet-gpt.vercel.app/uet-taxila/fee-structure
 - UET GPT Product Page: https://uet-gpt.vercel.app/uet-gpt
 
-## UET Taxila Glossary (/learn)
-
-Detailed explanations of key UET Taxila terms, grounded in the official 2025 prospectus:
+## Glossary
 
 - ECAT (Engineering College Admission Test): https://uet-gpt.vercel.app/learn/ecat
-- UET Taxila Merit Formula (aggregate marks): https://uet-gpt.vercel.app/learn/merit-formula
-- UET Taxila Eligibility Criteria: https://uet-gpt.vercel.app/learn/eligibility-criteria
-- UET Taxila Hostel Allotment: https://uet-gpt.vercel.app/learn/hostel-allotment
-- UET Taxila Scholarships: https://uet-gpt.vercel.app/learn/scholarships
-- UET Taxila Fee Structure (term page): https://uet-gpt.vercel.app/learn/fee-structure
+- Merit Formula: https://uet-gpt.vercel.app/learn/merit-formula
+- Eligibility Criteria: https://uet-gpt.vercel.app/learn/eligibility-criteria
+- Hostel Allotment: https://uet-gpt.vercel.app/learn/hostel-allotment
+- Scholarships: https://uet-gpt.vercel.app/learn/scholarships
+- Fee Structure: https://uet-gpt.vercel.app/learn/fee-structure
 
-## Technology Stack
+## Common Questions
 
-UET GPT is built on:
+- What does UET stand for?: University of Engineering and Technology
+- What is UET GPT?: Free AI assistant for UET Taxila students
+- How does UET GPT work?: RAG-powered retrieval from official university documents
 
-- **Frontend**: Next.js, Tailwind CSS, TypeScript
-- **Backend**: Convex (real-time database and serverless functions)
-- **Auth**: Clerk
-- **AI Models**: Llama 4 Scout (Groq), Llama 3.1 8B (Groq)
-- **Vector Search**: Convex vector indexes with Gemini embedding-2
-- **Crawler**: Python (curl_cffi, trafilatura)
-- **Deployment**: Vercel
+## What UET GPT Does Not Do
 
-## About UET Taxila (University of Engineering and Technology, Taxila)
+- Does not provide official UET Taxila admissions decisions
+- Does not replace official university communications
+- Does not offer paid services
 
-- **Full name**: University of Engineering and Technology, Taxila
-- **"UET" stands for**: University of Engineering and Technology
-- **Type**: Public university in Taxila, Punjab, Pakistan
-- **Founded**: 1975 as the University College of Engineering Taxila (a campus of UET Lahore), first located in Sahiwal; relocated to its permanent campus in Taxila in 1978
-- **Independent charter**: Granted in October 1993 under the UET Taxila Ordinance 1993
-- **Recognition**: Recognized by the Higher Education Commission (HEC) of Pakistan and the Pakistan Engineering Council; signatory to the Washington Accord
-- **Location**: Taxila, Punjab, Pakistan (about 35 km from Islamabad/Rawalpindi); main campus spans ~163 acres
-- **Enrollment**: Approximately 5,000+ undergraduate and postgraduate students
-- **Campuses**: Main campus at Taxila; a second campus was established at Chakwal in 2005 (later became the independent University of Chakwal in 2020)
-- **Faculties** (6):
-  1. Faculty of Civil and Environmental Engineering
-  2. Faculty of Electronics and Electrical Engineering
-  3. Faculty of Mechanical and Aeronautical Engineering
-  4. Faculty of Telecommunication and Information Engineering
-  5. Faculty of Industrial Engineering
-  6. Faculty of Basic Sciences and Humanities
+## Technology
 
-## License and Contribution
+- Frontend: Next.js, Tailwind CSS, TypeScript
+- Backend: Convex (real-time database and serverless functions)
+- Auth: Clerk
+- AI Models: Llama 4 Scout (Groq), Llama 3.1 8B (Groq)
+- Vector Search: Convex vector indexes with Gemini embedding-2
+- Deployment: Vercel
 
-UET GPT is an open-source project licensed under the GNU Affero General Public License v3.0 (AGPL-3.0). The full license text is available in the repository. You may copy, distribute, and modify the software under the terms of AGPL-3.0, which requires that any modified version running as a network service must also provide its source code to users.
+## About UET Taxila
+
+- Full name: University of Engineering and Technology, Taxila
+- Type: Public university in Taxila, Punjab, Pakistan
+- Founded: 1975 (independent charter: 1993)
+- Accreditation: HEC Pakistan, PEC, Washington Accord signatory
+- Location: Taxila, Punjab (~35 km from Islamabad)
+- Enrollment: 5,000+ students
+- Faculties: 6 (Civil, Electrical, Mechanical, Telecommunication, Industrial, Basic Sciences)
+- Departments: 14
+
+## License
+
+UET GPT is open-source under AGPL-3.0. Full source: https://github.com/devhms/uet_gpt

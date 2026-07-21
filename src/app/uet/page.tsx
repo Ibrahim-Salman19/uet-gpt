@@ -5,29 +5,25 @@ import { BreadcrumbJsonLd } from "@/lib/json-ld";
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
 export const metadata: Metadata = {
-  title: "UET - University of Engineering & Technology Taxila | UET GPT Guide",
+  title: "UET Taxila Guide: Admissions, Fees & Departments",
   description:
-    "UET (University of Engineering and Technology) Taxila guide & AI assistant. Search UET admissions, ECAT entry test, merit formula, fee structures, academic programs, and campus life with UET GPT.",
-  keywords: [
-    "UET",
-    "UET Taxila",
-    "UET GPT",
-    "University of Engineering and Technology",
-    "UET admissions",
-    "UET fee structure",
-    "UET entry test",
-    "UET merit list",
-    "UET Pakistan",
-  ],
+    "Complete guide to UET Taxila — admissions, ECAT entry test, merit formula, fee structures, departments, and campus life. Ask UET GPT for instant answers.",
   alternates: {
     canonical: `${siteUrl}/uet`,
   },
   openGraph: {
-    title: "UET - University of Engineering & Technology Taxila | UET GPT Guide",
+    title: "UET Taxila Guide: Admissions, Fees & Departments | UET GPT",
     description:
-      "Complete guide to UET (University of Engineering and Technology) Taxila. Get instant answers on admissions, fees, departments, and campus life with UET GPT.",
+      "Complete guide to UET Taxila — admissions, ECAT entry test, merit formula, fee structures, departments, and campus life.",
     url: `${siteUrl}/uet`,
     type: "website",
+    images: [{ url: `${siteUrl}/opengraph-image`, width: 1200, height: 630, alt: "UET GPT — AI Assistant for UET Taxila" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "UET Taxila Guide: Admissions, Fees & Departments | UET GPT",
+    description: "Complete guide to UET Taxila — admissions, ECAT, merit, fees, and departments.",
+    images: [`${siteUrl}/opengraph-image`],
   },
 };
 
@@ -49,7 +45,6 @@ const FAQ_ITEMS = [
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
-  dateModified: "2026-07-21",
   mainEntity: FAQ_ITEMS.map((item) => ({
     "@type": "Question",
     name: item.q,

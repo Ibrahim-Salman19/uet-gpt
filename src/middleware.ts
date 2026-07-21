@@ -28,7 +28,7 @@ const isPublicRoute = createRouteMatcher([
 const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
-  if (process.env.PLAYWRIGHT_TEST === "true" || req.nextUrl?.searchParams?.get("mock_auth") === "true") {
+  if (process.env.PLAYWRIGHT_TEST === "true" || (process.env.NODE_ENV === "development" && req.nextUrl?.searchParams?.get("mock_auth") === "true")) {
     return NextResponse.next();
   }
 
@@ -42,7 +42,7 @@ export default clerkMiddleware(async (auth, req) => {
   // Always allow search engine crawlers and AI bots for SEO / GEO indexing
   const userAgent = req.headers.get("user-agent") || "";
   const isSearchBot =
-    /bot|crawler|spider|google|bing|perplexity|gptbot|claudebot|chatgpt|anthropic|cohere|slurp|duckduckbot|baiduspider|yandex|facebookexternalhit|twitterbot|linkedinbot/i.test(
+    /bot|crawler|spider|google|bing|perplexity|gptbot|claudebot|chatgpt|anthropic|cohere|slurp|duckduckbot|baiduspider|yandex|facebookexternalhit|twitterbot|linkedinbot|oai-searchbot|google-extended|googleother|meta-externalagent|meta-externalfetcher|applebot|bytespider|ccbot|amazonbot|petalbot|youbot|diffbot/i.test(
       userAgent,
     );
 

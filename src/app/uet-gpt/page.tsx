@@ -1,21 +1,29 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BreadcrumbJsonLd } from "@/lib/json-ld";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
 export const metadata: Metadata = {
-  title: "UET GPT - AI Guide to UET Taxila",
+  title: "UET GPT: Free AI Assistant for UET Taxila Students",
   description:
-    "UET GPT is the AI guide to UET Taxila, built for students of the University of Engineering and Technology, Taxila. Ask about admissions, ECAT, merit, fees, departments, and campus life - grounded in official UET Taxila data.",
+    "UET GPT is the free AI chatbot for UET Taxila. Ask about admissions, ECAT, merit, fees, departments — answers grounded in official data.",
   alternates: {
     canonical: `${siteUrl}/uet-gpt`,
   },
   openGraph: {
-    title: "UET GPT - AI Guide to UET Taxila",
+    title: "UET GPT: Free AI Assistant for UET Taxila Students",
     description:
-      "UET GPT is the AI guide to UET Taxila, built for students of the University of Engineering and Technology, Taxila. Ask about admissions, ECAT, merit, fees, and campus life.",
+      "UET GPT is the free AI chatbot for UET Taxila students. Ask about admissions, ECAT, merit, fees, and campus life.",
     url: `${siteUrl}/uet-gpt`,
     type: "website",
+    images: [{ url: `${siteUrl}/opengraph-image`, width: 1200, height: 630, alt: "UET GPT — AI Assistant for UET Taxila" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "UET GPT: Free AI Assistant for UET Taxila Students",
+    description: "Free AI chatbot for UET Taxila — admissions, ECAT, merit, fees, and campus life.",
+    images: [`${siteUrl}/opengraph-image`],
   },
 };
 
@@ -63,6 +71,12 @@ const faqSchema = {
 export default function UetGptPage() {
   return (
     <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", url: siteUrl },
+          { name: "UET GPT", url: `${siteUrl}/uet-gpt` },
+        ]}
+      />
       <script
         type="application/ld+json"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: static schema object safe for serialization
@@ -348,6 +362,17 @@ export default function UetGptPage() {
                   faculties, departments, and admissions.
                 </p>
               </Link>
+              <Link
+                href="/uet"
+                className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/20 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-card)]/30 transition-all"
+              >
+                <h3 className="font-semibold text-base mb-2 text-[var(--text-primary)]">
+                  UET Keyword Hub
+                </h3>
+                <p className="text-sm text-[var(--text-secondary)] font-sans">
+                  Quick overview of UET, UET Taxila, and UET GPT with links to all guides.
+                </p>
+              </Link>
             </div>
           </section>
 
@@ -390,6 +415,12 @@ export default function UetGptPage() {
                 className="hover:text-[var(--text-primary)] transition-colors"
               >
                 UET Taxila
+              </Link>
+              <Link
+                href="/uet"
+                className="hover:text-[var(--text-primary)] transition-colors"
+              >
+                UET
               </Link>
             </div>
           </div>

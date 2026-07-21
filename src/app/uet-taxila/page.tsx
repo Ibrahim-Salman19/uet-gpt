@@ -5,18 +5,25 @@ import { BreadcrumbJsonLd } from "@/lib/json-ld";
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
 export const metadata: Metadata = {
-  title: "UET Taxila - University of Engineering and Technology, Taxila",
+  title: "UET Taxila - History, Faculties & Admissions Guide",
   description:
-    "UET Taxila (University of Engineering and Technology, Taxila) - history, campuses, faculties, departments, admissions, and how UET GPT helps students. The authoritative guide to UET Taxila.",
+    "UET Taxila history, campuses, 14 departments, faculties, admissions, and fee structure. Your AI-grounded guide powered by UET GPT.",
   alternates: {
     canonical: `${siteUrl}/uet-taxila`,
   },
   openGraph: {
-    title: "UET Taxila - University of Engineering and Technology, Taxila",
+    title: "UET Taxila - History, Faculties & Admissions Guide",
     description:
-      "History, campuses, faculties, departments, and admissions of UET Taxila, plus how UET GPT helps students navigate the university.",
+      "UET Taxila history, campuses, faculties, departments, admissions, and how UET GPT helps students.",
     url: `${siteUrl}/uet-taxila`,
     type: "website",
+    images: [{ url: `${siteUrl}/opengraph-image`, width: 1200, height: 630, alt: "UET GPT — AI Assistant for UET Taxila" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "UET Taxila - History, Faculties & Admissions Guide",
+    description: "UET Taxila history, faculties, departments, admissions, and campus life.",
+    images: [`${siteUrl}/opengraph-image`],
   },
 };
 
@@ -381,14 +388,14 @@ export default function UetTaxilaPage() {
                 </p>
               </Link>
               <Link
-                href="#uet-gpt"
+                href="/uet"
                 className="p-5 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/20 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-card)]/30 transition-all"
               >
                 <h3 className="font-semibold text-base mb-1 text-[var(--text-primary)]">
-                  What is UET GPT?
+                  UET Keyword Hub
                 </h3>
                 <p className="text-sm text-[var(--text-secondary)] font-sans">
-                  The open-source AI guide to UET Taxila.
+                  Quick overview of all UET pages.
                 </p>
               </Link>
             </div>
@@ -436,6 +443,9 @@ export default function UetTaxilaPage() {
               </Link>
               <Link href="/explore" className="hover:text-[var(--text-primary)] transition-colors">
                 Explore
+              </Link>
+              <Link href="/uet" className="hover:text-[var(--text-primary)] transition-colors">
+                UET Hub
               </Link>
             </div>
           </div>
