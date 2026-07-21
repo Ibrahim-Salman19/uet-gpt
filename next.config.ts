@@ -43,9 +43,8 @@ const nextConfig: NextConfig = {
     ].join("");
     return [
       // ─── Crawler / SEO files ─────────────────────────────────────────────
-      // sitemap.xml, robots.txt, llms.txt must NOT have X-Frame-Options or
-      // frame-ancestors in CSP — these headers cause Google Search Console's
-      // sitemap fetcher to reject the response with "could not be read".
+      // These files must NOT receive X-Frame-Options or CSP with frame-ancestors
+      // because Google Search Console's sitemap fetcher rejects such responses.
       {
         source: "/(sitemap\\.xml|robots\\.txt|llms\\.txt|llms-full\\.txt)",
         headers: [
@@ -57,9 +56,9 @@ const nextConfig: NextConfig = {
           { key: "Cache-Control", value: "public, max-age=3600, must-revalidate" },
         ],
       },
-      // ─── All other routes ────────────────────────────────────────────────
+      // ─── All other routes (excluding crawler files above) ─────────────────
       {
-        source: "/(.*)",
+        source: "/((?!sitemap\\.xml|robots\\.txt|llms\\.txt|llms-full\\.txt).*)",
         headers: [
           { key: "X-Frame-Options", value: "DENY" },
           { key: "X-Content-Type-Options", value: "nosniff" },
