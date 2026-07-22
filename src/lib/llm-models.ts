@@ -22,8 +22,11 @@ export const LLM_FALLBACK_CHAIN: ModelConfig[] = [
   // Cerebras: secondary — llama models deprecated May 2026; use active models
   { id: "gemma-4-31b", provider: "cerebras" },
   { id: "gpt-oss-120b", provider: "cerebras" },
-  // Google: tertiary — subject to daily free-tier quota exhaustion
-  { id: "gemini-2.0-flash", provider: "google" },
+  // Google: tertiary — use newer models; gemini-2.0-flash has exhausted free quota
+  // gemini-3.5-flash-lite: verified HTTP 200, free tier, newest & fastest
+  { id: "gemini-3.5-flash-lite", provider: "google" },
+  // gemini-3.1-flash-lite: verified HTTP 200, free tier, backup
+  { id: "gemini-3.1-flash-lite", provider: "google" },
 ];
 
 /**
