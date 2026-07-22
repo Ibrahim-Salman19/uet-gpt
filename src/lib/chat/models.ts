@@ -24,10 +24,9 @@ const PROVIDER_FACTORIES: Record<
 };
 
 const MODEL_MAPPING: Record<string, { id: string; provider: string }> = {
-  "gemini-3.5-flash": { id: "gemini-3.5-flash", provider: "google" },
-  "gemini-2.0-flash": { id: "gemini-2.0-flash", provider: "google" },
   "llama-3.3-70b": { id: "llama-3.3-70b-versatile", provider: "groq" },
   "llama-3.1-8b": { id: "llama-3.1-8b-instant", provider: "groq" },
+  "gemini-2.0-flash": { id: "gemini-2.0-flash", provider: "google" },
 };
 
 function buildFallbackChain(preferredModelKey?: string): { id: string; provider: string }[] {

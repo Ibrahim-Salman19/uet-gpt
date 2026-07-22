@@ -16,11 +16,9 @@ interface ModelConfig {
 }
 
 export const LLM_FALLBACK_CHAIN: ModelConfig[] = [
-  { id: "gemini-3.5-flash", provider: "google" },
-  { id: "gemini-2.0-flash", provider: "google" },
   { id: "llama-3.3-70b-versatile", provider: "groq" },
-  { id: "llama3.1-8b", provider: "cerebras" },
   { id: "llama-3.1-8b-instant", provider: "groq" },
+  { id: "gemini-2.0-flash", provider: "google" },
 ];
 
 /**
