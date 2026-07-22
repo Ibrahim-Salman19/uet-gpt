@@ -18,7 +18,13 @@ function getAllowedOrigins(): string[] {
     .filter((url): url is string => !!url)
     .map((url) => url.replace(/\/$/, ""));
   if (process.env.NODE_ENV === "development") {
-    allowed.push("http://localhost:3000");
+    allowed.push(
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "http://localhost:3005",
+      "http://127.0.0.1:3000",
+      "http://127.0.0.1:3005",
+    );
   }
   return allowed;
 }

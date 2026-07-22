@@ -131,11 +131,14 @@ function getErrorMessage(err: unknown): string {
   return "Failed to send message";
 }
 
+type RenameThreadMutation = (args: { id: string; title: string }) => Promise<null>;
+
 async function executeStreamPhase(
   threadId: string,
   content: string,
   convex: ConvexReactClient,
   insertMutation: InsertMessageMutation,
+  renameThreadMutation: RenameThreadMutation,
   abortController: AbortController,
   isRetryRequest: boolean,
 ): Promise<StreamResult> {
@@ -145,7 +148,8 @@ async function executeStreamPhase(
     toast.error("Response took too long. Please try again.");
   }, CHAT_TIMEOUT_MS);
   try {
-    const dbMessages = (await convex.query(api.messages.list, { threadId })) as DbMessage[];
+    const dbMessagesRaw = await convex.query(api.messages.list, { threadId });
+    const dbMessages: DbMessage[] = Array.isArray(dbMessagesRaw) ? (dbMessagesRaw as DbMessage[]) : [];
 
     // Whether the user message for this turn is already persisted. Only treat
     // this as a retry when the caller explicitly requested a retry AND the last
@@ -161,6 +165,27 @@ async function executeStreamPhase(
 
     if (!userMessageAlreadyPersisted) {
       await insertUserMessage(insertMutation, threadId, content);
+
+      // Auto-title the thread from the first user message so the sidebar
+      // shows something meaningful instead of "New Chat". Only the first
+      // message (empty dbMessages) renames. Fire-and-forget; a failure here
+      // must not break the stream.
+      if (dbMessages.length === 0) {
+        const cleanContent = content.trim().replace(/[?.,!]/g, "");
+        const words = cleanContent.split(/\s+/).filter(Boolean);
+        const MAX_TITLE_WORDS = 5;
+        const MAX_TITLE_CHARS = 80;
+        let newTitle =
+          words.length > MAX_TITLE_WORDS
+            ? `${words.slice(0, MAX_TITLE_WORDS).join(" ")}...`
+            : cleanContent;
+        if (newTitle.length > MAX_TITLE_CHARS) {
+          newTitle = `${newTitle.slice(0, MAX_TITLE_CHARS)}...`;
+        }
+        if (newTitle.length > 0) {
+          renameThreadMutation({ id: threadId, title: newTitle }).catch(console.error);
+        }
+      }
     }
 
     const formattedMessages = dbMessages.map((m) => ({ role: m.role, content: m.content }));
@@ -203,6 +228,7 @@ export function useChat(threadId: string | undefined) {
   const isRetryRef = useRef(false);
 
   const insertMutation = useMutation(api.messages.insert) as unknown as InsertMessageMutation;
+  const renameThread = useMutation(api.threads.rename) as unknown as RenameThreadMutation;
 
   // Abort any in-flight requests on thread change or unmount
   useEffect(() => {
@@ -256,19 +282,24 @@ export function useChat(threadId: string | undefined) {
           content,
           convex,
           insertMutation,
+          renameThread,
           abortController,
           isRetryRequest,
         );
 
-        if (!result.ok && result.error !== "aborted") {
-          setError(result.error);
-          toast.error(result.error);
+        if (!result.ok) {
+          if (result.error === "aborted") {
+            setError("Request timed out or was cancelled.");
+          } else {
+            setError(result.error);
+            toast.error(result.error);
+          }
         }
       } finally {
         cleanupStreamState(threadId, generation);
       }
     },
-    [threadId, convex, insertMutation],
+    [threadId, convex, insertMutation, renameThread],
   );
 
   const handleStop = useCallback(() => {

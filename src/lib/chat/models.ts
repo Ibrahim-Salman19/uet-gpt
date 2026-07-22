@@ -24,7 +24,8 @@ const PROVIDER_FACTORIES: Record<
 };
 
 const MODEL_MAPPING: Record<string, { id: string; provider: string }> = {
-  "llama-4-scout": { id: "meta-llama/llama-4-scout-17b-16e-instruct", provider: "groq" },
+  "gemini-3.5-flash": { id: "gemini-3.5-flash", provider: "google" },
+  "gemini-2.0-flash": { id: "gemini-2.0-flash", provider: "google" },
   "llama-3.3-70b": { id: "llama-3.3-70b-versatile", provider: "groq" },
   "llama-3.1-8b": { id: "llama-3.1-8b-instant", provider: "groq" },
 };
@@ -37,14 +38,27 @@ function buildFallbackChain(preferredModelKey?: string): { id: string; provider:
   return [preferredConfig, ...LLM_FALLBACK_CHAIN.filter((m) => m.id !== preferredConfig.id)];
 }
 
+function getProviderApiKeys(provider: string): string[] {
+  if (provider === "google") {
+    const keys = [
+      process.env.GEMINI_API_KEY,
+      process.env.GEMINI_API_KEY_1,
+      process.env.GEMINI_API_KEY_2,
+      process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+    ].filter((k): k is string => !!k && k.trim().length > 0);
+    return Array.from(new Set(keys));
+  }
+  const mainKey = process.env[PROVIDER_ENV_KEYS[provider as keyof typeof PROVIDER_ENV_KEYS]];
+  return mainKey ? [mainKey] : [];
+}
+
 export function getAvailableModels(preferredModelKey?: string): LanguageModel[] {
   const chain = buildFallbackChain(preferredModelKey);
   return chain.flatMap((modelConfig) => {
     const factory = PROVIDER_FACTORIES[modelConfig.provider];
     if (!factory) return [];
-    const apiKey = process.env[factory.envKey];
-    if (!apiKey) return [];
-    return [factory.create(apiKey)(modelConfig.id)];
+    const keys = getProviderApiKeys(modelConfig.provider);
+    return keys.map((key) => factory.create(key)(modelConfig.id));
   });
 }
 

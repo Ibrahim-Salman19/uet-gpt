@@ -1,8 +1,9 @@
 "use client";
 
+import { useAuth } from "@clerk/nextjs";
 import { api } from "convex/_generated/api";
 import { useMutation } from "convex/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -17,8 +18,10 @@ const DEFAULT_SUGGESTIONS = [
   { label: "Hostel Allotment", prompt: "Explain the hostel allotment process." },
 ];
 
-export default function ChatPage() {
+function ChatPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { isSignedIn, isLoaded: isAuthLoaded } = useAuth();
   const createThread = useMutation(api.threads.create);
   const [isCreating, setIsCreating] = useState(false);
   const creatingRef = useRef(false);
@@ -26,7 +29,18 @@ export default function ChatPage() {
 
   const handleSend = useCallback(
     async (message: string) => {
-      if (creatingRef.current) return;
+      if (!message.trim() || creatingRef.current) return;
+
+      if (isAuthLoaded && !isSignedIn) {
+        toast.error("Please sign in to start a conversation.", {
+          action: {
+            label: "Sign In",
+            onClick: () => router.push(`/sign-in?redirect_url=${encodeURIComponent("/chat")}`),
+          },
+        });
+        return;
+      }
+
       creatingRef.current = true;
       setIsCreating(true);
       try {
@@ -38,10 +52,20 @@ export default function ChatPage() {
           setIsCreating(false);
           toast.error("Failed to start conversation. Please try again.");
         }
-      } catch {
+      } catch (err: unknown) {
         creatingRef.current = false;
         setIsCreating(false);
-        toast.error("Failed to start conversation. Please try again.");
+        const errorMsg = err instanceof Error ? err.message : "Failed to start conversation";
+        if (errorMsg.toLowerCase().includes("unauthorized") || errorMsg.toLowerCase().includes("not found")) {
+          toast.error("Please sign in to start a conversation.", {
+            action: {
+              label: "Sign In",
+              onClick: () => router.push(`/sign-in?redirect_url=${encodeURIComponent("/chat")}`),
+            },
+          });
+        } else {
+          toast.error("Failed to start conversation. Please try again.");
+        }
       } finally {
         timeoutRef.current = setTimeout(() => {
           creatingRef.current = false;
@@ -49,8 +73,19 @@ export default function ChatPage() {
         }, 500);
       }
     },
-    [createThread, router],
+    [createThread, isAuthLoaded, isSignedIn, router],
   );
+
+  // Auto-send query parameter if navigated with ?q=...
+  const queryParam = searchParams.get("q");
+  const autoFiredRef = useRef(false);
+
+  useEffect(() => {
+    if (queryParam && !autoFiredRef.current && isAuthLoaded) {
+      autoFiredRef.current = true;
+      handleSend(queryParam);
+    }
+  }, [queryParam, isAuthLoaded, handleSend]);
 
   React.useEffect(() => {
     return () => {
@@ -135,5 +170,13 @@ export default function ChatPage() {
         </div>
       </div>
     </GlassPortal>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <React.Suspense fallback={null}>
+      <ChatPageContent />
+    </React.Suspense>
   );
 }

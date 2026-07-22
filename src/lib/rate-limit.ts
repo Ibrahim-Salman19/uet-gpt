@@ -92,15 +92,27 @@ export async function checkChatRateLimit(
         : userLimiter;
 
   if (!limiter) {
-    console.warn("[RATE-LIMIT] Rate limiting not configured - denying for safety");
-    return deniedResult();
+    console.warn("[RATE-LIMIT] Rate limiting not configured - allowing request for fallback");
+    return {
+      success: true,
+      limit: 100,
+      remaining: 100,
+      reset: Date.now() + 60000,
+      pending: Promise.resolve(),
+    };
   }
 
   try {
     return await limiter.limit(identifier);
   } catch (error) {
-    console.error("[RATE-LIMIT] Redis error - denying for safety:", error);
-    return deniedResult();
+    console.error("[RATE-LIMIT] Redis error - failing open for availability:", error);
+    return {
+      success: true,
+      limit: 100,
+      remaining: 100,
+      reset: Date.now() + 60000,
+      pending: Promise.resolve(),
+    };
   }
 }
 
