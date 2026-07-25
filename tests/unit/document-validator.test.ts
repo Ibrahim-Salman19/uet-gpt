@@ -188,9 +188,9 @@ describe("documentValidator", () => {
       documentValidator = mod.documentValidator;
     });
 
-    it("has exactly 19 fields", () => {
+    it("has exactly 20 fields", () => {
       const keys = Object.keys(documentValidator.fields);
-      expect(keys).toHaveLength(19);
+      expect(keys).toHaveLength(20);
     });
 
     it("contains all expected field names in order", () => {
@@ -210,6 +210,7 @@ describe("documentValidator", () => {
         "chunkCount",
         "chunksEmbedded",
         "crawlSessionId",
+        "personType",
         "freshnessTier",
         "isStale",
         "crawledAt",
@@ -322,8 +323,8 @@ describe("documentValidator", () => {
       });
     });
 
-    it("has all 19 fields in the serialized value", () => {
-      expect(Object.keys(j.value)).toHaveLength(19);
+    it("has all 20 fields in the serialized value", () => {
+      expect(Object.keys(j.value)).toHaveLength(20);
     });
   });
 
@@ -376,7 +377,7 @@ describe("documentValidator", () => {
 
     it("omit() with no fields returns identical validator", () => {
       const omitted = documentValidator.omit();
-      expect(Object.keys(omitted.fields)).toHaveLength(19);
+      expect(Object.keys(omitted.fields)).toHaveLength(20);
     });
 
     it("omit() removes all fields when all named", () => {
@@ -388,7 +389,7 @@ describe("documentValidator", () => {
     it("partial() marks all fields as optional", () => {
       const partial = documentValidator.partial();
       expect(partial.kind).toBe("object");
-      expect(Object.keys(partial.fields)).toHaveLength(19);
+      expect(Object.keys(partial.fields)).toHaveLength(20);
       for (const key of Object.keys(partial.fields)) {
         expect(partial.fields[key].isOptional).toBe("optional");
       }
@@ -411,7 +412,7 @@ describe("documentValidator", () => {
         tags: v.optional(v.array(v.string())),
       });
       expect(extended.kind).toBe("object");
-      expect(Object.keys(extended.fields)).toHaveLength(21);
+      expect(Object.keys(extended.fields)).toHaveLength(22);
       expect(extended.fields.popularity.kind).toBe("float64");
       expect(extended.fields.popularity.isOptional).toBe("required");
       expect(extended.fields.tags.kind).toBe("array");
@@ -423,7 +424,7 @@ describe("documentValidator", () => {
     });
 
     it("extend() does not mutate the original validator", () => {
-      expect(Object.keys(documentValidator.fields)).toHaveLength(19);
+      expect(Object.keys(documentValidator.fields)).toHaveLength(20);
     });
   });
 

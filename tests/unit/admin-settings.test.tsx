@@ -127,9 +127,11 @@ import { useMutation, useQuery } from "convex/react";
 import { toast } from "sonner";
 
 // Distinct spies per mutation so tests can assert the exact persistence call.
-// The page builds these as useMutation(api.admin.settings.upsertSettingsBatch)
-// and useMutation(api.admin.settings.resetSettings); useMutation is called in
-// that order on render, so map by call order.
+// The page calls useMutation twice per render (upsertSettingsBatch, then
+// resetSettings), in that order, on EVERY render — including the re-render
+// triggered by the dbSettings-merge useEffect. So we dispatch by call index
+// modulo 2: odd calls (1st of each render) → upsert, even calls (2nd) → reset.
+// This stays stable across re-renders, unlike a naive callCount===1 check.
 let upsertSpy: ReturnType<typeof vi.fn>;
 let resetSpy: ReturnType<typeof vi.fn>;
 
@@ -142,8 +144,8 @@ describe("AdminSettingsPage", () => {
     let callCount = 0;
     vi.mocked(useMutation).mockImplementation(() => {
       callCount += 1;
-      // First useMutation() call -> upsertSettingsBatch, second -> resetSettings.
-      return (callCount === 1 ? upsertSpy : resetSpy) as any;
+      // 1st of each render → upsert, 2nd → reset (repeats every render).
+      return (callCount % 2 === 1 ? upsertSpy : resetSpy) as any;
     });
   });
 

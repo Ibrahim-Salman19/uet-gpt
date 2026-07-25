@@ -100,7 +100,7 @@ describe("AdminDocumentsPage", () => {
     });
 
     // Set a search query to trigger filtered-empty state
-    const searchInput = screen.getByPlaceholderText("Search documents...");
+    const searchInput = screen.getByPlaceholderText("Search documents…");
     await act(async () => {
       fireEvent.change(searchInput, { target: { value: "nonexistent" } });
     });
@@ -138,7 +138,7 @@ describe("AdminDocumentsPage", () => {
       expect(screen.getByText("Admissions Guide")).toBeInTheDocument();
     });
 
-    const searchInput = screen.getByPlaceholderText("Search documents...");
+    const searchInput = screen.getByPlaceholderText("Search documents…");
     await act(async () => {
       fireEvent.change(searchInput, { target: { value: "Admissions" } });
     });

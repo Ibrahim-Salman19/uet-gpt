@@ -49,9 +49,11 @@ describe("SidebarHistory", () => {
     const container1 = links[1]?.parentElement;
 
     expect(container0?.className).toContain("bg-[var(--accent)]/10");
-    expect(container0?.className).not.toContain("text-zinc-400");
+    expect(container0?.className).not.toContain("text-[var(--text-secondary)]");
 
-    expect(container1?.className).toContain("text-zinc-400");
+    // The non-active link uses the themed secondary text token (was text-zinc-400
+    // before the design-token migration; source now uses var(--text-secondary)).
+    expect(container1?.className).toContain("text-[var(--text-secondary)]");
     expect(container1?.className).not.toContain("bg-[var(--accent)]/10");
   });
 });

@@ -5,6 +5,19 @@ vi.mock("../../convex/_generated/server", () => ({
   mutation: (opts: { handler: Function }) => ({ handler: opts.handler }),
 }));
 
+// The handler resolves component function refs through the generated api and
+// invokes them via ctx.runQuery. Stub the generated api so the component ref
+// exists, and provide a runQuery in the mock ctx below.
+vi.mock("../../convex/_generated/api", () => ({
+  components: {
+    agent: {
+      messages: {
+        getMessagesByIds: "getMessagesByIds",
+      },
+    },
+  },
+}));
+
 import { submit } from "../../convex/feedback/submit";
 
 interface MockMutationCtx {
@@ -15,6 +28,7 @@ interface MockMutationCtx {
     insert: ReturnType<typeof vi.fn>;
     query: ReturnType<typeof vi.fn>;
   };
+  runQuery: ReturnType<typeof vi.fn>;
 }
 
 function makeChain(value: unknown) {
@@ -47,6 +61,12 @@ describe("feedback:submit", () => {
         insert: mockInsert,
         query: mockQuery,
       },
+      // submit.ts calls components.agent.messages.getMessagesByIds to verify the
+      // caller owns the message before recording feedback. Return a message
+      // owned by the same clerk subject so the ownership check passes.
+      runQuery: vi.fn().mockResolvedValue([
+        { _id: "messages_id_123", userId: "clerk_test_123" },
+      ]),
     };
 
     const mockArgs = {

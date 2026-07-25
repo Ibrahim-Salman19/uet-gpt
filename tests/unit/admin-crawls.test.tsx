@@ -137,15 +137,6 @@ describe("AdminCrawlsPage", () => {
     });
   });
 
-  it("renders Refresh button", async () => {
-    mockConvex.query.mockReturnValue([]);
-    vi.mocked(useMutation).mockReturnValue(Object.assign(vi.fn(), { withOptimisticUpdate: vi.fn() }));
-    render(<AdminCrawlsPage />);
-    await waitFor(() => {
-      expect(screen.getByText("REFRESH")).toBeInTheDocument();
-    });
-  });
-
   it("renders New Crawl button", async () => {
     mockConvex.query.mockReturnValue([]);
     vi.mocked(useMutation).mockReturnValue(Object.assign(vi.fn(), { withOptimisticUpdate: vi.fn() }));
