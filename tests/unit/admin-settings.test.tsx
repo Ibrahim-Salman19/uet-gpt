@@ -233,9 +233,9 @@ describe("AdminSettingsPage", () => {
       expect(selects).toHaveLength(1);
       const select = selects[0] as HTMLSelectElement;
       const optionTexts = Array.from(select.options).map((o) => o.text);
-      expect(optionTexts).toContain("Llama 3.3 70B");
-      expect(optionTexts).toContain("Llama 3.1 8B");
-      expect(optionTexts).toContain("Mixtral 8x7B");
+      expect(optionTexts).toContain("GPT-OSS 120B");
+      expect(optionTexts).toContain("GPT-OSS 20B");
+      expect(optionTexts).toContain("Gemini 3.5 Flash-Lite");
     });
 
     it("sets correct defaults for RAG fields", () => {
@@ -243,7 +243,7 @@ describe("AdminSettingsPage", () => {
 
       // Verify select default value
       const select = screen.getByTestId("native-select") as HTMLSelectElement;
-      expect(select.value).toBe("llama-3.3-70b-versatile");
+      expect(select.value).toBe("openai/gpt-oss-120b");
     });
   });
 
@@ -324,11 +324,11 @@ describe("AdminSettingsPage", () => {
 
       const select = screen.getByTestId("native-select") as HTMLSelectElement;
 
-      expect(select.value).toBe("llama-3.3-70b-versatile");
+      expect(select.value).toBe("openai/gpt-oss-120b");
       fireEvent.change(select, {
-        target: { value: "mixtral-8x7b-32768" },
+        target: { value: "gemini-3.5-flash-lite" },
       });
-      expect(select.value).toBe("mixtral-8x7b-32768");
+      expect(select.value).toBe("gemini-3.5-flash-lite");
     });
   });
 

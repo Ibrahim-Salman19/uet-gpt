@@ -21,8 +21,8 @@ const FONT_SIZES = [
 ] as const;
 
 const MODELS = [
-  { value: "llama-4-scout", label: "UET-Pro", desc: "Best quality (Deep)" },
-  { value: "llama-3.1-8b", label: "UET-Fast", desc: "Fastest (Default)" },
+  { value: "gpt-oss-120b", label: "UET-Pro", desc: "Best quality (Deep)" },
+  { value: "gpt-oss-20b", label: "UET-Fast", desc: "Fastest (Default)" },
 ] as const;
 
 function SettingsSection({
@@ -163,7 +163,7 @@ export default function SettingsPage() {
   const userData = useStableQuery(api.users.getByClerkId, user?.id ? { clerkId: user.id } : "skip");
   const updatePreferences = useMutation(api.users.updatePreferences);
   const [fontSize, setFontSize] = useState<string>("medium");
-  const [model, setModel] = useState<string>("llama-3.1-8b");
+  const [model, setModel] = useState<string>("gpt-oss-20b");
   const initializedRef = useRef(false);
 
   useEffect(() => {

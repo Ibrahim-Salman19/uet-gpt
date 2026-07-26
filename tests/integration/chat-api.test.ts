@@ -139,13 +139,12 @@ describe("Chat API Integration", () => {
       vi.stubEnv("GEMINI_API_KEY", "gemini-key");
 
       const models = getModelPriorities();
-      expect(models).toHaveLength(6);
-      expect(models[0]).toBe("llama-3.3-70b-versatile");
-      expect(models[1]).toBe("llama-3.1-8b-instant");
+      expect(models).toHaveLength(5);
+      expect(models[0]).toBe("openai/gpt-oss-120b");
+      expect(models[1]).toBe("openai/gpt-oss-20b");
       expect(models[2]).toBe("gemma-4-31b");
       expect(models[3]).toBe("gpt-oss-120b");
       expect(models[4]).toBe("gemini-3.5-flash-lite");
-      expect(models[5]).toBe("gemini-3.1-flash-lite");
 
       vi.unstubAllEnvs();
     });

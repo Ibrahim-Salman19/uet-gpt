@@ -22,7 +22,6 @@ export const MAX_QUERY_LEN = 2_000;
 
 export const CRAG_CONFIG = {
   batchSize: 4,
-  groqModel: "llama-3.1-8b-instant",
   highConfidenceThreshold: 0.7,
   // When the reranker's top score is already at/above the "normal" confidence
   // tier (see determineConfidenceTier), the rerank ordering is trusted and the
@@ -31,9 +30,9 @@ export const CRAG_CONFIG = {
   skipThreshold: 0.6,
 } as const;
 
-export const FAITHFULNESS_CONFIG = {
-  groqModel: "llama-3.1-8b-instant",
-} as const;
+// NOTE: model selection moved to convex/rag/modelRegistry.ts (Track C).
+// The dying llama models were previously configured here; the registry now
+// centralizes Groq-primary → Gemini-fallback selection with strict schemas.
 
 export const CASCADE_CONFIG = {
   minWordOverlap: 0.1,

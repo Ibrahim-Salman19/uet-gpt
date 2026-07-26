@@ -59,10 +59,10 @@ function ModelSelector({
   triggerRef,
 }: {
   activeModelLabel: string;
-  activeModelKey: "llama-3.1-8b" | "llama-4-scout";
+  activeModelKey: "gpt-oss-20b" | "gpt-oss-120b";
   isOpen: boolean;
   onToggle: () => void;
-  onSelect: (modelKey: "llama-3.1-8b" | "llama-4-scout") => void;
+  onSelect: (modelKey: "gpt-oss-20b" | "gpt-oss-120b") => void;
   ref: React.RefObject<HTMLDivElement | null>;
   triggerRef: React.RefObject<HTMLButtonElement | null>;
 }) {
@@ -132,8 +132,8 @@ function ModelSelector({
           <button
             type="button"
             role="menuitemradio"
-            aria-checked={activeModelKey === "llama-3.1-8b"}
-            onClick={() => onSelect("llama-3.1-8b")}
+            aria-checked={activeModelKey === "gpt-oss-20b"}
+            onClick={() => onSelect("gpt-oss-20b")}
             className="w-full text-left px-4 py-2.5 hover:bg-white/5 text-xs text-zinc-200 hover:text-white transition-colors flex items-center justify-between focus-visible:bg-white/5 focus-visible:outline-none"
           >
             <span>UET-Fast</span>
@@ -144,8 +144,8 @@ function ModelSelector({
           <button
             type="button"
             role="menuitemradio"
-            aria-checked={activeModelKey === "llama-4-scout"}
-            onClick={() => onSelect("llama-4-scout")}
+            aria-checked={activeModelKey === "gpt-oss-120b"}
+            onClick={() => onSelect("gpt-oss-120b")}
             className="w-full text-left px-4 py-2.5 hover:bg-white/5 text-xs text-zinc-200 hover:text-white transition-colors flex items-center justify-between focus-visible:bg-white/5 focus-visible:outline-none"
           >
             <span>UET-Pro</span>
@@ -538,11 +538,11 @@ export function MainShell({ children }: MainShellProps) {
   const toggleSidebar = React.useCallback(() => setSidebarOpen((p) => !p), []);
   const closeSidebar = React.useCallback(() => setSidebarOpen(false), []);
 
-  const isPro = modelPreference === "llama-4-scout";
+  const isPro = modelPreference === "gpt-oss-120b";
   const activeModelLabel = isPro ? "UET-Pro" : "UET-Fast";
 
   const handleSelectModel = React.useCallback(
-    async (modelKey: "llama-3.1-8b" | "llama-4-scout") => {
+    async (modelKey: "gpt-oss-20b" | "gpt-oss-120b") => {
       setModelDropdownOpen(false);
       await updateModelPreference(modelKey);
     },

@@ -1,9 +1,8 @@
-import { createGroq } from "@ai-sdk/groq";
 import { generateObject } from "ai";
 import { v } from "convex/values";
 import { z } from "zod";
 import { internalAction } from "../_generated/server";
-import { FAITHFULNESS_CONFIG } from "./constants";
+import { getStructuredModelChain } from "./modelRegistry";
 
 function buildFaithfulnessPrompt(answer: string, sources: string[]): string {
   const sourcesText = sources
@@ -45,32 +44,48 @@ export const judgeFaithfulness = internalAction({
     score: v.number(),
   }),
   handler: async (_ctx, args) => {
-    if (!process.env.GROQ_API_KEY || !args.answer || args.sources.length === 0) {
+    if (!args.answer || args.sources.length === 0) {
       return { faithful: true, unsupportedClaims: [], score: 1.0 };
     }
 
-    const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
-
-    try {
-      const { object } = await generateObject({
-        model: groq(FAITHFULNESS_CONFIG.groqModel),
-        schema: z.object({
-          faithful: z.boolean(),
-          unsupportedClaims: z.array(z.string()),
-          // Constrain to [0,1] so the faithfulness score is on a known scale
-          // for any downstream threshold comparison.
-          score: z.number().min(0).max(1),
-        }),
-        prompt: buildFaithfulnessPrompt(args.answer, args.sources),
-        temperature: 0,
-        maxOutputTokens: 500,
-      });
-
-      // Defense-in-depth: clamp the score to [0,1] before returning.
-      return { ...object, score: Math.max(0, Math.min(1, object.score)) };
-    } catch (error) {
-      console.warn("Faithfulness check failed, defaulting to faithful:", error);
+    // Faithfulness is the most demanding structured role — use the LARGE model
+    // (gpt-oss-120b) primary with Gemini fallback (per operator directive).
+    const chain = getStructuredModelChain(true);
+    if (chain.length === 0) {
+      console.warn("Faithfulness: no provider key configured, returning faithful default");
       return { faithful: true, unsupportedClaims: [], score: 1.0 };
     }
+
+    for (const { model, label } of chain) {
+      try {
+        const { object } = await generateObject({
+          model,
+          // .strict() emits additionalProperties:false — required for Groq gpt-oss
+          // strict-schema mode (see TRACK_C_DESIGN.md diagnostic evidence).
+          schema: z
+            .object({
+              faithful: z.boolean(),
+              unsupportedClaims: z.array(z.string()),
+              // Constrain to [0,1] so the faithfulness score is on a known scale
+              // for any downstream threshold comparison.
+              score: z.number().min(0).max(1),
+            })
+            .strict(),
+          prompt: buildFaithfulnessPrompt(args.answer, args.sources),
+          temperature: 0,
+          maxOutputTokens: 500,
+        });
+
+        // Defense-in-depth: clamp the score to [0,1] before returning.
+        return { ...object, score: Math.max(0, Math.min(1, object.score)) };
+      } catch (error) {
+        console.warn(`Faithfulness: ${label} failed, trying next provider:`, error);
+      }
+    }
+
+    // All providers failed → faithful default (this is a safety net, not yet
+    // wired into generation; see the NOTE on this internalAction).
+    console.warn("Faithfulness: all providers failed, returning faithful default");
+    return { faithful: true, unsupportedClaims: [], score: 1.0 };
   },
 });

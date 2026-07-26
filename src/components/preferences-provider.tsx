@@ -25,8 +25,8 @@ interface PreferencesContextType {
   typingSoundEnabled: boolean;
   pinnedHighlights: PinnedHighlight[];
   fontSize: "small" | "medium" | "large";
-  modelPreference: "llama-3.1-8b" | "llama-4-scout";
-  updateModelPreference: (model: "llama-3.1-8b" | "llama-4-scout") => Promise<void>;
+  modelPreference: "gpt-oss-20b" | "gpt-oss-120b";
+  updateModelPreference: (model: "gpt-oss-20b" | "gpt-oss-120b") => Promise<void>;
 
   // Modals
   commandPaletteOpen: boolean;
@@ -412,7 +412,7 @@ function useVoiceTranscriptCallback() {
 type UpdatePreferencesFn = (args: {
   theme?: string;
   fontSize?: string;
-  model?: "llama-3.1-8b" | "llama-4-scout";
+  model?: "gpt-oss-20b" | "gpt-oss-120b";
 }) => Promise<unknown>;
 
 function usePreferenceActions(
@@ -468,10 +468,10 @@ function usePreferenceActions(
   );
 
   const updateModelPreference = React.useCallback(
-    async (model: "llama-3.1-8b" | "llama-4-scout") => {
+    async (model: "gpt-oss-20b" | "gpt-oss-120b") => {
       try {
         await updatePreferences({ model });
-        toast.success(`Model switched to ${model === "llama-4-scout" ? "UET-Pro" : "UET-Fast"}`);
+        toast.success(`Model switched to ${model === "gpt-oss-120b" ? "UET-Pro" : "UET-Fast"}`);
       } catch (err) {
         toast.error("Failed to update model preference");
       }

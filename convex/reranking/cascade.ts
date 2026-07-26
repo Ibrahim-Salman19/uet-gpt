@@ -1,7 +1,6 @@
 // @ts-nocheck
 // fallow-ignore-file security-sink
 import { v } from "convex/values";
-import { internal } from "../_generated/api";
 import { internalAction } from "../_generated/server";
 import { CASCADE_CONFIG } from "../rag/constants";
 
@@ -124,31 +123,11 @@ export const cascadeRerank = internalAction({
       }
     }
 
-    // ── Tier 2b: Groq lightweight reranker (free, no extra infra) ──
-    try {
-      type GroqResult = { text: string; score: number; index: number };
-      const groqResult: GroqResult[] = await ctx.runAction(
-        internal.reranking.groqRerank.groqRerank,
-        {
-          query: args.query,
-          documents: tier2Candidates.map((d) => ({ text: d.text, id: d.id })),
-          topK: Math.min(topK, tier2Candidates.length),
-        },
-      );
-      if (groqResult.length > 0) {
-        return groqResult.map((r: GroqResult) => {
-          const candidate =
-            r.index >= 0 && r.index < tier2Candidates.length ? tier2Candidates[r.index] : undefined;
-          return {
-            text: candidate?.text ?? r.text,
-            score: r.score,
-            index: candidate?.originalIndex ?? r.index,
-          };
-        });
-      }
-    } catch (error) {
-      console.warn("Groq rerank failed:", error);
-    }
+    // ── Tier 2b: REMOVED — was a generative-JSON Groq reranker (llama-3.1-8b,
+    // dying 2026-08-16). Per Track C design, reranking should use dedicated
+    // rerankers, not ask an LLM to manufacture a JSON ranking. The cascade now
+    // falls through directly to Cohere (Tier 3) → Tier-1 word-overlap/RRF.
+    // The internal.reranking.groqRerank action is retained but unwired.
 
     // ── Tier 3: Cohere free rerank fallback ──
     const cohereKey = process.env.COHERE_API_KEY;
