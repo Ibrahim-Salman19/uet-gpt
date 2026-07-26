@@ -43,6 +43,16 @@ GEMINI_API_KEY = (
     os.environ.get("GEMINI_API_KEY_1")
 )
 
+# Vision-capable Gemini model for PDF VLM extraction (OCR of scanned pages,
+# tables, multi-column layouts). gemini-2.0-flash is dead (HTTP 429 since
+# 2026-06-01); gemini-2.5-flash-lite is dead (HTTP 404 to new users).
+# Qualified alive via live probe 2026-07-26: gemini-3.6-flash returned
+# HTTP 200 on both text and inline_data (vision) calls. This MUST be a
+# multimodal model — a text-only model silently returns empty text for
+# image inputs, which would corrupt every PDF in the corpus. This is NOT
+# an embedding model; never repoint it at gemini-embedding-2.
+VLM_MODEL = "gemini-3.6-flash"
+
 CONVEX_SITE_URL = os.environ.get("CONVEX_SITE_URL")
 CONVEX_AUTH_TOKEN = os.environ.get("CONVEX_AUTH_TOKEN") or os.environ.get("CRAWL_WEBHOOK_SECRET")
 
@@ -126,7 +136,7 @@ def extract_vlm(path: str) -> str:
         try:
             import google.generativeai as genai  # type: ignore
             genai.configure(api_key=GEMINI_API_KEY)  # type: ignore
-            model = genai.GenerativeModel("gemini-2.0-flash")  # type: ignore
+            model = genai.GenerativeModel(VLM_MODEL)  # type: ignore
             use_new_sdk = False
         except ImportError:
             print("  [error] No Gemini SDK found. Run: python -m pip install google-genai")
@@ -197,7 +207,7 @@ def extract_vlm(path: str) -> str:
             try:
                 if use_new_sdk:
                     response = client.models.generate_content(
-                        model="gemini-2.0-flash",
+                        model=VLM_MODEL,
                         contents=[
                             current_prompt,
                             {"inline_data": {"mime_type": "image/png", "data": b64_png}},
