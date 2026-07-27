@@ -10,16 +10,26 @@
 
 import {
   ActionBuilder,
-  GenericActionCtx,
-  GenericDatabaseReader,
-  GenericDatabaseWriter,
-  GenericMutationCtx,
-  GenericQueryCtx,
   HttpActionBuilder,
   MutationBuilder,
   QueryBuilder,
+  GenericActionCtx,
+  GenericMutationCtx,
+  GenericQueryCtx,
+  GenericDatabaseReader,
+  GenericDatabaseWriter,
 } from "convex/server";
 import type { DataModel } from "./dataModel.js";
+
+/**
+ * Typesafe environment variables declared in `convex.config.ts`.
+ */
+type Env = {
+  readonly CLERK_JWT_ISSUER: string;
+  readonly CLERK_WEBHOOK_SECRET: string;
+  readonly GEMINI_API_KEY: string;
+  readonly GROQ_API_KEY: string;
+};
 
 /**
  * Define a query in this Convex app's public API.
@@ -94,6 +104,11 @@ export declare const internalAction: ActionBuilder<DataModel, "internal">;
  * @returns The wrapped function. Import this function from `convex/http.js` and route it to hook it up.
  */
 export declare const httpAction: HttpActionBuilder;
+
+/**
+ * Typesafe environment variables declared in `convex.config.ts`.
+ */
+export declare const env: Env;
 
 /**
  * A set of services for use within Convex query functions.

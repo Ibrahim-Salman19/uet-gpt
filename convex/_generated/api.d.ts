@@ -8,7 +8,6 @@
  * @module
  */
 
-import type { ApiFromModules, FilterApi, FunctionReference } from "convex/server";
 import type * as admin_settings from "../admin/settings.js";
 import type * as admin_stats from "../admin/stats.js";
 import type * as auth from "../auth.js";
@@ -47,24 +46,25 @@ import type * as doc_validator from "../doc/validator.js";
 import type * as embeddings_chunkTextSearch from "../embeddings/chunkTextSearch.js";
 import type * as embeddings_contextualize from "../embeddings/contextualize.js";
 import type * as embeddings_contextualizeCron from "../embeddings/contextualizeCron.js";
+import type * as embeddings_dimension from "../embeddings/dimension.js";
 import type * as embeddings_doc_queries from "../embeddings/doc_queries.js";
 import type * as embeddings_generate from "../embeddings/generate.js";
 import type * as embeddings_idf from "../embeddings/idf.js";
 import type * as embeddings_metadata from "../embeddings/metadata.js";
 import type * as embeddings_search from "../embeddings/search.js";
 import type * as emergencyStop from "../emergencyStop.js";
+import type * as eval from "../eval.js";
 import type * as eval_constants from "../eval/constants.js";
 import type * as eval_exportDataset from "../eval/exportDataset.js";
 import type * as eval_runEval from "../eval/runEval.js";
-import type * as eval from "../eval.js";
 import type * as faq from "../faq.js";
 import type * as feedback_list from "../feedback/list.js";
 import type * as feedback_submit from "../feedback/submit.js";
 import type * as health from "../health.js";
 import type * as http from "../http.js";
 import type * as lib_db_helpers from "../lib/db_helpers.js";
-import type * as messages_validator from "../messages/validator.js";
 import type * as messages from "../messages.js";
+import type * as messages_validator from "../messages/validator.js";
 import type * as observability_dashboard from "../observability/dashboard.js";
 import type * as observability_index from "../observability/index.js";
 import type * as observability_internal from "../observability/internal.js";
@@ -80,15 +80,22 @@ import type * as rag_instance from "../rag/instance.js";
 import type * as rag_prompts from "../rag/prompts.js";
 import type * as rag_retrieval from "../rag/retrieval.js";
 import type * as rag_routing from "../rag/routing.js";
+import type * as rag_smokeRetrieval from "../rag/smokeRetrieval.js";
 import type * as rag_testing from "../rag/testing.js";
 import type * as rateLimit from "../rateLimit.js";
 import type * as reranking_cascade from "../reranking/cascade.js";
 import type * as reranking_groqRerank from "../reranking/groqRerank.js";
 import type * as reranking_rerank from "../reranking/rerank.js";
-import type * as threads_validator from "../threads/validator.js";
 import type * as threads from "../threads.js";
-import type * as users_validator from "../users/validator.js";
+import type * as threads_validator from "../threads/validator.js";
 import type * as users from "../users.js";
+import type * as users_validator from "../users/validator.js";
+
+import type {
+  ApiFromModules,
+  FilterApi,
+  FunctionReference,
+} from "convex/server";
 
 declare const fullApi: ApiFromModules<{
   "admin/settings": typeof admin_settings;
@@ -129,6 +136,7 @@ declare const fullApi: ApiFromModules<{
   "embeddings/chunkTextSearch": typeof embeddings_chunkTextSearch;
   "embeddings/contextualize": typeof embeddings_contextualize;
   "embeddings/contextualizeCron": typeof embeddings_contextualizeCron;
+  "embeddings/dimension": typeof embeddings_dimension;
   "embeddings/doc_queries": typeof embeddings_doc_queries;
   "embeddings/generate": typeof embeddings_generate;
   "embeddings/idf": typeof embeddings_idf;
@@ -162,6 +170,7 @@ declare const fullApi: ApiFromModules<{
   "rag/prompts": typeof rag_prompts;
   "rag/retrieval": typeof rag_retrieval;
   "rag/routing": typeof rag_routing;
+  "rag/smokeRetrieval": typeof rag_smokeRetrieval;
   "rag/testing": typeof rag_testing;
   rateLimit: typeof rateLimit;
   "reranking/cascade": typeof reranking_cascade;
@@ -181,7 +190,10 @@ declare const fullApi: ApiFromModules<{
  * const myFunctionReference = api.myModule.myFunction;
  * ```
  */
-export declare const api: FilterApi<typeof fullApi, FunctionReference<any, "public">>;
+export declare const api: FilterApi<
+  typeof fullApi,
+  FunctionReference<any, "public">
+>;
 
 /**
  * A utility for referencing Convex functions in your app's internal API.
@@ -191,7 +203,10 @@ export declare const api: FilterApi<typeof fullApi, FunctionReference<any, "publ
  * const myFunctionReference = internal.myModule.myFunction;
  * ```
  */
-export declare const internal: FilterApi<typeof fullApi, FunctionReference<any, "internal">>;
+export declare const internal: FilterApi<
+  typeof fullApi,
+  FunctionReference<any, "internal">
+>;
 
 export declare const components: {
   rag: import("@convex-dev/rag/_generated/component.js").ComponentApi<"rag">;

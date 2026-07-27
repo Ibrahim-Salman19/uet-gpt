@@ -34,6 +34,35 @@ const SMOKE_MAX_QUERY_LEN = 200;
 const SMOKE_MAX_LIMIT = 5;
 const SNIPPET_LEN = 200;
 
+// Mirrors the return shape of internal.embeddings.search.searchDocumentsAction
+// (embeddings/search.ts:177-186). Defined locally so this probe does not depend
+// on the search module's inferred handler type and the deploy-time strict
+// typecheck has explicit annotations everywhere (no implicit any).
+type SearchHit = {
+  entryId: string;
+  content: string;
+  url: string;
+  title: string;
+  relevanceScore: number;
+  headingPath?: string[];
+};
+
+type SmokeResult = {
+  rank: number;
+  entryId: string;
+  url: string;
+  title: string;
+  relevanceScore: number;
+  snippet: string;
+};
+
+type SmokeReturn = {
+  query: string;
+  limit: number;
+  resultCount: number;
+  results: SmokeResult[];
+};
+
 function scanQuery(query: string): string {
   if (typeof query !== "string" || query.length === 0) {
     throw new ConvexError("query must be a non-empty string");
@@ -82,19 +111,22 @@ export const smokeRetrieval = internalAction({
       }),
     ),
   }),
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<SmokeReturn> => {
     const safeQuery = scanQuery(args.query);
     const limit = clampLimit(args.limit);
 
     // Real production retrieval pipeline — same internal action retrieveContext
     // calls. searchDocumentsAction runs: rag.search (vector) + fullTextSearch
     // (BM25) + chunkTextSearch + 3-way RRF fusion + FAQ fusion + decay scoring.
-    const hits = await ctx.runAction(internal.embeddings.search.searchDocumentsAction, {
-      queryText: safeQuery,
-      limit,
-    });
+    const hits: SearchHit[] = await ctx.runAction(
+      internal.embeddings.search.searchDocumentsAction,
+      {
+        queryText: safeQuery,
+        limit,
+      },
+    );
 
-    const results = hits.map((hit, idx) => ({
+    const results: SmokeResult[] = hits.map((hit: SearchHit, idx: number): SmokeResult => ({
       rank: idx + 1,
       entryId: hit.entryId,
       url: hit.url,
