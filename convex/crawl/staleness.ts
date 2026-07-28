@@ -1,6 +1,12 @@
 import { v } from "convex/values";
+import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import { internalMutation, type MutationCtx } from "../_generated/server";
+import {
+  classifyFreshness,
+  RETRIEVAL_ELIGIBLE_STATUSES,
+  SWEEP_BATCH_SIZE,
+} from "../shared/freshnessPolicy";
 import { rag } from "../rag/instance";
 
 export const markStaleDocuments = internalMutation({
@@ -95,50 +101,184 @@ export const purgeStaleDocuments = internalMutation({
   },
 });
 
+/**
+ * flagExpiredDocuments — resumable, cursor-based staleness sweep.
+ *
+ * Amendment #2 of the staleness-MVP verdict. The previous implementation used
+ * `.withIndex("by_status_and_isStale").take(batchSize)`, which re-reads the
+ * SAME first N rows on every invocation (the index order is stable, and
+ * flagging a row removes it from the `isStale:false` set but the next batch
+ * starts from the beginning again). That can permanently leave later
+ * documents unexamined.
+ *
+ * Execution model (per amendment #2):
+ *   - Daily cron (03:30 UTC, see crons.ts) starts a new sweep by calling this
+ *     mutation with no cursor. The cron is bounded: this handler processes ONE
+ *     paginated batch and then schedules the next via ctx.scheduler.runAfter,
+ *     so no single invocation runs an unbounded corpus scan (Convex skips
+ *     overlapping crons; a bounded batch avoids that risk).
+ *   - Each batch paginates the documents table with `.paginate({numItems,
+ *     cursor})`, which advances a stable cursor regardless of in-flight writes.
+ *   - Per-doc classification uses classifyFreshness from the shared policy
+ *     module — NEVER a local TTL copy. Only eligible-status docs (active/
+ *     indexed) that classify as "aged" and are not already flagged get
+ *     `isStale: true`.
+ *   - Counters accumulate across batches via the `cumulative` arg.
+ *   - The sweep is idempotent: re-running on already-flagged docs increments
+ *     `alreadyStale`, never re-patches.
+ *   - dryRun: counts only, zero writes — for the Gate 4 production dry run.
+ *
+ * Amendment #7: this flagger NEVER writes isStale:false. Only the ingestion
+ * path (crawl/mutations.ts) clears staleness on a successful recrawl. The age
+ * flagger does not reactivate documents.
+ *
+ * Continuation: when `!pageResult.isDone`, schedules the next batch at
+ * runAfter(0, ...) carrying the continuation cursor + cumulative counters +
+ * sweepId/startedAt so the whole sweep is correlated. Returns a structured
+ * result the observability cron (04:00 UTC) can read for sweep-state reporting.
+ */
 export const flagExpiredDocuments = internalMutation({
-  args: { limit: v.optional(v.number()) },
-  handler: async (ctx, { limit }) => {
-    const batchSize = limit ?? 200;
+  args: {
+    // Max rows to examine in THIS batch. Defaults to SWEEP_BATCH_SIZE (100).
+    limit: v.optional(v.number()),
+    // dryRun: classify + count but perform ZERO ctx.db.patch writes.
+    dryRun: v.optional(v.boolean()),
+    // Continuation cursor from the previous batch's paginate(). Undefined on
+    // the first batch of a new sweep.
+    cursor: v.optional(v.string()),
+    // Correlation id for the whole sweep. A new sweep mints one if absent.
+    sweepId: v.optional(v.string()),
+    // Epoch-ms when the sweep started (first batch). Carried across batches.
+    startedAt: v.optional(v.number()),
+    // Accumulated counters across prior batches of this sweep.
+    cumulative: v.optional(
+      v.object({
+        examined: v.number(),
+        flagged: v.number(),
+        alreadyStale: v.number(),
+        skipped: v.number(),
+      }),
+    ),
+  },
+  returns: v.object({
+    sweepId: v.string(),
+    examined: v.number(),
+    flagged: v.number(),
+    alreadyStale: v.number(),
+    skipped: v.number(),
+    nextCursor: v.union(v.string(), v.null()),
+    complete: v.boolean(),
+    dryRun: v.boolean(),
+  }),
+  handler: async (ctx, args) => {
+    const batchSize = Math.min(Math.max(1, args.limit ?? SWEEP_BATCH_SIZE), SWEEP_BATCH_SIZE);
+    const isDryRun = args.dryRun === true;
     const now = Date.now();
-    const DAY_MS = 24 * 60 * 60 * 1000;
 
-    const TTLS = {
-      high: 30 * DAY_MS,
-      medium: 90 * DAY_MS,
-      low: 180 * DAY_MS,
+    // Resolve sweep state. A missing sweepId means a fresh sweep started by
+    // the cron (or a manual one-off invocation).
+    const sweepId = args.sweepId ?? `sweep-${now}`;
+    const startedAt = args.startedAt ?? now;
+    const cumulative = args.cumulative ?? { examined: 0, flagged: 0, alreadyStale: 0, skipped: 0 };
+
+    // Paginate the documents table. Stable cursor advance is the fix for the
+    // re-examine-first-N-forever bug. We do NOT filter by status at the index
+    // level here because (a) classification must run on every row to keep
+    // counters honest and (b) the index `by_status_and_isStale` is reserved
+    // for the purge path. Pagination cost is one read per row examined.
+    const pageResult = await ctx.db
+      .query("documents")
+      .paginate({ numItems: batchSize, cursor: args.cursor ?? null });
+
+    let flagged = 0;
+    let alreadyStale = 0;
+    let skipped = 0;
+
+    for (const doc of pageResult.page) {
+      // Only eligible-status docs are candidates for age flagging. Other
+      // statuses (stale/failed/pending/processing/pending_embed) are skipped
+      // — they are either already invalidated or not yet ready.
+      const isEligibleStatus = (RETRIEVAL_ELIGIBLE_STATUSES as readonly string[]).includes(
+        doc.status ?? "",
+      );
+      if (!isEligibleStatus) {
+        skipped++;
+        continue;
+      }
+
+      // Already flagged? Idempotent — count, do not re-patch.
+      if (doc.isStale === true) {
+        alreadyStale++;
+        continue;
+      }
+
+      const decision = classifyFreshness({
+        status: doc.status,
+        isStale: doc.isStale,
+        crawledAt: doc.crawledAt,
+        freshnessTier: doc.freshnessTier,
+        now,
+      });
+
+      if (decision.state === "aged") {
+        if (!isDryRun) {
+          await ctx.db.patch(doc._id, { isStale: true });
+        }
+        flagged++;
+      } else {
+        skipped++;
+      }
+    }
+
+    const examined = pageResult.page.length;
+    const totals = {
+      examined: cumulative.examined + examined,
+      flagged: cumulative.flagged + flagged,
+      alreadyStale: cumulative.alreadyStale + alreadyStale,
+      skipped: cumulative.skipped + skipped,
     };
 
-    const indexedDocs = await ctx.db
-      .query("documents")
-      .withIndex("by_status_and_isStale", (q) => q.eq("status", "indexed").eq("isStale", false))
-      .take(batchSize);
+    const isComplete = pageResult.isDone;
+    const nextCursor = isComplete ? null : pageResult.continueCursor;
 
-    const activeDocs = await ctx.db
-      .query("documents")
-      .withIndex("by_status_and_isStale", (q) => q.eq("status", "active").eq("isStale", false))
-      .take(batchSize);
+    // Schedule the next batch if more rows remain. runAfter(0) runs promptly
+    // while staying outside the cron's overlap window. Carries sweep state.
+    if (!isComplete) {
+      ctx.scheduler.runAfter(
+        0,
+        internal.crawl.staleness.flagExpiredDocuments,
+        {
+          limit: batchSize,
+          dryRun: isDryRun,
+          cursor: pageResult.continueCursor,
+          sweepId,
+          startedAt,
+          cumulative: totals,
+        },
+      );
+    }
 
-    const candidates = [...indexedDocs, ...activeDocs];
-
-    const results = await Promise.all(
-      candidates.map(async (doc) => {
-        if (doc.isStale) return 0;
-
-        const tier = doc.freshnessTier || "low";
-        const ttl = TTLS[tier as keyof typeof TTLS] || TTLS.low;
-
-        if (now - doc.crawledAt > ttl) {
-          await ctx.db.patch(doc._id, { isStale: true });
-          return 1;
-        }
-        return 0;
-      }),
-    );
-    const flagged = results.reduce<number>((a, b) => a + b, 0);
+    if (!isDryRun && totals.flagged > 0) {
+      console.log("[STALENESS] flagExpiredDocuments batch", {
+        sweepId,
+        startedAt,
+        examined: totals.examined,
+        flagged: totals.flagged,
+        alreadyStale: totals.alreadyStale,
+        skipped: totals.skipped,
+        complete: isComplete,
+      });
+    }
 
     return {
-      flagged,
-      remaining: candidates.length === batchSize ? "more" : "done",
+      sweepId,
+      examined: totals.examined,
+      flagged: totals.flagged,
+      alreadyStale: totals.alreadyStale,
+      skipped: totals.skipped,
+      nextCursor,
+      complete: isComplete,
+      dryRun: isDryRun,
     };
   },
 });

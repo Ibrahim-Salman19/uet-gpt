@@ -110,7 +110,7 @@
     "Prints sensitive values (env values, tokens, secrets)"
   ],
 
-  "deferredScope": [
+    "deferredScope": [
     "Schema migration: new status literals (superseded/quarantined/deleted/withdrawn), lastVerifiedAt, supersededBy, sourceVersionId",
     "Full ETag / If-None-Match 304 conditional-GET in scripts/crawler.py + convex/crawl/webhook.ts",
     "Automatic stale-document purging (purgeStaleDocuments left in place but NOT wired to a cron)",
@@ -120,5 +120,49 @@
     "Crawl4AI re-enablement",
     "Full re-embedding",
     "Hosted retrieval ablations"
-  ]
+  ],
+
+  "gate3ProviderAudit": {
+    "runDate": "2026-07-27",
+    "mode": "READ-ONLY Convex CLI (4 small reads: 5+5+10+20 row caps, one empty; 1 insights call). No mutations, no deploys.",
+    "bandwidthCost": "Well within 50MB single-op and 700MB envelope budgets",
+    "q1_ingestionHealthSinceJune1": {
+      "verdict": "HEALTHY — embed + contextualize succeeded today (2026-07-27)",
+      "mostRecentEmbedAt": "2026-07-27T19:02:07.640Z (crawledChunks _creationTime) — MEASURED",
+      "mostRecentContextualizeAt": "2026-07-27T19:02:08.748Z (completedTime, state.kind=success) — MEASURED",
+      "mostRecentDocCrawledAt": "2026-07-27T19:02:04.557Z (status=indexed, chunksEmbedded=1) — MEASURED",
+      "contextualizeJobLatencies": "762ms / 784ms / 1055ms for 3 recent contextualizeNewChunk jobs — MEASURED (healthy)",
+      "embeddingModelInUse": "gemini-embedding-2 (dimension-locked to 768) — OBSERVED in chunk row",
+      "contextualizedTextPopulated": "Yes — genuine Gemini-generated prose present on newest chunk — MEASURED",
+      "implicationForStalenessMvp": "The recrawl-clear hook (crawl/mutations.ts) has a LIVE downstream path: re-embed + re-contextualize work end-to-end today. NOT blocked."
+    },
+    "q2_dlqAndProviderErrors": {
+      "crawlDeadLetterTable": "EMPTY — 'There are no documents in this table.' — MEASURED",
+      "modelNotFoundCount": 0,
+      "auth401Count": 0,
+      "quota429Count": 0,
+      "localDlqJsonl": "8 lines, all crawler-URL-refusal entries (depth filter), ZERO provider/model/auth error strings — OBSERVED (local artifact, not prod table)"
+    },
+    "q3_modelIdCrossReference": {
+      "gemini-2.0-flash (DEAD 2026-06-01)": "ZERO live hits — only comments (contextualize.ts:112, ingest_pdf.py:47, models.ts:33, llm-models.ts:25). Incident REMEDIATED.",
+      "gemini-3.5-flash-lite": "ALIVE — contextualize primary (contextualize.ts:117) + chat",
+      "gemini-3.1-flash-lite": "ALIVE — backup chat",
+      "gemini-embedding-2": "ALIVE — embedding model",
+      "llama-3.3-70b-versatile (DEAD 2026-08-16)": "NOT remediated — default chat model (settings page) + llm-models.ts:20",
+      "llama-3.1-8b-instant (DEAD 2026-08-16)": "NOT remediated — RAG auxiliary: CRAG (rag/constants.ts:25), faithfulness (rag/constants.ts:35), routing (rag/routing.ts:42,72,104), reranking (reranking/groqRerank.ts:33), cache (cache/multiVector.ts:19), eval (eval/constants.ts:1)",
+      "gpt-oss-120b / gemma-4-31b": "ALIVE (Cerebras) — chat fallback",
+      "groqDeadlineRisk": "20 days to 2026-08-16 shutdown. Orthogonal to staleness-MVP (Groq models are NOT in the ingest/embed/contextualize path) but will break RAG reranking/routing/faithfulness/cache/eval + default chat on shutdown. Separate remediation track required."
+    },
+    "q4_insights": {
+      "topLevel": "'No issues found. The deployment is healthy over the last 72 hours.' — MEASURED",
+      "functionErrorsOrHighLatency": "None surfaced at top level (no deep-log pull per bandwidth budget)"
+    },
+    "contextualizeBackfillCronCaveat": {
+      "cron": "daily-contextualize-chunks @ 03:00 UTC (crons.ts:84)",
+      "gate": "AUTO_BACKFILL_AFTER_MODEL_RECOVERY env (NAME only, no value) — contextualizeCron.ts:30-55 returns {backfillHeld:true} when set to 'false'",
+      "onDemandPath": "PROVEN working today (contextualizeNewChunk triggered by fresh crawl succeeds regardless of the backfill gate)",
+      "backfillDrainStatus": "UNVERIFIED — would require reading the env value to confirm whether the June-July backlog drained. Not blocking for staleness-MVP, which relies on fresh-recrawl-triggered contextualization, not the backfill cron."
+    },
+    "overallVerdict": "PASS — staleness-MVP recrawl-clear hook is NOT blocked. Ingestion/embed/contextualize healthy today. Groq Aug-16 deadline is a separate track."
+  }
 }
