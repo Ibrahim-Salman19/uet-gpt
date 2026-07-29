@@ -1,4 +1,3 @@
-// @ts-nocheck
 // fallow-ignore-file security-sink
 import { v } from "convex/values";
 import { internal } from "../_generated/api";

@@ -1,0 +1,20 @@
+sequenceDiagram
+  autonumber
+  participant Crawler as Sitemap / Crawl Worker
+  participant Safety as HTTP Fetch Safety & Host Allowlist
+  participant Extractor as Text & PDF Extractor
+  participant Chunker as Parent-Child Chunker
+  participant Embedder as Gemini Embedding 2 (768-dim)
+  participant DB as Convex DB (documents, chunks, vectors)
+  participant Cache as Cache Invalidator
+
+  Crawler->>Safety: Discover & Validate URL
+  Safety-->>Crawler: Approved Endpoint
+  Crawler->>Extractor: Fetch Raw Document
+  Extractor-->>Crawler: Extracted Content & Structure
+  Crawler->>Chunker: Split Content into Chunks
+  Chunker-->>Crawler: Parent Chunks & Child Chunks
+  Crawler->>Embedder: Generate 768-dim Embeddings
+  Embedder-->>Crawler: Vectors
+  Crawler->>DB: Atomic Mutation (Publish Version, Chunks, Embeddings)
+  DB-->>Cache: Trigger Invalidation for Stale/Superseded Records

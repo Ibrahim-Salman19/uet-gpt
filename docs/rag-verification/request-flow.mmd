@@ -1,0 +1,42 @@
+sequenceDiagram
+  autonumber
+  actor User
+  participant API as Next.js API / Route Handler
+  participant Security as Security Guard (HMAC / Injection Scan)
+  participant Router as Query Classifier & Intent Router
+  participant Cache as Semantic Cache (768-dim Vector Search)
+  participant Retrieval as Hybrid Retriever (Vector + Text + FAQ + Fact)
+  participant Temporal as Temporal Governance & Staleness Check
+  participant Reranker as Reranker Cascade (External -> Cohere -> Local)
+  participant CRAG as CRAG & Evidence Sufficiency Evaluator
+  participant Conflict as Conflict Detector & Evidence Gate
+  participant Generator as LLM Generator (Groq / Gemini)
+  participant Validator as Citation & Claim Validator
+
+  User->>API: Query Request
+  API->>Security: Validate Request & Scan Injection
+  Security-->>API: Approved
+  API->>Router: Classify Query & Intent
+  Router-->>API: Query Intent & Risk Class
+  API->>Cache: Vector Lookup (semanticCache)
+  alt Cache Hit & Compatible
+    Cache-->>API: Return Cached Response
+    API-->>User: Cached Answer
+  else Cache Miss
+    API->>Retrieval: Multi-channel Retrieval
+    Retrieval-->>API: Candidates (Dense, Lexical, FAQ, Facts)
+    API->>Temporal: Hydrate Metadata & Filter Excluded / Stale
+    Temporal-->>API: Eligible Candidates
+    API->>Reranker: Score Candidates (External/Cohere/Local)
+    Reranker-->>API: Reranked Evidence
+    API->>CRAG: CRAG Evaluation
+    CRAG-->>API: Relevance Scores
+    API->>Conflict: Detect Conflicts & Evaluate Sufficiency Gate
+    Conflict-->>API: Gated Evidence & Decision
+    API->>Generator: Generate Grounded Answer
+    Generator-->>API: Raw Generated Text
+    API->>Validator: Validate Citations & Claim Grounding
+    Validator-->>API: Verified Answer + Citations
+    API->>Cache: Publish to Semantic Cache
+    API-->>User: Final Verified Answer
+  end

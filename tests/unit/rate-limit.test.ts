@@ -46,32 +46,33 @@ describe("rate-limit", () => {
     process.env = { ...originalEnv };
   });
 
-  it("denies when UPSTASH_REDIS_REST_URL is missing", async () => {
+  it("allows when UPSTASH_REDIS_REST_URL is missing (fail-open for chat)", async () => {
     delete process.env.UPSTASH_REDIS_REST_URL;
     delete process.env.UPSTASH_REDIS_REST_TOKEN;
     const { checkChatRateLimit } = await import("../../src/lib/rate-limit");
     const result = await checkChatRateLimit("test_user");
     expect(result).not.toBeNull();
-    expect(result!.success).toBe(false);
-    expect(result!.limit).toBe(0);
-    expect(result!.remaining).toBe(0);
+    expect(result!.success).toBe(true);
+    expect(result!.limit).toBe(100);
+    expect(result!.remaining).toBe(100);
   });
 
-  it("denies when UPSTASH_REDIS_REST_TOKEN is missing", async () => {
+  it("allows when UPSTASH_REDIS_REST_TOKEN is missing (fail-open for chat)", async () => {
     process.env.UPSTASH_REDIS_REST_URL = "https://test.upstash.io";
     delete process.env.UPSTASH_REDIS_REST_TOKEN;
     const { checkChatRateLimit } = await import("../../src/lib/rate-limit");
     const result = await checkChatRateLimit("test_user");
     expect(result).not.toBeNull();
-    expect(result!.success).toBe(false);
-    expect(result!.limit).toBe(0);
-    expect(result!.remaining).toBe(0);
+    expect(result!.success).toBe(true);
+    expect(result!.limit).toBe(100);
+    expect(result!.remaining).toBe(100);
   });
 
-  it("denies for unconfigured rate limiter (fail-closed)", async () => {
+  it("denies for unconfigured admin rate limiter (fail-closed for admin actions)", async () => {
     delete process.env.UPSTASH_REDIS_REST_URL;
-    const { checkChatRateLimit } = await import("../../src/lib/rate-limit");
-    const result = await checkChatRateLimit("test_user_42", "user");
+    delete process.env.UPSTASH_REDIS_REST_TOKEN;
+    const { checkAdminActionRateLimit } = await import("../../src/lib/rate-limit");
+    const result = await checkAdminActionRateLimit("test_user_42");
     expect(result).not.toBeNull();
     expect(result!.success).toBe(false);
     expect(result!.limit).toBe(0);

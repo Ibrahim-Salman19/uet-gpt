@@ -1,0 +1,31 @@
+{
+  "queries": [
+    {
+      "id": "q1",
+      "text": "What is the current admission fee for UET Taxila?",
+      "expectedIntent": "admissions",
+      "expectedRiskClass": "high_current",
+      "expectedTemporalIntent": "current",
+      "baselineRecallAt5": 1.0,
+      "baselineMrr": 1.0
+    },
+    {
+      "id": "q2",
+      "text": "When is the entry test date for Fall 2026?",
+      "expectedIntent": "admissions",
+      "expectedRiskClass": "high_current",
+      "expectedTemporalIntent": "current",
+      "baselineRecallAt5": 1.0,
+      "baselineMrr": 1.0
+    },
+    {
+      "id": "q3",
+      "text": "What are the hostel fee details?",
+      "expectedIntent": "campus_life",
+      "expectedRiskClass": "medium_current",
+      "expectedTemporalIntent": "current",
+      "baselineRecallAt5": 1.0,
+      "baselineMrr": 1.0
+    }
+  ]
+}

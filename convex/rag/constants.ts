@@ -22,7 +22,7 @@ export const MAX_QUERY_LEN = 2_000;
 
 export const CRAG_CONFIG = {
   batchSize: 4,
-  groqModel: "llama-3.1-8b-instant",
+  groqModel: "openai/gpt-oss-20b",
   highConfidenceThreshold: 0.7,
   // When the reranker's top score is already at/above the "normal" confidence
   // tier (see determineConfidenceTier), the rerank ordering is trusted and the
@@ -32,7 +32,7 @@ export const CRAG_CONFIG = {
 } as const;
 
 export const FAITHFULNESS_CONFIG = {
-  groqModel: "llama-3.1-8b-instant",
+  groqModel: "openai/gpt-oss-20b",
 } as const;
 
 export const CASCADE_CONFIG = {
@@ -40,6 +40,6 @@ export const CASCADE_CONFIG = {
   overlapWeight: 0.6,
   positionWeight: 0.4,
   tier2CandidateCount: 15,
-  cohereModel: "rerank-english-v3.0",
+  cohereModel: "rerank-v3.5",
   cohereEndpoint: "https://api.cohere.ai/v1/rerank",
 } as const;

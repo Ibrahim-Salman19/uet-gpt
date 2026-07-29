@@ -4,6 +4,7 @@ import { ConvexError, v } from "convex/values";
 import { internalAction } from "../_generated/server";
 import { recordTiming } from "../observability/metrics";
 import { EMBEDDING_DIMENSION } from "./dimension";
+import { assertEmbeddingDimension, assertFiniteVector } from "../shared/invariants";
 
 // gemini-embedding-2 - stable as of May 2026
 // Dimensions: 768 (MRL supports 768/1536/3072)
@@ -230,11 +231,11 @@ export const generate = internalAction({
         textLength: args.text.length,
       });
       const emb = embeddings[0];
-      if (!emb || emb.length !== EMBEDDING_DIMENSION) {
-        throw new ConvexError(
-          `Invalid embedding dimension: expected ${EMBEDDING_DIMENSION}, got ${emb?.length}`,
-        );
+      if (!emb) {
+        throw new ConvexError("No embedding returned");
       }
+      assertEmbeddingDimension(emb, EMBEDDING_DIMENSION);
+      assertFiniteVector(emb);
       return emb;
     } catch (error: unknown) {
       const latencyMs = timer.end();

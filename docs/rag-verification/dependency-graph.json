@@ -1,0 +1,26 @@
+{
+  "nodes": [
+    { "id": "src/app/api/chat/route.ts", "type": "ENTRY_POINT" },
+    { "id": "convex/rag/constants.ts", "type": "ROUTING" },
+    { "id": "convex/rag/routing.ts", "type": "ROUTING" },
+    { "id": "convex/embeddings/generate.ts", "type": "EMBEDDING" },
+    { "id": "convex/embeddings/search.ts", "type": "VECTOR_RETRIEVAL" },
+    { "id": "convex/rag/retrieval.ts", "type": "HYBRID_RETRIEVAL" },
+    { "id": "convex/reranking/rerank.ts", "type": "RERANKING" },
+    { "id": "convex/reranking/cascade.ts", "type": "RERANKING" },
+    { "id": "convex/rag/crag.ts", "type": "CRAG" },
+    { "id": "convex/rag/faithfulness.ts", "type": "EVIDENCE_GATE" },
+    { "id": "convex/cache/validate.ts", "type": "CACHE" },
+    { "id": "convex/crawl/staleness.ts", "type": "TEMPORAL_GOVERNANCE" },
+    { "id": "convex/crawl/mutations.ts", "type": "INGESTION" }
+  ],
+  "edges": [
+    { "source": "src/app/api/chat/route.ts", "target": "convex/rag/routing.ts" },
+    { "source": "convex/rag/routing.ts", "target": "convex/embeddings/generate.ts" },
+    { "source": "convex/rag/routing.ts", "target": "convex/embeddings/search.ts" },
+    { "source": "convex/rag/retrieval.ts", "target": "convex/reranking/cascade.ts" },
+    { "source": "convex/reranking/cascade.ts", "target": "convex/reranking/rerank.ts" },
+    { "source": "convex/rag/retrieval.ts", "target": "convex/rag/crag.ts" },
+    { "source": "convex/rag/crag.ts", "target": "convex/rag/faithfulness.ts" }
+  ]
+}

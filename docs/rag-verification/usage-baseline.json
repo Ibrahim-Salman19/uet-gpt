@@ -1,0 +1,9 @@
+{
+  "totalDocuments": 638,
+  "indexedDocuments": 638,
+  "activeChunks": 3210,
+  "embeddingDimension": 768,
+  "vectorIndexSize": 768,
+  "p95LatencyMs": 1200,
+  "errorRatePercent": 0.0
+}

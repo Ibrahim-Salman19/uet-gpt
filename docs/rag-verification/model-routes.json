@@ -1,0 +1,51 @@
+{
+  "embedding": {
+    "model": "gemini-embedding-2",
+    "provider": "google",
+    "dimensionality": 768,
+    "contextWindowTokens": 8192,
+    "batchThreshold": 2,
+    "taskTypeSupported": false,
+    "queryPrefix": "Represent this university-information question for retrieving passages that answer it:",
+    "documentPrefix": "Represent this official university source passage for retrieval by questions it can answer:"
+  },
+  "generation": {
+    "primary": {
+      "model": "openai/gpt-oss-20b",
+      "provider": "groq",
+      "strictStructuredOutput": true,
+      "maxTokens": 2048,
+      "supportsStreaming": true
+    },
+    "secondary": {
+      "model": "openai/gpt-oss-120b",
+      "provider": "groq",
+      "strictStructuredOutput": true,
+      "maxTokens": 4096,
+      "supportsStreaming": true
+    },
+    "fallback": {
+      "model": "gemini-3.5-flash-lite",
+      "provider": "google",
+      "contextWindowTokens": 1048576,
+      "supportsStreaming": true
+    }
+  },
+  "reranking": {
+    "tier1": {
+      "endpoint": "process.env.RERANKER_URL",
+      "type": "external_cross_encoder",
+      "timeoutMs": 5000
+    },
+    "tier2": {
+      "model": "rerank-v3.5",
+      "provider": "cohere",
+      "endpoint": "https://api.cohere.ai/v1/rerank",
+      "timeoutMs": 5000
+    },
+    "tier3": {
+      "type": "local_positional_overlap",
+      "timeoutMs": 50
+    }
+  }
+}
