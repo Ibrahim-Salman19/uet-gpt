@@ -89,6 +89,7 @@ function clampLimit(limit: unknown): number {
 }
 
 function redact(text: string): string {
+  // Short snippet only — never return full chunk content from this probe.
   const cleaned = (text ?? "").replace(/\s+/g, " ").trim();
   if (cleaned.length <= SNIPPET_LEN) return cleaned;
   return `${cleaned.slice(0, SNIPPET_LEN)}…`;
@@ -120,6 +121,9 @@ export const smokeRetrieval = internalAction({
     const safeQuery = scanQuery(args.query);
     const limit = clampLimit(args.limit);
 
+    // Real production retrieval pipeline — same internal action retrieveContext
+    // calls. searchDocumentsAction runs: rag.search (vector) + fullTextSearch
+    // (BM25) + chunkTextSearch + 3-way RRF fusion + FAQ fusion + decay scoring.
     const hits: SearchHit[] = await ctx.runAction(
       internal.embeddings.search.searchDocumentsAction,
       {
