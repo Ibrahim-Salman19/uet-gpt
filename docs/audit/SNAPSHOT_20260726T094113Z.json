@@ -1,0 +1,245 @@
+{
+  "snapshot_id": "phase-0a-snapshot-20260726T094113Z",
+  "snapshot_timestamp_utc": "2026-07-26T09:41:13Z",
+  "snapshot_timestamp_local_pakistan": "2026-07-26T14:41:13+05:00",
+  "snapshot_purpose": "Phase 0A immutable deployed-state reference. Read-only w.r.t. application behavior. The reference point every later metric compares against.",
+  "verdict_at_snapshot": "UNVERIFIED DUE TO MISSING ACCESS — no real measurement has ever succeeded (see eval_baseline section).",
+
+  "authorization": {
+    "scope": "Phase 0A only. No behavioral, model, prompt, crawler, schema, index, or deployment changes.",
+    "approved_by": "user (final authorization: 'Begin Phase 0A only. Perform the immutable deployed-state snapshot with no behavioral changes.')",
+    "parallel_tracks_approved": ["A: snapshot", "B: Gemini incident investigation (read-only diagnostics)", "C: Groq deadline-protection substitutions in a branch"],
+    "phase_0B_gated_on": "merging the 8-item final addendum into the written plan + presentation of Phase 0A artifacts for review",
+    "production_rollout": "NO-GO until Phase 7 canary + rollback gates pass"
+  },
+
+  "integrity_finding_contaminated_artifacts": {
+    "severity": "CRITICAL — pre-existing fabrication",
+    "summary": "19 untracked files in the working tree contained fabricated audit data: scripts/build_audit_data.py hardcodes invented byte sizes (45210, 48120, ...) and writes fake metrics; baseline_eval_results.json claimed recall_at_5: 0.857 with dataset_size 210 — measurements that were never run (the real eval harness has only ever produced all-zeros, see eval_baseline section). eval_dataset.jsonl (210 rows) is hand-written Q/A with no crawl-verified source. failed_urls.csv is internally contradictory (HTTP Error with http_status 200).",
+    "decision_per_user": "Quarantine, do not commit. Both generator scripts (scripts/build_audit_data.py AND scripts/eval/build_eval_dataset.py) treated as suspect.",
+    "quarantine_location": "audit/_contaminated_untracked_20260726-143830/ (untracked, preserved for provenance investigation, NOT committed)",
+    "files_quarantined": [
+      "AUDIT_REPORT.md", "SECURITY_REVIEW.md", "SOURCE_SCOPE.md", "SOURCE_AUTHORITY_MATRIX.md",
+      "CRAWL_RUNBOOK.md", "EVALUATION_METHODOLOGY.md", "MIGRATION.md", "ROLLBACK.md",
+      "baseline_eval_results.json", "improved_eval_results.json", "remaining_failures.json",
+      "eval_dataset.jsonl", "url_inventory.csv", "failed_urls.csv", "document_inventory.csv",
+      "duplicate_clusters.csv", "crawl_manifest.jsonl",
+      "scripts/build_audit_data.py", "scripts/eval/build_eval_dataset.py"
+    ],
+    "evidence_of_fabrication": "git log --all --oneline for baseline_eval_results.json returns empty (never committed); file mtime 2026-07-26; metrics contradict the only real measurement (.agent/eval_baseline_pre_fix.json all-zeros); scripts/build_audit_data.py source hardcodes discovered_urls with invented byte sizes.",
+    "recommended_followup": "User to investigate provenance (who created scripts/build_audit_data.py and when) before any of the quarantined files are trusted or restored."
+  },
+
+  "code_state": {
+    "local_commit_sha": "d5889da145a19c57e7878f88488e6f97f760b2db",
+    "local_commit_subject": "fix(tests): align 24 stale tests with current source contracts; fix admin header shadowing",
+    "local_commit_date": "2026-07-26T00:56:16+05:00",
+    "local_branch": "main",
+    "production_commit_sha": "NEEDS-YOU — not exposed in https://uet-gpt.vercel.app/ rendered HTML; requires Vercel API auth to retrieve",
+    "remote": "github.com/devhms/uet_gpt.git (scrubbed)",
+    "working_tree_dirty": true,
+    "dirty_files_uncommitted": ["architecture.md (modified)"],
+    "untracked_in_tree_non_contaminated": [
+      "docs/extraction_standard.md", "docs/medium-article.html", "docs/medium-article.md",
+      "scripts/pdf_utils.py", ".zcode/ (session state)"
+    ],
+    "untracked_contaminated_quarantined": "see integrity_finding_contaminated_artifacts above",
+    "existing_agent_branches": ["agent/2026-05-30", "agent/2026-06-09", "agent/2026-07-20-extraction-quality"],
+    "existing_audit_tags": "none"
+  },
+
+  "deployment_identifiers": {
+    "convex_deployment_slug": "adamant-stork-623",
+    "convex_cloud_url": "https://adamant-stork-623.convex.cloud",
+    "convex_site_url": "https://adamant-stork-623.convex.site",
+    "vercel_url": "https://uet-gpt.vercel.app/",
+    "vercel_deployment_id": "NEEDS-YOU — requires Vercel API auth",
+    "vercel_project_id": "NEEDS-YOU — requires Vercel API auth",
+    "app_title_rendered": "UET GPT - Your AI Guide to UET Taxila",
+    "app_status_probe": "LIVE — Sign-In / Get-Started / chat-preview UI present in rendered HTML (verified 2026-07-26)"
+  },
+
+  "environment_variable_names_present": {
+    "note": "NAMES ONLY. Values are never recorded in any snapshot artifact.",
+    "present_in_env_local": [
+      "ADMIN_BOOTSTRAP_EMAIL", "ADMIN_EMAILS", "CEREBRAS_API_KEY", "CLERK_JWT_ISSUER",
+      "CLERK_SECRET_KEY", "CLERK_SIGNING_SECRET", "CLERK_WEBHOOK_SECRET", "CONVEX_AUTH_TOKEN",
+      "CONVEX_DEPLOYMENT", "CONVEX_SITE_URL", "CRAWL_WEBHOOK_SECRET", "CRON_SECRET",
+      "GEMINI_API_KEY", "GEMINI_API_KEY_1", "GEMINI_API_KEY_2", "GROQ_API_KEY",
+      "NEXT_PUBLIC_APP_URL", "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "NEXT_PUBLIC_CONVEX_URL",
+      "UPSTASH_REDIS_REST_TOKEN", "UPSTASH_REDIS_REST_URL"
+    ],
+    "missing_from_env_local_but_in_example": "NOT YET DIFFED — .env.local.example CRLF parsing failed during snapshot; to be captured in followup",
+    "gemini_key_type_audit": "NEEDS-YOU / NEEDS-VERIFICATION — GEMINI_API_KEY, _1, _2 are present (3 keys). Standard vs authorization type cannot be determined from name alone. Google will reject standard keys September 2026 per user's primary confirmation. Track B 0B-E task.",
+    "groq_key_present": true,
+    "cerebras_key_present": true,
+    "upstash_redis_present": true,
+    "clerk_keys_present": "full set (publishable, secret, signing, jwt issuer, webhook)",
+    "provider_account_tiers": "NEEDS-YOU — Groq tier (free/developer vs committed-spend enterprise) determines Aug 16 shutdown applicability; cannot be read from env. User to confirm."
+  },
+
+  "toolchain_state": {
+    "node_version": "v24.12.0",
+    "pnpm_version": "11.1.3",
+    "python_version": "3.13.11",
+    "python_sdk_convex": "0.7.0",
+    "python_crawl4ai": "0.8.6",
+    "python_curl_cffi": "0.15.0",
+    "python_google_ai_generativelanguage": "0.6.15",
+    "package_manager": "pnpm (per AGENTS.md — npm/yarn/bun forbidden)",
+    "lockfile": "pnpm-lock.yaml (sha256 prefix 63a2d2fef8389814, 392637 bytes)",
+    "requirements_txt_hash": "NOT CAPTURED — file may not exist; python deps recorded via pip freeze instead",
+    "python_resolved_deps_partial": "captured via pip freeze (aiohttp, beautifulsoup4, convex, Crawl4AI, curl_cffi, google-ai-generativelanguage, etc.) — full list in pip_freeze_<ts>.txt to be written",
+    "CRITICAL_TOOLCHAIN_FAILURE": {
+      "symptom_1": "pnpm typecheck fails: 'tsc is not recognized' (tsc binary not on PATH)",
+      "symptom_2": "convex CLI broken: node_modules/convex/package.json exists (9KB, dated Jun 10) but node_modules/convex/bin/main.js is MISSING — pnpm junction/install corruption",
+      "symptom_3": "pnpm exec convex throws 'Cannot find module' loader error",
+      "impact": "Blocks (a) baseline typecheck/vitest capture, (b) `npx convex deployment usage` bandwidth measurement that GOVERNS Tracks B+C budget, (c) in-process Convex queries for Track B freshness investigation.",
+      "root_cause_likely": "pnpm node-linker=hoisted junction rot — same failure mode as prior session which required full node_modules wipe + CI=true pnpm install --frozen-lockfile",
+      "remediation_requires": "User approval — wiping node_modules is destructive to working state and ~60s+ operation; not auto-executed in Phase 0A (read-only)."
+    }
+  },
+
+  "critical_file_hashes_sha256_prefix": {
+    "convex/schema.ts": "7935e45591570a61",
+    "convex/rag/prompts.ts": "8c2179786d4b2e3e (NOTE: this file has ZERO importers — dead code, see audit report)",
+    "src/lib/prompt.ts": "9164c5a7b24da56b (the ACTUAL live system prompt)",
+    "convex/rag/instance.ts": "b419f71ed5a41871 (RAG component config, embeddingDimension=768)",
+    "convex/rag/constants.ts": "c70cd13131de26f8",
+    "convex/embeddings/dimension.ts": "8cdcc1b974fbe7a6 (EMBEDDING_DIMENSION=768 — AGENTS.md forbidden op to change)",
+    "src/lib/llm-models.ts": "9987494481ac333a (answer-gen fallback chain)",
+    "src/lib/chat/models.ts": "8e47874dc85dc8fd (provider factory + MODEL_MAPPING)",
+    "scripts/crawl_config.json": "6ca073a84b681b9d",
+    "package.json": "5640ebc3e31e2977",
+    "convex/http.ts": "629dcffc8ef88d66 (HTTP router + HMAC webhook)",
+    "convex/crawl/webhook.ts": "74d42919d569da3b",
+    "convex/crawl/chunking.ts": "b0928db997b2d855",
+    "convex/embeddings/generate.ts": "4c3ae4694a6b6123",
+    "convex/embeddings/contextualize.ts": "a183efb5aeb98cb7",
+    "convex/rag/retrieval.ts": "c90698c6dc942b7f",
+    "convex/rag/routing.ts": "0fd7f28c85e62302",
+    "convex/rag/crag.ts": "6cef5a17020ebddd",
+    "convex/rag/faithfulness.ts": "9a01f070f789f2d7 (unwired judge)",
+    "convex/reranking/cascade.ts": "d9d2ac3a19a3399f",
+    "convex/eval/runEval.ts": "7d5f663468a6275d",
+    "scripts/crawler.py": "d13995031fa4c220"
+  },
+
+  "corpus_crawler_state": {
+    "last_crawl_activity_local": "2026-07-14T10:58:10+05:00 (epoch 1784008690, crawler_state.json mtime)",
+    "last_crawler_log_entry": "2026-07-14 ~11:05 (crawler.log tail)",
+    "visited_count": 296,
+    "last_run_stats": {"fetched": 50, "saved": 50, "skipped": 9, "failed": 24, "dlq": 6},
+    "queue_remaining_unvisited": 100,
+    "crawler_state_json_sha256": "b3bba4be32234621bc37f32d04a5b15dcd75074675b29b2df7db8d2c27f3fb5d",
+    "dlq_jsonl_sha256": "32d371e36e960c7ea03ba36d167eab349b0f9612a69b9c68798b50340e9a2ee",
+    "dlq_contents_real": [
+      "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=20",
+      "departmentfaculty?departmentId=21,22,23,24,25 (5 more — department faculty pages still failing)",
+      "https://admissions.uettaxila.edu.pk/Downloads/UET-Prospectus-2024.pdf (CRITICAL — highest-value doc, dead-lettered)",
+      "https://admissions.uettaxila.edu.pk/Downloads/UET-Prospectus-2025.pdf (CRITICAL — highest-value doc, dead-lettered)"
+    ],
+    "days_since_last_crawl": 12,
+    "freshness_warning": "No crawl activity for 12 days. Admissions/merit/datesheet content has a provisional SLO of 6h discovery — current corpus is stale relative to that target."
+  },
+
+  "eval_baseline_real": {
+    "file": ".agent/eval_baseline_pre_fix.json",
+    "sha256": "2960cbaaa43a67ababeed64b43d2d1587557af15ead84ddae61e00068cb347d0",
+    "file_mtime": "2026-07-20",
+    "metrics": {"recall_at_5": 0.0, "fragment_hit_rate": 0.0, "mrr": 0.0, "ndcg_at_5": 0.0, "total_pairs": 50, "elapsed_seconds": 16.5, "eval_error": false},
+    "failures_count": 50,
+    "failure_mode": "ALL 50 queries failed with '[Request ID: ...] Server Error Uncaught ConvexError: Authentication required at handler (../convex/eval.ts:46:17)'",
+    "interpretation": "This is the ONLY real measurement that exists. The zeros reflect an authentication failure (Python harness called public admin-gated evaluateSearch with no Clerk identity), NOT retrieval quality. Retrieval quality is genuinely UNKNOWN.",
+    "golden_set_real": "scripts/eval/golden_set.jsonl — 50 rows, sha256 33265a7d5163cdad2cffb040cd2860da156f9ed8c28ebe2d76cfd4919476b1b5. ALL 50 expected_url values are the bare string 'uettaxila.edu.pk' (1 distinct value) — degenerate; recall is trivially satisfiable by domain substring."
+  },
+
+  "model_lifecycle_inventory": {
+    "gemini_2_0_flash_DEAD": {
+      "status": "SHUT DOWN 2026-06-01 per user primary confirmation",
+      "code_references_count": 5,
+      "sites": ["convex/embeddings/contextualize.ts:126", "scripts/ingest_pdf.py:129", "scripts/ingest_pdf.py:200", "src/lib/llm-models.ts:25 (answer-gen fallback)", "src/lib/chat/models.ts:33 (MODEL_MAPPING)"],
+      "discovery_note": "Prior inventory showed 3 sites; snapshot found 5 — the model is ALSO in the answer-gen fallback chain, not just contextualization. Migration scope is larger than initially scoped.",
+      "track_b_action": "Replace with provisional gemini-3.6-flash (critical PDF) / gemini-3.5-flash-lite (scale) pending qualification"
+    },
+    "llama_3_3_70b_versatile_DYING": {
+      "status": "Scheduled shutdown 2026-08-16 for free/developer tiers per user primary confirmation (Groq docs page lists it as Production with no date — DISCREPANCY noted, user confirmation honored as authoritative)",
+      "code_references_count": 10,
+      "sites": ["src/app/admin/(admin-shell)/settings/page.tsx:56,135,138", "src/lib/llm-models.ts:20 (primary)", "src/lib/chat/models.ts:28", "tests/integration/chat-api.test.ts:143", "tests/unit/admin-settings.test.tsx:246,327"],
+      "track_c_action": "Replace with openai/gpt-oss-120b (primary candidate); no deprecated model kept as fallback"
+    },
+    "llama_3_1_8b_instant_DYING": {
+      "status": "Scheduled shutdown 2026-08-16 (same as above)",
+      "code_references_count": 13,
+      "sites": ["convex/cache/multiVector.ts:19", "convex/eval/constants.ts:1", "convex/rag/constants.ts:25,35 (CRAG + faithfulness)", "convex/rag/routing.ts:42,72,104 (intent, rewrite, HyDE-fallback)", "convex/reranking/groqRerank.ts:33"],
+      "track_c_action": "Replace with openai/gpt-oss-20b (fallback candidate); affects MORE backend paths than the answer-gen model"
+    },
+    "gemini_2_5_flash": {"status": "verify alive", "refs": 4, "sites": ["convex/crawl/chunking.ts:346 (doc-summary)", "convex/rag/routing.ts:102 (HyDE preferred)", "scripts/crawler.py:731,752 (VLM)"]},
+    "gemini_3_5_flash_lite": {"status": "GA 2026-07-21 per user, no shutdown announced", "refs": 6, "note": "ALREADY in fallback chain at llm-models.ts:26-27 — partial migration already done for answer-gen"},
+    "gemini_embedding_2": {"status": "no shutdown announced per user", "refs": 15, "dimension": 768, "DO_NOT_MIGRATE": "changing changes vector space — AGENTS.md forbidden op unless via new namespace with version tracking"},
+    "rerank_english_v3_0": {"status": "English-only — INADEQUATE for Urdu/mixed queries (R2 amendment)", "refs": 1, "site": "convex/rag/constants.ts:43", "phase_6_action": "multilingual reranker qualification (rerank-v4.0-fast/pro, rerank-v3.5)"},
+    "duplicate_getGroq_factories": "6 copies across routing.ts:7, crag.ts:49, faithfulness.ts:52, groqRerank.ts:7, eval/runEval.ts:8, cache/multiVector.ts:8 — consolidate in Phase 0B-G"
+  },
+
+  "convex_bandwidth_state": {
+    "status": "NOT MEASURED — convex CLI broken (see toolchain_state.CRITICAL_TOOLCHAIN_FAILURE)",
+    "user_reported_remaining_4day_envelope_mb": 700,
+    "planned_usable_mb": 490,
+    "reserve_mb": 210,
+    "daily_ceiling_mb": 122,
+    "gating_rule": "Measure npx convex deployment usage --prod --json before AND after every Convex-touching operation. BLOCKED until CLI repaired.",
+    "do_not_run_until_monthly_reset": ["full extraction", "prospectus bulk reprocessing", "full backup", "full corpus dedup scan", "full re-embedding", "hosted retrieval ablations"]
+  },
+
+  "backup_export_state": {
+    "existing_backup_reference": "NEEDS-YOU — not visible from local artifacts",
+    "last_backup_time": "NEEDS-YOU",
+    "backup_availability_status": "NEEDS-YOU",
+    "current_storage_size": "NEEDS-YOU — requires Convex dashboard or working CLI",
+    "phase_0a_action": "NO new full backup created (per bandwidth constraint + read-only Phase 0A scope)"
+  },
+
+  "corpus_counts": {
+    "document_count": "NEEDS-YOU / NEEDS-CLI — requires admin-authenticated Convex query (api.admin.stats.getOverviewData or convex/crawl/queries.getDocumentCountByStatus); local artifacts only show crawler run stats (50 saved in last run), not current store row counts",
+    "chunk_count": "NEEDS-YOU / NEEDS-CLI",
+    "embedding_model_distribution": "NEEDS-YOU / NEEDS-CLI — would reveal how many chunks were embedded with gemini-embedding-2 (relevant to Track B freshness)",
+    "contextualization_completion_rate": "NEEDS-YOU / NEEDS-CLI — KEY Track B signal: how many chunks have contextualizedText populated (Gemini-2.0-flash) vs null"
+  },
+
+  "live_site_probe_summary": {
+    "probed_2026_07_26": [
+      "https://uettaxila.edu.pk/ — SSR HTML, server-rendered, menus+PDFs visible",
+      "https://web.uettaxila.edu.pk/ — identical content to www. (canonicalization concern)",
+      "https://www.uettaxila.edu.pk/ — same nav as web.; relative+absolute URL mix proves single-site-across-hosts",
+      "https://admissions.uettaxila.edu.pk/ — SSR, Fall 2026 + 2026 merit list advertised",
+      "https://admissions.uettaxila.edu.pk/Fees.php — REAL HTML fee table: Tuition 38000/130000, 4yr total 740400/1619400, year 'Fall 2025' heading under 2026 banner (TEMPORAL CONFLICT)",
+      "https://admissions.uettaxila.edu.pk/Seats_Allocation.php — REAL seat matrix, Grand Total 1392, 'Fall 2026'",
+      "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=1 — REAL faculty data, profiles link to fms.uettaxila.edu.pk/Profile/ (OUT OF SCOPE — fms. not in includePatterns)",
+      "https://web.uettaxila.edu.pk/examinations/ — SSR, real content, .aspx routes work",
+      "robots.txt on web. and admissions. — comment-only, no Disallow, no Sitemap directive",
+      "sitemap.xml on uettaxila.edu.pk and web. — 404 (no sitemap; crawler relies on link-graph BFS)"
+    ]
+  },
+
+  "unavailable_or_unverifiable_fields_summary": [
+    "production_commit_sha (needs Vercel auth)",
+    "vercel_deployment_id, vercel_project_id (needs Vercel auth)",
+    "convex bandwidth usage current (CLI broken)",
+    "corpus document_count, chunk_count, embedding_model_distribution, contextualization_completion_rate (need admin Convex query — needs CLI or your auth)",
+    "existing backup reference, last backup time, current storage size (need Convex dashboard)",
+    "provider account tiers — Groq tier determines Aug 16 shutdown applicability (need your confirmation)",
+    "Gemini key type standard vs authorization (Track B 0B-E verification)",
+    "env.local.example diff (CRLF parse failed during snapshot — cosmetic, retry)"
+  ],
+
+  "confirmation_no_behavioral_change": {
+    "behavioral_changes_made": "NONE",
+    "deployments_made": "NONE",
+    "re_embeddings_triggered": "NONE",
+    "crawl_expansions_made": "NONE",
+    "production_writes": "NONE",
+    "main_branch_commits": "NONE",
+    "code_edits_made": "NONE — only file moves (quarantine) and new doc/manifest writes under docs/audit/",
+    "contaminated_files_committed": "NONE — all 19 quarantined to audit/_contaminated_untracked_20260726-143830/ (untracked)"
+  }
+}
