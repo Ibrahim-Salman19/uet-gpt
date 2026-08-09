@@ -1,42 +1,41 @@
 "use node";
-import { createGroq } from "@ai-sdk/groq";
 import { generateText } from "ai";
 import { v } from "convex/values";
 import { internalAction } from "../_generated/server";
 import { generateEmbeddingsInternal } from "../embeddings/generate";
-
-function getGroq() {
-  return createGroq({ apiKey: process.env.GROQ_API_KEY || "" });
-}
+import { getTextModelChain } from "../rag/modelRegistry";
 
 export async function generateAlternatePhrasingsInternal(
   queryText: string,
 ): Promise<string[] | null> {
-  if (!process.env.GROQ_API_KEY) return null;
+  const chain = getTextModelChain();
+  if (chain.length === 0) return null;
 
-  try {
-    const { text } = await generateText({
-      model: getGroq()("openai/gpt-oss-20b"),
-      system:
-        "Generate 2 alternate phrasings of the given search query about UET Taxila. " +
-        "Each should use different keywords but preserve the same search intent. " +
-        "If the query is in Roman Urdu, first translate to English, then generate alternates. " +
-        "Output each alternate on its own line, prefixed with '1. ' and '2. '.",
-      prompt: queryText,
-      temperature: 0.5,
-      maxOutputTokens: 150,
-    });
+  for (const { model, label } of chain) {
+    try {
+      const { text } = await generateText({
+        model,
+        system:
+          "Generate 2 alternate phrasings of the given search query about UET Taxila. " +
+          "Each should use different keywords but preserve the same search intent. " +
+          "If the query is in Roman Urdu, first translate to English, then generate alternates. " +
+          "Output each alternate on its own line, prefixed with '1. ' and '2. '.",
+        prompt: queryText,
+        temperature: 0.5,
+        maxOutputTokens: 150,
+      });
 
-    const lines = text
-      .split("\n")
-      .map((l) => l.replace(/^\d+\.\s*/, "").trim())
-      .filter((l) => l.length > 0);
+      const lines = text
+        .split("\n")
+        .map((l) => l.replace(/^\d+\.\s*/, "").trim())
+        .filter((l) => l.length > 0);
 
-    return lines.length >= 2 ? lines.slice(0, 2) : null;
-  } catch (error) {
-    console.warn("Failed to generate alternate phrasings:", error);
-    return null;
+      return lines.length >= 2 ? lines.slice(0, 2) : null;
+    } catch (error) {
+      console.warn(`generateAlternatePhrasings: ${label} failed, trying next provider:`, error);
+    }
   }
+  return null;
 }
 
 export const generateAlternates = internalAction({

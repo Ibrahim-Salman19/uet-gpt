@@ -138,6 +138,7 @@ const settingsSections: SettingsSection[] = [
           { label: "GPT-OSS 120B", value: "openai/gpt-oss-120b" },
           { label: "GPT-OSS 20B", value: "openai/gpt-oss-20b" },
           { label: "Mixtral 8x7B", value: "mixtral-8x7b-32768" },
+          { label: "Gemini 3.5 Flash-Lite", value: "gemini-3.5-flash-lite" },
         ],
       },
       { key: "cacheEnabled", label: "Semantic cache enabled", type: "boolean", defaultValue: true },

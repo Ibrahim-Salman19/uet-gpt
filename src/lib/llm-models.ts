@@ -16,7 +16,9 @@ interface ModelConfig {
 }
 
 export const LLM_FALLBACK_CHAIN: ModelConfig[] = [
-  // Groq: primary — highly reliable, fast, free tier (replacement models for deprecated Llama)
+  // Groq: primary — qualified alive 2026-07-26 via live probes (see TRACK_C_DESIGN.md).
+  // openai/gpt-oss-120b and gpt-oss-20b are Groq's official replacements for the
+  // Llama models that shut down 2026-08-16. Both support strict JSON Schema.
   { id: "openai/gpt-oss-120b", provider: "groq" },
   { id: "openai/gpt-oss-20b", provider: "groq" },
   // Cerebras: secondary — llama models deprecated May 2026; use active models

@@ -1,13 +1,9 @@
-import { createGroq } from "@ai-sdk/groq";
 import { generateText } from "ai";
 import { v } from "convex/values";
 import { api, internal } from "../_generated/api";
 import { internalAction } from "../_generated/server";
-import { EVAL_BATCH_SIZE, EVAL_MAX_QUERIES, EVAL_MODEL, EVAL_TOP_K } from "./constants";
-
-function getGroq() {
-  return createGroq({ apiKey: process.env.GROQ_API_KEY || "" });
-}
+import { getTextModelChain } from "../rag/modelRegistry";
+import { EVAL_BATCH_SIZE, EVAL_MAX_QUERIES, EVAL_TOP_K } from "./constants";
 
 type EvalQuery = {
   query: string;
@@ -52,39 +48,44 @@ async function judgeRelevanceBatch(
   query: string,
   chunks: Array<{ text: string; url: string; score: number }>,
 ): Promise<RelevanceJudgment[]> {
-  if (!process.env.GROQ_API_KEY) {
+  const chain = getTextModelChain();
+  if (chain.length === 0) {
     return chunks.map((_, i) => ({ index: i, relevant: false }));
   }
 
   const chunkList = chunks.map((c, i) => `[${i}] ${c.text.substring(0, 500)}`).join("\n---\n");
 
-  try {
-    const { text } = await generateText({
-      model: getGroq()(EVAL_MODEL),
-      system:
-        "You are a strict relevance judge. Given a query and a list of text chunks, " +
-        "determine which chunks contain information that helps answer the query. " +
-        "Output a JSON array of objects with 'index' (number) and 'relevant' (boolean). " +
-        'Example: [{"index":0,"relevant":true},{"index":1,"relevant":false}]',
-      prompt: `Query: "${query}"\n\nChunks:\n${chunkList}\n\nWhich chunks are relevant?`,
-      temperature: 0,
-      maxOutputTokens: 500,
-    });
+  for (const { model, label } of chain) {
+    try {
+      const { text } = await generateText({
+        model,
+        system:
+          "You are a strict relevance judge. Given a query and a list of text chunks, " +
+          "determine which chunks contain information that helps answer the query. " +
+          "Output a JSON array of objects with 'index' (number) and 'relevant' (boolean). " +
+          'Example: [{"index":0,"relevant":true},{"index":1,"relevant":false}]',
+        prompt: `Query: "${query}"\n\nChunks:\n${chunkList}\n\nWhich chunks are relevant?`,
+        temperature: 0,
+        maxOutputTokens: 500,
+      });
 
-    const cleaned = text
-      .replace(/```json?/gi, "")
-      .replace(/```/g, "")
-      .trim();
-    const parsed = JSON.parse(cleaned) as RelevanceJudgment[];
+      const cleaned = text
+        .replace(/```json?/gi, "")
+        .replace(/```/g, "")
+        .trim();
+      const parsed = JSON.parse(cleaned) as RelevanceJudgment[];
 
-    if (Array.isArray(parsed) && parsed.length === chunks.length) {
-      return parsed;
+      if (Array.isArray(parsed) && parsed.length === chunks.length) {
+        return parsed;
+      }
+      // Model returned malformed JSON or wrong count — try next provider.
+      console.warn(`judgeRelevanceBatch: ${label} returned unusable output, trying next provider`);
+    } catch (error) {
+      console.warn(`judgeRelevanceBatch: ${label} failed, trying next provider:`, error);
     }
-
-    return chunks.map((_, i) => ({ index: i, relevant: false }));
-  } catch {
-    return chunks.map((_, i) => ({ index: i, relevant: false }));
   }
+
+  return chunks.map((_, i) => ({ index: i, relevant: false }));
 }
 
 export const runEval = internalAction({

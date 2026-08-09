@@ -21,13 +21,13 @@ const MODEL_OPTIONS: ReadonlyArray<{
   description: string;
 }> = [
   {
-    key: "llama-3.1-8b",
+    key: "gpt-oss-20b",
     label: "UET-Fast",
     badge: "DEFAULT",
     description: "Lower latency for everyday questions",
   },
   {
-    key: "llama-4-scout",
+    key: "gpt-oss-120b",
     label: "UET-Pro",
     badge: "DEEP",
     description: "More deliberate responses for complex work",

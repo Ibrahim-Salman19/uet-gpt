@@ -8,7 +8,7 @@ import { useUserData } from "@/hooks/use-user-data";
 
 export type AccentTheme = "indigo" | "violet" | "sky" | "amber" | "navy";
 export type FontSize = "small" | "medium" | "large";
-export type ModelPreference = "llama-3.1-8b" | "llama-4-scout";
+export type ModelPreference = "gpt-oss-20b" | "gpt-oss-120b";
 export type ToggleSettingKey = "webgl" | "glow" | "anims" | "sounds" | "typingAnim" | "typingSound";
 
 interface PinnedHighlight {
@@ -75,7 +75,7 @@ const STORAGE = {
 const DEFAULTS = {
   accentTheme: "indigo" as AccentTheme,
   fontSize: "medium" as FontSize,
-  modelPreference: "llama-3.1-8b" as ModelPreference,
+  modelPreference: "gpt-oss-20b" as ModelPreference,
   webglEnabled: true,
   glowEnabled: true,
   animsEnabled: true,
@@ -190,7 +190,7 @@ function isFontSize(value: unknown): value is FontSize {
 }
 
 function isModelPreference(value: unknown): value is ModelPreference {
-  return value === "llama-3.1-8b" || value === "llama-4-scout";
+  return value === "gpt-oss-20b" || value === "gpt-oss-120b";
 }
 
 function isValidPin(value: unknown): value is PinnedHighlight {
@@ -614,7 +614,7 @@ function usePreferenceActions(updatePreferences: UpdatePreferencesFn, state: Pre
       state.setModelPreference(model);
       try {
         await updatePreferences({ model });
-        toast.success(`Model switched to ${model === "llama-4-scout" ? "UET-Pro" : "UET-Fast"}`);
+        toast.success(`Model switched to ${model === "gpt-oss-120b" ? "UET-Pro" : "UET-Fast"}`);
       } catch (error) {
         state.setModelPreference((current) => (current === model ? previous : current));
         console.error("Failed to update model preference", error);

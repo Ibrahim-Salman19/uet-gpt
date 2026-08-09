@@ -24,15 +24,14 @@ const PROVIDER_FACTORIES: Record<
 };
 
 const MODEL_MAPPING: Record<string, { id: string; provider: string }> = {
-  // Groq models (deprecated Llama models replaced August 2026)
-  "llama-3.3-70b": { id: "openai/gpt-oss-120b", provider: "groq" },
-  "llama-3.1-8b": { id: "openai/gpt-oss-20b", provider: "groq" },
+  // Groq models (Llama shut down 2026-08-16; replaced with qualified gpt-oss)
+  "gpt-oss-120b": { id: "openai/gpt-oss-120b", provider: "groq" },
+  "gpt-oss-20b": { id: "openai/gpt-oss-20b", provider: "groq" },
   // Cerebras models (Llama deprecated May 2026)
   "gemma-4-31b": { id: "gemma-4-31b", provider: "cerebras" },
-  "gpt-oss-120b": { id: "gpt-oss-120b", provider: "cerebras" },
-  // Google models (gemini-2.0-flash quota exhausted; use newer free-tier models)
+  "cerebras-gpt-oss-120b": { id: "gpt-oss-120b", provider: "cerebras" },
+  // Google models (gemini-3.5-flash-lite verified free tier)
   "gemini-3.5-flash-lite": { id: "gemini-3.5-flash-lite", provider: "google" },
-  "gemini-3.1-flash-lite": { id: "gemini-3.1-flash-lite", provider: "google" },
 };
 
 function buildFallbackChain(preferredModelKey?: string): { id: string; provider: string }[] {

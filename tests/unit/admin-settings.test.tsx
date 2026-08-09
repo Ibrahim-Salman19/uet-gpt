@@ -236,6 +236,7 @@ describe("AdminSettingsPage", () => {
       expect(optionTexts).toContain("GPT-OSS 120B");
       expect(optionTexts).toContain("GPT-OSS 20B");
       expect(optionTexts).toContain("Mixtral 8x7B");
+      expect(optionTexts).toContain("Gemini 3.5 Flash-Lite");
     });
 
     it("sets correct defaults for RAG fields", () => {
