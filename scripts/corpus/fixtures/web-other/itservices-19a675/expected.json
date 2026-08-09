@@ -1,0 +1,64 @@
+{
+  "_curated": true,
+  "_labelled_by": "scripts/eval/_label_webother.py (web-other expansion \u2014 labels sourced from raw body)",
+  "expected": {
+    "canonical_host": "web.uettaxila.edu.pk",
+    "criticality": "standard",
+    "forbidden_links_contain": [
+      "logout"
+    ],
+    "forbidden_text_blocks": [
+      "__VIEWSTATE",
+      "Untitled Document"
+    ],
+    "max_duration_ms": 60000,
+    "required_links_contain": [
+      "microsoft365.com",
+      "aka.ms/devtoolsforteaching"
+    ],
+    "required_resources": [
+      {
+        "crawlable": true,
+        "critical": false,
+        "kind": "pdf",
+        "nofollow": false,
+        "url_contains": "EDU-roam-Settings.pdf"
+      },
+      {
+        "crawlable": true,
+        "critical": false,
+        "kind": "pdf",
+        "nofollow": false,
+        "url_contains": "O365-Firstime-Login.pdf"
+      }
+    ],
+    "required_text_blocks": [
+      {
+        "text": "Office 365",
+        "why": "the flagship IT service named in the body"
+      },
+      {
+        "text": "Eduroam",
+        "why": "the wifi service named in the body"
+      },
+      {
+        "text": "NARC",
+        "why": "the hosting/operations unit named repeatedly"
+      },
+      {
+        "text": "OneDrive",
+        "why": "a concrete sub-service \u2014 proves body rendered"
+      }
+    ],
+    "resource_min_count": 2,
+    "title_contains": [
+      "IT Services"
+    ],
+    "title_not_contains": [
+      "Untitled",
+      "404"
+    ]
+  },
+  "family": "web-other",
+  "fixture_id": "web-other/itservices-19a675"
+}

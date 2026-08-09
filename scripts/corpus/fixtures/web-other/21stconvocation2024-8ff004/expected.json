@@ -1,0 +1,66 @@
+{
+  "_curated": true,
+  "_labelled_by": "scripts/eval/_label_webother.py (web-other expansion \u2014 labels sourced from raw body)",
+  "expected": {
+    "canonical_host": "web.uettaxila.edu.pk",
+    "criticality": "critical",
+    "forbidden_links_contain": [
+      "logout",
+      "login"
+    ],
+    "forbidden_text_blocks": [
+      "__VIEWSTATE",
+      "Untitled Document"
+    ],
+    "max_duration_ms": 60000,
+    "required_links_contain": [
+      "forms.office.com"
+    ],
+    "required_resources": [
+      {
+        "crawlable": true,
+        "critical": true,
+        "kind": "pdf",
+        "nofollow": false,
+        "url_contains": "Convocation-Advertisement-2024.pdf"
+      },
+      {
+        "crawlable": true,
+        "critical": false,
+        "kind": "pdf",
+        "nofollow": false,
+        "url_contains": "ListofMedalist202"
+      }
+    ],
+    "required_text_blocks": [
+      {
+        "text": "21st Convocation",
+        "why": "the ceremony identity \u2014 the page's subject"
+      },
+      {
+        "text": "Eligible Candidates",
+        "why": "eligibility section \u2014 who may attend"
+      },
+      {
+        "text": "Willingness Form",
+        "why": "the registration mechanism \u2014 critical for attendees"
+      },
+      {
+        "text": "Chancellor",
+        "why": "medalist category header \u2014 proves the medalists table rendered"
+      },
+      {
+        "text": "5th January-2024",
+        "why": "rehearsal date \u2014 a concrete critical fact"
+      }
+    ],
+    "resource_min_count": 2,
+    "title_contains": [],
+    "title_not_contains": [
+      "Untitled",
+      "404"
+    ]
+  },
+  "family": "web-other",
+  "fixture_id": "web-other/21stconvocation2024-8ff004"
+}

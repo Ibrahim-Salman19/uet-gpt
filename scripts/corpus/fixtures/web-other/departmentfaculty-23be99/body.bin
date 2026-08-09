@@ -1,0 +1,963 @@
+
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>DepartmentFaculty</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="/js/jquery.min.js" type="70050b4bf983ec41fe637fdc-text/javascript"></script>
+    <style type="text/css">
+        body {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+        }
+
+        .pagecontaier {
+            margin: 0 10%;
+        }
+
+        #FacultyPageHtml {
+        }
+
+        .depttitle {
+            color: #1E8CBF;
+            font-size: 24px;
+            background-color: white;
+            border: none;
+            width: 100%;
+        }
+
+        .sharedfacultydiv::before {
+            border: solid 1px green;
+            margin: 20px 0px;
+            width: 100%;
+        }
+
+        .sharedfacultydiv {
+        }
+
+        .sharedfacultydiv h2 {
+            border: 1px solid #DDDDDD;
+            font-size: 13px;
+            font-weight: bold;
+            color: #ffffff;
+            padding: 10px;
+            background: linear-gradient(to right, #002163,darkgray);
+            border-radius: 5px;
+            margin: 10px 0px;
+        }
+
+        .designationdiv h2 {
+            border: 1px solid #DDDDDD;
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffffff;
+            padding: 10px;
+            background-color: #1E8CBF;
+            border-radius: 5px;
+            margin: 10px 0px;
+        }
+
+        .designationdiv h2 span {
+            padding-left: 5px;
+            color: white;
+        }
+
+        .hecapprovedphdsupervisor {
+            font-weight: bold;
+            font-family: Calibri;
+            font-size: 14px;
+        }
+
+        .facultyprofilescontainer {
+        }
+
+        .facultyprofilescontainer div.profileDetailsTable:nth-child(even) {
+            margin-left: 2%;
+        }
+
+        .profileDetailsTable {
+            border: solid 2px #1E8CBF;
+            border-top-right-radius: 25px;
+            border-bottom-right-radius: 1px;
+            margin-top: 6px;
+            background: linear-gradient(#EBEBEB, #FBFBFB);
+            padding: 5px;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 11px;
+            width: 49%;
+            display: inline-block;
+        }
+
+        .highestqualification {
+            display: inline-block;
+            padding-top: 5px;
+        }
+
+        .facultydata {
+        }
+
+        .fullname {
+            color: #337ab7;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: underline;
+        }
+
+        .leavemark {
+            font-weight: bold;
+            color: #1E8CBF;
+            font-size: 16px;
+        }
+
+        .profileImg {
+            box-shadow: 1px 4px 10px #666;
+            border-radius: 100%;
+        }
+        .actingchairman {
+            font-weight: bold;
+            color: green;
+            font-size: 16px;
+            padding-left: 5px;
+        }
+    </style>
+    <script type="70050b4bf983ec41fe637fdc-text/javascript">
+        $(function () {
+            var departmentId = parseInt($('#hiddepartmentid').val());
+            if (departmentId == 16 || departmentId == 19) {
+                $('.designationdiv h2').each(function (index, item) {
+                    if ($(item).html() == 'Chairman') {
+                        $(item).html('Incharge');
+                    }
+                })
+            }
+            //if (departmentId == 14) {
+            //    $('.fullname').each(function (index, item) {
+            //        debugger;
+            //        if ($(item).html() == 'Dr. Muddassir Ali') {
+            //            $('<span class="actingchairman">(Acting Chairman)</span>').insertAfter($(item));
+            //        }
+            //    })
+            //}            
+            //Fix issue of Getting Designation Abbreviation // The C# code is returning Assoc. Prof. when called for Assistant Professor
+            $('.profileDetailsTable a').each(function(index, item){
+                if($(item).html() == 'Assoc. Prof. Dr. Naila Maqsood'){
+                    $(item).html('Asst. Prof. Dr. Naila Maqsood');
+                }
+            });
+
+            $('.fullname').each(function (index, item) {
+                var name = $(this).html();
+                if (name.length > 32) {
+                    name = name.substr(0, name.lastIndexOf(' '));
+                    $(this).html(name);
+                }
+            });
+            $('.facultyname').each(function (index, item) {
+                if ($(this).height() > 30) {
+                    $(this).css('zoom', '0.9');
+                }
+            });
+            //Remove Empty Spans
+            $('span.leavemark').each(function () {
+                if ($(this).html() == '') {
+                    $(this).remove();
+                }
+            });
+            //Remove Leave Status Legends from Page Footer if there isn't any faculty on leave
+            $('.leavestatusmark').each(function (index, item) {
+                var leaveMark = $('span:first', this);
+                var strLeaveMark = $(leaveMark).html();
+                var anyRecordFound = false;
+                $('.leavemark').each(function (leavemarkindex, leavemarkitem) {
+                    if ($(leavemarkitem).html() == strLeaveMark) {
+                        anyRecordFound = true;
+                        return;
+                    }                        
+                });
+                if (anyRecordFound == false) {
+                    $(this).remove();
+                }
+            });
+            //Remove hecapprovedphdsupervisor
+            $('span.hecapprovedphdsupervisor').each(function () {
+                if ($(this).html() == '') {
+                    $(this).parent().remove();
+                }
+            });
+            //Limit Specialization
+            $('span.specialization').each(function () {
+                if ($(this).html().length > 200) {
+                    var limitedStr = $(this).html().substr(0, 200) + " ...";
+                    $(this).html(limitedStr);
+                }
+            });
+            //Set Height of each box same
+            var maxHeight = 0;
+            $('.profileDetailsTable').each(function () {
+                var height = $(this).height();
+                if (height > maxHeight)
+                    maxHeight = height;
+            });
+            $('.profileDetailsTable').height(maxHeight);
+        });
+
+        window.onload = function (o) {
+            o.style.height = (o.contentWindow.document.body.scrollHeight + 415) + "px";
+        }
+    </script>
+</head>
+<body>
+    <input type="hidden" id="hiddepartmentid" value="5" />
+    <div class="container">
+        <div class="pagecontaier">
+            <div class="row">
+                <h1 class="depttitle" id="DepartmentTitle">Faculty : Software Engineering Department</h1>
+                <hr />
+            </div>
+            <div id="FacultyPageHtml">
+                <div class="row designationdiv"><h2>Dean</h2></div><div class="row facultyprofilescontainer"><div class="profileDetailsTable">
+    <div class="row facultyname">
+        <div class="col-sm-12">
+            <a href="http://fms.uettaxila.edu.pk/Profile/adnan.habib" target="_blank" class="fullname">Prof. Dr. Hafiz Adnan Habib</a><span class="leavemark"></span>
+        </div>
+        <div class="col-sm-12">
+            <span class="hecapprovedphdsupervisor"></span>
+        </div>
+    </div>
+    <div class="col-sm-9 facultydata">
+        <div class="row">
+            <span class="highestqualification">PhD Electrical Engineering, UET, Taxila</span>
+        </div>  
+        <div class="row">
+            &nbsp;
+        </div>
+        <div class="row">
+            <span style="color: #0066CC; font-weight: bold; font-size: 11px">Specialization: </span><span class="specialization font-weight-bold">Image Processing, Computer Vision, Video Processing, Gesture Recognition</span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Email: </span><span class="font-weight-bold"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="28494c4649460640494a414a685d4d5c5c4950414449064d4c5d065843">[email&#160;protected]</a></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Phone: </span><span class="font-weight-bold">+92 51 9047 414</span>
+        </div>
+    </div>  
+    <div class="col-sm-3" style="padding: 0px; margin: 0px;">
+        <img src="http://fms.uettaxila.edu.pk/profilethumbs/adnan.habib.jpg?random=639213947201380102" class="profileImg img-responsive" alt="No Image">
+    </div> 
+</div></div><div class="row designationdiv"><h2>Chairman</h2></div><div class="row facultyprofilescontainer"><div class="profileDetailsTable">
+    <div class="row facultyname">
+        <div class="col-sm-12">
+            <a href="http://fms.uettaxila.edu.pk/Profile/tabassam.nawaz" target="_blank" class="fullname">Prof. Dr. Tabassam Nawaz</a><span class="leavemark"></span>
+        </div>
+        <div class="col-sm-12">
+            <span class="hecapprovedphdsupervisor"></span>
+        </div>
+    </div>
+    <div class="col-sm-9 facultydata">
+        <div class="row">
+            <span class="highestqualification">PhD Engg. UET Taxila</span>
+        </div>  
+        <div class="row">
+            &nbsp;
+        </div>
+        <div class="row">
+            <span style="color: #0066CC; font-weight: bold; font-size: 11px">Specialization: </span><span class="specialization font-weight-bold">Advance Databases, Object Oriented Design and Analysis</span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Email: </span><span class="font-weight-bold"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ea9e8b888b99998b87c4848b9d8b90aa9f8f9e9e8b9283868bc48f8e9fc49a81">[email&#160;protected]</a></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Phone: </span><span class="font-weight-bold"></span>
+        </div>
+    </div>  
+    <div class="col-sm-3" style="padding: 0px; margin: 0px;">
+        <img src="http://fms.uettaxila.edu.pk/profilethumbs/tabassam.nawaz.jpg?random=639213947201380102" class="profileImg img-responsive" alt="No Image">
+    </div> 
+</div></div><div class="row designationdiv"><h2>Professors<span>(01)</span></h2></div><div class="row facultyprofilescontainer"><div class="profileDetailsTable">
+    <div class="row facultyname">
+        <div class="col-sm-12">
+            <a href="http://fms.uettaxila.edu.pk/Profile/tabassam.nawaz" target="_blank" class="fullname">Dr. Tabassam Nawaz</a><span class="leavemark"></span>
+        </div>
+        <div class="col-sm-12">
+            <span class="hecapprovedphdsupervisor"></span>
+        </div>
+    </div>
+    <div class="col-sm-9 facultydata">
+        <div class="row">
+            <span class="highestqualification">PhD Engg. UET Taxila</span>
+        </div>  
+        <div class="row">
+            &nbsp;
+        </div>
+        <div class="row">
+            <span style="color: #0066CC; font-weight: bold; font-size: 11px">Specialization: </span><span class="specialization font-weight-bold">Advance Databases, Object Oriented Design and Analysis</span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Email: </span><span class="font-weight-bold"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="790d181b180a0a18145717180e1803390c1c0d0d1801101518571c1d0c570912">[email&#160;protected]</a></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Phone: </span><span class="font-weight-bold"></span>
+        </div>
+    </div>  
+    <div class="col-sm-3" style="padding: 0px; margin: 0px;">
+        <img src="http://fms.uettaxila.edu.pk/profilethumbs/tabassam.nawaz.jpg?random=639213947201380102" class="profileImg img-responsive" alt="No Image">
+    </div> 
+</div></div><div class="row designationdiv"><h2>Associate Professors<span>(03)</span></h2></div><div class="row facultyprofilescontainer"><div class="profileDetailsTable">
+    <div class="row facultyname">
+        <div class="col-sm-12">
+            <a href="http://fms.uettaxila.edu.pk/Profile/s.anwar" target="_blank" class="fullname">Engr. Dr. Syed M. Anwar</a><span class="leavemark"></span>
+        </div>
+        <div class="col-sm-12">
+            <span class="hecapprovedphdsupervisor"></span>
+        </div>
+    </div>
+    <div class="col-sm-9 facultydata">
+        <div class="row">
+            <span class="highestqualification">PhD Engg. Sheffield, UK</span>
+        </div>  
+        <div class="row">
+            &nbsp;
+        </div>
+        <div class="row">
+            <span style="color: #0066CC; font-weight: bold; font-size: 11px">Specialization: </span><span class="specialization font-weight-bold">Medical Image & Signal Processing, BCI</span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Email: </span><span class="font-weight-bold"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5b28753a352c3a291b2e3e2f2f3a2332373a753e3f2e752b30">[email&#160;protected]</a></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Phone: </span><span class="font-weight-bold"></span>
+        </div>
+    </div>  
+    <div class="col-sm-3" style="padding: 0px; margin: 0px;">
+        <img src="http://fms.uettaxila.edu.pk/profilethumbs/s.anwar.jpg?random=639213947201380102" class="profileImg img-responsive" alt="No Image">
+    </div> 
+</div><div class="profileDetailsTable">
+    <div class="row facultyname">
+        <div class="col-sm-12">
+            <a href="http://fms.uettaxila.edu.pk/Profile/ali.javed" target="_blank" class="fullname">Engr. Dr. Ali Javed</a><span class="leavemark"></span>
+        </div>
+        <div class="col-sm-12">
+            <span class="hecapprovedphdsupervisor"></span>
+        </div>
+    </div>
+    <div class="col-sm-9 facultydata">
+        <div class="row">
+            <span class="highestqualification">Post Doctrate (Oakland University, MI, USA), Ph.D Computer Engineering (UET Taxila & University of Michigan, USA)</span>
+        </div>  
+        <div class="row">
+            &nbsp;
+        </div>
+        <div class="row">
+            <span style="color: #0066CC; font-weight: bold; font-size: 11px">Specialization: </span><span class="specialization font-weight-bold">Video Summarization, Image Processing, Computer Vision, Software Quality, Multimedia Forensics, Machine Learning, Medical Image Processing</span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Email: </span><span class="font-weight-bold"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="37565b5e195d564152537742524343564f5e5b561952534219475c">[email&#160;protected]</a></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Phone: </span><span class="font-weight-bold">+92-51-9047747</span>
+        </div>
+    </div>  
+    <div class="col-sm-3" style="padding: 0px; margin: 0px;">
+        <img src="http://fms.uettaxila.edu.pk/profilethumbs/ali.javed.jpg?random=639213947201380102" class="profileImg img-responsive" alt="No Image">
+    </div> 
+</div><div class="profileDetailsTable">
+    <div class="row facultyname">
+        <div class="col-sm-12">
+            <a href="http://fms.uettaxila.edu.pk/Profile/hassan.dawood" target="_blank" class="fullname">Engr. Dr. Hassan Dawood</a><span class="leavemark"></span>
+        </div>
+        <div class="col-sm-12">
+            <span class="hecapprovedphdsupervisor"></span>
+        </div>
+    </div>
+    <div class="col-sm-9 facultydata">
+        <div class="row">
+            <span class="highestqualification">Ph.D. Engineering, BNU, China</span>
+        </div>  
+        <div class="row">
+            &nbsp;
+        </div>
+        <div class="row">
+            <span style="color: #0066CC; font-weight: bold; font-size: 11px">Specialization: </span><span class="specialization font-weight-bold">Machine Learning, Image Processing, Computer Vision, Pattern Recognition</span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Email: </span><span class="font-weight-bold"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d1b9b0a2a2b0bfffb5b0a6bebeb591a4b4a5a5b0a9b8bdb0ffb4b5a4ffa1ba">[email&#160;protected]</a></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Phone: </span><span class="font-weight-bold">051-9047741</span>
+        </div>
+    </div>  
+    <div class="col-sm-3" style="padding: 0px; margin: 0px;">
+        <img src="http://fms.uettaxila.edu.pk/profilethumbs/hassan.dawood.jpg?random=639213947201380102" class="profileImg img-responsive" alt="No Image">
+    </div> 
+</div></div><div class="row designationdiv"><h2>Assistant Professors<span>(08)</span></h2></div><div class="row facultyprofilescontainer"><div class="profileDetailsTable">
+    <div class="row facultyname">
+        <div class="col-sm-12">
+            <a href="http://fms.uettaxila.edu.pk/Profile/madiha.liaqat" target="_blank" class="fullname">Engr. Dr. Madiha Liaqat</a><span class="leavemark"></span>
+        </div>
+        <div class="col-sm-12">
+            <span class="hecapprovedphdsupervisor"></span>
+        </div>
+    </div>
+    <div class="col-sm-9 facultydata">
+        <div class="row">
+            <span class="highestqualification">Ph.D. Engineering NUST Islamabad</span>
+        </div>  
+        <div class="row">
+            &nbsp;
+        </div>
+        <div class="row">
+            <span style="color: #0066CC; font-weight: bold; font-size: 11px">Specialization: </span><span class="specialization font-weight-bold">Artificial Intelligence, Information Retrieval</span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Email: </span><span class="font-weight-bold"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="6904080d0001084705000818081d291c0c1d1d0811000508470c0d1c471902">[email&#160;protected]</a></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Phone: </span><span class="font-weight-bold">+92-51-9047749</span>
+        </div>
+    </div>  
+    <div class="col-sm-3" style="padding: 0px; margin: 0px;">
+        <img src="http://fms.uettaxila.edu.pk/profilethumbs/madiha.liaqat.jpg?random=639213947201380102" class="profileImg img-responsive" alt="No Image">
+    </div> 
+</div><div class="profileDetailsTable">
+    <div class="row facultyname">
+        <div class="col-sm-12">
+            <a href="http://fms.uettaxila.edu.pk/Profile/huma.ayub" target="_blank" class="fullname">Dr. Huma Ayub </a><span class="leavemark"></span>
+        </div>
+        <div class="col-sm-12">
+            <span class="hecapprovedphdsupervisor"></span>
+        </div>
+    </div>
+    <div class="col-sm-9 facultydata">
+        <div class="row">
+            <span class="highestqualification">Ph.D. Engineering UET Taxila</span>
+        </div>  
+        <div class="row">
+            &nbsp;
+        </div>
+        <div class="row">
+            <span style="color: #0066CC; font-weight: bold; font-size: 11px">Specialization: </span><span class="specialization font-weight-bold">Video Content Analysis</span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Email: </span><span class="font-weight-bold"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="fe968b939fd09f878b9cbe8b9b8a8a9f8697929fd09b9a8bd08e95">[email&#160;protected]</a></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Phone: </span><span class="font-weight-bold">+92-51-9047-743</span>
+        </div>
+    </div>  
+    <div class="col-sm-3" style="padding: 0px; margin: 0px;">
+        <img src="http://fms.uettaxila.edu.pk/profilethumbs/huma.ayub.jpg?random=639213947201380102" class="profileImg img-responsive" alt="No Image">
+    </div> 
+</div><div class="profileDetailsTable">
+    <div class="row facultyname">
+        <div class="col-sm-12">
+            <a href="http://fms.uettaxila.edu.pk/Profile/muhammad.rizwan" target="_blank" class="fullname">Dr. Muhammad Rizwan</a><span class="leavemark"></span>
+        </div>
+        <div class="col-sm-12">
+            <span class="hecapprovedphdsupervisor"></span>
+        </div>
+    </div>
+    <div class="col-sm-9 facultydata">
+        <div class="row">
+            <span class="highestqualification">PhD Computer Engineering, UET, Taxila</span>
+        </div>  
+        <div class="row">
+            &nbsp;
+        </div>
+        <div class="row">
+            <span style="color: #0066CC; font-weight: bold; font-size: 11px">Specialization: </span><span class="specialization font-weight-bold">Computer Vision, Digital Image Processing</span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Email: </span><span class="font-weight-bold"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="1479617c75797975703a667d6e63757a5461716060756c7d78753a7170613a647f">[email&#160;protected]</a></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Phone: </span><span class="font-weight-bold">0092-51-9047-575</span>
+        </div>
+    </div>  
+    <div class="col-sm-3" style="padding: 0px; margin: 0px;">
+        <img src="http://fms.uettaxila.edu.pk/profilethumbs/muhammad.rizwan.jpg?random=639213947201380102" class="profileImg img-responsive" alt="No Image">
+    </div> 
+</div><div class="profileDetailsTable">
+    <div class="row facultyname">
+        <div class="col-sm-12">
+            <a href="http://fms.uettaxila.edu.pk/Profile/mubbashir.ayub" target="_blank" class="fullname">Engr. Dr. Mubbashir Ayub Minhas</a><span class="leavemark"></span>
+        </div>
+        <div class="col-sm-12">
+            <span class="hecapprovedphdsupervisor"></span>
+        </div>
+    </div>
+    <div class="col-sm-9 facultydata">
+        <div class="row">
+            <span class="highestqualification">Ph.D. Engineering UET Taxila</span>
+        </div>  
+        <div class="row">
+            &nbsp;
+        </div>
+        <div class="row">
+            <span style="color: #0066CC; font-weight: bold; font-size: 11px">Specialization: </span><span class="specialization font-weight-bold">Web 3.0, Advance Computing, Ubiquitious Computing</span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Email: </span><span class="font-weight-bold"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="402d35222221332829326e2139352200352534342138292c216e2524356e302b">[email&#160;protected]</a></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Phone: </span><span class="font-weight-bold">051-9047748</span>
+        </div>
+    </div>  
+    <div class="col-sm-3" style="padding: 0px; margin: 0px;">
+        <img src="http://fms.uettaxila.edu.pk/profilethumbs/mubbashir.ayub.jpg?random=639213947201380102" class="profileImg img-responsive" alt="No Image">
+    </div> 
+</div><div class="profileDetailsTable">
+    <div class="row facultyname">
+        <div class="col-sm-12">
+            <a href="http://fms.uettaxila.edu.pk/Profile/muhammad.asjad" target="_blank" class="fullname">Engr. Muhammad Asjad Saleem</a><span class="leavemark"></span>
+        </div>
+        <div class="col-sm-12">
+            <span class="hecapprovedphdsupervisor"></span>
+        </div>
+    </div>
+    <div class="col-sm-9 facultydata">
+        <div class="row">
+            <span class="highestqualification">MS Engg. UET Taxila</span>
+        </div>  
+        <div class="row">
+            &nbsp;
+        </div>
+        <div class="row">
+            <span style="color: #0066CC; font-weight: bold; font-size: 11px">Specialization: </span><span class="specialization font-weight-bold">Software Specification and Design, Information Systems, ERP System</span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Email: </span><span class="font-weight-bold"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5a372f323b37373b3e743b29303b3e1a2f3f2e2e3b2233363b743f3e2f742a31">[email&#160;protected]</a></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Phone: </span><span class="font-weight-bold">off: 051-9047 594  , resd: 051- 9047 481</span>
+        </div>
+    </div>  
+    <div class="col-sm-3" style="padding: 0px; margin: 0px;">
+        <img src="http://fms.uettaxila.edu.pk/profilethumbs/muhammad.asjad.jpg?random=639213947201380102" class="profileImg img-responsive" alt="No Image">
+    </div> 
+</div><div class="profileDetailsTable">
+    <div class="row facultyname">
+        <div class="col-sm-12">
+            <a href="http://fms.uettaxila.edu.pk/Profile/saima.zareen" target="_blank" class="fullname">Engr. Dr. Saima Zareen</a><span class="leavemark"></span>
+        </div>
+        <div class="col-sm-12">
+            <span class="hecapprovedphdsupervisor"></span>
+        </div>
+    </div>
+    <div class="col-sm-9 facultydata">
+        <div class="row">
+            <span class="highestqualification">PhD Engineering, UET Taxila</span>
+        </div>  
+        <div class="row">
+            &nbsp;
+        </div>
+        <div class="row">
+            <span style="color: #0066CC; font-weight: bold; font-size: 11px">Specialization: </span><span class="specialization font-weight-bold">Multidisciplinary Information Security/ Cyber Security and Multimedia Wireless Systems, Software Systems</span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Email: </span><span class="font-weight-bold"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0271636b6f632c78637067676c4277677676637a6b6e632c6766772c7269">[email&#160;protected]</a></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Phone: </span><span class="font-weight-bold">0519047751</span>
+        </div>
+    </div>  
+    <div class="col-sm-3" style="padding: 0px; margin: 0px;">
+        <img src="http://fms.uettaxila.edu.pk/profilethumbs/saima.zareen.jpg?random=639213947201380102" class="profileImg img-responsive" alt="No Image">
+    </div> 
+</div><div class="profileDetailsTable">
+    <div class="row facultyname">
+        <div class="col-sm-12">
+            <a href="http://fms.uettaxila.edu.pk/Profile/wajahat.abbas" target="_blank" class="fullname">Engr. Wajahat Abbas</a><span class="leavemark"></span>
+        </div>
+        <div class="col-sm-12">
+            <span class="hecapprovedphdsupervisor"></span>
+        </div>
+    </div>
+    <div class="col-sm-9 facultydata">
+        <div class="row">
+            <span class="highestqualification">MS Engg. UET Taxila</span>
+        </div>  
+        <div class="row">
+            &nbsp;
+        </div>
+        <div class="row">
+            <span style="color: #0066CC; font-weight: bold; font-size: 11px">Specialization: </span><span class="specialization font-weight-bold">Multimedia Transmission on Wireless Networks</span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Email: </span><span class="font-weight-bold"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ee998f848f868f9ac08f8c8c8f9dae9b8b9a9a8f9687828fc08b8a9bc09e85">[email&#160;protected]</a></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Phone: </span><span class="font-weight-bold">051-9047590</span>
+        </div>
+    </div>  
+    <div class="col-sm-3" style="padding: 0px; margin: 0px;">
+        <img src="http://fms.uettaxila.edu.pk/profilethumbs/wajahat.abbas.jpg?random=639213947201380102" class="profileImg img-responsive" alt="No Image">
+    </div> 
+</div><div class="profileDetailsTable">
+    <div class="row facultyname">
+        <div class="col-sm-12">
+            <a href="http://fms.uettaxila.edu.pk/Profile/wajeeha.batool" target="_blank" class="fullname">Engr. Wajeeha Batool</a><span class="leavemark"></span>
+        </div>
+        <div class="col-sm-12">
+            <span class="hecapprovedphdsupervisor"></span>
+        </div>
+    </div>
+    <div class="col-sm-9 facultydata">
+        <div class="row">
+            <span class="highestqualification">MS Engg. UET Taxila</span>
+        </div>  
+        <div class="row">
+            &nbsp;
+        </div>
+        <div class="row">
+            <span style="color: #0066CC; font-weight: bold; font-size: 11px">Specialization: </span><span class="specialization font-weight-bold">Digital Image Processing, Software Engineering</span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Email: </span><span class="font-weight-bold"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="1364727976767b723d7172677c7c7f5366766767726b7a7f723d7677663d6378">[email&#160;protected]</a></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Phone: </span><span class="font-weight-bold">9047595</span>
+        </div>
+    </div>  
+    <div class="col-sm-3" style="padding: 0px; margin: 0px;">
+        <img src="http://fms.uettaxila.edu.pk/profilethumbs/wajeeha.batool.jpg?random=639213947201380102" class="profileImg img-responsive" alt="No Image">
+    </div> 
+</div></div><div class="row designationdiv"><h2>Lecturers<span>(07)</span></h2></div><div class="row facultyprofilescontainer"><div class="profileDetailsTable">
+    <div class="row facultyname">
+        <div class="col-sm-12">
+            <a href="http://fms.uettaxila.edu.pk/Profile/tasawer.khan" target="_blank" class="fullname">Engr. Tasawer Khan</a><span class="leavemark"></span>
+        </div>
+        <div class="col-sm-12">
+            <span class="hecapprovedphdsupervisor"></span>
+        </div>
+    </div>
+    <div class="col-sm-9 facultydata">
+        <div class="row">
+            <span class="highestqualification">MS Engg. UK</span>
+        </div>  
+        <div class="row">
+            &nbsp;
+        </div>
+        <div class="row">
+            <span style="color: #0066CC; font-weight: bold; font-size: 11px">Specialization: </span><span class="specialization font-weight-bold">Web Services and Formal Methods</span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Email: </span><span class="font-weight-bold"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ec988d9f8d9b899ec287848d82ac998998988d9485808dc2898899c29c87">[email&#160;protected]</a></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Phone: </span><span class="font-weight-bold"></span>
+        </div>
+    </div>  
+    <div class="col-sm-3" style="padding: 0px; margin: 0px;">
+        <img src="http://fms.uettaxila.edu.pk/profilethumbs/tasawer.khan.jpg?random=639213947201380102" class="profileImg img-responsive" alt="No Image">
+    </div> 
+</div><div class="profileDetailsTable">
+    <div class="row facultyname">
+        <div class="col-sm-12">
+            <a href="http://fms.uettaxila.edu.pk/Profile/sehar.javaid" target="_blank" class="fullname">Engr. Sehar Javaid</a><span class="leavemark"></span>
+        </div>
+        <div class="col-sm-12">
+            <span class="hecapprovedphdsupervisor"></span>
+        </div>
+    </div>
+    <div class="col-sm-9 facultydata">
+        <div class="row">
+            <span class="highestqualification">MS Engg. NUST Islamabad</span>
+        </div>  
+        <div class="row">
+            &nbsp;
+        </div>
+        <div class="row">
+            <span style="color: #0066CC; font-weight: bold; font-size: 11px">Specialization: </span><span class="specialization font-weight-bold">Machine Learning</span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Email: </span><span class="font-weight-bold"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="6615030e0714480c0710070f022613031212071e0f0a074803021348160d">[email&#160;protected]</a></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Phone: </span><span class="font-weight-bold"></span>
+        </div>
+    </div>  
+    <div class="col-sm-3" style="padding: 0px; margin: 0px;">
+        <img src="http://fms.uettaxila.edu.pk/profilethumbs/sehar.javaid.jpg?random=639213947201380102" class="profileImg img-responsive" alt="No Image">
+    </div> 
+</div><div class="profileDetailsTable">
+    <div class="row facultyname">
+        <div class="col-sm-12">
+            <a href="http://fms.uettaxila.edu.pk/Profile/kanwal.yousaf" target="_blank" class="fullname">Engr. Dr. Kanwal Yousaf</a><span class="leavemark"></span>
+        </div>
+        <div class="col-sm-12">
+            <span class="hecapprovedphdsupervisor"></span>
+        </div>
+    </div>
+    <div class="col-sm-9 facultydata">
+        <div class="row">
+            <span class="highestqualification">PhD Engineering, UET Taxila</span>
+        </div>  
+        <div class="row">
+            &nbsp;
+        </div>
+        <div class="row">
+            <span style="color: #0066CC; font-weight: bold; font-size: 11px">Specialization: </span><span class="specialization font-weight-bold">Deep Learning, Artificial Intelligence, Image/Video Detection and Classification, mHealth Technology</span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Email: </span><span class="font-weight-bold"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="caa1aba4bdaba6e4b3a5bfb9abac8abfafbebeabb2a3a6abe4afaebfe4baa1">[email&#160;protected]</a></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Phone: </span><span class="font-weight-bold">051-9047738</span>
+        </div>
+    </div>  
+    <div class="col-sm-3" style="padding: 0px; margin: 0px;">
+        <img src="http://fms.uettaxila.edu.pk/profilethumbs/kanwal.yousaf.jpg?random=639213947201380102" class="profileImg img-responsive" alt="No Image">
+    </div> 
+</div><div class="profileDetailsTable">
+    <div class="row facultyname">
+        <div class="col-sm-12">
+            <a href="http://fms.uettaxila.edu.pk/Profile/arta.iftikhar" target="_blank" class="fullname">Engr. Dr. Arta Iftikhar</a><span class="leavemark"></span>
+        </div>
+        <div class="col-sm-12">
+            <span class="hecapprovedphdsupervisor"></span>
+        </div>
+    </div>
+    <div class="col-sm-9 facultydata">
+        <div class="row">
+            <span class="highestqualification">PhD Engineering, UET Taxila</span>
+        </div>  
+        <div class="row">
+            &nbsp;
+        </div>
+        <div class="row">
+            <span style="color: #0066CC; font-weight: bold; font-size: 11px">Specialization: </span><span class="specialization font-weight-bold">Digital Image Processing</span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Email: </span><span class="font-weight-bold"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2f4e5d5b4e0146495b4644474e5d6f5a4a5b5b4e5746434e014a4b5a015f44">[email&#160;protected]</a></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Phone: </span><span class="font-weight-bold"></span>
+        </div>
+    </div>  
+    <div class="col-sm-3" style="padding: 0px; margin: 0px;">
+        <img src="http://fms.uettaxila.edu.pk/profilethumbs/arta.iftikhar.jpg?random=639213947201380102" class="profileImg img-responsive" alt="No Image">
+    </div> 
+</div><div class="profileDetailsTable">
+    <div class="row facultyname">
+        <div class="col-sm-12">
+            <a href="http://fms.uettaxila.edu.pk/Profile/tehmina.kalsum" target="_blank" class="fullname">Dr. Tehmina Kalsum</a><span class="leavemark"></span>
+        </div>
+        <div class="col-sm-12">
+            <span class="hecapprovedphdsupervisor"></span>
+        </div>
+    </div>
+    <div class="col-sm-9 facultydata">
+        <div class="row">
+            <span class="highestqualification">PhD Engg. UET Taxila</span>
+        </div>  
+        <div class="row">
+            &nbsp;
+        </div>
+        <div class="row">
+            <span style="color: #0066CC; font-weight: bold; font-size: 11px">Specialization: </span><span class="specialization font-weight-bold">Artificial Intelligence, Image Processing, and Computer Vision</span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Email: </span><span class="font-weight-bold"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="fb8f9e939692959ad5909a97888e96bb8e9e8f8f9a8392979ad59e9f8ed58b90">[email&#160;protected]</a></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Phone: </span><span class="font-weight-bold"></span>
+        </div>
+    </div>  
+    <div class="col-sm-3" style="padding: 0px; margin: 0px;">
+        <img src="http://fms.uettaxila.edu.pk/profilethumbs/tehmina.kalsum.jpg?random=639213947201380102" class="profileImg img-responsive" alt="No Image">
+    </div> 
+</div><div class="profileDetailsTable">
+    <div class="row facultyname">
+        <div class="col-sm-12">
+            <a href="http://fms.uettaxila.edu.pk/Profile/maria.andaleeb" target="_blank" class="fullname">Engr. Maria Andaleeb</a><span class="leavemark"></span>
+        </div>
+        <div class="col-sm-12">
+            <span class="hecapprovedphdsupervisor"></span>
+        </div>
+    </div>
+    <div class="col-sm-9 facultydata">
+        <div class="row">
+            <span class="highestqualification">MS Engg. UET Taxila</span>
+        </div>  
+        <div class="row">
+            &nbsp;
+        </div>
+        <div class="row">
+            <span style="color: #0066CC; font-weight: bold; font-size: 11px">Specialization: </span><span class="specialization font-weight-bold">Networks, Web Services, Artificial Intelligence and Web Applications Engineering</span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Email: </span><span class="font-weight-bold"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="6b060a19020a450a050f0a070e0e092b1e0e1f1f0a1302070a450e0f1e451b00">[email&#160;protected]</a></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Phone: </span><span class="font-weight-bold"></span>
+        </div>
+    </div>  
+    <div class="col-sm-3" style="padding: 0px; margin: 0px;">
+        <img src="http://fms.uettaxila.edu.pk/profilethumbs/maria.andaleeb.jpg?random=639213947201380102" class="profileImg img-responsive" alt="No Image">
+    </div> 
+</div><div class="profileDetailsTable">
+    <div class="row facultyname">
+        <div class="col-sm-12">
+            <a href="http://fms.uettaxila.edu.pk/Profile/marriam.nawaz" target="_blank" class="fullname">Engr. Dr. Marriam Nawaz</a><span class="leavemark"></span>
+        </div>
+        <div class="col-sm-12">
+            <span class="hecapprovedphdsupervisor"></span>
+        </div>
+    </div>
+    <div class="col-sm-9 facultydata">
+        <div class="row">
+            <span class="highestqualification">Ph.D. Software Engineering UET Taxila</span>
+        </div>  
+        <div class="row">
+            &nbsp;
+        </div>
+        <div class="row">
+            <span style="color: #0066CC; font-weight: bold; font-size: 11px">Specialization: </span><span class="specialization font-weight-bold">Image Processing, Computer Vision, Multimedia forensic analysis</span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Email: </span><span class="font-weight-bold"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="264b4754544f474b08484751475c6653435252475e4f4a470843425308564d">[email&#160;protected]</a></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Phone: </span><span class="font-weight-bold"></span>
+        </div>
+    </div>  
+    <div class="col-sm-3" style="padding: 0px; margin: 0px;">
+        <img src="http://fms.uettaxila.edu.pk/profilethumbs/marriam.nawaz.jpg?random=639213947201380102" class="profileImg img-responsive" alt="No Image">
+    </div> 
+</div></div><div class="row designationdiv"><h2>Lab Engineers<span>(04)</span></h2></div><div class="row facultyprofilescontainer"><div class="profileDetailsTable">
+    <div class="row facultyname">
+        <div class="col-sm-12">
+            <a href="http://fms.uettaxila.edu.pk/Profile/nazia.bibi" target="_blank" class="fullname">Dr. Nazia Bibi</a><span class="leavemark"></span>
+        </div>
+        <div class="col-sm-12">
+            <span class="hecapprovedphdsupervisor"></span>
+        </div>
+    </div>
+    <div class="col-sm-9 facultydata">
+        <div class="row">
+            <span class="highestqualification">PhD Engg. UET, Taxila</span>
+        </div>  
+        <div class="row">
+            &nbsp;
+        </div>
+        <div class="row">
+            <span style="color: #0066CC; font-weight: bold; font-size: 11px">Specialization: </span><span class="specialization font-weight-bold"></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Email: </span><span class="font-weight-bold"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="92fcf3e8fbf3bcf0fbf0fbd2e7f7e6e6f3eafbfef3bcf7f6e7bce2f9">[email&#160;protected]</a></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Phone: </span><span class="font-weight-bold"></span>
+        </div>
+    </div>  
+    <div class="col-sm-3" style="padding: 0px; margin: 0px;">
+        <img src="http://fms.uettaxila.edu.pk/profilethumbs/nazia.bibi.jpg?random=639213947201380102" class="profileImg img-responsive" alt="No Image">
+    </div> 
+</div><div class="profileDetailsTable">
+    <div class="row facultyname">
+        <div class="col-sm-12">
+            <a href="http://fms.uettaxila.edu.pk/Profile/sidra.shafi" target="_blank" class="fullname">Engr. Sidra Shafi</a><span class="leavemark"></span>
+        </div>
+        <div class="col-sm-12">
+            <span class="hecapprovedphdsupervisor"></span>
+        </div>
+    </div>
+    <div class="col-sm-9 facultydata">
+        <div class="row">
+            <span class="highestqualification">B.Sc. Engg. (Hons) UET, Taxila</span>
+        </div>  
+        <div class="row">
+            &nbsp;
+        </div>
+        <div class="row">
+            <span style="color: #0066CC; font-weight: bold; font-size: 11px">Specialization: </span><span class="specialization font-weight-bold"></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Email: </span><span class="font-weight-bold"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="43302a2731226d302b22252a0336263737223b2a2f226d2627366d3328">[email&#160;protected]</a></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Phone: </span><span class="font-weight-bold"></span>
+        </div>
+    </div>  
+    <div class="col-sm-3" style="padding: 0px; margin: 0px;">
+        <img src="http://fms.uettaxila.edu.pk/profilethumbs/sidra.shafi.jpg?random=639213947201380102" class="profileImg img-responsive" alt="No Image">
+    </div> 
+</div><div class="profileDetailsTable">
+    <div class="row facultyname">
+        <div class="col-sm-12">
+            <a href="http://fms.uettaxila.edu.pk/Profile/rabia.arshad" target="_blank" class="fullname">Engr. Rabia Arshad</a><span class="leavemark"></span>
+        </div>
+        <div class="col-sm-12">
+            <span class="hecapprovedphdsupervisor"></span>
+        </div>
+    </div>
+    <div class="col-sm-9 facultydata">
+        <div class="row">
+            <span class="highestqualification">B.Sc. Engg. (Hons) UET, Taxila</span>
+        </div>  
+        <div class="row">
+            &nbsp;
+        </div>
+        <div class="row">
+            <span style="color: #0066CC; font-weight: bold; font-size: 11px">Specialization: </span><span class="specialization font-weight-bold"></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Email: </span><span class="font-weight-bold"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="a6d4c7c4cfc788c7d4d5cec7c2e6d3c3d2d2c7decfcac788c3c2d388d6cd">[email&#160;protected]</a></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Phone: </span><span class="font-weight-bold"></span>
+        </div>
+    </div>  
+    <div class="col-sm-3" style="padding: 0px; margin: 0px;">
+        <img src="http://fms.uettaxila.edu.pk/profilethumbs/rabia.arshad.jpg?random=639213947201380102" class="profileImg img-responsive" alt="No Image">
+    </div> 
+</div><div class="profileDetailsTable">
+    <div class="row facultyname">
+        <div class="col-sm-12">
+            <a href="http://fms.uettaxila.edu.pk/Profile/saba.awan" target="_blank" class="fullname">Dr. Saba Awan</a><span class="leavemark"></span>
+        </div>
+        <div class="col-sm-12">
+            <span class="hecapprovedphdsupervisor"></span>
+        </div>
+    </div>
+    <div class="col-sm-9 facultydata">
+        <div class="row">
+            <span class="highestqualification">PhD Engg. UET, Taxila</span>
+        </div>  
+        <div class="row">
+            &nbsp;
+        </div>
+        <div class="row">
+            <span style="color: #0066CC; font-weight: bold; font-size: 11px">Specialization: </span><span class="specialization font-weight-bold"></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Email: </span><span class="font-weight-bold"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5d2e3c3f3c733c2a3c331d283829293c2534313c73383928732d36">[email&#160;protected]</a></span>
+        </div>
+        <div class="row">
+            <span style="color: #0066FF;">Phone: </span><span class="font-weight-bold"></span>
+        </div>
+    </div>  
+    <div class="col-sm-3" style="padding: 0px; margin: 0px;">
+        <img src="http://fms.uettaxila.edu.pk/profilethumbs/saba.awan.jpg?random=639213947201380102" class="profileImg img-responsive" alt="No Image">
+    </div> 
+</div></div>
+            </div>
+            <hr />
+                <div class="row leavestatusmark">
+                    <span>*</span>&nbsp;<span>On Study Leave Abroad</span>
+                </div>
+                <div class="row leavestatusmark">
+                    <span>**</span>&nbsp;<span>Ex-Pakistan Leave</span>
+                </div>
+        </div>
+        <div style="display: none;color: red; margin: 20px;">
+            Disclaimer: This Page is Under Development. The Information on it is just for testing purposes. The Actual Faculty Pages can be viewed on the departmental websites.
+        </div>
+    </div>
+    <div>&nbsp;</div>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="70050b4bf983ec41fe637fdc-|49" defer></script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"d8564f6d5b4e410eb202d13f98326329","r":1}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25736420b71f884',t:'MTc4NTc3OTkyMg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

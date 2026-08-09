@@ -1,0 +1,64 @@
+{
+  "_curated": true,
+  "_labelled_by": "scripts/eval/_label_webother.py (web-other expansion \u2014 labels sourced from raw body)",
+  "expected": {
+    "canonical_host": "web.uettaxila.edu.pk",
+    "criticality": "standard",
+    "forbidden_links_contain": [
+      "logout",
+      "login"
+    ],
+    "forbidden_text_blocks": [
+      "__VIEWSTATE",
+      "Untitled Document"
+    ],
+    "max_duration_ms": 60000,
+    "required_links_contain": [
+      "dlsei.hec.gov.pk"
+    ],
+    "required_resources": [
+      {
+        "crawlable": true,
+        "critical": false,
+        "kind": "pdf",
+        "nofollow": false,
+        "url_contains": "DLSEI-DISCLAIMER_FORM.pdf"
+      },
+      {
+        "crawlable": true,
+        "critical": true,
+        "kind": "pdf",
+        "nofollow": false,
+        "url_contains": "DLSEI-SOP.pdf"
+      }
+    ],
+    "required_text_blocks": [
+      {
+        "text": "DLSEI intends to enhance online learning",
+        "why": "project purpose \u2014 the page's reason to exist"
+      },
+      {
+        "text": "24000 Licenses",
+        "why": "license capacity \u2014 a concrete deliverable fact"
+      },
+      {
+        "text": "1000+ courses",
+        "why": "course scale \u2014 a concrete deliverable fact"
+      },
+      {
+        "text": "Coursera",
+        "why": "the platform provider named in the body"
+      }
+    ],
+    "resource_min_count": 2,
+    "title_contains": [
+      "Digital Learning"
+    ],
+    "title_not_contains": [
+      "Untitled",
+      "404"
+    ]
+  },
+  "family": "web-other",
+  "fixture_id": "web-other/dlsei-d1a531"
+}

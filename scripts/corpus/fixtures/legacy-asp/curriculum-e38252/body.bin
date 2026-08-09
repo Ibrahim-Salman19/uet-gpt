@@ -1,0 +1,2786 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+    <title>
+        Department of Mechatronics Engineering, UET Taxila
+    </title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link href="css/MainTED.css?20260802172357" type="text/css" rel="Stylesheet">  
+
+    <style type="text/css">
+        .pagetable td {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <table width="100%" border="0" align="center" cellpadding="0" cellspacing="0">
+    <tr>
+        <td height="37" bgcolor="#666666">
+            <table width="972" border="0" align="center" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td width="19" valign="top">
+                        <br>
+                    </td>
+                    <td width="953" valign="middle" class="siteTopHeading">University of 
+            Engineering and Technology, Taxila </td>
+                </tr>
+                <tr>
+                    <td colspan="2" valign="top">
+                        <p>
+                            <img src="images/spacer.gif" width="5" height="2" hspace="0"></p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td height="100" valign="top" bgcolor="#E6E4DB">
+            <table width="936" border="0" align="center" cellpadding="0" cellspacing="0" style="margin-left: 200px;">
+                <tr>
+                    <td colspan="3">
+                        <img src="images/spacer.gif" width="10" height="10"></td>
+                </tr>
+                <tr>
+                    <td width="67" valign="top">
+                        <img src="images/logoUETT.jpg" width="67" height="65"><br>
+                    </td>
+                    <td width="587" valign="middle">
+                        <div style="font-size: 2.1em; color: #06517B; font-family: Calibri; font-weight: bold; padding-left: 10px;">Department of Mechatronics Engineering</div>
+                    </td>
+                    <td width="282" valign="middle">
+                        <table width="280" border="0" align="right" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td width="71" class="quickLinks">&nbsp;</td>
+                                <td width="125" class="quickLinks">
+                                    <div align="right">
+                                        <a href="http://web.uettaxila.edu.pk/">UET 
+                  Home </a>
+                                    </div>
+                                </td>
+                                <td width="84" class="quickLinks">
+                                    <div align="right">
+                                        <a href="contact.asp#contact">Contact Info</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td height="30" colspan="3" valign="bottom">
+                                    <form name="search" action="http://www.google.com/search" method="get" onsubmit="if (!window.__cfRLUnblockHandlers) return false; Gsitesearch(this)" data-cf-modified-622d8bbdf7c20e224b4d1aff-="">
+                                        <div align="right">
+                                            <input name="q" type="hidden" />
+                                            <input type="text" name="qfront" class="searchField" onblur="if (!window.__cfRLUnblockHandlers) return false; this.value == '' ? this.value = 'Search this site...' :  this.value = this.value;" onclick="if (!window.__cfRLUnblockHandlers) return false; this.value == 'Search this site...' ? this.value = '' : this.value = this.value;" value="Search this site..." size="20" maxlength="50" data-cf-modified-622d8bbdf7c20e224b4d1aff-="">
+                                            <input name="submit" type="submit" class="sectionHead" value=" Search ">
+                                        </div>
+                                    </form>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3" valign="top">
+                        <p>
+                            <img src="images/spacer.gif" width="5" height="2" hspace="0"></p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+<link rel="stylesheet" href="css/stylesMenu.css" />
+<table style="background-color: #E6E4DB; width: 100%">
+    <tr>
+        <td>
+            <nav>
+                <ul class="fancyNav">
+                    <li id="home"><a class="after" href="index.asp#home">Home</a></li>
+                    <li id="academcis"><a href="Academics.asp">Academics</a></li>
+                    <li id="faculty"><a href="faculty.asp#faculty">Faculty</a></li>
+                    <li id="contact"><a href="contact.asp#contact">Contact us</a></li>
+                    <li id="downloads"><a href="downloads.asp">Downloads</a></li>
+                </ul>
+            </nav>
+        </td>
+    </tr>
+</table>
+    <table width="972" border="0" align="center" cellpadding="0" cellspacing="0">
+        <tr>
+            <td>
+                <table width="972" border="0">
+                    <tr>
+                        <td width="750" class="homeMainText">
+                            <h1 class="pageheading">Curriculum</h1>
+                            <div style="text-align: center">
+                                <span style="text-align: center; font-size: 18px; font-weight: bold;">Courses Under Semester System</span>
+                            </div>
+                            <p> </p>
+                            <div style="text-align: center">
+                                <span style="text-align: center; font-size: 18px; font-weight: bold;">BSc. Mechatronics Engineerin</span>
+                            </div> 
+                            <h1>Semester I</h1>
+                            <table class="coursetable" style="width: 100.0%;" border="1" cellspacing="0" cellpadding="0">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <p><strong>Course No.</strong></p>
+                                        </th>
+                                        <th>
+                                            <p><strong>Course Title</strong></p>
+                                        </th>
+                                        <th>
+                                            <p><strong>Credit Hours (Theory)</strong></p>
+                                        </th>
+                                        <th>
+                                            <p><strong>Credit Hours (Practical)</strong></p>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <p>GS-111</p>
+                                        </td>
+                                        <td>
+                                            <p>Calculus and Analytical Geometry</p>
+                                        </td>
+                                        <td>
+                                            <p>3</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>ME-112</p>
+                                        </td>
+                                        <td>
+                                            <p>Engineering Statics</p>
+                                        </td>
+                                        <td>
+                                            <p>2</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>GS-113</p>
+                                        </td>
+                                        <td>
+                                            <p>Applied Physics</p>
+                                        </td>
+                                        <td>
+                                            <p>2</p>
+                                        </td>
+                                        <td>
+                                            <p>1</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>HS-114</p>
+                                        </td>
+                                        <td>
+                                            <p>Islamic Studies/Ethics</p>
+                                        </td>
+                                        <td>
+                                            <p>2</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>HS-115</p>
+                                        </td>
+                                        <td>
+                                            <p>Functional English</p>
+                                        </td>
+                                        <td>
+                                            <p>3</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>MDE-116</p>
+                                        </td>
+                                        <td>
+                                            <p>Occupational health and Safety</p>
+                                        </td>
+                                        <td>
+                                            <p>1</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>CS-117</p>
+                                        </td>
+                                        <td>
+                                            <p>Application of ICT</p>
+                                        </td>
+                                        <td>
+                                            <p>2</p>
+                                        </td>
+                                        <td>
+                                            <p>1</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p><strong>&nbsp;</strong></p>
+                                        </td>
+                                        <td>
+                                            <p><strong>Credit Hours (Theory + Practical)</strong></p>
+                                        </td>
+                                        <td>
+                                            <p><strong>15</strong></p>
+                                        </td>
+                                        <td>
+                                            <p><strong>2</strong></p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p><strong>&nbsp;</strong></p>
+                                        </td>
+                                        <td>
+                                            <p><strong>Credit Hours (Semester)</strong></p>
+                                        </td>
+                                        <td style="width: 50.18%;" colspan="2">
+                                            <p><strong>17</strong></p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <h1>Semester II</h1>
+                            <table class="coursetable" style="width: 100.0%;" border="1" cellspacing="0" cellpadding="0">
+                               <thead>
+                                    <tr>
+                                        <th>
+                                            <p><strong>Course No.</strong></p>
+                                        </th>
+                                        <th>
+                                            <p><strong>Course Title</strong></p>
+                                        </th>
+                                        <th>
+                                            <p><strong>Credit Hours (Theory)</strong></p>
+                                        </th>
+                                        <th>
+                                            <p><strong>Credit Hours (Practical)</strong></p>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <p>GS-121</p>
+                                        </td>
+                                        <td>
+                                            <p>Differential Equations</p>
+                                        </td>
+                                        <td>
+                                            <p>3</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>ME-122</p>
+                                        </td>
+                                        <td>
+                                            <p>Engineering Drawing &amp; Graphics</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                        <td>
+                                            <p>2</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>CSE-123</p>
+                                        </td>
+                                        <td>
+                                            <p>Computer Programming</p>
+                                        </td>
+                                        <td>
+                                            <p>2</p>
+                                        </td>
+                                        <td>
+                                            <p>1</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>EE-124</p>
+                                        </td>
+                                        <td>
+                                            <p>Electric circuit Analysis</p>
+                                        </td>
+                                        <td>
+                                            <p>3</p>
+                                        </td>
+                                        <td>
+                                            <p>1</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>HS-125</p>
+                                        </td>
+                                        <td>
+                                            <p>Arts and Humanities&nbsp; Elective</p>
+                                        </td>
+                                        <td>
+                                            <p>2</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>HS-126</p>
+                                        </td>
+                                        <td>
+                                            <p>Ideology and Constitution of Pakistan</p>
+                                        </td>
+                                        <td>
+                                            <p>2</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>ME-127</p>
+                                        </td>
+                                        <td>
+                                            <p>Workshop practice</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                        <td>
+                                            <p>1</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>HS-128</p>
+                                        </td>
+                                        <td>
+                                            <p>Understanding of Holy Quran-I</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                        <td>
+                                            <p>1</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p><strong>&nbsp;</strong></p>
+                                        </td>
+                                        <td>
+                                            <p><strong>Credit Hours (Theory + Practical)</strong></p>
+                                        </td>
+                                        <td>
+                                            <p><strong>13</strong></p>
+                                        </td>
+                                        <td>
+                                            <p><strong>5</strong></p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p><strong>&nbsp;</strong></p>
+                                        </td>
+                                        <td>
+                                            <p><strong>Credit Hours (Semester)</strong></p>
+                                        </td>
+                                        <td colspan="2">
+                                            <p><strong>18</strong></p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">
+                                            <p><strong>Total for first year</strong></p>
+                                        </td>
+                                        <td colspan="2" style="text-align: center !important;">
+                                            <p><strong>35</strong></p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <h1>Semester III</h1>
+                            <table class="coursetable" style="width: 100.0%;" border="1" cellspacing="0" cellpadding="0">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <p><strong>Course No.</strong></p>
+                                        </th>
+                                        <th>
+                                            <p><strong>Course Title</strong></p>
+                                        </th>
+                                        <th>
+                                            <p><strong>Credit Hours (Theory)</strong></p>
+                                        </th>
+                                        <th>
+                                            <p><strong>Credit Hours (Practical)</strong></p>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <p>GS-211</p>
+                                        </td>
+                                        <td>
+                                            <p>Linear algebra</p>
+                                        </td>
+                                        <td>
+                                            <p>3</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>EE-212</p>
+                                        </td>
+                                        <td>
+                                            <p>Electronics Devices and Circuits</p>
+                                        </td>
+                                        <td>
+                                            <p>3</p>
+                                        </td>
+                                        <td>
+                                            <p>1</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>ME-213</p>
+                                        </td>
+                                        <td>
+                                            <p>Engineering Dynamics</p>
+                                        </td>
+                                        <td>
+                                            <p>3</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>MTE-214</p>
+                                        </td>
+                                        <td>
+                                            <p>Solid Modeling</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                        <td>
+                                            <p>1</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>MTE-215</p>
+                                        </td>
+                                        <td>
+                                            <p>Materials and Manufacturing Processes</p>
+                                        </td>
+                                        <td>
+                                            <p>3</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                    </tr>
+                                    <tr style="height: 36.75pt;">
+                                        <td>
+                                            <p>CSE-216</p>
+                                        </td>
+                                        <td>
+                                            <p>Data Structures and Object Oriented Programming</p>
+                                        </td>
+                                        <td>
+                                            <p>2</p>
+                                        </td>
+                                        <td>
+                                            <p>1</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p><strong>&nbsp;</strong></p>
+                                        </td>
+                                        <td>
+                                            <p><strong>Credit Hours (Theory + Practical)</strong></p>
+                                        </td>
+                                        <td>
+                                            <p><strong>14</strong></p>
+                                        </td>
+                                        <td>
+                                            <p><strong>3</strong></p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p><strong>&nbsp;</strong></p>
+                                        </td>
+                                        <td>
+                                            <p><strong>Credit Hours (Semester)</strong></p>
+                                        </td>
+                                        <td colspan="2">
+                                            <p><strong>17</strong></p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <h1>Semester IV</h1>
+                            <table class="coursetable" style="width: 100.0%;" border="1" cellspacing="0" cellpadding="0">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <p><strong>Course No.</strong></p>
+                                        </th>
+                                        <th>
+                                            <p><strong>Course Title</strong></p>
+                                        </th>
+                                        <th>
+                                            <p><strong>Credit Hours (Theory)</strong></p>
+                                        </th>
+                                        <th>
+                                            <p><strong>Credit Hours (Practical)</strong></p>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <p>GS-221</p>
+                                        </td>
+                                        <td>
+                                            <p>Multivariate Calculus and Transform</p>
+                                        </td>
+                                        <td>
+                                            <p>3</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>MTE-222</p>
+                                        </td>
+                                        <td>
+                                            <p>Electronic Circuits Design</p>
+                                        </td>
+                                        <td>
+                                            <p>3</p>
+                                        </td>
+                                        <td>
+                                            <p>1</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>ME-223</p>
+                                        </td>
+                                        <td>
+                                            <p>Mechanics of Materials</p>
+                                        </td>
+                                        <td>
+                                            <p>2</p>
+                                        </td>
+                                        <td>
+                                            <p>1</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>EE-224</p>
+                                        </td>
+                                        <td>
+                                            <p>Digital logic Design</p>
+                                        </td>
+                                        <td>
+                                            <p>2</p>
+                                        </td>
+                                        <td>
+                                            <p>1</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>ME-225</p>
+                                        </td>
+                                        <td>
+                                            <p>Fluid Mechanics</p>
+                                        </td>
+                                        <td>
+                                            <p>2</p>
+                                        </td>
+                                        <td>
+                                            <p>1</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>MDE-226</p>
+                                        </td>
+                                        <td>
+                                            <p>Theory of Machines</p>
+                                        </td>
+                                        <td>
+                                            <p>2</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>HS-227</p>
+                                        </td>
+                                        <td>
+                                            <p>Understanding of Holy Quran-II</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                        <td>
+                                            <p>1</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>&nbsp;</p>
+                                        </td>
+                                        <td>
+                                            <p><strong>Credit Hours (Theory + Practical)</strong></p>
+                                        </td>
+                                        <td>
+                                            <p><strong>15</strong></p>
+                                        </td>
+                                        <td>
+                                            <p><strong>4</strong></p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>&nbsp;</p>
+                                        </td>
+                                        <td>
+                                            <p><strong>Credit Hours (Semester)</strong></p>
+                                        </td>
+                                        <td colspan="2">
+                                            <p><strong>19</strong></p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">
+                                            <p><strong>Total for second year</strong></p>
+                                        </td>
+                                        <td colspan="2" style="text-align: center !important;">
+                                            <p><strong>36</strong></p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <h1>Semester V</h1>
+                            <table class="coursetable" style="width: 100.0%;" border="1" cellspacing="0" cellpadding="0">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <p><strong>Course No.</strong></p>
+                                        </th>
+                                        <th>
+                                            <p><strong>Course Title</strong></p>
+                                        </th>
+                                        <th>
+                                            <p><strong>Credit Hours (Theory)</strong></p>
+                                        </th>
+                                        <th>
+                                            <p><strong>Credit Hours (Practical)</strong></p>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <p>GS-311</p>
+                                        </td>
+                                        <td>
+                                            <p>Probability and Statistics</p>
+                                        </td>
+                                        <td>
+                                            <p>2</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>MTE-312</p>
+                                        </td>
+                                        <td>
+                                            <p>Microcontroller and Embedded Systems</p>
+                                        </td>
+                                        <td>
+                                            <p>2</p>
+                                        </td>
+                                        <td>
+                                            <p>2</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>MTE-313</p>
+                                        </td>
+                                        <td>
+                                            <p>Design of Machine Elements</p>
+                                        </td>
+                                        <td>
+                                            <p>3</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>MTE-314</p>
+                                        </td>
+                                        <td>
+                                            <p>Instrumentation and Measurement</p>
+                                        </td>
+                                        <td>
+                                            <p>3</p>
+                                        </td>
+                                        <td>
+                                            <p>1</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>MS-315</p>
+                                        </td>
+                                        <td>
+                                            <p>Project Management</p>
+                                        </td>
+                                        <td>
+                                            <p>2</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>HS-316</p>
+                                        </td>
+                                        <td>
+                                            <p>Expository Writing</p>
+                                        </td>
+                                        <td>
+                                            <p>3</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>&nbsp;</p>
+                                        </td>
+                                        <td>
+                                            <p><strong>Credit Hours (Theory + Practical)</strong></p>
+                                        </td>
+                                        <td>
+                                            <p><strong>15</strong></p>
+                                        </td>
+                                        <td>
+                                            <p><strong>3</strong></p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>&nbsp;</p>
+                                        </td>
+                                        <td>
+                                            <p><strong>Credit Hours (Semester)</strong></p>
+                                        </td>
+                                        <td colspan="2">
+                                            <p><strong>18</strong></p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <h1>Semester VI</h1>
+                            <table class="coursetable" style="width: 100.0%;" border="1" cellspacing="0" cellpadding="0">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <p><strong>Course No.</strong></p>
+                                        </th>
+                                        <th>
+                                            <p><strong>Course Title</strong></p>
+                                        </th>
+                                        <th>
+                                            <p><strong>Credit Hours (Theory)</strong></p>
+                                        </th>
+                                        <th>
+                                            <p><strong>Credit Hours (Practical)</strong></p>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <p>GS-321</p>
+                                        </td>
+                                        <td>
+                                            <p>Numerical Analysis</p>
+                                        </td>
+                                        <td>
+                                            <p>2</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>MTE-322</p>
+                                        </td>
+                                        <td>
+                                            <p>Mechatronics Systems Design</p>
+                                        </td>
+                                        <td>
+                                            <p>2</p>
+                                        </td>
+                                        <td>
+                                            <p>2</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>MDE-323</p>
+                                        </td>
+                                        <td>
+                                            <p>Modeling and Simulation</p>
+                                        </td>
+                                        <td>
+                                            <p>2</p>
+                                        </td>
+                                        <td>
+                                            <p>1</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>MTE-324</p>
+                                        </td>
+                                        <td>
+                                            <p>Technical Elective I</p>
+                                        </td>
+                                        <td>
+                                            <p>3</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>MTE-325</p>
+                                        </td>
+                                        <td>
+                                            <p>Actuating Systems</p>
+                                        </td>
+                                        <td>
+                                            <p>3</p>
+                                        </td>
+                                        <td>
+                                            <p>1</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>HS-326</p>
+                                        </td>
+                                        <td>
+                                            <p>Civics and Community Engagement</p>
+                                        </td>
+                                        <td>
+                                            <p>2</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p><strong>&nbsp;</strong></p>
+                                        </td>
+                                        <td>
+                                            <p><strong>Credit Hours (Theory + Practical)</strong></p>
+                                        </td>
+                                        <td>
+                                            <p><strong>14</strong></p>
+                                        </td>
+                                        <td>
+                                            <p>4</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p><strong>&nbsp;</strong></p>
+                                        </td>
+                                        <td>
+                                            <p><strong>Credit Hours (Semester)</strong></p>
+                                        </td>
+                                        <td colspan="2">
+                                            <p><strong>18</strong></p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">
+                                            <p><strong>Total for third year</strong></p>
+                                        </td>
+                                        <td colspan="2" style="text-align: center !important;">
+                                            <p><strong>36</strong></p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <h1>Semester VII</h1>
+                            <table class="coursetable" style="width: 100.0%;" border="1" cellspacing="0" cellpadding="0">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <p><strong>Course No.</strong></p>
+                                        </th>
+                                        <th>
+                                            <p><strong>Course Title</strong></p>
+                                        </th>
+                                        <th>
+                                            <p><strong>Credit Hours (Theory)</strong></p>
+                                        </th>
+                                        <th>
+                                            <p><strong>Credit Hours (Practical)</strong></p>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <p>MTE-411</p>
+                                        </td>
+                                        <td>
+                                            <p>Robotics</p>
+                                        </td>
+                                        <td>
+                                            <p>3</p>
+                                        </td>
+                                        <td>
+                                            <p>1</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>MTE-412</p>
+                                        </td>
+                                        <td>
+                                            <p>Control Systems</p>
+                                        </td>
+                                        <td>
+                                            <p>3</p>
+                                        </td>
+                                        <td>
+                                            <p>1</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>HS-413</p>
+                                        </td>
+                                        <td>
+                                            <p>Social Sciences Elective</p>
+                                        </td>
+                                        <td>
+                                            <p>2</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>MTE-414</p>
+                                        </td>
+                                        <td>
+                                            <p>Technical Elective II</p>
+                                        </td>
+                                        <td>
+                                            <p>3</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>CSE-415</p>
+                                        </td>
+                                        <td>
+                                            <p>Artificial intelligence</p>
+                                        </td>
+                                        <td>
+                                            <p>1</p>
+                                        </td>
+                                        <td>
+                                            <p>1</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>MTE-416A</p>
+                                        </td>
+                                        <td>
+                                            <p>FYDP(Part-I)</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                        <td>
+                                            <p>2</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>HS-417</p>
+                                        </td>
+                                        <td>
+                                            <p>Pakistan Studies</p>
+                                        </td>
+                                        <td>
+                                            <p>2</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p><strong>&nbsp;</strong></p>
+                                        </td>
+                                        <td>
+                                            <p><strong>Credit Hours (Theory + Practical)</strong></p>
+                                        </td>
+                                        <td>
+                                            <p><strong>14</strong></p>
+                                        </td>
+                                        <td>
+                                            <p><strong>5</strong></p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p><strong>&nbsp;</strong></p>
+                                        </td>
+                                        <td>
+                                            <p><strong>Credit Hours (Semester)</strong></p>
+                                        </td>
+                                        <td colspan="2">
+                                            <p><strong>19</strong></p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <h1>Semester VIII</h1>
+                            <table class="coursetable" style="width: 100.0%;" border="1" cellspacing="0" cellpadding="0">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <p><strong>Course No.</strong></p>
+                                        </th>
+                                        <th>
+                                            <p><strong>Course Title</strong></p>
+                                        </th>
+                                        <th>
+                                            <p><strong>Credit Hours (Theory)</strong></p>
+                                        </th>
+                                        <th>
+                                            <p><strong>Credit Hours (Practical)</strong></p>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <p>MTE-421</p>
+                                        </td>
+                                        <td>
+                                            <p>Technical Elective III</p>
+                                        </td>
+                                        <td>
+                                            <p>3</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>MTE-422</p>
+                                        </td>
+                                        <td>
+                                            <p>Industrial Automation</p>
+                                        </td>
+                                        <td>
+                                            <p>2</p>
+                                        </td>
+                                        <td>
+                                            <p>1</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>ME-423</p>
+                                        </td>
+                                        <td>
+                                            <p>Fundamental of Thermal Sciences</p>
+                                        </td>
+                                        <td>
+                                            <p>2</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>MS-424</p>
+                                        </td>
+                                        <td>
+                                            <p>Entrepreneurship</p>
+                                        </td>
+                                        <td>
+                                            <p>2</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>MTE-416B</p>
+                                        </td>
+                                        <td>
+                                            <p>FYDP(Part-II)</p>
+                                        </td>
+                                        <td>
+                                            <p>0</p>
+                                        </td>
+                                        <td>
+                                            <p>4</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p><strong>&nbsp;</strong></p>
+                                        </td>
+                                        <td>
+                                            <p><strong>Credit Hours (Theory + Practical)</strong></p>
+                                        </td>
+                                        <td>
+                                            <p>9</p>
+                                        </td>
+                                        <td>
+                                            <p>5</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p><strong>&nbsp;</strong></p>
+                                        </td>
+                                        <td>
+                                            <p><strong>Credit Hours (Semester)</strong></p>
+                                        </td>
+                                        <td colspan="2">
+                                            <p><strong>14</strong></p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">
+                                            <p><strong>Total for fourth year</strong></p>
+                                        </td>
+                                        <td colspan="2" style="text-align: center !important;">
+                                            <p><strong>33</strong></p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">
+                                            <p><strong>Grand total for Four Years</strong></p>
+                                        </td>
+                                        <td colspan="2" style="text-align: center !important;">
+                                            <p><strong>140</strong></p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <h1>List of Elective Courses</h1>
+                            <h2>Arts and Humanities Elective</h2>
+                            <ol>
+                                <li>Beginners Spanish</li>
+                                <li>Elementary Arabic</li>
+                                <li>Elementary French</li>
+                                <li>Elementary Chinese</li>
+                                <li>History</li>
+                                <li>Philosophy</li>
+                                <li>Professional Ethics</li>
+                                <li>Communication and Presentation Skills</li>
+                            </ol>
+                            <p>&nbsp;</p>
+                            <h2>Social Science Elective</h2>
+                            <ol>
+                                <li>Sociology for Engineers</li>
+                                <li>Sociology</li>
+                                <li>Social Psychology</li>
+                                <li>Critical Thinking</li>
+                                <li>Human Resource Management</li>
+                                <li>Organizational Behavior</li>
+                                <li>Engineering Law</li>
+                                <li>Engineering Economics</li>
+                                <li>Applied Psychology</li>
+                                <li>Engineering Management</li>
+                                <li>Financial Management</li>
+                                <li>Marketing Management</li>
+                                <li>Leadership and Personal Grooming</li>
+                                <li>Research Methodology</li>
+                            </ol>
+                            <p>&nbsp;</p>
+                            <h2>Engineering Electives</h2>
+                            <ol>
+                                <li>Power Electronics</li>
+                                <li>Mechanical Vibrations</li>
+                                <li>Special Topics in Mechatronics</li>
+                                <li>Digital Signal Processing</li>
+                                <li>Digital Control Systems</li>
+                                <li>Digital Image Processing</li>
+                                <li>Power Plant Systems</li>
+                                <li>Introduction to Systems Engineering</li>
+                                <li>Machine Vision</li>
+                                <li>Advanced Artificial Intelligence</li>
+                                <li>Precision Manufacturing</li>
+                                <li>Energy resources and management</li>
+                                <li>Intelligent Systems</li>
+                                <li>Computer Aided Engineering</li>
+                                <li>Digital Filter Design</li>
+                                <li>Advanced Control Systems</li>
+                                <li>Mobile Robotics</li>
+                                <li>Internal Combustion Engine</li>
+                                <li>Automotive Technology</li>
+                                <li>Elect Instrumentation</li>
+                                <li>Laser and its Applications</li>
+                                <li>Condition Monitoring</li>
+                                <li>Bio-Mechatronics</li>
+                                <li>Data Communications and Networking</li>
+                                <li>Fuzzy Logic</li>
+                                <li>Applied Robotics</li>
+                                <li>Mechatronics Modelling for Automotive Systems</li>
+                                <li>Power Train Systems</li>
+                                <li>Embedded Systems</li>
+                                <li>Computer Integrated Manufacturing</li>
+                                <li>Introduction to Machine Learning</li>
+                                <li>Internet of Things</li>
+                                <li>Industry 4.0</li>
+                                <li>Product Design</li>
+                                <li>Aerial Robotics</li>
+                                <li>Smart Electric Vehicles</li>
+                                <li>Introduction to Biomedical Engineering</li>
+                                <li>Signals and Systems</li>
+                                <li>Applied Mobile Robotics</li>
+                                <li>Computer Organization</li>
+                                <li>Database Management Systems</li>
+                                <li>Data Communication and Networks</li>
+                                <li>Operating Systems</li>
+                                <li>Computer Architecture</li>
+                                <li>Web Design and Development</li>
+                                <li>Game Development</li>
+                            </ol>
+                            <p>&nbsp;</p>
+                        </td>
+                        <td width="280" class="homeNewsPan">
+                            <table width="220" border="0" cellpadding="0" cellspacing="0" bgcolor="#EFEFEF">
+    <tr>
+        <td width="230" bgcolor="#EFEFEF">
+            <table width="200" border="0" align="center" cellpadding="0" cellspacing="0" bgcolor="#EFEFEF">
+                <tr>
+                    <td height="30" class="mainnavtxtSub"><a id="ug" class="grouplink" href="Academics.asp">Academics</a></td>
+                </tr>
+                <tr>
+                    <td>
+                        <img src="images/seperatorTblSub.jpg" width="200" height="6"></td>
+                </tr>
+                <tr>
+                    <td height="30" class="mainnavtxtSub"><a id="labs" class="grouplink" href="Labs.asp">Labs</a></td>
+                </tr>
+                <tr>
+                    <td>
+                        <img src="images/seperatorTblSub.jpg" width="200" height="6"></td>
+                </tr>
+                <tr>
+                    <td height="30" class="mainnavtxtSub"><a id="labs" class="grouplink" href="Curriculum.asp">Curriculum</a></td>
+                </tr>
+                <tr>
+                    <td>
+                        <img src="images/seperatorTblSub.jpg" width="200" height="6"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+                        </td>
+                    </tr>
+                </table>
+                <p>&nbsp;</p>
+            </td>
+        </tr>
+    </table>
+    <table width="100%" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td height="62" bgcolor="#E6E4DB">
+            <table width="972" border="0" align="center" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td width="25">&nbsp;</td>
+                    <td>
+                        <table width="707" border="0" cellpadding="0" cellspacing="0">
+                            <tr>                                
+                                <td width="620" class="quickLinks">
+                                    <div align="left">
+                                        <a href="contact.asp#contact">Contact Info</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td height="20" valign="bottom" class="footerText"><strong>University 
+                  of Engineering and Technology Taxila</strong>, Department of Mechatronics Engineering, 051 9047670</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tdbgFooter">
+    <tr>
+        <td height="140" valign="top">
+            <table width="972" height="127" border="0" align="center" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td width="210" height="19" class="siteFooterItem">
+                        <img src="images/spacer.gif" alt="" width="10" height="10"></td>
+                    <td width="210"><span class="siteFooterItem">
+                        <img src="images/spacer.gif" alt="" width="10" height="10"></span></td>
+                    <td width="208"><span class="siteFooterItem">
+                        <img src="images/spacer.gif" alt="" width="10" height="10"></span></td>
+                    <td width="344">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td height="108" valign="top" class="siteFooterItem">
+                        <table width="98%" height="96" border="0" align="right" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td width="192" height="26" valign="top">
+                                    <p><span>About the university</span></p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td valign="top" class="quickLinksRight"><a href="http://web.uettaxila.edu.pk/AboutUs">The 
+                  University campus is located on the outskirts of Taxila at a 
+                  distance of 5 km from the city. It is situated near railway 
+                  station Mohra Shah Wali Shah on Taxila-Havelian branch line....</a></td>
+                            </tr>
+                        </table>
+
+                    </td>
+                    <td valign="top">
+                        <table width="98%" height="96" border="0" align="right" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td width="192" height="26" valign="top">
+                                    <p class="siteFooterItem">
+                                        <span>Important 
+                    websites</span>
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td valign="top" class="quickLinksRight">
+                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                        <tr>
+                                            <td width="95%" valign="top">
+                                                <img src="images/footePointer.jpg" alt="" width="6" height="6"><a href="http://www.hec.gov.pk/"> 
+                        HEC Pakistan<br>
+                                                    Higher Education Commission Pakistan </a></td>
+                                        </tr>
+                                        <tr>
+                                            <td valign="top">
+                                                <img src="images/footePointer.jpg" alt="" width="6" height="6">
+                                                <a href="http://www.pec.org.pk/">PEC Pakistan<br>
+                                                    Pakistan Engineering Council</a></td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td valign="top">
+                        <table width="98%" height="96" border="0" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td width="192" height="26" valign="top">
+                                    <p class="siteFooterItem">
+                                        <span>About Mechatronics Engineering Dept.</span>
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td valign="top" class="quickLinksRight"><a href="index.asp#home">Details</a></td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td valign="top">
+                        <table width="90%" border="0" align="right" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td height="50" colspan="3" valign="top">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td width="80%" class="copyright">
+                                    <div align="right" class="quickLinksTitle">
+                                        <span>© 
+                    2026, www.uettaxila.edu.pk</span>
+                                    </div>
+                                </td>
+                                <td width="3%">
+                                    <img src="images/seperator.gif" alt="" width="13" height="15"></td>
+                                <td width="17%">
+                                    <img src="images/logoCopyright.png" alt="UET Taxila" width="37" height="38" align="right"></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+    <div style="display: none;">
+        <div align="center">
+            <table class="coursetable" style="width: 100.0%;" border="1" cellspacing="0" cellpadding="0">
+                <thead>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <p><strong>&nbsp;Sr. No.</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Semester 1/Course title</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Th</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Lab</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Total </strong></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>GS-111</p>
+                        </td>
+                        <td>
+                            <p>Calculus and Analytical Geometry</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>ME-112</p>
+                        </td>
+                        <td>
+                            <p>Engineering Statics</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>GS-113</p>
+                        </td>
+                        <td>
+                            <p>Applied Physics</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                        <td>
+                            <p>1</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>HS-114</p>
+                        </td>
+                        <td>
+                            <p>Islamic Studies/Ethics</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>HS-115</p>
+                        </td>
+                        <td>
+                            <p>Functional English</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>MDE-116</p>
+                        </td>
+                        <td>
+                            <p>Occupational health and Safety</p>
+                        </td>
+                        <td>
+                            <p>1</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>1</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>CS-117</p>
+                        </td>
+                        <td>
+                            <p>Application of ICT</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                        <td>
+                            <p>1</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>&nbsp;</p>
+                        </td>
+                        <td>
+                            <p><strong>Total</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>15</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>2</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>17</strong></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="5">
+                            <p>&nbsp;</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p><strong>&nbsp;Sr. No.</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Semester 2/Course title</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Th</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Lab</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Total </strong></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>GS-121</p>
+                        </td>
+                        <td>
+                            <p>Differential Equations</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>ME-122</p>
+                        </td>
+                        <td>
+                            <p>Engineering Drawing &amp; Graphics</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>CSE-123</p>
+                        </td>
+                        <td>
+                            <p>Computer Programming</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                        <td>
+                            <p>1</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>EE-124</p>
+                        </td>
+                        <td>
+                            <p>Electric circuit Analysis</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                        <td>
+                            <p>1</p>
+                        </td>
+                        <td>
+                            <p>4</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>HS-125</p>
+                        </td>
+                        <td>
+                            <p>Arts and Humanities&nbsp; Elective</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>HS-126</p>
+                        </td>
+                        <td>
+                            <p>Ideology and Constitution of Pakistan</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>ME-127</p>
+                        </td>
+                        <td>
+                            <p>Workshop practice</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>1</p>
+                        </td>
+                        <td>
+                            <p>1</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>&nbsp;</p>
+                        </td>
+                        <td>
+                            <p><strong>Total</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>12</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>5</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>17</strong></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>&nbsp;</p>
+                        </td>
+                        <td>
+                            <p><strong>Total for 1<sup>st</sup> year</strong></p>
+                        </td>
+                        <td colspan="3">
+                            <p><strong>34</strong></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="5">
+                            <p>&nbsp;</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p><strong>Sr. No.</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Semester 3/Course Title</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Th</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Lab</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Total </strong></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>GS-211</p>
+                        </td>
+                        <td>
+                            <p>Linear algebra</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>EE-212</p>
+                        </td>
+                        <td>
+                            <p>Electronics Devices and Circuits</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                        <td>
+                            <p>1</p>
+                        </td>
+                        <td>
+                            <p>4</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>ME-213</p>
+                        </td>
+                        <td>
+                            <p>Engineering Dynamics</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>MTE-214</p>
+                        </td>
+                        <td>
+                            <p>Solid Modeling</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>1</p>
+                        </td>
+                        <td>
+                            <p>1</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>MTE-215</p>
+                        </td>
+                        <td>
+                            <p>Materials and Manufacturing Processes</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>CSE-216</p>
+                        </td>
+                        <td>
+                            <p>Data Structures and Object Oriented Programming</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                        <td>
+                            <p>1</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>&nbsp;</p>
+                        </td>
+                        <td>
+                            <p><strong>Total</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>14</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>3</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>17</strong></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="5">
+                            <p>&nbsp;</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p><strong>Sr. No.</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Semester 4/Course Title</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Th</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Lab</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Total </strong></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>GS-221</p>
+                        </td>
+                        <td>
+                            <p>Multivariate Calculus and Transform</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>MTE-222</p>
+                        </td>
+                        <td>
+                            <p>Electronic Circuits Design</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                        <td>
+                            <p>1</p>
+                        </td>
+                        <td>
+                            <p>4</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>ME-223</p>
+                        </td>
+                        <td>
+                            <p>Mechanics of Materials</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                        <td>
+                            <p>1</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>EE-224</p>
+                        </td>
+                        <td>
+                            <p>Digital logic Design</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                        <td>
+                            <p>1</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>ME-225</p>
+                        </td>
+                        <td>
+                            <p>Fluid Mechanics</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                        <td>
+                            <p>1</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>MDE-226</p>
+                        </td>
+                        <td>
+                            <p>Theory of Machines</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>&nbsp;</p>
+                        </td>
+                        <td>
+                            <p><strong>Total</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>15</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>4</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>18</strong></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>&nbsp;</p>
+                        </td>
+                        <td>
+                            <p><strong>Total for 2<sup>nd</sup> year</strong></p>
+                        </td>
+                        <td colspan="3">
+                            <p><strong>35</strong></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="5">
+                            <p>&nbsp;</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>&nbsp;<strong>Sr. No.</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Semester 5/Course Title</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Th</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Lab</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Total </strong></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>GS-311</p>
+                        </td>
+                        <td>
+                            <p>Probability and Statistics</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>MTE-312</p>
+                        </td>
+                        <td>
+                            <p>Microcontroller and Embedded Systems</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                        <td>
+                            <p>4</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>MTE-313</p>
+                        </td>
+                        <td>
+                            <p>Design of Machine Elements</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>MTE-314</p>
+                        </td>
+                        <td>
+                            <p>Instrumentation and Measurement</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                        <td>
+                            <p>1</p>
+                        </td>
+                        <td>
+                            <p>4</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>MS-315</p>
+                        </td>
+                        <td>
+                            <p>Project Management</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>HS-316</p>
+                        </td>
+                        <td>
+                            <p>Expository Writing</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>&nbsp;</p>
+                        </td>
+                        <td>
+                            <p><strong>Total</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>15</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>3</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>18</strong></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="5">
+                            <p>&nbsp;</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>&nbsp;<strong>Sr. No.</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Semester 6/Course Title</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Th</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Lab</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Total </strong></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>GS-321</p>
+                        </td>
+                        <td>
+                            <p>Numerical Analysis</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>MTE-322</p>
+                        </td>
+                        <td>
+                            <p>Mechatronics Systems Design</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                        <td>
+                            <p>4</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>MDE-323</p>
+                        </td>
+                        <td>
+                            <p>Modeling and Simulation</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                        <td>
+                            <p>1</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>MTE-324</p>
+                        </td>
+                        <td>
+                            <p>Technical Elective I</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>MTE-325</p>
+                        </td>
+                        <td>
+                            <p>Actuating Systems</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                        <td>
+                            <p>1</p>
+                        </td>
+                        <td>
+                            <p>4</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>HS-326</p>
+                        </td>
+                        <td>
+                            <p>Civics and Community Engagement</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>&nbsp;</p>
+                        </td>
+                        <td>
+                            <p><strong>Total</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>14</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>4</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>18</strong></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>&nbsp;</p>
+                        </td>
+                        <td>
+                            <p><strong>Total for 3<sup>rd</sup> year</strong></p>
+                        </td>
+                        <td colspan="3">
+                            <p><strong>36</strong></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="5">
+                            <p>&nbsp;</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>&nbsp;<strong>Sr. No.</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Semester 7/Course Title</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Th</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Lab</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Total </strong></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>MTE-411</p>
+                        </td>
+                        <td>
+                            <p>Robotics</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                        <td>
+                            <p>1</p>
+                        </td>
+                        <td>
+                            <p>4</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>MTE-412</p>
+                        </td>
+                        <td>
+                            <p>Control Systems</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                        <td>
+                            <p>1</p>
+                        </td>
+                        <td>
+                            <p>4</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>HS-413</p>
+                        </td>
+                        <td>
+                            <p>Social Sciences Elective</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>MTE-414</p>
+                        </td>
+                        <td>
+                            <p>Technical Elective II</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>CSE-415</p>
+                        </td>
+                        <td>
+                            <p>Artificial intelligence</p>
+                        </td>
+                        <td>
+                            <p>1</p>
+                        </td>
+                        <td>
+                            <p>1</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>MTE-416A</p>
+                        </td>
+                        <td>
+                            <p>FYDP(Part-I)</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>&nbsp;</p>
+                        </td>
+                        <td>
+                            <p><strong>Total</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>12</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>5</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>17</strong></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="5">
+                            <p>&nbsp;</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>&nbsp;<strong>Sr. No.</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Semester 8/Course Title</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Th</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Lab</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Total </strong></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>MTE-421</p>
+                        </td>
+                        <td>
+                            <p>Technical Elective III</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>MTE-422</p>
+                        </td>
+                        <td>
+                            <p>Industrial Automation</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                        <td>
+                            <p>1</p>
+                        </td>
+                        <td>
+                            <p>3</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>ME-423</p>
+                        </td>
+                        <td>
+                            <p>Fundamental of Thermal Sciences</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>MS-424</p>
+                        </td>
+                        <td>
+                            <p>Entrepreneurship</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>2</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>MTE-416B</p>
+                        </td>
+                        <td>
+                            <p>FYDP(Part-II)</p>
+                        </td>
+                        <td>
+                            <p>0</p>
+                        </td>
+                        <td>
+                            <p>4</p>
+                        </td>
+                        <td>
+                            <p>4</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p><strong>&nbsp;</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Total</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>9</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>5</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>14</strong></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p><strong>&nbsp;</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Total for 4<sup>th</sup> year</strong></p>
+                        </td>
+                        <td colspan="3">
+                            <p><strong>31</strong></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p><strong>&nbsp;</strong></p>
+                        </td>
+                        <td>
+                            <p><strong>Total for complete 4 years</strong></p>
+                        </td>
+                        <td colspan="3">
+                            <p><strong>136</strong></p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p>&nbsp;</p>
+        <div style="text-align: left">
+            <p><strong>List of Arts and Humanities Electives (2+0)</strong></p>
+            <p>Beginners Spanish</p>
+            <p>Elementary Arabic</p>
+            <p>Elementary French</p>
+            <p>Elementary Chinese</p>
+            <p>History</p>
+            <p>Philosophy</p>
+            <p>Professional Ethics</p>
+            <p>Communication and Presentation Skills</p>
+            <p><strong>List of Social Science Electives (2+0)</strong></p>
+            <p>Sociology for Engineers</p>
+            <p>Sociology</p>
+            <p>Social Psychology</p>
+            <p>Critical Thinking</p>
+            <p>Human Resource Management</p>
+            <p>Organizational Behavior</p>
+            <p>Engineering Law</p>
+            <p>Engineering Economics</p>
+            <p>Applied Psychology</p>
+            <p>Engineering Management</p>
+            <p>Financial Management</p>
+            <p>Marketing Management</p>
+            <p>Leadership and Personal Grooming</p>
+            <p>Research Methodology</p>
+            <p><strong>List of Technical Electives (3+0)</strong></p>
+            <p>Power Electronics</p>
+            <p>Mechanical Vibrations</p>
+            <p>Special Topics in Mechatronics</p>
+            <p>Digital Signal Processing</p>
+            <p>Digital Control Systems</p>
+            <p>Digital Image Processing</p>
+            <p>Power Plant Systems</p>
+            <p>Introduction to Systems Engineering</p>
+            <p>Machine Vision</p>
+            <p>Advanced Artificial Intelligence</p>
+            <p>Precision Manufacturing</p>
+            <p>Energy resources and management</p>
+            <p>Intelligent Systems</p>
+            <p>Computer Aided Engineering</p>
+            <p>Digital Filter Design</p>
+            <p>Advanced Control Systems</p>
+            <p>Mobile Robotics</p>
+            <p>Internal Combustion Engine</p>
+            <p>Automotive Technology</p>
+            <p>Elect Instrumentation</p>
+            <p>Laser and its Applications</p>
+            <p>Condition Monitoring</p>
+            <p>Bio-Mechatronics</p>
+            <p>Data Communications and Networking</p>
+            <p>Fuzzy Logic</p>
+            <p>Applied Robotics</p>
+            <p>Mechatronics Modelling for Automotive Systems</p>
+            <p>Power Train Systems</p>
+            <p>Embedded Systems</p>
+            <p>Computer Integrated Manufacturing</p>
+            <p>Introduction to Machine Learning</p>
+            <p>Internet of Things</p>
+            <p>Industry 4.0</p>
+            <p>Product Design</p>
+            <p>Aerial Robotics</p>
+            <p>Smart Electric Vehicles</p>
+            <p>Introduction to Biomedical Engineering</p>
+            <p>Signals and Systems</p>
+            <p>Applied Mobile Robotics</p>
+            <p>Computer Organization</p>
+            <p>Database Management Systems</p>
+            <p>Data Communication and Networks</p>
+            <p>Operating Systems</p>
+            <p>Computer Architecture</p>
+            <p>Web Design and Development</p>
+            <p>Game Development</p>
+        </div>
+        <p>&nbsp;</p>
+    </div>
+<script src="/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="622d8bbdf7c20e224b4d1aff-|49" defer></script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"d8564f6d5b4e410eb202d13f98326329","r":1}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a24d0e94c93668f5',t:'MTc4NTY3MzQzOQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

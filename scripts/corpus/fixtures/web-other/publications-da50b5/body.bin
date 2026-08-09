@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+    <title>Publications | University of Engineering and Technology, Taxila</title>
+    <link href="/css/bootstrap3.4.min.css" rel="stylesheet" />
+    <script src="/js/jquery3.4.min.js" type="4a11746f610d9822de425364-text/javascript"></script>
+    <script src="/js/bootstrap3.4.min.js" type="4a11746f610d9822de425364-text/javascript"></script>
+    <script type="4a11746f610d9822de425364-text/javascript" src="/js/labs.js"></script>
+    
+<link href="../css/labTemplate.css?s=4" rel="stylesheet" type="text/css" media="all" />
+    
+</head>
+<body>
+    <header class="container-fluid text-center col-sm-12 uetheader">
+        <div class="col-sm-1">
+    <a class="navbar-brand" href="#">
+        <img src="../images/Logos/uettaxila_logo.png" height="75" />
+    </a>
+</div>
+<div class="col-sm-11 headertitle">
+    <h2>Swarm Robotics Lab</h2>
+</div>
+<div class="col-sm-11" style="margin-top: 20px">
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <div class="collapse navbar-collapse" id="myNavbar">
+                <ul class="nav navbar-nav">
+                    <li><a href="Index">Home</a></li>
+                    <li><a href="AimandScope">Aim and Scope</a></li>
+                    <li><a href="SubLabs">Sub-Labs</a></li>
+                    <li><a href="Team">Team</a></li>
+                    <li><a href="PotentialPartnership">Potential Partnerships</a></li>
+                    <li><a href="Collaborations">Collaborations</a></li>
+                    <li><a href="Achievements">Achievements</a></li>
+                    <li><a href="Projects">Projects</a></li>
+                    <li><a href="Publications">Publications</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</div>
+
+
+    </header>
+    <div class="clearboth"></div>
+    <div class="container">
+        <div class="maincontent">
+            
+
+<h1 class="pageheading">Publications</h1>
+<div class="pagecontent">
+    <div class="paradiv">         
+        <h4 class="center"><strong><u>SCI-INDEXED Journals&nbsp; &ndash; [13]</u></strong></h4>
+        <ol>
+            <li>Waqas Ahmed, Muhammad Haroon Yousaf, Amanullah Yasin <strong>&ldquo;Robust Suspicious Action Recognition Approach using Pose Descriptor&rdquo; <u>Published</u></strong> in Mathematical Problems in Engineering. <strong>(IF: 1.305)</strong></li>
+            <li>Abdul Nasir, Muhammad Obaid Ullah, Muhammad Haroon Yousaf, Muhammad Asif Aziz <strong>&ldquo;Acquisition of 3-D trajectories with labeling support for multi-species insects under unconstrained flying conditions&rdquo; <u>Published</u></strong> in Ecological Informatics. <strong>(IF: 3.142)</strong></li>
+            <li>Hajra Bint-e-Naeem, Fiza Murtaza, Muhammad Haroon Yousaf,&nbsp;Sergio A. Velastin <strong>&ldquo;T-VLAD: Temporal Vector of Locally Aggregated Descriptor for Multiview Human Action Recognition&rdquo;</strong> <strong><u>Published</u></strong> in Pattern Recognition Letters. <strong>(IF: 3.55)</strong></li>
+            <li>Yusra Khalid Bhatti, Afshan Jamil, Nudrat Nida, Muhammad Haroon Yousaf, Serestina Viriri, Sergio A. Velastin <strong>&ldquo;Facial Expression Recognition of Instructor Using Deep Features and Extreme Learning Machine&rdquo; <u>Published</u></strong> in Computational Intelligence and Neuroscience. <strong>(IF: 2.284)</strong></li>
+            <li>Nudrat Nida, Muhammad Haroon Yousaf, Aun Irtaza, Sergio A. Velastin <strong>&ldquo;A video augmentation technique for human action recognition based on genetic algorithm&rdquo; <u>Published</u></strong> in ETRI Journal. <strong>(IF: 1.094)</strong></li>
+            <li>Saqib Umer, Hassan Dawood, Muhammad Haroon Yousaf, Hussain Dawood, Haseeb Ahmed <strong>&ldquo;Efficient foreground object segmentation from video by Probability Weighted Moments&rdquo; <u>Published</u></strong> in OptiK, Volume 229, March 2021, 166251. <strong>(IF: 2.187)</strong></li>
+            <li>Malik Ali Gul, Muhammad Haroon Yousaf, Shah Nawaz, Zaka Ur Rehman, HyungWon Kim <strong>&ldquo;Patient Monitoring by Abnormal Human Activity Recognition Based on CNN Architecture&rdquo; <u>Published</u></strong> in Electronics, 2020, 9, 1993. <strong>(IF: 2.412)</strong></li>
+            <li>Adeeba Kausar, Afshan Jamil, Nudrat Nida, Muhammad Haroon Yousaf <strong>&ldquo;Two-Wheeled Vehicle Detection using Two-Step and Single-Step Deep Learning Models&rdquo;</strong> <strong><u>Published</u></strong> in Arabian Journal of Science and Engineering 2020. <strong>(IF: 1.518)</strong></li>
+            <li>Ammar Mohsin Butt, Muhammad Haroon Yousaf, Fiza Murtaza, Saima Nazir, Serestina Viriri, Sergio A. Velastin, &ldquo;<strong>Agglomerative Clustering and Residual-VLAD Encoding for Human Action Recognition&rdquo;</strong> <strong><u>Published</u></strong> in Applied Sciences, Vol 10, 04412, June 2020 <strong>(IF: 2.217)</strong>.</li>
+            <li>Fiza Murtaza, Muhammad Haroon Yousaf, Sergio A. Velastin, Yu Qian &ldquo;<strong>Vectors of Temporally Correlated Snippets for Temporal Action Detection&rdquo;</strong> <strong><u>Published</u></strong> in Computers and Electrical Engineering, Volume 85, May 2020 <a href="https://doi.org/10.1016/j.compeleceng.2020.106654">https://doi.org/10.1016/j.compeleceng.2020.106654</a> <strong>(IF: 2.189)</strong>.</li>
+            <li>Hajra Bint-e-Naeem, Fiza Murtaza, Muhammad Haroon Yousaf,&nbsp;Sergio A. Velastin <strong>&ldquo;Multiple batches of motion history images (MB-MHIs) for multiview human action recognition&rdquo;</strong> <strong><u>Published</u></strong> in Arabian Journal of Science and Engineering, DOI: 10.1007/s13369-020-04481-y 2020. <strong>(IF: 1.518)</strong></li>
+            <li>Adeel Ahmed Jamil, Fawad Hussain, Muhammad Haroon Yousaf, Ammar Mohsin Butt, Sergio A. Velastin &ldquo;<strong>Vehicle Make and Model Recognition Using Bag of Expressions&rdquo;</strong> <strong><u>Published</u></strong> in Sensors, Vol. 20, No. 4, 1033, (2019) <strong>(IF: 3.0)</strong>.</li>
+            <li>Nudrat Nida, Muhammad Haroon Yousaf, Aun Irtaza, Sergio A. Velastin <strong>&ldquo;Deep temporal motion descriptor (DTMD) for human action recognition&rdquo; <u>Published</u></strong> in Turkish Journal of Electrical Engineering and Computer Science, DOI:10.3906/elk-1907-214 2019. <strong>(IF: 0.625)</strong></li>
+        </ol>
+        <h4><strong><u>International Conferences / Journals &ndash; [08]</u></strong></h4>
+        <ol>
+            <li>Muhammad Saad Saeed, Muhammad Haris Khan, Shah Nawaz, Muhammad Haroon Yousaf, Alessio Del Bue &ldquo;<strong>Fusion And Orthogonal Projection for Improved Face-Voice Association</strong>&rdquo; <strong><u>Accepted</u></strong> in 2022 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP).</li>
+            <li>Muhammad Ahmed Raza, Hajra Binte-Naeem, Muhammad Haroon Yousaf, Amanullah Yasin <strong>&ldquo;BirdView Retina-Net: Small-Scale Object Detector for Unmanned Aerial Vehicles)&rdquo;</strong> <strong><u>Presented Presentation</u></strong> in 16<sup>th</sup> International Conference on Emerging Technologies (ICET), Islamabad Pakistan 2021.<strong> (BEST PAPER AWARD in the Professional Category)</strong></li>
+            <li>Zubair Saeed, Ali Raza, Ans Hussain Qureshi, Muhammad Haroon Yousaf <strong>&ldquo;A Generic Multi-Crop Disease Detection and Classification Approach using CNN&rdquo;</strong> <strong><u>Published</u></strong> in Proceedings of 4<sup>th</sup> International Conference on Robotics and Automation in Industry (ICRAI), Islamabad Pakistan 2021.</li>
+            <li>Arslan Ali, Muhammad Muzamal Shahzad, Ans Hussain Qureshi, Mansoor Shaukat, Muhammad Haroon Yousaf <strong>&ldquo;A Decentralized Pattern Formation and Navigation Approach For Swarms: Multi-UAV Perspective&rdquo;</strong> <strong><u>Published</u></strong> in Proceedings of 4<sup>th</sup> International Conference on Robotics and Automation in Industry (ICRAI), Islamabad Pakistan 2021.</li>
+            <li>Mishal Fatima, Muhammad Haroon Yousaf, Amanullah Yasin, Sergio Velastin <strong>&ldquo;Unsupervised Fall Detection Approach Using Human Skeletons&rdquo;</strong> <strong><u>Published</u></strong> in Proceedings of 4<sup>th</sup> International Conference on Robotics and Automation in Industry (ICRAI), Islamabad Pakistan 2021.</li>
+            <li>Shahzeb Ahsan, Saran Khaliq, M. Danish Nisar <strong>&ldquo;Multi-Platform Hardware In The Loop (HIL) Simulation for Decentralized Swarm Communication Using ROS and GAZEBO&rdquo;</strong> <strong><u>Published</u></strong> in IEEE SwarmNet 2021.</li>
+            <li>Hajra Binte Naeem, Muhammad Haroon Yousaf, Farhan Hassan Khan, Amanullah Yasin &ldquo;<strong>Vision-Based Real-time Human Malicious Behavior Detection</strong>&rdquo; <strong>Accepted</strong> in International Conference on Artificial Intelligence 2021, Pakistan.</li>
+            <li>Umber Saba, Fiza Murtaza, Muhammad Haroon Yousaf, Serestina Viriri &ldquo;<strong>Plant Species Identification using Discriminant Bag of Words (DBoW)&rdquo;</strong> Published in VISAPP - 15th International Conference on Computer Vision Theory and Applications, Valletta, Malta (2020).</li>
+        </ol>
+        <h4 class="center"><strong><u>RESEARCH GRANTS</u></strong></h4>
+        <ol>
+            <li><strong>Finalist OPENCV AI Competition 2021</strong> by Intel/OPENCV. Worth 3498 US$.</li>
+            <li><strong>Winner</strong>, Robotics and Automation Startup Challenge 2021, worth 0.3 Mn. PKR.</li>
+            <li><strong>Joint Project</strong> &ldquo;IntelliSurv&rdquo; funded by SinoPak Centre for Artificial Intelligence (SPCAI), PAF-IAST 2021.</li>
+            <li>Research grant of 2,00,000 Rs. for Research Academia Collaboration for year 2021 by NESCOM Pakistan.</li>
+            <li>Research grant of 2,50,000 Rs. for Research Academia Collaboration for year 2021 by NESCOM Pakistan.</li>
+            <li>Research grant of 2,00,000 Rs. for Research Academia Collaboration for year 2020 by NESCOM Pakistan.</li>
+            <li>Research grant of 1,50,000 Rs. for Research Academia Collaboration for year 2020 by NESCOM Pakistan.</li>
+            <li>Research grant of 1,00,000 Rs. for Research Academia Collaboration for year 2019 by NESCOM Pakistan.</li>
+            <li>Research grant of 1,00,000 Rs. for Research Academia Collaboration for year 2019 by NESCOM Pakistan.</li>
+        </ol>
+       
+    </div> 
+</div>
+
+ 
+
+
+        </div>
+    </div>
+    <footer class="container-fluid text-center col-sm-12 uetfooter">
+        <div class="col-sm-12 footerbg">
+    <span class="col-sm-12">&copy; 2026 University of Engineering and Technology, Taxila</span>
+</div>
+    </footer>
+<script src="/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="4a11746f610d9822de425364-|49" defer></script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"d8564f6d5b4e410eb202d13f98326329","r":1}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25736c45e339a98',t:'MTc4NTc3OTk0Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

@@ -24,9 +24,9 @@ const PROVIDER_FACTORIES: Record<
 };
 
 const MODEL_MAPPING: Record<string, { id: string; provider: string }> = {
-  // Groq models
-  "llama-3.3-70b": { id: "llama-3.3-70b-versatile", provider: "groq" },
-  "llama-3.1-8b": { id: "llama-3.1-8b-instant", provider: "groq" },
+  // Groq models (deprecated Llama models replaced August 2026)
+  "llama-3.3-70b": { id: "openai/gpt-oss-120b", provider: "groq" },
+  "llama-3.1-8b": { id: "openai/gpt-oss-20b", provider: "groq" },
   // Cerebras models (Llama deprecated May 2026)
   "gemma-4-31b": { id: "gemma-4-31b", provider: "cerebras" },
   "gpt-oss-120b": { id: "gpt-oss-120b", provider: "cerebras" },

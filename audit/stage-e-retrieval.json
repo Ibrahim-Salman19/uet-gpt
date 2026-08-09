@@ -1,0 +1,90 @@
+{
+  "documents": 15,
+  "chunks": 41,
+  "queries": [
+    {
+      "query_id": "q1",
+      "question": "How can I apply for admission at UET Taxila?",
+      "relevant": 2,
+      "recall_at_5": 1.0,
+      "mrr": 1.0,
+      "top_docs": [
+        "https://admissions.uettaxila.edu.pk/",
+        "https://admission.uettaxila.edu.pk/application/index.php",
+        "https://web.uettaxila.edu.pk/",
+        "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=6",
+        "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=1"
+      ]
+    },
+    {
+      "query_id": "q2",
+      "question": "What is the contact address of the Mechanical Engineering department?",
+      "relevant": 9,
+      "recall_at_5": 0.333,
+      "mrr": 1.0,
+      "top_docs": [
+        "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=2",
+        "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=19",
+        "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=9",
+        "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=6",
+        "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=1"
+      ]
+    },
+    {
+      "query_id": "q3",
+      "question": "Which departments does the Civil Engineering department contain?",
+      "relevant": 3,
+      "recall_at_5": 0.333,
+      "mrr": 0.5,
+      "top_docs": [
+        "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=1",
+        "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=2",
+        "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=10",
+        "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=9",
+        "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=19"
+      ]
+    },
+    {
+      "query_id": "q4",
+      "question": "Who is the head of the Electrical Engineering department?",
+      "relevant": 3,
+      "recall_at_5": 0.333,
+      "mrr": 0.2,
+      "top_docs": [
+        "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=7",
+        "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=6",
+        "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=19",
+        "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=14",
+        "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=9"
+      ]
+    },
+    {
+      "query_id": "q5",
+      "question": "What is the main university website about?",
+      "relevant": 14,
+      "recall_at_5": 0.214,
+      "mrr": 0.5,
+      "top_docs": [
+        "https://admission.uettaxila.edu.pk/application/index.php",
+        "https://web.uettaxila.edu.pk/",
+        "https://admissions.uettaxila.edu.pk/",
+        "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=6",
+        "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=2"
+      ]
+    },
+    {
+      "query_id": "q6",
+      "question": "How many faculty members work in the Computer Engineering department?",
+      "relevant": 2,
+      "recall_at_5": 1.0,
+      "mrr": 0.25,
+      "top_docs": [
+        "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=4",
+        "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=1",
+        "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=9",
+        "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=6",
+        "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=7"
+      ]
+    }
+  ]
+}

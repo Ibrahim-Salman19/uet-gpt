@@ -1,0 +1,61 @@
+{
+  "_curated": true,
+  "_labelled_by": "scripts/eval/_label_webother.py (web-other expansion \u2014 labels sourced from raw body)",
+  "expected": {
+    "canonical_host": "web.uettaxila.edu.pk",
+    "criticality": "critical",
+    "forbidden_links_contain": [
+      "logout",
+      "login"
+    ],
+    "forbidden_text_blocks": [
+      "__VIEWSTATE",
+      "Untitled Document"
+    ],
+    "max_duration_ms": 60000,
+    "required_links_contain": [
+      "Downloads/ExamBranch"
+    ],
+    "required_resources": [
+      {
+        "crawlable": true,
+        "critical": true,
+        "kind": "pdf",
+        "nofollow": false,
+        "url_contains": "exambranch/ug/form"
+      },
+      {
+        "crawlable": true,
+        "critical": false,
+        "kind": "pdf",
+        "nofollow": false,
+        "url_contains": "exambranch/common/convocation"
+      },
+      {
+        "crawlable": true,
+        "critical": false,
+        "kind": "pdf",
+        "nofollow": false,
+        "url_contains": "exambranch/pg/phd-scrutinychecklist.pdf"
+      },
+      {
+        "crawlable": true,
+        "critical": false,
+        "kind": "document",
+        "nofollow": false,
+        "url_contains": "exambranch/pg/course-completion-form-msc.doc"
+      }
+    ],
+    "required_text_blocks": [],
+    "resource_min_count": 10,
+    "title_contains": [
+      "Examinations Branch Downloads"
+    ],
+    "title_not_contains": [
+      "Untitled",
+      "404"
+    ]
+  },
+  "family": "web-other",
+  "fixture_id": "web-other/downloadexaminationforms-87ee7b"
+}

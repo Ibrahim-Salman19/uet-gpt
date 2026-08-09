@@ -1,200 +1,352 @@
 "use client";
 
-import { X } from "lucide-react";
+import { Check, X } from "lucide-react";
 import * as React from "react";
-import { type AccentTheme, usePreferences } from "@/components/preferences-provider";
+import { type AccentTheme, type FontSize, usePreferences } from "@/components/preferences-provider";
 import { cn } from "@/lib/utils";
 
-export function PreferencesModal() {
-  const {
-    accentTheme,
-    webglEnabled,
-    glowEnabled,
-    animsEnabled,
-    soundsEnabled,
-    typingAnimEnabled,
-    typingSoundEnabled,
-    settingsOpen,
-    setSettingsOpen,
-    setAccentTheme,
-    toggleSetting,
-    resetPreferences,
-  } = usePreferences();
+const ACCENT_OPTIONS: ReadonlyArray<{
+  value: AccentTheme;
+  label: string;
+  swatch: string;
+}> = [
+  { value: "indigo", label: "Indigo", swatch: "#4f46e5" },
+  { value: "violet", label: "Violet", swatch: "#8b5cf6" },
+  { value: "sky", label: "Sky", swatch: "#0ea5e9" },
+  { value: "amber", label: "Amber", swatch: "#f59e0b" },
+  { value: "navy", label: "UET Gold", swatch: "#c8963e" },
+];
+const FONT_SIZE_OPTIONS: ReadonlyArray<{
+  value: FontSize;
+  label: string;
+  description: string;
+}> = [
+  { value: "small", label: "Compact", description: "More content on screen" },
+  { value: "medium", label: "Comfortable", description: "Balanced default size" },
+  { value: "large", label: "Large", description: "Improved reading comfort" },
+];
 
+function PreferenceSwitch({
+  id,
+  checked,
+  onToggle,
+  label,
+  description,
+  disabled = false,
+}: {
+  id: string;
+  checked: boolean;
+  onToggle: () => void;
+  label: string;
+  description: string;
+  disabled?: boolean;
+}) {
+  const descriptionId = `${id}-description`;
+
+  return (
+    <div className="flex items-start justify-between gap-4 border-b border-white/5 py-4 first:pt-0 last:border-none">
+      <div className={cn("min-w-0 flex-1", disabled && "opacity-55")}>
+        <label
+          htmlFor={id}
+          className={cn("text-[13px] font-medium text-zinc-200", !disabled && "cursor-pointer")}
+        >
+          {label}
+        </label>
+        <p id={descriptionId} className="mt-1.5 pr-4 text-[11px] leading-relaxed text-zinc-500">
+          {description}
+        </p>
+      </div>
+      <button
+        id={id}
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        aria-describedby={descriptionId}
+        disabled={disabled}
+        onClick={onToggle}
+        className={cn(
+          "relative h-6 w-11 shrink-0 rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transition-none",
+          checked ? "bg-[var(--accent)]" : "bg-zinc-700",
+        )}
+      >
+        <span
+          className={cn(
+            "pointer-events-none absolute left-1 top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-transform motion-reduce:transition-none",
+            checked && "translate-x-5",
+          )}
+        />
+      </button>
+    </div>
+  );
+}
+
+export function PreferencesModal() {
+  const preferences = usePreferences();
   const dialogRef = React.useRef<HTMLDialogElement | null>(null);
+  const titleId = React.useId();
+  const descriptionId = React.useId();
+
+  const handleClose = React.useCallback(() => {
+    preferences.setSettingsOpen(false);
+  }, [preferences.setSettingsOpen]);
 
   React.useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
 
-    if (settingsOpen) {
-      dialog.showModal();
-    } else {
+    if (preferences.settingsOpen && !dialog.open) {
+      try {
+        dialog.showModal();
+      } catch (error) {
+        if (process.env.NODE_ENV !== "production") {
+          console.warn("Preferences dialog could not be opened", error);
+        }
+        preferences.setSettingsOpen(false);
+      }
+    } else if (!preferences.settingsOpen && dialog.open) {
       dialog.close();
     }
-  }, [settingsOpen]);
+  }, [preferences.settingsOpen, preferences.setSettingsOpen]);
 
-  const handleClose = () => {
-    setSettingsOpen(false);
+  const handleDialogClick = (event: React.MouseEvent<HTMLDialogElement>) => {
+    if (event.target === event.currentTarget) handleClose();
   };
 
-  const renderToggle = (
-    id: string,
-    checked: boolean,
-    onClick: () => void,
-    label: string,
-    description: string,
+  const handleAccentKeyDown = (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+    currentIndex: number,
   ) => {
-    return (
-      <div className="flex items-start justify-between gap-4 py-4 first:pt-0 border-b border-white/5 last:border-none">
-        <label htmlFor={id} className="flex-1 cursor-pointer">
-          <div className="text-[13px] font-medium text-zinc-200 font-sans">{label}</div>
-          <div className="text-[11px] text-zinc-500 mt-1.5 leading-relaxed pr-4 font-sans">
-            {description}
-          </div>
-        </label>
-        <button
-          id={id}
-          role="switch"
-          aria-checked={checked}
-          onClick={onClick}
-          className={cn(
-            "w-11 h-6 shrink-0 rounded-full relative transition-colors shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)] focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:outline-none cursor-pointer",
-            checked ? "bg-[var(--accent)]" : "bg-zinc-700",
-          )}
-        >
-          <span
-            className={cn(
-              "absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform shadow-sm pointer-events-none",
-              checked ? "translate-x-5" : "translate-x-0",
-            )}
-          />
-        </button>
-      </div>
-    );
+    let nextIndex: number | null = null;
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      nextIndex = (currentIndex + 1) % ACCENT_OPTIONS.length;
+    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      nextIndex = (currentIndex - 1 + ACCENT_OPTIONS.length) % ACCENT_OPTIONS.length;
+    } else if (event.key === "Home") {
+      nextIndex = 0;
+    } else if (event.key === "End") {
+      nextIndex = ACCENT_OPTIONS.length - 1;
+    }
+
+    if (nextIndex === null) return;
+    event.preventDefault();
+    const next = ACCENT_OPTIONS[nextIndex];
+    if (!next) return;
+    preferences.setAccentTheme(next.value);
+    requestAnimationFrame(() => {
+      document.querySelector<HTMLButtonElement>(`[data-accent-theme="${next.value}"]`)?.focus();
+    });
+  };
+
+  const handleFontSizeKeyDown = (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+    currentIndex: number,
+  ) => {
+    let nextIndex: number | null = null;
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      nextIndex = (currentIndex + 1) % FONT_SIZE_OPTIONS.length;
+    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      nextIndex = (currentIndex - 1 + FONT_SIZE_OPTIONS.length) % FONT_SIZE_OPTIONS.length;
+    } else if (event.key === "Home") {
+      nextIndex = 0;
+    } else if (event.key === "End") {
+      nextIndex = FONT_SIZE_OPTIONS.length - 1;
+    }
+
+    if (nextIndex === null) return;
+    event.preventDefault();
+    const next = FONT_SIZE_OPTIONS[nextIndex];
+    if (!next) return;
+    preferences.setFontSize(next.value);
+    requestAnimationFrame(() => {
+      document.querySelector<HTMLButtonElement>(`[data-font-size="${next.value}"]`)?.focus();
+    });
   };
 
   return (
     <dialog
       ref={dialogRef}
       id="settings-modal"
+      aria-labelledby={titleId}
+      aria-describedby={descriptionId}
+      aria-busy={!preferences.preferencesHydrated}
+      onCancel={handleClose}
       onClose={handleClose}
-      className="fixed inset-0 z-[100] m-auto bg-transparent p-0 w-full max-w-[400px] border-none outline-none"
+      onClick={handleDialogClick}
+      className="fixed inset-0 z-[100] m-auto w-[calc(100%_-_2rem)] max-w-[430px] border-none bg-transparent p-0 outline-none backdrop:bg-black/70 backdrop:backdrop-blur-sm"
     >
-      <div className="bg-[var(--surface-3)] border border-[var(--surface-4)] rounded-[1.5rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col pointer-events-auto">
-        <div className="px-6 py-5 border-b border-white/5 flex justify-between items-center bg-zinc-950/50">
-          <h2 className="text-sm font-semibold text-zinc-100 tracking-wide font-sans">
-            Preferences
-          </h2>
+      <div className="pointer-events-auto flex max-h-[min(44rem,calc(100dvh_-_2rem))] flex-col overflow-hidden rounded-[1.5rem] border border-[var(--surface-4)] bg-[var(--surface-3)] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.9)]">
+        <header className="flex shrink-0 items-center justify-between border-b border-white/5 bg-zinc-950/50 px-6 py-5">
+          <div>
+            <h2 id={titleId} className="text-sm font-semibold tracking-wide text-zinc-100">
+              Preferences
+            </h2>
+            <p id={descriptionId} className="mt-1 text-[11px] text-zinc-500">
+              Visual, reading, motion, and audio settings.
+            </p>
+          </div>
           <button
+            type="button"
             onClick={handleClose}
-            className="text-zinc-500 hover:text-white transition-colors p-1 rounded hover:bg-white/5 focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:outline-none active:scale-95 cursor-pointer"
-            aria-label="Close Settings"
+            className="rounded-lg p-2 text-zinc-500 transition-colors hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
+            aria-label="Close preferences"
           >
-            <X className="w-5 h-5" />
+            <X className="h-5 w-5" aria-hidden="true" />
           </button>
-        </div>
+        </header>
 
-        <div className="p-6 space-y-2 max-h-[380px] overflow-y-auto custom-scroll">
-          {renderToggle(
-            "toggle-webgl",
-            webglEnabled,
-            () => toggleSetting("webgl"),
-            "High Performance Mode (WebGL)",
-            "Enables the dynamic 3D WebGL particle background behind the chat container.",
-          )}
+        <div className="custom-scroll min-h-0 flex-1 overflow-y-auto p-6">
+          <div>
+            <PreferenceSwitch
+              id="toggle-webgl"
+              disabled={!preferences.preferencesHydrated}
+              checked={preferences.webglEnabled}
+              onToggle={() => preferences.toggleSetting("webgl")}
+              label="Animated WebGL backdrop"
+              description="Shows a lightweight particle field when hardware acceleration is available. Unsupported or constrained devices automatically use a static fallback."
+            />
+            <PreferenceSwitch
+              id="toggle-glow"
+              disabled={!preferences.preferencesHydrated}
+              checked={preferences.glowEnabled}
+              onToggle={() => preferences.toggleSetting("glow")}
+              label="Pointer-tracking ambient glow"
+              description="Adds a subtle compositor-animated glow on fine-pointer devices. It is suppressed by reduced-motion and browser-exposed data-saver settings."
+            />
+            <PreferenceSwitch
+              id="toggle-anims"
+              disabled={!preferences.preferencesHydrated}
+              checked={preferences.animsEnabled}
+              onToggle={() => preferences.toggleSetting("anims")}
+              label="Interface animations"
+              description="Controls non-essential transitions and entry effects. Your operating system’s reduced-motion preference still takes priority."
+            />
+            <PreferenceSwitch
+              id="toggle-sounds"
+              disabled={!preferences.preferencesHydrated}
+              checked={preferences.soundsEnabled}
+              onToggle={() => preferences.toggleSetting("sounds")}
+              label="Interface sounds"
+              description="Plays short synthesized feedback tones after direct interactions. Sounds are off by default and never autoplay."
+            />
+            <PreferenceSwitch
+              id="toggle-typing-anim"
+              disabled={!preferences.preferencesHydrated}
+              checked={preferences.typingAnimEnabled}
+              onToggle={() => preferences.toggleSetting("typingAnim")}
+              label="Progressive response reveal"
+              description="Reveals generated responses progressively instead of displaying each received segment immediately."
+            />
+            <PreferenceSwitch
+              id="toggle-typing-sound"
+              checked={preferences.typingSoundEnabled}
+              onToggle={() => preferences.toggleSetting("typingSound")}
+              label="Typing feedback sound"
+              description={
+                preferences.soundsEnabled
+                  ? "Adds a quiet, rate-limited tone during progressive response rendering."
+                  : "Enable interface sounds first to use typing feedback."
+              }
+              disabled={!preferences.preferencesHydrated || !preferences.soundsEnabled}
+            />
+          </div>
 
-          {renderToggle(
-            "toggle-glow",
-            glowEnabled,
-            () => toggleSetting("glow"),
-            "Ambient Tracking Glow",
-            "Enables dynamic, mouse-tracking liquid gradients across the application shell.",
-          )}
-
-          {renderToggle(
-            "toggle-anims",
-            animsEnabled,
-            () => toggleSetting("anims"),
-            "Micro-Animations",
-            "Enables hover transitions, toolbars, and scroll entry reveals. Turn off for maximum UI speed.",
-          )}
-
-          {renderToggle(
-            "toggle-sounds",
-            soundsEnabled,
-            () => toggleSetting("sounds"),
-            "UI Sound Effects",
-            "Enables haptic-like synthesized electronic sound chimes on user interactions and chat receipts.",
-          )}
-
-          {renderToggle(
-            "toggle-typing-anim",
-            typingAnimEnabled,
-            () => toggleSetting("typingAnim"),
-            "Typing Animation",
-            "Enables progressive character-scrambling text reveal effects on advisor responses.",
-          )}
-
-          {renderToggle(
-            "toggle-typing-sound",
-            typingSoundEnabled,
-            () => toggleSetting("typingSound"),
-            "Typing Sound Effect",
-            "Plays synthesized keyboard clicks as text progressively renders.",
-          )}
-
-          {/* Accent Color Selection */}
-          <div className="space-y-3 pt-6 border-t border-white/5">
-            <label className="text-[13px] font-medium text-zinc-200 font-sans">Accent Theme</label>
-            <div className="grid grid-cols-5 gap-2 pt-1">
-              {(["indigo", "violet", "sky", "amber", "navy"] as AccentTheme[]).map((theme) => {
-                const colors: Record<AccentTheme, string> = {
-                  indigo: "bg-[#4f46e5]",
-                  violet: "bg-[#8b5cf6]",
-                  sky: "bg-[#0ea5e9]",
-                  amber: "bg-[#f59e0b]",
-                  navy: "bg-[#c8963e]", // UET Gold
-                };
+          <fieldset className="mt-6 border-t border-white/5 pt-6">
+            <legend className="text-[13px] font-medium text-zinc-200">Accent theme</legend>
+            <div
+              className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5"
+              role="radiogroup"
+              aria-label="Accent theme"
+            >
+              {ACCENT_OPTIONS.map((option, index) => {
+                const selected = preferences.accentTheme === option.value;
                 return (
                   <button
-                    key={theme}
-                    onClick={() => setAccentTheme(theme)}
+                    key={option.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={selected}
+                    tabIndex={selected && preferences.preferencesHydrated ? 0 : -1}
+                    disabled={!preferences.preferencesHydrated}
+                    data-accent-theme={option.value}
+                    onKeyDown={(event) => handleAccentKeyDown(event, index)}
+                    onClick={() => preferences.setAccentTheme(option.value)}
                     className={cn(
-                      "flex flex-col items-center gap-1.5 p-2 rounded-xl border bg-zinc-950/40 text-center transition-all duration-200 active:scale-95 group focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:outline-none cursor-pointer",
-                      accentTheme === theme
-                        ? "border-white/30 bg-white/10"
-                        : "border-white/5 hover:border-white/10",
+                      "relative flex min-h-16 flex-col items-center justify-center gap-2 rounded-xl border bg-zinc-950/40 p-2 text-center transition-[background-color,border-color,transform] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] active:scale-[0.97] disabled:cursor-wait disabled:opacity-50 motion-reduce:transition-none",
+                      selected
+                        ? "border-white/30 bg-white/10 text-zinc-100"
+                        : "border-white/5 text-zinc-400 hover:border-white/15 hover:text-zinc-200",
                     )}
                   >
                     <span
-                      className={cn(
-                        "w-4 h-4 rounded-full border border-white/10 shrink-0",
-                        colors[theme],
-                      )}
-                    ></span>
-                    <span className="text-[9px] font-mono text-zinc-400 capitalize">{theme}</span>
+                      className="h-5 w-5 rounded-full border border-white/15 shadow-sm"
+                      style={{ backgroundColor: option.swatch }}
+                      aria-hidden="true"
+                    />
+                    <span className="text-[9px] font-medium">{option.label}</span>
+                    {selected ? (
+                      <Check className="absolute right-1.5 top-1.5 h-3 w-3" aria-hidden="true" />
+                    ) : null}
                   </button>
                 );
               })}
             </div>
-          </div>
+          </fieldset>
+
+          <fieldset className="mt-6 border-t border-white/5 pt-6">
+            <legend className="text-[13px] font-medium text-zinc-200">Response text size</legend>
+            <div
+              className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3"
+              role="radiogroup"
+              aria-label="Response text size"
+            >
+              {FONT_SIZE_OPTIONS.map((option, index) => {
+                const selected = preferences.fontSize === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={selected}
+                    tabIndex={selected && preferences.preferencesHydrated ? 0 : -1}
+                    disabled={!preferences.preferencesHydrated}
+                    data-font-size={option.value}
+                    onKeyDown={(event) => handleFontSizeKeyDown(event, index)}
+                    onClick={() => preferences.setFontSize(option.value)}
+                    className={cn(
+                      "rounded-xl border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] disabled:cursor-wait disabled:opacity-50",
+                      selected
+                        ? "border-white/30 bg-white/10 text-zinc-100"
+                        : "border-white/5 bg-zinc-950/40 text-zinc-400 hover:border-white/15 hover:text-zinc-200",
+                    )}
+                  >
+                    <span className="block text-xs font-medium">{option.label}</span>
+                    <span className="mt-1 block text-[10px] leading-relaxed text-zinc-500">
+                      {option.description}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
         </div>
 
-        <div className="px-6 py-4 border-t border-white/5 bg-zinc-950 flex justify-between items-center">
+        <footer className="flex shrink-0 items-center justify-between border-t border-white/5 bg-zinc-950 px-6 py-4">
           <button
-            onClick={resetPreferences}
-            className="px-4 py-2 border border-white/5 hover:border-white/10 hover:bg-white/5 text-zinc-400 hover:text-white rounded-lg text-xs font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:outline-none active:scale-95 cursor-pointer font-sans"
+            type="button"
+            onClick={preferences.resetPreferences}
+            disabled={!preferences.preferencesHydrated}
+            className="rounded-lg border border-white/5 px-4 py-2 text-xs font-medium text-zinc-400 transition-colors hover:border-white/10 hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] disabled:cursor-wait disabled:opacity-50"
           >
-            Reset Defaults
+            Reset defaults
           </button>
           <button
+            type="button"
             onClick={handleClose}
-            className="px-5 py-2 bg-zinc-100 text-zinc-900 rounded-lg text-xs font-semibold hover:bg-white transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:outline-none active:scale-95 cursor-pointer font-sans"
+            className="rounded-lg bg-zinc-100 px-5 py-2 text-xs font-semibold text-zinc-900 transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
           >
             Done
           </button>
-        </div>
+        </footer>
       </div>
     </dialog>
   );

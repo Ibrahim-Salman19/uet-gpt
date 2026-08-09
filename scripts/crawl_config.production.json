@@ -1,0 +1,122 @@
+{
+  "seedUrls": [
+    "https://admissions.uettaxila.edu.pk/",
+    "https://admission.uettaxila.edu.pk/",
+    "https://web.uettaxila.edu.pk/",
+    "https://www.uettaxila.edu.pk/",
+    "https://uettaxila.edu.pk/",
+    "https://entrytest.uettaxila.edu.pk/"
+  ],
+  "departmentFacultyRange": {
+    "start": 1,
+    "end": 25
+  },
+  "includePatterns": [],
+  "excludePatterns": [
+    "*/logout*",
+    "*/login*"
+  ],
+  "maxDepth": 4,
+  "concurrency": 5,
+  "queueMaxSize": 2000,
+  "requestTimeout": 20,
+  "pdfTimeout": 120,
+  "connectTimeout": 10,
+  "maxRetries": 4,
+  "pushRetries": 4,
+  "pushTimeout": 30,
+  "minWordCount": 40,
+  "maxResponseBytes": 26214400,
+  "maxPdfResponseBytes": 52428800,
+  "maxIngestBytes": 4194304,
+  "maxRedirects": 5,
+  "requireAuthToken": true,
+  "stateSaveInterval": 25,
+  "dlqMaxAttempts": 10,
+  "ioBudget": {
+    "softBytes": 471859200,
+    "stopBytes": 503316480,
+    "maxBytes": 524288000
+  },
+  "trustEnvironmentProxies": false,
+  "impersonate": "chrome",
+  "robotsUserAgent": "UETTaxilaRAGCrawler",
+  "robots": {
+    "enabled": true,
+    "cacheSeconds": 86400,
+    "staleSeconds": 2592000
+  },
+  "sitemap": {
+    "enabled": true,
+    "maxFiles": 25,
+    "maxUrls": 8000
+  },
+  "tokenBucket": {
+    "rate": 8.0,
+    "capacity": 15.0
+  },
+  "rateLimiter": {
+    "minHostDelay": 0.1,
+    "minDelay": 0.05,
+    "maxDelay": 5.0,
+    "initialDelay": 0.4,
+    "aiStep": 0.01,
+    "mdFactor": 2.0,
+    "successThreshold": 10
+  },
+  "deduplication": {
+    "simhashThreshold": 6,
+    "simhashMinWords": 120
+  },
+  "pdf": {
+    "tableStrategy": "lines_strict",
+    "useOcr": true,
+    "ocrLanguage": "eng",
+    "describeImages": true,
+    "maxImagesPerPdf": 40,
+    "minImageBytes": 10000,
+    "minImageDimension": 100,
+    "maxImageBytes": 8388608,
+    "imageConcurrency": 3,
+    "geminiModel": "gemini-3.6-flash",
+    "geminiTimeout": 45,
+    "geminiRetries": 3
+  },
+  "html": {
+    "describeImages": true,
+    "maxImagesPerPage": 8,
+    "minImageBytes": 8000,
+    "maxImageBytes": 8388608,
+    "imageTimeout": 30,
+    "imageConcurrency": 3
+  },
+  "boilerplateSelectors": [
+    "[class*=cookie-banner i]",
+    "[id*=cookie-banner i]",
+    "[class*=cookie-consent i]",
+    "[id*=cookie-consent i]",
+    "script",
+    "style",
+    "noscript",
+    "template",
+    "iframe",
+    "canvas",
+    "input[type=hidden]"
+  ],
+  "allowedHostSuffixes": [
+    "uettaxila.edu.pk"
+  ],
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 UETTaxilaRAGCrawler/3.0",
+  "stripQueryParams": [
+    "utm_source",
+    "utm_medium",
+    "utm_campaign",
+    "utm_term",
+    "utm_content",
+    "fbclid",
+    "gclid",
+    "msclkid",
+    "ref",
+    "source"
+  ]
+}

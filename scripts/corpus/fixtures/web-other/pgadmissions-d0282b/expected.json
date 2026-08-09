@@ -1,0 +1,66 @@
+{
+  "_curated": true,
+  "_labelled_by": "scripts/eval/_label_webother.py (web-other expansion \u2014 labels sourced from raw body)",
+  "expected": {
+    "canonical_host": "web.uettaxila.edu.pk",
+    "criticality": "critical",
+    "forbidden_links_contain": [
+      "logout",
+      "login"
+    ],
+    "forbidden_text_blocks": [
+      "__VIEWSTATE",
+      "Untitled Document"
+    ],
+    "max_duration_ms": 60000,
+    "required_links_contain": [
+      "Downloads/PGAdmissions"
+    ],
+    "required_resources": [
+      {
+        "crawlable": true,
+        "critical": true,
+        "kind": "pdf",
+        "nofollow": false,
+        "url_contains": "prospectus-pg-2026.pdf"
+      },
+      {
+        "crawlable": true,
+        "critical": true,
+        "kind": "pdf",
+        "nofollow": false,
+        "url_contains": "phdad/application"
+      },
+      {
+        "crawlable": true,
+        "critical": true,
+        "kind": "pdf",
+        "nofollow": false,
+        "url_contains": "mscad/application"
+      },
+      {
+        "crawlable": true,
+        "critical": false,
+        "kind": "pdf",
+        "nofollow": false,
+        "url_contains": "phdad/phd%20statement"
+      }
+    ],
+    "required_text_blocks": [
+      {
+        "text": "Postgraduate",
+        "why": "the admissions track \u2014 the page's subject"
+      }
+    ],
+    "resource_min_count": 4,
+    "title_contains": [
+      "Postgraduate Admissions"
+    ],
+    "title_not_contains": [
+      "Untitled",
+      "404"
+    ]
+  },
+  "family": "web-other",
+  "fixture_id": "web-other/pgadmissions-d0282b"
+}

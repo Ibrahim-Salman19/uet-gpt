@@ -1,0 +1,56 @@
+{
+  "_curated": true,
+  "_labelled_by": "scripts/eval/_label_vacuous.py (Deliverable 2 grounded labels)",
+  "expected": {
+    "canonical_host": "admissions.uettaxila.edu.pk",
+    "criticality": "critical",
+    "forbidden_links_contain": [
+      "logout",
+      "login"
+    ],
+    "forbidden_text_blocks": [],
+    "required_links_contain": [
+      "ProgramsOffered"
+    ],
+    "required_resources": [
+      {
+        "crawlable": true,
+        "critical": true,
+        "kind": "page",
+        "url_contains": "ProgramsOffered"
+      }
+    ],
+    "required_text_blocks": [
+      {
+        "text": "Admission Eligibility",
+        "why": "page H1"
+      },
+      {
+        "text": "HSSC",
+        "why": "eligibility prerequisite keyword"
+      },
+      {
+        "text": "60%",
+        "why": "minimum HSSC percentage threshold"
+      },
+      {
+        "text": "Civil Engineering",
+        "why": "a program in the eligibility table"
+      },
+      {
+        "text": "Electrical Engineering",
+        "why": "a program in the eligibility table"
+      }
+    ],
+    "resource_min_count": 0,
+    "title_contains": [
+      "Admission Eligibility"
+    ],
+    "title_not_contains": [
+      "Untitled",
+      "404"
+    ]
+  },
+  "family": "admissions-php",
+  "fixture_id": "admissions-php/admission-eligibility-1cc3b3"
+}

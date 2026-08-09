@@ -1,0 +1,12 @@
+{
+  "body_sha256": "3c56311ac25f88522995f55b8e621258a92960c7fb30196592ef445d077c0eb0",
+  "body_size": 11610,
+  "content_type": "text/html; charset=utf-8",
+  "elapsed_ms": 1072,
+  "fetched_at": "2026-08-02T12:25:34+00:00",
+  "final_url": "https://admissions.uettaxila.edu.pk/Schedule2.php",
+  "redirect_chain": [],
+  "remote_ip": "104.21.50.7,172.67.198.179",
+  "requested_url": "https://admissions.uettaxila.edu.pk/Schedule2.php",
+  "status": 200
+}

@@ -1,0 +1,46 @@
+{
+  "_curated": true,
+  "_labelled_by": "scripts/eval/_label_webother.py (web-other expansion \u2014 labels sourced from raw body)",
+  "expected": {
+    "canonical_host": "web.uettaxila.edu.pk",
+    "criticality": "standard",
+    "forbidden_links_contain": [
+      "logout",
+      "login"
+    ],
+    "forbidden_text_blocks": [
+      "__VIEWSTATE"
+    ],
+    "max_duration_ms": 60000,
+    "required_links_contain": [],
+    "required_resources": [],
+    "required_text_blocks": [
+      {
+        "text": "Quality Enhancement Cell",
+        "why": "the office identity \u2014 the page's subject"
+      },
+      {
+        "text": "Feb 2011",
+        "why": "the QEC establishment date \u2014 a concrete fact"
+      },
+      {
+        "text": "Quality Assurance Agency",
+        "why": "QAA \u2014 the oversight body named throughout"
+      },
+      {
+        "text": "Vice-Chancellor",
+        "why": "the reporting line described in the body"
+      }
+    ],
+    "resource_min_count": 0,
+    "title_contains": [
+      "Quality Enhancement Cell"
+    ],
+    "title_not_contains": [
+      "Untitled",
+      "404"
+    ]
+  },
+  "family": "web-other",
+  "fixture_id": "web-other/aboutqec-3dfd36"
+}

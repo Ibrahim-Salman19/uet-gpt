@@ -1,15 +1,13 @@
-# Pinned for reproducible builds. Packages verified installed in the dev
-# environment are pinned to exact (==) versions; packages not present in that
-# environment are bounded with compatible-release (~=) on their known-good floor.
-# A fully hashed lockfile (pip-tools/uv, --require-hashes) is still recommended
-# - see owner_actions.
-curl_cffi~=0.7.0
-trafilatura~=1.6.0
-beautifulsoup4==4.14.2
-lxml==6.1.0
-markdownify==1.2.2
-pypdf==6.10.2
-pymupdf4llm~=0.0.3
-tqdm~=4.66.0
-python-dotenv==1.2.2
-convex~=0.7.0
+# Python 3.10+
+beautifulsoup4>=4.13,<5
+curl-cffi>=0.15,<0.16
+httpx>=0.28,<1
+lxml>=5.4,<7
+markdownify>=1.2,<2
+Pillow>=11,<13
+protego==0.6.2
+pymupdf==1.28.0
+pymupdf4llm==1.28.0
+python-dotenv>=1.1,<2
+tqdm>=4.67,<5
+trafilatura>=2.1,<3

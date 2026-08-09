@@ -1,48 +1,37 @@
 import { defineConfig, devices } from "@playwright/test";
+import dotenv from "dotenv";
+
+dotenv.config({ path: ".env.local" });
 
 export default defineConfig({
   testDir: "./tests/e2e",
-  fullyParallel: true,
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  reporter: [
-    ["html", { outputFolder: "playwright-report" }],
-    ["json", { outputFile: "test-results/results.json" }],
-  ],
+  workers: 1,
+  reporter: "line",
   use: {
-    baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || "http://127.0.0.1:3000",
+    baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || "http://localhost:3001",
     trace: "on-first-retry",
-    screenshot: "only-on-failure",
-    video: "retain-on-failure",
   },
   projects: [
-    // Setup project for Clerk authentication
     {
       name: "setup",
       testMatch: /global\.setup\.ts/,
     },
     {
-      name: "Desktop Chrome",
+      name: "chromium",
       use: {
         ...devices["Desktop Chrome"],
-        storageState: "playwright/.clerk/state.json",
-      },
-      dependencies: ["setup"],
-    },
-    {
-      name: "Mobile Chrome",
-      use: {
-        ...devices["Pixel 5"],
-        storageState: "playwright/.clerk/state.json",
+        storageState: "./playwright/.clerk/state.json",
       },
       dependencies: ["setup"],
     },
   ],
   webServer: {
-    command: "npx next start -p 3000",
-    url: "http://127.0.0.1:3000/next.svg",
-    reuseExistingServer: !process.env.CI,
-    timeout: 180 * 1000,
+    command: "PORT=3001 pnpm start",
+    url: "http://localhost:3001",
+    reuseExistingServer: true,
+    timeout: 180000,
   },
 });

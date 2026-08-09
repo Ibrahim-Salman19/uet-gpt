@@ -2,12 +2,12 @@ import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import { internalMutation, type MutationCtx } from "../_generated/server";
+import { rag } from "../rag/instance";
 import {
   classifyFreshness,
   RETRIEVAL_ELIGIBLE_STATUSES,
   SWEEP_BATCH_SIZE,
 } from "../shared/freshnessPolicy";
-import { rag } from "../rag/instance";
 
 export const markStaleDocuments = internalMutation({
   args: { crawlSessionId: v.string(), limit: v.optional(v.number()) },
@@ -244,18 +244,14 @@ export const flagExpiredDocuments = internalMutation({
     // Schedule the next batch if more rows remain. runAfter(0) runs promptly
     // while staying outside the cron's overlap window. Carries sweep state.
     if (!isComplete) {
-      ctx.scheduler.runAfter(
-        0,
-        internal.crawl.staleness.flagExpiredDocuments,
-        {
-          limit: batchSize,
-          dryRun: isDryRun,
-          cursor: pageResult.continueCursor,
-          sweepId,
-          startedAt,
-          cumulative: totals,
-        },
-      );
+      ctx.scheduler.runAfter(0, internal.crawl.staleness.flagExpiredDocuments, {
+        limit: batchSize,
+        dryRun: isDryRun,
+        cursor: pageResult.continueCursor,
+        sweepId,
+        startedAt,
+        cumulative: totals,
+      });
     }
 
     if (!isDryRun && totals.flagged > 0) {
@@ -268,6 +264,35 @@ export const flagExpiredDocuments = internalMutation({
         skipped: totals.skipped,
         complete: isComplete,
       });
+    }
+
+    if (!isDryRun) {
+      const existingList = await ctx.db
+        .query("appSettings")
+        .withIndex("by_key", (q) => q.eq("key", "observability_staleness_sweep"))
+        .collect();
+      const sweepMetricValue = JSON.stringify({
+        sweepId,
+        lastSweepStartedAt: startedAt,
+        lastSweepCompletedAt: isComplete ? Date.now() : null,
+        sweepComplete: isComplete,
+        documentsExamined: totals.examined,
+        documentsFlagged: totals.flagged,
+        documentsCleared: 0,
+        cursorRemaining: nextCursor !== null,
+        errors: 0,
+      });
+      const firstExisting = existingList[0];
+      if (firstExisting) {
+        await ctx.db.patch(firstExisting._id, { value: sweepMetricValue, updatedAt: Date.now() });
+      } else {
+        await ctx.db.insert("appSettings", {
+          key: "observability_staleness_sweep",
+          value: sweepMetricValue,
+          section: "observability",
+          updatedAt: Date.now(),
+        });
+      }
     }
 
     return {

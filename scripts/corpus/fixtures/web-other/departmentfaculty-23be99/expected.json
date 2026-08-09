@@ -1,0 +1,59 @@
+{
+  "_curated": true,
+  "_labelled_by": "scripts/eval/_label_webother.py (web-other expansion \u2014 labels sourced from raw body)",
+  "expected": {
+    "canonical_host": "web.uettaxila.edu.pk",
+    "criticality": "standard",
+    "forbidden_links_contain": [
+      "logout",
+      "login"
+    ],
+    "forbidden_text_blocks": [
+      "Untitled Document"
+    ],
+    "max_duration_ms": 60000,
+    "required_links_contain": [
+      "fms.uettaxila.edu.pk/Profile/ali.javed"
+    ],
+    "required_resources": [
+      {
+        "crawlable": true,
+        "critical": true,
+        "kind": "page",
+        "nofollow": false,
+        "url_contains": "fms.uettaxila.edu.pk/Profile/ali.javed"
+      },
+      {
+        "crawlable": true,
+        "critical": false,
+        "kind": "page",
+        "nofollow": false,
+        "url_contains": "fms.uettaxila.edu.pk/Profile/adnan.habib"
+      }
+    ],
+    "required_text_blocks": [
+      {
+        "text": "Software Engineering Department",
+        "why": "department identity \u2014 the page's subject"
+      },
+      {
+        "text": "Image Processing, Computer Vision",
+        "why": "a specialization listing for the Dean"
+      },
+      {
+        "text": "Ali Javed",
+        "why": "a named faculty member (Post Doctorate, Oakland U) \u2014 distinct from Mech page"
+      }
+    ],
+    "resource_min_count": 5,
+    "title_contains": [
+      "Software Engineering Department"
+    ],
+    "title_not_contains": [
+      "Untitled",
+      "404"
+    ]
+  },
+  "family": "web-other",
+  "fixture_id": "web-other/departmentfaculty-23be99"
+}

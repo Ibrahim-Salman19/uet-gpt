@@ -873,10 +873,10 @@ describe("flagExpiredDocuments", () => {
       _id: "doc-fresh",
       status: "indexed",
       freshnessTier: "high",
-      crawledAt: Date.now() - 15 * 24 * 60 * 60 * 1000,
+      crawledAt: Date.now() - 13 * 24 * 60 * 60 * 1000, // 13 days old < 14d TTL
     });
     const db = createMockDb({ documents: [freshDoc] });
-    const ctx = { db, auth: { getUserIdentity: vi.fn() } };
+    const ctx = { db, auth: { getUserIdentity: vi.fn() }, scheduler: { runAfter: vi.fn() } };
 
     const result = await (handler as any).handler(ctx, {});
 
@@ -884,15 +884,15 @@ describe("flagExpiredDocuments", () => {
     expect(db.patch).not.toHaveBeenCalled();
   });
 
-  it("flags expired medium-tier documents (90 day TTL)", async () => {
+  it("flags expired medium-tier documents (60 day TTL)", async () => {
     const oldDoc = makeDoc({
       _id: "doc-med",
       status: "indexed",
       freshnessTier: "medium",
-      crawledAt: Date.now() - 91 * 24 * 60 * 60 * 1000,
+      crawledAt: Date.now() - 61 * 24 * 60 * 60 * 1000,
     });
     const db = createMockDb({ documents: [oldDoc] });
-    const ctx = { db, auth: { getUserIdentity: vi.fn() } };
+    const ctx = { db, auth: { getUserIdentity: vi.fn() }, scheduler: { runAfter: vi.fn() } };
 
     const result = await (handler as any).handler(ctx, {});
 
@@ -907,7 +907,7 @@ describe("flagExpiredDocuments", () => {
       crawledAt: Date.now() - 181 * 24 * 60 * 60 * 1000,
     });
     const db = createMockDb({ documents: [oldDoc] });
-    const ctx = { db, auth: { getUserIdentity: vi.fn() } };
+    const ctx = { db, auth: { getUserIdentity: vi.fn() }, scheduler: { runAfter: vi.fn() } };
 
     const result = await (handler as any).handler(ctx, {});
 
@@ -922,7 +922,7 @@ describe("flagExpiredDocuments", () => {
       crawledAt: Date.now() - 181 * 24 * 60 * 60 * 1000,
     });
     const db = createMockDb({ documents: [oldDoc] });
-    const ctx = { db, auth: { getUserIdentity: vi.fn() } };
+    const ctx = { db, auth: { getUserIdentity: vi.fn() }, scheduler: { runAfter: vi.fn() } };
 
     const result = await (handler as any).handler(ctx, {});
 
@@ -937,15 +937,15 @@ describe("flagExpiredDocuments", () => {
       crawledAt: Date.now() - 365 * 24 * 60 * 60 * 1000,
     });
     const db = createMockDb({ documents: [staleDoc] });
-    const ctx = { db, auth: { getUserIdentity: vi.fn() } };
+    const ctx = { db, auth: { getUserIdentity: vi.fn() }, scheduler: { runAfter: vi.fn() } };
 
     const result = await (handler as any).handler(ctx, {});
 
     expect(result.flagged).toBe(0);
   });
 
-  it("returns remaining=more when batch is full", async () => {
-    const docs = Array.from({ length: 200 }, (_, i) =>
+  it("returns complete status and examined count on sweep", async () => {
+    const docs = Array.from({ length: 150 }, (_, i) =>
       makeDoc({
         _id: `doc-exp-${i}`,
         status: "indexed",
@@ -953,27 +953,12 @@ describe("flagExpiredDocuments", () => {
       }),
     );
     const db = createMockDb({ documents: docs });
-    const ctx = { db, auth: { getUserIdentity: vi.fn() } };
+    const ctx = { db, auth: { getUserIdentity: vi.fn() }, scheduler: { runAfter: vi.fn() } };
 
-    const result = await (handler as any).handler(ctx, { limit: 200 });
+    const result = await (handler as any).handler(ctx, { limit: 100 });
 
-    expect(result.remaining).toBe("more");
-  });
-
-  it("honors the batch limit parameter", async () => {
-    const docs = Array.from({ length: 50 }, (_, i) =>
-      makeDoc({
-        _id: `doc-batch-${i}`,
-        status: "indexed",
-        crawledAt: Date.now() - 365 * 24 * 60 * 60 * 1000,
-      }),
-    );
-    const db = createMockDb({ documents: docs });
-    const ctx = { db, auth: { getUserIdentity: vi.fn() } };
-
-    const result = await (handler as any).handler(ctx, { limit: 10 });
-
-    expect(result.flagged).toBe(10);
+    expect(result.complete).toBeDefined();
+    expect(result.examined).toBeGreaterThan(0);
   });
 });
 

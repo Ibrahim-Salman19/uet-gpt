@@ -1,0 +1,18 @@
+[
+  {
+    "question_id": "UET_EVAL_165",
+    "question": "daakhila ki akhri tarikh kab hai UET Taxila mein?",
+    "category": "urdu_queries",
+    "failure_reason": "Low confidence score on un-transliterated Roman Urdu query variants when sparse BM25 token matches rely strictly on English terms.",
+    "remediation_status": "Mitigated by intent classification query rewriting and synonym expansion.",
+    "remaining_risk": "Low"
+  },
+  {
+    "question_id": "UET_EVAL_177",
+    "question": "Were online admissions active at UET Taxila in 2010?",
+    "category": "historical_conflicts",
+    "failure_reason": "Historical archive for pre-2012 admissions forms is not present in active index.",
+    "remediation_status": "Labeled as historical query requiring explicit date warning.",
+    "remaining_risk": "Low"
+  }
+]

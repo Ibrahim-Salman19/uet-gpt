@@ -1,6 +1,7 @@
 "use client";
 
 import { GraduationCap } from "lucide-react";
+import * as React from "react";
 import { ChatSuggestions } from "@/components/chat/chat-suggestions";
 import { cn } from "@/lib/utils";
 
@@ -19,32 +20,42 @@ export function EmptyState({
   onSuggestionSelect,
   className,
 }: EmptyStateProps) {
+  const titleId = React.useId();
+  const descriptionId = React.useId();
+
   return (
-    <div
+    <section
       className={cn(
-        "flex h-full flex-col items-center justify-center px-4 md:px-8 text-center stagger-enter",
+        "stagger-enter flex h-full flex-col items-center justify-center px-4 text-center md:px-8 motion-reduce:animate-none",
         className,
       )}
+      aria-labelledby={titleId}
+      aria-describedby={descriptionId}
     >
-      {/* Icon */}
-      <div className="mb-4 md:mb-6 flex h-14 w-14 md:h-16 md:w-16 items-center justify-center rounded-[var(--radius-2xl)] bg-[var(--primary-muted)] border border-white/5 shadow-[var(--shadow-md)]">
-        <GraduationCap className="h-7 w-7 md:h-8 md:w-8 text-[var(--accent)]" />
+      <div
+        className="mb-4 flex h-14 w-14 items-center justify-center rounded-[var(--radius-2xl)] border border-white/5 bg-[var(--primary-muted)] shadow-[var(--shadow-md)] md:mb-6 md:h-16 md:w-16"
+        aria-hidden="true"
+      >
+        <GraduationCap className="h-7 w-7 text-[var(--accent)] md:h-8 md:w-8" />
       </div>
 
-      {/* Heading */}
-      <h2 className="mb-2 text-lg md:text-xl font-semibold tracking-tight text-[var(--text-primary)] max-w-[280px] md:max-w-none">
+      <h2
+        id={titleId}
+        className="mb-2 max-w-[280px] text-lg font-semibold tracking-tight text-[var(--text-primary)] md:max-w-none md:text-xl"
+      >
         {title}
       </h2>
 
-      {/* Description */}
-      <p className="mb-6 md:mb-8 max-w-xs md:max-w-md text-sm leading-relaxed text-[var(--text-secondary)]">
+      <p
+        id={descriptionId}
+        className="mb-6 max-w-xs text-sm leading-relaxed text-[var(--text-secondary)] md:mb-8 md:max-w-md"
+      >
         {description}
       </p>
 
-      {/* Suggestions */}
-      {suggestions && suggestions.length > 0 && (
+      {suggestions?.length ? (
         <ChatSuggestions suggestions={suggestions} onSelect={onSuggestionSelect} />
-      )}
-    </div>
+      ) : null}
+    </section>
   );
 }

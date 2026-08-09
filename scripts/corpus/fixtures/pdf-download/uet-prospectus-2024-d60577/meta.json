@@ -1,0 +1,12 @@
+{
+  "body_sha256": "eac214d8b80033e90162bbe50ae2c819f762080958c4de50b8e2aa4a24661cec",
+  "body_size": 4832630,
+  "content_type": "application/pdf",
+  "elapsed_ms": 2062,
+  "fetched_at": "2026-08-02T12:25:37+00:00",
+  "final_url": "https://admissions.uettaxila.edu.pk/Downloads/UET-Prospectus-2024.pdf",
+  "redirect_chain": [],
+  "remote_ip": "104.21.50.7,172.67.198.179",
+  "requested_url": "https://admissions.uettaxila.edu.pk/Downloads/UET-Prospectus-2024.pdf",
+  "status": 200
+}

@@ -1,0 +1,12 @@
+{
+  "body_sha256": "7b061b69a381b9eb8f0b1cf74176411d74c02d0f4979a3cd8d249b497534bfc6",
+  "body_size": 30241,
+  "content_type": "text/html; charset=utf-8",
+  "elapsed_ms": 1231,
+  "fetched_at": "2026-08-02T12:25:16+00:00",
+  "final_url": "https://admissions.uettaxila.edu.pk/ProcedureAndRequirements.php",
+  "redirect_chain": [],
+  "remote_ip": "104.21.50.7,172.67.198.179",
+  "requested_url": "https://admissions.uettaxila.edu.pk/ProcedureAndRequirements.php",
+  "status": 200
+}

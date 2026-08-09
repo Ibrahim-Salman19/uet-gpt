@@ -1,0 +1,21 @@
+{
+  "headers": {
+    "accept-ranges": "bytes",
+    "alt-svc": "h3=\":443\"; ma=86400",
+    "cache-control": "max-age=86400",
+    "cf-cache-status": "REVALIDATED",
+    "cf-ray": "a24d10fff919fd23-SIN",
+    "content-length": "4832630",
+    "content-type": "application/pdf",
+    "date": "Sun, 02 Aug 2026 12:25:39 GMT",
+    "etag": "\"49bd76-61b3942e996b9\"",
+    "last-modified": "Wed, 19 Jun 2024 07:36:49 GMT",
+    "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+    "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=v4%2BJEdTlFKHW9QPLxMdJcSCDWXtf9wJOT6ZT0VD4eumNyuXbYK6oKO2Ag2QLLncNZ%2BIf%2FOwQ2uStArjT2yWCugQBVl%2FUiU6VXsiRB38EniK0aKxVmD8pcAN7PDl5538CBKIY2PSpQrrx1IPRjOM%3D\"}]}",
+    "server": "cloudflare",
+    "server-timing": "cfCacheStatus;desc=\"REVALIDATED\", cfEdge;dur=13,cfOrigin;dur=819",
+    "strict-transport-security": "max-age=0",
+    "x-content-type-options": "nosniff"
+  },
+  "status": 200
+}

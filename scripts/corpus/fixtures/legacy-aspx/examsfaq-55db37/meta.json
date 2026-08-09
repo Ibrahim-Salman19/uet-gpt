@@ -1,0 +1,12 @@
+{
+  "body_sha256": "e2721d9ce74e63e0972119b0b85b981ac0a7a4e3284d16f2f2b0ca4719ac33bf",
+  "body_size": 77608,
+  "content_type": "text/html; charset=utf-8",
+  "elapsed_ms": 988,
+  "fetched_at": "2026-08-02T12:24:46+00:00",
+  "final_url": "https://web.uettaxila.edu.pk/ExamsFAQ.aspx",
+  "redirect_chain": [],
+  "remote_ip": "104.21.50.7,172.67.198.179",
+  "requested_url": "https://web.uettaxila.edu.pk/ExamsFAQ.aspx",
+  "status": 200
+}

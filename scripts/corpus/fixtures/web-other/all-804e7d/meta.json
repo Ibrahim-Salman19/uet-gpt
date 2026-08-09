@@ -1,0 +1,12 @@
+{
+  "body_sha256": "81145d6682b04d24036ba6c58310bf629a37afa6210f2c35243e09dcdfe3e34b",
+  "body_size": 103689,
+  "content_type": "text/html; charset=utf-8",
+  "elapsed_ms": 1261,
+  "fetched_at": "2026-08-03T17:58:51+00:00",
+  "final_url": "https://web.uettaxila.edu.pk/Events/All",
+  "redirect_chain": [],
+  "remote_ip": "104.21.50.7,172.67.198.179,2606:4700:3031::6815:3207,2606:4700:3032::ac43:c6b3",
+  "requested_url": "https://web.uettaxila.edu.pk/Events/All",
+  "status": 200
+}

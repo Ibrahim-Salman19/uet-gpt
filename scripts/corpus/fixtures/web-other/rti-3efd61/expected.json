@@ -1,0 +1,50 @@
+{
+  "_curated": true,
+  "_labelled_by": "scripts/eval/_label_webother.py (web-other expansion \u2014 labels sourced from raw body)",
+  "expected": {
+    "canonical_host": "web.uettaxila.edu.pk",
+    "criticality": "standard",
+    "forbidden_links_contain": [
+      "logout",
+      "login"
+    ],
+    "forbidden_text_blocks": [
+      "__VIEWSTATE",
+      "Untitled Document"
+    ],
+    "max_duration_ms": 60000,
+    "required_links_contain": [
+      "Rules",
+      "Budget"
+    ],
+    "required_resources": [],
+    "required_text_blocks": [
+      {
+        "text": "Contact Directory of all officials",
+        "why": "RTI disclosure \u2014 a required public-access link label"
+      },
+      {
+        "text": "Current Budget",
+        "why": "RTI disclosure \u2014 budget transparency link"
+      },
+      {
+        "text": "Current Universities Policies",
+        "why": "RTI disclosure \u2014 policy transparency link"
+      },
+      {
+        "text": "Current jobs and jobs archive",
+        "why": "RTI disclosure \u2014 jobs transparency link"
+      }
+    ],
+    "resource_min_count": 0,
+    "title_contains": [
+      "RTI"
+    ],
+    "title_not_contains": [
+      "Untitled",
+      "404"
+    ]
+  },
+  "family": "web-other",
+  "fixture_id": "web-other/rti-3efd61"
+}

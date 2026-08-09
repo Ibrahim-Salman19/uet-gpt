@@ -1,0 +1,12 @@
+{
+  "body_sha256": "b0b0149840e0c8fa8450a480e94326ac2b3b0c9a31d6a4a74268398ec3c35bbb",
+  "body_size": 389921,
+  "content_type": "text/html",
+  "elapsed_ms": 984,
+  "fetched_at": "2026-08-02T12:22:31+00:00",
+  "final_url": "https://web.uettaxila.edu.pk/cped/courses_UG.asp",
+  "redirect_chain": [],
+  "remote_ip": "104.21.50.7,172.67.198.179",
+  "requested_url": "https://web.uettaxila.edu.pk/cped/courses_UG.asp",
+  "status": 200
+}

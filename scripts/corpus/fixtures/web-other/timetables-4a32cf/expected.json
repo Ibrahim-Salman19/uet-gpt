@@ -1,0 +1,60 @@
+{
+  "_curated": true,
+  "_labelled_by": "scripts/eval/_label_webother.py (web-other expansion \u2014 labels sourced from raw body)",
+  "expected": {
+    "canonical_host": "web.uettaxila.edu.pk",
+    "criticality": "standard",
+    "forbidden_links_contain": [
+      "logout",
+      "login"
+    ],
+    "forbidden_text_blocks": [
+      "__VIEWSTATE",
+      "Untitled Document"
+    ],
+    "max_duration_ms": 60000,
+    "required_links_contain": [
+      "Downloads/TimeTables/CPED"
+    ],
+    "required_resources": [
+      {
+        "crawlable": true,
+        "critical": true,
+        "kind": "spreadsheet",
+        "nofollow": false,
+        "url_contains": "CPED-Spring-2026.xlsx"
+      },
+      {
+        "crawlable": true,
+        "critical": false,
+        "kind": "pdf",
+        "nofollow": false,
+        "url_contains": "CPED-Fall-2025.pdf"
+      }
+    ],
+    "required_text_blocks": [
+      {
+        "text": "Fall 2025",
+        "why": "a timetable semester label \u2014 proves the table rendered"
+      },
+      {
+        "text": "Spring 2026",
+        "why": "the latest timetable semester"
+      },
+      {
+        "text": "CPED",
+        "why": "the department code in the download paths"
+      }
+    ],
+    "resource_min_count": 5,
+    "title_contains": [
+      "TimeTables"
+    ],
+    "title_not_contains": [
+      "Untitled",
+      "404"
+    ]
+  },
+  "family": "web-other",
+  "fixture_id": "web-other/timetables-4a32cf"
+}

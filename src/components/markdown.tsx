@@ -1,5 +1,7 @@
+"use client";
+
 import { Check, Copy } from "lucide-react";
-import { useState } from "react";
+import * as React from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
@@ -13,173 +15,239 @@ interface MarkdownProps {
 
 const SAFE_URL_SCHEMES = new Set(["http:", "https:", "mailto:", "tel:"]);
 
-/**
- * Allow only safe URL schemes (plus scheme-relative / relative URLs). Rejects
- * `javascript:`, `data:`, `vbscript:`, etc. so untrusted markdown can never
- * produce an executable link.
- */
-function isSafeHref(href: string | undefined): href is string {
-  if (!href) return false;
-  const trimmed = href.trim();
-  // Relative or fragment/query links have no scheme - treat as safe.
-  if (/^(#|\/|\.\/|\.\.\/|\?)/.test(trimmed)) return true;
-  // No scheme at all (e.g. "example.com/path") - safe.
-  if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(trimmed)) return true;
+function sanitizeMarkdownUrl(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+
+  // Parse every value instead of trusting a scheme-shaped regular expression.
+  // URL parsing also catches browser-normalized obfuscations such as embedded
+  // ASCII tabs/newlines in `javascript:`. Relative URLs resolve against this
+  // inert base and retain their original relative spelling when returned.
   try {
-    const scheme = new URL(trimmed, "https://example.invalid").protocol;
-    return SAFE_URL_SCHEMES.has(scheme);
+    const protocol = new URL(trimmed, "https://uetgpt.invalid/").protocol;
+    return SAFE_URL_SCHEMES.has(protocol) ? trimmed : "";
   } catch {
-    return false;
+    return "";
   }
 }
 
-function CodeBlock({ language, children }: { language?: string; children: string }) {
-  const [copied, setCopied] = useState(false);
+function textFromReactNode(node: React.ReactNode): string {
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(textFromReactNode).join("");
+  if (React.isValidElement<{ children?: React.ReactNode }>(node)) {
+    return textFromReactNode(node.props.children);
+  }
+  return "";
+}
 
-  const handleCopy = async () => {
-    const success = await copyToClipboard(children);
-    if (success) {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
+function normalizeCodeForClipboard(value: string): string {
+  return value.endsWith("\n") ? value.slice(0, -1) : value;
+}
+
+function CodeBlock({
+  language,
+  code,
+  children,
+}: {
+  language?: string;
+  code: string;
+  children: React.ReactNode;
+}) {
+  const [copied, setCopied] = React.useState(false);
+  const resetTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  React.useEffect(() => {
+    return () => {
+      if (resetTimerRef.current !== null) clearTimeout(resetTimerRef.current);
+    };
+  }, []);
+
+  const handleCopy = React.useCallback(async () => {
+    const success = await copyToClipboard(code);
+    if (!success) return;
+
+    setCopied(true);
+    if (resetTimerRef.current !== null) clearTimeout(resetTimerRef.current);
+    resetTimerRef.current = setTimeout(() => {
+      setCopied(false);
+      resetTimerRef.current = null;
+    }, 2_000);
+  }, [code]);
 
   return (
-    <div className="group relative my-3 overflow-hidden rounded-[var(--radius-md)] border border-[var(--border)]">
-      {language && (
-        <div className="flex items-center justify-between border-b border-[var(--border)] bg-[var(--surface-muted)] px-3 py-1.5">
-          <span className="text-[11px] font-medium text-[var(--text-muted)]">{language}</span>
-        </div>
-      )}
-      <div className="relative">
-        <pre className="overflow-x-auto bg-[var(--surface-base)] p-3 md:p-4 text-xs md:text-sm leading-relaxed scrollbar-thin">
-          <code>{children}</code>
-        </pre>
+    <div className="group/code relative my-4 overflow-hidden rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface-base)]">
+      <div className="flex min-h-9 items-center justify-between border-b border-[var(--border)] bg-[var(--surface-muted)] px-3">
+        <span className="truncate font-mono text-[11px] font-medium text-[var(--text-muted)]">
+          {language || "text"}
+        </span>
         <Button
+          type="button"
           variant="ghost"
-          size="icon"
+          size="sm"
           onClick={handleCopy}
-          className="absolute right-2 top-2 h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100 pointer-coarse:opacity-100"
-          aria-label="Copy code"
+          className="h-7 gap-1.5 px-2 text-[11px] text-[var(--text-muted)] opacity-80 hover:text-[var(--text-primary)] focus-visible:opacity-100 md:opacity-0 md:group-hover/code:opacity-100 md:group-focus-within/code:opacity-100"
+          aria-label={copied ? "Code copied" : "Copy code"}
         >
           {copied ? (
-            <Check className="h-3.5 w-3.5 text-[var(--semantic-success)]" />
+            <Check className="h-3.5 w-3.5 text-[var(--semantic-success)]" aria-hidden="true" />
           ) : (
-            <Copy className="h-3.5 w-3.5" />
+            <Copy className="h-3.5 w-3.5" aria-hidden="true" />
           )}
+          <span>{copied ? "Copied" : "Copy"}</span>
         </Button>
       </div>
+      <pre className="overflow-x-auto p-3 text-xs leading-relaxed [tab-size:2] md:p-4 md:text-sm">
+        {children}
+      </pre>
     </div>
   );
 }
 
 export function Markdown({ content, className }: MarkdownProps) {
   return (
-    <div className={cn("prose prose-sm max-w-none", className)}>
+    <div className={cn("prose prose-sm max-w-none break-words", className)}>
       <ReactMarkdown
+        skipHtml
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeHighlight]}
+        rehypePlugins={[[rehypeHighlight, { detect: false, ignoreMissing: true }]]}
+        urlTransform={sanitizeMarkdownUrl}
         components={{
-          code({ className: cl, children, ...props }) {
-            // Block code is highlighted (`hljs`), carries a `language-` class, or
-            // spans multiple lines; anything else is inline. Avoid relying solely
-            // on the highlighter class so unknown/plain fenced blocks still render
-            // as blocks (delegated to the `pre` renderer below).
-            const hasLanguage = /\b(?:hljs|language-\w+)\b/.test(cl ?? "");
-            const isMultiline = typeof children === "string" && children.includes("\n");
-            const isInline = !hasLanguage && !isMultiline;
-            if (isInline) {
+          code({ className: codeClassName, children, node: _node, ...props }) {
+            const isBlock =
+              /\b(?:hljs|language-[\w-]+)\b/.test(codeClassName ?? "") ||
+              textFromReactNode(children).includes("\n");
+
+            if (!isBlock) {
               return (
                 <code
-                  className="rounded-[var(--radius-xs)] bg-[var(--surface-muted)] px-1.5 py-0.5 text-[0.9em] font-mono text-[var(--text-primary)]"
+                  className="rounded-[var(--radius-xs)] bg-[var(--surface-muted)] px-1.5 py-0.5 font-mono text-[0.9em] text-[var(--text-primary)]"
                   {...props}
                 >
                   {children}
                 </code>
               );
             }
-            return null;
+
+            return (
+              <code className={cn("font-mono", codeClassName)} {...props}>
+                {children}
+              </code>
+            );
           },
           pre({ children }) {
-            const child = children as React.ReactElement<{ className?: string; children: string }>;
-            const className = child?.props?.className || "";
-            // Extract only the `language-xxx` token; ignore other classes such
-            // as `hljs` that rehype-highlight adds, so the label stays clean.
-            const language = className.match(/language-(\w+)/)?.[1] ?? "";
-            const codeContent = String(child?.props?.children || "");
-            return <CodeBlock language={language}>{codeContent}</CodeBlock>;
+            const child = React.Children.toArray(children).find(React.isValidElement);
+            const element = child as React.ReactElement<{
+              className?: string;
+              children?: React.ReactNode;
+            }> | null;
+            const language = element?.props.className?.match(/\blanguage-([\w-]+)/)?.[1];
+            const code = normalizeCodeForClipboard(textFromReactNode(element?.props.children));
+
+            return (
+              <CodeBlock language={language} code={code}>
+                {children}
+              </CodeBlock>
+            );
           },
-          a({ href, children }) {
-            // Defense-in-depth: only allow safe schemes (and relative URLs) so
-            // model/RAG-generated `javascript:`/`data:`/`vbscript:` hrefs can
-            // never produce an active link, regardless of react-markdown config.
-            const safeHref = isSafeHref(href) ? href : undefined;
+          a({ href, children, node: _node, ...props }) {
+            if (!href) return <span>{children}</span>;
+            const external = /^(?:https?:)?\/\//i.test(href);
+
             return (
               <a
-                href={safeHref}
-                target="_blank"
-                rel="noopener noreferrer nofollow"
-                className="text-[var(--accent)] underline decoration-[var(--accent-muted)] underline-offset-2 transition-colors hover:decoration-[var(--accent)]"
+                href={href}
+                target={external ? "_blank" : undefined}
+                rel={external ? "noopener noreferrer nofollow" : undefined}
+                className="text-[var(--accent)] underline decoration-[var(--accent-muted)] underline-offset-2 transition-colors hover:decoration-[var(--accent)] focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+                {...props}
               >
                 {children}
+                {external ? <span className="sr-only"> (opens in a new tab)</span> : null}
               </a>
             );
           },
+          img({ src, alt, node: _node, ...props }) {
+            if (!src) return null;
+            return (
+              <img
+                {...props}
+                src={src}
+                alt={alt ?? ""}
+                loading="lazy"
+                decoding="async"
+                referrerPolicy="no-referrer"
+                className="my-4 h-auto max-w-full rounded-[var(--radius-md)] border border-[var(--border)]"
+              />
+            );
+          },
           ul({ children }) {
-            return <ul className="my-2 list-disc space-y-1 pl-5">{children}</ul>;
+            return (
+              <ul className="my-3 list-disc space-y-1.5 pl-5 marker:text-[var(--text-muted)]">
+                {children}
+              </ul>
+            );
           },
           ol({ children }) {
-            return <ol className="my-2 list-decimal space-y-1 pl-5">{children}</ol>;
+            return (
+              <ol className="my-3 list-decimal space-y-1.5 pl-5 marker:text-[var(--text-muted)]">
+                {children}
+              </ol>
+            );
           },
           li({ children }) {
             return (
-              <li className="text-[var(--chat-font-size,0.875rem)] leading-relaxed text-[var(--text-primary)]">
+              <li className="pl-1 text-[var(--chat-font-size,0.875rem)] leading-relaxed text-[var(--text-primary)]">
                 {children}
               </li>
             );
           },
           p({ children }) {
             return (
-              <p className="my-2 text-[var(--chat-font-size,0.875rem)] leading-relaxed text-[var(--text-primary)]">
+              <p className="my-2.5 text-[var(--chat-font-size,0.875rem)] leading-[1.7] text-[var(--text-primary)]">
                 {children}
               </p>
             );
           },
           h1({ children }) {
             return (
-              <h1 className="mb-2 mt-4 text-lg font-semibold text-[var(--text-primary)]">
+              <h1 className="mb-2 mt-5 text-xl font-semibold tracking-tight text-[var(--text-primary)]">
                 {children}
               </h1>
             );
           },
           h2({ children }) {
             return (
-              <h2 className="mb-2 mt-3 text-base font-semibold text-[var(--text-primary)]">
+              <h2 className="mb-2 mt-5 text-lg font-semibold tracking-tight text-[var(--text-primary)]">
                 {children}
               </h2>
             );
           },
           h3({ children }) {
             return (
-              <h3 className="mb-1 mt-3 text-sm font-semibold text-[var(--text-primary)]">
+              <h3 className="mb-1.5 mt-4 text-base font-semibold text-[var(--text-primary)]">
                 {children}
               </h3>
             );
           },
           blockquote({ children }) {
             return (
-              <blockquote className="my-3 border-l-2 border-[var(--accent-muted)] bg-[var(--surface-muted)] py-1 pl-4 text-[var(--chat-font-size,0.875rem)] italic text-[var(--text-secondary)]">
+              <blockquote className="my-4 border-l-2 border-[var(--accent-muted)] bg-[var(--surface-muted)] py-2 pl-4 pr-3 text-[var(--chat-font-size,0.875rem)] italic text-[var(--text-secondary)]">
                 {children}
               </blockquote>
             );
           },
           hr() {
-            return <hr className="my-4 border-[var(--border)]" />;
+            return <hr className="my-5 border-[var(--border)]" />;
           },
           table({ children }) {
             return (
-              <div className="my-3 overflow-x-auto rounded-[var(--radius-md)] border border-[var(--border)]">
-                <table className="w-full text-sm">{children}</table>
+              <div
+                className="my-4 max-w-full overflow-x-auto rounded-[var(--radius-md)] border border-[var(--border)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+                role="region"
+                aria-label="Scrollable table"
+                tabIndex={0}
+              >
+                <table className="w-full min-w-max border-collapse text-sm">{children}</table>
               </div>
             );
           },
@@ -188,14 +256,17 @@ export function Markdown({ content, className }: MarkdownProps) {
           },
           th({ children }) {
             return (
-              <th className="px-3 py-2 text-left font-medium text-[var(--text-primary)]">
+              <th
+                scope="col"
+                className="px-3 py-2 text-left font-semibold text-[var(--text-primary)]"
+              >
                 {children}
               </th>
             );
           },
           td({ children }) {
             return (
-              <td className="border-t border-[var(--border)] px-3 py-2 text-[var(--text-secondary)]">
+              <td className="border-t border-[var(--border)] px-3 py-2 align-top text-[var(--text-secondary)]">
                 {children}
               </td>
             );

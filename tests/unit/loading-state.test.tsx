@@ -6,7 +6,7 @@ import { LoadingState } from "@/components/loading-state";
 describe("LoadingState", () => {
   it("renders message skeletons by default", () => {
     const { container } = render(<LoadingState />);
-    expect(container.textContent).toContain("PROCESSING_RAG...");
+    expect(container.textContent).toContain("PROCESSING_CONTEXT");
   });
 
   it("renders sidebar skeleton with type='sidebar'", () => {
@@ -23,6 +23,6 @@ describe("LoadingState", () => {
 
   it("renders message skeleton with type='messages'", () => {
     const { container } = render(<LoadingState type="messages" />);
-    expect(container.textContent).toContain("TRANSMITTING...");
+    expect(container.textContent).toContain("LOADING_MESSAGE");
   });
 });

@@ -36,6 +36,7 @@ vi.mock("@/components/ui/button", () => (globalThis as any).currentAdminMocks.bu
 vi.mock("sonner", () => (globalThis as any).currentAdminMocks.sonnerMock as any);
 
 import AdminSettingsPage from "@/app/admin/(admin-shell)/settings/page";
+import { api } from "convex/_generated/api";
 
 vi.mock("@/components/ui/switch", () => ({
   Switch: ({ id, checked, onCheckedChange }: any) => (
@@ -139,11 +140,11 @@ describe("AdminSettingsPage", () => {
     vi.mocked(useQuery).mockReturnValue([]);
     upsertSpy = vi.fn().mockResolvedValue(undefined);
     resetSpy = vi.fn().mockResolvedValue(undefined);
-    let callCount = 0;
+    let callIndex = 0;
     vi.mocked(useMutation).mockImplementation(() => {
-      callCount += 1;
-      // First useMutation() call -> upsertSettingsBatch, second -> resetSettings.
-      return (callCount === 1 ? upsertSpy : resetSpy) as any;
+      const spy = callIndex % 2 === 0 ? upsertSpy : resetSpy;
+      callIndex += 1;
+      return spy as any;
     });
   });
 
@@ -231,8 +232,8 @@ describe("AdminSettingsPage", () => {
       expect(selects).toHaveLength(1);
       const select = selects[0] as HTMLSelectElement;
       const optionTexts = Array.from(select.options).map((o) => o.text);
-      expect(optionTexts).toContain("Llama 3.3 70B");
-      expect(optionTexts).toContain("Llama 3.1 8B");
+      expect(optionTexts).toContain("GPT-OSS 120B");
+      expect(optionTexts).toContain("GPT-OSS 20B");
       expect(optionTexts).toContain("Mixtral 8x7B");
     });
 
@@ -241,7 +242,7 @@ describe("AdminSettingsPage", () => {
 
       // Verify select default value
       const select = screen.getByTestId("native-select") as HTMLSelectElement;
-      expect(select.value).toBe("llama-3.3-70b-versatile");
+      expect(select.value).toBe("openai/gpt-oss-120b");
     });
   });
 
@@ -322,7 +323,7 @@ describe("AdminSettingsPage", () => {
 
       const select = screen.getByTestId("native-select") as HTMLSelectElement;
 
-      expect(select.value).toBe("llama-3.3-70b-versatile");
+      expect(select.value).toBe("openai/gpt-oss-120b");
       fireEvent.change(select, {
         target: { value: "mixtral-8x7b-32768" },
       });

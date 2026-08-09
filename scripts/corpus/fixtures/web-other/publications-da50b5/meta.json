@@ -1,0 +1,12 @@
+{
+  "body_sha256": "35349a4caed80b076c77cf805bf30893a71e0b9fb2ffaa659178db202a1044ad",
+  "body_size": 12749,
+  "content_type": "text/html; charset=utf-8",
+  "elapsed_ms": 721,
+  "fetched_at": "2026-08-03T17:59:02+00:00",
+  "final_url": "https://web.uettaxila.edu.pk/swarmroboticslab/Publications",
+  "redirect_chain": [],
+  "remote_ip": "104.21.50.7,172.67.198.179,2606:4700:3031::6815:3207,2606:4700:3032::ac43:c6b3",
+  "requested_url": "https://web.uettaxila.edu.pk/swarmroboticslab/Publications",
+  "status": 200
+}

@@ -1,0 +1,318 @@
+{
+  "corpus_version": 1,
+  "families": {
+    "admissions-php": 6,
+    "fetch-failure": 3,
+    "fms-profile": 2,
+    "legacy-asp": 6,
+    "legacy-aspx": 6,
+    "main-root": 3,
+    "pdf-download": 3,
+    "web-other": 14
+  },
+  "fixture_count": 43,
+  "fixtures": [
+    {
+      "family": "admissions-php",
+      "fixture_id": "admissions-php/admission-eligibility-1cc3b3",
+      "ok": true,
+      "requested_url": "https://admissions.uettaxila.edu.pk/Admission_Eligibility.php",
+      "status": 200
+    },
+    {
+      "family": "admissions-php",
+      "fixture_id": "admissions-php/faqs-07df8a",
+      "ok": true,
+      "requested_url": "https://admissions.uettaxila.edu.pk/FAQS.php",
+      "status": 200
+    },
+    {
+      "family": "admissions-php",
+      "fixture_id": "admissions-php/feesfortechnologyprograms-ff27fa",
+      "ok": true,
+      "requested_url": "https://admissions.uettaxila.edu.pk/FeesForTechnologyPrograms.php",
+      "status": 200
+    },
+    {
+      "family": "admissions-php",
+      "fixture_id": "admissions-php/procedureandrequirements-05a20e",
+      "ok": true,
+      "requested_url": "https://admissions.uettaxila.edu.pk/ProcedureAndRequirements.php",
+      "status": 200
+    },
+    {
+      "family": "admissions-php",
+      "fixture_id": "admissions-php/schedule2-ee1d41",
+      "ok": true,
+      "requested_url": "https://admissions.uettaxila.edu.pk/Schedule2.php",
+      "status": 200
+    },
+    {
+      "family": "admissions-php",
+      "fixture_id": "admissions-php/seats-allocation-a0bb04",
+      "ok": true,
+      "requested_url": "https://admissions.uettaxila.edu.pk/Seats_Allocation.php",
+      "status": 200
+    },
+    {
+      "family": "fetch-failure",
+      "fixture_id": "fetch-failure/admissions-78b6de",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/admissions/",
+      "status": 404
+    },
+    {
+      "family": "fetch-failure",
+      "fixture_id": "fetch-failure/default-73fbf4",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/default.asp",
+      "status": 500
+    },
+    {
+      "family": "fetch-failure",
+      "fixture_id": "fetch-failure/research-e30700",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/research/",
+      "status": 404
+    },
+    {
+      "family": "fms-profile",
+      "fixture_id": "fms-profile/gulistan-raja-556686",
+      "ok": true,
+      "requested_url": "https://fms.uettaxila.edu.pk/Profile/gulistan.raja",
+      "status": 200
+    },
+    {
+      "family": "fms-profile",
+      "fixture_id": "fms-profile/haroon-yousaf-e9402e",
+      "ok": true,
+      "requested_url": "https://fms.uettaxila.edu.pk/Profile/haroon.yousaf",
+      "status": 200
+    },
+    {
+      "family": "legacy-asp",
+      "fixture_id": "legacy-asp/academiccommittees-3ce22e",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/EncED/AcademicCommittees.asp",
+      "status": 522
+    },
+    {
+      "family": "legacy-asp",
+      "fixture_id": "legacy-asp/betcybersecurity-365f51",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/telecom/BETCyberSecurity.asp",
+      "status": 522
+    },
+    {
+      "family": "legacy-asp",
+      "fixture_id": "legacy-asp/betsoftwareengineering-a27271",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/telecom/BETSoftwareEngineering.asp",
+      "status": 200
+    },
+    {
+      "family": "legacy-asp",
+      "fixture_id": "legacy-asp/bsctechnologymechanical-a2d533",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/MED/BScTechnologyMechanical.asp",
+      "status": 522
+    },
+    {
+      "family": "legacy-asp",
+      "fixture_id": "legacy-asp/courses-ug-8ddef9",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/cped/courses_UG.asp",
+      "status": 200
+    },
+    {
+      "family": "legacy-asp",
+      "fixture_id": "legacy-asp/curriculum-e38252",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/MCED/Curriculum.asp",
+      "status": 200
+    },
+    {
+      "family": "legacy-aspx",
+      "fixture_id": "legacy-aspx/examsfaq-55db37",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/ExamsFAQ.aspx",
+      "status": 200
+    },
+    {
+      "family": "legacy-aspx",
+      "fixture_id": "legacy-aspx/hostels-837b47",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/Hostels.aspx",
+      "status": 522
+    },
+    {
+      "family": "legacy-aspx",
+      "fixture_id": "legacy-aspx/libraryrules-ed35c9",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/LibraryRules.aspx",
+      "status": 522
+    },
+    {
+      "family": "legacy-aspx",
+      "fixture_id": "legacy-aspx/oric-ecc7da",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/ORIC.aspx",
+      "status": 522
+    },
+    {
+      "family": "legacy-aspx",
+      "fixture_id": "legacy-aspx/sports-307a01",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/Sports.aspx",
+      "status": 200
+    },
+    {
+      "family": "legacy-aspx",
+      "fixture_id": "legacy-aspx/transport-057ca9",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/Transport.aspx",
+      "status": 200
+    },
+    {
+      "family": "main-root",
+      "fixture_id": "main-root/admissions-uettaxila-edu-pk-79a49c",
+      "ok": true,
+      "requested_url": "https://admissions.uettaxila.edu.pk/",
+      "status": 200
+    },
+    {
+      "family": "main-root",
+      "fixture_id": "main-root/uettaxila-edu-pk-9289bf",
+      "ok": true,
+      "requested_url": "https://uettaxila.edu.pk/",
+      "status": 200
+    },
+    {
+      "family": "main-root",
+      "fixture_id": "main-root/web-uettaxila-edu-pk-0b20b6",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/",
+      "status": 200
+    },
+    {
+      "family": "pdf-download",
+      "fixture_id": "pdf-download/peeda-2006-2-08031c",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/PageContents/Rules/peeda_2006_2.pdf",
+      "status": 200
+    },
+    {
+      "family": "pdf-download",
+      "fixture_id": "pdf-download/sexualharassment-policy-4b52e1",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/Downloads/Policies/SEXUALHARASSMENT-POLICY.pdf",
+      "status": 200
+    },
+    {
+      "family": "pdf-download",
+      "fixture_id": "pdf-download/uet-prospectus-2024-d60577",
+      "ok": true,
+      "requested_url": "https://admissions.uettaxila.edu.pk/Downloads/UET-Prospectus-2024.pdf",
+      "status": 200
+    },
+    {
+      "family": "web-other",
+      "fixture_id": "web-other/21stconvocation2024-8ff004",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/21stConvocation2024",
+      "status": 200
+    },
+    {
+      "family": "web-other",
+      "fixture_id": "web-other/aboutqec-3dfd36",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/qec/aboutQEC.htm",
+      "status": 200
+    },
+    {
+      "family": "web-other",
+      "fixture_id": "web-other/aimandscope-c165ee",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/swarmroboticslab/AimandScope",
+      "status": 200
+    },
+    {
+      "family": "web-other",
+      "fixture_id": "web-other/all-804e7d",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/Events/All",
+      "status": 200
+    },
+    {
+      "family": "web-other",
+      "fixture_id": "web-other/celebrating-pakistani-researchers-among-the-worl-c276af",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/NewsDetails/Celebrating-Pakistani-Researchers-Among-the-Worlds-Top-2-Scientists",
+      "status": 200
+    },
+    {
+      "family": "web-other",
+      "fixture_id": "web-other/departmentfaculty-23be99",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=5",
+      "status": 200
+    },
+    {
+      "family": "web-other",
+      "fixture_id": "web-other/departmentfaculty-263906",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=2",
+      "status": 200
+    },
+    {
+      "family": "web-other",
+      "fixture_id": "web-other/dlsei-d1a531",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/dlsei",
+      "status": 200
+    },
+    {
+      "family": "web-other",
+      "fixture_id": "web-other/downloadexaminationforms-87ee7b",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/DownloadExaminationForms",
+      "status": 200
+    },
+    {
+      "family": "web-other",
+      "fixture_id": "web-other/itservices-19a675",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/ITservices",
+      "status": 200
+    },
+    {
+      "family": "web-other",
+      "fixture_id": "web-other/pgadmissions-d0282b",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/pgAdmissions",
+      "status": 200
+    },
+    {
+      "family": "web-other",
+      "fixture_id": "web-other/publications-da50b5",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/swarmroboticslab/Publications",
+      "status": 200
+    },
+    {
+      "family": "web-other",
+      "fixture_id": "web-other/rti-3efd61",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/RTI",
+      "status": 200
+    },
+    {
+      "family": "web-other",
+      "fixture_id": "web-other/timetables-4a32cf",
+      "ok": true,
+      "requested_url": "https://web.uettaxila.edu.pk/TimeTables?DepartmentId=4&StudyLevelId=1",
+      "status": 200
+    }
+  ],
+  "generated_at": "2026-08-03T17:59:12+00:00"
+}

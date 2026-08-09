@@ -16,7 +16,7 @@ export async function generateAlternatePhrasingsInternal(
 
   try {
     const { text } = await generateText({
-      model: getGroq()("llama-3.1-8b-instant"),
+      model: getGroq()("openai/gpt-oss-20b"),
       system:
         "Generate 2 alternate phrasings of the given search query about UET Taxila. " +
         "Each should use different keywords but preserve the same search intent. " +

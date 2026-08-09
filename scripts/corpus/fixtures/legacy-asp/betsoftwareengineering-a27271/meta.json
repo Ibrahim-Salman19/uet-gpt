@@ -1,0 +1,12 @@
+{
+  "body_sha256": "6ef8792956fa7467f2f04ca9ed644db048a0ffa745ac13f0e405cea3fa76144d",
+  "body_size": 66328,
+  "content_type": "text/html",
+  "elapsed_ms": 2803,
+  "fetched_at": "2026-08-02T12:23:09+00:00",
+  "final_url": "https://web.uettaxila.edu.pk/telecom/BETSoftwareEngineering.asp",
+  "redirect_chain": [],
+  "remote_ip": "104.21.50.7,172.67.198.179",
+  "requested_url": "https://web.uettaxila.edu.pk/telecom/BETSoftwareEngineering.asp",
+  "status": 200
+}

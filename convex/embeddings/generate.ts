@@ -3,8 +3,8 @@
 import { ConvexError, v } from "convex/values";
 import { internalAction } from "../_generated/server";
 import { recordTiming } from "../observability/metrics";
-import { EMBEDDING_DIMENSION } from "./dimension";
 import { assertEmbeddingDimension, assertFiniteVector } from "../shared/invariants";
+import { EMBEDDING_DIMENSION } from "./dimension";
 
 // gemini-embedding-2 - stable as of May 2026
 // Dimensions: 768 (MRL supports 768/1536/3072)

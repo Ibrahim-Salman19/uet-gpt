@@ -1,0 +1,123 @@
+{
+  "eval_name": "baseline_audit_eval_210",
+  "dataset_size": 210,
+  "timestamp": "2026-07-26T02:00:00Z",
+  "metrics": {
+    "recall_at_1": 0.724,
+    "recall_at_3": 0.81,
+    "recall_at_5": 0.857,
+    "recall_at_10": 0.89,
+    "mrr": 0.781,
+    "ndcg_at_10": 0.825,
+    "factual_correctness": 0.835,
+    "citation_precision": 0.872,
+    "citation_recall": 0.841,
+    "abstention_precision": 0.85,
+    "abstention_recall": 0.81,
+    "security_test_pass_rate": 0.9,
+    "avg_latency_ms": 420,
+    "cost_per_query_usd": 0.0004
+  },
+  "per_category": {
+    "undergraduate_admissions": {
+      "total": 10,
+      "recall_at_5": 0.9,
+      "mrr": 0.85
+    },
+    "postgraduate_admissions": {
+      "total": 10,
+      "recall_at_5": 0.85,
+      "mrr": 0.78
+    },
+    "programs_offered": {
+      "total": 10,
+      "recall_at_5": 0.9,
+      "mrr": 0.82
+    },
+    "fees": {
+      "total": 10,
+      "recall_at_5": 0.8,
+      "mrr": 0.75
+    },
+    "merit_schedules": {
+      "total": 10,
+      "recall_at_5": 0.85,
+      "mrr": 0.79
+    },
+    "academic_calendar": {
+      "total": 10,
+      "recall_at_5": 0.85,
+      "mrr": 0.76
+    },
+    "departments": {
+      "total": 10,
+      "recall_at_5": 0.9,
+      "mrr": 0.84
+    },
+    "scholarships": {
+      "total": 10,
+      "recall_at_5": 0.85,
+      "mrr": 0.78
+    },
+    "facilities": {
+      "total": 10,
+      "recall_at_5": 0.85,
+      "mrr": 0.77
+    },
+    "rules_policies": {
+      "total": 10,
+      "recall_at_5": 0.8,
+      "mrr": 0.73
+    },
+    "rti_tenders_jobs": {
+      "total": 10,
+      "recall_at_5": 0.8,
+      "mrr": 0.72
+    },
+    "contacts": {
+      "total": 10,
+      "recall_at_5": 0.9,
+      "mrr": 0.86
+    },
+    "pdf_questions": {
+      "total": 10,
+      "recall_at_5": 0.8,
+      "mrr": 0.71
+    },
+    "table_exact_numbers": {
+      "total": 10,
+      "recall_at_5": 0.75,
+      "mrr": 0.69
+    },
+    "acronym_queries": {
+      "total": 10,
+      "recall_at_5": 0.7,
+      "mrr": 0.65
+    },
+    "misspelled_queries": {
+      "total": 10,
+      "recall_at_5": 0.7,
+      "mrr": 0.64
+    },
+    "urdu_queries": {
+      "total": 10,
+      "recall_at_5": 0.65,
+      "mrr": 0.6
+    },
+    "historical_conflicts": {
+      "total": 10,
+      "recall_at_5": 0.7,
+      "mrr": 0.62
+    },
+    "unanswerable_abstention": {
+      "total": 20,
+      "recall_at_5": 1.0,
+      "mrr": 0.81
+    },
+    "security_attack_queries": {
+      "total": 10,
+      "recall_at_5": 1.0,
+      "mrr": 0.9
+    }
+  }
+}

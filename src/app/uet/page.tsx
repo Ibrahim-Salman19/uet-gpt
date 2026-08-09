@@ -17,7 +17,14 @@ export const metadata: Metadata = {
       "Complete guide to UET Taxila — admissions, ECAT entry test, merit formula, fee structures, departments, and campus life.",
     url: `${siteUrl}/uet`,
     type: "website",
-    images: [{ url: `${siteUrl}/opengraph-image`, width: 1200, height: 630, alt: "UET GPT — AI Assistant for UET Taxila" }],
+    images: [
+      {
+        url: `${siteUrl}/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: "UET GPT — AI Assistant for UET Taxila",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -86,7 +93,9 @@ export default function UetPage() {
             UET (University of Engineering & Technology)
           </h1>
           <p className="text-lg text-[#a1a1aa] leading-relaxed">
-            Welcome to the complete guide for <strong className="text-white">UET</strong> (University of Engineering and Technology, Taxila) powered by <strong className="text-white">UET GPT</strong> — the open-source AI assistant.
+            Welcome to the complete guide for <strong className="text-white">UET</strong>{" "}
+            (University of Engineering and Technology, Taxila) powered by{" "}
+            <strong className="text-white">UET GPT</strong> — the open-source AI assistant.
           </p>
         </header>
 
@@ -111,7 +120,8 @@ export default function UetPage() {
               About UET GPT →
             </h2>
             <p className="text-sm text-[#a1a1aa]">
-              Learn how the RAG-powered AI chatbot helps students find instant answers with citations.
+              Learn how the RAG-powered AI chatbot helps students find instant answers with
+              citations.
             </p>
           </Link>
 
@@ -123,7 +133,8 @@ export default function UetPage() {
               Admissions & ECAT →
             </h2>
             <p className="text-sm text-[#a1a1aa]">
-              Eligibility, ECAT entry test formula, aggregate calculation, and key application dates.
+              Eligibility, ECAT entry test formula, aggregate calculation, and key application
+              dates.
             </p>
           </Link>
         </section>
@@ -132,7 +143,8 @@ export default function UetPage() {
           <h2 className="text-2xl font-bold text-white mb-6">Ask UET GPT Anything About UET</h2>
           <div className="rounded-xl border border-[#27272a] bg-[#09090b] p-6 text-center">
             <p className="text-base text-[#a1a1aa] mb-6">
-              Get instant, citation-backed answers to your questions about UET Taxila fees, merit lists, hostelling, transport, and departments.
+              Get instant, citation-backed answers to your questions about UET Taxila fees, merit
+              lists, hostelling, transport, and departments.
             </p>
             <Link
               href="/chat"

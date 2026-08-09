@@ -2,337 +2,357 @@
 
 import { api } from "convex/_generated/api";
 import { useMutation } from "convex/react";
-import {
-  Download,
-  HelpCircle,
-  Layers,
-  PlusCircle,
-  Search,
-  Settings,
-  ShieldAlert,
-  Trash2,
-} from "lucide-react";
+import { Layers, PlusCircle, Search, Settings, ShieldAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
-import { AccentTheme, usePreferences } from "@/components/preferences-provider";
+import { toast } from "sonner";
+import { usePreferences } from "@/components/preferences-provider";
 import { cn } from "@/lib/utils";
 
 interface CommandItemData {
   id: string;
   title: string;
-  desc: string;
+  description: string;
   icon: typeof Layers;
-  shortcut: string;
-  action: () => void;
+  aliases: string[];
+  badge: string;
+  action: () => void | Promise<void>;
 }
 
-function useCommandPalette() {
-  const { setSettingsOpen, setDiagnosticsOpen, setAccentTheme, setCommandPaletteOpen } =
-    usePreferences();
+function normalizeSearch(value: string): string {
+  return value
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase();
+}
 
+function useCommands(): CommandItemData[] {
+  const { setSettingsOpen, setDiagnosticsOpen, setAccentTheme } = usePreferences();
   const router = useRouter();
   const createThread = useMutation(api.threads.create);
 
-  const commands: CommandItemData[] = React.useMemo(() => {
-    return [
+  return React.useMemo(
+    () => [
       {
         id: "new",
-        title: "New Conversation",
-        desc: "Start a fresh chat thread with the advisor",
+        title: "New conversation",
+        description: "Create and open a fresh advisor thread",
         icon: PlusCircle,
-        shortcut: "/new",
+        aliases: ["chat", "thread", "new"],
+        badge: "/new",
         action: async () => {
-          try {
-            const threadId = await createThread({ title: "New Chat" });
-            if (threadId) router.push(`/chat/${threadId}`);
-          } catch (error) {
-            console.error("Failed to create thread:", error);
-          }
+          const threadId = await createThread({ title: "New Chat" });
+          if (!threadId) throw new Error("Thread creation returned no identifier");
+          router.push(`/chat/${threadId}`);
         },
       },
       {
         id: "settings",
-        title: "Preferences Settings",
-        desc: "Open theme, audio, and WebGL settings",
+        title: "Open preferences",
+        description: "Configure visuals, motion, sound, and accessibility",
         icon: Settings,
-        shortcut: "/settings",
+        aliases: ["settings", "preferences", "audio", "webgl"],
+        badge: "/settings",
         action: () => setSettingsOpen(true),
       },
       {
         id: "diagnostics",
-        title: "Toggle Telemetry Panel",
-        desc: "Show diagnostics of latency, FPS, and memory",
+        title: "Open diagnostics",
+        description: "Inspect observable connection and rendering metrics",
         icon: ShieldAlert,
-        shortcut: "/telemetry",
+        aliases: ["telemetry", "fps", "network", "connection"],
+        badge: "/diagnostics",
         action: () => setDiagnosticsOpen(true),
       },
-      {
-        id: "theme-indigo",
-        title: "Switch Accent: Indigo",
-        desc: "Set accent theme to electric indigo",
+      ...(
+        [
+          ["indigo", "Indigo", "cool indigo"],
+          ["violet", "Violet", "violet purple"],
+          ["sky", "Sky", "sky cyan blue"],
+          ["amber", "Amber", "amber gold"],
+          ["navy", "UET Gold", "uet navy gold"],
+        ] as const
+      ).map(([theme, label, aliases]) => ({
+        id: `theme-${theme}`,
+        title: `Accent: ${label}`,
+        description: `Apply the ${label} accent palette`,
         icon: Layers,
-        shortcut: "/indigo",
-        action: () => setAccentTheme("indigo"),
-      },
-      {
-        id: "theme-violet",
-        title: "Switch Accent: Violet",
-        desc: "Set accent theme to neon purple",
-        icon: Layers,
-        shortcut: "/violet",
-        action: () => setAccentTheme("violet"),
-      },
-      {
-        id: "theme-sky",
-        title: "Switch Accent: Sky Blue",
-        desc: "Set accent theme to light sky cyan",
-        icon: Layers,
-        shortcut: "/sky",
-        action: () => setAccentTheme("sky"),
-      },
-      {
-        id: "theme-amber",
-        title: "Switch Accent: Amber Gold",
-        desc: "Set accent theme to bright amber gold",
-        icon: Layers,
-        shortcut: "/amber",
-        action: () => setAccentTheme("amber"),
-      },
-      {
-        id: "theme-navy",
-        title: "Switch Accent: UET Gold",
-        desc: "Set accent theme to UET Gold & Navy identity",
-        icon: Layers,
-        shortcut: "/uet",
-        action: () => setAccentTheme("navy"),
-      },
-    ];
-  }, [createThread, router, setSettingsOpen, setDiagnosticsOpen, setAccentTheme]);
-
-  return { commands };
+        aliases: ["theme", "accent", ...aliases.split(" ")],
+        badge: `/${theme === "navy" ? "uet" : theme}`,
+        action: () => setAccentTheme(theme),
+      })),
+    ],
+    [createThread, router, setSettingsOpen, setDiagnosticsOpen, setAccentTheme],
+  );
 }
 
-function useCommandQuery(
+function useFilteredCommands(
   commands: CommandItemData[],
-  onSelectItem: (cmd: CommandItemData) => void,
+  onRun: (command: CommandItemData) => void,
 ) {
   const [query, setQuery] = React.useState("");
   const [selectedIndex, setSelectedIndex] = React.useState(0);
+  const deferredQuery = React.useDeferredValue(query);
 
   const filteredCommands = React.useMemo(() => {
-    if (!query) return commands;
-    return commands.filter(
-      (c) =>
-        c.title.toLowerCase().includes(query.toLowerCase()) ||
-        c.desc.toLowerCase().includes(query.toLowerCase()) ||
-        c.shortcut.toLowerCase().includes(query.toLowerCase()),
-    );
-  }, [query, commands]);
+    const normalized = normalizeSearch(deferredQuery);
+    if (!normalized) return commands;
+
+    return commands
+      .map((command) => {
+        const title = normalizeSearch(command.title);
+        const haystack = normalizeSearch(
+          `${command.title} ${command.description} ${command.badge} ${command.aliases.join(" ")}`,
+        );
+        const score = title.startsWith(normalized)
+          ? 0
+          : title.includes(normalized)
+            ? 1
+            : haystack.includes(normalized)
+              ? 2
+              : Number.POSITIVE_INFINITY;
+        return { command, score };
+      })
+      .filter((entry) => Number.isFinite(entry.score))
+      .sort((a, b) => a.score - b.score)
+      .map((entry) => entry.command);
+  }, [commands, deferredQuery]);
 
   React.useEffect(() => {
     setSelectedIndex(0);
-  }, [query]);
+  }, [deferredQuery]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  React.useEffect(() => {
+    if (selectedIndex >= filteredCommands.length) setSelectedIndex(0);
+  }, [filteredCommands.length, selectedIndex]);
+
+  const handleKeyDown = (event: React.KeyboardEvent) => {
     if (filteredCommands.length === 0) return;
-
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setSelectedIndex((prev) => (prev + 1) % filteredCommands.length);
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setSelectedIndex((prev) => (prev - 1 + filteredCommands.length) % filteredCommands.length);
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      if (filteredCommands[selectedIndex]) {
-        onSelectItem(filteredCommands[selectedIndex]);
-      }
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setSelectedIndex((index) => (index + 1) % filteredCommands.length);
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setSelectedIndex((index) => (index - 1 + filteredCommands.length) % filteredCommands.length);
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      const command = filteredCommands[selectedIndex];
+      if (command) onRun(command);
     }
   };
 
-  return { query, setQuery, selectedIndex, setSelectedIndex, filteredCommands, handleKeyDown };
+  return {
+    query,
+    setQuery,
+    selectedIndex,
+    setSelectedIndex,
+    filteredCommands,
+    handleKeyDown,
+  };
 }
 
 function CommandItem({
-  cmd,
-  isSelected,
-  onSelect,
+  command,
+  selected,
+  busy,
+  optionId,
+  onHover,
+  onRun,
 }: {
-  cmd: CommandItemData;
-  isSelected: boolean;
-  onSelect: (cmd: CommandItemData) => void;
+  command: CommandItemData;
+  selected: boolean;
+  busy: boolean;
+  optionId: string;
+  onHover: () => void;
+  onRun: () => void;
 }) {
-  const Icon = cmd.icon;
+  const Icon = command.icon;
   const ref = React.useRef<HTMLButtonElement | null>(null);
 
   React.useEffect(() => {
-    if (isSelected) {
-      ref.current?.scrollIntoView({ block: "nearest" });
-    }
-  }, [isSelected]);
+    if (selected) ref.current?.scrollIntoView({ block: "nearest" });
+  }, [selected]);
 
   return (
     <button
       ref={ref}
+      id={optionId}
       type="button"
-      id={`cmd-option-${cmd.id}`}
       role="option"
-      aria-selected={isSelected}
-      onClick={() => onSelect(cmd)}
+      aria-selected={selected}
+      tabIndex={-1}
+      disabled={busy}
+      onPointerEnter={onHover}
+      onClick={onRun}
       className={cn(
-        "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-all duration-150 group active:scale-[0.99] border border-transparent cursor-pointer",
-        isSelected ? "bg-white/10 text-white border-white/10" : "hover:bg-white/5 hover:text-white",
+        "group flex w-full items-center justify-between gap-4 rounded-lg border border-transparent px-3 py-2.5 text-left transition-colors focus-visible:outline-none disabled:cursor-wait disabled:opacity-60",
+        selected
+          ? "border-white/10 bg-white/10 text-white"
+          : "text-zinc-300 hover:bg-white/5 hover:text-white",
       )}
     >
-      <div className="flex items-center gap-3">
-        <Icon className="w-3.5 h-3.5 text-zinc-500 group-hover:text-white shrink-0 transition-colors" />
-        <div>
-          <div className="text-xs font-medium font-sans">{cmd.title}</div>
-          <div className="text-[10px] text-zinc-500 font-sans mt-0.5">{cmd.desc}</div>
-        </div>
-      </div>
-      <kbd className="text-[9px] font-mono text-zinc-500 uppercase tracking-wider bg-zinc-900 px-1.5 py-0.5 border border-white/5 rounded select-none">
-        {cmd.shortcut}
+      <span className="flex min-w-0 items-center gap-3">
+        <Icon
+          className="h-4 w-4 shrink-0 text-zinc-500 transition-colors group-hover:text-zinc-200"
+          aria-hidden="true"
+        />
+        <span className="min-w-0">
+          <span className="block truncate text-xs font-medium">{command.title}</span>
+          <span className="mt-0.5 block truncate text-[10px] text-zinc-500">
+            {command.description}
+          </span>
+        </span>
+      </span>
+      <kbd className="shrink-0 rounded border border-white/5 bg-zinc-900 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider text-zinc-500">
+        {command.badge}
       </kbd>
     </button>
   );
 }
 
-function CommandPaletteContent({
-  query,
-  setQuery,
-  filteredCommands,
-  selectedIndex,
-  handleSelect,
-}: {
-  query: string;
-  setQuery: (q: string) => void;
-  filteredCommands: CommandItemData[];
-  selectedIndex: number;
-  handleSelect: (cmd: CommandItemData) => void;
-}) {
-  const activeItem = filteredCommands[selectedIndex];
-  const activeDescendant = activeItem ? `cmd-option-${activeItem.id}` : undefined;
-  return (
-    <div className="bg-[#101012] border border-[#2d2d34] rounded-[1.5rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col pointer-events-auto">
-      <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/5 bg-zinc-950/60">
-        <Search className="w-4 h-4 text-zinc-500 shrink-0" aria-hidden="true" />
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Type a command or search…"
-          className="w-full bg-transparent text-xs text-zinc-100 placeholder:text-zinc-500 outline-none font-sans"
-          spellCheck="false"
-          autoComplete="off"
-          role="combobox"
-          aria-expanded="true"
-          aria-controls="cmd-list"
-          aria-activedescendant={activeDescendant}
-          aria-label="Search commands"
-          // biome-ignore lint/a11y/noAutofocus: command palette opens on user intent and focus is expected
-          autoFocus
-        />
-        <div className="flex items-center gap-1 shrink-0 select-none">
-          <kbd className="px-1.5 py-0.5 rounded bg-zinc-900 border border-white/10 text-[9px] font-mono text-zinc-500 shadow-sm">
-            ESC
-          </kbd>
-        </div>
-      </div>
-      <div
-        id="cmd-list"
-        role="listbox"
-        aria-label="Commands"
-        className="max-h-[320px] overflow-y-auto custom-scroll p-2 space-y-0.5 text-zinc-300"
-      >
-        <div
-          className="text-[9px] font-mono text-zinc-500 uppercase tracking-wider px-3 py-2 select-none"
-          role="presentation"
-        >
-          Quick Actions
-        </div>
-        {filteredCommands.length === 0 ? (
-          <div className="text-xs text-zinc-500 py-6 text-center font-sans">
-            No commands found matching &quot;{query}&quot;
-          </div>
-        ) : (
-          filteredCommands.map((cmd, idx) => (
-            <CommandItem
-              key={cmd.id}
-              cmd={cmd}
-              isSelected={idx === selectedIndex}
-              onSelect={handleSelect}
-            />
-          ))
-        )}
-      </div>
-    </div>
-  );
-}
-
-function useCommandPaletteHotkey(setOpen: (v: boolean) => void) {
+function useCommandPaletteHotkey(setOpen: (open: boolean) => void) {
   React.useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        setOpen(true);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        if (!event.repeat) setOpen(true);
       }
     };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [setOpen]);
 }
 
 export function CommandPalette() {
-  const { commandPaletteOpen, setCommandPaletteOpen, playTapSound } = usePreferences();
+  const { commandPaletteOpen, setCommandPaletteOpen } = usePreferences();
   const dialogRef = React.useRef<HTMLDialogElement | null>(null);
+  const inputRef = React.useRef<HTMLInputElement | null>(null);
+  const listId = React.useId();
+  const optionPrefix = React.useId();
+  const [runningId, setRunningId] = React.useState<string | null>(null);
+  const runningRef = React.useRef(false);
+  const commands = useCommands();
 
-  const handleClose = React.useCallback(
-    () => setCommandPaletteOpen(false),
-    [setCommandPaletteOpen],
-  );
-  const handleSelect = React.useCallback(
-    (cmd: CommandItemData) => {
-      playTapSound();
-      cmd.action();
-      setCommandPaletteOpen(false);
+  const close = React.useCallback(() => {
+    setCommandPaletteOpen(false);
+  }, [setCommandPaletteOpen]);
+
+  const runCommand = React.useCallback(
+    async (command: CommandItemData) => {
+      if (runningRef.current) return;
+      runningRef.current = true;
+      setRunningId(command.id);
+      try {
+        await command.action();
+        close();
+      } catch (error) {
+        console.error(`Command ${command.id} failed`, error);
+        toast.error("That command could not be completed");
+      } finally {
+        runningRef.current = false;
+        setRunningId(null);
+      }
     },
-    [playTapSound, setCommandPaletteOpen],
+    [close],
   );
 
-  const { commands } = useCommandPalette();
-  const { query, setQuery, selectedIndex, setSelectedIndex, filteredCommands, handleKeyDown } =
-    useCommandQuery(commands, handleSelect);
-
+  const search = useFilteredCommands(commands, (command) => void runCommand(command));
   useCommandPaletteHotkey(setCommandPaletteOpen);
 
   React.useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
-    if (commandPaletteOpen) {
-      dialog.showModal();
-      setQuery("");
-      setSelectedIndex(0);
-    } else {
+
+    if (commandPaletteOpen && !dialog.open) {
+      search.setQuery("");
+      search.setSelectedIndex(0);
+      try {
+        dialog.showModal();
+        requestAnimationFrame(() => inputRef.current?.focus());
+      } catch (error) {
+        if (process.env.NODE_ENV !== "production") {
+          console.warn("Command palette could not be opened", error);
+        }
+        setCommandPaletteOpen(false);
+      }
+    } else if (!commandPaletteOpen && dialog.open) {
       dialog.close();
     }
-  }, [commandPaletteOpen, setQuery, setSelectedIndex]);
+  }, [commandPaletteOpen, search.setQuery, search.setSelectedIndex, setCommandPaletteOpen]);
+
+  const activeCommand = search.filteredCommands[search.selectedIndex];
+  const activeId = activeCommand ? `${optionPrefix}-${activeCommand.id}` : undefined;
 
   return (
     <dialog
       ref={dialogRef}
       id="command-palette"
-      onClose={handleClose}
-      onKeyDown={handleKeyDown}
-      className="fixed inset-0 z-[100] m-auto bg-transparent p-0 w-full max-w-[500px] border-none outline-none"
+      aria-label="Command palette"
+      onCancel={close}
+      onClose={close}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) close();
+      }}
+      onKeyDown={search.handleKeyDown}
+      className="fixed inset-0 z-[100] m-auto w-[calc(100%_-_2rem)] max-w-[520px] border-none bg-transparent p-0 outline-none backdrop:bg-black/70 backdrop:backdrop-blur-sm"
     >
-      <CommandPaletteContent
-        query={query}
-        setQuery={setQuery}
-        filteredCommands={filteredCommands}
-        selectedIndex={selectedIndex}
-        handleSelect={handleSelect}
-      />
+      <div className="pointer-events-auto flex flex-col overflow-hidden rounded-[1.5rem] border border-[#2d2d34] bg-[#101012] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.9)]">
+        <div className="flex items-center gap-3 border-b border-white/5 bg-zinc-950/60 px-4 py-3.5">
+          <Search className="h-4 w-4 shrink-0 text-zinc-500" aria-hidden="true" />
+          <input
+            ref={inputRef}
+            type="search"
+            value={search.query}
+            onChange={(event) => search.setQuery(event.target.value)}
+            placeholder="Search commands…"
+            className="w-full bg-transparent text-xs text-zinc-100 outline-none placeholder:text-zinc-500"
+            spellCheck={false}
+            autoComplete="off"
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded="true"
+            aria-controls={listId}
+            aria-activedescendant={activeId}
+            aria-label="Search commands"
+          />
+          <kbd className="shrink-0 rounded border border-white/10 bg-zinc-900 px-1.5 py-0.5 font-mono text-[9px] text-zinc-500">
+            ESC
+          </kbd>
+        </div>
+
+        <div
+          id={listId}
+          role="listbox"
+          aria-label="Available commands"
+          aria-busy={Boolean(runningId)}
+          className="custom-scroll max-h-[min(22rem,60dvh)] space-y-0.5 overflow-y-auto p-2 text-zinc-300"
+        >
+          <div
+            className="px-3 py-2 font-mono text-[9px] uppercase tracking-wider text-zinc-500"
+            role="presentation"
+          >
+            Quick actions
+          </div>
+          {search.filteredCommands.length === 0 ? (
+            <p className="py-8 text-center text-xs text-zinc-500" role="status">
+              No command matches “{search.query}”.
+            </p>
+          ) : (
+            search.filteredCommands.map((command, index) => (
+              <CommandItem
+                key={command.id}
+                command={command}
+                selected={index === search.selectedIndex}
+                busy={Boolean(runningId)}
+                optionId={`${optionPrefix}-${command.id}`}
+                onHover={() => search.setSelectedIndex(index)}
+                onRun={() => void runCommand(command)}
+              />
+            ))
+          )}
+        </div>
+      </div>
     </dialog>
   );
 }

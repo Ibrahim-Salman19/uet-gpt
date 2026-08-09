@@ -1,12 +1,21 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
+
 import { APP_NAME } from "@/lib/constants";
 
+const PAGE_TITLE = `Explore UET Taxila - ${APP_NAME}`;
+const PAGE_DESCRIPTION =
+  "Search and browse indexed UET Taxila documents, including academic information, admissions resources, research, departments, programs, campus services, and official university pages.";
+
 export const metadata: Metadata = {
-  title: `Explore Documents - ${APP_NAME}`,
-  description:
-    "Browse and search all indexed UET Taxila documents - academic content, admissions info, campus resources, research papers, and official university pages.",
+  title: PAGE_TITLE,
+  description: PAGE_DESCRIPTION,
 };
 
-export default function ExploreLayout({ children }: { children: React.ReactNode }) {
+interface ExploreLayoutProps {
+  children: ReactNode;
+}
+
+export default function ExploreLayout({ children }: Readonly<ExploreLayoutProps>) {
   return children;
 }

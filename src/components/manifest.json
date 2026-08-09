@@ -1,0 +1,159 @@
+{
+  "package": "uetgpt-ui-production-v2",
+  "generated_on": "2026-07-31",
+  "tsx_file_count": 19,
+  "files": [
+    {
+      "file": "ConvexConnectionMonitor.tsx",
+      "original_lines": 29,
+      "enhanced_lines": 111,
+      "added_or_changed_lines": 98,
+      "removed_or_changed_lines": 16,
+      "sha256": "b24cb7bdf38e97447344aef6fc6592b24da747a48f27ea22085557c5e9ead66c"
+    },
+    {
+      "file": "ambient-glow.tsx",
+      "original_lines": 57,
+      "enhanced_lines": 128,
+      "added_or_changed_lines": 94,
+      "removed_or_changed_lines": 23,
+      "sha256": "9e6c1e29cf19f301f8dcd8a8d9a141c17e351a76ac8cc9afa83cbf230d0f4f80"
+    },
+    {
+      "file": "backdrop-wrapper.tsx",
+      "original_lines": 31,
+      "enhanced_lines": 84,
+      "added_or_changed_lines": 59,
+      "removed_or_changed_lines": 6,
+      "sha256": "568e947df65440a8e9509abfe834e11b24031d4e7ff2efcf74f49e0e9b11c931"
+    },
+    {
+      "file": "command-palette.tsx",
+      "original_lines": 338,
+      "enhanced_lines": 344,
+      "added_or_changed_lines": 255,
+      "removed_or_changed_lines": 249,
+      "sha256": "5b7ea84bb29fddeed0891c24f5ef9baf2d71e00e01f5cdc677f4cc0a609c0f81"
+    },
+    {
+      "file": "connection-status.tsx",
+      "original_lines": 61,
+      "enhanced_lines": 115,
+      "added_or_changed_lines": 90,
+      "removed_or_changed_lines": 36,
+      "sha256": "7bfcca5382f7f44ca1e08eb7f7038becd204f45c80ac3e575cb15d5b2962052d"
+    },
+    {
+      "file": "convex-ready-gate.tsx",
+      "original_lines": 566,
+      "enhanced_lines": 272,
+      "added_or_changed_lines": 242,
+      "removed_or_changed_lines": 536,
+      "sha256": "2dd0087b2693e0b5a835a05a0c5fe29ab5fd0b25a4da2d04aaf7ce79c85e6e69"
+    },
+    {
+      "file": "diagnostics-panel.tsx",
+      "original_lines": 86,
+      "enhanced_lines": 291,
+      "added_or_changed_lines": 270,
+      "removed_or_changed_lines": 65,
+      "sha256": "e4893dcc794d77e670cb9d10efb408dacc760488bb84c3c03bf1c6a51f1f1b34"
+    },
+    {
+      "file": "empty-state.tsx",
+      "original_lines": 50,
+      "enhanced_lines": 61,
+      "added_or_changed_lines": 24,
+      "removed_or_changed_lines": 13,
+      "sha256": "bc3133e98eeaaa84f67d9a98e85280d9441b76595e42524f03411290baa3718f"
+    },
+    {
+      "file": "loading-state.tsx",
+      "original_lines": 546,
+      "enhanced_lines": 544,
+      "added_or_changed_lines": 1,
+      "removed_or_changed_lines": 3,
+      "sha256": "a6c67a90ad4be38d374f29181afcf928468ef2d469fda369c6b67eecdc272996"
+    },
+    {
+      "file": "main-shell.tsx",
+      "original_lines": 602,
+      "enhanced_lines": 654,
+      "added_or_changed_lines": 457,
+      "removed_or_changed_lines": 405,
+      "sha256": "4b93647d7da3c49c001cff0478e49a5c13fc019eb7e0683c11d2dabbeffe6f07"
+    },
+    {
+      "file": "markdown.tsx",
+      "original_lines": 209,
+      "enhanced_lines": 249,
+      "added_or_changed_lines": 144,
+      "removed_or_changed_lines": 104,
+      "sha256": "ac898b4a7b24c5239a31efd176ea97a7c030c07f4e5242c297c287f7e0cb308e"
+    },
+    {
+      "file": "preferences-modal.tsx",
+      "original_lines": 201,
+      "enhanced_lines": 354,
+      "added_or_changed_lines": 301,
+      "removed_or_changed_lines": 148,
+      "sha256": "726d8859023521ac206620ae64455b1da96e002d575c781051dd994c9df6add9"
+    },
+    {
+      "file": "preferences-provider.tsx",
+      "original_lines": 794,
+      "enhanced_lines": 988,
+      "added_or_changed_lines": 768,
+      "removed_or_changed_lines": 574,
+      "sha256": "a92e6527eb8aa8f0a2465d86079f9cbafa81b3d39788490dd96a78906fab405c"
+    },
+    {
+      "file": "providers.tsx",
+      "original_lines": 133,
+      "enhanced_lines": 241,
+      "added_or_changed_lines": 181,
+      "removed_or_changed_lines": 73,
+      "sha256": "0d62a9d7802391c9606b5ef634761f3bff86c6992fe634d59e70dae4906f3156"
+    },
+    {
+      "file": "theme-provider.tsx",
+      "original_lines": 65,
+      "enhanced_lines": 131,
+      "added_or_changed_lines": 99,
+      "removed_or_changed_lines": 33,
+      "sha256": "54658add1b152d8eb297a35590d003fac97ff16a7f1665a87fe0c2038f56a2e4"
+    },
+    {
+      "file": "theme-toggle.tsx",
+      "original_lines": 22,
+      "enhanced_lines": 31,
+      "added_or_changed_lines": 13,
+      "removed_or_changed_lines": 4,
+      "sha256": "5f55cdf9bdfdab16f58074d87029254a37a66da6588c3c8f1ef1c691845dc036"
+    },
+    {
+      "file": "voice-modal-wrapper.tsx",
+      "original_lines": 14,
+      "enhanced_lines": 11,
+      "added_or_changed_lines": 4,
+      "removed_or_changed_lines": 7,
+      "sha256": "39b9bc1a067e2745326915b60151595091a2c0ca498aa7b966f3c261b319ae7c"
+    },
+    {
+      "file": "voice-modal.tsx",
+      "original_lines": 424,
+      "enhanced_lines": 433,
+      "added_or_changed_lines": 304,
+      "removed_or_changed_lines": 295,
+      "sha256": "b18d0dc818b923096ead18f8dc4ba286cb0d3d4c783bbe028c0a54a1cf463880"
+    },
+    {
+      "file": "webgl-backdrop.tsx",
+      "original_lines": 461,
+      "enhanced_lines": 590,
+      "added_or_changed_lines": 288,
+      "removed_or_changed_lines": 159,
+      "sha256": "eb86ce50199b7e20eaef8e34eb6f9b4b4ef22ffc9c13abf7b1273ca2ef597892"
+    }
+  ]
+}

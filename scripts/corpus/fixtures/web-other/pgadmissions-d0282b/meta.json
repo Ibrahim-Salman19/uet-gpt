@@ -1,0 +1,12 @@
+{
+  "body_sha256": "3a933009b0f70fc338f82109dd51c72c09e77a17ae96ecfce24ac13822ff271e",
+  "body_size": 69919,
+  "content_type": "text/html; charset=utf-8",
+  "elapsed_ms": 1078,
+  "fetched_at": "2026-08-03T17:59:09+00:00",
+  "final_url": "https://web.uettaxila.edu.pk/pgAdmissions",
+  "redirect_chain": [],
+  "remote_ip": "104.21.50.7,172.67.198.179,2606:4700:3031::6815:3207,2606:4700:3032::ac43:c6b3",
+  "requested_url": "https://web.uettaxila.edu.pk/pgAdmissions",
+  "status": 200
+}

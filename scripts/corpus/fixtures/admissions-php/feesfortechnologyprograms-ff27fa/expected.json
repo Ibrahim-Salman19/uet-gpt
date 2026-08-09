@@ -1,0 +1,46 @@
+{
+  "_curated": true,
+  "_labelled_by": "scripts/eval/_label_vacuous.py (Deliverable 2 grounded labels)",
+  "expected": {
+    "canonical_host": "admissions.uettaxila.edu.pk",
+    "criticality": "critical",
+    "forbidden_links_contain": [
+      "logout",
+      "login"
+    ],
+    "forbidden_text_blocks": [],
+    "required_links_contain": [],
+    "required_text_blocks": [
+      {
+        "text": "Fee Structure",
+        "why": "page H1"
+      },
+      {
+        "text": "Tuition",
+        "why": "a recurring line item"
+      },
+      {
+        "text": "25,000",
+        "why": "tuition amount"
+      },
+      {
+        "text": "Per Semester",
+        "why": "recurring-charge section"
+      },
+      {
+        "text": "Non-Resident",
+        "why": "fee-table column header"
+      }
+    ],
+    "resource_min_count": 0,
+    "title_contains": [
+      "Fee Structure"
+    ],
+    "title_not_contains": [
+      "Untitled",
+      "404"
+    ]
+  },
+  "family": "admissions-php",
+  "fixture_id": "admissions-php/feesfortechnologyprograms-ff27fa"
+}

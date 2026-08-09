@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle, Mic, MicOff } from "lucide-react";
+import { CheckCircle, Mic, MicOff, RotateCcw } from "lucide-react";
 import * as React from "react";
 import { usePreferences } from "@/components/preferences-provider";
 
@@ -8,32 +8,31 @@ interface VoiceModalProps {
   onTranscript?: (text: string) => void;
 }
 
-// ── Minimal Web Speech API types ──
-// The DOM lib does not ship SpeechRecognition typings in all TS configs, so we
-// declare the narrow surface we actually use instead of falling back to `any`.
+const MAX_LISTENING_MS = 60_000;
 
-interface SpeechRecognitionAlternative {
+interface SpeechRecognitionAlternativeLike {
   readonly transcript: string;
 }
 
-interface SpeechRecognitionResult {
+interface SpeechRecognitionResultLike {
   readonly isFinal: boolean;
   readonly length: number;
-  [index: number]: SpeechRecognitionAlternative;
+  [index: number]: SpeechRecognitionAlternativeLike;
 }
 
-interface SpeechRecognitionResultList {
+interface SpeechRecognitionResultListLike {
   readonly length: number;
-  [index: number]: SpeechRecognitionResult;
+  [index: number]: SpeechRecognitionResultLike;
 }
 
 interface SpeechRecognitionEventLike extends Event {
   readonly resultIndex: number;
-  readonly results: SpeechRecognitionResultList;
+  readonly results: SpeechRecognitionResultListLike;
 }
 
 interface SpeechRecognitionErrorEventLike extends Event {
   readonly error: string;
+  readonly message?: string;
 }
 
 interface SpeechRecognitionInstance {
@@ -52,162 +51,235 @@ interface SpeechRecognitionInstance {
 
 type SpeechRecognitionConstructor = new () => SpeechRecognitionInstance;
 
-interface SpeechRecognitionWindow {
+interface SpeechRecognitionWindow extends Window {
   SpeechRecognition?: SpeechRecognitionConstructor;
   webkitSpeechRecognition?: SpeechRecognitionConstructor;
 }
 
-function getSpeechRecognition(): SpeechRecognitionConstructor | undefined {
+function getSpeechRecognitionConstructor(): SpeechRecognitionConstructor | undefined {
   if (typeof window === "undefined") return undefined;
-  const w = window as unknown as SpeechRecognitionWindow;
-  return w.SpeechRecognition ?? w.webkitSpeechRecognition;
+  const speechWindow = window as SpeechRecognitionWindow;
+  return speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition;
 }
 
-// ── Speech Recognition Hook ──
+function speechErrorMessage(error: string): string {
+  switch (error) {
+    case "no-speech":
+      return "No speech was detected. Check your microphone and try again.";
+    case "audio-capture":
+      return "No working microphone was found.";
+    case "not-allowed":
+    case "service-not-allowed":
+      return "Microphone or speech-recognition permission was denied.";
+    case "network":
+      return "Speech recognition could not reach its recognition service.";
+    case "language-not-supported":
+      return "Your current browser language is not supported for speech recognition.";
+    case "aborted":
+      return "Listening was cancelled.";
+    default:
+      return "Speech recognition stopped unexpectedly. Please try again.";
+  }
+}
 
 function useSpeechRecognition() {
   const [transcript, setTranscript] = React.useState("");
   const [isListening, setIsListening] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const [isSupported, setIsSupported] = React.useState(true);
+  const [isSupported, setIsSupported] = React.useState(false);
   const recognitionRef = React.useRef<SpeechRecognitionInstance | null>(null);
+  const finalTranscriptRef = React.useRef("");
+  const manuallyStoppingRef = React.useRef(false);
+  const autoStopTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Check browser support
-  React.useEffect(() => {
-    if (!getSpeechRecognition()) {
-      setIsSupported(false);
+  const clearAutoStopTimer = React.useCallback(() => {
+    if (autoStopTimerRef.current !== null) {
+      clearTimeout(autoStopTimerRef.current);
+      autoStopTimerRef.current = null;
     }
   }, []);
 
-  // Setup speech recognition
+  React.useEffect(() => {
+    setIsSupported(Boolean(getSpeechRecognitionConstructor()));
+  }, []);
+
+  const abortListening = React.useCallback(() => {
+    clearAutoStopTimer();
+    manuallyStoppingRef.current = true;
+    const recognition = recognitionRef.current;
+    recognitionRef.current = null;
+    if (recognition) {
+      recognition.onstart = null;
+      recognition.onresult = null;
+      recognition.onerror = null;
+      recognition.onend = null;
+      try {
+        recognition.abort();
+      } catch {
+        // Already stopped.
+      }
+    }
+    setIsListening(false);
+  }, [clearAutoStopTimer]);
+
   const startListening = React.useCallback(() => {
-    const SpeechRecognition = getSpeechRecognition();
+    const SpeechRecognition = getSpeechRecognitionConstructor();
     if (!SpeechRecognition) {
+      setIsSupported(false);
       setError("Speech recognition is not supported in this browser.");
       return;
     }
 
+    abortListening();
+    manuallyStoppingRef.current = false;
+    finalTranscriptRef.current = "";
+    setTranscript("");
+    setError(null);
+
     const recognition = new SpeechRecognition();
-    recognition.lang = "en-US";
+    recognition.lang = navigator.language || "en-US";
     recognition.interimResults = true;
-    recognition.continuous = false;
+    recognition.continuous = true;
     recognition.maxAlternatives = 1;
     recognitionRef.current = recognition;
 
     recognition.onstart = () => {
+      if (recognitionRef.current !== recognition) return;
       setIsListening(true);
-      setError(null);
+      clearAutoStopTimer();
+      autoStopTimerRef.current = setTimeout(() => {
+        if (recognitionRef.current !== recognition) return;
+        manuallyStoppingRef.current = true;
+        try {
+          recognition.stop();
+        } catch {
+          abortListening();
+        }
+      }, MAX_LISTENING_MS);
     };
 
-    recognition.onresult = (event: SpeechRecognitionEventLike) => {
-      let interimTranscript = "";
-      let finalTranscript = "";
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const result = event.results[i];
-        if (!result) continue;
-        const alt = result[0];
-        if (!alt) continue;
+    recognition.onresult = (event) => {
+      let interim = "";
+      for (let index = event.resultIndex; index < event.results.length; index += 1) {
+        const result = event.results[index];
+        const alternative = result?.[0];
+        if (!alternative) continue;
+
         if (result.isFinal) {
-          finalTranscript += alt.transcript;
+          finalTranscriptRef.current =
+            `${finalTranscriptRef.current} ${alternative.transcript}`.trim();
         } else {
-          interimTranscript += alt.transcript;
+          interim += alternative.transcript;
         }
       }
-      setTranscript(finalTranscript || interimTranscript);
+
+      setTranscript(`${finalTranscriptRef.current} ${interim}`.trim());
     };
 
-    recognition.onerror = (event: SpeechRecognitionErrorEventLike) => {
-      if (event.error === "no-speech") {
-        setError("No speech detected. Try again.");
-      } else if (event.error === "not-allowed") {
-        setError("Microphone access was denied. Allow microphone in browser settings.");
-      } else {
-        setError(`Error: ${event.error}`);
+    recognition.onerror = (event) => {
+      clearAutoStopTimer();
+      if (event.error !== "aborted" || !manuallyStoppingRef.current) {
+        setError(speechErrorMessage(event.error));
       }
       setIsListening(false);
     };
 
     recognition.onend = () => {
+      clearAutoStopTimer();
+      if (recognitionRef.current === recognition) recognitionRef.current = null;
       setIsListening(false);
     };
 
-    recognition.start();
-  }, []);
+    try {
+      recognition.start();
+    } catch (startError) {
+      recognitionRef.current = null;
+      setIsListening(false);
+      setError(
+        startError instanceof DOMException && startError.name === "InvalidStateError"
+          ? "The microphone is already starting. Please wait a moment."
+          : "Speech recognition could not be started.",
+      );
+    }
+  }, [abortListening, clearAutoStopTimer]);
 
   const stopListening = React.useCallback(() => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
+    const recognition = recognitionRef.current;
+    if (!recognition) {
+      setIsListening(false);
+      return;
     }
-    setIsListening(false);
-  }, []);
+    manuallyStoppingRef.current = true;
+    try {
+      recognition.stop();
+    } catch {
+      abortListening();
+    }
+  }, [abortListening]);
 
-  // Ensure the microphone is released if the component unmounts while listening.
-  React.useEffect(() => {
-    return () => {
-      recognitionRef.current?.abort();
-      recognitionRef.current = null;
-    };
-  }, []);
+  const reset = React.useCallback(() => {
+    abortListening();
+    finalTranscriptRef.current = "";
+    setTranscript("");
+    setError(null);
+  }, [abortListening]);
+
+  React.useEffect(() => abortListening, [abortListening]);
 
   return {
     transcript,
     isListening,
     error,
     isSupported,
-    setTranscript,
-    setError,
     startListening,
     stopListening,
+    abortListening,
+    reset,
   };
 }
 
-// ── Waveform Bars ──
-
-function usePrefersReducedMotion() {
-  const [reduced, setReduced] = React.useState(false);
+function useReducedMotion(): boolean {
+  const [reduced, setReduced] = React.useState(true);
 
   React.useEffect(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return;
-    const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(mql.matches);
-    const handler = (e: MediaQueryListEvent) => setReduced(e.matches);
-    mql.addEventListener("change", handler);
-    return () => mql.removeEventListener("change", handler);
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReduced(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
   }, []);
 
   return reduced;
 }
 
-const WAVEFORM_HEIGHTS = [0.3, 0.7, 0.5, 0.9, 0.4, 0.6, 0.8, 0.35, 0.65];
+const WAVEFORM_HEIGHTS = [30, 70, 50, 90, 40, 60, 80, 35, 65] as const;
 
 function WaveformBars({
-  isListening,
+  listening,
   hasTranscript,
 }: {
-  isListening: boolean;
+  listening: boolean;
   hasTranscript: boolean;
 }) {
-  const prefersReducedMotion = usePrefersReducedMotion();
-  const animate = isListening && !prefersReducedMotion;
+  const reducedMotion = useReducedMotion();
+
   return (
-    <div className="flex items-end justify-center gap-1.5 h-12" aria-hidden="true">
-      {WAVEFORM_HEIGHTS.map((h, i) => (
-        <div
-          key={`bar-${h}`}
-          className="w-1 rounded-full transition-all duration-300"
+    <div className="flex h-12 items-end justify-center gap-1.5" aria-hidden="true">
+      {WAVEFORM_HEIGHTS.map((height, index) => (
+        <span
+          key={`${height}-${index}`}
+          className="w-1 rounded-full transition-[height,background-color] duration-300 motion-reduce:transition-none"
           style={{
-            height: isListening ? `${h * 100}%` : "20%",
-            background: isListening
+            height: listening ? `${height}%` : "20%",
+            backgroundColor: listening
               ? "var(--accent)"
               : hasTranscript
-                ? "oklch(0.55 0.18 145)"
-                : "rgb(63, 63, 70)",
-            animationName: animate ? "pulse" : "none",
-            animationDuration: `${0.6 + i * 0.07}s`,
-            animationTimingFunction: "ease-in-out",
-            animationIterationCount: "infinite",
-            animationDirection: "alternate",
-            animationDelay: `${i * 0.05}s`,
+                ? "var(--semantic-success, #34d399)"
+                : "rgb(63 63 70)",
+            animation:
+              listening && !reducedMotion
+                ? `pulse ${0.65 + index * 0.06}s ease-in-out ${index * 0.04}s infinite alternate`
+                : "none",
           }}
         />
       ))}
@@ -215,210 +287,151 @@ function WaveformBars({
   );
 }
 
-// ── Voice Action Buttons ──
-
-function VoiceActionButtons({
-  isListening,
-  transcript,
-  isSupported,
-  onCancel,
-  onStop,
-  onConfirm,
-  onStart,
-}: {
-  isListening: boolean;
-  transcript: string;
-  isSupported: boolean;
-  onCancel: () => void;
-  onStop: () => void;
-  onConfirm: () => void;
-  onStart: () => void;
-}) {
-  return (
-    <div className="w-full flex gap-3">
-      <button
-        type="button"
-        onClick={onCancel}
-        aria-label="Cancel voice input"
-        className="flex-1 py-2.5 border border-white/5 hover:bg-white/5 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white transition-all duration-200 active:scale-95 cursor-pointer font-sans"
-      >
-        Cancel
-      </button>
-
-      {isListening ? (
-        <button
-          type="button"
-          onClick={onStop}
-          aria-label="Stop listening"
-          className="flex-1 py-2.5 bg-red-500/20 border border-red-500/30 hover:bg-red-500/30 rounded-lg text-xs font-semibold text-red-400 hover:text-red-300 transition-all duration-200 active:scale-95 cursor-pointer font-sans flex items-center justify-center gap-1.5"
-        >
-          <MicOff className="h-3.5 w-3.5" aria-hidden="true" />
-          Stop
-        </button>
-      ) : transcript ? (
-        <button
-          type="button"
-          onClick={onConfirm}
-          aria-label="Confirm and send transcript"
-          className="flex-1 py-2.5 bg-[var(--accent)]/20 border border-[var(--accent)]/30 hover:bg-[var(--accent)]/30 rounded-lg text-xs font-semibold text-[var(--accent)] transition-all duration-200 active:scale-95 cursor-pointer font-sans flex items-center justify-center gap-1.5"
-        >
-          <CheckCircle className="h-3.5 w-3.5" aria-hidden="true" />
-          Confirm
-        </button>
-      ) : (
-        <button
-          type="button"
-          onClick={onStart}
-          disabled={!isSupported}
-          aria-label="Start listening"
-          className="flex-1 py-2.5 bg-[var(--accent)]/20 border border-[var(--accent)]/30 hover:bg-[var(--accent)]/30 rounded-lg text-xs font-semibold text-[var(--accent)] transition-all duration-200 active:scale-95 cursor-pointer font-sans flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <Mic className="h-3.5 w-3.5" aria-hidden="true" />
-          Start
-        </button>
-      )}
-    </div>
-  );
-}
-
-function VoiceDialogContent({
-  isListening,
-  transcript,
-  error,
-  isSupported,
-  onCancel,
-  onConfirm,
-  onStop,
-  onStart,
-}: {
-  isListening: boolean;
-  transcript: string;
-  error: string | null;
-  isSupported: boolean;
-  onCancel: () => void;
-  onConfirm: () => void;
-  onStop: () => void;
-  onStart: () => void;
-}) {
-  return (
-    <div className="bg-[var(--surface-3)] border border-[var(--surface-4)] rounded-[1.5rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.9)] p-6 flex flex-col items-center text-center gap-4">
-      <div>
-        <h3
-          id="voice-modal-title"
-          className="text-sm font-semibold text-zinc-100 tracking-wide font-sans"
-        >
-          Voice Input
-        </h3>
-        <p
-          id="voice-modal-status"
-          role="status"
-          aria-live="polite"
-          className="text-xs text-zinc-500 mt-1 font-sans"
-        >
-          {isListening
-            ? "Listening… speak your question"
-            : transcript
-              ? "Tap confirm to send, or retry"
-              : isSupported
-                ? "Tap the mic to start"
-                : "Not supported in this browser"}
-        </p>
-      </div>
-
-      <WaveformBars isListening={isListening} hasTranscript={!!transcript} />
-
-      <p
-        id="voice-transcript"
-        role="status"
-        aria-live="polite"
-        aria-label="Recognized speech transcript"
-        className="text-xs font-mono text-[var(--accent)] italic min-h-[2.5rem] px-2 select-text leading-relaxed w-full text-left"
-      >
-        {transcript || (error ? "" : "\u00a0")}
-      </p>
-
-      {error && (
-        <p role="alert" className="text-xs text-red-400 font-sans -mt-2 px-2">
-          {error}
-        </p>
-      )}
-
-      <VoiceActionButtons
-        isListening={isListening}
-        transcript={transcript}
-        isSupported={isSupported}
-        onCancel={onCancel}
-        onStop={onStop}
-        onConfirm={onConfirm}
-        onStart={onStart}
-      />
-    </div>
-  );
-}
-
 export function VoiceModal({ onTranscript }: VoiceModalProps) {
   const { voiceInputOpen, setVoiceInputOpen } = usePreferences();
   const dialogRef = React.useRef<HTMLDialogElement | null>(null);
-  const {
-    transcript,
-    isListening,
-    error,
-    isSupported,
-    setTranscript,
-    setError,
-    startListening,
-    stopListening,
-  } = useSpeechRecognition();
+  const titleId = React.useId();
+  const statusId = React.useId();
+  const speech = useSpeechRecognition();
 
-  const handleConfirm = React.useCallback(() => {
-    if (transcript.trim() && onTranscript) onTranscript(transcript.trim());
+  const close = React.useCallback(() => {
+    speech.reset();
     setVoiceInputOpen(false);
-    setTranscript("");
-  }, [transcript, onTranscript, setVoiceInputOpen]);
+  }, [speech.reset, setVoiceInputOpen]);
 
-  const handleClose = React.useCallback(() => {
-    stopListening();
-    setVoiceInputOpen(false);
-    setTranscript("");
-    setError(null);
-  }, [stopListening, setVoiceInputOpen]);
+  const confirm = React.useCallback(() => {
+    const value = speech.transcript.trim();
+    if (!value || !onTranscript) return;
+    try {
+      onTranscript(value);
+      close();
+    } catch (error) {
+      console.error("Voice transcript callback failed", error);
+    }
+  }, [speech.transcript, onTranscript, close]);
 
   React.useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
-    if (voiceInputOpen) {
-      dialog.showModal();
-      setTranscript("");
-      setError(null);
-      // Defer mic start slightly so the open animation settles. Capture the id
-      // so we can cancel it if the modal closes within the delay window,
-      // otherwise startListening would fire after close and re-open the mic.
-      const startTimer = setTimeout(startListening, 200);
-      return () => clearTimeout(startTimer);
+
+    if (voiceInputOpen && !dialog.open) {
+      speech.reset();
+      try {
+        dialog.showModal();
+      } catch (error) {
+        if (process.env.NODE_ENV !== "production") {
+          console.warn("Voice dialog could not be opened", error);
+        }
+        setVoiceInputOpen(false);
+      }
+    } else if (!voiceInputOpen && dialog.open) {
+      speech.abortListening();
+      dialog.close();
     }
-    stopListening();
-    dialog.close();
-  }, [voiceInputOpen, startListening, stopListening, setTranscript, setError]);
+  }, [voiceInputOpen, speech.reset, speech.abortListening, setVoiceInputOpen]);
+
+  const status = speech.isListening
+    ? "Listening. Speak clearly, then choose Stop."
+    : speech.transcript
+      ? "Review the transcript, then confirm or retry."
+      : speech.isSupported
+        ? "Choose Start when you are ready."
+        : "Speech recognition is unavailable in this browser.";
 
   return (
     <dialog
       ref={dialogRef}
       id="voice-modal"
-      aria-labelledby="voice-modal-title"
-      aria-describedby="voice-modal-status"
-      onClose={handleClose}
-      className="fixed inset-0 z-[100] m-auto bg-transparent p-0 w-full max-w-[360px] border-none outline-none"
+      aria-labelledby={titleId}
+      aria-describedby={statusId}
+      onCancel={close}
+      onClose={() => setVoiceInputOpen(false)}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) close();
+      }}
+      className="fixed inset-0 z-[100] m-auto w-[calc(100%_-_2rem)] max-w-[380px] border-none bg-transparent p-0 outline-none backdrop:bg-black/70 backdrop:backdrop-blur-sm"
     >
-      <VoiceDialogContent
-        isListening={isListening}
-        transcript={transcript}
-        error={error}
-        isSupported={isSupported}
-        onCancel={handleClose}
-        onConfirm={handleConfirm}
-        onStop={stopListening}
-        onStart={startListening}
-      />
+      <div className="flex flex-col items-center gap-4 rounded-[1.5rem] border border-[var(--surface-4)] bg-[var(--surface-3)] p-6 text-center shadow-[0_32px_64px_-12px_rgba(0,0,0,0.9)]">
+        <div>
+          <h2 id={titleId} className="text-sm font-semibold tracking-wide text-zinc-100">
+            Voice input
+          </h2>
+          <p id={statusId} role="status" aria-live="polite" className="mt-1 text-xs text-zinc-500">
+            {status}
+          </p>
+        </div>
+
+        <WaveformBars listening={speech.isListening} hasTranscript={Boolean(speech.transcript)} />
+
+        <div className="w-full rounded-lg border border-white/5 bg-zinc-950/45 p-3 text-left">
+          <p className="min-h-12 whitespace-pre-wrap break-words font-mono text-xs leading-relaxed text-[var(--accent)]">
+            {speech.transcript || "Your transcript will appear here."}
+          </p>
+        </div>
+
+        {speech.error ? (
+          <p role="alert" className="text-xs leading-relaxed text-red-400">
+            {speech.error}
+          </p>
+        ) : null}
+
+        <p className="text-[10px] leading-relaxed text-zinc-600">
+          Depending on the browser, speech may be processed by the browser vendor’s online
+          recognition service. Listening stops automatically after one minute.
+        </p>
+
+        <div className="grid w-full grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={close}
+            className="rounded-lg border border-white/5 py-2.5 text-xs font-semibold text-zinc-400 transition-colors hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
+          >
+            Cancel
+          </button>
+
+          {speech.isListening ? (
+            <button
+              type="button"
+              onClick={speech.stopListening}
+              className="flex items-center justify-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/20 py-2.5 text-xs font-semibold text-red-300 transition-colors hover:bg-red-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+            >
+              <MicOff className="h-3.5 w-3.5" aria-hidden="true" />
+              Stop
+            </button>
+          ) : speech.transcript ? (
+            <button
+              type="button"
+              onClick={confirm}
+              disabled={!onTranscript}
+              className="flex items-center justify-center gap-1.5 rounded-lg border border-[var(--accent)]/30 bg-[var(--accent)]/20 py-2.5 text-xs font-semibold text-[var(--accent)] transition-colors hover:bg-[var(--accent)]/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-45"
+            >
+              <CheckCircle className="h-3.5 w-3.5" aria-hidden="true" />
+              Confirm
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={speech.startListening}
+              disabled={!speech.isSupported}
+              className="flex items-center justify-center gap-1.5 rounded-lg border border-[var(--accent)]/30 bg-[var(--accent)]/20 py-2.5 text-xs font-semibold text-[var(--accent)] transition-colors hover:bg-[var(--accent)]/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-45"
+            >
+              <Mic className="h-3.5 w-3.5" aria-hidden="true" />
+              Start
+            </button>
+          )}
+        </div>
+
+        {!speech.isListening && (speech.transcript || speech.error) ? (
+          <button
+            type="button"
+            onClick={speech.startListening}
+            className="flex items-center gap-1.5 text-xs text-zinc-500 underline-offset-4 hover:text-zinc-300 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+          >
+            <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+            Clear and try again
+          </button>
+        ) : null}
+      </div>
     </dialog>
   );
 }

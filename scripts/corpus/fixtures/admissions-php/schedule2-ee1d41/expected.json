@@ -1,0 +1,36 @@
+{
+  "_curated": true,
+  "expected": {
+    "canonical_host": "admissions.uettaxila.edu.pk",
+    "forbidden_links_contain": [
+      "logout",
+      "login"
+    ],
+    "forbidden_text_blocks": [],
+    "required_links_contain": [],
+    "required_text_blocks": [
+      {
+        "text": "Entry Test Schedule",
+        "why": "section heading"
+      }
+    ],
+    "resource_min_count": 0,
+    "title_contains": [
+      "UET Taxila UG Admissions"
+    ],
+    "title_not_contains": [
+      "Untitled",
+      "404"
+    ],
+    "criticality": "critical",
+    "required_resources": [
+      {
+        "url_contains": "Entry_Test_2020_English.pdf",
+        "kind": "pdf",
+        "crawlable": true
+      }
+    ]
+  },
+  "family": "admissions-php",
+  "fixture_id": "admissions-php/schedule2-ee1d41"
+}

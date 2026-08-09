@@ -1,0 +1,12 @@
+{
+  "body_sha256": "f4e9dfe3a98d1ac6f6cc419c1bd809024b2c9942a406966feed43b6e4c37bb2b",
+  "body_size": 15778,
+  "content_type": "text/html; charset=utf-8",
+  "elapsed_ms": 2924,
+  "fetched_at": "2026-08-02T12:25:26+00:00",
+  "final_url": "https://admissions.uettaxila.edu.pk/Admission_Eligibility.php",
+  "redirect_chain": [],
+  "remote_ip": "104.21.50.7,172.67.198.179",
+  "requested_url": "https://admissions.uettaxila.edu.pk/Admission_Eligibility.php",
+  "status": 200
+}

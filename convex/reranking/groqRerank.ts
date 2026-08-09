@@ -30,7 +30,7 @@ export const groqRerank = internalAction({
 
     try {
       const { object } = await generateObject({
-        model: getGroq()("llama-3.1-8b-instant"),
+        model: getGroq()("openai/gpt-oss-20b"),
         schema: z.object({
           scores: z.array(z.object({ index: z.number(), score: z.number().min(0).max(1) })),
         }),

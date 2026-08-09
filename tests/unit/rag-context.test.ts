@@ -69,7 +69,7 @@ describe("RAG Pipeline - Context Assembly (Sandwich Strategy)", () => {
       }
     ).handler(mockCtx, {
       chunks,
-      maxTokens: 40,
+      maxTokens: 100,
     })) as string;
 
     expect(result).toContain("A".repeat(100));

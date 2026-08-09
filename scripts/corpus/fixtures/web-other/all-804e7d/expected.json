@@ -1,0 +1,46 @@
+{
+  "_curated": true,
+  "_labelled_by": "scripts/eval/_label_webother.py (web-other expansion \u2014 labels sourced from raw body)",
+  "expected": {
+    "canonical_host": "web.uettaxila.edu.pk",
+    "criticality": "standard",
+    "forbidden_links_contain": [
+      "logout",
+      "login"
+    ],
+    "forbidden_text_blocks": [
+      "__VIEWSTATE",
+      "Untitled Document"
+    ],
+    "max_duration_ms": 60000,
+    "required_links_contain": [
+      "EventDetails/21st-Convocation-2024",
+      "Events/Convocation"
+    ],
+    "required_resources": [],
+    "required_text_blocks": [
+      {
+        "text": "21st Convocation 2024",
+        "why": "a dated event entry \u2014 proves the listing rendered"
+      },
+      {
+        "text": "Seminar on Awareness about Traffic Rules",
+        "why": "a distinct event entry"
+      },
+      {
+        "text": "All Pakistan Literary Competition",
+        "why": "a distinct event entry"
+      }
+    ],
+    "resource_min_count": 0,
+    "title_contains": [
+      "Events"
+    ],
+    "title_not_contains": [
+      "Untitled",
+      "404"
+    ]
+  },
+  "family": "web-other",
+  "fixture_id": "web-other/all-804e7d"
+}

@@ -1,0 +1,2913 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Profile - Faculty Management System - UET Taxila</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/css/bootstrap.min.css" rel="stylesheet" media="all" />
+    <link href="/css/Styles.css?s=1" rel="stylesheet" />
+    <script src="/js/jquery.min.js" type="cacc6ce059c8a7f2a1af4c90-text/javascript"></script>
+    <script src="/js/jquery.form-validator.js" type="cacc6ce059c8a7f2a1af4c90-text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="cacc6ce059c8a7f2a1af4c90-text/javascript"></script>
+    <script src="/js/Profile.js" type="cacc6ce059c8a7f2a1af4c90-text/javascript"></script>
+</head>
+<body>
+    <div>
+<nav class="navbar navbar-inverse navbarcustom">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">
+                <img src="/images/uettaxila_logo.png" /></a>
+        </div>
+        <div class="collapse navbar-collapse" id="myNavbar">
+            <ul class="nav navbar-nav headerstyle">
+                <li>Faculty Management System - UET Taxila</li>
+            </ul>
+            <div class="navbar-buttons navbar-header pull-right">
+<a class="btn btn-lg btn-default" href="/Account">Login</a>            </div>
+        </div>
+    </div>
+</nav>
+  
+        <div class="container-fluid text-center contentclass">
+            <div class="row content">
+                 
+            <div class="row viewdiv">
+                <div class="col-sm-12 viewbtn"><input type="radio" checked="checked" name="profileviewtypeid" value="1">List View</div>
+                <div class="col-sm-12 viewbtn"><input type="radio" name="profileviewtypeid" value="2">One Page View</div>
+            </div>
+    <div class="col-sm-12">
+
+    <div id="profileview1">
+        <div class="col-sm-2 sidenav" id="leftmenu">
+<a href="#" data-fieldtype="0">Personal Information</a>
+<a href="#" data-fieldtype="1">Education</a>
+<a href="#" data-fieldtype="2">Research Work</a>
+<a href="#" data-fieldtype="3">Research Intrst</a>
+<a href="#" data-fieldtype="4">Publications</a>
+<a href="#" data-fieldtype="5">Projects</a>
+<a href="#" data-fieldtype="6">Admin Work</a>
+<a href="#" data-fieldtype="7">Development Work</a>
+<a href="#" data-fieldtype="8">Experience</a>
+<a href="#" data-fieldtype="9">Services</a>
+<a href="#" data-fieldtype="10">Membership</a>
+<a href="#" data-fieldtype="11">Teaching</a>
+<a href="#" data-fieldtype="12">Academic Positions</a>
+<a href="#" data-fieldtype="13">Affiliations</a>
+<a href="#" data-fieldtype="14">Awards</a>
+<a href="#" data-fieldtype="15">Conferences</a>
+<a href="#" data-fieldtype="16">Participations</a>
+<a href="#" data-fieldtype="17">Thesis Supervised</a>
+<a href="#" data-fieldtype="18">Workshops/ Courses Attended</a>
+<a href="#" data-fieldtype="19">PostGraduate Students</a>
+<a href="#" data-fieldtype="20">Research Group</a>
+        </div>
+        <div class="col-sm-10 text-left" id="profiledetailsdiv">
+            <div data-displayid="0">
+                <table class="table table-strip" >
+                    <tr>
+                        <td colspan="2">
+                            <img src="../imgs/gulistan.raja.jpg?random=639212883500313940" class="profileimg" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Name</td>
+                        <td>Dr. Gulistan Raja
+                        </td>                    
+                    </tr>
+                    <tr>
+                        <td>Designation</td>
+                        <td>Professor</td>
+                    </tr>
+                    <tr>
+                        <td>Department</td>
+                        <td>Electrical Engineering (Taxila)</td>
+                    </tr>
+                    <tr>
+                        <td>Highest Qualification</td>
+                        <td>PhD Electrical Engineering</td>
+                    </tr>
+                    <tr>
+                        <td>Specialization</td>
+                        <td>Signal and Image Processing, Medical Image Analysis, ASIC Design</td>
+                    </tr>
+                    <tr>
+                        <td>Phone No</td>
+                        <td>051-9047534 (Off)</td>
+                    </tr>
+                    <tr>
+                        <td>Cell No</td>
+                        <td>0312-9552563</td>
+                    </tr>
+                    <tr>
+                        <td>Fax No</td>
+                        <td>051-9047420</td>
+                    </tr>
+                    <tr>
+                        <td>Email</td>
+                        <td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5037253c392324313e7e22313a3110253524243128393c317e3534257e203b">[email&#160;protected]</a></td>
+                    </tr>
+                </table>
+            </div>
+            <div data-displayid="1">
+                <ul>
+	<li>
+	<p><strong>Ph.D. Electrical Engineering, UET Taxila, 2008</strong><br />
+	Specialization - Signal Processing and Communication</p>
+	</li>
+	<li>
+	<p><strong>M.S.&nbsp;Engineering,&nbsp;Osaka University, 2002</strong>&nbsp;<br />
+	Specialization - Information Systems</p>
+	</li>
+	<li>
+	<p><strong>B.Sc. Electrical Engineering, UET Taxila, 1996</strong><br />
+	Specialization -&nbsp;Electronics and Communication</p>
+	</li>
+</ul>
+
+            </div>
+            <div data-displayid="2">
+                 <p><strong>&nbsp; &nbsp; &nbsp; ORCID ID: <a href="https://orcid.org/0000-0003-2026-1219">Gulistan Raja</a><br />
+&nbsp; &nbsp; &nbsp;<em> HEC Approved Supervisor</em></strong></p>
+
+<p><strong><big>&nbsp; &nbsp;&nbsp; PhD Research Supervision</big></strong></p>
+
+<p><strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em>Former/Current PhD Students:</em> </strong></p>
+
+<ol>
+	<li>
+	<p>Dr. Hafiz M. Irfan Arshad (09-PhD-EE-37), &quot;An Improved Latent Fingerprint Feature&nbsp;Extraction and Matching Algorithm&quot;, Graduated: Jan. 2015</p>
+	</li>
+	<li>
+	<p>Dr. Furqan Shoukat (11-EE-PhD-51),&nbsp;&quot;An Efficient Scheme for Lung Nodule Detection&quot;, Graduated: Apr. 2018</p>
+	</li>
+	<li>
+	<p>Dr. Ahmad Saeed Khattak (11-EE-PhD-43), &quot;A Multi-Feature Hybrid Object Tracking Algorithm&quot;, Graduated: Dec. 2019</p>
+	</li>
+	<li>
+	<p>Dr. Muhammad Qasim (15-PhD-ENC-06) , &quot;Image Dehazing using Deep Convolutional Neural Networks&quot;, Graduated: Oct. 2023</p>
+	</li>
+	<li>
+	<p>Mansoor Ahmad (17-PhD-EE-83), &ldquo;Histopathological Diagnosis of Lung Cancer using Convolutional Neural Network&quot;<em>, in Research Phase</em></p>
+	</li>
+	<li>
+	<p>Muhammad Abdullah Umar (19-PhD-EE-96), &quot;Multi-Disease Retinal Image Analysis using Machine Learning Methods&quot;, <em>in Research Phase</em></p>
+	</li>
+	<li>
+	<p>Yasar Rizwan&nbsp;(19-PhD-EE-97), &quot;AI based State Assessment and Control of Power Electronic Converters&quot;,&nbsp;<em>in Research Phase</em></p>
+	</li>
+	<li>
+	<p>Zaeem Anjum Wakeel&nbsp;(19-PhD-EE-98), &quot;Detection of Myocardial Fibrosis using Cardiac Magnetic Resonance Images&quot;,&nbsp;<em>in Research Phase</em></p>
+	</li>
+	<li>
+	<p>Muhammad Usman (24-PhD-EE-119), &quot;Capacity Enhancement of Short Reach Optical Over Step-Index Plastic Optical Fiber&quot;, <em>in Course Work</em><br />
+	&nbsp;</p>
+	</li>
+</ol>
+
+<p><strong>&nbsp; &nbsp; &nbsp;<em>PhD Thesis Evaluated/Examined:&nbsp;</em></strong></p>
+
+<ol>
+	<li>
+	<p>Sajid Hussain Alvi, &ldquo;Performance Analysis of Cooperative Communications over Fading Channels&rdquo; COMSATS Institute of Information Technology Islamabad, Dec. 2016</p>
+	</li>
+	<li>
+	<p>Sardar Muhammad Gulfam, &ldquo;Geometrically based Modeling and Characterization of 3D Aeronautical Radio Propagation Channels&rdquo;, COMSATS Institute of Information Technology Islamabad, Feb. 2017</p>
+	</li>
+	<li>
+	<p>Abrar Ahmad, &ldquo;Geometric Modeling and Characterization of 3-D Land Mobile Radio Cellular Propagation Channels&rdquo;, COMSATS Institute of Information Technology Islamabad, Aug. 2017</p>
+	</li>
+	<li>
+	<p>Bakhtiar Ali, &ldquo;Rate Optimization and Resource Allocation in Cooperative Cognitive Radio Network&rdquo;, COMSATS Institute of Information Technology Islamabad, Dec. 2017</p>
+	</li>
+	<li>
+	<p>M. Nadeem Sial, &quot;Analysis&nbsp; of Decoupled&nbsp; User Association&nbsp; in Multi-Tier 5G Heterogeneous&nbsp; Cellular Networks&quot;,&nbsp;COMSATS Institute of Information Technology Islamabad, Mar. 2018</p>
+	</li>
+	<li>
+	<p>Mohsin Fayyaz, &ldquo;Optical Interconnects in Data Center Networks&rdquo;, COMSATS University, Abbotabad Campus, Jan. 2019</p>
+	</li>
+	<li>
+	<p>Aadil Raza, &ldquo;Radio-over-Fiber Transmission Schemes for Next Generation Wireless Access Networks&rdquo;, COMSATS University, Islamabad, May 2019</p>
+	</li>
+	<li>
+	<p>Muhammad Tahir, &ldquo;Fast Video Coding using Spatio-Temporal Features and Ensemble Classification&rdquo;, Capital University of Science and Technology, Islamabad, Sep. 2019</p>
+	</li>
+	<li>
+	<p>Mohammad Arif, &quot;Performance Evaluation of Heterogeneous Cellular Networks&quot;,&nbsp;COMSATS University, Islamabad, March 2021</p>
+	</li>
+	<li>
+	<p>Waqar Alam, &ldquo;Robust Nonlinear Control Strategies and its Application to Closed-Loop Artificial Pancreas&rdquo;, COMSATS University, Islamabad, July 2021</p>
+	</li>
+	<li>
+	<p>Olufisayo Sunday Ekundayo, &ldquo;Facial Expression Recognition and Intensity Estimation&rdquo;, University of KwaZulu-Natal, Durban, South Africa, Oct. 2021</p>
+	</li>
+	<li>
+	<p>Saqib Amin, &quot;Embedded System Approach for Laser Based Self-Mixing Interferometry Sensing&quot;,&nbsp;Riphah&nbsp;International&nbsp;University, Islamabad, Apr. 2022</p>
+	</li>
+	<li>
+	<p>Mehreen Sirshar, &quot;Computational Diagnostic Systems for Lung Diseases Through Deep Learning and NLP Based Automated Medical Reporting&quot;, EME, NUST&nbsp;Rawalpindi, Aug. 2022</p>
+	</li>
+	<li>
+	<p>Arslan Shafique, &ldquo;Noise-tolerant Chaos Based Cryptosystems for the Security of Digital Images Using Machine Learning&rdquo; Riphah International University, Islamabad, Sep. 2022</p>
+	</li>
+	<li>Asif Siddique, &quot;Efficient encoding of HDR Images and Videos&quot;,&nbsp;Riphah International University, Islamabad, Jun. 2023<br />
+	&nbsp;</li>
+	<li>Ghalib Hussain. &quot;On Wireless Channel-based Secret Keys for Secure Communications&quot;,&nbsp;COMSATS University, Islamabad, Nov. 2025<br />
+	&nbsp;</li>
+</ol>
+
+<p><big><strong>&nbsp; &nbsp; &nbsp;MSc Research Supervision</strong></big></p>
+
+<ol>
+	<li>
+	<p>Sadiqullah (03-MS-C-05), &quot;VLSI Design&nbsp;and Implementation of Transform &amp; Quantization Module for Advanced Coding Standard H.264&quot;, 2005</p>
+	</li>
+	<li>
+	<p>Jamshed Iqbal (03-MS-E-10), &quot;Low Power Design and Implementation of Embedded Hardware for Text, Audio and Image Processing Applications&quot;, 2005</p>
+	</li>
+	<li>
+	<p>Muhammad Qasim (01-MS-E-15), &quot;Real Time Adaptive Video Enhancement Using Local Statistics&quot;, 2006</p>
+	</li>
+	<li>
+	<p>Sijjad Minallah (04-MS-EE-26) , &quot;FFT Processor Implementation&quot;, 2006</p>
+	</li>
+	<li>
+	<p>Gul Ahmed Kayani (04-MS-EE-15), &quot;Performance Analysis of OFDM for Wireless Environment&quot;, 2006&nbsp;</p>
+	</li>
+	<li>
+	<p>Saira Zafar (05-MS-EE-01), &quot;Performance Analysis of Dual-Band 802.11a+g in the Same Environment&quot;, 2007</p>
+	</li>
+	<li>
+	<p>Farhan Ahmad Nadeem (04-MS-EE-36), &quot;Design and Implementation of National Data Cache for Research Data Archival&quot;, 2007</p>
+	</li>
+	<li>
+	<p>Muhammad Umer Farooq (04-MS-EE-33), &quot;Evaluation of IP over Resilient Packet Rings&quot;, 2007</p>
+	</li>
+	<li>
+	<p>Uzma Siddique (06-MS- EE-18), &quot;Analysis of GSM Transmission Networks in Pakistan&quot;, 2008</p>
+	</li>
+	<li>
+	<p>Naeem Iqbal Ratyal (05-MS-EE-07), &quot;Implementation of RF Jamming Detection in Wireless Networks&quot;, 2008</p>
+	</li>
+	<li>
+	<p>Ansar Ali (04-MS-EE-04), &quot;Implementation of a Post Processing Algorithm to Reduce Quantization Effect in Images&quot;, 2008</p>
+	</li>
+	<li>
+	<p>Hina Saleem (06-MS-EE-07), &quot;Design&nbsp;and Implementation of Embedded hardware Echo Cancelation Solution for PSTN Interfaced Applications&quot;, 2008</p>
+	</li>
+	<li>
+	<p>Abdul Majid, (06-MS-EE-SS-06)&quot;Hardware Implementation of Canny Edge Detection Algorithm&quot;, 2009</p>
+	</li>
+	<li>
+	<p>Saima Ishtiaq (06-MS-EE-SS-05), &quot;Implementation of High Range Dynamic Histogram Equalization Technique for Image Enhancement&quot;, 2009</p>
+	</li>
+	<li>
+	<p>Sufian Anwar (06-MS-EE-SS-10), &quot;Implementation of Fractal Encoder for Image Compression&quot;, 2009</p>
+	</li>
+	<li>
+	<p>Qaiser Hussain Alvi (07F-MS-EE-12), &quot;Implementation of Long Term Evolution (LTE) Mobile Broadband Standard Physical Layer&quot;, 2010</p>
+	</li>
+	<li>
+	<p>Adnan Younus (09-MS-EE-06), &quot;Performance Analysis of Lossless Compression Methods for Biomedical Images&quot;, 2011</p>
+	</li>
+	<li>
+	<p>Furqan Shoukat (08-MS-EE-03), &quot;Implementation of Optimized Algorithm for Medical Image Recognition&quot;, 2011</p>
+	</li>
+	<li>
+	<p>Junaid Mir (09-MS-EE-01), &quot;Compression of Medical Images using Fractal Technique&quot;, 2011</p>
+	</li>
+	<li>
+	<p>Fatima Nazir (09-MS-EE-03), &quot;Performance Analysis of H.264/SVC for Medical Video Compression&quot;, 2011</p>
+	</li>
+	<li>
+	<p>Muhammad Riaz ur Rehman (09-MS-EE-20), &quot;Hardware Implementation of Lapped Biorthogonal Transform for JPEG-XR Compression&quot;, 2011</p>
+	</li>
+	<li>
+	<p>Syed Kashif Husaain (07F-MS-EE-05), &quot;Implementation of Hybrid Image Compression Technique for Medical Images&quot;, 2011</p>
+	</li>
+	<li>
+	<p>Muhammad Abdul Basit (07F-MS-EE-13), &quot;Hybrid Image Compression of Medical Images using Lapped Biorthogonal Transform and Discrete Cosine Transform&quot;, 2011</p>
+	</li>
+	<li>
+	<p>Zubair Khalid (08-MS-EE-17), &quot;Hardware Implementation of Deblocking Filter for Reduction of Blocking Artifacts&quot;, 2012</p>
+	</li>
+	<li>
+	<p>Muhammad Laeeq ur Rehman (10-MS-EE-01), &quot;Implementation of Monomodal Registration for Medical Images&quot;, 2012</p>
+	</li>
+	<li>
+	<p>Aysha Khalid Khan (11F-MS-EE-28), &quot;Implementation of Region based Segmentation for Medical Images&quot;, 2013</p>
+	</li>
+	<li>
+	<p>Tasleem Kausar (11F-MS-EE-26), &quot;Congestion Control Protocol Design for Efficient Broadcast in VANETs&quot;, 2013</p>
+	</li>
+	<li>
+	<p>Imran Amjad (09-MS-EE-14), &quot;Segmentation of Medical Images using Non-Rigid Registration&quot;, 2013</p>
+	</li>
+	<li>
+	<p>Jawad Ali Raja (09-MS-EE-10), &quot;Selective Compression of Medical Images using Multiple Regions of Interest&quot;, 2013</p>
+	</li>
+	<li>
+	<p>Madiha Azam (10-MS-EE-88), &quot;Registration of Medical Images using Non-Rigid Transformation&quot;, 2013</p>
+	</li>
+	<li>
+	<p>Zain ul Abdin&nbsp;(09-MS-EE-12) , &quot;Implementation of 3-D Wavelet Transforms for Medical Image Processing&quot;, 2013</p>
+	</li>
+	<li>
+	<p>Muhammad Muzammil (10-MS-EE-79), &quot;Hardware Implementation of Diamond Search Motion Estimation Algorithm for Real Time Video Applications&quot;, 2014</p>
+	</li>
+	<li>
+	<p>Awais Khan (12F-MS-EE-11), &quot;Design and Implementation of In-loop Filter for Emerging HEVC Standard&quot;, 2014</p>
+	</li>
+	<li>
+	<p>Anza Ahmad (10-MS-EE-86), &quot;Partial and Latent Fingerprints Image Enhancement&quot;, 2014</p>
+	</li>
+	<li>
+	<p>Saeed ur Rehman (10-MS-EE-07), &quot;Performance Evaluation of High Efficiency Video Coding over Broadband Networks&quot;, 2014</p>
+	</li>
+	<li>
+	<p>Syed Shahzad Hussain Shah (12-MS-EE-89), &quot;Hardware Implementation of an Improved Image Encryption Algorithm&quot; , 2015</p>
+	</li>
+	<li>
+	<p>Zahra Aleem (11-MS-EE-78), &quot;A Transform Coefficients Coding Architecture for HEVC&quot;, 2015</p>
+	</li>
+	<li>
+	<p>Muhammad Atif Imtiaz (11-MS-EE-75), &quot;Speech Recognition using Mel-Frequency Cepstral Coefficient (MFCC)&quot;, 2015</p>
+	</li>
+	<li>
+	<p>Saira Arif (13F-MS-EE-38), &quot;Performance Analysis of QoS Aware Wireless Sensor Networks&quot;, 2015</p>
+	</li>
+	<li>
+	<p>Zubair Bashir (11F-MS-EE-14), &quot;An FPGA Implementation of Video Enhancement Algorithm for Real Time Applications&quot;, 2016</p>
+	</li>
+	<li>
+	<p>Humaira Batool (11-MS-EE-81), &quot;Sleep Apnea Detection based on Classifiers and Heart Rate Variability&quot;, 2016</p>
+	</li>
+	<li>
+	<p>Saad Bin Shafique (13F-MS-EE-17), &quot;Architecture Design and Implementation of Object Detection for Real-Time Surveillance Systems&quot;, 2016</p>
+	</li>
+	<li>
+	<p>Bilal Hassan (14F-MS-EE-15), &quot;Automatic Identification of Macular Edama from Optical Coherence Tomography (OCT) Images&quot;, 2016</p>
+	</li>
+	<li>
+	<p>Hira Waris (13-MS-EE-88), &quot;GA-EDA: Hybrid Metaheuristic for Design Space Exploration of Multicore Architecture&quot;, 2016&nbsp;</p>
+	</li>
+	<li>
+	<p>Ayesha Ehtesham (14F-MS-EE-12), &quot;Design of a Phase Unwrapping Method for an Optical Feedback Laser Sensor&quot;, 2017</p>
+	</li>
+	<li>
+	<p>Asra Abid Siddiqui (14F-MS-EE-13), &quot;Robust Signal Processing for Speckle affected Self-Mixing Interferometric Signals&quot;, 2017</p>
+	</li>
+	<li>
+	<p>Muhammad Naseem Majoka (12-MS-EE-80), &quot;VLSI Design and Architecture of Image De-Hazing Algorithm for Real Time Applications&quot;, 2017</p>
+	</li>
+	<li>
+	<p>Zeeshan Arshad Jadoon (13-MS-EE-91), &quot;Moving Object Detection and Classification based on HOG Features and Linear SVM Classifiers&quot;, 2018</p>
+	</li>
+	<li>
+	<p>Muhammad Fawad (13-MS-EE-88), &quot;Suppression of Intercarrier Interference in OFDM using Discrete Wavelet Transform&quot;, 2018</p>
+	</li>
+	<li>
+	<p>Muhammad Usman (16F-MS-EE-26), &quot;Detection of Multimodal Fringes for a Self-Mixing Interferometric Displacement Sensor&quot;,&nbsp;2018</p>
+	</li>
+	<li>
+	<p>Muhammad Rizwan Chughtai (14-MS-EE-41), &quot;Design and Implementation of Automatic Pills Recognition System&quot;, 2018</p>
+	</li>
+	<li>
+	<p>Yasir Rizwan (14-MS-EE-45), &quot;Adaptive Filter Design for Power Inverters&quot;, 2019</p>
+	</li>
+	<li>
+	<p>Muhammad Kashif (17F-MS-EE-10), &quot;An Effective Content based Image Retrieval System for Lung Diseases&quot;, 2019</p>
+	</li>
+	<li>
+	<p>Iqra Bibi (17F-MS-EE-17) &quot;Automated Detection of Diabetic Retinopathy using Fundus Images&quot;, 2020</p>
+	</li>
+	<li>
+	<p>Muhammad Ayaz (17F-MS-ENC-04), &quot;Accurate Detection of Pulmonary Tuberculosis using Chest Radiograph Images&quot;, 2020</p>
+	</li>
+	<li>
+	<p>Muhammad Shan Saleem&nbsp;(17F-MS-ENC-05), &quot;Design and Implementation of Improved Single Image Dehazing Algorithm&quot;, 2020</p>
+	</li>
+	<li>
+	<p>Mariam Nawaz (17F-MS-EE-33), &quot;Implementation of Dehazing and Enhancement Algorithm for Images&quot;, <em>2020</em></p>
+	</li>
+	<li>
+	<p>Khadija Anam&nbsp;(17-MS-EE-94), &quot;Melanoma Recognition in Dermascopic Images using Encoded Deep Features&quot;,&nbsp;<em>2021</em></p>
+	</li>
+	<li>
+	<p>Laiba Khursheed&nbsp;(17F-MS-EE-34), &quot;Real Time Architecture for Image Dehazing&quot;, <em>2021</em></p>
+	</li>
+	<li>
+	<p>Sahar Liaqat&nbsp;(17-MS-EE-95), &quot;Computer-Aided Detection of COVID-19 using Chest Imaging&quot;,&nbsp;<em>2021</em></p>
+	</li>
+	<li>
+	<p>Sobia Shakeel&nbsp;(17-MS-EE-98), &quot;Detection and Classification of Breast Cancer from Mammograph images using Deep Convolution Neural Network&quot;,&nbsp;<em>2021</em></p>
+	</li>
+	<li>
+	<p>Mubashar Masood (19-MS-EE-32), &quot;Design and implementation of Improved Visual Object Tracking (VOT) algorithm&quot;, <em>2023</em></p>
+	</li>
+	<li>
+	<p>Muhammad Usman (20-MS-EE-28), &quot;Classification of Multi Plant Disease using Convolutional Neural Network&quot;,<em>&nbsp;2023</em></p>
+	</li>
+	<li>
+	<p>Bilal Ahmed (21-MS-EE-63), &quot;Infrared Image Quality Assessment using Convolutional Neural Network&quot;, <em>2023</em></p>
+	</li>
+	<li>
+	<p>Essa Khan (20-MS-EE-23), &quot;PlantDiseaseNet: A Comprehensive CNN-based Framework for Multi-Crop Disease Classification&quot;, 2025</p>
+	</li>
+	<li>
+	<p>Farhan Mushtaq Hashmi (22-MS-EE-15), &quot;Dehazing of Infrared Images using Generative Adversarial Network&quot;, 2025</p>
+	</li>
+</ol>
+
+            </div>
+            <div data-displayid="3">
+                <ul>
+	<li>Signal and&nbsp;Image Processing<br />
+	&nbsp;</li>
+	<li>Medical Image Analysis<br />
+	&nbsp;</li>
+	<li>VLSI Architecture of Image Processing Systems<br />
+	&nbsp;</li>
+	<li>Computer Networks</li>
+</ul>
+
+            </div>
+            <div data-displayid="4">
+                <p><strong>&nbsp; &nbsp; &nbsp; <em>Books/Monographs</em></strong></p>
+
+<ol>
+	<li>
+	<p><strong>Gulistan Raja</strong>, &quot;Optimized Low Bit Rate Video Coding: Algorithms for Suppression of Blocking Artifacts&quot;,&nbsp;&nbsp;Published by LAP Publishing, Germany, Sept. 2011, ISBN:<strong> </strong>978-3-8454-4091-0.</p>
+	</li>
+	<li>
+	<p>M. R. Rehman, <strong>Gulistan Raja,</strong> and A. K. Khan, &quot;Implementation of Lapped Biorthognal Transform for Image Coding&quot; Chapter&nbsp;in Book Titled: <em>Advanced Video Coding for Next-Generation Multimedia Services,</em>&nbsp;Intech Publishers, Rijeka, Croatia, Dec. 2012, ISBN: 980-953-307-677-0.&nbsp;</p>
+	</li>
+</ol>
+
+<p><strong><em>&nbsp; &nbsp; &nbsp; Selected Publications in International/National Journals</em></strong></p>
+
+<ol>
+	<li>
+	<p><strong>Gulistan Raja,</strong> and M.J. Mirza, &quot;Evaluation of Loop Filtering for Reduction of Blocking Effects in Real Time Low Bit Rate Video Coding&quot;, &nbsp;M.U. Research Journal of Engineering and Technology, Vol. 26, No. 3, 2007, pp. 211-218.</p>
+	</li>
+	<li>
+	<p><strong>Gulistan Raja</strong>, M. J. Mirza, and T. Song, &ldquo;H.264/AVC Deblocking Filter based on Motion Activity in Video Sequences&rdquo;, Journal of IEICE Electronics Express, Vol. 5, No. 19, 2008, pp. 809-814.</p>
+	</li>
+	<li>
+	<p>N. I. Rityal, M. Waris, and <strong>Gulistan Raja</strong>, &quot;Impact of Data Jamming on Throughput of IEEE 802.11b Networks&quot;, Journal of Institute of Electrical and Electronics Engineers (IEEEP), Vol 63, 2009, pp. 19-23.</p>
+	</li>
+	<li>
+	<p>A. K. Khan, <strong>Gulistan Raja</strong>, and H. Jamal, &quot;Performance Analysis of Macroblock Partitions for H.264/AVC Motion Estimation&rdquo;,&nbsp; M.U. Research Journal of Engineering &amp; Technology, Vol. 29, No. 1, 2010, pp. 19-24.</p>
+	</li>
+	<li>
+	<p>S. Anwar and <strong>Gulistan Raja</strong>, &quot;Fractal Color Image Compression using a Fast Encoding Algorithm&quot;, Journal of Engineering &amp; Applied Sciences, Vol. 29, No. 2, 2010, pp. 45-54.</p>
+	</li>
+	<li>
+	<p><strong>Gulistan Raja</strong>, &quot;H.264/AVC Deblocking Filter for 1080p High Definition Video&quot;, P. Journal of Sci., Vol. 63, No. 1, 2011, pp. 40-43.</p>
+	</li>
+	<li>
+	<p>S. K. Hussain and <strong>Gulistan Raja</strong>, &quot;A JPEG 2000 based Hybrid Image Compression Technique for Medical Images&quot;, The Nuc. Journal, Vol. 48, No. 4, Dec. 2011, pp. 287-293.</p>
+	</li>
+	<li>
+	<p>U. Siddique, L. Ahmad, and&nbsp;<strong>Gulistan Raja</strong>, &quot;Microwave Attenuation and Prediction of Rain Outage for Wireless Networks in Pakistan Tropical Regions&quot;, International Journal of Microwave Science and Technology, Vol. 2011, 2011, pp. 1-6.</p>
+	</li>
+	<li>
+	<p>A. Mazhar, S. Jabeen, S, Nisar, and <strong>Gulistan Raja</strong>, &quot;Performance Evaluation of H.264/AVC Fidelity Range Extensions&quot;, Technical Journal, Taxila, 2011, pp. 59-64.&nbsp;</p>
+	</li>
+	<li>
+	<p>I. Ali, M. Muzammil and <strong>Gulistan Raja</strong>, &quot;Performance Analysis of Motion Estimation Algorithms based on Motion Activity in Video Sequences&quot;, P. Journal of Sci., Vol. 64, No. 1, 2012, pp. 39-45.</p>
+	</li>
+	<li>
+	<p><strong>Gulistan Raja</strong>, &quot;Statistical Analysis of H.264/AVC Deblocking Filter&quot;, The Nuc. Journal, Vol. 49, No. 1, Mar. 2012, pp. 29-34.</p>
+	</li>
+	<li>
+	<p><strong>Gulistan Raja</strong> and Z. Khalid, &quot;Hardware Implementation of H.264/AVC Deblocking Filter&quot;, Journal of Engineering &amp; Applied Sciences, Vol. 31, No. 1, 2012, pp. 31-35.</p>
+	</li>
+	<li>
+	<p>M. L. Shahid and <strong>Gulistan Raja</strong>, &quot;Implementation of Modified Control Point Image Registration Method&quot;, The Nuc. Journal, Vol. 50, No. 1, 2013, pp. 53-60.</p>
+	</li>
+	<li>
+	<p>A. K. Khan, <strong>Gulistan Raja,</strong> and Ahmad K. Khan, &ldquo;Implementation of Marker based Watershed Image Segmentation on Magnetic Resonance Imaging&rdquo;, Life Sci. Journal, &nbsp;Vol. 10, No. 2, Mar 2013, pp. 115-118.</p>
+	</li>
+	<li>
+	<p><strong>Gulistan Raja</strong>, A. Khan, A. Rashid, and Ahmad K. Khan, &ldquo;Performance Analysis of Emerging High Efficiency Video Coding (HEVC)&rdquo;, Life Sci. Journal, Vol. 10, No.3, June 2013, pp. 800-803.</p>
+	</li>
+	<li>
+	<p>A. Younus, <strong>Gulistan Raja,&nbsp;</strong>and<strong> </strong>A. K. Khan, &quot;Hybrid Compression of Medical Images based on Lapped Biorthogonal Transform and Discrete Cosine Transform&quot;, P. Journal of Sci., Vol. 65, No. 2, 2013, pp. 219-223.</p>
+	</li>
+	<li>
+	<p>A. Farooq, A. K. Khan, and <strong>Gulistan Raja</strong>, &ldquo;Implementation of a Speech Based Interface System for Visually Impaired Persons&rdquo;, Life Sci. Journal, Vol. 10, No. 9s, Sep. 2013, pp. 398-400.</p>
+	</li>
+	<li>
+	<p>J. A. Raja, <strong>Gulistan Raja,</strong> and A. K. Khan, &ldquo;Selective Compression of Medical Images using Multiple Regions of Interest&rdquo;, Life Sci. Journal, Vol. 10, No. 9s, Sep. 2013, pp. 394-397.</p>
+	</li>
+	<li>
+	<p>B. Khan, A. K. Khan, <strong>Gulistan Raja,&nbsp;</strong>and M. H. Yousaf, &ldquo;Implementation of Modified Mean-shift Tracking Algorithm for Occlusion Handling&rdquo;, Life Sci. Journal, Vol. 10, No.11s, Nov. 2013, pp. 337-342.</p>
+	</li>
+	<li>
+	<p><strong>Gulistan Raja</strong>, A. Khan, A. K. Khan, and M. H. Yousaf, &ldquo;Performance Analysis of HEVC In-Loop Filter&rdquo;, Life Sci. Journal, Vol. 10, No.11s, Nov. 2013, pp. 331-336.</p>
+	</li>
+	<li>
+	<p>R. Afzal, A. K. Khan, and <strong>Gulistan Raja,</strong> &quot;Reduction of Color Images using Averaging Functions&quot;, Technical Journal, Taxila, Vol. 19, No. 1, 2014, pp. 23-28.</p>
+	</li>
+	<li>
+	<p>T. Kausar and <strong>Gulistan Raja</strong>, &quot;Vehicle Load and Moving Similarity based AODV Routing Scheme for VANETs&quot;, Information Journal, Vol. 17, No. 6(B), June 2014, pp. 2813-2822.</p>
+	</li>
+	<li>
+	<p>S. U. Rehman and <strong>Gulistan Raja</strong>, &quot;Performance Evaluation of HEVC High Efficiency Video Coding over Broadband Networks&quot;, International Journal of Computer Science Issues, Vol. 11, Issue 4, July 2014, pp. 68-74.</p>
+	</li>
+	<li>
+	<p>I. Arshad, <strong>Gulistan Raja,</strong> and A. K. Khan, &quot;Latent Fingerprints Segmentation: Feasibility of using Clustering based Automation Approach&quot;, Arabian Journal of Science and Engineering, Vol. 39, Issue 11, Nov. 2014, pp. 7933-7944.</p>
+	</li>
+	<li>
+	<p>A. Ahmad, I. Arshad, and <strong>Gulistan Raja</strong>, &quot;Partial Fingerprint Image Enhancement using Region Division Technique and Morphological&nbsp;Transform&quot;, The Nuc. Journal, Vol. 52, No. 2, June 2015, pp. 63-70.</p>
+	</li>
+	<li>
+	<p>M. Muzammil,&nbsp;<strong>Gulistan Raja,</strong>&nbsp;and I. Ali, &quot;FPGA Architecture of Diamond Search Motion Estimation Algorithm for Real-Time Video Applications&quot;, NED University Journal of Research, Vol. XII, No. 4, Sep. 2015, pp. 93-100.</p>
+	</li>
+	<li>
+	<p>A. Raza, M. H. Yousaf, H. A. Sial, and <strong>Gulistan Raja</strong>, &quot;HMM based Scheme for Instructor Activity Recognition in Lecture Room Environment&quot;, The Smart Computing Review Journal, Vol. 5, No. 6, Dec. 2015, pp. 578-590.</p>
+	</li>
+	<li>
+	<p>N. Ashraf , A. K. Khan, and <strong>Gulistan Raja</strong>, &quot;64-QAM Full-Duplex DWDM Radio over 10 G-bit/s and 25 G-bit/s Data and Video Transmission in the 5 GHz and 60 GHz Dual Frequency Bands&quot;, Journal of Optics, Springer, Vol. 45, Issue 1, Mar. 2016, pp. 21-25.</p>
+	</li>
+	<li>
+	<p>B. Hassan,&nbsp;<strong>Gulistan Raja</strong>, T. Hassan, and M. U. Akram, &quot;Structure Tensor Based Automated Detection of&nbsp;Macular Edema and Central Serous Retinopathy using&nbsp;Optical Coherence Tomography Images&quot;, Journal of Optical Society of America A, Vol. 33, Issue 4, Apr. 2016, pp. 455-463.</p>
+	</li>
+	<li>
+	<p>M. Z. Ahmad, I. Arshad,&nbsp;<strong>Gulistan Raja,&nbsp;</strong>and A. K. Khan,&quot; Textured Cosmetic Contact Lens Detection using Statistical Features and SVM Classifier&quot;, B. U. Journal of Information and Communication Technologies, Vol. 9, Issue 1, June 2016, pp. 23-29.</p>
+	</li>
+	<li>
+	<p>S. Arif and&nbsp;<strong>Gulistan Raja</strong>, &quot;Energy and Priority Aware Scheduling Scheme for Wireless Sensor Networks&quot;,&nbsp;B. U. Journal of Information and Communication Technologies, Vol. 9, Issue 1, June 2016, pp. 36-42.</p>
+	</li>
+	<li>
+	<p>Z. &nbsp;Bashir, <strong>Gulistan Raja,</strong> and M. Obaid Ullah, &quot;A Video Enhancement Algorithm for Low-Lighting Environment using FPGA Architecture&quot;, &nbsp;NED University Journal of Research, Vol. XIII, No. 4, Sep. 2016, pp. 81-89.</p>
+	</li>
+	<li>
+	<p>M. Asghar, I. Arshad, I. A. Taj, <strong>Gulistan Raja,&nbsp;</strong>and A. &nbsp;K. Khan, &quot;Palm and Finger Segmentation of High Resolution Images using Hand Shape and Texture&quot;, &nbsp;Proc. &nbsp;Pakistan Academy of Sciences: A, Vol. 53, No. 4, Dec. 2016, pp. 401-416.</p>
+	</li>
+	<li>
+	<p>Z. Shabbir, I. Arshad, <strong>Gulistan Raja,&nbsp;</strong>and A. K. Khan, &quot;Content Based Image Retrieval using Improved Local Tetra Pattern and Neural Network&quot;, The Nuc. Journal, Vol. 53, No. 4, Dec. 2016, pp. 225-232.</p>
+	</li>
+	<li>
+	<p>A. Khan and&nbsp;<strong>Gulistan Raja</strong>, &quot;FPGA Implementation of HEVC Deblocking Filter for Fast Processing of Super High Resolution Applications&quot;, &nbsp;Turkish Journal of Electrical Engineering and Computer Sciences, Vol. 24, No. 6, Dec. 2016, pp.4661-4669.</p>
+	</li>
+	<li>
+	<p>I. Amjad, F. Shaukat, <strong>Gulistan&nbsp;Raja,</strong> and A.K. Khan, &quot;An Algorithm to Segment the Mid-Brain Structures Using Multiresolution Non-Rigid Registration &quot;, Pakistan Journal of Science, Vol. 69, Issue 2, June 2017, pp. 221-227.</p>
+	</li>
+	<li>
+	<p>A. Murtaza, F. Shaukat, <strong>Gulistan&nbsp;Raja,&nbsp;</strong>and A.K. Khan, &quot;An Efficient Algorithmic Solution for High Payload Good Imperceptibility Hybrid Image Steganography&quot;,&nbsp;Pakistan Journal of Science, Vol. 69, Issue 2, June 2017, pp. 228-234.</p>
+	</li>
+	<li>
+	<p>N. Ashraf, F. Shaukat, <strong>Gulistan Raja,</strong> and A. K. Khan, &quot;Full-Duplex Millimeter-wave Radio over Fiber with 24 Gbps 4-QAM Downstream Signal in W-Band (75-110GHz)&quot;,&nbsp;B. U. Journal of Information and Communication Technologies, Vol. 10, Issue 1, June 2017, pp. 21-28.</p>
+	</li>
+	<li>
+	<p>F. Shaukat, <strong>Gulistan Raja</strong>, A. Gooya,&nbsp; and A.&nbsp;Frangi, &quot;Fully Automatic and Accurate Detection of Lung Nodules in CT images using a Hybrid Feature Set&quot;, Medical Physics Journal, Vol. 44, Issue 7, July 2017, pp.&nbsp;3615-3629.</p>
+	</li>
+	<li>
+	<p>A. A. Siddiqui, U. Zabit, O. D. Bernal, <strong>Gulistan Raja,&nbsp;</strong>and<strong>&nbsp;</strong>T. Bosch, &quot;All Analog Processing of Speckle affected Self-Mixing Interferometric Signals&quot;, IEEE Sensors Journal, Vol. 17, Issue 18,&nbsp;Sep. 2017, pp. 5892-5899.</p>
+	</li>
+	<li>
+	<p>A. Ehtesham, U. Zabit, O. D. Bernal, <strong>Gulistan Raja,</strong>&nbsp;and T. Bosch, &quot;Analysis and Implementation of a Direct Phase Unwrapping Method for Displacement Measurement using Self-Mixing Interferometry&quot;,&nbsp;IEEE Sensors Journal, Vol. 72, Issue 22, Nov. 2017, pp.&nbsp;7425-7432.</p>
+	</li>
+	<li>
+	<p>F. Shaukat and <strong>Gulistan Raja</strong>,&nbsp; &quot;An Efficient Algorithmic Solution for Automatic Segmentation of Lungs from CT Images&quot;,&nbsp;Pakistan Journal of Science, Vol. 70, No. 1, Mar. 2018, pp. 71-78.</p>
+	</li>
+	<li>
+	<p>N. U. Ain, F. Shaukat, A.S. Nagra, and <strong>Gulistan&nbsp;Raja</strong>, &quot;An Efficient Algorithm for Fingerprint Recognition using Minutiae Extraction&quot;,&nbsp;Pakistan Journal of Science, Vol. 70, No.2, Jun. 2018, pp. 169-176.</p>
+	</li>
+	<li>
+	<p>A. S. Khattak, <strong>Gulistan Raja,</strong> and N. Anjum, &quot;Adaptive Framework for Multi-Feature Hybrid Object Tracking&quot;, Applied Sciences Journal, Vol. 8, No. 11, Nov. 2018, pp. 1-17.</p>
+	</li>
+	<li>
+	<p>R. Chughtai , <strong>Gulistan Raja</strong>, J. Mir, and F. Shaukat, &quot;An Efficient Scheme for Automatic Pill Recognition Using Neural Networks&quot; The Nucleus Journal, Vol. 56, No. 1, Jun. 2019, pp. 42-48.</p>
+	</li>
+	<li>
+	<p>F. Shaukat,&nbsp;<strong>Gulistan Raja,</strong> and&nbsp;A.&nbsp;Frangi, &quot;Computer-Aided Detection of Lung Nodules: A Review&quot;,&nbsp; SPIE&nbsp;Journal of Medical Imaging, Vol. 6, No. 2, Apr-Jun. 2019, pp.&nbsp;1-11.</p>
+	</li>
+	<li>
+	<p>F. Shaukat,&nbsp;&nbsp;K. Javed, <strong>Gulistan Raja</strong>&nbsp;, J. Mir, and M. L. R.&nbsp;Shahid, &quot;Automatic Lung Nodule Detection in CT Images using Convolutional Neural Networks&quot;, IEICE Transactions on Fundamentals on Electronics, Communications and Computer Sciences, Vol. E102-A, No.10, Oct. 2019,&nbsp;pp.1364-1373.</p>
+	</li>
+	<li>
+	<p>M. Usman, U. Zabit,&nbsp;O. D. Bernal, <strong>Gulistan Raja,&nbsp;</strong>and T. Bosch, &quot;Detection of Multi-Modal Fringes for Self Mixing based Vibration Measurement&quot;, IEEE Transactions on Instrument and Measurement, Vol. 69, Issue 1, Jan. 2020,&nbsp;pp. 258-267.</p>
+	</li>
+	<li>
+	<p>M. Usman, U. Zabit, O. D. Bernal, and <strong>Gulistan Raja</strong>, &quot;Blind Identification of Occurrence of Multi-modality in Laser Feedback based Self-Mixing Sensor&quot;, Chinese Optics Letters, Vol. 18, Issue 1, Jan. 2020,&nbsp; pp. &nbsp;011201- (2020).</p>
+	</li>
+	<li>
+	<p>M. Kashif, <strong>Gulistan Raja</strong>, and&nbsp;F. Shaukat, &quot;An Efficient Content based Image Retrieval System for Diagnosis of Lung Diseases&quot;, Journal of Digital Imaging, Vol. 33. Issue 4,&nbsp;Sep. 2020,&nbsp;pp. 971-987.</p>
+	</li>
+	<li>
+	<p>I. Bibi, J. Mir, and&nbsp;<strong>Gulistan Raja</strong>, &quot;Automated Detection of Diabetic Retinopathy in Fundus Images using Fused Features&quot;,&nbsp;Physical and Engineering Sciences in Medicine, Vol. 43,&nbsp;Issue 4,&nbsp;Dec. 2020,&nbsp;pp.1253&ndash;1264.</p>
+	</li>
+	<li>
+	<p>M. Ayaz,&nbsp;F Shaukat, and <strong>Gulistan Raja</strong>, &quot;Ensemble Learning Based Automatic Detection of Tuberculosis in Chest X-ray Images using Hybrid Feature Descriptors&quot;,&nbsp;&nbsp;Physical and Engineering Sciences in Medicine, Vol. 44, Issue 1,&nbsp;Mar. 2021,&nbsp;pp.183-194.</p>
+	</li>
+	<li>
+	<p>H. Waris, A.&nbsp; Ahmad, M. Y. Qadri, <strong>Gulistan Raja</strong> and T. N. Malik, &quot;GA&ndash;EDA: Hybrid Design Space Exploration Engine for Multicore Architecture&quot;, Journal of Circuits Systems and Computers, Vol. 30, Issue 10,&nbsp;Aug. 2021, pp.&nbsp;1-29.</p>
+	</li>
+	<li>
+	<p>M. Qasim and <strong>Gulistan Raja</strong>, &ldquo;SPIDE-Net: Spectral Prior-based Image Dehazing and Enhancement Network&rdquo;, IEEE Access, Vol.10, Nov. 2022, pp.&nbsp;120296-120311.</p>
+	</li>
+	<li>E. Khan and <strong>Gulistan Raja, </strong>&ldquo;Advancing Crop Protection through Convolutional Neural Networks: A Multi-Plant Disease Classification Study&rdquo;, IJANSER, Vol. 8, No. 3, June 2024, pp. 68-76.<br />
+	&nbsp;</li>
+	<li>M. Masood&nbsp;and&nbsp;<strong>Gulistan Raja, </strong>&quot;Aberrance Repressed Multi-feature Integrated Correlation Filter with Adaptive Learning for Visual Object Tracking&quot;,&nbsp;M.U. Research Journal of Engineering &amp; Technology,&nbsp;Vol. 43, No. 4, Oct. 2024, pp. 14-28.<br />
+	&nbsp;</li>
+	<li>F. M. Hashmi, <strong>Gulistan Raja</strong>, M. Qasim and A. Khalid, &quot;Infra Aerial Dehaze: Dehazing of Infrared Aerial Images using Cycle Generative Adversarial Network&quot;, Accepted in&nbsp;Journal of Intelligent &amp; Fuzzy Systems, Aug. 2025</li>
+</ol>
+
+<p><strong><em>Publications in International Conferences</em></strong></p>
+
+<ol>
+	<li>
+	<p><strong>Gulistan Raja</strong>, T. Song, G. Fujita, T. Onoye, and I. Shirakawa, &ldquo;VLSI Design of Deblocking Filter and Advanced Intra Coding for H.263&rdquo;,&nbsp;Proceedings of&nbsp;IEICE General Conference, Mar. 27-30, 2002, Tokyo, Japan, pp. A-3-7.</p>
+	</li>
+	<li>
+	<p><strong>Gulistan Raja</strong>, U. Farooq, and H. Jamal, &ldquo;VLSI Architecture of Supplemental Enhancement Module &amp; Modified Quantization Module for H.263+ Video Codec&rdquo;, Proceedings of&nbsp;7th IEEE International Multitopic Conference, Dec. 8-9, 2003, Islamabad, pp. 118-120.</p>
+	</li>
+	<li>
+	<p><strong>Gulistan Raja</strong>&nbsp;and M. J. Mirza, &ldquo;Performance Comparison of Advanced Video Coding H.264 Standard with Baseline H263 and H.263+ Standards&rdquo;,&nbsp; Proceedings of&nbsp;4th International Symposium on Communications &amp; Information Technologies, Oct. 26-29, 2004, Sapporo, Japan, pp. 743-746.</p>
+	</li>
+	<li>
+	<p>S. Khan&nbsp;and&nbsp;<strong>Gulistan Raja</strong>, &ldquo;Integer Cosine Transform and Its Application in Image/Video Compression&rdquo;, Proceedings of&nbsp;IEEE International Conference on Software Engineering and Applications, ICSEA-2004, December 30-31, 2004, Islamabad, pp. 187-191.</p>
+	</li>
+	<li>
+	<p><strong>Gulistan Raja</strong>, S. Khan, and M. J. Mirza, &ldquo;VLSI Architecture &amp; Implementation of H.264 Integer Transform&rdquo;, Proceedings of 17th IEEE International Conference on Microelectronics, Islamabad, December 13-15, 2005, pp. 218-223.</p>
+	</li>
+	<li>
+	<p><strong>Gulistan Raja</strong>&nbsp;and M. J. Mirza, &ldquo;Evaluation of Emerging JVT H.264/AVC with MPEG Video&rdquo;, Proceedings of&nbsp;9th IEEE International Multi-topic Conference, Karachi, December 24-25, 2005, pp. 626-629.</p>
+	</li>
+	<li>
+	<p>A. Sana,&nbsp;<strong>Gulistan Raja</strong>, S. Hussain, R. N. Zaidi, M. A. Ali, and S. Ahmed, &ldquo;A Novel Fair Queuing Algorithm for Hybrid Wired/Wireless Quality of Service Support with Wireless Compensation&rdquo;, Proceedings of 2nd IEEE International Conference on Emerging Technologies, ICET 2006, Peshawar, Nov 13-14, 2006, pp. 44-49.</p>
+	</li>
+	<li>
+	<p>U. Siddique, I. Sabbir, and&nbsp;<strong>Gulistan Raja</strong>, &quot;Rain Outage Prediction for GSM Networks in Pakistan&quot;, Proceedings of&nbsp;IEEE International Symposium on Wireless Communication Systems, ISWCS 08, Reykjavik, Iceland, , 21-24 Oct. 2008, pp.85-88.</p>
+	</li>
+	<li>
+	<p><strong>Gulistan Raja</strong>&nbsp;and M. J. Mirza, &quot;Low Complexity Deblocking Filter using Motion Vectors&quot;, Proceedings of International Conference on Consumer Electronics, ICCE-10, Las Vegas, USA, 11-13 Jan 2010, pp. 9.2-5.</p>
+	</li>
+	<li>
+	<p>F.&nbsp;Shoukat and&nbsp;<strong>Gulistan Raja</strong>, &quot;Implementation of Rule-Based Medical Image Recognition for Lung CT Images&quot;, Proceedings of 9th International Bhurban Conference on Applied Sciences &amp; Technology, Islamabad, 9-12 Jan 2012.</p>
+	</li>
+	<li>
+	<p>F. Nazir and&nbsp;<strong>Gulistan Raja</strong>, &quot;Performance Analysis of H.264/SVC&nbsp;Spatial Scalability for Medical Videos&quot;, Proceedings of 9th International Bhurban Conference on Applied Sciences &amp; Technology, Islamabad, 9-12 Jan 2012.</p>
+	</li>
+	<li>
+	<p><strong>Gulistan Raja</strong>&nbsp;and A. Khan, &quot;The Emerging High Efficiency Video Coding Standard (HEVC)&quot;, IOP Conf. Ser.: Mater. Sci. Eng., Vol. 51, 012010, Dec. 2013.</p>
+	</li>
+	<li>
+	<p>S. S. H. Shah, M. N. Majoka, and&nbsp;<strong>Gulistan Raja,</strong>&nbsp;&quot;Design and Implementation of 32-bit Vedic Multiplier on FPGA&quot;, Proceedings of 1st International Conference on Modern Communication and Computing Technologies, Nawabshah, 26-28 Feb 2014.</p>
+	</li>
+	<li>
+	<p>I. Ali,&nbsp;<strong>Gulistan Raja</strong>, M. Muzammil, and A. K. Khan, &quot;Adaptive Modified Hexagon Based Search Motion Estimation Algorithm&quot;, 4th International Conference on Consumer Electronics, Berlin, 7-10 Sep. 2014.</p>
+	</li>
+	<li>
+	<p>I. Ali,&nbsp;<strong>Gulistan Raja</strong>&nbsp;and A. K. Khan, &quot;A 16-bit Architecture of Advanced Encryption Standard for Embedded&nbsp; Applications&quot;, 12th International Conference on Frontiers in Informaion Technology, Islamabad, 17-19 Dec. 2014, pp. 220-225.&nbsp;</p>
+	</li>
+	<li>
+	<p>A. S. Khattak,&nbsp;<strong>Gulistan Raja</strong>, N. Anjum, and M. Qasim, &quot;Integration of Mean-Shift and Particle Filter: A Survey&quot;, 12th International Conference on Frontiers in Information Technology, Islamabad, 17-19 Dec. 2014, pp. 286-291.</p>
+	</li>
+	<li>
+	<p>F. Shoukat and&nbsp;<strong>Gulistan Raja</strong>, &ldquo;Computer Aided Detection of Lung Cancer Nodules: A Review&rdquo;, International Multi-Topic Conference, Mehran University, Jamshoro, 11-13 Feb 2015.</p>
+	</li>
+	<li>
+	<p>S. S. H. Shah and&nbsp;<strong>Gulistan Raja</strong>, &quot;FPGA Implementation of Chaotic based AES Image Encryption Algorithm&quot;, IEEE International Conference on Signal and Image Processing Applications, ICSIPA 2015, Kuala Lumpur, 19-21 Oct. 2015, pp. 574-577.</p>
+	</li>
+	<li>
+	<p>B. Hassan and&nbsp;<strong>Gulistan Raja,</strong>&nbsp;&quot; Fully Automated Assessment of Macular Edema using Optical Coherence Tomography (OCT) Images&quot;, International Conference on Intelligent Systems Engineering, ICISE 2016, Islamabad, 15-18 Jan. 2016.</p>
+	</li>
+	<li>
+	<p>M. A. Imtiaz and&nbsp;<strong>Gulistan Raja&nbsp;</strong>&ldquo;Isolated Word Automatic Speech Recognition (ASR) System using MFCC, DTW and KNN&rdquo;, IEEE 2nd&nbsp;Asia Pacific Conference on Multimedia and Broadcasting, APMediaCast 2016, Bali, Indonesia, 17-19 Nov. 2016.</p>
+	</li>
+	<li>
+	<p>M. N. Majoka and <strong>Gulistan Raja</strong>, &quot;FPGA based Image De-Hazing Architecture for Real Time Applications&quot;, IEEE IntelliSys Conference, London, 7-8 Sep. 2017, pp. 609-613.</p>
+	</li>
+	<li>
+	<p>K. Saeed and <strong>Gulistan Raja</strong>, &quot;Performance Evaluation of Modern Broadwell Architecture of a Parallel &amp; Distributed Microprocessor&quot;,&nbsp;International Symposium on Wireless Systems and Networks (ISWSN), Lahore, 19-21 Nov. 2017.</p>
+	</li>
+	<li>
+	<p>Z. Rauf&nbsp;and <strong>Gulistan Raja</strong>, &quot;Requirement Based Transform Coefficient Coding Architecture for DCT/DST for HEVC&quot;,&nbsp;International Symposium on Wireless Systems and Networks (ISWSN), Lahore, 19-21 Nov. 2017.</p>
+	</li>
+	<li>
+	<p><strong>Gulistan Raja</strong>, &quot;Outcome based Education and Accreditation - Challenges for Pakistani Engineering Programs&quot;, International Engineering Conference &amp; Exhibition, Riyadh, KSA, 4-7 Dec. 2017.</p>
+	</li>
+	<li>
+	<p>M. Nawaz, <strong>Gulistan Raja</strong> and M. Qasim, &quot;A New Approach for Dehazing and Enhancement of Infrared Images&quot;,&nbsp;18th International Bhurban Conference on Applied Sciences and Technologies (IBCAST 2021), Islamabad, 12-16 Jan. 2021.</p>
+	</li>
+	<li>
+	<p>S. Shakeel and <strong>Gulistan Raja</strong>, &quot;Classification of Breast Cancer from Mammogram images using Deep Convolution Neural Networks&quot;,&nbsp;18th International Bhurban Conference on Applied Sciences and Technologies (IBCAST 2021), Islamabad, 12-16 Jan. 2021.</p>
+	</li>
+	<li>
+	<p>S. Liaqat and <strong>Gulistan Raja</strong>, &quot;Computer-Aided Detection of COVID-19 Using Chest Imaging&quot;,&nbsp;11th International Conference on Pattern Recognition Systems (ICPRS 2021),&nbsp;Curic&oacute;, Chile, 17-19 Mar. 2021.</p>
+	</li>
+	<li>
+	<p>L. Khurshid and <strong>Gulistan Raja</strong>, &quot;Real Time Architecture for Image De-Hazing&quot;, 11th International Conference on Pattern Recognition Systems (ICPRS 2021),&nbsp;Curic&oacute;, Chile, 17-19 Mar. 2021.</p>
+	</li>
+	<li>
+	<p>M. W. Malik, Q. Gull and <strong>Gulistan Raja</strong>, &quot;Blockchain-based Security and Privacy-aware Protocol for Vehicular Ad Hoc Network&quot;,&nbsp;19th International Bhurban Conference on Applied Sciences and Technologies (IBCAST 2022), Islamabad, 16-20 Aug. 2022.</p>
+	</li>
+	<li>M. S. Saleem, <strong>Gulistan Raja </strong>and&nbsp;J. &nbsp;Mir, &ldquo;Guided Image Filter inspired Improved Single Image Dehazing Method&rdquo;, 2nd International Conference on Engineering &amp; Computing Technologies, ICECT 2022, 22 Nov. 2022.<br />
+	&nbsp;</li>
+	<li>M. Masood and<strong> Gulistan Raja</strong>, &quot;&nbsp;Multi-feature Integration with Adaptive Learning based Correlation Filter for Visual Object Tracking&quot;,&nbsp;International Multidisciplinary Conference on Emerging Research &amp; Technology (IMCERT), Karachi, Jan. 4-5, 2023.<br />
+	&nbsp;</li>
+	<li>M. U. Abdullah and<strong> Gulistan Raja</strong>, &quot;Computer-Aided Diagnosis Systems for Diabetic Retinopathy: A comprehensive Review&quot;, 3rd International Conference on Key Enabling Technologies, Istanbul, Turkey, 28-30 Aug. 2023.&nbsp;<br />
+	&nbsp;</li>
+	<li>M. Usman and <strong>Gulistan Raja</strong>, &quot;&nbsp;A Multi-Plant Disease Classification using Convolutional Neural Network&quot;,&nbsp;3rd International Conference on Key Enabling Technologies, Istanbul, Turkey, 28-30 Aug. 2023.&nbsp;<br />
+	&nbsp;</li>
+	<li>&nbsp;Y. Rizwan and <strong>Gulistan Raja</strong>, &quot;A Comprehensive Review of Machine Learning Applications in State Assessment and Control of Power Electronic Converters&quot;,&nbsp;&nbsp;4th International Conference on Key Enabling Technologies,&nbsp;1-2&nbsp;Sep.&nbsp;2024, Dublin, Ireland.<br />
+	&nbsp;</li>
+	<li>&nbsp;M. B. Khan, F.&nbsp;Shaukat, M. Abdullah, J.&nbsp;Mir and <strong>Gulistan Raja</strong>, &quot;Fully Automatic Lung Segmentation in Thoracic CT Images using K-means Thresholding&quot;,&nbsp;4th International Conference on Key Enabling Technologies,&nbsp;1-2&nbsp;Sep.&nbsp;2024, Dublin, Ireland.<br />
+	&nbsp;</li>
+	<li>F. M. Hashmi, <strong>Gulistan Raja</strong>, M. Qasim and A. Khalid, &quot;Generation of Synthetic Infrared Hazy Aerial Images Dataset using Conditional Generative Adversarial Network&quot;, 22nd International Bhurban Conference on Applied Sciences and Technologies (IBCAST 2025), Murree, 19-22 Aug. 2025.</li>
+</ol>
+
+            </div>
+            <div data-displayid="5">
+                <ul>
+	<li>
+	<p>Grant of 8.3K Euro for Project &ldquo;Capacity Building in Biomedical Engineering Education for Digital Transformation and Industry 4.0/5.0 Technologies&rdquo;, to Consortium of 10 Universities including UET Taxila by Erasmus plus European Union, 2023</p>
+	</li>
+	<li>
+	<p>Research grant of 0.2 Million PKR &quot;Generation of Infrared Hazy Images Dataset using CNN and GAN Networks and AI Model Training to Remove Haze for High and Dense Hazy IR Images&quot; 2024</p>
+	</li>
+	<li>
+	<p>Research grant of 0.1 Million PKR &quot;AI based No Reference Image Quality Evaluator Metric for Infrared Images&quot; 2024</p>
+	</li>
+	<li>
+	<p>Research grant of 0.1 Million PKR, &quot;AI based De-Noising Network for Infrared Images&quot;, 2024</p>
+	</li>
+	<li>
+	<p>Research grant of 8.3 Million PKR for project &quot;EMeRALDS: Electronic Medical Records driven Automated Lung nodule Detection and Cancer Risk Stratification&quot;, 2022</p>
+	</li>
+	<li>
+	<p>Research grant of 0.2 Million PKR for project &quot;Generic Classification of Scene Contents using Multispectral Imaging&quot;,&nbsp;2020</p>
+	</li>
+	<li>
+	<p>Research grant of 0.1 Million PKR for project &quot;Image Enhancement Techniques (Night Time)&quot;,&nbsp;2019</p>
+	</li>
+	<li>
+	<p>Research grant of 1.74 Million PKR for project &ldquo;An Efficient Scheme for Lung Nodule Detection&rdquo;, 2015</p>
+	</li>
+	<li>
+	<p>Research grant of 1.075 Million PKR for project &ldquo;Implementation of Latent Fingerprint Enhancement and Marking Region of Interest (ROI)&rdquo;,&nbsp;2013</p>
+	</li>
+	<li>
+	<p>Research grant of 0.2 Million PKR for project &ldquo;Design &amp; Implementation of Improved Quality Low Bit Rate Video Coding&rdquo;,&nbsp;2005</p>
+	</li>
+</ul>
+
+            </div>
+            <div data-displayid="6">
+                <!--?xml:namespace prefix = o ns = "urn:schemas-microsoft-com:office:office" /-->
+<ul>
+	<li>Director, Advanced Studies, Research &amp; Technological Development (ASR&amp;TD)&nbsp;,&nbsp;UET Taxila<br />
+	<em>29 Aug. 2023 - Present</em><br />
+	&nbsp;</li>
+	<li><em>Member , Finance Committee, UET Taxila<br />
+	20 Jan. 2025 - Present</em></li>
+</ul>
+
+<p><strong><em>&nbsp; &nbsp; &nbsp; Past Administrative Responsibilities</em></strong></p>
+
+<ul>
+	<li>
+	<p>Convener, OBE Committee&nbsp;,&nbsp;Electrical Engg. Dept.<br />
+	<em>1 Mar. 2022 - 15 Jul. 2024</em></p>
+	</li>
+	<li>
+	<p>Chairman, Central Purchase Committee, UET Taxila<br />
+	<em>2 Jan. 2015 - 5 Nov. 2021</em></p>
+	</li>
+	<li>
+	<p>Chairman, Selection Committee, UET Taxila<br />
+	<em>19 June 2018 - 21 Nov. 2019</em></p>
+	</li>
+	<li>
+	<p>Founding Chairman, Biomedical Engg.&nbsp;&amp; Tech.&nbsp;Dept., UET Taxila<br />
+	<em>2 Oct. 2017 - 26 Apr. 2018</em></p>
+	</li>
+	<li>
+	<p>Chairman, Electronics Engineering Department, UET Taxila<br />
+	<em>20 Mar. 2015 - 26 Apr. 2018</em></p>
+	</li>
+	<li>
+	<p>Director, Telephone Exchange, UET Taxila&nbsp;<br />
+	<em>2 Mar. 2012 - 1 Apr. 2016</em></p>
+	</li>
+	<li>
+	<p>Chairman, Livery Committee, UET Taxila&nbsp;<br />
+	<em>14 Jan. 2011 - 13 Mar. 2015</em></p>
+	</li>
+	<li>
+	<p>Director, Digital Systems Lab, Electrical Engineering Department, UET Taxila<br />
+	<em>Oct. 2011&nbsp;- Mar. 2015</em></p>
+	</li>
+	<li>
+	<p>Member, Central Purchase Committee, UET Taxila<br />
+	<em>Jan. 2012 - Dec. 2014</em></p>
+	</li>
+	<li>
+	<p>Scrutinizer, MSc / PhD Examinations, UET Taxila<br />
+	<em>Aug. 2007 - Aug. 2014 </em></p>
+	</li>
+	<li>
+	<p>Director, Postgraduate Studies, Electrical Engineering Department, UET Taxila<br />
+	<em>7 Jan. 2004 -&nbsp; 3 Jun. 2013</em></p>
+	</li>
+	<li>
+	<p>Member, Library Committee, UET Taxila<br />
+	<em>Dec. 2010 - Mar. 2013</em></p>
+	</li>
+	<li>
+	<p>Member, Board of Advanced Studies &amp; Research, UET Taxila<br />
+	<em>Jul.&nbsp;2009 - Dec. 2012</em></p>
+	</li>
+	<li>
+	<p>President, Teaching Staff Association, UET Taxila<br />
+	<em>For the Year 2011</em></p>
+	</li>
+	<li>
+	<p>Chairman, Financial Aid / Fee Concession Committee, UET Taxila<br />
+	<em>Mar. 2011 - Oct. 2011</em></p>
+	</li>
+	<li>
+	<p>Transport Officer, UET Taxila<br />
+	<em>17 Sep. 2007 - 8 Nov. 2010</em></p>
+	</li>
+	<li>
+	<p>Director, Multimedia &amp; Vision Lab, Electrical Engineering Department, UET Taxila<br />
+	<em>Mar. 2009 - May. 2010</em></p>
+	</li>
+	<li>
+	<p>Focal Person, HEC-JNBS Program, UET Taxila<br />
+	<em>May. 2006 -&nbsp;Nov. 2010</em></p>
+	</li>
+	<li>
+	<p>Director, Computer Communication Lab, Electrical Engineering Department, UET Taxila<br />
+	<em>Mar. 2007 - Feb. 2009</em></p>
+	</li>
+</ul>
+
+            </div>
+            <div data-displayid="7">
+                <ul style="list-style-type:square">
+	<li>
+	<p>Establishement of BS Biomedical Engg. Technology Program in Biomedical Engineering &amp; Technology Dept., UET Taxila, 2017</p>
+	</li>
+	<li>
+	<p>Implementation of OBE System in Electronics Engineering Department, UET Taxila, 2015-2018</p>
+	</li>
+	<li>
+	<p>Establishment of HEC Recognized MSc/PhD Program in&nbsp;Electronic Engineering Department, UET Taxila, 2017</p>
+	</li>
+	<li>
+	<p>Establishment of Instrumentation/Microprocessor &amp; Microcontroller/Digital System Lab in Electronic Engg. Dept., UET Taxila, 2017</p>
+	</li>
+	<li>
+	<p>Preparation of PC-1 for Video and Image Processing Laboratory, UET Taxila, 2005&nbsp;</p>
+	</li>
+</ul>
+
+            </div>
+            <div data-displayid="8">
+                <ul>
+	<li>
+	<p>More than 28 Years of Teaching and Research Experience</p>
+	</li>
+	<li>
+	<p>More than 19 years of Administration Experience&nbsp;&nbsp;</p>
+	</li>
+</ul>
+
+            </div>
+            <div data-displayid="9">
+                <ul>
+	<li>
+	<p>Convener, BE Tech. (Electrical), NCRC Committee by NTC, Islamabad, 2026</p>
+	</li>
+	<li>
+	<p>Panel Member, NRPU Engg. &amp; Tech., HEC, Islamabad&nbsp;<br />
+	<em>Nov. 2025&nbsp;- Sep.&nbsp;2026</em></p>
+	</li>
+	<li>
+	<p>Reviewer, HEC Post&nbsp;Doctoral&nbsp;Fellowship Program, 2025</p>
+	</li>
+	<li>
+	<p>Reviewer, HEC International Research Support Initiative Program (IRSIP), 2025</p>
+	</li>
+	<li>
+	<p>Associate Editor, The Journal of Engineering (IET), UK<br />
+	<em>Dec. 2020 - Mar. 2026</em></p>
+	</li>
+	<li>
+	<p>Vice Chair,&nbsp;IEEE Islamabad Section<br />
+	<em>Feb. 2023 - Present</em></p>
+	</li>
+	<li>
+	<p>Member, Editorial Board,&nbsp;Journal of Applied Sciences and Emerging Technologies (JASET)<br />
+	<em>Oct. 2022 - Present</em></p>
+	</li>
+	<li>
+	<p>Associate Editor, IEICE Transactions on Fundamentals of Electronics, Communications and<br />
+	Computer Sciences, Japan<br />
+	<em>Feb. 2021 - Sep. 2024</em></p>
+	</li>
+	<li>
+	<p>Panel Member, NRPU CS&amp;IT, HEC, Islamabad&nbsp;<br />
+	<em>Aug. 2021 - July.&nbsp;2022</em></p>
+	</li>
+	<li>
+	<p>Branch Mentor, IEEE Student Branch, UET Taxila<br />
+	<em>Nov. 2022 - Present</em></p>
+	</li>
+	<li>
+	<p>Academic Editor, PLOS ONE Journal, USA<br />
+	<em>Aug. 2020 - Dec. 2023</em></p>
+	</li>
+	<li>
+	<p>Associate Editor, IEEE Access Journal, USA<br />
+	<em>Aug. 2019 - Sep. 2022</em></p>
+	</li>
+	<li>
+	<p>Awards and Recognition Chair, IEEE Islamabad Section<br />
+	<em>Apr. 2018 - Jan. 2023</em></p>
+	</li>
+	<li>
+	<p>Vice President, Monbukagakusho Alumni Association of Pakistan (MAAP)<br />
+	<em>Nov. 2021 - Dec. 2023</em></p>
+	</li>
+	<li>
+	<p>Judge for Various IEEE (USA) Awards&nbsp;<br />
+	<em>Jan. 2021 - Dec. 2023</em></p>
+	</li>
+	<li>
+	<p>Counselor, IEEE UET Taxila Student Branch<br />
+	<em>Dec. 2009 - Nov. 2022</em></p>
+	</li>
+	<li>
+	<p>Joint Secretary, Monbukagakusho Alumni Association of Pakistan (MAAP)<br />
+	<em>Nov. 2019 - Oct. 2021</em></p>
+	</li>
+	<li>
+	<p>Member, Organizing Committee<br />
+	South Asia Symposium on Greener-Safer South Asia, FAST, Islamabad, 17 Mar. 2018</p>
+	</li>
+	<li>
+	<p>Finance Secretary, Monbukagakusho Alumni Association of Pakistan (MAAP)<br />
+	<em>May 2017 - Nov. 2019</em></p>
+	</li>
+</ul>
+
+<p><em><strong>&nbsp; &nbsp; &nbsp; Reviewer of following Journals/Conferences</strong></em></p>
+
+<ul>
+	<li>
+	<p>IEEE International Conference on Acoustics, Speech, and Signal Processing (ICASSP 2024), Seoul, Korea, 14~19 April 2024</p>
+	</li>
+	<li>
+	<p>IEEE Transactions on Artificial Intelligence, 2023</p>
+	</li>
+	<li>
+	<p>Scientific Reports, Springer Nature, 2023</p>
+	</li>
+	<li>
+	<p>IEEE Transactions&nbsp;on&nbsp;Knowledge&nbsp;and&nbsp;Data&nbsp;Engineering, 2022</p>
+	</li>
+	<li>
+	<p>Wireless Communications and Mobile Computing, 2022</p>
+	</li>
+	<li>
+	<p>IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems, 2021</p>
+	</li>
+	<li>
+	<p>SPIE Journal of Electronic Imaging, 2021</p>
+	</li>
+	<li>
+	<p>16th IEEE International Conference on Emerging Technologies 2021 (ICET 2021), Islamabad, 22-23 Dec. 2021</p>
+	</li>
+	<li>
+	<p>The 7th International Conference on Man Machine Systems (ICoMMS 2021), Malaysia, 19-20 Oct. 2021</p>
+	</li>
+	<li>
+	<p>Intl. Conf. on Innovation and Intelligence for Informatics, Computing, and Technologies, Bahrain, 29-30 Sep. 2021</p>
+	</li>
+	<li>
+	<p>Journal of Experimental &amp; Theoretical Artificial Intelligence, 2019-2020</p>
+	</li>
+	<li>
+	<p>IEEE Access Journal, 2019-2020</p>
+	</li>
+	<li>
+	<p>IEICE Transactions on Information and Systems, 2020</p>
+	</li>
+	<li>
+	<p>5th International Conference on Electronic Design (ICED), Malaysia, 19 August 2020.</p>
+	</li>
+	<li>
+	<p>Zooming Innovation in Consumer Technologies International Conference (ZINC 2020), Novi Sad, Serbia, May 26-27, 2020</p>
+	</li>
+	<li>
+	<p>International Journal of Computing &amp; Digital Systems, 2019-2020</p>
+	</li>
+	<li>
+	<p>IEEE International Conference on Open Source and Technologies, Lahore, Dec. 2014-2021</p>
+	</li>
+	<li>
+	<p>IEEE International Conference on Consumer Electronics, Berlin,&nbsp;2014-2020</p>
+	</li>
+	<li>
+	<p>22nd IEEE International Multi Topic Conference (INMIC), Islamabad, Nov. 29-30, 2019</p>
+	</li>
+	<li>
+	<p>International Conference on Applied and Engineering Mathematics (ICAEM), Taxila, Aug. 27-29, 2019</p>
+	</li>
+	<li>
+	<p>IEICE&nbsp;Transactions on Information and Systems, Japan, 2017-2019</p>
+	</li>
+	<li>
+	<p>IEEE International Conference on Signal and Image Processing (ICSIPA), Kuala Lumpur, 17-19 Sep. 2019</p>
+	</li>
+	<li>
+	<p>KSII Transactions on Internet and Information Systems, Korea, 2016</p>
+	</li>
+	<li>
+	<p>IEICE Transactions on Fundamentals of Electronics, Communications and Computer Sciences, Japan, 2016</p>
+	</li>
+	<li>
+	<p>5th International Conference on Advances in Computing, Communications and Informatics, Jaipur, Sep. 2016</p>
+	</li>
+	<li>
+	<p>IEICE Transactions on Information and Systems, Japan, 2015</p>
+	</li>
+	<li>
+	<p>4th International Conference on Advances in Computing, Communications and Informatics, Kerala,&nbsp;Aug. 2015</p>
+	</li>
+	<li>
+	<p>IEEE International Midwest Symposium on Circuits and Systems, Texas, Aug. 2014</p>
+	</li>
+	<li>
+	<p>IEEE 2nd National Conference on Information Assurance, NCIA-2013, Rawalpindi, Dec. 2013</p>
+	</li>
+	<li>
+	<p>IEICE Transactions on Fundamentals of Electronics, Communications and Computer Sciences Special Section on VLSI Design and CAD Algorithms, Japan, 2009, 2010 and 2014.</p>
+	</li>
+	<li>
+	<p>8th-9th IEEE International Conference on Emerging Technologies, Islamabad, Oct. 2012 and Dec. 2013</p>
+	</li>
+	<li>
+	<p>8th-13th International Conferences on Frontiers on Information Technology, Islamabad, Dec. 2010-Dec. 2015&nbsp;</p>
+	</li>
+	<li>
+	<p>Egyptian Informatics Journal, Published by Elsevier, 2013</p>
+	</li>
+	<li>
+	<p>The Imaging Science Journal, Maney Publishing, UK, 2012</p>
+	</li>
+	<li>
+	<p>IEEE International Symposium on Circuits and Systems, ISCAS-10, Paris, May 2010</p>
+	</li>
+	<li>
+	<p>IEEE International Conference on Computer and Communication Engineering, Malaysia, May 2010</p>
+	</li>
+	<li>
+	<p>Journal of IEICE Electronics Express (ELEX), Japan, 2009</p>
+	</li>
+	<li>13th IEEE International Multitopic Conference, Islamabad, Dec. 2009</li>
+</ul>
+
+            </div>
+            <div data-displayid="10">
+                <ul>
+	<li>
+	<p>Senior Member, IEEE (USA)</p>
+	</li>
+	<li>
+	<p>Fellow, IEEEP&nbsp;</p>
+	</li>
+	<li>
+	<p>Member, Institute of Engineers, Pakistan</p>
+	</li>
+	<li>
+	<p>Member, Pakistan Engg. Congress&nbsp;</p>
+	</li>
+	<li>
+	<p>Professional Member, Pakistan Engineering Council (PEC)</p>
+	</li>
+</ul>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;<strong>Other Memberships</strong></p>
+
+<ul>
+	<li>
+	<p>Member, Academic Council, Punjab University of Technology, M.B.Din<br />
+	<em>5 Aug. 2022 - Present&nbsp;</em></p>
+	</li>
+	<li>
+	<p>Member, Engineering Curriculum Review &amp; Development Committee (ECRDC) for Electrical and Allied Engineering Discipline, Pakistan Engineering Council<br />
+	<em>&nbsp;Apr. 2022 &ndash; Present</em></p>
+	</li>
+	<li>
+	<p>Member, Board of Studies, IIU, Islamabad<br />
+	<em>Nov. 2021&nbsp;- Oct. 2024</em></p>
+	</li>
+	<li>
+	<p>Member, Academic Council, University of Chakwal<br />
+	<em>Nov. 2020 - Oct. 2023</em></p>
+	</li>
+	<li>
+	<p>Member, Board of Faculty, FE&amp;CE, UET Peshawar<br />
+	<em>Feb. 2020 - Present</em></p>
+	</li>
+	<li>
+	<p>Member, Board of Studies,&nbsp; UET Mardan<br />
+	<em>Mar. 2019 - Present</em></p>
+	</li>
+	<li>
+	<p>Member, Academic Council, Muslim Youth University, Islamabad<br />
+	<em>Jan. 2020 - Dec. 2022</em></p>
+	</li>
+	<li>
+	<p>Member,&nbsp; Board of Undergraduate Studies, Electronic Engg. Dept., UET Taxila<br />
+	<em>Dec. 2018 - Present</em></p>
+	</li>
+	<li>
+	<p>Member, Board of Faculty&nbsp;of Industrial Engineering, UET Taxila<br />
+	<em>May 2014 - Present</em></p>
+	</li>
+	<li>
+	<p>Member, Academic Council, UET Taxila<br />
+	<em>Dec 2013&nbsp;- Present</em></p>
+	</li>
+	<li>
+	<p>Member, Board of Faculty of Electronics and Electrical Engg., UET Taxila<br />
+	<em>Dec. 2012 - Present</em></p>
+	</li>
+	<li>
+	<p>Member, Board of Postgrduate Studies, EED, UET Taxila<br />
+	<em>Dec. 2012 - Present</em></p>
+	</li>
+	<li>
+	<p>Member, Board of Undergraduate Studies, EED, UET Taxila<br />
+	<em>Apr. 2002 - Present</em></p>
+	</li>
+	<li>
+	<p>Member, Institutional Scholarship Award Committee, UET Taxila<br />
+	<em>May 2013&nbsp;- June 2019</em></p>
+	</li>
+</ul>
+
+<p><strong>&nbsp; &nbsp; Past Memberships</strong></p>
+
+<ul>
+	<li>
+	<p>Member, National Curriculum Revision Committee, HEC, Islamabad</p>
+	</li>
+	<li>
+	<p>Member, Board of Studies, Islamic International University, Islamabad</p>
+	</li>
+	<li>
+	<p>Member, Board of Faculty, Riphah Intl. University, Islamabad</p>
+	</li>
+	<li>
+	<p>Member, Board of Faculty, Wah Engineering College, Wah Cantt</p>
+	</li>
+	<li>
+	<p>Member, Board of Studies, Computer Systems Engg., MUST, AJK</p>
+	</li>
+</ul>
+
+            </div>
+            <div data-displayid="11">
+                <ul>
+	<li>
+	<p>Digital Image Processing</p>
+	</li>
+	<li>
+	<p>Computer Networks</p>
+	</li>
+	<li>
+	<p>Multimedia Systems and Communication</p>
+	</li>
+	<li>
+	<p>Advanced Computer&nbsp;Systems</p>
+	</li>
+	<li>
+	<p>Digital Systems</p>
+	</li>
+	<li>
+	<p>Digital Logic Design</p>
+	</li>
+	<li>
+	<p>Discrete Structures</p>
+	</li>
+	<li>
+	<p>Communication Systems</p>
+	</li>
+</ul>
+
+            </div>
+            <div data-displayid="12">
+                <ul>
+	<li>
+	<p><strong>Dean</strong>, Faculty of Electronics &amp; Electrical Engineering, UET Taxila<br />
+	<em>July 2024 - Present</em></p>
+	</li>
+	<li>
+	<p><strong>Visiting Professor,</strong>&nbsp;Faculty of Engineering, Univeristy of Jaffna, Sri Lanka<br />
+	<em>May 2025</em></p>
+	</li>
+	<li>
+	<p><strong>Professor</strong>, Electrical Engineering Department,&nbsp;UET Taxila<br />
+	<em>Dec.&nbsp;2012 - Present</em></p>
+	</li>
+	<li>
+	<p><strong>Chairman</strong>, Electronics Engineering Department,&nbsp;UET Taxila<br />
+	<em>Mar. 2015 - Apr. 2018</em></p>
+	</li>
+	<li>
+	<p><strong>Chairman</strong>, Biomedical Engineering Department,&nbsp;UET Taxila<br />
+	<em>Oct. 2017 - Apr. 2018</em></p>
+	</li>
+	<li>
+	<p><strong>Associate Professor</strong>, Electrical Engg. Department, UET Taxila<br />
+	<em>April 2012 - Dec. 2012</em></p>
+	</li>
+	<li>
+	<p><strong>Assistant Professor</strong>, Electrical Engg. Department, UET Taxila<br />
+	<em>May 2003 - March 2012</em></p>
+	</li>
+	<li>
+	<p><strong>LSI Designer</strong>, Synthesis&nbsp;Corporation, Osaka, Japan<br />
+	<em>April 2000 - March 2002</em></p>
+	</li>
+	<li>
+	<p><strong>Teaching/Research Associate</strong>, Electrical Engg. Department, UET Taxila<br />
+	<em>June 1997 - April 2003</em></p>
+	</li>
+</ul>
+
+            </div>
+            <div data-displayid="13">
+                <p><strong><em>Served as Visiting Faculty in&nbsp;</em></strong></p>
+
+<ul>
+	<li>
+	<p>Adjunct Faculty, IIU, Islamabad</p>
+	</li>
+	<li>
+	<p>Air University, Islamabad</p>
+	</li>
+	<li>
+	<p>Wah Engineering College, Wah Cantt.</p>
+	</li>
+	<li>
+	<p>Chakwal Campus, UET Taxila</p>
+	</li>
+</ul>
+
+            </div>
+            <div data-displayid="14">
+                <ul>
+	<li>
+	<p><a href="http://web.uettaxila.edu.pk/uet/EncED/news28.asp">IEEE Outstanding Branch Counselor Award, R10 (Asia Pacific Region), 2016</a></p>
+	</li>
+	<li>
+	<p>Recepient of Best Teacher Award for year 2009 by Higher Education Commission, Islamabad (<strong><em>DEDICATED to&nbsp;MY STUDENTS</em></strong>)<br />
+	<a href="http://web.uettaxila.edu.pk/uet/uetSub/news/bestTeacherAward09.htm"><strong><em>Best University Teacher Award by HEC</em></strong></a></p>
+	</li>
+	<li>
+	<p>Scholarship for Masters Study by OFIX, Government of Japan, 1999</p>
+	</li>
+</ul>
+
+            </div>
+            <div data-displayid="15">
+                <ul>
+	<li>
+	<p>2nd Intl. Conference on Digital Technologies for Sustainable Agriculture, ICDTSA-2025, Kilinochchi, Univeristy of Jaffna, Sri Lanka, 22-23 May 2025</p>
+	</li>
+	<li>
+	<p>4th International Conference on Key Enabling Technologies,&nbsp;1-2&nbsp;Sep.&nbsp;2024, Dublin, Ireland.</p>
+	</li>
+	<li>
+	<p>2nd International Conference on Energy, Power, and Environment (ICEPE23),&nbsp;University of Gujrat, 8-9 Mar. 2023</p>
+	</li>
+	<li>
+	<p>19th International Bhurban Conference on Applied Sciences and Technologies (IBCAST 2022), Bhurban, Muree, 16-20 Aug. 2022</p>
+	</li>
+	<li>
+	<p>18th International Bhurban Conference on Applied Sciences and Technologies (IBCAST 2021), Islamabad, 12-16 Jan. 2021</p>
+	</li>
+	<li>
+	<p>International&nbsp;Conference&nbsp;on Electrical, Comm. &amp; Comp. Engineering (ICECCE-2019), Swat, 24-25 July 2019</p>
+	</li>
+	<li>
+	<p>International Symposium on Wireless Systems and Networks (ISWSN), Lahore, 19-21 Nov. 2017</p>
+	</li>
+	<li>
+	<p>SAI Intelligent Systems Conference, IntelliSys 2017, London, United Kingdom, 7-8 Sep. 2017</p>
+	</li>
+	<li>
+	<p>IEEE International&nbsp;Conference&nbsp;on Signal and Image Processing Applications, ICSIPA 2015, Kuala Lumpur, Malaysia, 19-21 Oct. 2015</p>
+	</li>
+	<li>
+	<p>International&nbsp;Conference&nbsp;on Sensing for Industry, Control, Comm. &amp; Security Technologies, Karachi, 24-26 Jun. 2013</p>
+	</li>
+	<li>
+	<p>International Conference on Engineering Sciences, Punjab University Lahore, 28-29 Feb. 2012</p>
+	</li>
+	<li>
+	<p>International Conference on Consumer Electronics, Las Vegas, USA, 10-13 Jan.&nbsp;2010</p>
+	</li>
+	<li>
+	<p>Global Pervasive Signal Processing Conference, Santa Clara, California, USA, 24-27 Oct.&nbsp;2005</p>
+	</li>
+	<li>
+	<p>IEICE General Conference, Tokyo, Japan, Mar. 27-30, 2002</p>
+	</li>
+</ul>
+
+            </div>
+            <div data-displayid="16">
+                <ul>
+	<li>
+	<p>IEEE Panel of Conference Organizers Conference, POCO, FAST Islamabad, 25 May 2023</p>
+	</li>
+	<li>
+	<p>SECDIV-NIPS Islamabad International Conference on Promoting Strategic Trade Controls through International Cooperation, 5-6 Sep. 2022</p>
+	</li>
+	<li>
+	<p>Ecosystem Restoration: One-Health and Pandemics, organized by&nbsp;Pakistan Academy of Sciences (PAS) &amp; Monbukagakusho-MEXT Alumni Association of Pakistan (MAAP), Islamabad, 5 June 2022</p>
+	</li>
+	<li>
+	<p>3rd&nbsp;International Deans Conference of Engineering Institutions, organized by Pakistan Engineering Council (PEC), Islamabad,&nbsp;&nbsp;7-8 April 2021.</p>
+	</li>
+	<li>
+	<p>Virtual Conference Organizers&rsquo; Panel - To Explore the Challenges of Organizing a Full Virtual Technical Conference, organized by IEEE Bangladesh Section, via Zoom, 1-2 July 2020</p>
+	</li>
+	<li>
+	<p>Washington Accord Workshop on Sharing Best Practices and Policies for Online Teaching Learning and Assessment System and Virtual/Remote Accreditation Process, via Zoom,organized by PEC Islamabad,&nbsp;13 June 2020</p>
+	</li>
+	<li>
+	<p>One Day Training Session on OBA Accreditation Process for Program Evaluators by Pakistan Engineering Council, 29 Apr. 2017</p>
+	</li>
+	<li>
+	<p>Workspace Ethics, Team Building &amp; Time Management and Leadership &amp; Decision Making by Cornwall Education &amp; Training (UK) Limited at UET Taxila, 1-2 Dec. 2016</p>
+	</li>
+	<li>
+	<p>SMART Goals &amp; Strategic Thinking and Interpersonal Skills &amp; Corporate Communication by Cornwall Education &amp; Training (UK) Limited at UET Taxila, 24-25 Nov 2016</p>
+	</li>
+	<li>
+	<p>Short course on Leadership for Engineers &amp; Technical Managers, PEC, Islamabad, 27 Jan 2014</p>
+	</li>
+</ul>
+
+            </div>
+            <div data-displayid="17">
+                <h3>Please see <ins><span class="marker"><em><strong>Research Work</strong></em></span></ins> tab</h3>
+
+            </div>
+            <div data-displayid="18">
+                <p><em><strong>Workshops/Courses Attended:&nbsp;</strong></em></p>
+
+<ol>
+	<li>Strategic Leadership &amp; Institutional Management (SLIM) Program at LCWU Lahore by PHEC, 4-6 May 2026<br />
+	&nbsp;</li>
+	<li>Certified Training Programme for Academic Leaders and University Management on Governance and Leadership, Edinburgh Napier Uuniversity, UK, May 2025<br />
+	&nbsp;</li>
+	<li>COMSTECH-CCOE International Workshop on Quality Assurance and University Ranking, OIC-COMSTECH, Islamabad, 2-3 July 2025<br />
+	&nbsp;</li>
+	<li>Strategic Leadership for Pro Vice-Chancellors and Deans, organized by Sindh Higher Education Commission, Karachi, 10-11 Apr. 2025&nbsp;<br />
+	&nbsp;</li>
+	<li>Academic Staff Traning under BIOMED 5.0 Erasmus+ Project, Romania, 10-14 Feb. 2025<br />
+	&nbsp;</li>
+	<li>Academic Staff Traning under BIOMED 5.0 Erasmus+ Project, Ireland, 3-6 Sep. 2024</li>
+</ol>
+
+<p>&nbsp;</p>
+
+<p><em><strong>Invited Talks:</strong></em></p>
+
+<ol>
+	<li>2nd Intl. Conference on Digital Technologies for Sustainable Agriculture, ICDTSA-2025, Kilinochchi, University of Jaffna, Sri Lanka, 22-23 May 2025<br />
+	&nbsp;</li>
+	<li>20th International Bhurban Conference on Applied Sciences and Technology (IBCAST-2023), Murree, 22-25 Aug. 2023.<br />
+	&nbsp;</li>
+	<li>International Symposium on Artificial Intelligence, Medical Imaging and Pattern Recognition (ISAIMP-2023), NCP, Islamabad, 24-25 July 2023..<br />
+	&nbsp;</li>
+	<li>2nd International Conference titled as Energy, Power, Environment, Control, and Computing (ICEPECC-2023), UoG, Gujrat, 8-9 March 2023.<br />
+	&nbsp;</li>
+	<li><em>&nbsp;</em>International Conference&nbsp;on Electrical, Communication &amp; Computer Engineering (ICECCE-2019), Swat, 24-25 July 2019.<br />
+	&nbsp;</li>
+	<li>1st International Conference on Sensing for Industry, Control, Communication &amp; Security Technologies,&nbsp;Karachi, 24-26 Jun. 2013.<br />
+	&nbsp;</li>
+</ol>
+
+<p><em><strong>Conduction of OBE Workshops/Trainings:</strong>&nbsp;</em></p>
+
+<ol>
+	<li>Conducted workshop on &quot;Outcome based System of Education &amp; Accreditation&quot;, Comp. Engg. Dept., UET Taxila, 26 Feb. 2024.<br />
+	&nbsp;</li>
+	<li>Conducted 2-day training&nbsp;on &quot;Outcome besed System of Education and Accredidation&quot;, University of Gujrat, 12-13 Feb. 2024.<br />
+	&nbsp;</li>
+	<li>Conducted workshop on &quot;Outcome based Education - An interactive Session for Computing Professionals&quot;, CUST, Islamabad, 2 Aug. 2023.<br />
+	&nbsp;</li>
+	<li>Conducted workshop on &quot;Difference between Outcome Based Education and Traditional Education&quot;, University of Chakwal, 17 Jul. 2023.<br />
+	&nbsp;</li>
+	<li>Conducted CPD on &quot;Outcome Based System of Education and Accreditation&quot;, UET Taxila, 8 Feb&nbsp;2023.<br />
+	&nbsp;</li>
+	<li>Conducted Training on &quot;Outcome based Education &amp; Related Concepts&quot;,&nbsp;Mehran University of Engineering &amp; Technology, SZAB Campus Khairpur Mirz,&nbsp;17 Oct. 2022.<br />
+	&nbsp;</li>
+	<li>Conducted Workshop on &quot;Outcome based Learning&quot;,&nbsp;Fatima Jinnah Women University, Rawalpindi,&nbsp;9 Sep. 2022.<br />
+	&nbsp;</li>
+	<li>Conducted &quot;2-day Advanced Workshop on OBE&quot;, UET Taxila, 7-8 Sep. 2022.<br />
+	&nbsp;</li>
+	<li>Conducted &quot;One Day Workshop on&nbsp;OBE&nbsp;System&quot;, University of Chakwal, 26. Jul. 2022.<br />
+	&nbsp;</li>
+	<li>Conducted CPD on &quot;Outcome Based System of Education and Accreditation &ndash; Implementation Perspective&quot;, UET Taxila, 8 Mar 2022.<br />
+	&nbsp;</li>
+	<li>Conducted workshop on &quot;Outcome based System of Education&quot; NUTEC University, Islamabad, 1 Feb 2022.<br />
+	&nbsp;</li>
+	<li>Conducted workshop on &quot;CEPs/PBLs/OELs and its Assessment&quot;, MUST University Mirpur, AJK, 3 July 2021.<br />
+	&nbsp;</li>
+</ol>
+
+<p><em><strong>Particpation in OBE Workshops/Trainings</strong>&nbsp;</em></p>
+
+<ol>
+	<li>2-Day Advanced Level International OBE/OBA Training for PEC Program Evaluators, Faculty and Quality Directors, NUST, Islamabad, 22-23 Aug. 2022.<br />
+	&nbsp;</li>
+	<li>Two Days International Training Workshop on OBE &amp; Implementation, UET Taxila organized by PEC Islamabad, 6-7 Feb 2018.<br />
+	&nbsp;</li>
+	<li>Two Days International Training Workshop on Outcome Based Education and Implementation&nbsp;organized by QEC UET Taxila in collaboration with PEC,&nbsp;1-2&nbsp;Feb. 2017.<br />
+	&nbsp;</li>
+	<li>Two Days Workshop on Outcome based Education &amp; Assessment System of Accreditation, PEC, 2-3 Mar 2015.<br />
+	&nbsp;</li>
+	<li>Two Days Workshop on OBA System of Accreditation for Program Evaluators, Islamabad, 6-7 Nov. 2014.<br />
+	&nbsp;</li>
+	<li>Workshop on Complex Problem Solving and Activities, PEC, Islamabad, 24 Apr 2014.<br />
+	&nbsp;</li>
+	<li>Short course on Outcome based Education and Accreditation, PEC, Islamabad, 28 Feb 2014.</li>
+</ol>
+
+            </div>
+            <div data-displayid="19">
+                
+            </div>
+            <div data-displayid="20">
+                
+            </div> 
+        </div>
+    </div>
+    
+    <div id="profileview2" style="display: none">
+        <fieldset>
+            <legend>Profile Information</legend>
+            <table style="width: 100%" class="table table-hover ">
+                <tr>
+                    <td colspan="2">
+                        <table style="width: 100%">
+                            <tr>
+                                <td class="col-sm-10" style="vertical-align: top">
+                                    <table>
+                                        <tr>
+                                            <td>Name</td>
+                                            <td>Dr. Gulistan Raja</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Designation</td>
+                                            <td>Professor</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Department</td>
+                                            <td>Electrical Engineering (Taxila)</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Highest Qualification</td>
+                                            <td>PhD Electrical Engineering</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Specialization</td>
+                                            <td>Signal and Image Processing, Medical Image Analysis, ASIC Design</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Phone No</td>
+                                            <td>051-9047534 (Off)</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Cell No</td>
+                                            <td>0312-9552563</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Fax No</td>
+                                            <td>051-9047420</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Email</td>
+                                            <td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4324362f2a3037222d6d312229220336263737223b2a2f226d2627366d3328">[email&#160;protected]</a></td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td class="col-sm-2" style="vertical-align: top; padding-top: 20px;">
+                                    <img src="../imgs/gulistan.raja.jpg?random=639212883500313940" class="profileimg" />
+                                </td>
+                            </tr>
+
+                        </table>
+                    </td>
+
+                </tr>
+
+                <tr>
+                    <td>Education</td>
+                    <td><ul>
+	<li>
+	<p><strong>Ph.D. Electrical Engineering, UET Taxila, 2008</strong><br />
+	Specialization - Signal Processing and Communication</p>
+	</li>
+	<li>
+	<p><strong>M.S.&nbsp;Engineering,&nbsp;Osaka University, 2002</strong>&nbsp;<br />
+	Specialization - Information Systems</p>
+	</li>
+	<li>
+	<p><strong>B.Sc. Electrical Engineering, UET Taxila, 1996</strong><br />
+	Specialization -&nbsp;Electronics and Communication</p>
+	</li>
+</ul>
+</td>
+                </tr>
+                <tr>
+                    <td>Research Work</td>
+                    <td><p><strong>&nbsp; &nbsp; &nbsp; ORCID ID: <a href="https://orcid.org/0000-0003-2026-1219">Gulistan Raja</a><br />
+&nbsp; &nbsp; &nbsp;<em> HEC Approved Supervisor</em></strong></p>
+
+<p><strong><big>&nbsp; &nbsp;&nbsp; PhD Research Supervision</big></strong></p>
+
+<p><strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em>Former/Current PhD Students:</em> </strong></p>
+
+<ol>
+	<li>
+	<p>Dr. Hafiz M. Irfan Arshad (09-PhD-EE-37), &quot;An Improved Latent Fingerprint Feature&nbsp;Extraction and Matching Algorithm&quot;, Graduated: Jan. 2015</p>
+	</li>
+	<li>
+	<p>Dr. Furqan Shoukat (11-EE-PhD-51),&nbsp;&quot;An Efficient Scheme for Lung Nodule Detection&quot;, Graduated: Apr. 2018</p>
+	</li>
+	<li>
+	<p>Dr. Ahmad Saeed Khattak (11-EE-PhD-43), &quot;A Multi-Feature Hybrid Object Tracking Algorithm&quot;, Graduated: Dec. 2019</p>
+	</li>
+	<li>
+	<p>Dr. Muhammad Qasim (15-PhD-ENC-06) , &quot;Image Dehazing using Deep Convolutional Neural Networks&quot;, Graduated: Oct. 2023</p>
+	</li>
+	<li>
+	<p>Mansoor Ahmad (17-PhD-EE-83), &ldquo;Histopathological Diagnosis of Lung Cancer using Convolutional Neural Network&quot;<em>, in Research Phase</em></p>
+	</li>
+	<li>
+	<p>Muhammad Abdullah Umar (19-PhD-EE-96), &quot;Multi-Disease Retinal Image Analysis using Machine Learning Methods&quot;, <em>in Research Phase</em></p>
+	</li>
+	<li>
+	<p>Yasar Rizwan&nbsp;(19-PhD-EE-97), &quot;AI based State Assessment and Control of Power Electronic Converters&quot;,&nbsp;<em>in Research Phase</em></p>
+	</li>
+	<li>
+	<p>Zaeem Anjum Wakeel&nbsp;(19-PhD-EE-98), &quot;Detection of Myocardial Fibrosis using Cardiac Magnetic Resonance Images&quot;,&nbsp;<em>in Research Phase</em></p>
+	</li>
+	<li>
+	<p>Muhammad Usman (24-PhD-EE-119), &quot;Capacity Enhancement of Short Reach Optical Over Step-Index Plastic Optical Fiber&quot;, <em>in Course Work</em><br />
+	&nbsp;</p>
+	</li>
+</ol>
+
+<p><strong>&nbsp; &nbsp; &nbsp;<em>PhD Thesis Evaluated/Examined:&nbsp;</em></strong></p>
+
+<ol>
+	<li>
+	<p>Sajid Hussain Alvi, &ldquo;Performance Analysis of Cooperative Communications over Fading Channels&rdquo; COMSATS Institute of Information Technology Islamabad, Dec. 2016</p>
+	</li>
+	<li>
+	<p>Sardar Muhammad Gulfam, &ldquo;Geometrically based Modeling and Characterization of 3D Aeronautical Radio Propagation Channels&rdquo;, COMSATS Institute of Information Technology Islamabad, Feb. 2017</p>
+	</li>
+	<li>
+	<p>Abrar Ahmad, &ldquo;Geometric Modeling and Characterization of 3-D Land Mobile Radio Cellular Propagation Channels&rdquo;, COMSATS Institute of Information Technology Islamabad, Aug. 2017</p>
+	</li>
+	<li>
+	<p>Bakhtiar Ali, &ldquo;Rate Optimization and Resource Allocation in Cooperative Cognitive Radio Network&rdquo;, COMSATS Institute of Information Technology Islamabad, Dec. 2017</p>
+	</li>
+	<li>
+	<p>M. Nadeem Sial, &quot;Analysis&nbsp; of Decoupled&nbsp; User Association&nbsp; in Multi-Tier 5G Heterogeneous&nbsp; Cellular Networks&quot;,&nbsp;COMSATS Institute of Information Technology Islamabad, Mar. 2018</p>
+	</li>
+	<li>
+	<p>Mohsin Fayyaz, &ldquo;Optical Interconnects in Data Center Networks&rdquo;, COMSATS University, Abbotabad Campus, Jan. 2019</p>
+	</li>
+	<li>
+	<p>Aadil Raza, &ldquo;Radio-over-Fiber Transmission Schemes for Next Generation Wireless Access Networks&rdquo;, COMSATS University, Islamabad, May 2019</p>
+	</li>
+	<li>
+	<p>Muhammad Tahir, &ldquo;Fast Video Coding using Spatio-Temporal Features and Ensemble Classification&rdquo;, Capital University of Science and Technology, Islamabad, Sep. 2019</p>
+	</li>
+	<li>
+	<p>Mohammad Arif, &quot;Performance Evaluation of Heterogeneous Cellular Networks&quot;,&nbsp;COMSATS University, Islamabad, March 2021</p>
+	</li>
+	<li>
+	<p>Waqar Alam, &ldquo;Robust Nonlinear Control Strategies and its Application to Closed-Loop Artificial Pancreas&rdquo;, COMSATS University, Islamabad, July 2021</p>
+	</li>
+	<li>
+	<p>Olufisayo Sunday Ekundayo, &ldquo;Facial Expression Recognition and Intensity Estimation&rdquo;, University of KwaZulu-Natal, Durban, South Africa, Oct. 2021</p>
+	</li>
+	<li>
+	<p>Saqib Amin, &quot;Embedded System Approach for Laser Based Self-Mixing Interferometry Sensing&quot;,&nbsp;Riphah&nbsp;International&nbsp;University, Islamabad, Apr. 2022</p>
+	</li>
+	<li>
+	<p>Mehreen Sirshar, &quot;Computational Diagnostic Systems for Lung Diseases Through Deep Learning and NLP Based Automated Medical Reporting&quot;, EME, NUST&nbsp;Rawalpindi, Aug. 2022</p>
+	</li>
+	<li>
+	<p>Arslan Shafique, &ldquo;Noise-tolerant Chaos Based Cryptosystems for the Security of Digital Images Using Machine Learning&rdquo; Riphah International University, Islamabad, Sep. 2022</p>
+	</li>
+	<li>Asif Siddique, &quot;Efficient encoding of HDR Images and Videos&quot;,&nbsp;Riphah International University, Islamabad, Jun. 2023<br />
+	&nbsp;</li>
+	<li>Ghalib Hussain. &quot;On Wireless Channel-based Secret Keys for Secure Communications&quot;,&nbsp;COMSATS University, Islamabad, Nov. 2025<br />
+	&nbsp;</li>
+</ol>
+
+<p><big><strong>&nbsp; &nbsp; &nbsp;MSc Research Supervision</strong></big></p>
+
+<ol>
+	<li>
+	<p>Sadiqullah (03-MS-C-05), &quot;VLSI Design&nbsp;and Implementation of Transform &amp; Quantization Module for Advanced Coding Standard H.264&quot;, 2005</p>
+	</li>
+	<li>
+	<p>Jamshed Iqbal (03-MS-E-10), &quot;Low Power Design and Implementation of Embedded Hardware for Text, Audio and Image Processing Applications&quot;, 2005</p>
+	</li>
+	<li>
+	<p>Muhammad Qasim (01-MS-E-15), &quot;Real Time Adaptive Video Enhancement Using Local Statistics&quot;, 2006</p>
+	</li>
+	<li>
+	<p>Sijjad Minallah (04-MS-EE-26) , &quot;FFT Processor Implementation&quot;, 2006</p>
+	</li>
+	<li>
+	<p>Gul Ahmed Kayani (04-MS-EE-15), &quot;Performance Analysis of OFDM for Wireless Environment&quot;, 2006&nbsp;</p>
+	</li>
+	<li>
+	<p>Saira Zafar (05-MS-EE-01), &quot;Performance Analysis of Dual-Band 802.11a+g in the Same Environment&quot;, 2007</p>
+	</li>
+	<li>
+	<p>Farhan Ahmad Nadeem (04-MS-EE-36), &quot;Design and Implementation of National Data Cache for Research Data Archival&quot;, 2007</p>
+	</li>
+	<li>
+	<p>Muhammad Umer Farooq (04-MS-EE-33), &quot;Evaluation of IP over Resilient Packet Rings&quot;, 2007</p>
+	</li>
+	<li>
+	<p>Uzma Siddique (06-MS- EE-18), &quot;Analysis of GSM Transmission Networks in Pakistan&quot;, 2008</p>
+	</li>
+	<li>
+	<p>Naeem Iqbal Ratyal (05-MS-EE-07), &quot;Implementation of RF Jamming Detection in Wireless Networks&quot;, 2008</p>
+	</li>
+	<li>
+	<p>Ansar Ali (04-MS-EE-04), &quot;Implementation of a Post Processing Algorithm to Reduce Quantization Effect in Images&quot;, 2008</p>
+	</li>
+	<li>
+	<p>Hina Saleem (06-MS-EE-07), &quot;Design&nbsp;and Implementation of Embedded hardware Echo Cancelation Solution for PSTN Interfaced Applications&quot;, 2008</p>
+	</li>
+	<li>
+	<p>Abdul Majid, (06-MS-EE-SS-06)&quot;Hardware Implementation of Canny Edge Detection Algorithm&quot;, 2009</p>
+	</li>
+	<li>
+	<p>Saima Ishtiaq (06-MS-EE-SS-05), &quot;Implementation of High Range Dynamic Histogram Equalization Technique for Image Enhancement&quot;, 2009</p>
+	</li>
+	<li>
+	<p>Sufian Anwar (06-MS-EE-SS-10), &quot;Implementation of Fractal Encoder for Image Compression&quot;, 2009</p>
+	</li>
+	<li>
+	<p>Qaiser Hussain Alvi (07F-MS-EE-12), &quot;Implementation of Long Term Evolution (LTE) Mobile Broadband Standard Physical Layer&quot;, 2010</p>
+	</li>
+	<li>
+	<p>Adnan Younus (09-MS-EE-06), &quot;Performance Analysis of Lossless Compression Methods for Biomedical Images&quot;, 2011</p>
+	</li>
+	<li>
+	<p>Furqan Shoukat (08-MS-EE-03), &quot;Implementation of Optimized Algorithm for Medical Image Recognition&quot;, 2011</p>
+	</li>
+	<li>
+	<p>Junaid Mir (09-MS-EE-01), &quot;Compression of Medical Images using Fractal Technique&quot;, 2011</p>
+	</li>
+	<li>
+	<p>Fatima Nazir (09-MS-EE-03), &quot;Performance Analysis of H.264/SVC for Medical Video Compression&quot;, 2011</p>
+	</li>
+	<li>
+	<p>Muhammad Riaz ur Rehman (09-MS-EE-20), &quot;Hardware Implementation of Lapped Biorthogonal Transform for JPEG-XR Compression&quot;, 2011</p>
+	</li>
+	<li>
+	<p>Syed Kashif Husaain (07F-MS-EE-05), &quot;Implementation of Hybrid Image Compression Technique for Medical Images&quot;, 2011</p>
+	</li>
+	<li>
+	<p>Muhammad Abdul Basit (07F-MS-EE-13), &quot;Hybrid Image Compression of Medical Images using Lapped Biorthogonal Transform and Discrete Cosine Transform&quot;, 2011</p>
+	</li>
+	<li>
+	<p>Zubair Khalid (08-MS-EE-17), &quot;Hardware Implementation of Deblocking Filter for Reduction of Blocking Artifacts&quot;, 2012</p>
+	</li>
+	<li>
+	<p>Muhammad Laeeq ur Rehman (10-MS-EE-01), &quot;Implementation of Monomodal Registration for Medical Images&quot;, 2012</p>
+	</li>
+	<li>
+	<p>Aysha Khalid Khan (11F-MS-EE-28), &quot;Implementation of Region based Segmentation for Medical Images&quot;, 2013</p>
+	</li>
+	<li>
+	<p>Tasleem Kausar (11F-MS-EE-26), &quot;Congestion Control Protocol Design for Efficient Broadcast in VANETs&quot;, 2013</p>
+	</li>
+	<li>
+	<p>Imran Amjad (09-MS-EE-14), &quot;Segmentation of Medical Images using Non-Rigid Registration&quot;, 2013</p>
+	</li>
+	<li>
+	<p>Jawad Ali Raja (09-MS-EE-10), &quot;Selective Compression of Medical Images using Multiple Regions of Interest&quot;, 2013</p>
+	</li>
+	<li>
+	<p>Madiha Azam (10-MS-EE-88), &quot;Registration of Medical Images using Non-Rigid Transformation&quot;, 2013</p>
+	</li>
+	<li>
+	<p>Zain ul Abdin&nbsp;(09-MS-EE-12) , &quot;Implementation of 3-D Wavelet Transforms for Medical Image Processing&quot;, 2013</p>
+	</li>
+	<li>
+	<p>Muhammad Muzammil (10-MS-EE-79), &quot;Hardware Implementation of Diamond Search Motion Estimation Algorithm for Real Time Video Applications&quot;, 2014</p>
+	</li>
+	<li>
+	<p>Awais Khan (12F-MS-EE-11), &quot;Design and Implementation of In-loop Filter for Emerging HEVC Standard&quot;, 2014</p>
+	</li>
+	<li>
+	<p>Anza Ahmad (10-MS-EE-86), &quot;Partial and Latent Fingerprints Image Enhancement&quot;, 2014</p>
+	</li>
+	<li>
+	<p>Saeed ur Rehman (10-MS-EE-07), &quot;Performance Evaluation of High Efficiency Video Coding over Broadband Networks&quot;, 2014</p>
+	</li>
+	<li>
+	<p>Syed Shahzad Hussain Shah (12-MS-EE-89), &quot;Hardware Implementation of an Improved Image Encryption Algorithm&quot; , 2015</p>
+	</li>
+	<li>
+	<p>Zahra Aleem (11-MS-EE-78), &quot;A Transform Coefficients Coding Architecture for HEVC&quot;, 2015</p>
+	</li>
+	<li>
+	<p>Muhammad Atif Imtiaz (11-MS-EE-75), &quot;Speech Recognition using Mel-Frequency Cepstral Coefficient (MFCC)&quot;, 2015</p>
+	</li>
+	<li>
+	<p>Saira Arif (13F-MS-EE-38), &quot;Performance Analysis of QoS Aware Wireless Sensor Networks&quot;, 2015</p>
+	</li>
+	<li>
+	<p>Zubair Bashir (11F-MS-EE-14), &quot;An FPGA Implementation of Video Enhancement Algorithm for Real Time Applications&quot;, 2016</p>
+	</li>
+	<li>
+	<p>Humaira Batool (11-MS-EE-81), &quot;Sleep Apnea Detection based on Classifiers and Heart Rate Variability&quot;, 2016</p>
+	</li>
+	<li>
+	<p>Saad Bin Shafique (13F-MS-EE-17), &quot;Architecture Design and Implementation of Object Detection for Real-Time Surveillance Systems&quot;, 2016</p>
+	</li>
+	<li>
+	<p>Bilal Hassan (14F-MS-EE-15), &quot;Automatic Identification of Macular Edama from Optical Coherence Tomography (OCT) Images&quot;, 2016</p>
+	</li>
+	<li>
+	<p>Hira Waris (13-MS-EE-88), &quot;GA-EDA: Hybrid Metaheuristic for Design Space Exploration of Multicore Architecture&quot;, 2016&nbsp;</p>
+	</li>
+	<li>
+	<p>Ayesha Ehtesham (14F-MS-EE-12), &quot;Design of a Phase Unwrapping Method for an Optical Feedback Laser Sensor&quot;, 2017</p>
+	</li>
+	<li>
+	<p>Asra Abid Siddiqui (14F-MS-EE-13), &quot;Robust Signal Processing for Speckle affected Self-Mixing Interferometric Signals&quot;, 2017</p>
+	</li>
+	<li>
+	<p>Muhammad Naseem Majoka (12-MS-EE-80), &quot;VLSI Design and Architecture of Image De-Hazing Algorithm for Real Time Applications&quot;, 2017</p>
+	</li>
+	<li>
+	<p>Zeeshan Arshad Jadoon (13-MS-EE-91), &quot;Moving Object Detection and Classification based on HOG Features and Linear SVM Classifiers&quot;, 2018</p>
+	</li>
+	<li>
+	<p>Muhammad Fawad (13-MS-EE-88), &quot;Suppression of Intercarrier Interference in OFDM using Discrete Wavelet Transform&quot;, 2018</p>
+	</li>
+	<li>
+	<p>Muhammad Usman (16F-MS-EE-26), &quot;Detection of Multimodal Fringes for a Self-Mixing Interferometric Displacement Sensor&quot;,&nbsp;2018</p>
+	</li>
+	<li>
+	<p>Muhammad Rizwan Chughtai (14-MS-EE-41), &quot;Design and Implementation of Automatic Pills Recognition System&quot;, 2018</p>
+	</li>
+	<li>
+	<p>Yasir Rizwan (14-MS-EE-45), &quot;Adaptive Filter Design for Power Inverters&quot;, 2019</p>
+	</li>
+	<li>
+	<p>Muhammad Kashif (17F-MS-EE-10), &quot;An Effective Content based Image Retrieval System for Lung Diseases&quot;, 2019</p>
+	</li>
+	<li>
+	<p>Iqra Bibi (17F-MS-EE-17) &quot;Automated Detection of Diabetic Retinopathy using Fundus Images&quot;, 2020</p>
+	</li>
+	<li>
+	<p>Muhammad Ayaz (17F-MS-ENC-04), &quot;Accurate Detection of Pulmonary Tuberculosis using Chest Radiograph Images&quot;, 2020</p>
+	</li>
+	<li>
+	<p>Muhammad Shan Saleem&nbsp;(17F-MS-ENC-05), &quot;Design and Implementation of Improved Single Image Dehazing Algorithm&quot;, 2020</p>
+	</li>
+	<li>
+	<p>Mariam Nawaz (17F-MS-EE-33), &quot;Implementation of Dehazing and Enhancement Algorithm for Images&quot;, <em>2020</em></p>
+	</li>
+	<li>
+	<p>Khadija Anam&nbsp;(17-MS-EE-94), &quot;Melanoma Recognition in Dermascopic Images using Encoded Deep Features&quot;,&nbsp;<em>2021</em></p>
+	</li>
+	<li>
+	<p>Laiba Khursheed&nbsp;(17F-MS-EE-34), &quot;Real Time Architecture for Image Dehazing&quot;, <em>2021</em></p>
+	</li>
+	<li>
+	<p>Sahar Liaqat&nbsp;(17-MS-EE-95), &quot;Computer-Aided Detection of COVID-19 using Chest Imaging&quot;,&nbsp;<em>2021</em></p>
+	</li>
+	<li>
+	<p>Sobia Shakeel&nbsp;(17-MS-EE-98), &quot;Detection and Classification of Breast Cancer from Mammograph images using Deep Convolution Neural Network&quot;,&nbsp;<em>2021</em></p>
+	</li>
+	<li>
+	<p>Mubashar Masood (19-MS-EE-32), &quot;Design and implementation of Improved Visual Object Tracking (VOT) algorithm&quot;, <em>2023</em></p>
+	</li>
+	<li>
+	<p>Muhammad Usman (20-MS-EE-28), &quot;Classification of Multi Plant Disease using Convolutional Neural Network&quot;,<em>&nbsp;2023</em></p>
+	</li>
+	<li>
+	<p>Bilal Ahmed (21-MS-EE-63), &quot;Infrared Image Quality Assessment using Convolutional Neural Network&quot;, <em>2023</em></p>
+	</li>
+	<li>
+	<p>Essa Khan (20-MS-EE-23), &quot;PlantDiseaseNet: A Comprehensive CNN-based Framework for Multi-Crop Disease Classification&quot;, 2025</p>
+	</li>
+	<li>
+	<p>Farhan Mushtaq Hashmi (22-MS-EE-15), &quot;Dehazing of Infrared Images using Generative Adversarial Network&quot;, 2025</p>
+	</li>
+</ol>
+</td>
+                </tr>
+                <tr>
+                    <td>Research Interests</td>
+                    <td><ul>
+	<li>Signal and&nbsp;Image Processing<br />
+	&nbsp;</li>
+	<li>Medical Image Analysis<br />
+	&nbsp;</li>
+	<li>VLSI Architecture of Image Processing Systems<br />
+	&nbsp;</li>
+	<li>Computer Networks</li>
+</ul>
+</td>
+                </tr>
+                <tr>
+                    <td>Publications</td>
+                    <td><p><strong>&nbsp; &nbsp; &nbsp; <em>Books/Monographs</em></strong></p>
+
+<ol>
+	<li>
+	<p><strong>Gulistan Raja</strong>, &quot;Optimized Low Bit Rate Video Coding: Algorithms for Suppression of Blocking Artifacts&quot;,&nbsp;&nbsp;Published by LAP Publishing, Germany, Sept. 2011, ISBN:<strong> </strong>978-3-8454-4091-0.</p>
+	</li>
+	<li>
+	<p>M. R. Rehman, <strong>Gulistan Raja,</strong> and A. K. Khan, &quot;Implementation of Lapped Biorthognal Transform for Image Coding&quot; Chapter&nbsp;in Book Titled: <em>Advanced Video Coding for Next-Generation Multimedia Services,</em>&nbsp;Intech Publishers, Rijeka, Croatia, Dec. 2012, ISBN: 980-953-307-677-0.&nbsp;</p>
+	</li>
+</ol>
+
+<p><strong><em>&nbsp; &nbsp; &nbsp; Selected Publications in International/National Journals</em></strong></p>
+
+<ol>
+	<li>
+	<p><strong>Gulistan Raja,</strong> and M.J. Mirza, &quot;Evaluation of Loop Filtering for Reduction of Blocking Effects in Real Time Low Bit Rate Video Coding&quot;, &nbsp;M.U. Research Journal of Engineering and Technology, Vol. 26, No. 3, 2007, pp. 211-218.</p>
+	</li>
+	<li>
+	<p><strong>Gulistan Raja</strong>, M. J. Mirza, and T. Song, &ldquo;H.264/AVC Deblocking Filter based on Motion Activity in Video Sequences&rdquo;, Journal of IEICE Electronics Express, Vol. 5, No. 19, 2008, pp. 809-814.</p>
+	</li>
+	<li>
+	<p>N. I. Rityal, M. Waris, and <strong>Gulistan Raja</strong>, &quot;Impact of Data Jamming on Throughput of IEEE 802.11b Networks&quot;, Journal of Institute of Electrical and Electronics Engineers (IEEEP), Vol 63, 2009, pp. 19-23.</p>
+	</li>
+	<li>
+	<p>A. K. Khan, <strong>Gulistan Raja</strong>, and H. Jamal, &quot;Performance Analysis of Macroblock Partitions for H.264/AVC Motion Estimation&rdquo;,&nbsp; M.U. Research Journal of Engineering &amp; Technology, Vol. 29, No. 1, 2010, pp. 19-24.</p>
+	</li>
+	<li>
+	<p>S. Anwar and <strong>Gulistan Raja</strong>, &quot;Fractal Color Image Compression using a Fast Encoding Algorithm&quot;, Journal of Engineering &amp; Applied Sciences, Vol. 29, No. 2, 2010, pp. 45-54.</p>
+	</li>
+	<li>
+	<p><strong>Gulistan Raja</strong>, &quot;H.264/AVC Deblocking Filter for 1080p High Definition Video&quot;, P. Journal of Sci., Vol. 63, No. 1, 2011, pp. 40-43.</p>
+	</li>
+	<li>
+	<p>S. K. Hussain and <strong>Gulistan Raja</strong>, &quot;A JPEG 2000 based Hybrid Image Compression Technique for Medical Images&quot;, The Nuc. Journal, Vol. 48, No. 4, Dec. 2011, pp. 287-293.</p>
+	</li>
+	<li>
+	<p>U. Siddique, L. Ahmad, and&nbsp;<strong>Gulistan Raja</strong>, &quot;Microwave Attenuation and Prediction of Rain Outage for Wireless Networks in Pakistan Tropical Regions&quot;, International Journal of Microwave Science and Technology, Vol. 2011, 2011, pp. 1-6.</p>
+	</li>
+	<li>
+	<p>A. Mazhar, S. Jabeen, S, Nisar, and <strong>Gulistan Raja</strong>, &quot;Performance Evaluation of H.264/AVC Fidelity Range Extensions&quot;, Technical Journal, Taxila, 2011, pp. 59-64.&nbsp;</p>
+	</li>
+	<li>
+	<p>I. Ali, M. Muzammil and <strong>Gulistan Raja</strong>, &quot;Performance Analysis of Motion Estimation Algorithms based on Motion Activity in Video Sequences&quot;, P. Journal of Sci., Vol. 64, No. 1, 2012, pp. 39-45.</p>
+	</li>
+	<li>
+	<p><strong>Gulistan Raja</strong>, &quot;Statistical Analysis of H.264/AVC Deblocking Filter&quot;, The Nuc. Journal, Vol. 49, No. 1, Mar. 2012, pp. 29-34.</p>
+	</li>
+	<li>
+	<p><strong>Gulistan Raja</strong> and Z. Khalid, &quot;Hardware Implementation of H.264/AVC Deblocking Filter&quot;, Journal of Engineering &amp; Applied Sciences, Vol. 31, No. 1, 2012, pp. 31-35.</p>
+	</li>
+	<li>
+	<p>M. L. Shahid and <strong>Gulistan Raja</strong>, &quot;Implementation of Modified Control Point Image Registration Method&quot;, The Nuc. Journal, Vol. 50, No. 1, 2013, pp. 53-60.</p>
+	</li>
+	<li>
+	<p>A. K. Khan, <strong>Gulistan Raja,</strong> and Ahmad K. Khan, &ldquo;Implementation of Marker based Watershed Image Segmentation on Magnetic Resonance Imaging&rdquo;, Life Sci. Journal, &nbsp;Vol. 10, No. 2, Mar 2013, pp. 115-118.</p>
+	</li>
+	<li>
+	<p><strong>Gulistan Raja</strong>, A. Khan, A. Rashid, and Ahmad K. Khan, &ldquo;Performance Analysis of Emerging High Efficiency Video Coding (HEVC)&rdquo;, Life Sci. Journal, Vol. 10, No.3, June 2013, pp. 800-803.</p>
+	</li>
+	<li>
+	<p>A. Younus, <strong>Gulistan Raja,&nbsp;</strong>and<strong> </strong>A. K. Khan, &quot;Hybrid Compression of Medical Images based on Lapped Biorthogonal Transform and Discrete Cosine Transform&quot;, P. Journal of Sci., Vol. 65, No. 2, 2013, pp. 219-223.</p>
+	</li>
+	<li>
+	<p>A. Farooq, A. K. Khan, and <strong>Gulistan Raja</strong>, &ldquo;Implementation of a Speech Based Interface System for Visually Impaired Persons&rdquo;, Life Sci. Journal, Vol. 10, No. 9s, Sep. 2013, pp. 398-400.</p>
+	</li>
+	<li>
+	<p>J. A. Raja, <strong>Gulistan Raja,</strong> and A. K. Khan, &ldquo;Selective Compression of Medical Images using Multiple Regions of Interest&rdquo;, Life Sci. Journal, Vol. 10, No. 9s, Sep. 2013, pp. 394-397.</p>
+	</li>
+	<li>
+	<p>B. Khan, A. K. Khan, <strong>Gulistan Raja,&nbsp;</strong>and M. H. Yousaf, &ldquo;Implementation of Modified Mean-shift Tracking Algorithm for Occlusion Handling&rdquo;, Life Sci. Journal, Vol. 10, No.11s, Nov. 2013, pp. 337-342.</p>
+	</li>
+	<li>
+	<p><strong>Gulistan Raja</strong>, A. Khan, A. K. Khan, and M. H. Yousaf, &ldquo;Performance Analysis of HEVC In-Loop Filter&rdquo;, Life Sci. Journal, Vol. 10, No.11s, Nov. 2013, pp. 331-336.</p>
+	</li>
+	<li>
+	<p>R. Afzal, A. K. Khan, and <strong>Gulistan Raja,</strong> &quot;Reduction of Color Images using Averaging Functions&quot;, Technical Journal, Taxila, Vol. 19, No. 1, 2014, pp. 23-28.</p>
+	</li>
+	<li>
+	<p>T. Kausar and <strong>Gulistan Raja</strong>, &quot;Vehicle Load and Moving Similarity based AODV Routing Scheme for VANETs&quot;, Information Journal, Vol. 17, No. 6(B), June 2014, pp. 2813-2822.</p>
+	</li>
+	<li>
+	<p>S. U. Rehman and <strong>Gulistan Raja</strong>, &quot;Performance Evaluation of HEVC High Efficiency Video Coding over Broadband Networks&quot;, International Journal of Computer Science Issues, Vol. 11, Issue 4, July 2014, pp. 68-74.</p>
+	</li>
+	<li>
+	<p>I. Arshad, <strong>Gulistan Raja,</strong> and A. K. Khan, &quot;Latent Fingerprints Segmentation: Feasibility of using Clustering based Automation Approach&quot;, Arabian Journal of Science and Engineering, Vol. 39, Issue 11, Nov. 2014, pp. 7933-7944.</p>
+	</li>
+	<li>
+	<p>A. Ahmad, I. Arshad, and <strong>Gulistan Raja</strong>, &quot;Partial Fingerprint Image Enhancement using Region Division Technique and Morphological&nbsp;Transform&quot;, The Nuc. Journal, Vol. 52, No. 2, June 2015, pp. 63-70.</p>
+	</li>
+	<li>
+	<p>M. Muzammil,&nbsp;<strong>Gulistan Raja,</strong>&nbsp;and I. Ali, &quot;FPGA Architecture of Diamond Search Motion Estimation Algorithm for Real-Time Video Applications&quot;, NED University Journal of Research, Vol. XII, No. 4, Sep. 2015, pp. 93-100.</p>
+	</li>
+	<li>
+	<p>A. Raza, M. H. Yousaf, H. A. Sial, and <strong>Gulistan Raja</strong>, &quot;HMM based Scheme for Instructor Activity Recognition in Lecture Room Environment&quot;, The Smart Computing Review Journal, Vol. 5, No. 6, Dec. 2015, pp. 578-590.</p>
+	</li>
+	<li>
+	<p>N. Ashraf , A. K. Khan, and <strong>Gulistan Raja</strong>, &quot;64-QAM Full-Duplex DWDM Radio over 10 G-bit/s and 25 G-bit/s Data and Video Transmission in the 5 GHz and 60 GHz Dual Frequency Bands&quot;, Journal of Optics, Springer, Vol. 45, Issue 1, Mar. 2016, pp. 21-25.</p>
+	</li>
+	<li>
+	<p>B. Hassan,&nbsp;<strong>Gulistan Raja</strong>, T. Hassan, and M. U. Akram, &quot;Structure Tensor Based Automated Detection of&nbsp;Macular Edema and Central Serous Retinopathy using&nbsp;Optical Coherence Tomography Images&quot;, Journal of Optical Society of America A, Vol. 33, Issue 4, Apr. 2016, pp. 455-463.</p>
+	</li>
+	<li>
+	<p>M. Z. Ahmad, I. Arshad,&nbsp;<strong>Gulistan Raja,&nbsp;</strong>and A. K. Khan,&quot; Textured Cosmetic Contact Lens Detection using Statistical Features and SVM Classifier&quot;, B. U. Journal of Information and Communication Technologies, Vol. 9, Issue 1, June 2016, pp. 23-29.</p>
+	</li>
+	<li>
+	<p>S. Arif and&nbsp;<strong>Gulistan Raja</strong>, &quot;Energy and Priority Aware Scheduling Scheme for Wireless Sensor Networks&quot;,&nbsp;B. U. Journal of Information and Communication Technologies, Vol. 9, Issue 1, June 2016, pp. 36-42.</p>
+	</li>
+	<li>
+	<p>Z. &nbsp;Bashir, <strong>Gulistan Raja,</strong> and M. Obaid Ullah, &quot;A Video Enhancement Algorithm for Low-Lighting Environment using FPGA Architecture&quot;, &nbsp;NED University Journal of Research, Vol. XIII, No. 4, Sep. 2016, pp. 81-89.</p>
+	</li>
+	<li>
+	<p>M. Asghar, I. Arshad, I. A. Taj, <strong>Gulistan Raja,&nbsp;</strong>and A. &nbsp;K. Khan, &quot;Palm and Finger Segmentation of High Resolution Images using Hand Shape and Texture&quot;, &nbsp;Proc. &nbsp;Pakistan Academy of Sciences: A, Vol. 53, No. 4, Dec. 2016, pp. 401-416.</p>
+	</li>
+	<li>
+	<p>Z. Shabbir, I. Arshad, <strong>Gulistan Raja,&nbsp;</strong>and A. K. Khan, &quot;Content Based Image Retrieval using Improved Local Tetra Pattern and Neural Network&quot;, The Nuc. Journal, Vol. 53, No. 4, Dec. 2016, pp. 225-232.</p>
+	</li>
+	<li>
+	<p>A. Khan and&nbsp;<strong>Gulistan Raja</strong>, &quot;FPGA Implementation of HEVC Deblocking Filter for Fast Processing of Super High Resolution Applications&quot;, &nbsp;Turkish Journal of Electrical Engineering and Computer Sciences, Vol. 24, No. 6, Dec. 2016, pp.4661-4669.</p>
+	</li>
+	<li>
+	<p>I. Amjad, F. Shaukat, <strong>Gulistan&nbsp;Raja,</strong> and A.K. Khan, &quot;An Algorithm to Segment the Mid-Brain Structures Using Multiresolution Non-Rigid Registration &quot;, Pakistan Journal of Science, Vol. 69, Issue 2, June 2017, pp. 221-227.</p>
+	</li>
+	<li>
+	<p>A. Murtaza, F. Shaukat, <strong>Gulistan&nbsp;Raja,&nbsp;</strong>and A.K. Khan, &quot;An Efficient Algorithmic Solution for High Payload Good Imperceptibility Hybrid Image Steganography&quot;,&nbsp;Pakistan Journal of Science, Vol. 69, Issue 2, June 2017, pp. 228-234.</p>
+	</li>
+	<li>
+	<p>N. Ashraf, F. Shaukat, <strong>Gulistan Raja,</strong> and A. K. Khan, &quot;Full-Duplex Millimeter-wave Radio over Fiber with 24 Gbps 4-QAM Downstream Signal in W-Band (75-110GHz)&quot;,&nbsp;B. U. Journal of Information and Communication Technologies, Vol. 10, Issue 1, June 2017, pp. 21-28.</p>
+	</li>
+	<li>
+	<p>F. Shaukat, <strong>Gulistan Raja</strong>, A. Gooya,&nbsp; and A.&nbsp;Frangi, &quot;Fully Automatic and Accurate Detection of Lung Nodules in CT images using a Hybrid Feature Set&quot;, Medical Physics Journal, Vol. 44, Issue 7, July 2017, pp.&nbsp;3615-3629.</p>
+	</li>
+	<li>
+	<p>A. A. Siddiqui, U. Zabit, O. D. Bernal, <strong>Gulistan Raja,&nbsp;</strong>and<strong>&nbsp;</strong>T. Bosch, &quot;All Analog Processing of Speckle affected Self-Mixing Interferometric Signals&quot;, IEEE Sensors Journal, Vol. 17, Issue 18,&nbsp;Sep. 2017, pp. 5892-5899.</p>
+	</li>
+	<li>
+	<p>A. Ehtesham, U. Zabit, O. D. Bernal, <strong>Gulistan Raja,</strong>&nbsp;and T. Bosch, &quot;Analysis and Implementation of a Direct Phase Unwrapping Method for Displacement Measurement using Self-Mixing Interferometry&quot;,&nbsp;IEEE Sensors Journal, Vol. 72, Issue 22, Nov. 2017, pp.&nbsp;7425-7432.</p>
+	</li>
+	<li>
+	<p>F. Shaukat and <strong>Gulistan Raja</strong>,&nbsp; &quot;An Efficient Algorithmic Solution for Automatic Segmentation of Lungs from CT Images&quot;,&nbsp;Pakistan Journal of Science, Vol. 70, No. 1, Mar. 2018, pp. 71-78.</p>
+	</li>
+	<li>
+	<p>N. U. Ain, F. Shaukat, A.S. Nagra, and <strong>Gulistan&nbsp;Raja</strong>, &quot;An Efficient Algorithm for Fingerprint Recognition using Minutiae Extraction&quot;,&nbsp;Pakistan Journal of Science, Vol. 70, No.2, Jun. 2018, pp. 169-176.</p>
+	</li>
+	<li>
+	<p>A. S. Khattak, <strong>Gulistan Raja,</strong> and N. Anjum, &quot;Adaptive Framework for Multi-Feature Hybrid Object Tracking&quot;, Applied Sciences Journal, Vol. 8, No. 11, Nov. 2018, pp. 1-17.</p>
+	</li>
+	<li>
+	<p>R. Chughtai , <strong>Gulistan Raja</strong>, J. Mir, and F. Shaukat, &quot;An Efficient Scheme for Automatic Pill Recognition Using Neural Networks&quot; The Nucleus Journal, Vol. 56, No. 1, Jun. 2019, pp. 42-48.</p>
+	</li>
+	<li>
+	<p>F. Shaukat,&nbsp;<strong>Gulistan Raja,</strong> and&nbsp;A.&nbsp;Frangi, &quot;Computer-Aided Detection of Lung Nodules: A Review&quot;,&nbsp; SPIE&nbsp;Journal of Medical Imaging, Vol. 6, No. 2, Apr-Jun. 2019, pp.&nbsp;1-11.</p>
+	</li>
+	<li>
+	<p>F. Shaukat,&nbsp;&nbsp;K. Javed, <strong>Gulistan Raja</strong>&nbsp;, J. Mir, and M. L. R.&nbsp;Shahid, &quot;Automatic Lung Nodule Detection in CT Images using Convolutional Neural Networks&quot;, IEICE Transactions on Fundamentals on Electronics, Communications and Computer Sciences, Vol. E102-A, No.10, Oct. 2019,&nbsp;pp.1364-1373.</p>
+	</li>
+	<li>
+	<p>M. Usman, U. Zabit,&nbsp;O. D. Bernal, <strong>Gulistan Raja,&nbsp;</strong>and T. Bosch, &quot;Detection of Multi-Modal Fringes for Self Mixing based Vibration Measurement&quot;, IEEE Transactions on Instrument and Measurement, Vol. 69, Issue 1, Jan. 2020,&nbsp;pp. 258-267.</p>
+	</li>
+	<li>
+	<p>M. Usman, U. Zabit, O. D. Bernal, and <strong>Gulistan Raja</strong>, &quot;Blind Identification of Occurrence of Multi-modality in Laser Feedback based Self-Mixing Sensor&quot;, Chinese Optics Letters, Vol. 18, Issue 1, Jan. 2020,&nbsp; pp. &nbsp;011201- (2020).</p>
+	</li>
+	<li>
+	<p>M. Kashif, <strong>Gulistan Raja</strong>, and&nbsp;F. Shaukat, &quot;An Efficient Content based Image Retrieval System for Diagnosis of Lung Diseases&quot;, Journal of Digital Imaging, Vol. 33. Issue 4,&nbsp;Sep. 2020,&nbsp;pp. 971-987.</p>
+	</li>
+	<li>
+	<p>I. Bibi, J. Mir, and&nbsp;<strong>Gulistan Raja</strong>, &quot;Automated Detection of Diabetic Retinopathy in Fundus Images using Fused Features&quot;,&nbsp;Physical and Engineering Sciences in Medicine, Vol. 43,&nbsp;Issue 4,&nbsp;Dec. 2020,&nbsp;pp.1253&ndash;1264.</p>
+	</li>
+	<li>
+	<p>M. Ayaz,&nbsp;F Shaukat, and <strong>Gulistan Raja</strong>, &quot;Ensemble Learning Based Automatic Detection of Tuberculosis in Chest X-ray Images using Hybrid Feature Descriptors&quot;,&nbsp;&nbsp;Physical and Engineering Sciences in Medicine, Vol. 44, Issue 1,&nbsp;Mar. 2021,&nbsp;pp.183-194.</p>
+	</li>
+	<li>
+	<p>H. Waris, A.&nbsp; Ahmad, M. Y. Qadri, <strong>Gulistan Raja</strong> and T. N. Malik, &quot;GA&ndash;EDA: Hybrid Design Space Exploration Engine for Multicore Architecture&quot;, Journal of Circuits Systems and Computers, Vol. 30, Issue 10,&nbsp;Aug. 2021, pp.&nbsp;1-29.</p>
+	</li>
+	<li>
+	<p>M. Qasim and <strong>Gulistan Raja</strong>, &ldquo;SPIDE-Net: Spectral Prior-based Image Dehazing and Enhancement Network&rdquo;, IEEE Access, Vol.10, Nov. 2022, pp.&nbsp;120296-120311.</p>
+	</li>
+	<li>E. Khan and <strong>Gulistan Raja, </strong>&ldquo;Advancing Crop Protection through Convolutional Neural Networks: A Multi-Plant Disease Classification Study&rdquo;, IJANSER, Vol. 8, No. 3, June 2024, pp. 68-76.<br />
+	&nbsp;</li>
+	<li>M. Masood&nbsp;and&nbsp;<strong>Gulistan Raja, </strong>&quot;Aberrance Repressed Multi-feature Integrated Correlation Filter with Adaptive Learning for Visual Object Tracking&quot;,&nbsp;M.U. Research Journal of Engineering &amp; Technology,&nbsp;Vol. 43, No. 4, Oct. 2024, pp. 14-28.<br />
+	&nbsp;</li>
+	<li>F. M. Hashmi, <strong>Gulistan Raja</strong>, M. Qasim and A. Khalid, &quot;Infra Aerial Dehaze: Dehazing of Infrared Aerial Images using Cycle Generative Adversarial Network&quot;, Accepted in&nbsp;Journal of Intelligent &amp; Fuzzy Systems, Aug. 2025</li>
+</ol>
+
+<p><strong><em>Publications in International Conferences</em></strong></p>
+
+<ol>
+	<li>
+	<p><strong>Gulistan Raja</strong>, T. Song, G. Fujita, T. Onoye, and I. Shirakawa, &ldquo;VLSI Design of Deblocking Filter and Advanced Intra Coding for H.263&rdquo;,&nbsp;Proceedings of&nbsp;IEICE General Conference, Mar. 27-30, 2002, Tokyo, Japan, pp. A-3-7.</p>
+	</li>
+	<li>
+	<p><strong>Gulistan Raja</strong>, U. Farooq, and H. Jamal, &ldquo;VLSI Architecture of Supplemental Enhancement Module &amp; Modified Quantization Module for H.263+ Video Codec&rdquo;, Proceedings of&nbsp;7th IEEE International Multitopic Conference, Dec. 8-9, 2003, Islamabad, pp. 118-120.</p>
+	</li>
+	<li>
+	<p><strong>Gulistan Raja</strong>&nbsp;and M. J. Mirza, &ldquo;Performance Comparison of Advanced Video Coding H.264 Standard with Baseline H263 and H.263+ Standards&rdquo;,&nbsp; Proceedings of&nbsp;4th International Symposium on Communications &amp; Information Technologies, Oct. 26-29, 2004, Sapporo, Japan, pp. 743-746.</p>
+	</li>
+	<li>
+	<p>S. Khan&nbsp;and&nbsp;<strong>Gulistan Raja</strong>, &ldquo;Integer Cosine Transform and Its Application in Image/Video Compression&rdquo;, Proceedings of&nbsp;IEEE International Conference on Software Engineering and Applications, ICSEA-2004, December 30-31, 2004, Islamabad, pp. 187-191.</p>
+	</li>
+	<li>
+	<p><strong>Gulistan Raja</strong>, S. Khan, and M. J. Mirza, &ldquo;VLSI Architecture &amp; Implementation of H.264 Integer Transform&rdquo;, Proceedings of 17th IEEE International Conference on Microelectronics, Islamabad, December 13-15, 2005, pp. 218-223.</p>
+	</li>
+	<li>
+	<p><strong>Gulistan Raja</strong>&nbsp;and M. J. Mirza, &ldquo;Evaluation of Emerging JVT H.264/AVC with MPEG Video&rdquo;, Proceedings of&nbsp;9th IEEE International Multi-topic Conference, Karachi, December 24-25, 2005, pp. 626-629.</p>
+	</li>
+	<li>
+	<p>A. Sana,&nbsp;<strong>Gulistan Raja</strong>, S. Hussain, R. N. Zaidi, M. A. Ali, and S. Ahmed, &ldquo;A Novel Fair Queuing Algorithm for Hybrid Wired/Wireless Quality of Service Support with Wireless Compensation&rdquo;, Proceedings of 2nd IEEE International Conference on Emerging Technologies, ICET 2006, Peshawar, Nov 13-14, 2006, pp. 44-49.</p>
+	</li>
+	<li>
+	<p>U. Siddique, I. Sabbir, and&nbsp;<strong>Gulistan Raja</strong>, &quot;Rain Outage Prediction for GSM Networks in Pakistan&quot;, Proceedings of&nbsp;IEEE International Symposium on Wireless Communication Systems, ISWCS 08, Reykjavik, Iceland, , 21-24 Oct. 2008, pp.85-88.</p>
+	</li>
+	<li>
+	<p><strong>Gulistan Raja</strong>&nbsp;and M. J. Mirza, &quot;Low Complexity Deblocking Filter using Motion Vectors&quot;, Proceedings of International Conference on Consumer Electronics, ICCE-10, Las Vegas, USA, 11-13 Jan 2010, pp. 9.2-5.</p>
+	</li>
+	<li>
+	<p>F.&nbsp;Shoukat and&nbsp;<strong>Gulistan Raja</strong>, &quot;Implementation of Rule-Based Medical Image Recognition for Lung CT Images&quot;, Proceedings of 9th International Bhurban Conference on Applied Sciences &amp; Technology, Islamabad, 9-12 Jan 2012.</p>
+	</li>
+	<li>
+	<p>F. Nazir and&nbsp;<strong>Gulistan Raja</strong>, &quot;Performance Analysis of H.264/SVC&nbsp;Spatial Scalability for Medical Videos&quot;, Proceedings of 9th International Bhurban Conference on Applied Sciences &amp; Technology, Islamabad, 9-12 Jan 2012.</p>
+	</li>
+	<li>
+	<p><strong>Gulistan Raja</strong>&nbsp;and A. Khan, &quot;The Emerging High Efficiency Video Coding Standard (HEVC)&quot;, IOP Conf. Ser.: Mater. Sci. Eng., Vol. 51, 012010, Dec. 2013.</p>
+	</li>
+	<li>
+	<p>S. S. H. Shah, M. N. Majoka, and&nbsp;<strong>Gulistan Raja,</strong>&nbsp;&quot;Design and Implementation of 32-bit Vedic Multiplier on FPGA&quot;, Proceedings of 1st International Conference on Modern Communication and Computing Technologies, Nawabshah, 26-28 Feb 2014.</p>
+	</li>
+	<li>
+	<p>I. Ali,&nbsp;<strong>Gulistan Raja</strong>, M. Muzammil, and A. K. Khan, &quot;Adaptive Modified Hexagon Based Search Motion Estimation Algorithm&quot;, 4th International Conference on Consumer Electronics, Berlin, 7-10 Sep. 2014.</p>
+	</li>
+	<li>
+	<p>I. Ali,&nbsp;<strong>Gulistan Raja</strong>&nbsp;and A. K. Khan, &quot;A 16-bit Architecture of Advanced Encryption Standard for Embedded&nbsp; Applications&quot;, 12th International Conference on Frontiers in Informaion Technology, Islamabad, 17-19 Dec. 2014, pp. 220-225.&nbsp;</p>
+	</li>
+	<li>
+	<p>A. S. Khattak,&nbsp;<strong>Gulistan Raja</strong>, N. Anjum, and M. Qasim, &quot;Integration of Mean-Shift and Particle Filter: A Survey&quot;, 12th International Conference on Frontiers in Information Technology, Islamabad, 17-19 Dec. 2014, pp. 286-291.</p>
+	</li>
+	<li>
+	<p>F. Shoukat and&nbsp;<strong>Gulistan Raja</strong>, &ldquo;Computer Aided Detection of Lung Cancer Nodules: A Review&rdquo;, International Multi-Topic Conference, Mehran University, Jamshoro, 11-13 Feb 2015.</p>
+	</li>
+	<li>
+	<p>S. S. H. Shah and&nbsp;<strong>Gulistan Raja</strong>, &quot;FPGA Implementation of Chaotic based AES Image Encryption Algorithm&quot;, IEEE International Conference on Signal and Image Processing Applications, ICSIPA 2015, Kuala Lumpur, 19-21 Oct. 2015, pp. 574-577.</p>
+	</li>
+	<li>
+	<p>B. Hassan and&nbsp;<strong>Gulistan Raja,</strong>&nbsp;&quot; Fully Automated Assessment of Macular Edema using Optical Coherence Tomography (OCT) Images&quot;, International Conference on Intelligent Systems Engineering, ICISE 2016, Islamabad, 15-18 Jan. 2016.</p>
+	</li>
+	<li>
+	<p>M. A. Imtiaz and&nbsp;<strong>Gulistan Raja&nbsp;</strong>&ldquo;Isolated Word Automatic Speech Recognition (ASR) System using MFCC, DTW and KNN&rdquo;, IEEE 2nd&nbsp;Asia Pacific Conference on Multimedia and Broadcasting, APMediaCast 2016, Bali, Indonesia, 17-19 Nov. 2016.</p>
+	</li>
+	<li>
+	<p>M. N. Majoka and <strong>Gulistan Raja</strong>, &quot;FPGA based Image De-Hazing Architecture for Real Time Applications&quot;, IEEE IntelliSys Conference, London, 7-8 Sep. 2017, pp. 609-613.</p>
+	</li>
+	<li>
+	<p>K. Saeed and <strong>Gulistan Raja</strong>, &quot;Performance Evaluation of Modern Broadwell Architecture of a Parallel &amp; Distributed Microprocessor&quot;,&nbsp;International Symposium on Wireless Systems and Networks (ISWSN), Lahore, 19-21 Nov. 2017.</p>
+	</li>
+	<li>
+	<p>Z. Rauf&nbsp;and <strong>Gulistan Raja</strong>, &quot;Requirement Based Transform Coefficient Coding Architecture for DCT/DST for HEVC&quot;,&nbsp;International Symposium on Wireless Systems and Networks (ISWSN), Lahore, 19-21 Nov. 2017.</p>
+	</li>
+	<li>
+	<p><strong>Gulistan Raja</strong>, &quot;Outcome based Education and Accreditation - Challenges for Pakistani Engineering Programs&quot;, International Engineering Conference &amp; Exhibition, Riyadh, KSA, 4-7 Dec. 2017.</p>
+	</li>
+	<li>
+	<p>M. Nawaz, <strong>Gulistan Raja</strong> and M. Qasim, &quot;A New Approach for Dehazing and Enhancement of Infrared Images&quot;,&nbsp;18th International Bhurban Conference on Applied Sciences and Technologies (IBCAST 2021), Islamabad, 12-16 Jan. 2021.</p>
+	</li>
+	<li>
+	<p>S. Shakeel and <strong>Gulistan Raja</strong>, &quot;Classification of Breast Cancer from Mammogram images using Deep Convolution Neural Networks&quot;,&nbsp;18th International Bhurban Conference on Applied Sciences and Technologies (IBCAST 2021), Islamabad, 12-16 Jan. 2021.</p>
+	</li>
+	<li>
+	<p>S. Liaqat and <strong>Gulistan Raja</strong>, &quot;Computer-Aided Detection of COVID-19 Using Chest Imaging&quot;,&nbsp;11th International Conference on Pattern Recognition Systems (ICPRS 2021),&nbsp;Curic&oacute;, Chile, 17-19 Mar. 2021.</p>
+	</li>
+	<li>
+	<p>L. Khurshid and <strong>Gulistan Raja</strong>, &quot;Real Time Architecture for Image De-Hazing&quot;, 11th International Conference on Pattern Recognition Systems (ICPRS 2021),&nbsp;Curic&oacute;, Chile, 17-19 Mar. 2021.</p>
+	</li>
+	<li>
+	<p>M. W. Malik, Q. Gull and <strong>Gulistan Raja</strong>, &quot;Blockchain-based Security and Privacy-aware Protocol for Vehicular Ad Hoc Network&quot;,&nbsp;19th International Bhurban Conference on Applied Sciences and Technologies (IBCAST 2022), Islamabad, 16-20 Aug. 2022.</p>
+	</li>
+	<li>M. S. Saleem, <strong>Gulistan Raja </strong>and&nbsp;J. &nbsp;Mir, &ldquo;Guided Image Filter inspired Improved Single Image Dehazing Method&rdquo;, 2nd International Conference on Engineering &amp; Computing Technologies, ICECT 2022, 22 Nov. 2022.<br />
+	&nbsp;</li>
+	<li>M. Masood and<strong> Gulistan Raja</strong>, &quot;&nbsp;Multi-feature Integration with Adaptive Learning based Correlation Filter for Visual Object Tracking&quot;,&nbsp;International Multidisciplinary Conference on Emerging Research &amp; Technology (IMCERT), Karachi, Jan. 4-5, 2023.<br />
+	&nbsp;</li>
+	<li>M. U. Abdullah and<strong> Gulistan Raja</strong>, &quot;Computer-Aided Diagnosis Systems for Diabetic Retinopathy: A comprehensive Review&quot;, 3rd International Conference on Key Enabling Technologies, Istanbul, Turkey, 28-30 Aug. 2023.&nbsp;<br />
+	&nbsp;</li>
+	<li>M. Usman and <strong>Gulistan Raja</strong>, &quot;&nbsp;A Multi-Plant Disease Classification using Convolutional Neural Network&quot;,&nbsp;3rd International Conference on Key Enabling Technologies, Istanbul, Turkey, 28-30 Aug. 2023.&nbsp;<br />
+	&nbsp;</li>
+	<li>&nbsp;Y. Rizwan and <strong>Gulistan Raja</strong>, &quot;A Comprehensive Review of Machine Learning Applications in State Assessment and Control of Power Electronic Converters&quot;,&nbsp;&nbsp;4th International Conference on Key Enabling Technologies,&nbsp;1-2&nbsp;Sep.&nbsp;2024, Dublin, Ireland.<br />
+	&nbsp;</li>
+	<li>&nbsp;M. B. Khan, F.&nbsp;Shaukat, M. Abdullah, J.&nbsp;Mir and <strong>Gulistan Raja</strong>, &quot;Fully Automatic Lung Segmentation in Thoracic CT Images using K-means Thresholding&quot;,&nbsp;4th International Conference on Key Enabling Technologies,&nbsp;1-2&nbsp;Sep.&nbsp;2024, Dublin, Ireland.<br />
+	&nbsp;</li>
+	<li>F. M. Hashmi, <strong>Gulistan Raja</strong>, M. Qasim and A. Khalid, &quot;Generation of Synthetic Infrared Hazy Aerial Images Dataset using Conditional Generative Adversarial Network&quot;, 22nd International Bhurban Conference on Applied Sciences and Technologies (IBCAST 2025), Murree, 19-22 Aug. 2025.</li>
+</ol>
+</td>
+                </tr>
+                <tr>
+                    <td>Projects</td>
+                    <td><ul>
+	<li>
+	<p>Grant of 8.3K Euro for Project &ldquo;Capacity Building in Biomedical Engineering Education for Digital Transformation and Industry 4.0/5.0 Technologies&rdquo;, to Consortium of 10 Universities including UET Taxila by Erasmus plus European Union, 2023</p>
+	</li>
+	<li>
+	<p>Research grant of 0.2 Million PKR &quot;Generation of Infrared Hazy Images Dataset using CNN and GAN Networks and AI Model Training to Remove Haze for High and Dense Hazy IR Images&quot; 2024</p>
+	</li>
+	<li>
+	<p>Research grant of 0.1 Million PKR &quot;AI based No Reference Image Quality Evaluator Metric for Infrared Images&quot; 2024</p>
+	</li>
+	<li>
+	<p>Research grant of 0.1 Million PKR, &quot;AI based De-Noising Network for Infrared Images&quot;, 2024</p>
+	</li>
+	<li>
+	<p>Research grant of 8.3 Million PKR for project &quot;EMeRALDS: Electronic Medical Records driven Automated Lung nodule Detection and Cancer Risk Stratification&quot;, 2022</p>
+	</li>
+	<li>
+	<p>Research grant of 0.2 Million PKR for project &quot;Generic Classification of Scene Contents using Multispectral Imaging&quot;,&nbsp;2020</p>
+	</li>
+	<li>
+	<p>Research grant of 0.1 Million PKR for project &quot;Image Enhancement Techniques (Night Time)&quot;,&nbsp;2019</p>
+	</li>
+	<li>
+	<p>Research grant of 1.74 Million PKR for project &ldquo;An Efficient Scheme for Lung Nodule Detection&rdquo;, 2015</p>
+	</li>
+	<li>
+	<p>Research grant of 1.075 Million PKR for project &ldquo;Implementation of Latent Fingerprint Enhancement and Marking Region of Interest (ROI)&rdquo;,&nbsp;2013</p>
+	</li>
+	<li>
+	<p>Research grant of 0.2 Million PKR for project &ldquo;Design &amp; Implementation of Improved Quality Low Bit Rate Video Coding&rdquo;,&nbsp;2005</p>
+	</li>
+</ul>
+</td>
+                </tr>
+                <tr>
+                    <td>Admin Work</td>
+                    <td><!--?xml:namespace prefix = o ns = "urn:schemas-microsoft-com:office:office" /-->
+<ul>
+	<li>Director, Advanced Studies, Research &amp; Technological Development (ASR&amp;TD)&nbsp;,&nbsp;UET Taxila<br />
+	<em>29 Aug. 2023 - Present</em><br />
+	&nbsp;</li>
+	<li><em>Member , Finance Committee, UET Taxila<br />
+	20 Jan. 2025 - Present</em></li>
+</ul>
+
+<p><strong><em>&nbsp; &nbsp; &nbsp; Past Administrative Responsibilities</em></strong></p>
+
+<ul>
+	<li>
+	<p>Convener, OBE Committee&nbsp;,&nbsp;Electrical Engg. Dept.<br />
+	<em>1 Mar. 2022 - 15 Jul. 2024</em></p>
+	</li>
+	<li>
+	<p>Chairman, Central Purchase Committee, UET Taxila<br />
+	<em>2 Jan. 2015 - 5 Nov. 2021</em></p>
+	</li>
+	<li>
+	<p>Chairman, Selection Committee, UET Taxila<br />
+	<em>19 June 2018 - 21 Nov. 2019</em></p>
+	</li>
+	<li>
+	<p>Founding Chairman, Biomedical Engg.&nbsp;&amp; Tech.&nbsp;Dept., UET Taxila<br />
+	<em>2 Oct. 2017 - 26 Apr. 2018</em></p>
+	</li>
+	<li>
+	<p>Chairman, Electronics Engineering Department, UET Taxila<br />
+	<em>20 Mar. 2015 - 26 Apr. 2018</em></p>
+	</li>
+	<li>
+	<p>Director, Telephone Exchange, UET Taxila&nbsp;<br />
+	<em>2 Mar. 2012 - 1 Apr. 2016</em></p>
+	</li>
+	<li>
+	<p>Chairman, Livery Committee, UET Taxila&nbsp;<br />
+	<em>14 Jan. 2011 - 13 Mar. 2015</em></p>
+	</li>
+	<li>
+	<p>Director, Digital Systems Lab, Electrical Engineering Department, UET Taxila<br />
+	<em>Oct. 2011&nbsp;- Mar. 2015</em></p>
+	</li>
+	<li>
+	<p>Member, Central Purchase Committee, UET Taxila<br />
+	<em>Jan. 2012 - Dec. 2014</em></p>
+	</li>
+	<li>
+	<p>Scrutinizer, MSc / PhD Examinations, UET Taxila<br />
+	<em>Aug. 2007 - Aug. 2014 </em></p>
+	</li>
+	<li>
+	<p>Director, Postgraduate Studies, Electrical Engineering Department, UET Taxila<br />
+	<em>7 Jan. 2004 -&nbsp; 3 Jun. 2013</em></p>
+	</li>
+	<li>
+	<p>Member, Library Committee, UET Taxila<br />
+	<em>Dec. 2010 - Mar. 2013</em></p>
+	</li>
+	<li>
+	<p>Member, Board of Advanced Studies &amp; Research, UET Taxila<br />
+	<em>Jul.&nbsp;2009 - Dec. 2012</em></p>
+	</li>
+	<li>
+	<p>President, Teaching Staff Association, UET Taxila<br />
+	<em>For the Year 2011</em></p>
+	</li>
+	<li>
+	<p>Chairman, Financial Aid / Fee Concession Committee, UET Taxila<br />
+	<em>Mar. 2011 - Oct. 2011</em></p>
+	</li>
+	<li>
+	<p>Transport Officer, UET Taxila<br />
+	<em>17 Sep. 2007 - 8 Nov. 2010</em></p>
+	</li>
+	<li>
+	<p>Director, Multimedia &amp; Vision Lab, Electrical Engineering Department, UET Taxila<br />
+	<em>Mar. 2009 - May. 2010</em></p>
+	</li>
+	<li>
+	<p>Focal Person, HEC-JNBS Program, UET Taxila<br />
+	<em>May. 2006 -&nbsp;Nov. 2010</em></p>
+	</li>
+	<li>
+	<p>Director, Computer Communication Lab, Electrical Engineering Department, UET Taxila<br />
+	<em>Mar. 2007 - Feb. 2009</em></p>
+	</li>
+</ul>
+</td>
+                </tr>
+                <tr>
+                    <td>Development Work</td>
+                    <td><ul style="list-style-type:square">
+	<li>
+	<p>Establishement of BS Biomedical Engg. Technology Program in Biomedical Engineering &amp; Technology Dept., UET Taxila, 2017</p>
+	</li>
+	<li>
+	<p>Implementation of OBE System in Electronics Engineering Department, UET Taxila, 2015-2018</p>
+	</li>
+	<li>
+	<p>Establishment of HEC Recognized MSc/PhD Program in&nbsp;Electronic Engineering Department, UET Taxila, 2017</p>
+	</li>
+	<li>
+	<p>Establishment of Instrumentation/Microprocessor &amp; Microcontroller/Digital System Lab in Electronic Engg. Dept., UET Taxila, 2017</p>
+	</li>
+	<li>
+	<p>Preparation of PC-1 for Video and Image Processing Laboratory, UET Taxila, 2005&nbsp;</p>
+	</li>
+</ul>
+</td>
+                </tr>
+                <tr>
+                    <td>Experience</td>
+                    <td><ul>
+	<li>
+	<p>More than 28 Years of Teaching and Research Experience</p>
+	</li>
+	<li>
+	<p>More than 19 years of Administration Experience&nbsp;&nbsp;</p>
+	</li>
+</ul>
+</td>
+                </tr>
+                <tr>
+                    <td>Services</td>
+                    <td><ul>
+	<li>
+	<p>Convener, BE Tech. (Electrical), NCRC Committee by NTC, Islamabad, 2026</p>
+	</li>
+	<li>
+	<p>Panel Member, NRPU Engg. &amp; Tech., HEC, Islamabad&nbsp;<br />
+	<em>Nov. 2025&nbsp;- Sep.&nbsp;2026</em></p>
+	</li>
+	<li>
+	<p>Reviewer, HEC Post&nbsp;Doctoral&nbsp;Fellowship Program, 2025</p>
+	</li>
+	<li>
+	<p>Reviewer, HEC International Research Support Initiative Program (IRSIP), 2025</p>
+	</li>
+	<li>
+	<p>Associate Editor, The Journal of Engineering (IET), UK<br />
+	<em>Dec. 2020 - Mar. 2026</em></p>
+	</li>
+	<li>
+	<p>Vice Chair,&nbsp;IEEE Islamabad Section<br />
+	<em>Feb. 2023 - Present</em></p>
+	</li>
+	<li>
+	<p>Member, Editorial Board,&nbsp;Journal of Applied Sciences and Emerging Technologies (JASET)<br />
+	<em>Oct. 2022 - Present</em></p>
+	</li>
+	<li>
+	<p>Associate Editor, IEICE Transactions on Fundamentals of Electronics, Communications and<br />
+	Computer Sciences, Japan<br />
+	<em>Feb. 2021 - Sep. 2024</em></p>
+	</li>
+	<li>
+	<p>Panel Member, NRPU CS&amp;IT, HEC, Islamabad&nbsp;<br />
+	<em>Aug. 2021 - July.&nbsp;2022</em></p>
+	</li>
+	<li>
+	<p>Branch Mentor, IEEE Student Branch, UET Taxila<br />
+	<em>Nov. 2022 - Present</em></p>
+	</li>
+	<li>
+	<p>Academic Editor, PLOS ONE Journal, USA<br />
+	<em>Aug. 2020 - Dec. 2023</em></p>
+	</li>
+	<li>
+	<p>Associate Editor, IEEE Access Journal, USA<br />
+	<em>Aug. 2019 - Sep. 2022</em></p>
+	</li>
+	<li>
+	<p>Awards and Recognition Chair, IEEE Islamabad Section<br />
+	<em>Apr. 2018 - Jan. 2023</em></p>
+	</li>
+	<li>
+	<p>Vice President, Monbukagakusho Alumni Association of Pakistan (MAAP)<br />
+	<em>Nov. 2021 - Dec. 2023</em></p>
+	</li>
+	<li>
+	<p>Judge for Various IEEE (USA) Awards&nbsp;<br />
+	<em>Jan. 2021 - Dec. 2023</em></p>
+	</li>
+	<li>
+	<p>Counselor, IEEE UET Taxila Student Branch<br />
+	<em>Dec. 2009 - Nov. 2022</em></p>
+	</li>
+	<li>
+	<p>Joint Secretary, Monbukagakusho Alumni Association of Pakistan (MAAP)<br />
+	<em>Nov. 2019 - Oct. 2021</em></p>
+	</li>
+	<li>
+	<p>Member, Organizing Committee<br />
+	South Asia Symposium on Greener-Safer South Asia, FAST, Islamabad, 17 Mar. 2018</p>
+	</li>
+	<li>
+	<p>Finance Secretary, Monbukagakusho Alumni Association of Pakistan (MAAP)<br />
+	<em>May 2017 - Nov. 2019</em></p>
+	</li>
+</ul>
+
+<p><em><strong>&nbsp; &nbsp; &nbsp; Reviewer of following Journals/Conferences</strong></em></p>
+
+<ul>
+	<li>
+	<p>IEEE International Conference on Acoustics, Speech, and Signal Processing (ICASSP 2024), Seoul, Korea, 14~19 April 2024</p>
+	</li>
+	<li>
+	<p>IEEE Transactions on Artificial Intelligence, 2023</p>
+	</li>
+	<li>
+	<p>Scientific Reports, Springer Nature, 2023</p>
+	</li>
+	<li>
+	<p>IEEE Transactions&nbsp;on&nbsp;Knowledge&nbsp;and&nbsp;Data&nbsp;Engineering, 2022</p>
+	</li>
+	<li>
+	<p>Wireless Communications and Mobile Computing, 2022</p>
+	</li>
+	<li>
+	<p>IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems, 2021</p>
+	</li>
+	<li>
+	<p>SPIE Journal of Electronic Imaging, 2021</p>
+	</li>
+	<li>
+	<p>16th IEEE International Conference on Emerging Technologies 2021 (ICET 2021), Islamabad, 22-23 Dec. 2021</p>
+	</li>
+	<li>
+	<p>The 7th International Conference on Man Machine Systems (ICoMMS 2021), Malaysia, 19-20 Oct. 2021</p>
+	</li>
+	<li>
+	<p>Intl. Conf. on Innovation and Intelligence for Informatics, Computing, and Technologies, Bahrain, 29-30 Sep. 2021</p>
+	</li>
+	<li>
+	<p>Journal of Experimental &amp; Theoretical Artificial Intelligence, 2019-2020</p>
+	</li>
+	<li>
+	<p>IEEE Access Journal, 2019-2020</p>
+	</li>
+	<li>
+	<p>IEICE Transactions on Information and Systems, 2020</p>
+	</li>
+	<li>
+	<p>5th International Conference on Electronic Design (ICED), Malaysia, 19 August 2020.</p>
+	</li>
+	<li>
+	<p>Zooming Innovation in Consumer Technologies International Conference (ZINC 2020), Novi Sad, Serbia, May 26-27, 2020</p>
+	</li>
+	<li>
+	<p>International Journal of Computing &amp; Digital Systems, 2019-2020</p>
+	</li>
+	<li>
+	<p>IEEE International Conference on Open Source and Technologies, Lahore, Dec. 2014-2021</p>
+	</li>
+	<li>
+	<p>IEEE International Conference on Consumer Electronics, Berlin,&nbsp;2014-2020</p>
+	</li>
+	<li>
+	<p>22nd IEEE International Multi Topic Conference (INMIC), Islamabad, Nov. 29-30, 2019</p>
+	</li>
+	<li>
+	<p>International Conference on Applied and Engineering Mathematics (ICAEM), Taxila, Aug. 27-29, 2019</p>
+	</li>
+	<li>
+	<p>IEICE&nbsp;Transactions on Information and Systems, Japan, 2017-2019</p>
+	</li>
+	<li>
+	<p>IEEE International Conference on Signal and Image Processing (ICSIPA), Kuala Lumpur, 17-19 Sep. 2019</p>
+	</li>
+	<li>
+	<p>KSII Transactions on Internet and Information Systems, Korea, 2016</p>
+	</li>
+	<li>
+	<p>IEICE Transactions on Fundamentals of Electronics, Communications and Computer Sciences, Japan, 2016</p>
+	</li>
+	<li>
+	<p>5th International Conference on Advances in Computing, Communications and Informatics, Jaipur, Sep. 2016</p>
+	</li>
+	<li>
+	<p>IEICE Transactions on Information and Systems, Japan, 2015</p>
+	</li>
+	<li>
+	<p>4th International Conference on Advances in Computing, Communications and Informatics, Kerala,&nbsp;Aug. 2015</p>
+	</li>
+	<li>
+	<p>IEEE International Midwest Symposium on Circuits and Systems, Texas, Aug. 2014</p>
+	</li>
+	<li>
+	<p>IEEE 2nd National Conference on Information Assurance, NCIA-2013, Rawalpindi, Dec. 2013</p>
+	</li>
+	<li>
+	<p>IEICE Transactions on Fundamentals of Electronics, Communications and Computer Sciences Special Section on VLSI Design and CAD Algorithms, Japan, 2009, 2010 and 2014.</p>
+	</li>
+	<li>
+	<p>8th-9th IEEE International Conference on Emerging Technologies, Islamabad, Oct. 2012 and Dec. 2013</p>
+	</li>
+	<li>
+	<p>8th-13th International Conferences on Frontiers on Information Technology, Islamabad, Dec. 2010-Dec. 2015&nbsp;</p>
+	</li>
+	<li>
+	<p>Egyptian Informatics Journal, Published by Elsevier, 2013</p>
+	</li>
+	<li>
+	<p>The Imaging Science Journal, Maney Publishing, UK, 2012</p>
+	</li>
+	<li>
+	<p>IEEE International Symposium on Circuits and Systems, ISCAS-10, Paris, May 2010</p>
+	</li>
+	<li>
+	<p>IEEE International Conference on Computer and Communication Engineering, Malaysia, May 2010</p>
+	</li>
+	<li>
+	<p>Journal of IEICE Electronics Express (ELEX), Japan, 2009</p>
+	</li>
+	<li>13th IEEE International Multitopic Conference, Islamabad, Dec. 2009</li>
+</ul>
+</td>
+                </tr>
+                <tr>
+                    <td>Memberships</td>
+                    <td><ul>
+	<li>
+	<p>Senior Member, IEEE (USA)</p>
+	</li>
+	<li>
+	<p>Fellow, IEEEP&nbsp;</p>
+	</li>
+	<li>
+	<p>Member, Institute of Engineers, Pakistan</p>
+	</li>
+	<li>
+	<p>Member, Pakistan Engg. Congress&nbsp;</p>
+	</li>
+	<li>
+	<p>Professional Member, Pakistan Engineering Council (PEC)</p>
+	</li>
+</ul>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;<strong>Other Memberships</strong></p>
+
+<ul>
+	<li>
+	<p>Member, Academic Council, Punjab University of Technology, M.B.Din<br />
+	<em>5 Aug. 2022 - Present&nbsp;</em></p>
+	</li>
+	<li>
+	<p>Member, Engineering Curriculum Review &amp; Development Committee (ECRDC) for Electrical and Allied Engineering Discipline, Pakistan Engineering Council<br />
+	<em>&nbsp;Apr. 2022 &ndash; Present</em></p>
+	</li>
+	<li>
+	<p>Member, Board of Studies, IIU, Islamabad<br />
+	<em>Nov. 2021&nbsp;- Oct. 2024</em></p>
+	</li>
+	<li>
+	<p>Member, Academic Council, University of Chakwal<br />
+	<em>Nov. 2020 - Oct. 2023</em></p>
+	</li>
+	<li>
+	<p>Member, Board of Faculty, FE&amp;CE, UET Peshawar<br />
+	<em>Feb. 2020 - Present</em></p>
+	</li>
+	<li>
+	<p>Member, Board of Studies,&nbsp; UET Mardan<br />
+	<em>Mar. 2019 - Present</em></p>
+	</li>
+	<li>
+	<p>Member, Academic Council, Muslim Youth University, Islamabad<br />
+	<em>Jan. 2020 - Dec. 2022</em></p>
+	</li>
+	<li>
+	<p>Member,&nbsp; Board of Undergraduate Studies, Electronic Engg. Dept., UET Taxila<br />
+	<em>Dec. 2018 - Present</em></p>
+	</li>
+	<li>
+	<p>Member, Board of Faculty&nbsp;of Industrial Engineering, UET Taxila<br />
+	<em>May 2014 - Present</em></p>
+	</li>
+	<li>
+	<p>Member, Academic Council, UET Taxila<br />
+	<em>Dec 2013&nbsp;- Present</em></p>
+	</li>
+	<li>
+	<p>Member, Board of Faculty of Electronics and Electrical Engg., UET Taxila<br />
+	<em>Dec. 2012 - Present</em></p>
+	</li>
+	<li>
+	<p>Member, Board of Postgrduate Studies, EED, UET Taxila<br />
+	<em>Dec. 2012 - Present</em></p>
+	</li>
+	<li>
+	<p>Member, Board of Undergraduate Studies, EED, UET Taxila<br />
+	<em>Apr. 2002 - Present</em></p>
+	</li>
+	<li>
+	<p>Member, Institutional Scholarship Award Committee, UET Taxila<br />
+	<em>May 2013&nbsp;- June 2019</em></p>
+	</li>
+</ul>
+
+<p><strong>&nbsp; &nbsp; Past Memberships</strong></p>
+
+<ul>
+	<li>
+	<p>Member, National Curriculum Revision Committee, HEC, Islamabad</p>
+	</li>
+	<li>
+	<p>Member, Board of Studies, Islamic International University, Islamabad</p>
+	</li>
+	<li>
+	<p>Member, Board of Faculty, Riphah Intl. University, Islamabad</p>
+	</li>
+	<li>
+	<p>Member, Board of Faculty, Wah Engineering College, Wah Cantt</p>
+	</li>
+	<li>
+	<p>Member, Board of Studies, Computer Systems Engg., MUST, AJK</p>
+	</li>
+</ul>
+</td>
+                </tr>
+                <tr>
+                    <td>Teaching</td>
+                    <td><ul>
+	<li>
+	<p>Digital Image Processing</p>
+	</li>
+	<li>
+	<p>Computer Networks</p>
+	</li>
+	<li>
+	<p>Multimedia Systems and Communication</p>
+	</li>
+	<li>
+	<p>Advanced Computer&nbsp;Systems</p>
+	</li>
+	<li>
+	<p>Digital Systems</p>
+	</li>
+	<li>
+	<p>Digital Logic Design</p>
+	</li>
+	<li>
+	<p>Discrete Structures</p>
+	</li>
+	<li>
+	<p>Communication Systems</p>
+	</li>
+</ul>
+</td>
+                </tr>
+                <tr>
+                    <td>Academic Positions</td>
+                    <td><ul>
+	<li>
+	<p><strong>Dean</strong>, Faculty of Electronics &amp; Electrical Engineering, UET Taxila<br />
+	<em>July 2024 - Present</em></p>
+	</li>
+	<li>
+	<p><strong>Visiting Professor,</strong>&nbsp;Faculty of Engineering, Univeristy of Jaffna, Sri Lanka<br />
+	<em>May 2025</em></p>
+	</li>
+	<li>
+	<p><strong>Professor</strong>, Electrical Engineering Department,&nbsp;UET Taxila<br />
+	<em>Dec.&nbsp;2012 - Present</em></p>
+	</li>
+	<li>
+	<p><strong>Chairman</strong>, Electronics Engineering Department,&nbsp;UET Taxila<br />
+	<em>Mar. 2015 - Apr. 2018</em></p>
+	</li>
+	<li>
+	<p><strong>Chairman</strong>, Biomedical Engineering Department,&nbsp;UET Taxila<br />
+	<em>Oct. 2017 - Apr. 2018</em></p>
+	</li>
+	<li>
+	<p><strong>Associate Professor</strong>, Electrical Engg. Department, UET Taxila<br />
+	<em>April 2012 - Dec. 2012</em></p>
+	</li>
+	<li>
+	<p><strong>Assistant Professor</strong>, Electrical Engg. Department, UET Taxila<br />
+	<em>May 2003 - March 2012</em></p>
+	</li>
+	<li>
+	<p><strong>LSI Designer</strong>, Synthesis&nbsp;Corporation, Osaka, Japan<br />
+	<em>April 2000 - March 2002</em></p>
+	</li>
+	<li>
+	<p><strong>Teaching/Research Associate</strong>, Electrical Engg. Department, UET Taxila<br />
+	<em>June 1997 - April 2003</em></p>
+	</li>
+</ul>
+</td>
+                </tr>
+                <tr>
+                    <td>Affiliations</td>
+                    <td><p><strong><em>Served as Visiting Faculty in&nbsp;</em></strong></p>
+
+<ul>
+	<li>
+	<p>Adjunct Faculty, IIU, Islamabad</p>
+	</li>
+	<li>
+	<p>Air University, Islamabad</p>
+	</li>
+	<li>
+	<p>Wah Engineering College, Wah Cantt.</p>
+	</li>
+	<li>
+	<p>Chakwal Campus, UET Taxila</p>
+	</li>
+</ul>
+</td>
+                </tr>
+                <tr>
+                    <td>Awards</td>
+                    <td><ul>
+	<li>
+	<p><a href="http://web.uettaxila.edu.pk/uet/EncED/news28.asp">IEEE Outstanding Branch Counselor Award, R10 (Asia Pacific Region), 2016</a></p>
+	</li>
+	<li>
+	<p>Recepient of Best Teacher Award for year 2009 by Higher Education Commission, Islamabad (<strong><em>DEDICATED to&nbsp;MY STUDENTS</em></strong>)<br />
+	<a href="http://web.uettaxila.edu.pk/uet/uetSub/news/bestTeacherAward09.htm"><strong><em>Best University Teacher Award by HEC</em></strong></a></p>
+	</li>
+	<li>
+	<p>Scholarship for Masters Study by OFIX, Government of Japan, 1999</p>
+	</li>
+</ul>
+ </td>
+                </tr>
+                <tr>
+                    <td>Conferences</td>
+                    <td><ul>
+	<li>
+	<p>2nd Intl. Conference on Digital Technologies for Sustainable Agriculture, ICDTSA-2025, Kilinochchi, Univeristy of Jaffna, Sri Lanka, 22-23 May 2025</p>
+	</li>
+	<li>
+	<p>4th International Conference on Key Enabling Technologies,&nbsp;1-2&nbsp;Sep.&nbsp;2024, Dublin, Ireland.</p>
+	</li>
+	<li>
+	<p>2nd International Conference on Energy, Power, and Environment (ICEPE23),&nbsp;University of Gujrat, 8-9 Mar. 2023</p>
+	</li>
+	<li>
+	<p>19th International Bhurban Conference on Applied Sciences and Technologies (IBCAST 2022), Bhurban, Muree, 16-20 Aug. 2022</p>
+	</li>
+	<li>
+	<p>18th International Bhurban Conference on Applied Sciences and Technologies (IBCAST 2021), Islamabad, 12-16 Jan. 2021</p>
+	</li>
+	<li>
+	<p>International&nbsp;Conference&nbsp;on Electrical, Comm. &amp; Comp. Engineering (ICECCE-2019), Swat, 24-25 July 2019</p>
+	</li>
+	<li>
+	<p>International Symposium on Wireless Systems and Networks (ISWSN), Lahore, 19-21 Nov. 2017</p>
+	</li>
+	<li>
+	<p>SAI Intelligent Systems Conference, IntelliSys 2017, London, United Kingdom, 7-8 Sep. 2017</p>
+	</li>
+	<li>
+	<p>IEEE International&nbsp;Conference&nbsp;on Signal and Image Processing Applications, ICSIPA 2015, Kuala Lumpur, Malaysia, 19-21 Oct. 2015</p>
+	</li>
+	<li>
+	<p>International&nbsp;Conference&nbsp;on Sensing for Industry, Control, Comm. &amp; Security Technologies, Karachi, 24-26 Jun. 2013</p>
+	</li>
+	<li>
+	<p>International Conference on Engineering Sciences, Punjab University Lahore, 28-29 Feb. 2012</p>
+	</li>
+	<li>
+	<p>International Conference on Consumer Electronics, Las Vegas, USA, 10-13 Jan.&nbsp;2010</p>
+	</li>
+	<li>
+	<p>Global Pervasive Signal Processing Conference, Santa Clara, California, USA, 24-27 Oct.&nbsp;2005</p>
+	</li>
+	<li>
+	<p>IEICE General Conference, Tokyo, Japan, Mar. 27-30, 2002</p>
+	</li>
+</ul>
+</td>
+                </tr>
+                <tr>
+                    <td>Participations</td>
+                    <td><ul>
+	<li>
+	<p>IEEE Panel of Conference Organizers Conference, POCO, FAST Islamabad, 25 May 2023</p>
+	</li>
+	<li>
+	<p>SECDIV-NIPS Islamabad International Conference on Promoting Strategic Trade Controls through International Cooperation, 5-6 Sep. 2022</p>
+	</li>
+	<li>
+	<p>Ecosystem Restoration: One-Health and Pandemics, organized by&nbsp;Pakistan Academy of Sciences (PAS) &amp; Monbukagakusho-MEXT Alumni Association of Pakistan (MAAP), Islamabad, 5 June 2022</p>
+	</li>
+	<li>
+	<p>3rd&nbsp;International Deans Conference of Engineering Institutions, organized by Pakistan Engineering Council (PEC), Islamabad,&nbsp;&nbsp;7-8 April 2021.</p>
+	</li>
+	<li>
+	<p>Virtual Conference Organizers&rsquo; Panel - To Explore the Challenges of Organizing a Full Virtual Technical Conference, organized by IEEE Bangladesh Section, via Zoom, 1-2 July 2020</p>
+	</li>
+	<li>
+	<p>Washington Accord Workshop on Sharing Best Practices and Policies for Online Teaching Learning and Assessment System and Virtual/Remote Accreditation Process, via Zoom,organized by PEC Islamabad,&nbsp;13 June 2020</p>
+	</li>
+	<li>
+	<p>One Day Training Session on OBA Accreditation Process for Program Evaluators by Pakistan Engineering Council, 29 Apr. 2017</p>
+	</li>
+	<li>
+	<p>Workspace Ethics, Team Building &amp; Time Management and Leadership &amp; Decision Making by Cornwall Education &amp; Training (UK) Limited at UET Taxila, 1-2 Dec. 2016</p>
+	</li>
+	<li>
+	<p>SMART Goals &amp; Strategic Thinking and Interpersonal Skills &amp; Corporate Communication by Cornwall Education &amp; Training (UK) Limited at UET Taxila, 24-25 Nov 2016</p>
+	</li>
+	<li>
+	<p>Short course on Leadership for Engineers &amp; Technical Managers, PEC, Islamabad, 27 Jan 2014</p>
+	</li>
+</ul>
+ </td>
+                </tr>
+                <tr>
+                    <td>Thesis Supervised</td>
+                    <td><h3>Please see <ins><span class="marker"><em><strong>Research Work</strong></em></span></ins> tab</h3>
+ </td>
+                </tr>
+                <tr>
+                    <td>Workshops/Courses Attended</td>
+                    <td><p><em><strong>Workshops/Courses Attended:&nbsp;</strong></em></p>
+
+<ol>
+	<li>Strategic Leadership &amp; Institutional Management (SLIM) Program at LCWU Lahore by PHEC, 4-6 May 2026<br />
+	&nbsp;</li>
+	<li>Certified Training Programme for Academic Leaders and University Management on Governance and Leadership, Edinburgh Napier Uuniversity, UK, May 2025<br />
+	&nbsp;</li>
+	<li>COMSTECH-CCOE International Workshop on Quality Assurance and University Ranking, OIC-COMSTECH, Islamabad, 2-3 July 2025<br />
+	&nbsp;</li>
+	<li>Strategic Leadership for Pro Vice-Chancellors and Deans, organized by Sindh Higher Education Commission, Karachi, 10-11 Apr. 2025&nbsp;<br />
+	&nbsp;</li>
+	<li>Academic Staff Traning under BIOMED 5.0 Erasmus+ Project, Romania, 10-14 Feb. 2025<br />
+	&nbsp;</li>
+	<li>Academic Staff Traning under BIOMED 5.0 Erasmus+ Project, Ireland, 3-6 Sep. 2024</li>
+</ol>
+
+<p>&nbsp;</p>
+
+<p><em><strong>Invited Talks:</strong></em></p>
+
+<ol>
+	<li>2nd Intl. Conference on Digital Technologies for Sustainable Agriculture, ICDTSA-2025, Kilinochchi, University of Jaffna, Sri Lanka, 22-23 May 2025<br />
+	&nbsp;</li>
+	<li>20th International Bhurban Conference on Applied Sciences and Technology (IBCAST-2023), Murree, 22-25 Aug. 2023.<br />
+	&nbsp;</li>
+	<li>International Symposium on Artificial Intelligence, Medical Imaging and Pattern Recognition (ISAIMP-2023), NCP, Islamabad, 24-25 July 2023..<br />
+	&nbsp;</li>
+	<li>2nd International Conference titled as Energy, Power, Environment, Control, and Computing (ICEPECC-2023), UoG, Gujrat, 8-9 March 2023.<br />
+	&nbsp;</li>
+	<li><em>&nbsp;</em>International Conference&nbsp;on Electrical, Communication &amp; Computer Engineering (ICECCE-2019), Swat, 24-25 July 2019.<br />
+	&nbsp;</li>
+	<li>1st International Conference on Sensing for Industry, Control, Communication &amp; Security Technologies,&nbsp;Karachi, 24-26 Jun. 2013.<br />
+	&nbsp;</li>
+</ol>
+
+<p><em><strong>Conduction of OBE Workshops/Trainings:</strong>&nbsp;</em></p>
+
+<ol>
+	<li>Conducted workshop on &quot;Outcome based System of Education &amp; Accreditation&quot;, Comp. Engg. Dept., UET Taxila, 26 Feb. 2024.<br />
+	&nbsp;</li>
+	<li>Conducted 2-day training&nbsp;on &quot;Outcome besed System of Education and Accredidation&quot;, University of Gujrat, 12-13 Feb. 2024.<br />
+	&nbsp;</li>
+	<li>Conducted workshop on &quot;Outcome based Education - An interactive Session for Computing Professionals&quot;, CUST, Islamabad, 2 Aug. 2023.<br />
+	&nbsp;</li>
+	<li>Conducted workshop on &quot;Difference between Outcome Based Education and Traditional Education&quot;, University of Chakwal, 17 Jul. 2023.<br />
+	&nbsp;</li>
+	<li>Conducted CPD on &quot;Outcome Based System of Education and Accreditation&quot;, UET Taxila, 8 Feb&nbsp;2023.<br />
+	&nbsp;</li>
+	<li>Conducted Training on &quot;Outcome based Education &amp; Related Concepts&quot;,&nbsp;Mehran University of Engineering &amp; Technology, SZAB Campus Khairpur Mirz,&nbsp;17 Oct. 2022.<br />
+	&nbsp;</li>
+	<li>Conducted Workshop on &quot;Outcome based Learning&quot;,&nbsp;Fatima Jinnah Women University, Rawalpindi,&nbsp;9 Sep. 2022.<br />
+	&nbsp;</li>
+	<li>Conducted &quot;2-day Advanced Workshop on OBE&quot;, UET Taxila, 7-8 Sep. 2022.<br />
+	&nbsp;</li>
+	<li>Conducted &quot;One Day Workshop on&nbsp;OBE&nbsp;System&quot;, University of Chakwal, 26. Jul. 2022.<br />
+	&nbsp;</li>
+	<li>Conducted CPD on &quot;Outcome Based System of Education and Accreditation &ndash; Implementation Perspective&quot;, UET Taxila, 8 Mar 2022.<br />
+	&nbsp;</li>
+	<li>Conducted workshop on &quot;Outcome based System of Education&quot; NUTEC University, Islamabad, 1 Feb 2022.<br />
+	&nbsp;</li>
+	<li>Conducted workshop on &quot;CEPs/PBLs/OELs and its Assessment&quot;, MUST University Mirpur, AJK, 3 July 2021.<br />
+	&nbsp;</li>
+</ol>
+
+<p><em><strong>Particpation in OBE Workshops/Trainings</strong>&nbsp;</em></p>
+
+<ol>
+	<li>2-Day Advanced Level International OBE/OBA Training for PEC Program Evaluators, Faculty and Quality Directors, NUST, Islamabad, 22-23 Aug. 2022.<br />
+	&nbsp;</li>
+	<li>Two Days International Training Workshop on OBE &amp; Implementation, UET Taxila organized by PEC Islamabad, 6-7 Feb 2018.<br />
+	&nbsp;</li>
+	<li>Two Days International Training Workshop on Outcome Based Education and Implementation&nbsp;organized by QEC UET Taxila in collaboration with PEC,&nbsp;1-2&nbsp;Feb. 2017.<br />
+	&nbsp;</li>
+	<li>Two Days Workshop on Outcome based Education &amp; Assessment System of Accreditation, PEC, 2-3 Mar 2015.<br />
+	&nbsp;</li>
+	<li>Two Days Workshop on OBA System of Accreditation for Program Evaluators, Islamabad, 6-7 Nov. 2014.<br />
+	&nbsp;</li>
+	<li>Workshop on Complex Problem Solving and Activities, PEC, Islamabad, 24 Apr 2014.<br />
+	&nbsp;</li>
+	<li>Short course on Outcome based Education and Accreditation, PEC, Islamabad, 28 Feb 2014.</li>
+</ol>
+ </td>
+                </tr>
+                <tr>
+                    <td>PostGraduate Students</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Research Group</td>
+                    <td></td>
+                </tr>
+            </table>
+        </fieldset>
+
+    </div>
+    </div>
+
+
+            </div>
+        </div>
+<footer class="container-fluid text-center">
+    <p>&copy; 2018. Developed by NARC, UET Taxila.</p>
+</footer>
+  
+    </div>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="cacc6ce059c8a7f2a1af4c90-|49" defer></script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a24d11531e48fd08',t:'MTc4NTY3MzU1MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"d8564f6d5b4e410eb202d13f98326329","r":1}' crossorigin="anonymous"></script>
+</body>
+</html>

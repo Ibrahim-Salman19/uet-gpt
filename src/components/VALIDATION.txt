@@ -1,0 +1,110 @@
+UETGPT UI Production v2 validation
+Date: 2026-07-31
+
+Isolated strict TSX transpilation:
+PASS ConvexConnectionMonitor.tsx
+PASS ambient-glow.tsx
+PASS backdrop-wrapper.tsx
+PASS command-palette.tsx
+PASS connection-status.tsx
+PASS convex-ready-gate.tsx
+PASS diagnostics-panel.tsx
+PASS empty-state.tsx
+PASS loading-state.tsx
+PASS main-shell.tsx
+PASS markdown.tsx
+PASS preferences-modal.tsx
+PASS preferences-provider.tsx
+PASS providers.tsx
+PASS theme-provider.tsx
+PASS theme-toggle.tsx
+PASS voice-modal-wrapper.tsx
+PASS voice-modal.tsx
+PASS webgl-backdrop.tsx
+
+Binder diagnostics:
+PASS: no binder diagnostics
+
+Original export contracts:
+ConvexConnectionMonitor.tsx
+  exports: CONVEX_CONNECTION_EVENT, ConvexConnectionDetail, ConvexConnectionMonitor, useConvexConnectionSnapshot
+  missing original exports: none
+  new module imports: none
+ambient-glow.tsx
+  exports: AmbientGlow
+  missing original exports: none
+  new module imports: none
+backdrop-wrapper.tsx
+  exports: BackdropWrapper
+  missing original exports: none
+  new module imports: @/components/preferences-provider
+command-palette.tsx
+  exports: CommandPalette
+  missing original exports: none
+  new module imports: sonner
+connection-status.tsx
+  exports: ConnectionStatus
+  missing original exports: none
+  new module imports: @/components/ConvexConnectionMonitor
+convex-ready-gate.tsx
+  exports: ConvexReadyGate, ConvexReconnectBanner
+  missing original exports: none
+  new module imports: @/components/ConvexConnectionMonitor, @/lib/utils
+diagnostics-panel.tsx
+  exports: DiagnosticsPanel
+  missing original exports: none
+  new module imports: @/components/ConvexConnectionMonitor
+empty-state.tsx
+  exports: EmptyState
+  missing original exports: none
+  new module imports: react
+loading-state.tsx
+  exports: LoadingState, LoadingStateProps, LoadingStateType
+  missing original exports: none
+  new module imports: none
+main-shell.tsx
+  exports: MainShell
+  missing original exports: none
+  new module imports: lucide-react
+markdown.tsx
+  exports: Markdown
+  missing original exports: none
+  new module imports: none
+preferences-modal.tsx
+  exports: PreferencesModal
+  missing original exports: none
+  new module imports: none
+preferences-provider.tsx
+  exports: AccentTheme, FontSize, ModelPreference, PreferencesProvider, ToggleSettingKey, accentThemes, usePreferences
+  missing original exports: none
+  new module imports: none
+providers.tsx
+  exports: Providers
+  missing original exports: none
+  new module imports: none
+theme-provider.tsx
+  exports: Theme, ThemeProvider, useTheme
+  missing original exports: none
+  new module imports: none
+theme-toggle.tsx
+  exports: ThemeToggle
+  missing original exports: none
+  new module imports: none
+voice-modal-wrapper.tsx
+  exports: VoiceModalWrapper
+  missing original exports: none
+  new module imports: react
+voice-modal.tsx
+  exports: VoiceModal
+  missing original exports: none
+  new module imports: none
+webgl-backdrop.tsx
+  exports: WebGLBackdrop
+  missing original exports: none
+  new module imports: none
+
+Pattern scan:
+PASS: no matched unsafe/fabricated/suppression patterns.
+NOTE: the theme provider uses a fixed nonce-capable dangerouslySetInnerHTML bootstrap, reviewed separately.
+
+Archive and full-repository checks are separate from this isolated validation.

@@ -1,0 +1,21 @@
+{
+  "headers": {
+    "alt-svc": "h3=\":443\"; ma=86400",
+    "cache-control": "private",
+    "cf-cache-status": "DYNAMIC",
+    "cf-ray": "a24d11531e48fd08-SIN",
+    "content-encoding": "zstd",
+    "content-type": "text/html; charset=utf-8",
+    "date": "Sun, 02 Aug 2026 12:25:52 GMT",
+    "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+    "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=dq3K%2Bhkgp6RyyyaitBQP2KjJj9P57VW23sr8%2BBh4JWvluElqmvV%2BXa14IweD4DUbSWYDEyVk3pH%2BWUJwSAD0kJfFxCi1fYXEekIa9M7sDYluRKNYWhgL7CqlO1bL7izxzsjCn%2Fa5ww%3D%3D\"}]}",
+    "server": "cloudflare",
+    "server-timing": "cfCacheStatus;desc=\"DYNAMIC\", cfEdge;dur=14,cfOrigin;dur=521",
+    "strict-transport-security": "max-age=0",
+    "x-aspnet-version": "4.0.30319",
+    "x-aspnetmvc-version": "4.0",
+    "x-content-type-options": "nosniff",
+    "x-powered-by": "ASP.NET"
+  },
+  "status": 200
+}

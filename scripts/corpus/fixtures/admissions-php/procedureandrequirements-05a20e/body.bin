@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UET Taxila Undergraduate Admissions </title>
+    <!-- <php echo date("Y"); ?> -->
+    <link href="assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap-icons/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=1">
+    <script type="079681de03d55abcd9282337-text/javascript" src="../js/jquery.js"></script>
+</head>
+
+<body>
+
+<!-- Dynamic Announcement Bar -->
+<div class="py-3 text-center fw-semibold" style="background: #dc3545; color: white; font-size: 1.1rem;">
+    🚨 Undergraduate Admissions Fall 2026 | Registration Started  <!-- Applicationsare now open — Apply Today!  <php echo date("Y"); ?>-->
+</div>
+
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="index.php">
+            <img src="https://admissions.uettaxila.edu.pk/images/UETLogo.png" class="logo me-3" alt="UET Taxila Logo">
+            <span class="fw-bold">
+                UET Taxila<br>
+                <small style="font-size: 0.85rem; opacity: 0.9;">Undergraduate Admissions</small>
+                 <!-- <php echo date("Y"); ?> -->
+            </span>
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="nav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="index.php">Home</a></li>
+                 <li class="nav-item"><a class="nav-link" href="ProgramsOffered.php">Programs</a></li>
+               <!-- <li class="nav-item"><a class="nav-link" href="#Discover">Discover</a></li>
+                <li class="nav-item"><a class="nav-link" href="#Facilities">Facilities</a></li>
+                -->
+                <li class="nav-item"><a class="nav-link" href="explore.php">Explore Campus</a></li>
+                <li class="nav-item"><a class="nav-link" href="FAQS.php">FAQs</a></li>
+                <li class="nav-item"><a class="nav-link" href="Downloads.php">Downloads</a></li>
+                <li class="nav-item"><a class="nav-link" href="#Contact">Contact Us</a></li>
+                  <!-- <php
+                        if (session_status() === PHP_SESSION_NONE) {
+                                session_start();
+                                }
+
+                    if (empty($_SESSION)) {
+                                                   echo '<li class="nav-item"><a class="nav-link" href="My_UET.php">My UET</a></li>';
+                                        } else {
+                                                    echo '<li class="nav-item"><a class="nav-link" href="Logout.php">Logout</a></li>';
+                                            }
+                    ?> -->
+                    <li class="nav-item"><a class="nav-link " id="applylink" href="https://admission.uettaxila.edu.pk/application/index.php">Apply Now</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<script type="079681de03d55abcd9282337-text/javascript">
+  $(document).ready(function() {
+    $(".btnapply").click(function(e) {
+      e.preventDefault(); // prevent link navigation
+      alert("Registeration Opening Soon");
+    });
+  });
+</script>
+    <style type="text/css">
+        .Size {
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .Size2 {
+            font-size: 18px;
+        }
+
+        .Size2 {
+            font-size: 18px;
+        }
+
+        .Size2 {
+            font-size: 18px;
+        }
+
+        .Size2 {
+            font-size: 18px;
+        }
+
+        .Size2 {
+            font-size: 18px;
+        }
+
+        .Size {
+            font-size: 24px;
+        }
+    </style>
+    <script type="079681de03d55abcd9282337-text/javascript" src="js/jquery.js"></script>
+    <script type="079681de03d55abcd9282337-text/javascript" src="js/coin-slider.js"></script>
+    <script type="079681de03d55abcd9282337-text/javascript" src='js/jquery.simplemodal.js'></script>
+    <script type="079681de03d55abcd9282337-text/javascript" src='js/basic.js'></script>
+    <script type="079681de03d55abcd9282337-text/javascript">
+        $(document).ready(function (e) {
+            $("#6").addClass("active_menu")
+            $("#1, #3,#4, #2, #5,#7, #8").removeClass("active_menu");
+        });
+    </script>
+</head>
+
+<body>
+<div class="container mt-5 pt-5">
+
+     <div class="text-center mb-5">
+                    <h3 class="display-5 fw-bold text-dark">Online Admission Procedure</h3>
+                       <p class="lead text-muted">Undergraduate Admissions 2026 — University of Engineering & Technology Taxila</p>
+        <div style="width: 80px; height: 4px; background: var(--uet-accent); margin: 20px auto; border-radius: 2px;"></div>
+           </div>
+   
+   <div class="card shadow-lg border-0 rounded-4 overflow-hidden mb-5">
+        
+            
+
+
+                <div style="width:100%"> <!--  Start First Yellow Heading Text  -->
+                    <h2 style="padding: 70px 0px 10px 0px; text-align:center;margin-left: -61px;display:none;">STEP-1: Entry
+                        Test  <br/><span style="color:red;display:none;">For Entry Test procedures please <a
+                                    href="https://admission.uet.edu.pk/Modules/EntryTest/Default.aspx">click here</a></span></h2>
+                    <h3 style="text-align: center; color:red;display:none;">For Entry Test
+                            Registration <a href="https://admission.uet.edu.pk/Modules/EntryTest/Default.aspx"> Please click here</a> [Last Date :
+                            29<sup>th</sup> February, 2024]</h3>
+                            <h3 style="text-align: center;color:red;display:none;">Entry test will be conducted from 11<sup>th</sup> to 15<sup>th</sup> March 2024 by UET Lahore. </h3>
+                        <h3 style="text-align: center;color:red;display:none;">ECAT was conducted by UET Lahore from 03<sup>rd</sup> to 07<sup>th</sup> June 2024. </h3>
+                        <h3 style="text-align: center;color:red;display:none">ECAT  will be conducted by UET Lahore from 13<sup>th</sup> to 17<sup>th</sup> March 2025. </h3>
+                    <!-- <h2 style="padding: 30px 0px 10px 0px; text-align:center;display:none">STEP-2: Admission Procedure <br/><span style="color:red;">(Only those candidates are eligible to apply who appeared in ECAT-2025 (Phase-I & Phase-II)/Equivalent. Entry Test is not required for BS Physics and Mathematics.)<br/></span> -->
+                       <h2 style="padding: 30px 0px 10px 0px; text-align:center;display:none"> Admission Procedure <br/><span style="color:red;">(Only those candidates are eligible to apply who appeared in TCAT/ECAT-2025 (Phase-I & Phase-II)/Equivalent. Entry Test is not required for BS Physics and Mathematics.)<br/></span>
+                   <span style="display:none;">[Start Date: 10<sup>th</sup> June, 2024; End Date: 22<sup>nd</sup> August, 2022]</span>
+                    </h2>
+                   <h3 style="text-align: center; color:red;display:none;">(Admissions will be announced after ECAT-2024. Only those candidate will be able to apply who will appear in ECAT-2024, being conducted by UET Lahore.)</h3>
+					<h3 style="padding: 20px 0px 10px 25px;text-decoration: underline;">Application Processing Fee <span style="color:red;display:none">[For <a href="Admission_Eligibility.php">Group 01</a> and <a href="Admission_Eligibility.php">Group 02</a> sepearate application processing fee is required]</span></h3>
+                    
+                    <p style="padding-left: 50px; width:90%; line-height: 170%;">Application processing fee of Rs. 4000/- can be deposited through HBL digital banking against candidate's CNIC/Form-B number by following any of below mentioned modes:
+                    <ol style="padding-left: 90px;width: 90%;line-height: 170%;">
+                        <li>Non HBL Account Holders (Konnect App, Konnect Shops/Agents) selecting "UET Taxila Admission Processing"</li>
+                        <li>HBL Account Holders (HBL Internet Banking, HBL Mobile App) selecting "UET Taxila Admission Processing"</li>                        
+                    </ol>                    
+                    </p>
+					<div  style="font-weight: bold;text-align: center;color: red;margin-top: 10px;font-size: 15px;">
+                        Without application fee your application will not be considered.
+                    </div>
+                    <p style="padding-left: 50px; width:90%; line-height: 170%;font-size: 15px;font-weight: bold;margin-top: 10px;">To view the detailed process of "how to submit application processing fee" <a href="ApplicationProcessingFee.php">Click Here</a></p>
+                    
+                    <h3 style="padding: 20px 0px 10px 25px;text-decoration: underline;">Instructions for Online Filling of Application Form
+                        (F-I) <span style="color:red;">[For <span style="color:red;"><a href="Admission_Eligibility.php">Group 01</a> and <a href="Admission_Eligibility.php">Group 02</a> sepearate online application forms (F-I) are required]</span></h3>
+                    <ol style="padding-left: 50px;width: 90%;line-height: 170%;">
+                        <li style="display:none;">
+                        Visit the nearest designated TCS Center <a href="ProspectusAvailability.php">(TCS Centers)</a> for submission of application processing fee Rs. 1500/- <strong>(Rs. 1450/- Application Processing Fee + Rs. 50/- TCS Charges)</strong> and obtain computerized deposit slip having <strong style="color:red;"> 15 digit </strong>  <strong style="color:red;"> Ref # </strong><span style="color:red;">[If 14 digit, make it 15 by adding 0 to the extreme left]</span>.
+                            <ul style="padding: 5px 18px;">
+                                <li>Please, provide your ECAT roll number as registration number to TCS Staff</li>
+                                <li>Please, ask TCS Staff to deposit admission application processing fee for UET Taxila</li>
+                            </ul>
+                        </li>                        
+                        <li style="display:none;">
+                            Submit Fee <strong>Rs. 1700/-</strong> (Prospectus Charges + Processing Fee + TCS chargers)
+                            in TCS center and get receipt having consignment number (CN No.). 
+                        </li>
+                        <li style="display:none;">
+                            Fee will be submitted in HBL UET Taxila <strong>Account Title: 'UET Taxila Recurring'
+                                No. 19157900213501</strong> on deposit slip available in HBL UET, Taxila. In this case
+                            the candidate will submit only <strong>Rs. 1450/- </strong>(Prospectus Charges + Processing
+                            Fee paid at once). <strong style="color:red;">Ref # </strong>
+                        </li>
+                        <li>
+                            Visit online admission portal <a href="http://admissions.uettaxila.edu.pk">admissions.uettaxila.edu.pk</a>
+                            and click on MY UET button for registration with UET Taxila.
+                        </li>
+                        <li>
+                            For registration click registration button and provide the following information.
+                            <ol style="list-style-type: lower-roman;padding-left: 30px;width: 90%;line-height: 170%;">
+                                <li>CNIC/Form B number without dashes.</li>
+                                <li>Set your password</li>
+                                <li>TCAT/ECAT/Equivalent Roll No. <span style="color:red;">(Not Required for BS Mathematics and Physics)</span></li>
+                                <li style="display:none;"><span>TCS <strong style="color:red;">Ref # (15 digit)</strong> <span style="color:red;">[If 14 digit, make it 15 by adding 0 to the extreme left]</span></li>
+                                <li style="display:none;">Deposit date</li>
+                                <li style="display:none;">Name of TCS Center</li>
+                                <li style="display:none;">Upload the image of deposit slip</li>
+                            </ol>
+                        </li>
+                        <li>Sign in now.</li>
+                        <li>Fill the personnel information educational information, applicable options and preference
+                            and submit it online.
+                        </li>
+                        <li>The applicant can sign in again and again in to see/edit his/her data until the submission
+                            of application online.
+                        </li>
+                        <li>While filling the preference table, fill the column for preference very carefully. The order
+                            of preference once given shall be final and cannot be changed subsequently of the submission
+                            of application for online.
+                        </li>
+                        <li>Under the column Category choose only among “A” (open merit), “S” (Partially Subsidized) and “X” (children of overseas
+                            Pakistani). The other categories will be adjusted
+                            automatically depending upon his applicable option.
+                        </li>
+                        <li>As per schedule mentioned at <a href="http://admissions.uettaxila.edu.pk">admissions.uettaxila.edu.pk</a>
+                            check merit lists.
+                        </li>
+                        <li>If the name of applicant appears in the merit list, he will visit his "My UET" account for further instructions.
+                        </li>
+                        <li>The applicant will upload all required documents as per the instructiuons at "My UET" account.
+                        </li>
+                        <li style="color: red; font-size: 15px; display:none;">The admission offer to “Not Eligible” candidates will
+                            be cancelled whereas the “Eligible” candidates will be issued call letter and bank challan.
+                        </li>
+                        <li style="display:none;">After depositing fee in HBL, UET, Taxila branch the candidate will submit the following
+                            documents in the Admission Office within the time period of a particular merit list:
+                            <ol style="list-style-type: lower-roman;padding-left: 30px;width: 90%;line-height: 170%;">
+                                <li>Bank Challan receipt in support of the University Dues deposited in the Habib Bank
+                                    Ltd. University of Engineering and Technology Taxila Branch.
+                                </li>
+                                <li>Medical Certificate (F-V) duly signed and stamped by the District Medical
+                                    Superintendent or the Medical Office of the University or a Commissioned Medical
+                                    officer.
+                                </li>
+                                <li>Ten attested and most recent photographs.</li>
+                                <li>Attested Certificate of parent’s /guardian’s income.</li>
+                                <li>Original degrees, certificates and result card of SSC, HSSC, BSc, GCE(A), Diploma of
+                                    Associate Engineers or the equivalent qualifications and their duplicate attested
+                                    photocopies.
+                                </li>
+                                <li>Original Marks Sheet of Entry Test</li>
+                                <li>Original NCC certificate (if applicable)</li>
+                                <li>Original Domicile certificate</li>
+                                <li>Attested copy of National CNIC/Form B</li>
+                                <li>Bio-Data Sheet (F-VI) duly completed</li>
+                                <li>Undertaking (F-VII) on a Stamp Paper of Rs. 50/- (Stamp Paper also attested by
+                                    1<sup>st</sup> Class Magistrate/Oath Commissioner
+                                </li>
+                            </ol>
+                        </li>
+                        <li style="display:none;">
+                            <strong style="text-decoration: underline;color: red;">Notification of
+                                Selection</strong><br/>
+                            A list of selectees will be displayed on official University web site.
+                        </li>
+                        <li><strong style="text-decoration: underline;color: red;">Important consideration in
+                                next merit lists:</strong> Admissions are granted on merit and according
+                            to preferences given by the applicants. An
+                            applicant who secures admission in a discipline
+                            of his lower preference and he desires to be
+                            considered in next merit lists, MUST pay the 1st semester dues of university and upload
+                            all the required documents on "My UET" account. If he fails to do so, his name would
+                            be excluded from any future merit lists and his
+                            admission would be cancelled.
+                        </li>
+                        <li>
+                            <strong style="text-decoration: underline;color: red;">Freezing in any given Discipline and
+                                Category</strong><br/>
+                            If an applicant requests in writing to retain the discipline and category in which he has
+                            been selected for admission
+                            on merit, then he will not have any right to claim his admission in any other discipline and
+                            category of higher or
+                            lower merit if a seat falls vacant in any discipline. Applicant desiring to freeze
+                            category/discipline should have to
+                            apply in person on prescribed form for this purpose before the next merit list is displayed.
+                        </li>
+                        <li style="display:none;">
+                            <strong style="text-decoration: underline;color: red;">Relaxation on Time
+                                Limit</strong><br/>
+                            If a selectee is prevented by unavoidable circumstances from timely fulfilment of the
+                            requirements laid down in 29.1 and 29.2 (Admission 2024 Guidelines / Prospectus). he should intimate the
+                            Convener Admission Committee
+                            about it within prescribed time limit along with relevant documentary proof. The Convener
+                            Admission Committee may at his discretion, grant relaxation in the time limit, which shall not
+                            exceed Three Days.
+                        </li>
+                        <li>
+                            <strong style="text-decoration: underline;color: red;">Forfeiture of Right for
+                                Admission</strong><br/>
+                            A selectee who fails to fulfill the requirements laid down in 29.1 and 29.2 (Admission 2024 Guidelines / Prospectus) within the
+                            prescribed time limit shall forfeit his right
+                            of admission and will not be considered in
+                            subsequent merit lists.
+                        </li>
+                        <li>
+                            <strong style="text-decoration: underline;color: red;">Provisional Admission</strong><br/>
+                            On fulfillment of the obligations mentioned in 29.1 and 29.2 (Admission 2024 Guidelines / Prospectus) a selectee
+                            will be admitted to
+                            the university. This admission shall, however, be provisional un till all the original
+                            degrees or certificates, submitted by him, have been verified for their veracity.
+                        </li>
+
+
+                    </ol>
+                    <p style="padding-left: 50px; width:90%; line-height: 170%; display: none;">
+                        i. On the web-link click on My UET button. Enter your CNIC/B Form No. issued by NADRA and set
+                        password then click Register
+                        button for registration with UET to access the application Form. </br>
+                    </p>
+                    <p style="padding-left: 50px; width:90%; line-height: 170%; display: none;">ii. Candidate can now
+                        Sign in. </p>
+                    <p style="padding-left: 50px; width:90%; line-height: 170%; display: none;">iii. Please fill the
+                        personal information, applicable options, Educational information and preferences. </br>
+                    </p>
+                    <p style="padding-left: 50px; width:90%; line-height: 170%; display: none;">iv. The candidate can
+                        Sign in again and again to see/edit his/her data until he /she submits his/her final printed
+                        application
+                        Form <strong>BY HAND/BY POST</strong> in Admission Office, UET, Taxila. </br>
+                    </p>
+                    <p style="padding-left: 50px; width:90%; line-height: 170%; display: none;"> v. After filling the
+                        Application Form online according to given instructions, applicant will get its printout, sign
+                        it and
+                        attach requisite documents, along with the Declaration Form (F-0) (available in the Prospectus)
+                        and then submit <strong>BY HAND/BY POST</strong> in
+                        the Admission Office, UET, Taxila. </p>
+                    <p style="padding-left: 50px; width:90%; line-height: 170%; display: none;">vi. Only one application
+                        form is to be submitted for any number of disciplines and
+                        categories you apply for both <b>Campuses (Taxila & Chakwal)</b>. Fill the column for
+                        preferences very carefully. </br>
+                        vii. The Order of preferences once given shall be final and cannot be
+                        changed subsequently, after the submission of Application Form in Admission Office. </br>
+                    </p>
+                    <p style="text-align: center; display: none;"><img style="width: 700px;height: 300px;"
+                                                                       src="images/Advertise_urdu.png"/></p>
+                    <h3 style="padding: 20px 0px 10px 25px; display: none;"> Notification of Selection</h3>
+                    <p style="padding-left: 50px; width:90%; line-height: 170%; display: none;">
+                        A list of selectees will be displayed on official University web site. </br></p>
+
+                    <h3 style="padding: 20px 0px 10px 25px; color:#ff0000; display: none;"> Important: Consideration in
+                        next merit lists</h3>
+                    <p style="padding-left: 50px; width:90%; line-height: 170%;display: none;">
+                        Admissions are granted on merit and according to preferences given by the applicants. An
+                        applicant who secures
+                        admission in a discipline of his lower preference and he desires to be considered in next merit
+                        lists. MUST submit
+                        all the UNIVERSITY dues and ORIGINAL documents. If he fails to do so, his name would be excluded
+                        from any future
+                        merit lists and his admission would be cancelled. </br></p>
+                    <h3 style="padding: 20px 0px 10px 25px; display: none;">
+                        Freezing in any given Discipline and Category</h3>
+                    <p style="padding-left: 50px; width:90%; line-height: 170%; display: none;">
+                        If an applicant requests in writing to retain the discipline and category in which he has been
+                        selected for admission
+                        on merit, then he will not have any right to claim his admission in any other discipline and
+                        category of higher or
+                        lower merit if a seat falls vacant in any discipline. Applicant desiring to freeze
+                        category/discipline should have to
+                        apply in person on prescribed form for this purpose before the next merit list is
+                        displayed.</br></p>
+                    <p style="padding-left: 50px; width:90%; line-height: 170%;">&nbsp;</p>
+                </div> <!--  End First Yellow Heading Text  -->
+            </div>
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-5">
+        <h5 class="fw-semibold mb-3">Note</h5>
+
+        <p> i. Any information regarding admissions can be obtained during working hours by calling Phone
+                        <strong>No: 051-9047412</strong>.<br>
+                        ii. Members of the Admission Committee will also be available for consultation, in person,
+                        during
+                        admission period. </p>
+           
+    </div>
+        </div>
+              
+    </div><!--content container Start-->
+    
+<!-- FOOTER -->
+<div class="footer mt-5 pt-5 pb-3" id="Contact">
+<div class="container">
+
+<div class="row">
+
+<div class="col-md-4">
+<h5>📞 Contact Us</h5>
+<p>
+University of Engineering & Technology Taxila<br>
+Taxila, Punjab, Pakistan
+</p>
+<p>
+📧 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="8affeda4ebeee7e3f9f9e3e5e4caffeffefeebf2e3e6eba4efeeffa4fae1">[email&#160;protected]</a><br>
+📞 +92-51-9047400-412
+</p>
+<p>
+For Admission Related Quries, Create Query from Admission Portal Profile usign "Ask Admission" Link<br>
+</p>
+</div>
+
+<div class="col-md-4">
+<h5>🔗 Quick Links</h5>
+<ul class="list-unstyled">
+<li><a href="Schedule.php">Fall 2026 Important Dates</a></li>
+<li><a href="whyus.php">Why Us</a></li>
+<li><a href="Seats_Allocation.php">Seats Allocation</a></li>
+<li><a href="ProgramsOffered.php">Undergraduate Programs</a></li>
+<li><a href="explore.php">Explore</a></li>
+<li><a href="Downloads.php">Downloads</a></li>
+<li><a href="FAQS.php">FAQS</a></li>
+<li><a href="Calculator.php">Percentage Calculator</a></li>
+</ul>
+</div>
+<div class="col-md-4">
+    <h5>🔗 Quick Links</h5>
+    <ul class="list-unstyled">
+<li><a href="Admission_Eligibility.php">Admission Eligibility</a></li>
+</ul>
+    </div>
+
+<!-- <div class="col-md-4">
+<h5>✉️ Send Message</h5>
+
+<form action="send.php" method="POST">
+<input type="text" name="name" class="form-control mb-2" placeholder="Your Name" required>
+<input type="email" name="email" class="form-control mb-2" placeholder="Your Email" required>
+<textarea name="message" class="form-control mb-2" placeholder="Message" rows="3" required></textarea>
+<button type="submit" class="btn btn-light w-100">Send</button>
+</form>
+
+</div> -->
+
+</div>
+
+<hr style="background:white;">
+<p class="text-center mb-0">© 2026 UET Taxila Undergraduate Admissions Portal</p>
+
+</div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="assets/bootstrap/js/bootstrap.bundle.min.js" type="079681de03d55abcd9282337-text/javascript"></script>
+<script src="assets/js/app.js" type="079681de03d55abcd9282337-text/javascript"></script>
+<script src="/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="079681de03d55abcd9282337-|49" defer></script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"d8564f6d5b4e410eb202d13f98326329","r":1}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a24d107e688dfe19',t:'MTc4NTY3MzUxNw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
+

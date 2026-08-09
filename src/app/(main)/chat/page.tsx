@@ -56,7 +56,10 @@ function ChatPageContent() {
         creatingRef.current = false;
         setIsCreating(false);
         const errorMsg = err instanceof Error ? err.message : "Failed to start conversation";
-        if (errorMsg.toLowerCase().includes("unauthorized") || errorMsg.toLowerCase().includes("not found")) {
+        if (
+          errorMsg.toLowerCase().includes("unauthorized") ||
+          errorMsg.toLowerCase().includes("not found")
+        ) {
           toast.error("Please sign in to start a conversation.", {
             action: {
               label: "Sign In",

@@ -98,11 +98,11 @@ describe("AdminLayout", () => {
     expect(screen.getByText("Child Content")).toBeTruthy();
   });
 
-  it("defaults header to 'Admin' when pathname does not match a nav item", () => {
+  it("defaults header to root nav item 'Overview' when pathname does not match another nav item", () => {
     vi.mocked(usePathname).mockReturnValue("/admin/unknown");
     render(<AdminLayout><div>Content</div></AdminLayout>);
-    // The h1 header says "Admin", but sidebar still shows all nav items
-    expect(screen.getByRole("heading", { level: 1, name: "Admin" })).toBeTruthy();
+    // /admin/unknown starts with /admin/, matching the Overview nav item
+    expect(screen.getByRole("heading", { level: 1, name: "Overview" })).toBeTruthy();
   });
 
   it("renders all nav link icons", () => {

@@ -47,7 +47,14 @@ export const metadata: Metadata = {
     siteName: APP_NAME,
     type: "website",
     locale: "en_PK",
-    images: [{ url: `${siteUrl}/opengraph-image`, width: 1200, height: 630, alt: "UET GPT — AI Assistant for UET Taxila" }],
+    images: [
+      {
+        url: `${siteUrl}/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: "UET GPT — AI Assistant for UET Taxila",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",

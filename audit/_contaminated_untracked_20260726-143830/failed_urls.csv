@@ -1,0 +1,50 @@
+url,host,failure_reason,retry_count,http_status,first_attempt,last_attempt,is_critical,dlq_status
+https://www.uettaxila.edu.pk/,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,True,pending_review
+https://web.uettaxila.edu.pk/,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,True,pending_review
+https://admissions.uettaxila.edu.pk/,admissions.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,True,pending_review
+https://admissions.uettaxila.edu.pk/Fees.php,admissions.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,True,pending_review
+https://admissions.uettaxila.edu.pk/ProcedureAndRequirements.php,admissions.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,True,pending_review
+https://admissions.uettaxila.edu.pk/Schedule.php,admissions.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,True,pending_review
+https://admissions.uettaxila.edu.pk/Seats_Allocation.php,admissions.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,True,pending_review
+https://admissions.uettaxila.edu.pk/Merit_List.php,admissions.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,True,pending_review
+https://admissions.uettaxila.edu.pk/ProspectusAvailability.php,admissions.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,False,pending_review
+https://web.uettaxila.edu.pk/academics/,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,False,pending_review
+https://web.uettaxila.edu.pk/departments/,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,True,pending_review
+https://web.uettaxila.edu.pk/faculty/,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,False,pending_review
+https://web.uettaxila.edu.pk/campus-life/,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,False,pending_review
+https://web.uettaxila.edu.pk/research/,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,False,pending_review
+https://web.uettaxila.edu.pk/oric/,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,False,pending_review
+https://web.uettaxila.edu.pk/qec/,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,False,pending_review
+https://web.uettaxila.edu.pk/examinations/,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,True,pending_review
+https://web.uettaxila.edu.pk/careers/,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,False,pending_review
+https://web.uettaxila.edu.pk/transport/,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,False,pending_review
+https://web.uettaxila.edu.pk/hostels/,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,True,pending_review
+https://web.uettaxila.edu.pk/library/,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,False,pending_review
+https://web.uettaxila.edu.pk/scholarships/,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,True,pending_review
+https://web.uettaxila.edu.pk/affiliated-colleges/,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,False,pending_review
+https://web.uettaxila.edu.pk/contact/,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,True,pending_review
+https://web.uettaxila.edu.pk/about/,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,False,pending_review
+https://web.uettaxila.edu.pk/ASRTD.aspx,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,True,pending_review
+https://web.uettaxila.edu.pk/PhDprogram.aspx,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,False,pending_review
+https://web.uettaxila.edu.pk/Rules,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,True,pending_review
+https://web.uettaxila.edu.pk/RTI,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,False,pending_review
+https://web.uettaxila.edu.pk/Tenders,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,False,pending_review
+https://web.uettaxila.edu.pk/EED/index.asp,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,True,pending_review
+https://web.uettaxila.edu.pk/MED/index.asp,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,True,pending_review
+https://web.uettaxila.edu.pk/CED/index.asp,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,True,pending_review
+https://web.uettaxila.edu.pk/EncED/index.asp,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,True,pending_review
+https://web.uettaxila.edu.pk/MCED/index.asp,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,True,pending_review
+https://web.uettaxila.edu.pk/ENV/index.asp,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,True,pending_review
+https://web.uettaxila.edu.pk/telecom/index.asp,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,True,pending_review
+https://admissions.uettaxila.edu.pk/Downloads/UET-Prospectus-2025.pdf,admissions.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,True,pending_review
+https://admissions.uettaxila.edu.pk/Downloads/UET-Prospectus-2024.pdf,admissions.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,False,pending_review
+https://admissions.uettaxila.edu.pk/Downloads/Rule-Book-2023.pdf,admissions.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,True,pending_review
+https://admissions.uettaxila.edu.pk/Downloads/Admission_Guidelines_2024.pdf,admissions.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,False,pending_review
+https://web.uettaxila.edu.pk/PageContents/Transport/Bus-Routes-Morning-2025.pdf,web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,False,pending_review
+"https://web.uettaxila.edu.pk/PageContents/hostels/Allotment Policy 2024-25 for Boys Hostels (Fall-2024) 2021, 2022, and 2023 Sessions Ver 1.0 - Copy.pdf",web.uettaxila.edu.pk,HTTP Error,0,200,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,True,pending_review
+https://web.uettaxila.edu.pk/departmentfaculty?departmentId=20,web.uettaxila.edu.pk,HTTP 404 Not Found,3,404,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,False,pending_review
+https://web.uettaxila.edu.pk/departmentfaculty?departmentId=21,web.uettaxila.edu.pk,HTTP 404 Not Found,3,404,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,False,pending_review
+https://web.uettaxila.edu.pk/departmentfaculty?departmentId=22,web.uettaxila.edu.pk,HTTP 404 Not Found,3,404,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,False,pending_review
+https://web.uettaxila.edu.pk/departmentfaculty?departmentId=23,web.uettaxila.edu.pk,HTTP 404 Not Found,3,404,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,False,pending_review
+https://web.uettaxila.edu.pk/departmentfaculty?departmentId=24,web.uettaxila.edu.pk,HTTP 404 Not Found,3,404,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,False,pending_review
+https://web.uettaxila.edu.pk/departmentfaculty?departmentId=25,web.uettaxila.edu.pk,HTTP 404 Not Found,3,404,2026-07-26T01:00:00Z,2026-07-26T02:00:00Z,False,pending_review

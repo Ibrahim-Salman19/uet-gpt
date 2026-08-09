@@ -45,6 +45,8 @@ type SearchHit = {
   title: string;
   relevanceScore: number;
   headingPath?: string[];
+  freshnessState?: string;
+  applicability?: string;
 };
 
 type SmokeResult = {
@@ -54,6 +56,8 @@ type SmokeResult = {
   title: string;
   relevanceScore: number;
   snippet: string;
+  freshnessState?: string;
+  applicability?: string;
 };
 
 type SmokeReturn = {
@@ -85,7 +89,6 @@ function clampLimit(limit: unknown): number {
 }
 
 function redact(text: string): string {
-  // Short snippet only — never return full chunk content from this probe.
   const cleaned = (text ?? "").replace(/\s+/g, " ").trim();
   if (cleaned.length <= SNIPPET_LEN) return cleaned;
   return `${cleaned.slice(0, SNIPPET_LEN)}…`;
@@ -108,6 +111,8 @@ export const smokeRetrieval = internalAction({
         title: v.string(),
         relevanceScore: v.number(),
         snippet: v.string(),
+        freshnessState: v.optional(v.string()),
+        applicability: v.optional(v.string()),
       }),
     ),
   }),
@@ -115,9 +120,6 @@ export const smokeRetrieval = internalAction({
     const safeQuery = scanQuery(args.query);
     const limit = clampLimit(args.limit);
 
-    // Real production retrieval pipeline — same internal action retrieveContext
-    // calls. searchDocumentsAction runs: rag.search (vector) + fullTextSearch
-    // (BM25) + chunkTextSearch + 3-way RRF fusion + FAQ fusion + decay scoring.
     const hits: SearchHit[] = await ctx.runAction(
       internal.embeddings.search.searchDocumentsAction,
       {
@@ -126,14 +128,18 @@ export const smokeRetrieval = internalAction({
       },
     );
 
-    const results: SmokeResult[] = hits.map((hit: SearchHit, idx: number): SmokeResult => ({
-      rank: idx + 1,
-      entryId: hit.entryId,
-      url: hit.url,
-      title: hit.title,
-      relevanceScore: hit.relevanceScore,
-      snippet: redact(hit.content),
-    }));
+    const results: SmokeResult[] = hits.map(
+      (hit: SearchHit, idx: number): SmokeResult => ({
+        rank: idx + 1,
+        entryId: hit.entryId,
+        url: hit.url,
+        title: hit.title,
+        relevanceScore: hit.relevanceScore,
+        snippet: redact(hit.content),
+        freshnessState: hit.freshnessState,
+        applicability: hit.applicability,
+      }),
+    );
 
     return {
       query: safeQuery,

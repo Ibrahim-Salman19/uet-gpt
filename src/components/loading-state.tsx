@@ -1,519 +1,551 @@
-"use client";
+import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
-interface LoadingStateProps {
-  type?: "messages" | "sidebar" | "page" | "admin-overview" | "admin-list" | "admin-settings";
+export type LoadingStateType =
+  | "messages"
+  | "sidebar"
+  | "page"
+  | "admin-overview"
+  | "admin-list"
+  | "admin-settings";
+
+export interface LoadingStateProps {
+  type?: LoadingStateType;
   className?: string;
+  /** Accessible status text. Visual skeleton copy remains unchanged. */
+  label?: string;
+}
+
+interface SkeletonProps {
+  className?: string;
+  label: string;
+}
+
+const SIDEBAR_ITEMS = [
+  "chat_workspace",
+  "explore_rag",
+  "syllabi_db",
+  "campus_map",
+  "settings_config",
+  "system_status",
+] as const;
+
+const MESSAGE_SEQUENCE = [true, false, false, true, false] as const;
+const ADMIN_BREAKDOWN_ROWS = ["documents", "chunks", "sources"] as const;
+const ADMIN_JOB_ROWS = ["crawler", "indexer", "embeddings"] as const;
+const ADMIN_LIST_ROWS = ["01", "02", "03", "04", "05"] as const;
+const ADMIN_SETTING_GROUPS = ["retrieval", "generation", "operations"] as const;
+const ADMIN_SETTING_FIELDS = ["primary", "secondary"] as const;
+
+const DEFAULT_LABELS: Record<LoadingStateType, string> = {
+  messages: "Loading conversation",
+  sidebar: "Loading navigation",
+  page: "Loading page",
+  "admin-overview": "Loading admin overview",
+  "admin-list": "Loading admin documents",
+  "admin-settings": "Loading admin settings",
+};
+
+function StatusDot({ ping = true }: { ping?: boolean }) {
+  return (
+    <span className="relative flex h-1.5 w-1.5 shrink-0" aria-hidden="true">
+      {ping ? (
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--ks-verdigris-patina)] opacity-70 motion-reduce:animate-none" />
+      ) : null}
+      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[var(--ks-verdigris-patina)]" />
+    </span>
+  );
+}
+
+function ShimmerLine({ className, delay = 0 }: { className?: string; delay?: number }) {
+  return (
+    <div className={cn("relative h-px overflow-hidden bg-[var(--ks-rule)]", className)}>
+      <div
+        className="absolute inset-y-0 left-0 w-1/3 animate-progress bg-[var(--ks-kinpaku-gold)] opacity-70 motion-reduce:animate-none"
+        style={delay ? { animationDelay: `${delay}ms` } : undefined}
+      />
+    </div>
+  );
+}
+
+function LoadingRegion({ label, className, children }: SkeletonProps & { children: ReactNode }) {
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+      aria-atomic="true"
+      className={className}
+      data-loading-state="true"
+    >
+      <span className="sr-only">{label}</span>
+      <div aria-hidden="true" className="contents">
+        {children}
+      </div>
+    </div>
+  );
 }
 
 function MessageSkeleton({ isUser }: { isUser: boolean }) {
+  const lineWidths = isUser ? ["w-[82%]", "w-[61%]", "w-[38%]"] : ["w-[94%]", "w-[78%]", "w-[56%]"];
+
   return (
-    <div className="flex items-start gap-5 px-6 py-6 w-full max-w-5xl mx-auto border-b border-white/[0.02]">
-      {/* Avatar Outline */}
-      <div className="h-8 w-8 shrink-0 border border-white/10 rounded-xl bg-zinc-950 flex items-center justify-center select-none font-mono text-[9px] text-zinc-500">
+    <div className="mx-auto flex w-full max-w-5xl items-start gap-3 border-b border-[var(--ks-rule)] px-4 py-5 sm:gap-5 sm:px-6 sm:py-6">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[var(--ks-rule-strong)] bg-[var(--surface-0)] font-mono text-[9px] text-[var(--ks-text-muted)] select-none">
         {isUser ? "USR" : "SYS"}
       </div>
 
-      <div className="flex-1 flex flex-col gap-3.5 items-start min-w-0">
-        {/* Monospace Metadata Tag */}
-        <div className="flex items-center gap-2 font-mono text-[9px] tracking-widest text-zinc-500 uppercase select-none">
+      <div className="flex min-w-0 flex-1 flex-col items-start gap-3.5">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[9px] tracking-widest text-[var(--ks-text-muted)] uppercase select-none">
           <span>{isUser ? "USER" : "UETGPT"}</span>
-          <span className="opacity-40">//</span>
-          <span className="animate-pulse text-[var(--accent)] font-semibold">
-            {isUser ? "TRANSMITTING..." : "PROCESSING_RAG..."}
+          <span className="text-[var(--ks-text-faint)]">//</span>
+          <span className="animate-pulse font-semibold text-[var(--accent)] motion-reduce:animate-none">
+            {isUser ? "LOADING_MESSAGE" : "PROCESSING_CONTEXT"}
           </span>
         </div>
 
-        {/* Hairline geometric pulse lines */}
         <div className="w-full space-y-2.5">
-          <div className="h-[1px] bg-white/10 w-[90%] relative overflow-hidden">
-            <div className="absolute top-0 bottom-0 left-0 w-1/3 bg-[var(--ks-kinpaku-gold)] animate-progress" />
-          </div>
-          <div className="h-[1px] bg-white/10 w-[75%] relative overflow-hidden">
-            <div
-              className="absolute top-0 bottom-0 left-0 w-1/3 bg-[var(--ks-kinpaku-gold)] animate-progress"
-              style={{ animationDelay: "150ms" }}
+          {lineWidths.map((width, index) => (
+            <ShimmerLine
+              key={`${isUser ? "user" : "assistant"}-${width}`}
+              className={width}
+              delay={index * 140}
             />
-          </div>
-          <div className="h-[1px] bg-white/10 w-[50%] relative overflow-hidden">
-            <div
-              className="absolute top-0 bottom-0 left-0 w-1/3 bg-[var(--ks-kinpaku-gold)] animate-progress"
-              style={{ animationDelay: "300ms" }}
-            />
-          </div>
+          ))}
         </div>
       </div>
     </div>
   );
 }
 
-function SidebarSkeleton() {
+function MessagesSkeleton({ className, label }: SkeletonProps) {
   return (
-    <div className="flex flex-col h-full bg-[var(--surface-1)] border-r border-[var(--ks-rule)] min-h-[400px]">
-      {/* Header element */}
-      <div className="p-4 border-b border-[var(--ks-rule)] flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="h-6 w-6 border border-[var(--ks-rule-strong)] flex items-center justify-center rounded-[2px]">
+    <LoadingRegion label={label} className={cn("flex min-w-0 flex-col", className)}>
+      {MESSAGE_SEQUENCE.map((isUser, index) => (
+        <MessageSkeleton key={`message-${index}`} isUser={isUser} />
+      ))}
+    </LoadingRegion>
+  );
+}
+
+function SidebarSkeleton({ className, label }: SkeletonProps) {
+  return (
+    <LoadingRegion
+      label={label}
+      className={cn(
+        "flex h-full min-h-[400px] min-w-0 flex-col border-r border-[var(--ks-rule)] bg-[var(--surface-1)]",
+        className,
+      )}
+    >
+      <div className="flex items-center justify-between border-b border-[var(--ks-rule)] p-4">
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[2px] border border-[var(--ks-rule-strong)]">
             <span className="font-mono text-[8px] text-[var(--ks-kinpaku-gold)] select-none">
               UET
             </span>
           </div>
-          <span className="font-mono text-[10px] tracking-wider text-[var(--ks-champagne)] select-none font-bold">
-            {"UETGPT // NAV"}
+          <span className="truncate font-mono text-[10px] font-bold tracking-wider text-[var(--ks-champagne)] select-none">
+            UETGPT // NAV
           </span>
         </div>
-        <span className="relative flex h-1.5 w-1.5">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--ks-verdigris-patina)] opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[var(--ks-verdigris-patina)]"></span>
-        </span>
+        <StatusDot />
       </div>
 
-      {/* Main navigation list */}
-      <div className="flex flex-col p-3 gap-1.5 mt-2">
-        {Array.from({ length: 6 }, (_, i) => `sidebar-skeleton-${i}`).map((key, index) => (
+      <div className="mt-2 flex flex-col gap-1.5 p-3">
+        {SIDEBAR_ITEMS.map((item, index) => (
           <div
-            key={key}
-            className="flex items-center justify-between p-2.5 border border-[var(--ks-rule)] bg-[var(--surface-0)] rounded-[2px] transition-all"
+            key={item}
+            className="flex min-w-0 items-center justify-between gap-3 rounded-[2px] border border-[var(--ks-rule)] bg-[var(--surface-0)] p-2.5"
           >
-            <div className="flex items-center gap-2.5">
-              <span className="font-mono text-[9px] text-[var(--ks-kinpaku-gold)] opacity-70">
-                0{index + 1}
+            <div className="flex min-w-0 items-center gap-2.5">
+              <span className="shrink-0 font-mono text-[9px] text-[var(--ks-kinpaku-gold)] opacity-70">
+                {String(index + 1).padStart(2, "0")}
               </span>
-              <span className="font-mono text-[9px] text-[var(--ks-text-muted)] tracking-wider select-none uppercase">
-                {
-                  [
-                    "chat_workspace",
-                    "explore_rag",
-                    "syllabi_db",
-                    "campus_map",
-                    "settings_config",
-                    "system_status",
-                  ][index]
-                }
+              <span className="truncate font-mono text-[9px] tracking-wider text-[var(--ks-text-muted)] uppercase select-none">
+                {item}
               </span>
             </div>
-            {/* Subtle pulse block indicator */}
-            <div className="w-1.5 h-1.5 bg-[var(--ks-rule-strong)] animate-pulse rounded-[1px]" />
+            <div className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-[1px] bg-[var(--ks-rule-strong)] motion-reduce:animate-none" />
           </div>
         ))}
       </div>
 
-      {/* Footer diagnostic block */}
-      <div className="mt-auto p-4 border-t border-[var(--ks-rule)] bg-[var(--ks-lacquer-deep)]">
-        <div className="font-mono text-[8px] text-[var(--ks-text-faint)] leading-relaxed select-none">
-          {"SECURE CONNECTION // SSL_READY"}
+      <div className="mt-auto border-t border-[var(--ks-rule)] bg-[var(--ks-lacquer-deep)] p-4">
+        <div className="font-mono text-[8px] leading-relaxed text-[var(--ks-text-faint)] select-none">
+          SECURE CONNECTION // READY
           <br />
-          {"NODE // V24_ACTIVE"}
+          APP SHELL // INITIALIZING
           <br />
-          {"CONVEX // HANDSHAKE_OK"}
+          CONVEX // CONNECTING
         </div>
       </div>
+    </LoadingRegion>
+  );
+}
+
+function MetricCard({
+  title,
+  value = "-- // --",
+  className,
+  status,
+  progress = false,
+}: {
+  title: string;
+  value?: string;
+  className?: string;
+  status?: string;
+  progress?: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "relative space-y-4 overflow-hidden rounded-xl border border-[var(--ks-rule)] bg-[var(--surface-0)] p-5",
+        className,
+      )}
+    >
+      <div className="flex min-w-0 items-center justify-between gap-3 font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
+        <span className="truncate">{title}</span>
+        {status ? (
+          <span className="shrink-0 animate-pulse text-[var(--accent)] motion-reduce:animate-none">
+            {status}
+          </span>
+        ) : null}
+      </div>
+      <div className="font-mono text-xl text-[var(--ks-champagne)]">{value}</div>
+      {progress ? <ShimmerLine className="w-full" /> : null}
     </div>
   );
 }
 
-function AdminOverviewSkeleton() {
+function AdminOverviewSkeleton({ className, label }: SkeletonProps) {
   return (
-    <div className="space-y-6 animate-pulse">
-      {/* Header Skeleton */}
-      <div className="flex items-center justify-between pb-2 border-b border-[var(--ks-rule)]">
+    <LoadingRegion label={label} className={cn("space-y-6", className)}>
+      <div className="flex items-center justify-between border-b border-[var(--ks-rule)] pb-2">
         <h2 className="font-mono text-[10px] tracking-widest text-[var(--ks-champagne)] uppercase select-none">
-          {"ADMIN // SYSTEM_OVERVIEW"}
+          ADMIN // SYSTEM_OVERVIEW
         </h2>
+        <StatusDot />
       </div>
 
-      {/* Primary Bento Row: 2 + 1 + 1 */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div className="lg:col-span-2 rounded-xl border border-[var(--ks-rule)] bg-[var(--surface-0)] p-5 space-y-4 relative overflow-hidden">
-          <div className="flex justify-between items-center font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
-            <span>CRAWL_ACTIVITY_METRICS</span>
-            <span className="text-[var(--accent)] animate-pulse">LIVE</span>
-          </div>
-          <div className="font-mono text-xl text-[var(--ks-champagne)]">00.00 // SYNC</div>
-          <div className="h-[1px] bg-white/10 w-full relative overflow-hidden">
-            <div className="absolute top-0 bottom-0 left-0 w-1/3 bg-[var(--ks-kinpaku-gold)] animate-progress" />
-          </div>
-        </div>
-        <div className="rounded-xl border border-[var(--ks-rule)] bg-[var(--surface-0)] p-5 space-y-4">
-          <div className="flex justify-between items-center font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
-            <span>DOCUMENT_COUNT</span>
-          </div>
-          <div className="font-mono text-xl text-[var(--ks-champagne)]">-- // --</div>
-        </div>
-        <div className="rounded-xl border border-[var(--ks-rule)] bg-[var(--surface-0)] p-5 space-y-4">
-          <div className="flex justify-between items-center font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
-            <span>ACTIVE_JOBS</span>
-          </div>
-          <div className="font-mono text-xl text-[var(--ks-champagne)]">-- // --</div>
-        </div>
+        <MetricCard
+          title="CRAWL_ACTIVITY_METRICS"
+          value="SYNCING // DATA"
+          status="LIVE"
+          progress
+          className="lg:col-span-2"
+        />
+        <MetricCard title="DOCUMENT_COUNT" />
+        <MetricCard title="ACTIVE_JOBS" />
       </div>
 
-      {/* Secondary Bento Row: 1 + 1 + 2 */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-xl border border-[var(--ks-rule)] bg-[var(--surface-0)] p-5 space-y-4">
-          <div className="flex justify-between items-center font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
-            <span>SYSTEM_CPU</span>
-          </div>
-          <div className="font-mono text-xl text-[var(--ks-champagne)]">-- // --</div>
-        </div>
-        <div className="rounded-xl border border-[var(--ks-rule)] bg-[var(--surface-0)] p-5 space-y-4">
-          <div className="flex justify-between items-center font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
-            <span>MEMORY_POOL</span>
-          </div>
-          <div className="font-mono text-xl text-[var(--ks-champagne)]">-- // --</div>
-        </div>
-        <div className="lg:col-span-2 rounded-xl border border-[var(--ks-rule)] bg-[var(--surface-0)] p-5 space-y-4 relative overflow-hidden">
-          <div className="flex justify-between items-center font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
-            <span>VECTOR_INDEX_LOAD</span>
-            <span className="text-[var(--ks-verdigris-patina)]">RESOLVING</span>
-          </div>
-          <div className="font-mono text-xl text-[var(--ks-champagne)]">CALCULATING...</div>
-          <div className="h-[1px] bg-white/10 w-full relative overflow-hidden">
-            <div className="absolute top-0 bottom-0 left-0 w-1/3 bg-[var(--ks-kinpaku-gold)] animate-progress" />
-          </div>
-        </div>
+        <MetricCard title="SYSTEM_CPU" />
+        <MetricCard title="MEMORY_POOL" />
+        <MetricCard
+          title="VECTOR_INDEX_LOAD"
+          value="CALCULATING..."
+          status="RESOLVING"
+          progress
+          className="lg:col-span-2"
+        />
       </div>
 
-      {/* Breakdown and Jobs Row */}
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="border border-[var(--ks-rule)] rounded-xl bg-[var(--surface-0)] p-6 space-y-4">
-          <div className="pb-3 border-b border-[var(--ks-rule)]">
-            <div className="font-mono text-[9px] text-[var(--ks-champagne)] uppercase">
-              DATABASE_BREAKDOWN
-            </div>
+        <section className="space-y-4 rounded-xl border border-[var(--ks-rule)] bg-[var(--surface-0)] p-5 sm:p-6">
+          <div className="border-b border-[var(--ks-rule)] pb-3 font-mono text-[9px] text-[var(--ks-champagne)] uppercase">
+            DATABASE_BREAKDOWN
           </div>
           <div className="space-y-4">
-            {["bd-1", "bd-2", "bd-3"].map((id, index) => (
-              <div key={id} className="flex items-center justify-between">
-                <div className="font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
-                  SEC_0{index + 1}
+            {ADMIN_BREAKDOWN_ROWS.map((row, index) => (
+              <div key={row} className="flex min-w-0 items-center justify-between gap-4">
+                <div className="truncate font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
+                  SEC_{String(index + 1).padStart(2, "0")} // {row}
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="h-[1px] bg-white/10 w-24 relative overflow-hidden">
-                    <div className="absolute top-0 bottom-0 left-0 w-1/3 bg-[var(--ks-kinpaku-gold)] animate-progress" />
-                  </div>
-                  <div className="font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
-                    --
-                  </div>
+                <div className="flex shrink-0 items-center gap-3">
+                  <ShimmerLine className="w-16 sm:w-24" delay={index * 140} />
+                  <div className="font-mono text-[9px] text-[var(--ks-text-muted)]">--</div>
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        </section>
 
-        <div className="border border-[var(--ks-rule)] rounded-xl bg-[var(--surface-0)] p-6 space-y-4">
-          <div className="pb-3 border-b border-[var(--ks-rule)]">
-            <div className="font-mono text-[9px] text-[var(--ks-champagne)] uppercase">
-              CRAWLER_TELEMETRY
-            </div>
+        <section className="space-y-4 rounded-xl border border-[var(--ks-rule)] bg-[var(--surface-0)] p-5 sm:p-6">
+          <div className="border-b border-[var(--ks-rule)] pb-3 font-mono text-[9px] text-[var(--ks-champagne)] uppercase">
+            CRAWLER_TELEMETRY
           </div>
           <div className="space-y-4">
-            {["job-1", "job-2", "job-3"].map((id, index) => (
-              <div key={id} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-[9px] text-[var(--ks-kinpaku-gold)] uppercase">
+            {ADMIN_JOB_ROWS.map((row, index) => (
+              <div key={row} className="flex min-w-0 items-center justify-between gap-4">
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="shrink-0 font-mono text-[9px] text-[var(--ks-kinpaku-gold)] uppercase">
                     [PENDING]
                   </span>
-                  <span className="font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
-                    NODE_0{index + 1}
+                  <span className="truncate font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
+                    NODE_{String(index + 1).padStart(2, "0")} // {row}
                   </span>
                 </div>
-                <div className="font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">--</div>
+                <div className="shrink-0 font-mono text-[9px] text-[var(--ks-text-muted)]">--</div>
               </div>
             ))}
           </div>
-        </div>
+        </section>
       </div>
-    </div>
+    </LoadingRegion>
   );
 }
 
-function AdminListSkeleton() {
+function AdminListSkeleton({ className, label }: SkeletonProps) {
   return (
-    <div className="space-y-6 animate-pulse">
-      {/* Header Skeleton */}
+    <LoadingRegion label={label} className={cn("space-y-6", className)}>
       <div className="flex items-center justify-between border-b border-[var(--ks-rule)] pb-4">
-        <div className="space-y-2">
+        <div className="min-w-0 space-y-2">
           <h2 className="font-mono text-[10px] tracking-widest text-[var(--ks-champagne)] uppercase select-none">
-            {"ADMIN // DOCUMENT_LIST"}
+            ADMIN // DOCUMENT_LIST
           </h2>
           <p className="font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
             RETRIEVING FILES FROM CONVEX
           </p>
         </div>
+        <StatusDot />
       </div>
 
-      {/* Filter controls */}
-      <div className="flex items-center gap-4">
-        <div className="h-9 w-64 border border-[var(--ks-rule)] bg-[var(--surface-0)] rounded-[2px]" />
-        <div className="h-9 w-32 border border-[var(--ks-rule)] bg-[var(--surface-0)] rounded-[2px]" />
+      <div className="grid gap-3 sm:grid-cols-[minmax(0,16rem)_8rem] sm:gap-4">
+        <div className="h-9 min-w-0 rounded-[2px] border border-[var(--ks-rule)] bg-[var(--surface-0)]" />
+        <div className="h-9 min-w-0 rounded-[2px] border border-[var(--ks-rule)] bg-[var(--surface-0)]" />
       </div>
 
-      <div className="h-[1px] bg-white/5" />
-
-      {/* High-density rows */}
-      <div className="space-y-px border border-[var(--ks-rule)] bg-[var(--surface-0)] rounded-xl overflow-hidden">
-        {["row-1", "row-2", "row-3", "row-4", "row-5"].map((id, index) => (
+      <div className="overflow-hidden rounded-xl border border-[var(--ks-rule)] bg-[var(--surface-0)]">
+        {ADMIN_LIST_ROWS.map((row, index) => (
           <div
-            key={id}
-            className="flex items-center justify-between p-4 bg-[var(--surface-0)] relative overflow-hidden border-b border-[var(--ks-rule)] last:border-0"
+            key={row}
+            className="relative flex min-w-0 items-center justify-between overflow-hidden border-b border-[var(--ks-rule)] bg-[var(--surface-0)] p-4 last:border-b-0"
           >
-            {/* Shimmer overlay line */}
-            <div className="absolute top-0 bottom-0 left-0 w-[2px] bg-[var(--accent)]/30 animate-pulse" />
-            <div className="flex-1 min-w-0 space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-[9px] text-[var(--accent)] uppercase">
-                  DOC_0{index + 1}
+            <div className="absolute inset-y-0 left-0 w-0.5 animate-pulse bg-[var(--accent)] opacity-30 motion-reduce:animate-none" />
+            <div className="min-w-0 flex-1 space-y-2 pl-1">
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="shrink-0 font-mono text-[9px] text-[var(--accent)] uppercase">
+                  DOC_{row}
                 </span>
-                <span className="font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
-                  // SCANNING_INDEX...
+                <span className="truncate font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
+                  // SCANNING_INDEX
                 </span>
               </div>
-              <div className="h-[1px] bg-white/10 w-2/3 relative overflow-hidden">
-                <div className="absolute top-0 bottom-0 left-0 w-1/3 bg-[var(--ks-kinpaku-gold)] animate-progress" />
-              </div>
+              <ShimmerLine
+                className={cn(
+                  "max-w-full",
+                  index % 3 === 0 ? "w-2/3" : index % 3 === 1 ? "w-4/5" : "w-1/2",
+                )}
+                delay={index * 90}
+              />
             </div>
           </div>
         ))}
       </div>
-    </div>
+    </LoadingRegion>
   );
 }
 
-function AdminSettingsSkeleton() {
+function AdminSettingsSkeleton({ className, label }: SkeletonProps) {
   return (
-    <div className="space-y-6 animate-pulse">
-      {/* Header Skeleton */}
+    <LoadingRegion label={label} className={cn("space-y-6", className)}>
       <div className="flex items-center justify-between border-b border-[var(--ks-rule)] pb-4">
-        <div className="space-y-2">
+        <div className="min-w-0 space-y-2">
           <h2 className="font-mono text-[10px] tracking-widest text-[var(--ks-champagne)] uppercase select-none">
-            {"ADMIN // SYSTEM_CONFIG"}
+            ADMIN // SYSTEM_CONFIG
           </h2>
           <p className="font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
-            RETRIEVING ENVIRONMENTAL PARAMS
+            RETRIEVING ENVIRONMENT PARAMETERS
           </p>
         </div>
+        <StatusDot />
       </div>
 
-      <div className="h-[1px] bg-white/5" />
-
-      {/* Split panes settings skeletons */}
-      <div className="space-y-8">
-        {["sec-1", "sec-2", "sec-3"].map((sectionId, secIndex) => (
-          <div
-            key={sectionId}
-            className="grid grid-cols-1 lg:grid-cols-3 gap-8 py-6 border-b border-[var(--ks-rule)] last:border-0"
+      <div className="divide-y divide-[var(--ks-rule)]">
+        {ADMIN_SETTING_GROUPS.map((group, groupIndex) => (
+          <section
+            key={group}
+            className="grid grid-cols-1 gap-5 py-6 first:pt-0 last:pb-0 lg:grid-cols-3 lg:gap-8"
           >
-            {/* Left Column: Info */}
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-[9px] text-[var(--accent)] uppercase">
-                  [PARAM_GROUP_{secIndex + 1}]
-                </span>
+              <div className="font-mono text-[9px] text-[var(--accent)] uppercase">
+                [PARAM_GROUP_{groupIndex + 1}] // {group}
               </div>
               <div className="font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
-                RESOLVING_DEPENDENCIES...
+                RESOLVING_DEPENDENCIES
               </div>
             </div>
 
-            {/* Right Column: Fields (spans 2) */}
-            <div className="lg:col-span-2 space-y-4">
-              {["field-1", "field-2"].map((fieldId, fIndex) => (
+            <div className="space-y-1 lg:col-span-2">
+              {ADMIN_SETTING_FIELDS.map((field, fieldIndex) => (
                 <div
-                  key={`${sectionId}-${fieldId}`}
-                  className="flex items-center justify-between py-2 border-b border-white/[0.02] last:border-0"
+                  key={`${group}-${field}`}
+                  className="flex flex-col gap-3 border-b border-[var(--ks-rule)] py-3 last:border-b-0 sm:flex-row sm:items-center sm:justify-between sm:gap-6"
                 >
                   <div className="font-mono text-[9px] text-[var(--ks-text-muted)] uppercase">
-                    KEY_VAR_{secIndex + 1}_0{fIndex + 1}
+                    KEY_VAR_{groupIndex + 1}_{String(fieldIndex + 1).padStart(2, "0")}
                   </div>
-                  <div className="h-8 w-[180px] border border-[var(--ks-rule)] bg-[var(--surface-0)] rounded-[2px]" />
+                  <div className="h-8 w-full rounded-[2px] border border-[var(--ks-rule)] bg-[var(--surface-0)] sm:w-[180px]" />
                 </div>
               ))}
             </div>
-          </div>
+          </section>
         ))}
       </div>
-    </div>
+    </LoadingRegion>
   );
 }
 
-export function LoadingState({ type = "messages", className }: LoadingStateProps) {
-  if (type === "sidebar") {
-    return <SidebarSkeleton />;
-  }
-
-  if (type === "admin-overview") {
-    return <AdminOverviewSkeleton />;
-  }
-
-  if (type === "admin-list") {
-    return <AdminListSkeleton />;
-  }
-
-  if (type === "admin-settings") {
-    return <AdminSettingsSkeleton />;
-  }
-
-  if (type === "page") {
-    return (
-      <div
-        className={cn(
-          "flex flex-col items-center justify-center w-full min-h-[80vh] p-8",
-          className,
-        )}
-      >
-        {/* Anti-Slop Skeletal Layout: Matches final layout shape, uses hairline frames instead of thick lazy pills */}
-        <div className="w-full max-w-6xl flex flex-col gap-8">
-          {/* Header Skeleton */}
-          <div className="flex justify-between items-end border-b border-[var(--ks-rule)] pb-4">
-            <div className="flex flex-col gap-2">
-              <div className="w-24 h-[1px] bg-[var(--ks-kinpaku-gold)] opacity-70" />
-              <h2 className="font-mono text-[11px] tracking-widest text-[var(--ks-champagne)] uppercase select-none">
-                {"UETGPT // ASSEMBLING WORKSPACE"}
-              </h2>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="font-mono text-[9px] text-[var(--ks-text-muted)] tracking-wider">
-                SYNCING DATA
-              </span>
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--ks-verdigris-patina)] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[var(--ks-verdigris-patina)]"></span>
-              </span>
-            </div>
+function PageSkeleton({ className, label }: SkeletonProps) {
+  return (
+    <LoadingRegion
+      label={label}
+      className={cn(
+        "flex min-h-[80vh] w-full flex-col items-center justify-center p-4 sm:p-6 lg:p-8",
+        className,
+      )}
+    >
+      <div className="flex w-full max-w-6xl flex-col gap-6 sm:gap-8">
+        <div className="flex flex-col gap-4 border-b border-[var(--ks-rule)] pb-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex min-w-0 flex-col gap-2">
+            <div className="h-px w-24 bg-[var(--ks-kinpaku-gold)] opacity-70" />
+            <h2 className="font-mono text-[11px] tracking-widest text-[var(--ks-champagne)] uppercase select-none">
+              UETGPT // ASSEMBLING WORKSPACE
+            </h2>
           </div>
+          <div className="flex items-center gap-3">
+            <span className="font-mono text-[9px] tracking-wider text-[var(--ks-text-muted)]">
+              SYNCING DATA
+            </span>
+            <StatusDot />
+          </div>
+        </div>
 
-          {/* Bento Grid Skeleton */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-            {/* Main Primary View Skeleton */}
-            <div className="col-span-1 md:col-span-8 border border-[var(--ks-rule)] bg-[var(--surface-0)] min-h-[500px] p-6 flex flex-col justify-between relative overflow-hidden">
-              {/* Subtle architectural grid background */}
-              <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--ks-rule)_1px,transparent_1px),linear-gradient(to_bottom,var(--ks-rule)_1px,transparent_1px)] bg-[size:40px_40px] opacity-30" />
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-12">
+          <section className="relative col-span-1 flex min-h-[420px] flex-col justify-between overflow-hidden border border-[var(--ks-rule)] bg-[var(--surface-0)] p-5 sm:min-h-[500px] sm:p-6 md:col-span-8">
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--ks-rule)_1px,transparent_1px),linear-gradient(to_bottom,var(--ks-rule)_1px,transparent_1px)] bg-[size:40px_40px] opacity-30" />
 
-              {/* Technical corner accents */}
-              <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-[var(--ks-kinpaku-gold)] opacity-50" />
-              <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-[var(--ks-kinpaku-gold)] opacity-50" />
-              <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-[var(--ks-kinpaku-gold)] opacity-50" />
-              <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-[var(--ks-kinpaku-gold)] opacity-50" />
+            <div className="absolute top-0 left-0 h-4 w-4 border-t border-l border-[var(--ks-kinpaku-gold)] opacity-50" />
+            <div className="absolute top-0 right-0 h-4 w-4 border-t border-r border-[var(--ks-kinpaku-gold)] opacity-50" />
+            <div className="absolute bottom-0 left-0 h-4 w-4 border-b border-l border-[var(--ks-kinpaku-gold)] opacity-50" />
+            <div className="absolute right-0 bottom-0 h-4 w-4 border-r border-b border-[var(--ks-kinpaku-gold)] opacity-50" />
 
-              <div className="relative z-10 space-y-6 max-w-2xl mt-4">
-                {/* Hairline structural boxes instead of pills */}
-                <div className="h-12 border border-[var(--ks-rule-strong)] bg-[var(--surface-1)] w-[85%] relative overflow-hidden">
-                  <div className="absolute top-0 bottom-0 left-0 w-1/4 bg-[var(--ks-kinpaku-gold)] opacity-10 animate-progress" />
-                </div>
-                <div className="h-12 border border-[var(--ks-rule-strong)] bg-[var(--surface-1)] w-[60%] relative overflow-hidden">
-                  <div
-                    className="absolute top-0 bottom-0 left-0 w-1/4 bg-[var(--ks-kinpaku-gold)] opacity-10 animate-progress"
-                    style={{ animationDelay: "200ms" }}
+            <div className="relative z-10 mt-4 max-w-2xl space-y-6">
+              <div className="relative h-12 w-[85%] overflow-hidden border border-[var(--ks-rule-strong)] bg-[var(--surface-1)]">
+                <div className="absolute inset-y-0 left-0 w-1/4 animate-progress bg-[var(--ks-kinpaku-gold)] opacity-10 motion-reduce:animate-none" />
+              </div>
+              <div className="relative h-12 w-[60%] overflow-hidden border border-[var(--ks-rule-strong)] bg-[var(--surface-1)]">
+                <div
+                  className="absolute inset-y-0 left-0 w-1/4 animate-progress bg-[var(--ks-kinpaku-gold)] opacity-10 motion-reduce:animate-none"
+                  style={{ animationDelay: "200ms" }}
+                />
+              </div>
+
+              <div className="space-y-4 pt-8">
+                <ShimmerLine className="w-full" delay={400} />
+                <div className="h-px w-3/4 bg-[var(--ks-rule)]" />
+                <div className="h-px w-1/2 bg-[var(--ks-rule)]" />
+              </div>
+            </div>
+
+            <div className="relative z-10 mt-8 flex items-center justify-between gap-4 font-mono text-[9px] text-[var(--ks-text-muted)]">
+              <span>[ MODULE_A: LOADING ]</span>
+              <span className="text-[var(--ks-kinpaku-gold)]">INITIALIZING</span>
+            </div>
+          </section>
+
+          <div className="col-span-1 flex flex-col gap-4 sm:gap-6 md:col-span-4">
+            <section className="relative flex min-h-[210px] flex-col items-center justify-center border border-[var(--ks-rule)] bg-[var(--surface-0)] p-6 sm:min-h-[238px]">
+              <span className="absolute top-4 left-4 font-mono text-[8px] text-[var(--ks-text-faint)]">
+                STATUS_NODE
+              </span>
+
+              <div className="relative flex h-20 w-20 items-center justify-center opacity-60">
+                <svg
+                  className="absolute h-full w-full animate-[spin_10s_linear_infinite] motion-reduce:animate-none"
+                  viewBox="0 0 100 100"
+                  focusable="false"
+                >
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="48"
+                    fill="none"
+                    stroke="var(--ks-rule-strong)"
+                    strokeWidth="1"
+                    strokeDasharray="8 8"
                   />
-                </div>
+                </svg>
+                <svg
+                  className="absolute h-[70%] w-[70%] animate-[spin_6s_linear_infinite_reverse] motion-reduce:animate-none"
+                  viewBox="0 0 100 100"
+                  focusable="false"
+                >
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="48"
+                    fill="none"
+                    stroke="var(--ks-kinpaku-gold)"
+                    strokeWidth="1"
+                    strokeDasharray="30 15"
+                    className="opacity-50"
+                  />
+                </svg>
+                <StatusDot />
+              </div>
+            </section>
 
-                <div className="pt-8 space-y-4">
-                  <div className="h-[1px] bg-[var(--ks-rule)] w-full relative overflow-hidden">
+            <section className="flex min-h-[210px] flex-col justify-between border border-[var(--ks-rule)] bg-[var(--surface-0)] p-6 sm:min-h-[238px]">
+              <div>
+                <div className="mb-6 h-px w-12 bg-[var(--ks-rule-strong)]" />
+                <div className="space-y-4">
+                  {["w-1/2", "w-2/3", "w-1/3"].map((width) => (
                     <div
-                      className="absolute top-0 left-0 h-full w-24 bg-[var(--ks-verdigris-patina)] animate-progress"
-                      style={{ animationDelay: "400ms" }}
-                    />
-                  </div>
-                  <div className="h-[1px] bg-[var(--ks-rule)] w-3/4" />
-                  <div className="h-[1px] bg-[var(--ks-rule)] w-1/2" />
+                      key={width}
+                      className="flex items-center justify-between gap-4 border-b border-[var(--ks-rule)] pb-2"
+                    >
+                      <div className={cn("h-2 border border-[var(--ks-rule-strong)]", width)} />
+                      <div className="h-2 w-4 border border-[var(--ks-rule)]" />
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              <div className="relative z-10 font-mono text-[9px] text-[var(--ks-text-muted)] flex items-center justify-between mt-8">
-                <span>[ MODULE_A: LOADING ]</span>
-                <span className="text-[var(--ks-kinpaku-gold)]">78%</span>
-              </div>
-            </div>
-
-            {/* Secondary Column Skeletons */}
-            <div className="col-span-1 md:col-span-4 flex flex-col gap-6">
-              {/* Top Secondary Card (with integrated Aperture Rings) */}
-              <div className="border border-[var(--ks-rule)] bg-[var(--surface-0)] min-h-[238px] p-6 flex flex-col items-center justify-center relative">
-                <span className="absolute top-4 left-4 font-mono text-[8px] text-[var(--ks-text-faint)]">
-                  STATUS_NODE
+              <div className="mt-4 flex items-center gap-2">
+                <div className="h-2 w-2 animate-pulse bg-[var(--ks-rule-strong)] motion-reduce:animate-none" />
+                <span className="font-mono text-[8px] text-[var(--ks-text-muted)]">
+                  AWAITING_STREAM
                 </span>
-
-                {/* Embedded Aperture Ring representing a loading submodule */}
-                <div className="relative w-20 h-20 flex items-center justify-center opacity-60">
-                  <svg
-                    className="absolute w-full h-full animate-[spin_10s_linear_infinite]"
-                    viewBox="0 0 100 100"
-                  >
-                    <title>Outer loading tracker ring</title>
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="48"
-                      fill="none"
-                      stroke="var(--ks-rule-strong)"
-                      strokeWidth="1"
-                      strokeDasharray="8 8"
-                    />
-                  </svg>
-                  <svg
-                    className="absolute w-[70%] h-[70%] animate-[spin_6s_linear_infinite_reverse]"
-                    viewBox="0 0 100 100"
-                  >
-                    <title>Inner loading progress ring</title>
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="48"
-                      fill="none"
-                      stroke="var(--ks-kinpaku-gold)"
-                      strokeWidth="1"
-                      strokeDasharray="30 15"
-                      className="opacity-50"
-                    />
-                  </svg>
-                  <div className="w-1.5 h-1.5 bg-[var(--ks-verdigris-patina)] animate-ping rounded-full" />
-                </div>
               </div>
-
-              {/* Bottom Secondary Card */}
-              <div className="border border-[var(--ks-rule)] bg-[var(--surface-0)] min-h-[238px] p-6 flex flex-col justify-between">
-                <div>
-                  <div className="w-12 h-[1px] bg-[var(--ks-rule-strong)] mb-6" />
-                  <div className="space-y-4">
-                    {/* Hairline rows */}
-                    <div className="flex justify-between items-center border-b border-[var(--ks-rule)] pb-2">
-                      <div className="w-1/2 h-2 border border-[var(--ks-rule-strong)]" />
-                      <div className="w-4 h-2 border border-[var(--ks-rule)]" />
-                    </div>
-                    <div className="flex justify-between items-center border-b border-[var(--ks-rule)] pb-2">
-                      <div className="w-2/3 h-2 border border-[var(--ks-rule-strong)]" />
-                      <div className="w-4 h-2 border border-[var(--ks-rule)]" />
-                    </div>
-                    <div className="flex justify-between items-center border-b border-[var(--ks-rule)] pb-2">
-                      <div className="w-1/3 h-2 border border-[var(--ks-rule-strong)]" />
-                      <div className="w-4 h-2 border border-[var(--ks-rule)]" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 mt-4">
-                  <div className="w-2 h-2 bg-[var(--ks-rule-strong)] animate-pulse" />
-                  <span className="font-mono text-[8px] text-[var(--ks-text-muted)]">
-                    AWAITING_STREAM
-                  </span>
-                </div>
-              </div>
-            </div>
+            </section>
           </div>
         </div>
       </div>
-    );
-  }
-
-  return (
-    <div className={cn("flex flex-col gap-1", className)}>
-      <MessageSkeleton isUser />
-      <MessageSkeleton isUser={false} />
-      <MessageSkeleton isUser={false} />
-      <MessageSkeleton isUser />
-      <MessageSkeleton isUser={false} />
-    </div>
+    </LoadingRegion>
   );
+}
+
+export function LoadingState({
+  type = "messages",
+  className,
+  label = DEFAULT_LABELS[type],
+}: LoadingStateProps) {
+  switch (type) {
+    case "sidebar":
+      return <SidebarSkeleton className={className} label={label} />;
+    case "page":
+      return <PageSkeleton className={className} label={label} />;
+    case "admin-overview":
+      return <AdminOverviewSkeleton className={className} label={label} />;
+    case "admin-list":
+      return <AdminListSkeleton className={className} label={label} />;
+    case "admin-settings":
+      return <AdminSettingsSkeleton className={className} label={label} />;
+    case "messages":
+    default:
+      return <MessagesSkeleton className={className} label={label} />;
+  }
 }

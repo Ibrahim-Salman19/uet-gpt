@@ -1,0 +1,17 @@
+{
+  "baseline_type": "restored_compatibility",
+  "reviewer_gate": "SINGLE_HUMAN_REVIEWED",
+  "inter_annotator_agreement": "NOT_MEASURABLE",
+  "legacy_configuration_status": "unrunnable",
+  "behavioral_difference_reason": "unavoidable provider model shutdown",
+  "original_gemini_model": "gemini-2.0-flash",
+  "replacement_gemini_context_model": "gemini-3.5-flash-lite",
+  "replacement_gemini_vlm_model": "gemini-3.6-flash",
+  "original_groq_fast_model": "llama-3.1-8b-instant",
+  "replacement_groq_fast_model": "openai/gpt-oss-20b",
+  "original_groq_pro_model": "llama-3.3-70b-versatile",
+  "replacement_groq_pro_model": "openai/gpt-oss-120b",
+  "track_b_verification_record": "docs/audit/TRACK_B_VERIFICATION.md",
+  "track_c_verification_record": "docs/audit/TRACK_C_VERIFICATION.md",
+  "timestamp": "2026-07-28T16:42:00Z"
+}

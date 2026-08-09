@@ -1,0 +1,25 @@
+{
+  "_curated": true,
+  "_labelled_by": "scripts/eval/_label_vacuous.py (Deliverable 2 grounded labels)",
+  "expected": {
+    "canonical_host": "web.uettaxila.edu.pk",
+    "criticality": "standard",
+    "forbidden_links_contain": [
+      "logout",
+      "login"
+    ],
+    "forbidden_text_blocks": [],
+    "required_links_contain": [],
+    "required_text_blocks": [],
+    "resource_min_count": 0,
+    "title_contains": [
+      "Software Engineering"
+    ],
+    "title_not_contains": [
+      "Untitled",
+      "404"
+    ]
+  },
+  "family": "legacy-asp",
+  "fixture_id": "legacy-asp/betsoftwareengineering-a27271"
+}

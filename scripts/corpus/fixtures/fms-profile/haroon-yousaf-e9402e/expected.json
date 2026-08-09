@@ -1,0 +1,49 @@
+{
+  "_curated": true,
+  "_labelled_by": "scripts/eval/_label_vacuous.py (Deliverable 2 grounded labels)",
+  "expected": {
+    "canonical_host": "fms.uettaxila.edu.pk",
+    "criticality": "standard",
+    "forbidden_links_contain": [
+      "logout"
+    ],
+    "forbidden_text_blocks": [],
+    "required_links_contain": [],
+    "required_text_blocks": [
+      {
+        "text": "Dr. Muhammad Haroon Yousaf",
+        "why": "faculty name"
+      },
+      {
+        "text": "Designation",
+        "why": "profile-table field"
+      },
+      {
+        "text": "Department",
+        "why": "profile-table field"
+      },
+      {
+        "text": "Email",
+        "why": "profile-table field"
+      },
+      {
+        "text": "Professor",
+        "why": "designation value"
+      },
+      {
+        "text": "PhD",
+        "why": "highest qualification"
+      }
+    ],
+    "resource_min_count": 0,
+    "title_contains": [
+      "Haroon Yousaf"
+    ],
+    "title_not_contains": [
+      "Untitled",
+      "404"
+    ]
+  },
+  "family": "fms-profile",
+  "fixture_id": "fms-profile/haroon-yousaf-e9402e"
+}

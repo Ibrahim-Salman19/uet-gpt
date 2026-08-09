@@ -203,6 +203,31 @@ export default defineSchema({
     freshnessTier: v.optional(v.union(v.literal("high"), v.literal("medium"), v.literal("low"))),
     isStale: v.optional(v.boolean()),
     personType: v.optional(v.union(v.literal("faculty"), v.literal("staff"), v.literal("admin"))),
+    lifecycleStatus: v.optional(
+      v.union(
+        v.literal("active"),
+        v.literal("superseded"),
+        v.literal("withdrawn"),
+        v.literal("explicitly_stale"),
+        v.literal("quarantined"),
+        v.literal("deleted"),
+      ),
+    ),
+    freshnessState: v.optional(
+      v.union(v.literal("fresh"), v.literal("aged"), v.literal("unknown")),
+    ),
+    applicability: v.optional(
+      v.union(
+        v.literal("current"),
+        v.literal("historical"),
+        v.literal("session_specific"),
+        v.literal("expired"),
+        v.literal("timeless"),
+        v.literal("unknown"),
+      ),
+    ),
+    academicSession: v.optional(v.string()),
+    documentVersionId: v.optional(v.string()),
   })
     .index("by_url", ["url"])
     .index("by_entryId", ["entryId"])
@@ -216,7 +241,9 @@ export default defineSchema({
     .index("by_contentHash", ["contentHash"])
     .index("by_source_category", ["source", "category"])
     .index("by_personType", ["personType"])
-    .index("by_status_and_isStale", ["status", "isStale"]),
+    .index("by_status_and_isStale", ["status", "isStale"])
+    .index("by_lifecycleStatus", ["lifecycleStatus"])
+    .index("by_freshnessState", ["freshnessState"]),
 
   processedWebhooks: defineTable({
     jobId: v.string(),
@@ -358,6 +385,129 @@ export default defineSchema({
     }),
     lastUpdatedAt: v.number(),
   }).index("by_statsId", ["statsId"]),
+
+  sourceRegistry: defineTable({
+    sourceId: v.string(),
+    canonicalHost: v.string(),
+    allowedPathPrefixes: v.array(v.string()),
+    deniedPathPrefixes: v.array(v.string()),
+    authority: v.union(
+      v.literal("official_primary"),
+      v.literal("official_secondary"),
+      v.literal("official_archive"),
+    ),
+    sourceType: v.union(
+      v.literal("html"),
+      v.literal("pdf"),
+      v.literal("structured_feed"),
+      v.literal("verified_faq"),
+    ),
+    defaultFreshnessTier: v.union(v.literal("high"), v.literal("medium"), v.literal("low")),
+    crawlEnabled: v.boolean(),
+    liveVerificationEnabled: v.boolean(),
+    parserProfile: v.string(),
+    maximumResponseBytes: v.number(),
+    owner: v.string(),
+    approvedAt: v.number(),
+  })
+    .index("by_sourceId", ["sourceId"])
+    .index("by_canonicalHost", ["canonicalHost"]),
+
+  structuredFacts: defineTable({
+    type: v.union(
+      v.literal("fee_amount"),
+      v.literal("deadline"),
+      v.literal("merit_value"),
+      v.literal("eligibility_requirement"),
+      v.literal("entry_test_date"),
+      v.literal("exam_date"),
+      v.literal("schedule_time"),
+      v.literal("required_document"),
+    ),
+    subject: v.string(),
+    normalizedValue: v.string(),
+    unit: v.optional(v.string()),
+    session: v.optional(v.string()),
+    validFrom: v.optional(v.number()),
+    validUntil: v.optional(v.number()),
+    sourceVersionId: v.string(),
+    authority: v.string(),
+    freshnessState: v.union(v.literal("fresh"), v.literal("aged"), v.literal("unknown")),
+    applicability: v.union(
+      v.literal("current"),
+      v.literal("historical"),
+      v.literal("session_specific"),
+      v.literal("expired"),
+      v.literal("unknown"),
+    ),
+    createdAt: v.number(),
+  })
+    .index("by_type_and_subject", ["type", "subject"])
+    .index("by_session", ["session"])
+    .index("by_freshnessState", ["freshnessState"]),
+
+  evaluationSuites: defineTable({
+    suiteId: v.string(),
+    version: v.string(),
+    status: v.union(
+      v.literal("draft"),
+      v.literal("reviewed"),
+      v.literal("release_candidate"),
+      v.literal("production"),
+    ),
+    sourceSnapshot: v.string(),
+    questionCount: v.number(),
+    owner: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_suiteId", ["suiteId"])
+    .index("by_status", ["status"]),
+
+  agentReleases: defineTable({
+    releaseId: v.string(),
+    gitCommit: v.string(),
+    promptVersion: v.string(),
+    modelRegistryVersion: v.string(),
+    retrievalPolicyVersion: v.string(),
+    freshnessPolicyVersion: v.string(),
+    evidencePolicyVersion: v.string(),
+    evaluationSuiteVersion: v.string(),
+    corpusGeneration: v.string(),
+    offlineEvaluationResult: v.string(),
+    previewEvaluationResult: v.string(),
+    canaryEvaluationResult: v.optional(v.string()),
+    status: v.union(
+      v.literal("candidate"),
+      v.literal("preview"),
+      v.literal("canary"),
+      v.literal("production"),
+      v.literal("rolled_back"),
+      v.literal("retired"),
+    ),
+    approvedBy: v.optional(v.string()),
+    approvedAt: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index("by_releaseId", ["releaseId"])
+    .index("by_status", ["status"])
+    .index("by_gitCommit", ["gitCommit"]),
+
+  traceSpans: defineTable({
+    traceId: v.string(),
+    spanId: v.string(),
+    parentSpanId: v.optional(v.string()),
+    name: v.string(),
+    runState: v.optional(v.string()),
+    reasonCode: v.optional(v.string()),
+    startTime: v.number(),
+    endTime: v.optional(v.number()),
+    durationMs: v.optional(v.number()),
+    status: v.union(v.literal("ok"), v.literal("error")),
+    attributesJson: v.optional(v.string()),
+  })
+    .index("by_traceId", ["traceId"])
+    .index("by_name", ["name"])
+    .index("by_reasonCode", ["reasonCode"]),
 
   // Note: `threads` and `messages` tables are managed by @convex-dev/agent component.
   // Do not define them here to avoid table name conflicts with the component's internal tables.

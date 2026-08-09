@@ -140,78 +140,99 @@ class TestIngestPipeline(unittest.TestCase):
         self.assertEqual(len(virtual_url.split("/")[-1]), 16)
 
     def test_infer_freshness_tier(self):
-        """infer_freshness_tier should classify URLs correctly."""
+        """infer_freshness_tier should classify source+title pairs correctly."""
         from ingest_pdf import infer_freshness_tier
 
-        self.assertEqual(infer_freshness_tier("https://web.uettaxila.edu.pk/"), "high")
-        self.assertEqual(infer_freshness_tier("https://uettaxila.edu.pk/"), "high")
-        self.assertEqual(infer_freshness_tier("https://web.uettaxila.edu.pk/admissions"), "high")
-        self.assertEqual(infer_freshness_tier("https://web.uettaxila.edu.pk/academics"), "high")
-        self.assertEqual(infer_freshness_tier("https://web.uettaxila.edu.pk/department"), "medium")
-        self.assertEqual(infer_freshness_tier("https://web.uettaxila.edu.pk/faculty"), "medium")
-        self.assertEqual(infer_freshness_tier("https://web.uettaxila.edu.pk/contact"), "low")
-        self.assertEqual(infer_freshness_tier("Admissions Brochure 2025"), "high")
-        self.assertEqual(infer_freshness_tier("Department of CS Faculty"), "medium")
-        self.assertEqual(infer_freshness_tier("Campus Map"), "low")
+        self.assertEqual(infer_freshness_tier("https://web.uettaxila.edu.pk/", ""), "low")
+        self.assertEqual(infer_freshness_tier("https://uettaxila.edu.pk/", ""), "low")
+        self.assertEqual(infer_freshness_tier("https://web.uettaxila.edu.pk/admissions", ""), "high")
+        self.assertEqual(infer_freshness_tier("https://web.uettaxila.edu.pk/academics", ""), "high")
+        self.assertEqual(infer_freshness_tier("https://web.uettaxila.edu.pk/department", ""), "medium")
+        self.assertEqual(infer_freshness_tier("https://web.uettaxila.edu.pk/faculty", ""), "medium")
+        self.assertEqual(infer_freshness_tier("https://web.uettaxila.edu.pk/contact", ""), "low")
+        self.assertEqual(infer_freshness_tier("", "Admissions Brochure 2025"), "high")
+        self.assertEqual(infer_freshness_tier("", "Department of CS Faculty"), "medium")
+        self.assertEqual(infer_freshness_tier("", "Campus Map"), "low")
 
 
 class TestAssignTier(unittest.TestCase):
-    """Verify assign_tier matches infer_freshness_tier logic."""
+    """Verify crawler.assign_freshness_tier classifies URLs correctly."""
 
-    def test_assign_tier_equivalence(self):
-        """assign_tier and infer_freshness_tier should agree on URLs."""
-        from ingest_pdf import infer_freshness_tier
-        from crawler import assign_tier
+    def test_assign_tier_high(self):
+        """Root and high-value URLs should be classified high."""
+        from crawler import assign_freshness_tier
 
-        test_urls = [
-            ("https://web.uettaxila.edu.pk/", "high"),
-            ("https://uettaxila.edu.pk/", "high"),
-            ("https://web.uettaxila.edu.pk/admissions", "high"),
-            ("https://web.uettaxila.edu.pk/academics", "high"),
-            ("https://web.uettaxila.edu.pk/department/cs", "medium"),
-            ("https://web.uettaxila.edu.pk/faculty/professor", "medium"),
-            ("https://web.uettaxila.edu.pk/campus-life", "low"),
-            ("https://web.uettaxila.edu.pk/contact", "low"),
+        high_urls = [
+            "https://web.uettaxila.edu.pk/",
+            "https://uettaxila.edu.pk/",
+            "https://web.uettaxila.edu.pk/admissions",
+            "https://web.uettaxila.edu.pk/academics",
+            "https://web.uettaxila.edu.pk/scholarships",
         ]
-        for url, expected_tier in test_urls:
+        for url in high_urls:
             with self.subTest(url=url):
-                self.assertEqual(assign_tier(url), expected_tier)
-                self.assertEqual(infer_freshness_tier(url), expected_tier)
+                self.assertEqual(assign_freshness_tier(url), "high")
+
+    def test_assign_tier_medium(self):
+        """Department/faculty/program URLs should be classified medium."""
+        from crawler import assign_freshness_tier
+
+        medium_urls = [
+            "https://web.uettaxila.edu.pk/department/cs",
+            "https://web.uettaxila.edu.pk/faculty/professor",
+        ]
+        for url in medium_urls:
+            with self.subTest(url=url):
+                self.assertEqual(assign_freshness_tier(url), "medium")
+
+    def test_assign_tier_low(self):
+        """Low-value URLs should be classified low."""
+        from crawler import assign_freshness_tier
+
+        low_urls = [
+            "https://web.uettaxila.edu.pk/campus-life",
+            "https://web.uettaxila.edu.pk/contact",
+        ]
+        for url in low_urls:
+            with self.subTest(url=url):
+                self.assertEqual(assign_freshness_tier(url), "low")
 
 
-class TestSimHash(unittest.TestCase):
-    """Verify SimHash near-duplicate detection."""
+class TestContentDeduplicator(unittest.TestCase):
+    """Verify SimHash-style near-duplicate detection via ContentDeduplicator."""
 
     def test_simhash_exact_match(self):
-        from crawler import SimHash
-        sh = SimHash()
+        from crawler import ContentDeduplicator
+        deduper = ContentDeduplicator(threshold=6, min_words=3)
         text = "UET Taxila offers undergraduate and graduate programs in engineering."
-        self.assertFalse(sh.is_near_dup(text))
-        self.assertTrue(sh.is_near_dup(text))
+        fingerprint, _ = deduper.fingerprint(text)
+        self.assertEqual(deduper.hamming(fingerprint, fingerprint), 0)
 
     def test_simhash_near_match(self):
-        from crawler import SimHash
-        sh = SimHash()
-        a = "UET Taxila offers undergraduate and graduate programs in engineering and computer science."
-        b = "UET Taxila offers undergraduate and graduate programs in engineering as well as computer science."
-        self.assertFalse(sh.is_near_dup(a))
-        self.assertTrue(sh.is_near_dup(b))
+        from crawler import ContentDeduplicator
+        deduper = ContentDeduplicator(threshold=6, min_words=3)
+        a = "UET Taxila offers undergraduate and graduate programs in engineering computer science mathematics physics chemistry and humanities with modern laboratories"
+        b = "UET Taxila offers undergraduate and graduate programs in engineering computer science mathematics physics chemistry and humanities with modern lab"
+        fa, _ = deduper.fingerprint(a)
+        fb, _ = deduper.fingerprint(b)
+        self.assertLessEqual(deduper.hamming(fa, fb), 6)
 
     def test_simhash_different(self):
-        from crawler import SimHash
-        sh = SimHash()
-        a = "UET Taxila offers undergraduate programs."
-        b = "Admission deadline for Fall 2025 is August 15."
-        self.assertFalse(sh.is_near_dup(a))
-        self.assertFalse(sh.is_near_dup(b))
+        from crawler import ContentDeduplicator
+        deduper = ContentDeduplicator(threshold=6, min_words=3)
+        a = "UET Taxila offers undergraduate and graduate programs in engineering computer science mathematics physics chemistry and humanities with modern laboratories"
+        c = "Admission deadline for Fall 2025 is August 15 with merit lists published online."
+        fa, _ = deduper.fingerprint(a)
+        fc, _ = deduper.fingerprint(c)
+        self.assertGreater(deduper.hamming(fa, fc), 6)
 
 
 class TestUrlPriority(unittest.TestCase):
-    """Verify URL priority scoring."""
+    """Verify URL priority scoring (min-heap order: smaller tuple = higher priority)."""
 
     def test_url_priority_high(self):
         from crawler import url_priority
-        self.assertGreater(
+        self.assertLess(
             url_priority("https://web.uettaxila.edu.pk/admissions", 0),
             url_priority("https://web.uettaxila.edu.pk/campus-life", 0),
         )
@@ -220,22 +241,71 @@ class TestUrlPriority(unittest.TestCase):
         from crawler import url_priority
         root_score = url_priority("https://web.uettaxila.edu.pk/", 0)
         regular_score = url_priority("https://web.uettaxila.edu.pk/campus-life", 0)
-        self.assertGreater(root_score, regular_score)
+        self.assertLess(root_score, regular_score)
 
 
 class TestRobotsTxtCache(unittest.TestCase):
-    """Verify robots.txt parser cache."""
+    """Verify robots.txt retrieval and per-origin caching via RobotsPolicy."""
+
+    def setUp(self):
+        import asyncio
+        import crawler as c
+
+        self.c = c
+
+        class FakeHttp:
+            def __init__(self):
+                self.calls = 0
+
+            async def get(self, url, **kwargs):
+                self.calls += 1
+                return c.HttpResult(
+                    requested_url=url,
+                    final_url=url,
+                    status=200,
+                    headers={"cache-control": "max-age=3600"},
+                    body=b"User-agent: *\nDisallow: /files/\n",
+                )
+
+        self.tmp = tempfile.TemporaryDirectory()
+        root = Path(self.tmp.name)
+        (root / "scripts").mkdir()
+        (root / "scripts" / "crawl_config.json").write_text("{}", encoding="utf-8")
+        args = c.CliArgs(
+            0, False, "scripts/crawl_config.json", str(root), True,
+            True, "INFO", True,
+        )
+        settings = c.load_settings(args, Path("/repo/scripts/crawler.py"))
+        policy = c.UrlPolicy(settings)
+        self.fake_http = FakeHttp()
+        self.policy = c.RobotsPolicy(settings, policy, self.fake_http)
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.loop)
+
+    def tearDown(self):
+        self.loop.close()
+        self.tmp.cleanup()
 
     def test_robot_parser_creation(self):
-        from crawler import _get_robot_parser
-        result = _get_robot_parser("web.uettaxila.edu.pk")
-        self.assertIsNotNone(result)
+        """RobotsPolicy.allowed should honor robots.txt rules."""
+        allowed, _ = self.loop.run_until_complete(
+            self.policy.allowed("https://web.uettaxila.edu.pk/admissions")
+        )
+        self.assertTrue(allowed)
+        denied, _ = self.loop.run_until_complete(
+            self.policy.allowed("https://web.uettaxila.edu.pk/files/x.pdf")
+        )
+        self.assertFalse(denied)
 
     def test_robot_parser_cached(self):
-        from crawler import _get_robot_parser, _robot_parsers
-        _robot_parsers.clear()
-        _get_robot_parser("web.uettaxila.edu.pk")
-        self.assertIn("web.uettaxila.edu.pk", _robot_parsers)
+        """robots.txt should be fetched once and cached per origin."""
+        self.loop.run_until_complete(
+            self.policy.allowed("https://web.uettaxila.edu.pk/admissions")
+        )
+        self.loop.run_until_complete(
+            self.policy.allowed("https://web.uettaxila.edu.pk/campus-life")
+        )
+        self.assertEqual(self.fake_http.calls, 1)
 
 
 if __name__ == "__main__":

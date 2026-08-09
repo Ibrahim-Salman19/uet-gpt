@@ -1,0 +1,18 @@
+{
+  "headers": {
+    "alt-svc": "h3=\":443\"; ma=86400",
+    "cache-control": "private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0",
+    "cf-ray": "a24d0eafbb20f894-SIN",
+    "content-length": "7270",
+    "content-type": "text/html; charset=UTF-8",
+    "date": "Sun, 02 Aug 2026 12:24:23 GMT",
+    "expires": "Thu, 01 Jan 1970 00:00:01 GMT",
+    "referrer-policy": "same-origin",
+    "retry-after": "120",
+    "server": "cloudflare",
+    "server-timing": "cfEdge;dur=19455,cfOrigin;dur=0",
+    "set-cookie": "cf_use_ob=0; Expires=Sun, 02 Aug 2026 12:24:53 GMT",
+    "x-frame-options": "SAMEORIGIN"
+  },
+  "status": 522
+}

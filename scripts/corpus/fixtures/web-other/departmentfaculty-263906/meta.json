@@ -1,0 +1,12 @@
+{
+  "body_sha256": "e9e8bcac0c2046e5f6e45c8e2a568b9bcc827a34b367150e7ff5c21a21fa1ef3",
+  "body_size": 65946,
+  "content_type": "text/html; charset=utf-8",
+  "elapsed_ms": 1695,
+  "fetched_at": "2026-08-03T17:58:38+00:00",
+  "final_url": "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=2",
+  "redirect_chain": [],
+  "remote_ip": "104.21.50.7,172.67.198.179,2606:4700:3031::6815:3207,2606:4700:3032::ac43:c6b3",
+  "requested_url": "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=2",
+  "status": 200
+}

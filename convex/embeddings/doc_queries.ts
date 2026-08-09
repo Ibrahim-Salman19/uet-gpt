@@ -9,6 +9,9 @@ type DocQueryResult = {
   category: string;
   crawledAt?: number;
   freshnessTier?: string;
+  isStale?: boolean;
+  status?: string;
+  lastVerifiedAt?: number;
   parentText?: string;
   headingPath?: string[];
   contextualizedText?: string;
@@ -39,6 +42,9 @@ export const getDocumentByEntryId = internalQuery({
       category: v.string(),
       crawledAt: v.optional(v.number()),
       freshnessTier: v.optional(v.string()),
+      isStale: v.optional(v.boolean()),
+      status: v.optional(v.string()),
+      lastVerifiedAt: v.optional(v.number()),
       parentText: v.optional(v.string()),
       headingPath: v.optional(v.array(v.string())),
       contextualizedText: v.optional(v.string()),
@@ -59,10 +65,9 @@ export const getDocumentByEntryId = internalQuery({
           category: doc.category,
           crawledAt: doc.crawledAt ?? undefined,
           freshnessTier: doc.freshnessTier ?? undefined,
-          // WS-1: hydrate parentText from the normalized chunkParents table when a
-          // parentId reference is present (new rows); fall back to the legacy
-          // per-child parentText field for pre-migration rows. Either way
-          // pickBestContent sees a parentText string when one exists.
+          isStale: doc.isStale ?? undefined,
+          status: doc.status ?? undefined,
+          lastVerifiedAt: (doc.metadata as { lastVerifiedAt?: number } | undefined)?.lastVerifiedAt,
           parentText: await resolveParentText(ctx, chunk),
           headingPath: chunk.headingPath,
           contextualizedText: chunk.contextualizedText,
@@ -83,6 +88,9 @@ export const getDocumentByEntryId = internalQuery({
       category: doc.category,
       crawledAt: doc.crawledAt ?? undefined,
       freshnessTier: doc.freshnessTier ?? undefined,
+      isStale: doc.isStale ?? undefined,
+      status: doc.status ?? undefined,
+      lastVerifiedAt: (doc.metadata as { lastVerifiedAt?: number } | undefined)?.lastVerifiedAt,
       parentText: undefined,
       headingPath: undefined,
       contextualizedText: undefined,
@@ -103,6 +111,9 @@ export const getDocumentsByEntryIds = internalQuery({
           category: v.string(),
           crawledAt: v.optional(v.number()),
           freshnessTier: v.optional(v.string()),
+          isStale: v.optional(v.boolean()),
+          status: v.optional(v.string()),
+          lastVerifiedAt: v.optional(v.number()),
           parentText: v.optional(v.string()),
           headingPath: v.optional(v.array(v.string())),
           contextualizedText: v.optional(v.string()),
@@ -179,8 +190,10 @@ export const getDocumentsByEntryIds = internalQuery({
               category: doc.category,
               crawledAt: doc.crawledAt ?? undefined,
               freshnessTier: doc.freshnessTier ?? undefined,
-              // WS-1: prefer normalized chunkParents text, fall back to legacy
-              // per-child parentText for pre-migration rows.
+              isStale: doc.isStale ?? undefined,
+              status: doc.status ?? undefined,
+              lastVerifiedAt: (doc.metadata as { lastVerifiedAt?: number } | undefined)
+                ?.lastVerifiedAt,
               parentText: chunk.parentId ? parentsById.get(chunk.parentId)?.text : chunk.parentText,
               headingPath: chunk.headingPath,
               contextualizedText: chunk.contextualizedText,
@@ -199,6 +212,10 @@ export const getDocumentsByEntryIds = internalQuery({
             category: fallbackDoc.category,
             crawledAt: fallbackDoc.crawledAt ?? undefined,
             freshnessTier: fallbackDoc.freshnessTier ?? undefined,
+            isStale: fallbackDoc.isStale ?? undefined,
+            status: fallbackDoc.status ?? undefined,
+            lastVerifiedAt: (fallbackDoc.metadata as { lastVerifiedAt?: number } | undefined)
+              ?.lastVerifiedAt,
             parentText: undefined,
             headingPath: undefined,
             contextualizedText: undefined,

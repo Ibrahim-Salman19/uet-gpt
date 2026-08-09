@@ -1,0 +1,248 @@
+
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>TimeTables</title>
+    <style type="text/css">
+        body {
+            font-family: Verdana, sans-serif, Arial, Helvetica;
+            font-size: 13px;
+        }
+        ul {
+            line-height: 1.8em;
+        }
+        .detailstd a, .detailstd a:link {
+            font-size: 13px;
+            font-weight: bold;
+        }
+        /* 
+        .timetbl {
+            width: 100%;
+            border: none;
+        }
+
+            .timetbl td {
+                border: none;
+            }
+
+                .timetbl td a, .timetbl td a:link {
+                    padding: 10px;
+                    text-decoration: none;
+                    outline: none;
+                    color: #54a6de;
+                }
+
+        .onerow {
+            width: 100%;
+            clear: both;
+            background: linear-gradient(to right,lavender, lightgoldenrodyellow);
+            border-bottom: solid 1px #002163;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .detailstd {
+            width: 78%;
+            padding: 2%;
+            vertical-align: top;
+            text-align: left;
+            float: left;
+            display: inline;
+            font-size: 1.3em;
+        }
+
+            .detailstd a, .detailstd a:link {
+                color: #002163;
+                font-weight: bold;
+            }
+
+        .pagetitle {
+            text-align: center;
+            background-color: lightblue;
+            padding: 1em;
+            color: white;
+            font-size: 1.5em;
+        }*/
+        a, a:visited {
+            text-decoration: none;
+            outline: none;
+            color: #54a6de;
+        }
+    </style>
+</head>
+<body>
+    <div> 
+        <font color="#333333" size="3">
+            <strong>
+                <br>
+                TEACHING SCHEDULE / TIME TABLE<br>
+                <br>
+            </strong>
+        </font> 
+        <table class="timetbl" style="display: none">
+                <tr>
+                    <td>
+                        <div class="onerow">
+                            <div class="detailstd">
+                                <a target="_blank" href="/Downloads/TimeTables/CPED/CPED-Spring-2026.xlsx">Spring 2026</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="onerow">
+                            <div class="detailstd">
+                                <a target="_blank" href="/Downloads/TimeTables/CPED/CPED-Fall-2025.pdf">Fall 2025</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="onerow">
+                            <div class="detailstd">
+                                <a target="_blank" href="/Downloads/TimeTables/CPED/CPED-Fall-2024.pdf">Fall 2024</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="onerow">
+                            <div class="detailstd">
+                                <a target="_blank" href="/Downloads/TimeTables/CPED/CPED-Spring-2024.pdf">Spring 2024</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="onerow">
+                            <div class="detailstd">
+                                <a target="_blank" href="/Downloads/TimeTables/CPED/CPED-Fall-2023.xlsx">Fall 2023</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="onerow">
+                            <div class="detailstd">
+                                <a target="_blank" href="/Downloads/TimeTables/CPED/CPED-Fall-2022-Updated-19-10-2022.xlsx">Fall 2022</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="onerow">
+                            <div class="detailstd">
+                                <a target="_blank" href="/Downloads/TimeTables/CPED/Fall-2021-Updated.xlsx">Fall 2021</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="onerow">
+                            <div class="detailstd">
+                                <a target="_blank" href="/Downloads/TimeTables/CPED/CPED-Spring-2021.xlsx">Spring 2021</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="onerow">
+                            <div class="detailstd">
+                                <a target="_blank" href="/Downloads/TimeTables/CPED/CPED-Fall2020-Updated.xlsx">Fall 2020</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="onerow">
+                            <div class="detailstd">
+                                <a target="_blank" href="/Downloads/TimeTables/CPED/Spring-2020-updated.xlsx">Spring 2020</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="onerow">
+                            <div class="detailstd">
+                                <a target="_blank" href="/Downloads/TimeTables/CPED/Fall-2019.xlsx">Fall 2019</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="onerow">
+                            <div class="detailstd">
+                                <a target="_blank" href="/Downloads/TimeTables/CPED/Time_Table_CPED_Spring_2019.xlsx">Spring 2019</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="onerow">
+                            <div class="detailstd">
+                                <a target="_blank" href="/Downloads/TimeTables/CPED/UGS_Time_Table_CPED_wef_03_09_2018.xlsx">Fall 2018</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+        </table>
+        <ul style="padding-left: 10px">
+                <li class="detailstd">
+                    <a target="_blank" href="/Downloads/TimeTables/CPED/CPED-Spring-2026.xlsx?random=639213947385035669">Spring 2026</a>
+                </li>
+                <li class="detailstd">
+                    <a target="_blank" href="/Downloads/TimeTables/CPED/CPED-Fall-2025.pdf?random=639213947385035669">Fall 2025</a>
+                </li>
+                <li class="detailstd">
+                    <a target="_blank" href="/Downloads/TimeTables/CPED/CPED-Fall-2024.pdf?random=639213947385035669">Fall 2024</a>
+                </li>
+                <li class="detailstd">
+                    <a target="_blank" href="/Downloads/TimeTables/CPED/CPED-Spring-2024.pdf?random=639213947385035669">Spring 2024</a>
+                </li>
+                <li class="detailstd">
+                    <a target="_blank" href="/Downloads/TimeTables/CPED/CPED-Fall-2023.xlsx?random=639213947385035669">Fall 2023</a>
+                </li>
+                <li class="detailstd">
+                    <a target="_blank" href="/Downloads/TimeTables/CPED/CPED-Fall-2022-Updated-19-10-2022.xlsx?random=639213947385035669">Fall 2022</a>
+                </li>
+                <li class="detailstd">
+                    <a target="_blank" href="/Downloads/TimeTables/CPED/Fall-2021-Updated.xlsx?random=639213947385035669">Fall 2021</a>
+                </li>
+                <li class="detailstd">
+                    <a target="_blank" href="/Downloads/TimeTables/CPED/CPED-Spring-2021.xlsx?random=639213947385035669">Spring 2021</a>
+                </li>
+                <li class="detailstd">
+                    <a target="_blank" href="/Downloads/TimeTables/CPED/CPED-Fall2020-Updated.xlsx?random=639213947385035669">Fall 2020</a>
+                </li>
+                <li class="detailstd">
+                    <a target="_blank" href="/Downloads/TimeTables/CPED/Spring-2020-updated.xlsx?random=639213947385035669">Spring 2020</a>
+                </li>
+                <li class="detailstd">
+                    <a target="_blank" href="/Downloads/TimeTables/CPED/Fall-2019.xlsx?random=639213947385035669">Fall 2019</a>
+                </li>
+                <li class="detailstd">
+                    <a target="_blank" href="/Downloads/TimeTables/CPED/Time_Table_CPED_Spring_2019.xlsx?random=639213947385035669">Spring 2019</a>
+                </li>
+                <li class="detailstd">
+                    <a target="_blank" href="/Downloads/TimeTables/CPED/UGS_Time_Table_CPED_wef_03_09_2018.xlsx?random=639213947385035669">Fall 2018</a>
+                </li>
+        </ul>
+    </div>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25736b43e3149d1',t:'MTc4NTc3OTk0MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"d8564f6d5b4e410eb202d13f98326329","r":1}' crossorigin="anonymous"></script>
+</body>
+</html>

@@ -7,6 +7,9 @@ import { toast } from "sonner";
 import { useUserData } from "@/hooks/use-user-data";
 
 export type AccentTheme = "indigo" | "violet" | "sky" | "amber" | "navy";
+export type FontSize = "small" | "medium" | "large";
+export type ModelPreference = "llama-3.1-8b" | "llama-4-scout";
+export type ToggleSettingKey = "webgl" | "glow" | "anims" | "sounds" | "typingAnim" | "typingSound";
 
 interface PinnedHighlight {
   id: string;
@@ -24,11 +27,11 @@ interface PreferencesContextType {
   typingAnimEnabled: boolean;
   typingSoundEnabled: boolean;
   pinnedHighlights: PinnedHighlight[];
-  fontSize: "small" | "medium" | "large";
-  modelPreference: "llama-3.1-8b" | "llama-4-scout";
-  updateModelPreference: (model: "llama-3.1-8b" | "llama-4-scout") => Promise<void>;
+  fontSize: FontSize;
+  modelPreference: ModelPreference;
+  preferencesHydrated: boolean;
+  updateModelPreference: (model: ModelPreference) => Promise<void>;
 
-  // Modals
   commandPaletteOpen: boolean;
   setCommandPaletteOpen: (open: boolean) => void;
   diagnosticsOpen: boolean;
@@ -38,21 +41,17 @@ interface PreferencesContextType {
   settingsOpen: boolean;
   setSettingsOpen: (open: boolean) => void;
 
-  // Actions
   setAccentTheme: (theme: AccentTheme) => void;
-  toggleSetting: (
-    key: "webgl" | "glow" | "anims" | "sounds" | "typingAnim" | "typingSound",
-  ) => void;
+  setFontSize: (size: FontSize) => void;
+  toggleSetting: (key: ToggleSettingKey) => void;
   resetPreferences: () => void;
   addPin: (query: string, content: string) => void;
   removePin: (id: string) => void;
-  isPinned: (query: string) => boolean;
+  isPinned: (content: string) => boolean;
 
-  // Voice transcript callback - set by active ChatInput to receive voice text
   voiceTranscriptCallback: ((text: string) => void) | null;
   setVoiceTranscriptCallback: (fn: ((text: string) => void) | null) => void;
 
-  // Audio Synth
   playTypingSound: () => void;
   playTapSound: () => void;
   playSweepSound: () => void;
@@ -61,7 +60,31 @@ interface PreferencesContextType {
 
 const PreferencesContext = React.createContext<PreferencesContextType | null>(null);
 
-const accentThemes: Record<AccentTheme, Record<string, string>> = {
+const STORAGE = {
+  accent: "pref-accent-theme",
+  fontSize: "pref-font-size",
+  webgl: "pref-webgl",
+  glow: "pref-glow",
+  anims: "pref-anims",
+  sounds: "pref-sounds",
+  typingAnim: "pref-typing-anim",
+  typingSound: "pref-typing-sound",
+  pins: "pref-pinned-highlights",
+} as const;
+
+const DEFAULTS = {
+  accentTheme: "indigo" as AccentTheme,
+  fontSize: "medium" as FontSize,
+  modelPreference: "llama-3.1-8b" as ModelPreference,
+  webglEnabled: true,
+  glowEnabled: true,
+  animsEnabled: true,
+  soundsEnabled: false,
+  typingAnimEnabled: true,
+  typingSoundEnabled: false,
+};
+
+export const accentThemes: Record<AccentTheme, Record<string, string>> = {
   indigo: {
     "--accent": "oklch(0.63 0.18 265)",
     "--accent-hover": "oklch(0.56 0.21 265)",
@@ -115,7 +138,7 @@ const accentThemes: Record<AccentTheme, Record<string, string>> = {
     "--accent-950": "#451a03",
   },
   navy: {
-    "--accent": "oklch(0.68 0.14 75)", // Golden accent theme for UET Identity
+    "--accent": "oklch(0.68 0.14 75)",
     "--accent-hover": "oklch(0.72 0.14 75)",
     "--accent-active": "oklch(0.64 0.13 75)",
     "--accent-fg": "oklch(0.2 0.02 265)",
@@ -129,127 +152,137 @@ const accentThemes: Record<AccentTheme, Record<string, string>> = {
   },
 };
 
-function safeSetItem(key: string, value: string): void {
+const MAX_PINNED_HIGHLIGHTS = 200;
+const MAX_PIN_QUERY_LENGTH = 4_000;
+const MAX_PIN_CONTENT_LENGTH = 24_000;
+
+function safeGetItem(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function safeSetItem(key: string, value: string): boolean {
   try {
     localStorage.setItem(key, value);
-  } catch (err) {
-    // Private mode / quota exceeded - persistence is best-effort.
-    console.error(`Failed to persist "${key}":`, err);
+    return true;
+  } catch (error) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn(`Could not persist preference ${key}`, error);
+    }
+    return false;
   }
 }
 
-function loadBooleanInitial(key: string, defaultVal: boolean): boolean {
-  try {
-    const val = localStorage.getItem(key);
-    return val !== null ? val === "true" : defaultVal;
-  } catch {
-    return defaultVal;
-  }
+function readBoolean(key: string, fallback: boolean): boolean {
+  const stored = safeGetItem(key);
+  return stored === "true" ? true : stored === "false" ? false : fallback;
 }
 
-function loadStringInitial(key: string, defaultVal: string): string {
-  try {
-    return localStorage.getItem(key) ?? defaultVal;
-  } catch {
-    return defaultVal;
-  }
+function isAccentTheme(value: unknown): value is AccentTheme {
+  return typeof value === "string" && Object.hasOwn(accentThemes, value);
 }
 
-function loadAccentThemeInitial(): AccentTheme {
-  const stored = loadStringInitial("pref-accent-theme", "indigo") as AccentTheme;
-  return stored && accentThemes[stored] ? stored : "indigo";
+function isFontSize(value: unknown): value is FontSize {
+  return value === "small" || value === "medium" || value === "large";
 }
 
-const MAX_PINNED_HIGHLIGHTS = 200;
+function isModelPreference(value: unknown): value is ModelPreference {
+  return value === "llama-3.1-8b" || value === "llama-4-scout";
+}
 
 function isValidPin(value: unknown): value is PinnedHighlight {
   if (typeof value !== "object" || value === null) return false;
-  const v = value as Record<string, unknown>;
+  const pin = value as Record<string, unknown>;
   return (
-    typeof v.id === "string" &&
-    typeof v.query === "string" &&
-    typeof v.content === "string" &&
-    typeof v.createdAt === "number"
+    typeof pin.id === "string" &&
+    typeof pin.query === "string" &&
+    typeof pin.content === "string" &&
+    typeof pin.createdAt === "number" &&
+    Number.isFinite(pin.createdAt)
   );
 }
 
-function loadPinsInitial(): PinnedHighlight[] {
+function loadPins(): PinnedHighlight[] {
+  const stored = safeGetItem(STORAGE.pins);
+  if (!stored) return [];
   try {
-    const stored = localStorage.getItem("pref-pinned-highlights");
-    if (!stored) return [];
-    const parsed = JSON.parse(stored);
-    if (!Array.isArray(parsed)) return [];
-    // Validate each item so corrupted/legacy data can't crash consumers that
-    // assume `.content` exists (e.g. isPinned), and cap the array length.
-    return parsed.filter(isValidPin).slice(-MAX_PINNED_HIGHLIGHTS);
+    const parsed: unknown = JSON.parse(stored);
+    return Array.isArray(parsed) ? parsed.filter(isValidPin).slice(-MAX_PINNED_HIGHLIGHTS) : [];
   } catch {
     return [];
   }
 }
 
+function persistPins(pins: PinnedHighlight[]): boolean {
+  return safeSetItem(STORAGE.pins, JSON.stringify(pins));
+}
+
+function normalizePinContent(value: string): string {
+  return value.trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+let fallbackPinSequence = 0;
+
 function generatePinId(): string {
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
-    return crypto.randomUUID();
+  if (typeof crypto !== "undefined") {
+    if (typeof crypto.randomUUID === "function") return crypto.randomUUID();
+    if (typeof crypto.getRandomValues === "function") {
+      const values = crypto.getRandomValues(new Uint32Array(2));
+      return `pin_${values[0]!.toString(36)}_${values[1]!.toString(36)}`;
+    }
   }
-  return `pin_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
-}
-
-function savePins(pins: PinnedHighlight[]): void {
-  try {
-    localStorage.setItem("pref-pinned-highlights", JSON.stringify(pins));
-  } catch (err) {
-    // localStorage can throw in private mode or when the quota is exceeded.
-    console.error("Failed to persist pinned highlights:", err);
-  }
-}
-
-function isValidFontSize(v: string | null): v is "small" | "medium" | "large" {
-  return v === "small" || v === "medium" || v === "large";
-}
-
-function loadFontSizeInitial(): "small" | "medium" | "large" {
-  try {
-    const stored = localStorage.getItem("pref-font-size");
-    if (isValidFontSize(stored)) return stored;
-    return "medium";
-  } catch {
-    return "medium";
-  }
+  fallbackPinSequence += 1;
+  return `pin_${Date.now().toString(36)}_${fallbackPinSequence.toString(36)}`;
 }
 
 function usePreferencesState() {
-  const [fontSize, setFontSizeState] = React.useState<"small" | "medium" | "large">(
-    loadFontSizeInitial,
+  const [fontSize, setFontSize] = React.useState<FontSize>(DEFAULTS.fontSize);
+  const [accentTheme, setAccentTheme] = React.useState<AccentTheme>(DEFAULTS.accentTheme);
+  const [modelPreference, setModelPreference] = React.useState<ModelPreference>(
+    DEFAULTS.modelPreference,
   );
-  const [accentTheme, setAccentThemeState] = React.useState<AccentTheme>(loadAccentThemeInitial);
-  const [webglEnabled, setWebglEnabled] = React.useState(() =>
-    loadBooleanInitial("pref-webgl", true),
-  );
-  const [glowEnabled, setGlowEnabled] = React.useState(() => loadBooleanInitial("pref-glow", true));
-  const [animsEnabled, setAnimsEnabled] = React.useState(() =>
-    loadBooleanInitial("pref-anims", true),
-  );
-  const [soundsEnabled, setSoundsEnabled] = React.useState(() =>
-    loadBooleanInitial("pref-sounds", true),
-  );
-  const [typingAnimEnabled, setTypingAnimEnabled] = React.useState(() =>
-    loadBooleanInitial("pref-typing-anim", true),
-  );
-  const [typingSoundEnabled, setTypingSoundEnabled] = React.useState(() =>
-    loadBooleanInitial("pref-typing-sound", true),
-  );
-  const [pinnedHighlights, setPinnedHighlights] =
-    React.useState<PinnedHighlight[]>(loadPinsInitial);
+  const [webglEnabled, setWebglEnabled] = React.useState(DEFAULTS.webglEnabled);
+  const [glowEnabled, setGlowEnabled] = React.useState(DEFAULTS.glowEnabled);
+  const [animsEnabled, setAnimsEnabled] = React.useState(DEFAULTS.animsEnabled);
+  const [soundsEnabled, setSoundsEnabled] = React.useState(DEFAULTS.soundsEnabled);
+  const [typingAnimEnabled, setTypingAnimEnabled] = React.useState(DEFAULTS.typingAnimEnabled);
+  const [typingSoundEnabled, setTypingSoundEnabled] = React.useState(DEFAULTS.typingSoundEnabled);
+  const [pinnedHighlights, setPinnedHighlights] = React.useState<PinnedHighlight[]>([]);
+  const [hydrated, setHydrated] = React.useState(false);
+
   const [commandPaletteOpen, setCommandPaletteOpen] = React.useState(false);
   const [diagnosticsOpen, setDiagnosticsOpen] = React.useState(false);
   const [voiceInputOpen, setVoiceInputOpen] = React.useState(false);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
 
+  // Read local storage only after hydration. This keeps the server and first
+  // client render deterministic while still restoring device-local settings.
+  React.useEffect(() => {
+    const storedAccent = safeGetItem(STORAGE.accent);
+    const storedFont = safeGetItem(STORAGE.fontSize);
+    if (isAccentTheme(storedAccent)) setAccentTheme(storedAccent);
+    if (isFontSize(storedFont)) setFontSize(storedFont);
+
+    setWebglEnabled(readBoolean(STORAGE.webgl, DEFAULTS.webglEnabled));
+    setGlowEnabled(readBoolean(STORAGE.glow, DEFAULTS.glowEnabled));
+    setAnimsEnabled(readBoolean(STORAGE.anims, DEFAULTS.animsEnabled));
+    setSoundsEnabled(readBoolean(STORAGE.sounds, DEFAULTS.soundsEnabled));
+    setTypingAnimEnabled(readBoolean(STORAGE.typingAnim, DEFAULTS.typingAnimEnabled));
+    setTypingSoundEnabled(readBoolean(STORAGE.typingSound, DEFAULTS.typingSoundEnabled));
+    setPinnedHighlights(loadPins());
+    setHydrated(true);
+  }, []);
+
   return {
     fontSize,
-    setFontSizeState,
+    setFontSize,
     accentTheme,
-    setAccentThemeState,
+    setAccentTheme,
+    modelPreference,
+    setModelPreference,
     webglEnabled,
     setWebglEnabled,
     glowEnabled,
@@ -264,6 +297,7 @@ function usePreferencesState() {
     setTypingSoundEnabled,
     pinnedHighlights,
     setPinnedHighlights,
+    hydrated,
     commandPaletteOpen,
     setCommandPaletteOpen,
     diagnosticsOpen,
@@ -275,262 +309,417 @@ function usePreferencesState() {
   };
 }
 
-function syncPrefFromConvex<T>(
-  val: T | undefined,
-  setter: (v: T) => void,
-  storageKey: string,
-): void {
-  if (val == null) return;
-  setter(val);
-  safeSetItem(storageKey, String(val));
-}
-
-interface ConvexUserPreferences {
-  preferences?: {
-    fontSize?: string | null;
-    theme?: string | null;
-  } | null;
-}
-
-function useConvexPreferenceSync(
-  userData: ConvexUserPreferences | null | undefined,
-  setFontSizeState: (v: "small" | "medium" | "large") => void,
-  setAccentThemeState: (v: AccentTheme) => void,
-) {
-  const fontSize = userData?.preferences?.fontSize;
-  const theme = userData?.preferences?.theme;
-
-  React.useEffect(() => {
-    syncPrefFromConvex(
-      typeof fontSize === "string" && isValidFontSize(fontSize) ? fontSize : undefined,
-      setFontSizeState,
-      "pref-font-size",
-    );
-    // Only apply a server-provided accent theme if it is a known key; otherwise
-    // ignore it rather than trusting arbitrary stored data as a valid theme.
-    const validTheme =
-      typeof theme === "string" && theme in accentThemes ? (theme as AccentTheme) : undefined;
-    syncPrefFromConvex(validTheme, setAccentThemeState, "pref-accent-theme");
-  }, [fontSize, theme, setFontSizeState, setAccentThemeState]);
-}
-
-function useFontSizeEffect(fontSize: "small" | "medium" | "large") {
-  React.useEffect(() => {
-    const root = document.documentElement;
-    const sizeMap = { small: "0.875rem", medium: "1.025rem", large: "1.15rem" };
-    root.style.setProperty("--chat-font-size", sizeMap[fontSize]);
-  }, [fontSize]);
-}
-
-function useThemeEffect(accentTheme: AccentTheme) {
-  React.useEffect(() => {
-    const root = document.documentElement;
-    const themeVars = accentThemes[accentTheme];
-    if (themeVars) {
-      Object.entries(themeVars).forEach(([key, val]) => {
-        root.style.setProperty(key, val);
-      });
-    }
-    safeSetItem("pref-accent-theme", accentTheme);
-  }, [accentTheme]);
-}
-
-function usePreferencePersistence({
-  webglEnabled,
-  glowEnabled,
-  animsEnabled,
-  soundsEnabled,
-  typingAnimEnabled,
-  typingSoundEnabled,
-}: {
-  webglEnabled: boolean;
-  glowEnabled: boolean;
-  animsEnabled: boolean;
-  soundsEnabled: boolean;
-  typingAnimEnabled: boolean;
-  typingSoundEnabled: boolean;
-}) {
-  React.useEffect(() => {
-    safeSetItem("pref-webgl", String(webglEnabled));
-  }, [webglEnabled]);
-
-  React.useEffect(() => {
-    safeSetItem("pref-glow", String(glowEnabled));
-  }, [glowEnabled]);
-
-  React.useEffect(() => {
-    safeSetItem("pref-sounds", String(soundsEnabled));
-  }, [soundsEnabled]);
-
-  React.useEffect(() => {
-    safeSetItem("pref-typing-anim", String(typingAnimEnabled));
-  }, [typingAnimEnabled]);
-
-  React.useEffect(() => {
-    safeSetItem("pref-typing-sound", String(typingSoundEnabled));
-  }, [typingSoundEnabled]);
-
-  React.useEffect(() => {
-    const body = document.body;
-    if (animsEnabled) {
-      body.classList.remove("reduce-micro-animations");
-    } else {
-      body.classList.add("reduce-micro-animations");
-    }
-    safeSetItem("pref-anims", String(animsEnabled));
-  }, [animsEnabled]);
-}
-
-function useGlobalClickSound(soundsEnabled: boolean, playTapSound: () => void) {
-  React.useEffect(() => {
-    // Don't attach the document-level listener at all when sounds are off, so we
-    // avoid running closest() on every click in the app for no reason.
-    if (!soundsEnabled) return;
-    const handleGlobalClick = (e: MouseEvent) => {
-      const target = (e.target as HTMLElement).closest(
-        'button:not([data-custom-sound="true"]), [role="tab"], [role="switch"], a, input[type="submit"]',
-      );
-      if (target) {
-        playTapSound();
-      }
-    };
-    document.addEventListener("click", handleGlobalClick);
-    return () => document.removeEventListener("click", handleGlobalClick);
-  }, [soundsEnabled, playTapSound]);
-}
-
-function useVoiceTranscriptCallback() {
-  const ref = React.useRef<((text: string) => void) | null>(null);
-  const [callback, setCallback] = React.useState<((text: string) => void) | null>(null);
-  const setFn = React.useCallback((fn: ((text: string) => void) | null) => {
-    ref.current = fn;
-    setCallback(() => fn);
-  }, []);
-  return { voiceTranscriptCallback: callback, setVoiceTranscriptCallback: setFn };
-}
+type PreferenceState = ReturnType<typeof usePreferencesState>;
 
 type UpdatePreferencesFn = (args: {
   theme?: string;
   fontSize?: string;
-  model?: "llama-3.1-8b" | "llama-4-scout";
+  model?: ModelPreference;
 }) => Promise<unknown>;
 
-function usePreferenceActions(
-  updatePreferences: UpdatePreferencesFn,
-  setters: {
-    setAccentThemeState: (v: AccentTheme) => void;
-    setWebglEnabled: (v: boolean | ((p: boolean) => boolean)) => void;
-    setGlowEnabled: (v: boolean | ((p: boolean) => boolean)) => void;
-    setAnimsEnabled: (v: boolean | ((p: boolean) => boolean)) => void;
-    setSoundsEnabled: (v: boolean | ((p: boolean) => boolean)) => void;
-    setTypingAnimEnabled: (v: boolean | ((p: boolean) => boolean)) => void;
-    setTypingSoundEnabled: (v: boolean | ((p: boolean) => boolean)) => void;
-    setPinnedHighlights: (
-      v: PinnedHighlight[] | ((p: PinnedHighlight[]) => PinnedHighlight[]),
-    ) => void;
-  },
-  pinnedHighlights: PinnedHighlight[],
-) {
+function useServerPreferenceSync(
+  userData: ReturnType<typeof useUserData>["convexUser"],
+  serverModelPreference: unknown,
+  state: PreferenceState,
+): void {
+  const fontSize = userData?.preferences?.fontSize;
+  const theme = userData?.preferences?.theme;
+
+  React.useEffect(() => {
+    if (isFontSize(fontSize)) {
+      state.setFontSize(fontSize);
+      safeSetItem(STORAGE.fontSize, fontSize);
+    }
+    if (isAccentTheme(theme)) {
+      state.setAccentTheme(theme);
+      safeSetItem(STORAGE.accent, theme);
+    }
+  }, [fontSize, theme, state.setFontSize, state.setAccentTheme]);
+
+  React.useEffect(() => {
+    if (isModelPreference(serverModelPreference)) {
+      state.setModelPreference(serverModelPreference);
+    }
+  }, [serverModelPreference, state.setModelPreference]);
+}
+
+function useDomPreferenceEffects(state: PreferenceState): void {
+  React.useEffect(() => {
+    if (!state.hydrated) return;
+    const root = document.documentElement;
+    const sizes: Record<FontSize, string> = {
+      small: "0.875rem",
+      medium: "1.025rem",
+      large: "1.15rem",
+    };
+    root.style.setProperty("--chat-font-size", sizes[state.fontSize]);
+    safeSetItem(STORAGE.fontSize, state.fontSize);
+  }, [state.fontSize, state.hydrated]);
+
+  React.useEffect(() => {
+    if (!state.hydrated) return;
+    const root = document.documentElement;
+    for (const [property, value] of Object.entries(accentThemes[state.accentTheme])) {
+      root.style.setProperty(property, value);
+    }
+    root.dataset.accentTheme = state.accentTheme;
+    safeSetItem(STORAGE.accent, state.accentTheme);
+  }, [state.accentTheme, state.hydrated]);
+
+  React.useEffect(() => {
+    if (!state.hydrated) return;
+    safeSetItem(STORAGE.webgl, String(state.webglEnabled));
+  }, [state.webglEnabled, state.hydrated]);
+  React.useEffect(() => {
+    if (!state.hydrated) return;
+    safeSetItem(STORAGE.glow, String(state.glowEnabled));
+  }, [state.glowEnabled, state.hydrated]);
+  React.useEffect(() => {
+    if (!state.hydrated) return;
+    safeSetItem(STORAGE.sounds, String(state.soundsEnabled));
+  }, [state.soundsEnabled, state.hydrated]);
+  React.useEffect(() => {
+    if (!state.hydrated) return;
+    safeSetItem(STORAGE.typingAnim, String(state.typingAnimEnabled));
+  }, [state.typingAnimEnabled, state.hydrated]);
+  React.useEffect(() => {
+    if (!state.hydrated) return;
+    safeSetItem(STORAGE.typingSound, String(state.typingSoundEnabled));
+  }, [state.typingSoundEnabled, state.hydrated]);
+
+  React.useEffect(() => {
+    if (!state.hydrated) return;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const apply = () => {
+      document.body.classList.toggle(
+        "reduce-micro-animations",
+        !state.animsEnabled || reducedMotion.matches,
+      );
+    };
+
+    apply();
+    safeSetItem(STORAGE.anims, String(state.animsEnabled));
+    reducedMotion.addEventListener("change", apply);
+    return () => reducedMotion.removeEventListener("change", apply);
+  }, [state.animsEnabled, state.hydrated]);
+}
+
+function useCrossTabPreferenceSync(state: PreferenceState): void {
+  React.useEffect(() => {
+    if (!state.hydrated) return;
+    const handleStorage = (event: StorageEvent) => {
+      if (event.storageArea !== localStorage || event.key === null) return;
+
+      switch (event.key) {
+        case STORAGE.accent:
+          state.setAccentTheme(
+            isAccentTheme(event.newValue) ? event.newValue : DEFAULTS.accentTheme,
+          );
+          break;
+        case STORAGE.fontSize:
+          state.setFontSize(isFontSize(event.newValue) ? event.newValue : DEFAULTS.fontSize);
+          break;
+        case STORAGE.webgl:
+          state.setWebglEnabled(
+            event.newValue === null ? DEFAULTS.webglEnabled : event.newValue === "true",
+          );
+          break;
+        case STORAGE.glow:
+          state.setGlowEnabled(
+            event.newValue === null ? DEFAULTS.glowEnabled : event.newValue === "true",
+          );
+          break;
+        case STORAGE.anims:
+          state.setAnimsEnabled(
+            event.newValue === null ? DEFAULTS.animsEnabled : event.newValue === "true",
+          );
+          break;
+        case STORAGE.sounds:
+          state.setSoundsEnabled(
+            event.newValue === null ? DEFAULTS.soundsEnabled : event.newValue === "true",
+          );
+          break;
+        case STORAGE.typingAnim:
+          state.setTypingAnimEnabled(
+            event.newValue === null ? DEFAULTS.typingAnimEnabled : event.newValue === "true",
+          );
+          break;
+        case STORAGE.typingSound:
+          state.setTypingSoundEnabled(
+            event.newValue === null ? DEFAULTS.typingSoundEnabled : event.newValue === "true",
+          );
+          break;
+        case STORAGE.pins:
+          state.setPinnedHighlights(loadPins());
+          break;
+      }
+    };
+
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, [
+    state.setAccentTheme,
+    state.setFontSize,
+    state.setWebglEnabled,
+    state.setGlowEnabled,
+    state.setAnimsEnabled,
+    state.setSoundsEnabled,
+    state.setTypingAnimEnabled,
+    state.setTypingSoundEnabled,
+    state.setPinnedHighlights,
+    state.hydrated,
+  ]);
+}
+
+function useOverlayControls(state: PreferenceState) {
+  const setCommandPaletteOpen = React.useCallback(
+    (open: boolean) => {
+      state.setCommandPaletteOpen(open);
+      if (open) {
+        state.setSettingsOpen(false);
+        state.setVoiceInputOpen(false);
+      }
+    },
+    [state.setCommandPaletteOpen, state.setSettingsOpen, state.setVoiceInputOpen],
+  );
+
+  const setSettingsOpen = React.useCallback(
+    (open: boolean) => {
+      state.setSettingsOpen(open);
+      if (open) {
+        state.setCommandPaletteOpen(false);
+        state.setVoiceInputOpen(false);
+      }
+    },
+    [state.setSettingsOpen, state.setCommandPaletteOpen, state.setVoiceInputOpen],
+  );
+
+  const setVoiceInputOpen = React.useCallback(
+    (open: boolean) => {
+      state.setVoiceInputOpen(open);
+      if (open) {
+        state.setCommandPaletteOpen(false);
+        state.setSettingsOpen(false);
+      }
+    },
+    [state.setVoiceInputOpen, state.setCommandPaletteOpen, state.setSettingsOpen],
+  );
+
+  const setDiagnosticsOpen = React.useCallback(
+    (open: boolean) => state.setDiagnosticsOpen(open),
+    [state.setDiagnosticsOpen],
+  );
+
+  return {
+    setCommandPaletteOpen,
+    setSettingsOpen,
+    setVoiceInputOpen,
+    setDiagnosticsOpen,
+  };
+}
+
+function useVoiceTranscriptCallback() {
+  const [callback, setCallback] = React.useState<((text: string) => void) | null>(null);
+  const setVoiceTranscriptCallback = React.useCallback(
+    (next: ((text: string) => void) | null) => setCallback(() => next),
+    [],
+  );
+  return { voiceTranscriptCallback: callback, setVoiceTranscriptCallback };
+}
+
+function usePreferenceActions(updatePreferences: UpdatePreferencesFn, state: PreferenceState) {
   const setAccentTheme = React.useCallback(
     (theme: AccentTheme) => {
-      // Apply locally immediately for responsiveness, then persist. Only surface
-      // success once the mutation resolves so a failed save isn't reported as OK.
-      setters.setAccentThemeState(theme);
-      updatePreferences({ theme })
-        .then(() => {
-          toast.success(`Theme switched to ${theme.charAt(0).toUpperCase() + theme.slice(1)}`);
-        })
-        .catch((err: unknown) => {
-          console.error("Failed to persist accent theme:", err);
-          toast.error("Theme applied locally but could not be saved");
-        });
+      if (theme === state.accentTheme) return;
+      state.setAccentTheme(theme);
+      void updatePreferences({ theme }).catch((error: unknown) => {
+        console.error("Failed to persist accent theme", error);
+        toast.error("Theme changed on this device but could not be synced");
+      });
     },
-    [updatePreferences],
+    [state.accentTheme, state.setAccentTheme, updatePreferences],
+  );
+
+  const setFontSize = React.useCallback(
+    (size: FontSize) => {
+      if (size === state.fontSize) return;
+      state.setFontSize(size);
+      void updatePreferences({ fontSize: size }).catch((error: unknown) => {
+        console.error("Failed to persist font size", error);
+        toast.error("Text size changed on this device but could not be synced");
+      });
+    },
+    [state.fontSize, state.setFontSize, updatePreferences],
   );
 
   const toggleSetting = React.useCallback(
-    (key: "webgl" | "glow" | "anims" | "sounds" | "typingAnim" | "typingSound") => {
-      // NOTE: these toggles are intentionally device-local (persisted only to
-      // localStorage via usePreferencePersistence); they are not synced to
-      // Convex. The success toast reflects the local update completing.
-      const toggleFns: Record<string, () => void> = {
-        webgl: () => setters.setWebglEnabled((p) => !p),
-        glow: () => setters.setGlowEnabled((p) => !p),
-        anims: () => setters.setAnimsEnabled((p) => !p),
-        sounds: () => setters.setSoundsEnabled((p) => !p),
-        typingAnim: () => setters.setTypingAnimEnabled((p) => !p),
-        typingSound: () => setters.setTypingSoundEnabled((p) => !p),
-      };
-      toggleFns[key]?.();
-      toast.success("Preferences updated");
+    (key: ToggleSettingKey) => {
+      const settings = {
+        webgl: {
+          value: state.webglEnabled,
+          set: state.setWebglEnabled,
+          label: "WebGL backdrop",
+        },
+        glow: { value: state.glowEnabled, set: state.setGlowEnabled, label: "Ambient glow" },
+        anims: {
+          value: state.animsEnabled,
+          set: state.setAnimsEnabled,
+          label: "Micro-animations",
+        },
+        sounds: {
+          value: state.soundsEnabled,
+          set: state.setSoundsEnabled,
+          label: "Interface sounds",
+        },
+        typingAnim: {
+          value: state.typingAnimEnabled,
+          set: state.setTypingAnimEnabled,
+          label: "Typing animation",
+        },
+        typingSound: {
+          value: state.typingSoundEnabled,
+          set: state.setTypingSoundEnabled,
+          label: "Typing sounds",
+        },
+      } satisfies Record<
+        ToggleSettingKey,
+        { value: boolean; set: React.Dispatch<React.SetStateAction<boolean>>; label: string }
+      >;
+
+      const setting = settings[key];
+      const next = !setting.value;
+      setting.set(next);
+      toast.success(`${setting.label} ${next ? "enabled" : "disabled"}`);
     },
-    [],
+    [
+      state.webglEnabled,
+      state.glowEnabled,
+      state.animsEnabled,
+      state.soundsEnabled,
+      state.typingAnimEnabled,
+      state.typingSoundEnabled,
+      state.setWebglEnabled,
+      state.setGlowEnabled,
+      state.setAnimsEnabled,
+      state.setSoundsEnabled,
+      state.setTypingAnimEnabled,
+      state.setTypingSoundEnabled,
+    ],
   );
 
   const updateModelPreference = React.useCallback(
-    async (model: "llama-3.1-8b" | "llama-4-scout") => {
+    async (model: ModelPreference) => {
+      if (model === state.modelPreference) return;
+      const previous = state.modelPreference;
+      state.setModelPreference(model);
       try {
         await updatePreferences({ model });
         toast.success(`Model switched to ${model === "llama-4-scout" ? "UET-Pro" : "UET-Fast"}`);
-      } catch (err) {
-        toast.error("Failed to update model preference");
+      } catch (error) {
+        state.setModelPreference((current) => (current === model ? previous : current));
+        console.error("Failed to update model preference", error);
+        toast.error("Model change could not be saved");
+        throw error;
       }
     },
-    [updatePreferences],
+    [state.modelPreference, state.setModelPreference, updatePreferences],
   );
 
   const resetPreferences = React.useCallback(() => {
-    setters.setAccentThemeState("indigo");
-    setters.setWebglEnabled(true);
-    setters.setGlowEnabled(true);
-    setters.setAnimsEnabled(true);
-    setters.setSoundsEnabled(true);
-    setters.setTypingAnimEnabled(true);
-    setters.setTypingSoundEnabled(true);
-    toast.success("Preferences reset to default values");
-  }, []);
+    state.setAccentTheme(DEFAULTS.accentTheme);
+    state.setFontSize(DEFAULTS.fontSize);
+    state.setModelPreference(DEFAULTS.modelPreference);
+    state.setWebglEnabled(DEFAULTS.webglEnabled);
+    state.setGlowEnabled(DEFAULTS.glowEnabled);
+    state.setAnimsEnabled(DEFAULTS.animsEnabled);
+    state.setSoundsEnabled(DEFAULTS.soundsEnabled);
+    state.setTypingAnimEnabled(DEFAULTS.typingAnimEnabled);
+    state.setTypingSoundEnabled(DEFAULTS.typingSoundEnabled);
 
-  const addPin = React.useCallback((query: string, content: string) => {
-    setters.setPinnedHighlights((prev) => {
-      if (prev.some((p) => p.content.toLowerCase().trim() === content.toLowerCase().trim())) {
-        toast.info("Message is already pinned");
-        return prev;
-      }
-      const updated = [
-        ...prev,
-        {
-          id: generatePinId(),
-          query,
-          content,
-          createdAt: Date.now(),
-        },
-      ].slice(-MAX_PINNED_HIGHLIGHTS);
-      savePins(updated);
-      toast.success("Added to pinned highlights");
-      return updated;
+    void updatePreferences({
+      theme: DEFAULTS.accentTheme,
+      fontSize: DEFAULTS.fontSize,
+      model: DEFAULTS.modelPreference,
+    }).catch((error: unknown) => {
+      console.error("Failed to sync reset preferences", error);
+      toast.error("Defaults were restored locally but could not be synced");
     });
-  }, []);
+    toast.success("Preferences reset to accessible defaults");
+  }, [
+    state.setAccentTheme,
+    state.setFontSize,
+    state.setModelPreference,
+    state.setWebglEnabled,
+    state.setGlowEnabled,
+    state.setAnimsEnabled,
+    state.setSoundsEnabled,
+    state.setTypingAnimEnabled,
+    state.setTypingSoundEnabled,
+    updatePreferences,
+  ]);
 
-  const removePin = React.useCallback((id: string) => {
-    setters.setPinnedHighlights((prev) => {
-      const updated = prev.filter((p) => p.id !== id);
-      savePins(updated);
-      toast.success("Removed from pinned highlights");
-      return updated;
-    });
-  }, []);
+  const addPin = React.useCallback(
+    (query: string, content: string) => {
+      const cleanQuery = query.trim().slice(0, MAX_PIN_QUERY_LENGTH);
+      const cleanContent = content.trim().slice(0, MAX_PIN_CONTENT_LENGTH);
+      if (!cleanContent) return;
 
-  const isPinned = React.useCallback(
-    (contentToCheck: string) => {
-      return pinnedHighlights.some(
-        (p) => p.content.toLowerCase().trim() === contentToCheck.toLowerCase().trim(),
-      );
+      state.setPinnedHighlights((current) => {
+        const normalized = normalizePinContent(cleanContent);
+        if (current.some((pin) => normalizePinContent(pin.content) === normalized)) {
+          toast.info("Message is already pinned");
+          return current;
+        }
+
+        const next = [
+          ...current,
+          {
+            id: generatePinId(),
+            query: cleanQuery,
+            content: cleanContent,
+            createdAt: Date.now(),
+          },
+        ].slice(-MAX_PINNED_HIGHLIGHTS);
+
+        if (!persistPins(next)) {
+          toast.error("Pin could not be saved on this device");
+          return current;
+        }
+        toast.success("Added to pinned highlights");
+        return next;
+      });
     },
-    [pinnedHighlights],
+    [state.setPinnedHighlights],
+  );
+
+  const removePin = React.useCallback(
+    (id: string) => {
+      state.setPinnedHighlights((current) => {
+        const next = current.filter((pin) => pin.id !== id);
+        if (next.length === current.length) return current;
+        if (!persistPins(next)) {
+          toast.error("Pinned highlight could not be removed");
+          return current;
+        }
+        toast.success("Removed from pinned highlights");
+        return next;
+      });
+    },
+    [state.setPinnedHighlights],
+  );
+
+  const normalizedPins = React.useMemo(
+    () => new Set(state.pinnedHighlights.map((pin) => normalizePinContent(pin.content))),
+    [state.pinnedHighlights],
+  );
+  const isPinned = React.useCallback(
+    (content: string) => normalizedPins.has(normalizePinContent(content)),
+    [normalizedPins],
   );
 
   return {
     setAccentTheme,
+    setFontSize,
     toggleSetting,
     updateModelPreference,
     resetPreferences,
@@ -540,255 +729,246 @@ function usePreferenceActions(
   };
 }
 
-export function PreferencesProvider({ children }: { children: React.ReactNode }) {
-  const { convexUser: userData, modelPreference } = useUserData();
-  const updatePreferences = useMutation(api.users.updatePreferences);
-  const {
-    fontSize,
-    setFontSizeState,
-    accentTheme,
-    setAccentThemeState,
-    webglEnabled,
-    setWebglEnabled,
-    glowEnabled,
-    setGlowEnabled,
-    animsEnabled,
-    setAnimsEnabled,
-    soundsEnabled,
-    setSoundsEnabled,
-    typingAnimEnabled,
-    setTypingAnimEnabled,
-    typingSoundEnabled,
-    setTypingSoundEnabled,
-    pinnedHighlights,
-    setPinnedHighlights,
-    commandPaletteOpen,
-    setCommandPaletteOpen,
-    diagnosticsOpen,
-    setDiagnosticsOpen,
-    voiceInputOpen,
-    setVoiceInputOpen,
-    settingsOpen,
-    setSettingsOpen,
-  } = usePreferencesState();
-  const { voiceTranscriptCallback, setVoiceTranscriptCallback } = useVoiceTranscriptCallback();
-  useConvexPreferenceSync(userData, setFontSizeState, setAccentThemeState);
-  useFontSizeEffect(fontSize);
-  useThemeEffect(accentTheme);
-  usePreferencePersistence({
-    webglEnabled,
-    glowEnabled,
-    animsEnabled,
-    soundsEnabled,
-    typingAnimEnabled,
-    typingSoundEnabled,
-  });
+interface WebkitAudioWindow extends Window {
+  webkitAudioContext?: typeof AudioContext;
+}
 
-  const {
-    setAccentTheme,
-    toggleSetting,
-    updateModelPreference,
-    resetPreferences,
-    addPin,
-    removePin,
-    isPinned,
-  } = usePreferenceActions(
-    updatePreferences,
-    {
-      setAccentThemeState,
-      setWebglEnabled,
-      setGlowEnabled,
-      setAnimsEnabled,
-      setSoundsEnabled,
-      setTypingAnimEnabled,
-      setTypingSoundEnabled,
-      setPinnedHighlights,
+function useAudioSynth(soundsEnabled: boolean, typingSoundEnabled: boolean) {
+  const contextRef = React.useRef<AudioContext | null>(null);
+  const enabledRef = React.useRef(soundsEnabled);
+  const typingEnabledRef = React.useRef(typingSoundEnabled);
+  const lastTypingSoundAtRef = React.useRef(0);
+  const timeoutIdsRef = React.useRef(new Set<ReturnType<typeof setTimeout>>());
+
+  React.useEffect(() => {
+    enabledRef.current = soundsEnabled;
+  }, [soundsEnabled]);
+  React.useEffect(() => {
+    typingEnabledRef.current = typingSoundEnabled;
+  }, [typingSoundEnabled]);
+
+  const getContext = React.useCallback((): AudioContext | null => {
+    if (typeof window === "undefined") return null;
+    const AudioContextConstructor =
+      window.AudioContext ?? (window as WebkitAudioWindow).webkitAudioContext;
+    if (!AudioContextConstructor) return null;
+
+    if (!contextRef.current || contextRef.current.state === "closed") {
+      try {
+        contextRef.current = new AudioContextConstructor({ latencyHint: "interactive" });
+      } catch {
+        try {
+          contextRef.current = new AudioContextConstructor();
+        } catch (error) {
+          if (process.env.NODE_ENV !== "production") {
+            console.warn("Audio context could not be created", error);
+          }
+          return null;
+        }
+      }
+    }
+    if (contextRef.current.state === "suspended") {
+      void contextRef.current.resume().catch(() => undefined);
+    }
+    return contextRef.current;
+  }, []);
+
+  const playTone = React.useCallback(
+    (startFrequency: number, endFrequency: number, duration: number, volume: number) => {
+      const context = getContext();
+      if (!context) return;
+
+      try {
+        const now = context.currentTime;
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+
+        oscillator.type = "sine";
+        oscillator.frequency.setValueAtTime(Math.max(1, startFrequency), now);
+        oscillator.frequency.exponentialRampToValueAtTime(
+          Math.max(1, endFrequency),
+          now + duration,
+        );
+        gain.gain.setValueAtTime(Math.max(0.0001, volume), now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+        oscillator.connect(gain);
+        gain.connect(context.destination);
+        oscillator.addEventListener(
+          "ended",
+          () => {
+            oscillator.disconnect();
+            gain.disconnect();
+          },
+          { once: true },
+        );
+        oscillator.start(now);
+        oscillator.stop(now + duration + 0.02);
+      } catch (error) {
+        if (process.env.NODE_ENV !== "production") {
+          console.warn("Audio feedback could not be played", error);
+        }
+      }
     },
-    pinnedHighlights,
+    [getContext],
   );
 
-  const { playTypingSound, playTapSound, playSweepSound, playChimeSound } = useAudioSynth(
-    soundsEnabled,
-    typingSoundEnabled,
-  );
+  React.useEffect(() => {
+    return () => {
+      for (const timeoutId of timeoutIdsRef.current) clearTimeout(timeoutId);
+      timeoutIdsRef.current.clear();
+      const context = contextRef.current;
+      contextRef.current = null;
+      if (context && context.state !== "closed") void context.close().catch(() => undefined);
+    };
+  }, []);
 
-  useGlobalClickSound(soundsEnabled, playTapSound);
+  const playTypingSound = React.useCallback(() => {
+    if (!enabledRef.current || !typingEnabledRef.current) return;
+    const now = performance.now();
+    if (now - lastTypingSoundAtRef.current < 32) return;
+    lastTypingSoundAtRef.current = now;
+    playTone(680, 260, 0.025, 0.018);
+  }, [playTone]);
 
-  const contextValue = React.useMemo(
+  const playTapSound = React.useCallback(() => {
+    if (enabledRef.current) playTone(560, 240, 0.035, 0.025);
+  }, [playTone]);
+
+  const playSweepSound = React.useCallback(() => {
+    if (enabledRef.current) playTone(300, 1_100, 0.32, 0.045);
+  }, [playTone]);
+
+  const playChimeSound = React.useCallback(() => {
+    if (!enabledRef.current) return;
+    playTone(523.25, 523.25, 0.24, 0.028);
+
+    const timeoutId = setTimeout(() => {
+      timeoutIdsRef.current.delete(timeoutId);
+      if (enabledRef.current) playTone(659.25, 659.25, 0.25, 0.026);
+    }, 85);
+    timeoutIdsRef.current.add(timeoutId);
+  }, [playTone]);
+
+  return { playTypingSound, playTapSound, playSweepSound, playChimeSound };
+}
+
+function useGlobalClickSound(enabled: boolean, playTapSound: () => void): void {
+  React.useEffect(() => {
+    if (!enabled) return;
+
+    const handleClick = (event: MouseEvent) => {
+      if (!(event.target instanceof Element)) return;
+      const control = event.target.closest<HTMLElement>(
+        'button, a[href], [role="button"], [role="tab"], [role="switch"], input[type="submit"]',
+      );
+      if (
+        !control ||
+        control.dataset.sound === "off" ||
+        control.dataset.customSound === "true" ||
+        control.getAttribute("aria-disabled") === "true" ||
+        (control instanceof HTMLButtonElement && control.disabled)
+      ) {
+        return;
+      }
+      playTapSound();
+    };
+
+    document.addEventListener("click", handleClick, { passive: true });
+    return () => document.removeEventListener("click", handleClick);
+  }, [enabled, playTapSound]);
+}
+
+export function PreferencesProvider({ children }: { children: React.ReactNode }) {
+  const userData = useUserData();
+  const updatePreferences = useMutation(api.users.updatePreferences) as UpdatePreferencesFn;
+  const state = usePreferencesState();
+
+  useServerPreferenceSync(userData.convexUser, userData.modelPreference, state);
+  useDomPreferenceEffects(state);
+  useCrossTabPreferenceSync(state);
+
+  const transcript = useVoiceTranscriptCallback();
+  const overlays = useOverlayControls(state);
+  const actions = usePreferenceActions(updatePreferences, state);
+  const audio = useAudioSynth(state.soundsEnabled, state.typingSoundEnabled);
+  useGlobalClickSound(state.soundsEnabled, audio.playTapSound);
+
+  const contextValue = React.useMemo<PreferencesContextType>(
     () => ({
-      accentTheme,
-      webglEnabled,
-      glowEnabled,
-      animsEnabled,
-      soundsEnabled,
-      typingAnimEnabled,
-      typingSoundEnabled,
-      pinnedHighlights,
-      fontSize,
-      modelPreference,
-      updateModelPreference,
-      commandPaletteOpen,
-      setCommandPaletteOpen,
-      diagnosticsOpen,
-      setDiagnosticsOpen,
-      voiceInputOpen,
-      setVoiceInputOpen,
-      settingsOpen,
-      setSettingsOpen,
-      voiceTranscriptCallback,
-      setVoiceTranscriptCallback,
-      setAccentTheme,
-      toggleSetting,
-      resetPreferences,
-      addPin,
-      removePin,
-      isPinned,
-      playTypingSound,
-      playTapSound,
-      playSweepSound,
-      playChimeSound,
+      accentTheme: state.accentTheme,
+      webglEnabled: state.webglEnabled,
+      glowEnabled: state.glowEnabled,
+      animsEnabled: state.animsEnabled,
+      soundsEnabled: state.soundsEnabled,
+      typingAnimEnabled: state.typingAnimEnabled,
+      typingSoundEnabled: state.typingSoundEnabled,
+      pinnedHighlights: state.pinnedHighlights,
+      fontSize: state.fontSize,
+      modelPreference: state.modelPreference,
+      preferencesHydrated: state.hydrated,
+      updateModelPreference: actions.updateModelPreference,
+      commandPaletteOpen: state.commandPaletteOpen,
+      setCommandPaletteOpen: overlays.setCommandPaletteOpen,
+      diagnosticsOpen: state.diagnosticsOpen,
+      setDiagnosticsOpen: overlays.setDiagnosticsOpen,
+      voiceInputOpen: state.voiceInputOpen,
+      setVoiceInputOpen: overlays.setVoiceInputOpen,
+      settingsOpen: state.settingsOpen,
+      setSettingsOpen: overlays.setSettingsOpen,
+      voiceTranscriptCallback: transcript.voiceTranscriptCallback,
+      setVoiceTranscriptCallback: transcript.setVoiceTranscriptCallback,
+      setAccentTheme: actions.setAccentTheme,
+      setFontSize: actions.setFontSize,
+      toggleSetting: actions.toggleSetting,
+      resetPreferences: actions.resetPreferences,
+      addPin: actions.addPin,
+      removePin: actions.removePin,
+      isPinned: actions.isPinned,
+      ...audio,
     }),
     [
-      accentTheme,
-      webglEnabled,
-      glowEnabled,
-      animsEnabled,
-      soundsEnabled,
-      typingAnimEnabled,
-      typingSoundEnabled,
-      pinnedHighlights,
-      fontSize,
-      modelPreference,
-      commandPaletteOpen,
-      diagnosticsOpen,
-      voiceInputOpen,
-      settingsOpen,
-      voiceTranscriptCallback,
+      state.accentTheme,
+      state.webglEnabled,
+      state.glowEnabled,
+      state.animsEnabled,
+      state.soundsEnabled,
+      state.typingAnimEnabled,
+      state.typingSoundEnabled,
+      state.pinnedHighlights,
+      state.fontSize,
+      state.modelPreference,
+      state.hydrated,
+      state.commandPaletteOpen,
+      state.diagnosticsOpen,
+      state.voiceInputOpen,
+      state.settingsOpen,
+      overlays.setCommandPaletteOpen,
+      overlays.setDiagnosticsOpen,
+      overlays.setVoiceInputOpen,
+      overlays.setSettingsOpen,
+      transcript.voiceTranscriptCallback,
+      transcript.setVoiceTranscriptCallback,
+      actions.updateModelPreference,
+      actions.setAccentTheme,
+      actions.setFontSize,
+      actions.toggleSetting,
+      actions.resetPreferences,
+      actions.addPin,
+      actions.removePin,
+      actions.isPinned,
+      audio.playTypingSound,
+      audio.playTapSound,
+      audio.playSweepSound,
+      audio.playChimeSound,
     ],
   );
 
   return <PreferencesContext.Provider value={contextValue}>{children}</PreferencesContext.Provider>;
 }
 
-export function usePreferences() {
+export function usePreferences(): PreferencesContextType {
   const context = React.useContext(PreferencesContext);
-  if (!context) {
-    throw new Error("usePreferences must be used within a PreferencesProvider");
-  }
+  if (!context) throw new Error("usePreferences must be used within a PreferencesProvider");
   return context;
-}
-
-function useAudioSynth(soundsEnabled: boolean, typingSoundEnabled: boolean) {
-  const audioCtxRef = React.useRef<AudioContext | null>(null);
-  const soundsEnabledRef = React.useRef(soundsEnabled);
-  const typingSoundEnabledRef = React.useRef(typingSoundEnabled);
-
-  React.useEffect(() => {
-    soundsEnabledRef.current = soundsEnabled;
-  }, [soundsEnabled]);
-
-  React.useEffect(() => {
-    typingSoundEnabledRef.current = typingSoundEnabled;
-  }, [typingSoundEnabled]);
-
-  const getAudioContext = React.useCallback(() => {
-    if (!audioCtxRef.current) {
-      audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-    }
-    if (audioCtxRef.current.state === "suspended") {
-      audioCtxRef.current.resume();
-    }
-    return audioCtxRef.current;
-  }, []);
-
-  function playTone(
-    frequency: number,
-    endFrequency: number,
-    duration: number,
-    gainValue: number,
-  ): void {
-    try {
-      const ctx = getAudioContext();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(frequency, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(endFrequency, ctx.currentTime + duration);
-      gain.gain.setValueAtTime(gainValue, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + duration + 0.02);
-    } catch (err) {
-      // Best-effort cosmetic audio; AudioContext can fail (autoplay policy,
-      // unsupported browser). Log for diagnostics rather than swallowing silently.
-      console.warn("playTone failed:", err);
-    }
-  }
-
-  const chimeTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-
-  React.useEffect(() => {
-    return () => {
-      if (chimeTimeoutRef.current) clearTimeout(chimeTimeoutRef.current);
-      if (audioCtxRef.current && audioCtxRef.current.state !== "closed") {
-        audioCtxRef.current.close().catch(() => {});
-      }
-    };
-  }, []);
-
-  const playTypingSound = React.useCallback(() => {
-    if (!soundsEnabledRef.current || !typingSoundEnabledRef.current) return;
-    playTone(800, 200, 0.03, 0.03);
-  }, []);
-
-  const playTapSound = React.useCallback(() => {
-    if (!soundsEnabledRef.current) return;
-    playTone(800, 200, 0.03, 0.03);
-  }, []);
-
-  const playSweepSound = React.useCallback(() => {
-    if (!soundsEnabledRef.current) return;
-    playTone(300, 1200, 0.4, 0.06);
-  }, []);
-
-  const playChimeSound = React.useCallback(() => {
-    if (!soundsEnabledRef.current) return;
-    try {
-      const ctx = getAudioContext();
-      const osc1 = ctx.createOscillator();
-      const gain1 = ctx.createGain();
-      osc1.connect(gain1);
-      gain1.connect(ctx.destination);
-      osc1.type = "sine";
-      osc1.frequency.setValueAtTime(523.25, ctx.currentTime);
-      gain1.gain.setValueAtTime(0.03, ctx.currentTime);
-      gain1.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.3);
-      osc1.start(ctx.currentTime);
-      osc1.stop(ctx.currentTime + 0.35);
-
-      chimeTimeoutRef.current = setTimeout(() => {
-        if (!soundsEnabledRef.current) return;
-        try {
-          const osc2 = ctx.createOscillator();
-          const gain2 = ctx.createGain();
-          osc2.connect(gain2);
-          gain2.connect(ctx.destination);
-          osc2.type = "sine";
-          osc2.frequency.setValueAtTime(659.25, ctx.currentTime);
-          gain2.gain.setValueAtTime(0.03, ctx.currentTime);
-          gain2.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.3);
-          osc2.start(ctx.currentTime);
-          osc2.stop(ctx.currentTime + 0.35);
-        } catch (e) {
-          console.warn("playChimeSound (second tone) failed:", e);
-        }
-      }, 80);
-    } catch (err) {
-      console.warn("playChimeSound failed:", err);
-    }
-  }, [getAudioContext]);
-
-  return { playTypingSound, playTapSound, playSweepSound, playChimeSound };
 }

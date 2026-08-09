@@ -1,0 +1,42 @@
+{
+  "_curated": true,
+  "_labelled_by": "scripts/eval/_label_vacuous.py (Deliverable 2 grounded labels)",
+  "expected": {
+    "canonical_host": "admissions.uettaxila.edu.pk",
+    "criticality": "critical",
+    "forbidden_links_contain": [
+      "logout",
+      "login"
+    ],
+    "forbidden_text_blocks": [],
+    "required_links_contain": [],
+    "required_text_blocks": [
+      {
+        "text": "Online Admission Procedure",
+        "why": "procedure section heading"
+      },
+      {
+        "text": "Entry Test",
+        "why": "STEP-1 keyword"
+      },
+      {
+        "text": "documents",
+        "why": "requirements keyword"
+      },
+      {
+        "text": "ECAT",
+        "why": "entry-test keyword"
+      }
+    ],
+    "resource_min_count": 0,
+    "title_contains": [
+      "Admission Procedure"
+    ],
+    "title_not_contains": [
+      "Untitled",
+      "404"
+    ]
+  },
+  "family": "admissions-php",
+  "fixture_id": "admissions-php/procedureandrequirements-05a20e"
+}

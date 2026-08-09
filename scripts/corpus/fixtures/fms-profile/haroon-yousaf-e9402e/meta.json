@@ -1,0 +1,12 @@
+{
+  "body_sha256": "6a9dd408efa468fbbe5547da5d4986dcec716ee52fcd5d65ed9fbf9921ee6fa6",
+  "body_size": 184516,
+  "content_type": "text/html; charset=utf-8",
+  "elapsed_ms": 1326,
+  "fetched_at": "2026-08-02T12:25:47+00:00",
+  "final_url": "https://fms.uettaxila.edu.pk/Profile/haroon.yousaf",
+  "redirect_chain": [],
+  "remote_ip": "104.21.50.7,172.67.198.179",
+  "requested_url": "https://fms.uettaxila.edu.pk/Profile/haroon.yousaf",
+  "status": 200
+}

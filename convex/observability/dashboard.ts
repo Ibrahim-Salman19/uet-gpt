@@ -25,6 +25,14 @@ export const getObservabilityData = query({
       totalDocuments: v.number(),
       staleDocuments: v.number(),
       stalePercentage: v.number(),
+      lastSweepStartedAt: v.optional(v.union(v.number(), v.null())),
+      lastSweepCompletedAt: v.optional(v.union(v.number(), v.null())),
+      sweepComplete: v.optional(v.boolean()),
+      documentsExamined: v.optional(v.number()),
+      documentsFlagged: v.optional(v.number()),
+      documentsCleared: v.optional(v.number()),
+      cursorRemaining: v.optional(v.boolean()),
+      errors: v.optional(v.number()),
     }),
     errors24h: v.array(
       v.object({

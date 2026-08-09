@@ -1,0 +1,12 @@
+{
+  "body_sha256": "1efcbc50c39bf2d4778f448c07b180f4211732847d7e36edc146a3ec5c0c4ded",
+  "body_size": 93489,
+  "content_type": "application/pdf",
+  "elapsed_ms": 764,
+  "fetched_at": "2026-08-02T12:25:44+00:00",
+  "final_url": "https://web.uettaxila.edu.pk/PageContents/Rules/peeda_2006_2.pdf",
+  "redirect_chain": [],
+  "remote_ip": "104.21.50.7,172.67.198.179",
+  "requested_url": "https://web.uettaxila.edu.pk/PageContents/Rules/peeda_2006_2.pdf",
+  "status": 200
+}

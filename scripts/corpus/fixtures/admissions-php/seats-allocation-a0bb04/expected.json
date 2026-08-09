@@ -1,0 +1,41 @@
+{
+  "_curated": true,
+  "expected": {
+    "canonical_host": "admissions.uettaxila.edu.pk",
+    "forbidden_links_contain": [
+      "logout",
+      "login"
+    ],
+    "forbidden_text_blocks": [],
+    "required_links_contain": [],
+    "required_text_blocks": [
+      {
+        "text": "Punjab (Open Merit)",
+        "why": "the largest seat quota category"
+      },
+      {
+        "text": "Civil",
+        "why": "a program column header in the seat table"
+      }
+    ],
+    "resource_min_count": 0,
+    "title_contains": [
+      "Seat Allocation Chart"
+    ],
+    "title_not_contains": [
+      "Untitled",
+      "404"
+    ],
+    "criticality": "critical",
+    "required_resources": [
+      {
+        "url_contains": "ProgramsOffered",
+        "kind": "page",
+        "crawlable": true,
+        "critical": true
+      }
+    ]
+  },
+  "family": "admissions-php",
+  "fixture_id": "admissions-php/seats-allocation-a0bb04"
+}

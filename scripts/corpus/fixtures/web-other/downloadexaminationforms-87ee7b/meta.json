@@ -1,0 +1,12 @@
+{
+  "body_sha256": "bf43dda06d77adff85ec2e78ed659846216a41dabee99bb90c4e03ed70d75b42",
+  "body_size": 71737,
+  "content_type": "text/html; charset=utf-8",
+  "elapsed_ms": 1047,
+  "fetched_at": "2026-08-03T17:58:44+00:00",
+  "final_url": "https://web.uettaxila.edu.pk/DownloadExaminationForms",
+  "redirect_chain": [],
+  "remote_ip": "104.21.50.7,172.67.198.179,2606:4700:3031::6815:3207,2606:4700:3032::ac43:c6b3",
+  "requested_url": "https://web.uettaxila.edu.pk/DownloadExaminationForms",
+  "status": 200
+}

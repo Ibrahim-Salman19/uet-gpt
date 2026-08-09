@@ -1,0 +1,6 @@
+cluster_id,canonical_url,duplicate_url,duplicate_type,similarity_score,authority_delta,action_taken
+DUP_001,https://web.uettaxila.edu.pk/,https://uettaxila.edu.pk/,www_web_alias,1.0,0.0,canonicalized_to_web
+DUP_002,https://admissions.uettaxila.edu.pk/Downloads/UET-Prospectus-2025.pdf,https://admissions.uettaxila.edu.pk/Downloads/UET-Prospectus-2024.pdf,outdated_version,0.92,-0.2,superseded_by_2025
+DUP_003,https://web.uettaxila.edu.pk/Departments.aspx,https://web.uettaxila.edu.pk/departments/,aspx_directory_alias,0.98,0.0,merged_canonical_route
+DUP_004,https://web.uettaxila.edu.pk/Library.aspx,https://web.uettaxila.edu.pk/library.aspx,casing_variant,1.0,0.0,lowercase_canonicalized
+DUP_005,"https://web.uettaxila.edu.pk/PageContents/hostels/Allotment Policy 2024-25 for Boys Hostels (Fall-2024) 2021, 2022, and 2023 Sessions Ver 1.0 - Copy.pdf",https://web.uettaxila.edu.pk/PageContents/hostels/Allotment Policy 2023-24.pdf,historical_policy_copy,0.88,-0.3,flagged_historical

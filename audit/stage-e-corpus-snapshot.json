@@ -1,0 +1,72 @@
+{
+  "schema_version": 2,
+  "created_at": "2026-08-01T22:11:04+00:00",
+  "mode": "live_refetch_proxy",
+  "documents": [],
+  "fetch_failures": [
+    {
+      "url": "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=1",
+      "reason": "robots.txt denied retrieval"
+    },
+    {
+      "url": "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=14",
+      "reason": "robots.txt denied retrieval"
+    },
+    {
+      "url": "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=16",
+      "reason": "robots.txt denied retrieval"
+    },
+    {
+      "url": "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=6",
+      "reason": "robots.txt denied retrieval"
+    },
+    {
+      "url": "https://admission.uettaxila.edu.pk/application/index.php",
+      "reason": "robots.txt denied retrieval"
+    },
+    {
+      "url": "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=18",
+      "reason": "robots.txt denied retrieval"
+    },
+    {
+      "url": "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=17",
+      "reason": "robots.txt denied retrieval"
+    },
+    {
+      "url": "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=9",
+      "reason": "robots.txt denied retrieval"
+    },
+    {
+      "url": "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=10",
+      "reason": "robots.txt denied retrieval"
+    },
+    {
+      "url": "https://admissions.uettaxila.edu.pk/",
+      "reason": "robots.txt denied retrieval"
+    },
+    {
+      "url": "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=4",
+      "reason": "robots.txt denied retrieval"
+    },
+    {
+      "url": "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=19",
+      "reason": "robots.txt denied retrieval"
+    },
+    {
+      "url": "https://web.uettaxila.edu.pk/",
+      "reason": "robots.txt denied retrieval"
+    },
+    {
+      "url": "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=7",
+      "reason": "robots.txt denied retrieval"
+    },
+    {
+      "url": "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=13",
+      "reason": "robots.txt denied retrieval"
+    },
+    {
+      "url": "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=2",
+      "reason": "robots.txt denied retrieval"
+    }
+  ]
+}

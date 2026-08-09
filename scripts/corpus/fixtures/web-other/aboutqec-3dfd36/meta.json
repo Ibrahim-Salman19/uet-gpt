@@ -1,0 +1,12 @@
+{
+  "body_sha256": "f763522f4e4e6012f9e388e777b6a0478e8cc3e469b4fd31c332ee6ed0f99c30",
+  "body_size": 19185,
+  "content_type": "text/html",
+  "elapsed_ms": 887,
+  "fetched_at": "2026-08-03T17:59:04+00:00",
+  "final_url": "https://web.uettaxila.edu.pk/qec/aboutQEC.htm",
+  "redirect_chain": [],
+  "remote_ip": "104.21.50.7,172.67.198.179,2606:4700:3031::6815:3207,2606:4700:3032::ac43:c6b3",
+  "requested_url": "https://web.uettaxila.edu.pk/qec/aboutQEC.htm",
+  "status": 200
+}

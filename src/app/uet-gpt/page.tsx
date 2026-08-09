@@ -17,7 +17,14 @@ export const metadata: Metadata = {
       "UET GPT is the free AI chatbot for UET Taxila students. Ask about admissions, ECAT, merit, fees, and campus life.",
     url: `${siteUrl}/uet-gpt`,
     type: "website",
-    images: [{ url: `${siteUrl}/opengraph-image`, width: 1200, height: 630, alt: "UET GPT — AI Assistant for UET Taxila" }],
+    images: [
+      {
+        url: `${siteUrl}/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: "UET GPT — AI Assistant for UET Taxila",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -416,10 +423,7 @@ export default function UetGptPage() {
               >
                 UET Taxila
               </Link>
-              <Link
-                href="/uet"
-                className="hover:text-[var(--text-primary)] transition-colors"
-              >
+              <Link href="/uet" className="hover:text-[var(--text-primary)] transition-colors">
                 UET
               </Link>
             </div>

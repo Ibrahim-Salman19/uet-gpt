@@ -1,0 +1,45 @@
+{
+  "_curated": true,
+  "expected": {
+    "canonical_host": "web.uettaxila.edu.pk",
+    "forbidden_links_contain": [
+      "logout",
+      "login"
+    ],
+    "forbidden_text_blocks": [
+      "__VIEWSTATE",
+      "Untitled Document"
+    ],
+    "required_links_contain": [
+      "bus-routes-morning-2025.pdf"
+    ],
+    "required_text_blocks": [
+      {
+        "text": "Transport Services",
+        "why": "section heading"
+      },
+      {
+        "text": "Bus-Routes-Morning-2025.pdf",
+        "why": "a current resource link that must survive extraction"
+      }
+    ],
+    "resource_min_count": 0,
+    "title_contains": [
+      "Transport"
+    ],
+    "title_not_contains": [
+      "Untitled",
+      "404"
+    ],
+    "criticality": "standard",
+    "required_resources": [
+      {
+        "url_contains": "Bus-Routes",
+        "kind": "pdf",
+        "crawlable": true
+      }
+    ]
+  },
+  "family": "legacy-aspx",
+  "fixture_id": "legacy-aspx/transport-057ca9"
+}

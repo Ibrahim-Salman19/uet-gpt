@@ -2,6 +2,7 @@ import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { userWebhook } from "./clerk/webhook";
 import { crawlWebhook, ingestWebhook, resetWebhook } from "./crawl/webhook";
+import { exportCorpusWebhook } from "./crawl/exportCorpus";
 
 const http = httpRouter();
 
@@ -100,6 +101,24 @@ http.route({
 
 http.route({
   path: "/api/reset",
+  method: "OPTIONS",
+  handler: httpAction(
+    async (_ctx, request) =>
+      new Response(null, {
+        status: 204,
+        headers: corsHeaders(request),
+      }),
+  ),
+});
+
+http.route({
+  path: "/api/export/corpus",
+  method: "GET",
+  handler: exportCorpusWebhook,
+});
+
+http.route({
+  path: "/api/export/corpus",
   method: "OPTIONS",
   handler: httpAction(
     async (_ctx, request) =>

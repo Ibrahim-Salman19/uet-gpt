@@ -1,11 +1,12 @@
 "use client";
 
+import { ChevronDown, Menu, MessageSquare, Search, Settings, Share2, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
 import { toast } from "sonner";
 import { DiagnosticsPanel } from "@/components/diagnostics-panel";
-import { usePreferences } from "@/components/preferences-provider";
+import { type ModelPreference, usePreferences } from "@/components/preferences-provider";
 import { Sidebar } from "@/components/sidebar";
 import { cn, copyToClipboard } from "@/lib/utils";
 
@@ -13,190 +14,334 @@ interface MainShellProps {
   children: React.ReactNode;
 }
 
-// ── Model Dropdown Hook ──
+const MODEL_OPTIONS: ReadonlyArray<{
+  key: ModelPreference;
+  label: string;
+  badge: string;
+  description: string;
+}> = [
+  {
+    key: "llama-3.1-8b",
+    label: "UET-Fast",
+    badge: "DEFAULT",
+    description: "Lower latency for everyday questions",
+  },
+  {
+    key: "llama-4-scout",
+    label: "UET-Pro",
+    badge: "DEEP",
+    description: "More deliberate responses for complex work",
+  },
+];
+
+function useMediaQuery(query: string): boolean {
+  const subscribe = React.useCallback(
+    (onChange: () => void) => {
+      const mediaQuery = window.matchMedia(query);
+      if (typeof mediaQuery.addEventListener === "function") {
+        mediaQuery.addEventListener("change", onChange);
+        return () => mediaQuery.removeEventListener("change", onChange);
+      }
+      mediaQuery.addListener(onChange);
+      return () => mediaQuery.removeListener(onChange);
+    },
+    [query],
+  );
+  const getSnapshot = React.useCallback(() => window.matchMedia(query).matches, [query]);
+  const getServerSnapshot = React.useCallback(() => false, []);
+  return React.useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+}
 
 function useModelDropdown() {
   const [open, setOpen] = React.useState(false);
-  const ref = React.useRef<HTMLDivElement | null>(null);
+  const rootRef = React.useRef<HTMLDivElement | null>(null);
   const triggerRef = React.useRef<HTMLButtonElement | null>(null);
 
   React.useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  // Close on Escape and return focus to the trigger.
-  React.useEffect(() => {
     if (!open) return;
-    const handleKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        setOpen(false);
-        triggerRef.current?.focus();
-      }
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!rootRef.current || event.composedPath().includes(rootRef.current)) return;
+      setOpen(false);
     };
-    document.addEventListener("keydown", handleKey);
-    return () => document.removeEventListener("keydown", handleKey);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      setOpen(false);
+      if (triggerRef.current?.isConnected) triggerRef.current.focus();
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, [open]);
 
-  return { open, setOpen, ref, triggerRef };
+  return { open, setOpen, rootRef, triggerRef };
 }
 
-// ── Model Selector ──
-
 function ModelSelector({
-  activeModelLabel,
-  activeModelKey,
-  isOpen,
-  onToggle,
-  onSelect,
-  ref,
+  activeModel,
+  open,
+  setOpen,
+  rootRef,
   triggerRef,
+  onSelect,
 }: {
-  activeModelLabel: string;
-  activeModelKey: "llama-3.1-8b" | "llama-4-scout";
-  isOpen: boolean;
-  onToggle: () => void;
-  onSelect: (modelKey: "llama-3.1-8b" | "llama-4-scout") => void;
-  ref: React.RefObject<HTMLDivElement | null>;
+  activeModel: ModelPreference;
+  open: boolean;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  rootRef: React.RefObject<HTMLDivElement | null>;
   triggerRef: React.RefObject<HTMLButtonElement | null>;
+  onSelect: (model: ModelPreference) => Promise<void>;
 }) {
   const menuRef = React.useRef<HTMLDivElement | null>(null);
+  const menuId = React.useId();
+  const [pendingModel, setPendingModel] = React.useState<ModelPreference | null>(null);
+  const pendingRef = React.useRef(false);
+  const activeOption =
+    MODEL_OPTIONS.find((option) => option.key === activeModel) ?? MODEL_OPTIONS[0]!;
 
-  // When the menu opens, move focus to the first menu item for keyboard users.
   React.useEffect(() => {
-    if (isOpen) {
-      const first = menuRef.current?.querySelector<HTMLButtonElement>('[role="menuitemradio"]');
-      first?.focus();
-    }
-  }, [isOpen]);
+    if (!open) return;
+    requestAnimationFrame(() => {
+      menuRef.current
+        ?.querySelector<HTMLButtonElement>(`[data-model-key="${activeModel}"]`)
+        ?.focus();
+    });
+  }, [open, activeModel]);
 
   const handleMenuKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     const items = Array.from(
-      menuRef.current?.querySelectorAll<HTMLButtonElement>('[role="menuitemradio"]') ?? [],
+      menuRef.current?.querySelectorAll<HTMLButtonElement>(
+        '[role="menuitemradio"]:not(:disabled)',
+      ) ?? [],
     );
-    if (items.length === 0) return;
-    const currentIndex = items.indexOf(document.activeElement as HTMLButtonElement);
-    if (event.key === "ArrowDown") {
+    if (!items.length) return;
+    const index = Math.max(0, items.indexOf(document.activeElement as HTMLButtonElement));
+
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       event.preventDefault();
-      items[(currentIndex + 1) % items.length]?.focus();
-    } else if (event.key === "ArrowUp") {
-      event.preventDefault();
-      items[(currentIndex - 1 + items.length) % items.length]?.focus();
+      const delta = event.key === "ArrowDown" ? 1 : -1;
+      items[(index + delta + items.length) % items.length]?.focus();
     } else if (event.key === "Home") {
       event.preventDefault();
       items[0]?.focus();
     } else if (event.key === "End") {
       event.preventDefault();
-      items[items.length - 1]?.focus();
+      items.at(-1)?.focus();
+    } else if (event.key === "Tab") {
+      setOpen(false);
+    }
+  };
+
+  const selectModel = async (model: ModelPreference) => {
+    if (pendingRef.current || pendingModel || model === activeModel) {
+      setOpen(false);
+      if (triggerRef.current?.isConnected) triggerRef.current.focus();
+      return;
+    }
+
+    pendingRef.current = true;
+    setPendingModel(model);
+    try {
+      await onSelect(model);
+      setOpen(false);
+      requestAnimationFrame(() => {
+        if (triggerRef.current?.isConnected) triggerRef.current.focus();
+      });
+    } catch {
+      // The preference provider reports the persistence error and rolls back.
+    } finally {
+      pendingRef.current = false;
+      setPendingModel(null);
     }
   };
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative" ref={rootRef}>
       <button
-        type="button"
         ref={triggerRef}
-        onClick={onToggle}
-        className="flex items-center gap-2 px-3 py-2 md:px-4 bg-zinc-950/60 backdrop-blur-md rounded-lg border border-white/5 text-xs text-zinc-300 hover:text-white transition-all duration-300 ease-[var(--ease-spring)] group focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:outline-none active:scale-[0.98] active:translate-y-[1px] min-h-[36px]"
-        aria-label="Select AI Model"
+        type="button"
+        onClick={() => setOpen((current) => !current)}
+        className="group flex min-h-10 items-center gap-2 rounded-lg border border-white/5 bg-zinc-950/60 px-3 py-2 text-xs text-zinc-300 backdrop-blur-md transition-colors hover:border-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 md:px-4"
+        aria-label="Select AI model"
         aria-haspopup="menu"
-        aria-expanded={isOpen}
+        aria-expanded={open}
+        aria-controls={open ? menuId : undefined}
       >
-        <span className="font-medium">{activeModelLabel}</span>
-        <svg
-          className="w-3.5 h-3.5 text-zinc-500 group-hover:text-zinc-300 transition-colors"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
+        <span className="font-medium">{activeOption.label}</span>
+        <ChevronDown
+          className={cn(
+            "h-3.5 w-3.5 text-zinc-500 transition-transform group-hover:text-zinc-300 motion-reduce:transition-none",
+            open && "rotate-180",
+          )}
           aria-hidden="true"
-        >
-          <title>Dropdown arrow</title>
-          <path d="M6 9l6 6 6-6" />
-        </svg>
+        />
       </button>
-      {isOpen && (
+
+      {open ? (
         <div
           ref={menuRef}
+          id={menuId}
           role="menu"
           aria-label="AI model"
           onKeyDown={handleMenuKeyDown}
-          className="absolute left-0 mt-2 w-48 rounded-xl bg-[var(--surface-3)] border border-[var(--surface-4)] shadow-[0_16px_32px_rgba(0,0,0,0.8)] py-1.5 z-50 pointer-events-auto animate-[dropdown-open_200ms_ease-out]"
+          className="pointer-events-auto absolute left-0 z-50 mt-2 w-64 animate-[dropdown-open_160ms_ease-out] rounded-xl border border-[var(--surface-4)] bg-[var(--surface-3)] p-1.5 shadow-[0_16px_32px_rgba(0,0,0,0.8)] motion-reduce:animate-none"
         >
-          <button
-            type="button"
-            role="menuitemradio"
-            aria-checked={activeModelKey === "llama-3.1-8b"}
-            onClick={() => onSelect("llama-3.1-8b")}
-            className="w-full text-left px-4 py-2.5 hover:bg-white/5 text-xs text-zinc-200 hover:text-white transition-colors flex items-center justify-between focus-visible:bg-white/5 focus-visible:outline-none"
-          >
-            <span>UET-Fast</span>
-            <span className="text-[9px] font-mono text-zinc-500 bg-zinc-900 border border-white/5 px-1 rounded">
-              DEFAULT
-            </span>
-          </button>
-          <button
-            type="button"
-            role="menuitemradio"
-            aria-checked={activeModelKey === "llama-4-scout"}
-            onClick={() => onSelect("llama-4-scout")}
-            className="w-full text-left px-4 py-2.5 hover:bg-white/5 text-xs text-zinc-200 hover:text-white transition-colors flex items-center justify-between focus-visible:bg-white/5 focus-visible:outline-none"
-          >
-            <span>UET-Pro</span>
-            <span className="text-[9px] font-mono text-zinc-500 bg-zinc-900 border border-white/5 px-1 rounded">
-              DEEP
-            </span>
-          </button>
+          {MODEL_OPTIONS.map((option) => {
+            const selected = option.key === activeModel;
+            const pending = option.key === pendingModel;
+            return (
+              <button
+                key={option.key}
+                type="button"
+                role="menuitemradio"
+                aria-checked={selected}
+                data-model-key={option.key}
+                disabled={Boolean(pendingModel)}
+                onClick={() => void selectModel(option.key)}
+                className="flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-left text-xs text-zinc-200 transition-colors hover:bg-white/5 hover:text-white focus-visible:bg-white/5 focus-visible:outline-none disabled:cursor-wait disabled:opacity-60"
+              >
+                <span className="min-w-0">
+                  <span className="block font-medium">{option.label}</span>
+                  <span className="mt-0.5 block truncate text-[10px] text-zinc-500">
+                    {pending ? "Saving preference…" : option.description}
+                  </span>
+                </span>
+                <span className="shrink-0 rounded border border-white/5 bg-zinc-900 px-1.5 py-0.5 font-mono text-[9px] text-zinc-500">
+                  {option.badge}
+                </span>
+              </button>
+            );
+          })}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
 
-// ── Sidebar Panel ──
+function useInert(ref: React.RefObject<HTMLElement | null>, inert: boolean): void {
+  React.useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+
+    if (typeof (element as unknown as { inert?: boolean }).inert === "boolean") {
+      (element as unknown as { inert: boolean }).inert = inert;
+    } else if (inert) {
+      element.setAttribute("inert", "");
+    } else {
+      element.removeAttribute("inert");
+    }
+
+    return () => {
+      if (typeof (element as unknown as { inert?: boolean }).inert === "boolean") {
+        (element as unknown as { inert: boolean }).inert = false;
+      } else {
+        element.removeAttribute("inert");
+      }
+    };
+  }, [ref, inert]);
+}
+
+function useMobileSidebarFocus(
+  open: boolean,
+  desktop: boolean,
+  panelRef: React.RefObject<HTMLElement | null>,
+  triggerRef: React.RefObject<HTMLButtonElement | null>,
+  onClose: () => void,
+) {
+  React.useEffect(() => {
+    if (!open || desktop) return;
+    const panel = panelRef.current;
+    if (!panel) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    requestAnimationFrame(() => {
+      panel.querySelector<HTMLElement>("[data-sidebar-autofocus]")?.focus();
+    });
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+      if (event.key !== "Tab") return;
+
+      const focusable = Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          'a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter(
+        (element) =>
+          !element.hasAttribute("hidden") &&
+          element.getAttribute("aria-hidden") !== "true" &&
+          element.getClientRects().length > 0,
+      );
+      if (!focusable.length) return;
+
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", handleKeyDown);
+      if (triggerRef.current?.isConnected) triggerRef.current.focus();
+    };
+  }, [open, desktop, panelRef, triggerRef, onClose]);
+}
 
 function SidebarPanel({
   open,
+  desktop,
   onClose,
+  triggerRef,
   children,
 }: {
   open: boolean;
+  desktop: boolean;
   onClose: () => void;
+  triggerRef: React.RefObject<HTMLButtonElement | null>;
   children: React.ReactNode;
 }) {
+  const panelRef = React.useRef<HTMLElement | null>(null);
+  useInert(panelRef, !open);
+  useMobileSidebarFocus(open, desktop, panelRef, triggerRef, onClose);
+
   return (
     <>
       <div
         className={cn(
-          "fixed inset-0 bg-black/60 backdrop-blur-sm z-[80] lg:hidden transition-opacity duration-300",
-          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
+          "fixed inset-0 z-[80] bg-black/60 backdrop-blur-sm transition-opacity duration-300 lg:hidden motion-reduce:transition-none",
+          open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
         )}
         onClick={onClose}
         aria-hidden="true"
       />
       <aside
-        className={cn(
-          "h-full bg-[var(--surface-1)]/90 backdrop-blur-md flex flex-col shrink-0 z-[90] overflow-hidden",
-          "transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
-          "fixed top-0 left-0 lg:relative",
-          open
-            ? "translate-x-0 pointer-events-auto opacity-100"
-            : "-translate-x-full lg:translate-x-0 pointer-events-none",
-          open
-            ? "w-72 xl:w-80 border-r border-[var(--surface-5)] lg:opacity-100 lg:pointer-events-auto"
-            : "lg:w-0 lg:opacity-0 lg:border-r-transparent lg:pointer-events-none",
-        )}
-        style={{
-          transitionProperty: "width, transform, opacity, border-color",
-          willChange: open ? "width, opacity" : "auto",
-        }}
+        ref={panelRef}
+        id="primary-sidebar"
         aria-label="Navigation sidebar"
+        aria-hidden={!open}
+        className={cn(
+          "fixed left-0 top-0 z-[90] flex h-full shrink-0 flex-col overflow-hidden bg-[var(--surface-1)]/95 backdrop-blur-md transition-[width,transform,opacity,border-color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] lg:relative motion-reduce:transition-none",
+          open
+            ? "w-72 translate-x-0 border-r border-[var(--surface-5)] opacity-100 xl:w-80"
+            : "w-72 -translate-x-full border-r border-transparent opacity-0 lg:w-0 lg:translate-x-0",
+        )}
       >
         {children}
       </aside>
@@ -204,71 +349,84 @@ function SidebarPanel({
   );
 }
 
-// ── Header ──
+function SidebarHeader({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="flex shrink-0 items-center justify-between border-b border-[var(--surface-5)] p-5">
+      <div className="flex items-center gap-3">
+        <span
+          className="relative flex h-7 w-7 items-center justify-center rounded border border-[var(--accent)]/20 bg-[var(--accent)]/10"
+          aria-hidden="true"
+        >
+          <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+        </span>
+        <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-200">
+          UETGPT
+        </span>
+      </div>
+      <button
+        type="button"
+        data-sidebar-autofocus
+        onClick={onClose}
+        className="flex min-h-9 min-w-9 items-center justify-center rounded-lg p-2 text-zinc-500 transition-colors hover:bg-white/5 hover:text-zinc-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] lg:hidden"
+        aria-label="Close navigation"
+      >
+        <X className="h-4 w-4" aria-hidden="true" />
+      </button>
+    </div>
+  );
+}
 
 function Header({
   sidebarOpen,
+  sidebarTriggerRef,
   onToggleSidebar,
   modelSelector,
-  onShareClick,
-  onCommandPaletteOpen,
+  onShare,
+  onOpenCommandPalette,
 }: {
   sidebarOpen: boolean;
+  sidebarTriggerRef: React.RefObject<HTMLButtonElement | null>;
   onToggleSidebar: () => void;
   modelSelector: React.ReactNode;
-  onShareClick: () => void;
-  onCommandPaletteOpen: (open: boolean) => void;
+  onShare: () => void;
+  onOpenCommandPalette: () => void;
 }) {
   return (
-    <header className="w-full px-3 py-2.5 md:px-5 md:py-4 lg:px-6 lg:py-5 flex justify-between items-center pointer-events-auto shrink-0 border-b border-white/[0.04] bg-[var(--surface-1)]/60 backdrop-blur-xl relative z-[60] shadow-[0_4px_24px_rgba(0,0,0,0.2)]">
-      <div className="flex items-center gap-3">
+    <header className="pointer-events-auto relative z-[60] flex w-full shrink-0 items-center justify-between border-b border-white/[0.04] bg-[var(--surface-1)]/60 px-3 py-2.5 shadow-[0_4px_24px_rgba(0,0,0,0.2)] backdrop-blur-xl md:px-5 md:py-4 lg:px-6 lg:py-5">
+      <div className="flex min-w-0 items-center gap-3">
         <button
+          ref={sidebarTriggerRef}
           type="button"
           onClick={onToggleSidebar}
-          aria-label="Toggle navigation"
-          className="text-zinc-400 hover:text-white transition-all duration-300 ease-[var(--ease-spring)] p-2 rounded-xl bg-zinc-950/60 border border-white/5 backdrop-blur-md hover:bg-white/5 active:scale-[0.98] active:translate-y-[1px] flex items-center justify-center shrink-0 min-h-[40px] min-w-[40px]"
+          aria-label={sidebarOpen ? "Close navigation" : "Open navigation"}
+          aria-expanded={sidebarOpen}
+          aria-controls="primary-sidebar"
+          className="flex min-h-10 min-w-10 shrink-0 items-center justify-center rounded-xl border border-white/5 bg-zinc-950/60 p-2 text-zinc-400 backdrop-blur-md transition-colors hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
         >
-          <svg
-            className="w-4.5 h-4.5"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <title>Toggle Sidebar</title>
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <line x1="3" y1="18" x2="21" y2="18" />
-          </svg>
+          <Menu className="h-[18px] w-[18px]" aria-hidden="true" />
         </button>
         {modelSelector}
       </div>
+
       <div className="flex items-center gap-2">
         <button
           type="button"
-          onClick={onShareClick}
-          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-zinc-950/60 border border-white/5 rounded-lg text-[10px] text-zinc-400 hover:text-white transition-all duration-300 ease-[var(--ease-spring)] group focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:outline-none select-none active:scale-[0.98] active:translate-y-[1px]"
+          onClick={onShare}
+          className="flex min-h-9 items-center gap-1.5 rounded-lg border border-white/5 bg-zinc-950/60 px-2.5 py-1.5 text-[10px] text-zinc-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] sm:px-3"
+          aria-label="Share this page"
         >
-          <svg
-            className="w-3.5 h-3.5 text-zinc-500 group-hover:text-white transition-colors shrink-0"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <title>Share icon</title>
-            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13" />
-          </svg>
-          <span>Share</span>
+          <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
+          <span className="hidden sm:inline">Share</span>
         </button>
         <button
           type="button"
-          onClick={() => onCommandPaletteOpen(true)}
-          className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-zinc-950/60 border border-white/5 rounded-lg text-[10px] text-zinc-400 hover:text-white hover:border-white/10 transition-all duration-300 ease-[var(--ease-spring)] select-none active:scale-[0.98] active:translate-y-[1px]"
+          onClick={onOpenCommandPalette}
+          className="hidden min-h-9 items-center gap-1.5 rounded-lg border border-white/5 bg-zinc-950/60 px-3 py-1.5 text-[10px] text-zinc-400 transition-colors hover:border-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] md:flex"
         >
+          <Search className="h-3.5 w-3.5" aria-hidden="true" />
           <span>Search</span>
-          <kbd className="font-mono text-[9px] opacity-60 bg-zinc-900 border border-white/10 px-1.5 py-0.5 rounded">
-            Ctrl+K
+          <kbd className="rounded border border-white/10 bg-zinc-900 px-1.5 py-0.5 font-mono text-[9px] opacity-70">
+            Ctrl/⌘ K
           </kbd>
         </button>
       </div>
@@ -276,155 +434,62 @@ function Header({
   );
 }
 
-// ── Sidebar Header ──
-
-function SidebarHeader({ onClose }: { onClose: () => void }) {
-  return (
-    <div className="p-5 flex items-center justify-between border-b border-[var(--surface-5)] shrink-0">
-      <div className="flex items-center gap-3">
-        <div
-          className="relative w-7 h-7 flex items-center justify-center rounded bg-[var(--accent)]/10 border border-[var(--accent)]/20"
-          aria-hidden="true"
-        >
-          <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
-        </div>
-        <span className="text-[11px] uppercase tracking-[0.2em] font-semibold text-zinc-200 font-sans">
-          UETGPT
-        </span>
-      </div>
-      <button
-        type="button"
-        onClick={onClose}
-        className="text-zinc-500 hover:text-zinc-300 transition-colors p-2 rounded-lg hover:bg-white/5 min-h-[36px] min-w-[36px] flex items-center justify-center lg:hidden"
-        aria-label="Close sidebar"
-      >
-        <svg
-          className="w-4 h-4"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <title>Close sidebar</title>
-          <path d="M19 12H5M12 19l-7-7 7-7" />
-        </svg>
-      </button>
-    </div>
-  );
-}
-
-// ── Mobile Bottom Navigation ──
-
 const MOBILE_NAV_ITEMS = [
-  {
-    href: "/chat",
-    label: "Chat",
-    icon: (active: boolean) => (
-      <svg
-        className={cn(
-          "w-5 h-5 transition-all duration-200",
-          active ? "stroke-[var(--accent)]" : "stroke-zinc-500",
-        )}
-        viewBox="0 0 24 24"
-        fill={active ? "rgba(var(--accent-rgb,212,168,74),0.08)" : "none"}
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <title>Chat</title>
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-      </svg>
-    ),
-  },
-  {
-    href: "/explore",
-    label: "Explore",
-    icon: (active: boolean) => (
-      <svg
-        className={cn(
-          "w-5 h-5 transition-all duration-200",
-          active ? "stroke-[var(--accent)]" : "stroke-zinc-500",
-        )}
-        viewBox="0 0 24 24"
-        fill={active ? "rgba(var(--accent-rgb,212,168,74),0.08)" : "none"}
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <title>Explore</title>
-        <circle cx="11" cy="11" r="8" />
-        <line x1="21" y1="21" x2="16.65" y2="16.65" />
-      </svg>
-    ),
-  },
-  {
-    href: "/settings",
-    label: "Settings",
-    icon: (active: boolean) => (
-      <svg
-        className={cn(
-          "w-5 h-5 transition-all duration-200",
-          active ? "stroke-[var(--accent)]" : "stroke-zinc-500",
-        )}
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <title>Settings</title>
-        <circle cx="12" cy="12" r="3" />
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-      </svg>
-    ),
-  },
-];
+  { href: "/chat", label: "Chat", icon: MessageSquare },
+  { href: "/explore", label: "Explore", icon: Search },
+  { href: "/settings", label: "Settings", icon: Settings },
+] as const;
 
 function MobileBottomNav({ visible }: { visible: boolean }) {
   const pathname = usePathname();
+  const navRef = React.useRef<HTMLElement | null>(null);
+  useInert(navRef, !visible);
 
   return (
     <nav
+      ref={navRef}
       className={cn(
-        "fixed bottom-0 left-0 right-0 z-[70] lg:hidden glass-nav mobile-bottom-nav h-16 box-content",
-        "transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
-        visible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none",
+        "glass-nav mobile-bottom-nav fixed inset-x-0 bottom-0 z-[70] box-content h-16 pb-[env(safe-area-inset-bottom)] transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:hidden motion-reduce:transition-none",
+        visible ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-full opacity-0",
       )}
       aria-label="Mobile navigation"
+      aria-hidden={!visible}
     >
-      <div className="flex items-center justify-around px-2 h-16">
-        {MOBILE_NAV_ITEMS.map((item, idx) => {
-          const isActive = pathname.startsWith(item.href);
+      <div className="flex h-16 items-center justify-around px-2">
+        {MOBILE_NAV_ITEMS.map((item) => {
+          const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+          const Icon = item.icon;
           return (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                "mobile-nav-item flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-xl transition-all duration-200 min-h-[52px] min-w-[64px] relative overflow-hidden",
-                isActive
-                  ? "text-[var(--accent)]"
-                  : "text-zinc-500 hover:text-zinc-300 active:scale-95",
+                "relative flex min-h-[52px] min-w-16 flex-col items-center justify-center gap-1 overflow-hidden rounded-xl px-4 py-2 transition-colors",
+                active ? "text-[var(--accent)]" : "text-zinc-500 hover:text-zinc-300",
               )}
-              style={{ animationDelay: `${idx * 40}ms` }}
-              aria-current={isActive ? "page" : undefined}
-              aria-label={item.label}
+              aria-current={active ? "page" : undefined}
             >
-              {isActive && <div className="absolute inset-0 bg-[var(--accent)]/5 rounded-xl" />}
-              <span className="relative z-10">{item.icon(isActive)}</span>
+              {active ? (
+                <span
+                  className="absolute inset-0 rounded-xl bg-[var(--accent)]/5"
+                  aria-hidden="true"
+                />
+              ) : null}
+              <Icon className="relative z-10 h-5 w-5" aria-hidden="true" />
               <span
                 className={cn(
-                  "relative z-10 text-[11px] font-medium tracking-wide transition-all duration-200",
-                  isActive ? "text-[var(--accent)]" : "text-zinc-400",
+                  "relative z-10 text-[11px] font-medium tracking-wide",
+                  active ? "text-[var(--accent)]" : "text-zinc-400",
                 )}
               >
                 {item.label}
               </span>
-              {isActive && (
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 rounded-full bg-[var(--accent)]" />
-              )}
+              {active ? (
+                <span
+                  className="absolute bottom-0 left-1/2 h-0.5 w-4 -translate-x-1/2 rounded-full bg-[var(--accent)]"
+                  aria-hidden="true"
+                />
+              ) : null}
             </Link>
           );
         })}
@@ -433,161 +498,169 @@ function MobileBottomNav({ visible }: { visible: boolean }) {
   );
 }
 
-// ── Keyboard Shortcut Hook ──
+const NON_TEXT_INPUT_TYPES = new Set([
+  "button",
+  "checkbox",
+  "color",
+  "file",
+  "hidden",
+  "image",
+  "radio",
+  "range",
+  "reset",
+  "submit",
+]);
 
-function useSidebarKeyboardShortcuts(closeSidebar: () => void, toggleSidebar: () => void) {
-  React.useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        closeSidebar();
-      } else if (e.key === "/" && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault();
-        toggleSidebar();
-      }
-    };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [closeSidebar, toggleSidebar]);
+function isTextEntry(element: Element | null): boolean {
+  if (!(element instanceof HTMLElement)) return false;
+  if (element.isContentEditable) return true;
+  if (element instanceof HTMLTextAreaElement) return true;
+  return element instanceof HTMLInputElement && !NON_TEXT_INPUT_TYPES.has(element.type);
 }
 
-// ── Share Button Handler ──
-
-function useShareHandler() {
-  return React.useCallback(async () => {
-    if (typeof window === "undefined") return;
-    const success = await copyToClipboard(window.location.href);
-    if (success) {
-      toast.success("Share link copied!");
-    } else {
-      toast.error("Could not copy the share link");
-    }
-  }, []);
-}
-
-/**
- * Client-side shell that manages:
- * - Slide-in/out sidebar with mobile overlay
- * - Top header with hamburger, model selector, Ctrl+K pill
- * - Mobile bottom navigation bar (hidden on lg+)
- * - Accessibility skip-link target
- */
-export function MainShell({ children }: MainShellProps) {
-  const pathname = usePathname();
-  const [sidebarOpen, setSidebarOpen] = React.useState(true);
-  const { setCommandPaletteOpen, modelPreference, updateModelPreference } = usePreferences();
-  const {
-    open: modelDropdownOpen,
-    setOpen: setModelDropdownOpen,
-    ref: dropdownRef,
-    triggerRef: modelTriggerRef,
-  } = useModelDropdown();
-
-  // Global focus tracker to check if keyboard is likely open / user is typing
-  const [inputFocused, setInputFocused] = React.useState(false);
+function useInputFocus(): boolean {
+  const [focused, setFocused] = React.useState(false);
 
   React.useEffect(() => {
-    const isTextEntry = (el: Element | null): boolean =>
-      !!el &&
-      (el.tagName === "INPUT" ||
-        el.tagName === "TEXTAREA" ||
-        (el as HTMLElement).isContentEditable);
-
-    const handleFocusIn = (e: FocusEvent) => {
-      if (isTextEntry(e.target as Element | null)) {
-        setInputFocused(true);
-      }
-    };
-
-    const handleFocusOut = (e: FocusEvent) => {
-      const target = e.target as HTMLElement;
-      if (isTextEntry(target)) {
-        // Inspect where focus is moving to directly (no timeout race). If it is
-        // not another text-entry control, mark inputs as no longer focused.
-        const next = e.relatedTarget as Element | null;
-        if (!isTextEntry(next)) {
-          setInputFocused(false);
-        }
-      }
-    };
-
-    document.addEventListener("focusin", handleFocusIn);
+    const update = () => setFocused(isTextEntry(document.activeElement));
+    const handleFocusOut = () => queueMicrotask(update);
+    document.addEventListener("focusin", update);
     document.addEventListener("focusout", handleFocusOut);
-
+    update();
     return () => {
-      document.removeEventListener("focusin", handleFocusIn);
+      document.removeEventListener("focusin", update);
       document.removeEventListener("focusout", handleFocusOut);
     };
   }, []);
 
+  return focused;
+}
+
+function useSidebarKeyboardShortcut(
+  desktop: boolean,
+  sidebarOpen: boolean,
+  toggleSidebar: () => void,
+  closeSidebar: () => void,
+): void {
   React.useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 1024) {
-        setSidebarOpen(false);
-      } else {
-        setSidebarOpen(true);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.defaultPrevented) return;
+
+      if ((event.ctrlKey || event.metaKey) && event.key === "/") {
+        event.preventDefault();
+        if (!event.repeat) toggleSidebar();
+        return;
+      }
+
+      // Escape belongs to the topmost transient surface first. Menus and native
+      // dialogs handle it themselves; the desktop sidebar closes only when no
+      // higher-priority overlay remains open.
+      if (
+        desktop &&
+        sidebarOpen &&
+        event.key === "Escape" &&
+        !document.querySelector("dialog[open]") &&
+        document.activeElement?.closest('[role="menu"]') === null
+      ) {
+        event.preventDefault();
+        closeSidebar();
       }
     };
 
-    // Run once on mount
-    handleResize();
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [desktop, sidebarOpen, toggleSidebar, closeSidebar]);
+}
 
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+function useShareHandler() {
+  return React.useCallback(async () => {
+    const data = { title: document.title, url: window.location.href };
+    try {
+      if (typeof navigator.share === "function") {
+        await navigator.share(data);
+        return;
+      }
+      if (await copyToClipboard(data.url)) {
+        toast.success("Share link copied");
+      } else {
+        toast.error("The share link could not be copied");
+      }
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      console.error("Share failed", error);
+      toast.error("This page could not be shared");
+    }
   }, []);
+}
 
-  const toggleSidebar = React.useCallback(() => setSidebarOpen((p) => !p), []);
-  const closeSidebar = React.useCallback(() => setSidebarOpen(false), []);
+export function MainShell({ children }: MainShellProps) {
+  const pathname = usePathname();
+  const desktop = useMediaQuery("(min-width: 1024px)");
+  const [desktopSidebarOpen, setDesktopSidebarOpen] = React.useState(true);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = React.useState(false);
+  const sidebarOpen = desktop ? desktopSidebarOpen : mobileSidebarOpen;
+  const sidebarTriggerRef = React.useRef<HTMLButtonElement | null>(null);
+  const inputFocused = useInputFocus();
+  const preferences = usePreferences();
+  const dropdown = useModelDropdown();
+  const share = useShareHandler();
 
-  const isPro = modelPreference === "llama-4-scout";
-  const activeModelLabel = isPro ? "UET-Pro" : "UET-Fast";
+  React.useEffect(() => {
+    setMobileSidebarOpen(false);
+    dropdown.setOpen(false);
+  }, [pathname, dropdown.setOpen]);
 
-  const handleSelectModel = React.useCallback(
-    async (modelKey: "llama-3.1-8b" | "llama-4-scout") => {
-      setModelDropdownOpen(false);
-      await updateModelPreference(modelKey);
-    },
-    [setModelDropdownOpen, updateModelPreference],
-  );
+  const toggleSidebar = React.useCallback(() => {
+    if (desktop) setDesktopSidebarOpen((open) => !open);
+    else setMobileSidebarOpen((open) => !open);
+  }, [desktop]);
+  const closeSidebar = React.useCallback(() => {
+    if (desktop) setDesktopSidebarOpen(false);
+    else setMobileSidebarOpen(false);
+  }, [desktop]);
 
-  const onShareClick = useShareHandler();
-
-  useSidebarKeyboardShortcuts(closeSidebar, toggleSidebar);
+  useSidebarKeyboardShortcut(desktop, sidebarOpen, toggleSidebar, closeSidebar);
 
   const isChatThread = pathname.startsWith("/chat/") && pathname !== "/chat";
-  const showMobilePadding = !inputFocused && !isChatThread;
+  const showMobileNav = !inputFocused && !isChatThread && !mobileSidebarOpen;
 
   return (
     <div className="relative z-10 flex h-full w-full overflow-hidden">
-      <SidebarPanel open={sidebarOpen} onClose={closeSidebar}>
+      <SidebarPanel
+        open={sidebarOpen}
+        desktop={desktop}
+        onClose={closeSidebar}
+        triggerRef={sidebarTriggerRef}
+      >
         <SidebarHeader onClose={closeSidebar} />
         <Sidebar />
       </SidebarPanel>
 
-      <div className="flex flex-1 flex-col min-w-0 pointer-events-auto bg-transparent relative h-full overflow-hidden">
+      <div className="pointer-events-auto relative flex h-full min-w-0 flex-1 flex-col overflow-hidden bg-transparent">
         <Header
           sidebarOpen={sidebarOpen}
+          sidebarTriggerRef={sidebarTriggerRef}
           onToggleSidebar={toggleSidebar}
           modelSelector={
             <ModelSelector
-              activeModelLabel={activeModelLabel}
-              activeModelKey={modelPreference}
-              isOpen={modelDropdownOpen}
-              onToggle={() => setModelDropdownOpen((p) => !p)}
-              onSelect={handleSelectModel}
-              ref={dropdownRef}
-              triggerRef={modelTriggerRef}
+              activeModel={preferences.modelPreference}
+              open={dropdown.open}
+              setOpen={dropdown.setOpen}
+              rootRef={dropdown.rootRef}
+              triggerRef={dropdown.triggerRef}
+              onSelect={preferences.updateModelPreference}
             />
           }
-          onShareClick={onShareClick}
-          onCommandPaletteOpen={setCommandPaletteOpen}
+          onShare={() => void share()}
+          onOpenCommandPalette={() => preferences.setCommandPaletteOpen(true)}
         />
 
-        {/* Main content with bottom padding on mobile for nav bar */}
         <main
           id="main-content"
+          tabIndex={-1}
           className={cn(
-            "flex-1 overflow-hidden relative lg:pb-0 transition-[padding-bottom] duration-150 ease-out",
-            showMobilePadding ? "pb-16" : "pb-0",
+            "relative flex-1 overflow-hidden transition-[padding-bottom] duration-150 ease-out lg:pb-0 motion-reduce:transition-none",
+            showMobileNav ? "pb-[calc(4rem_+_env(safe-area-inset-bottom))]" : "pb-0",
           )}
         >
           {children}
@@ -595,8 +668,7 @@ export function MainShell({ children }: MainShellProps) {
         </main>
       </div>
 
-      {/* Mobile bottom navigation - hidden on lg+ screens */}
-      <MobileBottomNav visible={!inputFocused && !isChatThread} />
+      <MobileBottomNav visible={showMobileNav} />
     </div>
   );
 }

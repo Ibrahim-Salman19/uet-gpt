@@ -1,0 +1,10 @@
+{
+  "_curated": true,
+  "_note": "522 Cloudflare capture: extractor must not raise and must not invent content from the error page.",
+  "family": "legacy-asp",
+  "fixture_id": "legacy-asp/bsctechnologymechanical-a2d533",
+  "expected": {
+    "outcome": "no_content",
+    "criticality": "diagnostic"
+  }
+}

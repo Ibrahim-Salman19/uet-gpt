@@ -1,0 +1,42 @@
+{
+  "_curated": true,
+  "_note": "The homepage legitimately links to the alumni MIS login (mis.uettaxila.edu.pk/Alumni/Login/Login.aspx). Discovery of a login link is correct and useful for audit; the crawler's UrlPolicy excludes */login* from the crawl frontier at authorization time. So 'login' is NOT forbidden in the discovery layer here — only 'logout' (a state-changing route) is.",
+  "expected": {
+    "canonical_host": "uettaxila.edu.pk",
+    "forbidden_links_contain": [
+      "logout"
+    ],
+    "forbidden_text_blocks": [],
+    "required_links_contain": [
+      "admissions.uettaxila.edu.pk"
+    ],
+    "required_text_blocks": [
+      {
+        "text": "Undergraduate Admissions 2026",
+        "why": "front-page admissions banner"
+      },
+      {
+        "text": "merit list",
+        "why": "critical current notice"
+      }
+    ],
+    "resource_min_count": 0,
+    "title_contains": [
+      "UET Taxila"
+    ],
+    "title_not_contains": [
+      "Untitled",
+      "404"
+    ],
+    "criticality": "critical",
+    "required_resources": [
+      {
+        "url_contains": "condensed-mathematics",
+        "kind": "pdf",
+        "crawlable": true
+      }
+    ]
+  },
+  "family": "main-root",
+  "fixture_id": "main-root/web-uettaxila-edu-pk-0b20b6"
+}

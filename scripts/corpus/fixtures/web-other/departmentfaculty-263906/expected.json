@@ -1,0 +1,59 @@
+{
+  "_curated": true,
+  "_labelled_by": "scripts/eval/_label_webother.py (web-other expansion \u2014 labels sourced from raw body)",
+  "expected": {
+    "canonical_host": "web.uettaxila.edu.pk",
+    "criticality": "standard",
+    "forbidden_links_contain": [
+      "logout",
+      "login"
+    ],
+    "forbidden_text_blocks": [
+      "Untitled Document"
+    ],
+    "max_duration_ms": 60000,
+    "required_links_contain": [
+      "fms.uettaxila.edu.pk/Profile/asim.pasha"
+    ],
+    "required_resources": [
+      {
+        "crawlable": true,
+        "critical": true,
+        "kind": "page",
+        "nofollow": false,
+        "url_contains": "fms.uettaxila.edu.pk/Profile/asim.pasha"
+      },
+      {
+        "crawlable": true,
+        "critical": false,
+        "kind": "page",
+        "nofollow": false,
+        "url_contains": "fms.uettaxila.edu.pk/Profile/muzaffar.ali"
+      }
+    ],
+    "required_text_blocks": [
+      {
+        "text": "Mechanical Engineering Department",
+        "why": "department identity \u2014 the page's subject"
+      },
+      {
+        "text": "Fracture and Fatigue of Metals",
+        "why": "a specialization listing for the Dean \u2014 distinguishes from other depts"
+      },
+      {
+        "text": "HVAC",
+        "why": "a specialization \u2014 common Mechanical Eng topic"
+      }
+    ],
+    "resource_min_count": 5,
+    "title_contains": [
+      "Mechanical Engineering Department"
+    ],
+    "title_not_contains": [
+      "Untitled",
+      "404"
+    ]
+  },
+  "family": "web-other",
+  "fixture_id": "web-other/departmentfaculty-263906"
+}

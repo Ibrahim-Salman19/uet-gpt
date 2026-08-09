@@ -1,0 +1,12 @@
+{
+  "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "body_size": 0,
+  "content_type": "text/html; charset=utf-8",
+  "elapsed_ms": 19694,
+  "fetched_at": "2026-08-02T12:23:14+00:00",
+  "final_url": "https://web.uettaxila.edu.pk/telecom/BETCyberSecurity.asp",
+  "redirect_chain": [],
+  "remote_ip": "104.21.50.7,172.67.198.179",
+  "requested_url": "https://web.uettaxila.edu.pk/telecom/BETCyberSecurity.asp",
+  "status": 522
+}

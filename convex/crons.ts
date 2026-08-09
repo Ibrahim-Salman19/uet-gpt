@@ -79,7 +79,8 @@ crons.weekly(
 crons.interval("clear-stale-rate-limits", { hours: 1 }, internal.rateLimit.clearStaleRateLimits);
 
 // Phase 2: Contextual retrieval - daily backfill of raw chunks via Gemini Flash free tier
-// Runs at 3:00 UTC, after daily crawl completes at 0:00 UTC, before staleness check at 4:00 UTC
+// Runs at 3:00 UTC, after daily crawl completes at 0:00 UTC, before the staleness sweep
+// at 3:30 UTC and the staleness observability report at 4:00 UTC.
 // Processes up to 10 chunks/day (reduced from 50 to save bandwidth & respect 250 RPD free tier)
 crons.daily(
   "daily-contextualize-chunks",
@@ -87,7 +88,29 @@ crons.daily(
   internal.embeddings.contextualizeCron.contextualizeCron,
 );
 
-// Phase 5: Observability - check document staleness daily
+// Phase 5a (staleness-MVP, amendment #1): Flag aged documents BEFORE the
+// staleness-check observability report runs at 4:00 UTC, so the 4:00 report
+// reflects the same day's flagging rather than yesterday's state.
+//
+// flagExpiredDocuments is a BOUNDED sweep — it processes one paginated batch
+// (SWEEP_BATCH_SIZE=100) and then schedules continuation via
+// ctx.scheduler.runAfter, so the cron invocation itself returns in
+// milliseconds. This avoids Convex's cron-overlap-skip behaviour: a later cron
+// can be skipped if the preceding one is still running, so each invocation
+// must be short. The whole sweep is idempotent and resumable.
+//
+// Ordering: 03:00 contextualize → 03:30 staleness-flag → 04:00 staleness-check.
+crons.daily(
+  "staleness-flag-expired",
+  { hourUTC: 3, minuteUTC: 30 },
+  internal.crawl.staleness.flagExpiredDocuments,
+  {},
+);
+
+// Phase 5: Observability - check document staleness daily at 4:00 UTC, AFTER
+// the 3:30 staleness-flag-expired sweep has run (or reported a partial state).
+// Reports counts + sweep-state fields so the dashboard distinguishes a
+// complete sweep from a still-running one.
 crons.daily(
   "staleness-check",
   { hourUTC: 4, minuteUTC: 0 },

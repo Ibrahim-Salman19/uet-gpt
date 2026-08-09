@@ -1,0 +1,188 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>UET Taxila UG Admissions</title>
+<link href="css/layout.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="css/coin-slider-styles.css" />
+<link rel="stylesheet" type="text/css" href="css/tableLayout.css">
+<link type='text/css' href='css/basic.css' rel='stylesheet' media='screen' />
+<script type="feabc4e9d21c42ca89c5ff2f-text/javascript" src="js/jquery.js"></script>
+<script type="feabc4e9d21c42ca89c5ff2f-text/javascript" src="js/coin-slider.js"></script>
+<script type="feabc4e9d21c42ca89c5ff2f-text/javascript" src='js/jquery.simplemodal.js'></script>
+<script type="feabc4e9d21c42ca89c5ff2f-text/javascript" src='js/basic.js'></script>
+<script type="feabc4e9d21c42ca89c5ff2f-text/javascript">
+	$(document).ready(function(e) {
+		$("#7").addClass("active_menu")
+		$("#1, #3,#4, #2, #5,#6, #8").removeClass("active_menu");
+    });
+</script>
+<style>
+.byline {padding: 40px 0px 10px 0px ;}
+</style>
+</head>
+
+<div id="container">
+        <div id="header"><div id="logo_image" style="width:23%;"><img src="images/UETLogo.png" alt="Logo"/>
+    </div><div id="logo_text" style="padding-top:15px;"><h1 style="text-align:center; font-size:53px; ">UET Taxila Admissions</h1>
+        <h2 style="text-align:center; font-size:21px; margin-top:-8px;">University of Engineering &amp; Technology Taxila</h2>
+        <h2 style="text-align:center;">Undergraduate Admissions</h2>
+    </div></div><div id="top_menu"><nav>
+        <ul>
+            <li id="i1"><a href="index.php">Home</a></li>
+            <li id="i2"><a href="Discover.php">Discover</a></li>
+            <li id="i3"><a href="Merit_List.php">Merit List</a></li>
+            <li id="i6-6"> <a href="#">Fee Structure</a>
+            <ul>
+            <li id="i6-1"><a href="Fees.php">Fees Engineering Programs</a></li>  
+            <!-- <li id="i6-2"><a href="FeesForCSEvening.php">Fees For BS Computer Science (After Noon Program)</a></li> -->
+            <li id="i6-3"><a href="FeesForTechnologyPrograms.php">Fees For Technology Programs</a></li>
+            
+                            </ul>    
+        </li>
+            <li id="i5"><a href="#">Seats</a>
+                <ul>
+                    <li id="i5-1"><a href="Seats_Allocation.php">Seats Allocation</a></li>
+                    <li id="i5-2"><a href="Applicants_From_Punjab_Province.php">Applicants From Punjab Province</a></li>                    
+                    <li id="i5-8"><a href="Cat_S.php">Partial-Subsidized</a></li>
+                    <li id="i5-3"><a href="Applicants_From_Other_Provinces.php">Applicants From Other Provinces</a></li>
+                    <li id="i5-4"><a href="International_Students.php">International Students</a></li>
+                    <li id="i5-5"><a href="HEC_Nominees.php">HEC Nominees</a></li>
+                    <li id="i5-6"><a href="Children_of_Armed_Forces_Personnel.php">Children of Armed Forces Personnel</a></li>
+                    <li id="i5-7"><a href="Diploma_Holders.php">Diploma Holders</a></li>
+                    <li id="i5-8"><a href="Cat_X.php">Overseas Pakistanis</a></li>
+                </ul>
+            </li>
+            <li id="i6"><a href="#">Admissions</a>
+                <ul>
+                    <li id="i6-1"><a href="ProcedureAndRequirements.php">Procedure &amp; Requirements</a></li>
+                    <li id="i6-1-1"><a href="ProgramsOffered.php">Programs Offered</a></li>
+                    <li id="i6-2"><a href="Schedule.php">Schedule</a></li>
+                    <li id="i6-3"> <a href="Admission_Eligibility.php">Eligibility</a></li>
+                    <li> <a href="Advertisement_admission.php">Advertisements</a></li>
+                    <li id="i6-4" style="display:none;"> <a href="PreviousMeritPositions.php">Previous Merit Positions</a></li>
+                    <li id="i6-5"> <a href="Calculator.php">Percentage Calculator</a></li>
+                    <li id="i6-6"> <a href="Fees.php">Fee Structure</a>
+                    <ul>
+            <li id="i6-6-1"><a href="FeesForTechnologyPrograms.php">Fees For Technology Programs</a></li>
+            <li id="i6-6-2"><a href="Fees.php">Fees Engineering Programs</a></li>  
+                            </ul>    
+                </li>
+                      
+                    <li id="i6-7"> <a href="ProspectusAvailability.php">Prospectus Available</a></li>
+                    <li id="i6-8"> <a href="Downloads.php">Downloads</a></li>
+                </ul>
+            </li>
+            <li id="i7" style="display:none;"><a href="#">Entry Test</a>
+                <ul>
+                    <li id="i7-1"><a href="ProcedureAndRequirements2.php">Procedure &amp; Requirements</a></li>
+                    <li id="i7-2"><a href="Schedule2.php">Schedule</a></li>
+                    <li id="i7-3"><a href="Eligiblity.php">Eligibility</a></li>
+                    <li id="i7-4"><a href="Advertisements.php">Advertisements</a></li>
+                    <li id="i7-5"><a href="Test_Centers.php">Test Centers</a></li>
+                    <li id="i7-6"><a href="Result.php">Result</a></li>
+                    <li id="i7-8"><a href="Bus_Route.php">Bus Route</a></li>
+                </ul>
+            </li>
+            <li id="i8"><a href="My_UET.php">My UET</a></li>
+             
+    </nav>
+</div>
+
+    <div id="content_container"><!-- content container Start -->
+        	<h2 class="News">Entry Test Schedule</h2>
+    </div> <!-- content container Start -->
+
+			<!-- InstanceBeginEditable name="EditRegion1" -->
+			<div class="post">
+            <p>&nbsp;  </p>
+              <div class="entry">
+
+              <div class="entry" style="margin-top:5px;">
+                    <!--table width="975" height="42" id="box-table-a" style="border:none; background-color: #FFFFFF;">
+
+
+                        <tr >
+                          <td height="42" colspan="4" class="News" style="text-align:center">Tentative Schedule for Entry - 2015 </td>
+                        </tr>
+
+                    </table-->
+
+<div align=center>
+            <table style="width:80%">
+                                              <tr style="background-color:#CCC">
+                          <td height="29" colspan="4" style="text-align:center; border-bottom: solid #666666; font: 12px">Entry - 2020</td>
+                        </tr>
+                        <tr>
+                          <th >Sr. No </th>
+                          <th >Event</th>
+                          <th >Date</th>
+                          <th >Time/Day</th>
+                        </tr>
+                        <tr>
+                          <td>1</td>
+                          <td><a href="Downloads/Entry_Test_2020_English.pdf">Entry Test Advertisement (English)</a></td>
+                          <td align="center">-- </td>
+                          <td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                          <td>2</td>
+                          <td><a href="Downloads/Entry_Test_2020_Urdu.pdf">Entry Test Advertisement (Urdu)</a></td>
+                          <td align="center">-- </td>
+                          <td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                          <td>3</td>
+                          <td>Online Registration for Entry Test Starts <a href="http://admission.uet.edu.pk">Click Here</a> </td>
+                          <td align="center">06-May-2020</td>
+                          <td>--</td>
+                        </tr>
+                        <tr >
+                          <td>4</td>
+                          <td><strong style="color: #FF0000;">Last Date for receiving of Entry Test Tokens from banks</strong></td>
+                          <td align="center"><strong style="color: #FF0000;" >01-June-2020</strong></td>
+                          <td><strong style="color: #FF0000;" >--</strong></td>
+                        </tr>
+                        <tr >
+                          <td>5</td>
+                          <td><strong style="color: #FF0000;">Last Date for Entry Test Registration</strong></td>
+                          <td align="center"><strong style="color: #FF0000;" >02-June-2020</strong></td>
+                          <td><strong style="color: #FF0000;" >--</strong></td>
+                        </tr>
+
+                        <tr>
+                          <td>6</td>
+                          <td>Mock Test (To guide the candidates on attempting computer based test in the assigned virtual university centers at the alloted time )</td>
+                          <td align="center">27<sup>th</sup> and 28<sup>th</sup> July, 2020</td>
+                          <td>--</td>
+                        </tr>
+
+                        <tr>
+                          <td>7</td>
+                          <td style="color: #FF0000;font-weight:bold;">Entry Test (In the assigned virtual university centers at the alloted time)</td>
+                          <td align="center" style="color: #FF0000;font-weight:bold;">3<sup>rd</sup> to 6<sup>th</sup> August, 2020</td>
+                          <td>--</td>
+                        </tr>
+
+                        <tr>
+                          <td>8</td>
+                          <td>Entry Test Result</td>
+                          <td align="center">15-June-2020</td>
+                          <td>--</td>
+                        </tr>
+
+                         <p align="center">&nbsp;</p>
+
+
+            </table>
+</div>
+
+</div>
+			</div>
+      <p>&nbsp;  </p> <p>&nbsp;  </p>
+<!-- InstanceEndEditable -->
+		    <div id="footer" style="margin-top: 17px;"> <!--Footer Start-->
+    <a href="http://web.uettaxila.edu.pk" target="_blank" style="text-decoration:underline"> UET Taxila</a>
+     <a href="ContactUs.php" style="text-decoration:underline; float:right">Contact Us</a>
+</div> <!--Footer End--><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a24d10ec99645cd8',t:'MTc4NTY3MzUzNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"d8564f6d5b4e410eb202d13f98326329","r":1}' crossorigin="anonymous"></script>
+<script src="/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="feabc4e9d21c42ca89c5ff2f-|49" defer></script>

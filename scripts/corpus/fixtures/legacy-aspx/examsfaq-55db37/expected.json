@@ -1,0 +1,38 @@
+{
+  "_curated": true,
+  "_labelled_by": "scripts/eval/_label_vacuous.py (Deliverable 2 grounded labels)",
+  "expected": {
+    "canonical_host": "web.uettaxila.edu.pk",
+    "criticality": "standard",
+    "forbidden_links_contain": [
+      "logout",
+      "login"
+    ],
+    "forbidden_text_blocks": [],
+    "required_links_contain": [],
+    "required_text_blocks": [
+      {
+        "text": "Examination Frequently Asked Questions",
+        "why": "page heading"
+      },
+      {
+        "text": "Transcript",
+        "why": "exams FAQ topic"
+      },
+      {
+        "text": "Grade Sheet",
+        "why": "exams FAQ topic"
+      }
+    ],
+    "resource_min_count": 0,
+    "title_contains": [
+      "Examination Frequently Asked Questions"
+    ],
+    "title_not_contains": [
+      "Untitled",
+      "404"
+    ]
+  },
+  "family": "legacy-aspx",
+  "fixture_id": "legacy-aspx/examsfaq-55db37"
+}

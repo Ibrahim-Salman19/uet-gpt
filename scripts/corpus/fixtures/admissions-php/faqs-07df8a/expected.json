@@ -1,0 +1,42 @@
+{
+  "_curated": true,
+  "_labelled_by": "scripts/eval/_label_vacuous.py (Deliverable 2 grounded labels)",
+  "expected": {
+    "canonical_host": "admissions.uettaxila.edu.pk",
+    "criticality": "critical",
+    "forbidden_links_contain": [
+      "logout",
+      "login"
+    ],
+    "forbidden_text_blocks": [],
+    "required_links_contain": [],
+    "required_text_blocks": [
+      {
+        "text": "Frequently Asked Questions",
+        "why": "page H1"
+      },
+      {
+        "text": "Rs. 4,000",
+        "why": "application processing fee amount"
+      },
+      {
+        "text": "application processing fee",
+        "why": "fee-answer keyword"
+      },
+      {
+        "text": "HBL",
+        "why": "payment-channel bank"
+      }
+    ],
+    "resource_min_count": 0,
+    "title_contains": [
+      "Frequently Asked Questions"
+    ],
+    "title_not_contains": [
+      "Untitled",
+      "404"
+    ]
+  },
+  "family": "admissions-php",
+  "fixture_id": "admissions-php/faqs-07df8a"
+}

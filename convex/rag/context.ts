@@ -7,6 +7,33 @@ import { internalQuery } from "../_generated/server";
 // NOTE: This is a query (not an action) because it performs pure computation
 // with no external API calls or database access. Actions have higher latency
 // due to isolate cold starts, so queries are preferred for CPU-only work.
+function formatChunkHeader(chunk: {
+  title: string;
+  url: string;
+  headingPath?: string[];
+  crawledAt?: number;
+  freshnessTier?: string;
+  freshnessState?: string;
+  applicability?: string;
+}): string {
+  const sectionLabel = chunk.headingPath?.length
+    ? `Section: ${chunk.headingPath.join(" > ")}\n`
+    : "";
+  const dateStr =
+    chunk.crawledAt && Number.isFinite(chunk.crawledAt)
+      ? new Date(chunk.crawledAt).toISOString().split("T")[0]
+      : "unavailable";
+  const tier = chunk.freshnessTier ?? "low";
+  const state = chunk.freshnessState ?? (dateStr === "unavailable" ? "unknown" : "fresh");
+  const applicability = chunk.applicability ?? (state === "fresh" ? "current" : "unknown");
+
+  return `${sectionLabel}Source: [${chunk.title}](${chunk.url})
+Retrieved: ${dateStr}
+Freshness tier: ${tier}
+Freshness state: ${state}
+Applicability: ${applicability}`;
+}
+
 export const buildContext = internalQuery({
   args: {
     chunks: v.array(
@@ -16,6 +43,10 @@ export const buildContext = internalQuery({
         url: v.string(),
         title: v.string(),
         headingPath: v.optional(v.array(v.string())),
+        crawledAt: v.optional(v.number()),
+        freshnessTier: v.optional(v.string()),
+        freshnessState: v.optional(v.string()),
+        applicability: v.optional(v.string()),
       }),
     ),
     maxTokens: v.optional(v.number()),
@@ -26,21 +57,13 @@ export const buildContext = internalQuery({
     const sortedChunks = [...args.chunks].sort((a, b) => b.relevanceScore - a.relevanceScore);
 
     // 2. Greedily pack chunks in rank order until the budget is exhausted.
-    //
-    // Approximate chars-per-token at 4 (matches the rest of the pipeline and the
-    // unit test). A true tokenizer would be more accurate but is unavailable in
-    // the Convex runtime.
     const maxChars = (args.maxTokens ?? 3000) * 4;
     const budgetedChunks: typeof sortedChunks = [];
     let currentChars = 0;
 
     for (const chunk of sortedChunks) {
-      const sectionLabel = chunk.headingPath?.length
-        ? `Section: ${chunk.headingPath.join(" > ")}\n`
-        : "";
-      const chunkText = `${sectionLabel}Source: [${chunk.title}](${chunk.url})\n\n${chunk.content}\n\n---\n\n`;
-      // Skip an oversized chunk but keep packing smaller, lower-ranked ones so a
-      // single large top chunk never blanks out the entire context.
+      const header = formatChunkHeader(chunk);
+      const chunkText = `${header}\n\n${chunk.content}\n\n---\n\n`;
       if (currentChars + chunkText.length > maxChars) {
         continue;
       }
@@ -49,7 +72,6 @@ export const buildContext = internalQuery({
     }
 
     // 3. Apply Sandwich Strategy only to the budgeted chunks
-    // Top chunks go at index 0, length-1, 1, length-2, etc.
     const sandwiched: typeof sortedChunks = new Array(budgetedChunks.length);
     let left = 0;
     let right = budgetedChunks.length - 1;
@@ -66,10 +88,8 @@ export const buildContext = internalQuery({
 
     // 4. Format context string using array join
     const contextParts = sandwiched.filter(Boolean).map((chunk) => {
-      const sectionLabel = chunk.headingPath?.length
-        ? `Section: ${chunk.headingPath.join(" > ")}\n`
-        : "";
-      return `${sectionLabel}Source: [${chunk.title}](${chunk.url})\n\n${chunk.content}\n\n---\n\n`;
+      const header = formatChunkHeader(chunk);
+      return `${header}\n\n${chunk.content}\n\n---\n\n`;
     });
 
     return contextParts.join("").trim();

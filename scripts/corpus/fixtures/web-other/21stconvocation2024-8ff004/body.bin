@@ -1,0 +1,2054 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+     
+    <link href="/css/bootstrap3.4.min.css" rel="stylesheet" />
+    <script src="/js/jquery3.4.min.js" type="5a1e85b58b668adbc5b0d718-text/javascript"></script>
+    <script src="/js/bootstrap3.4.min.js" type="5a1e85b58b668adbc5b0d718-text/javascript"></script>
+    <link rel="stylesheet" href="/cssuetauto/font-awesome/css/font-awesome.min.css" type="text/css" media="all" />
+    <link href="/css/convocation.css?random=639213947322817285" rel="stylesheet" />
+    
+    <link href="/css/convocation2024.css?random=639213947322817285" rel="stylesheet" />
+
+    <script type="5a1e85b58b668adbc5b0d718-text/javascript" src="/jsuetauto/universal/jquery.js"></script>
+    <link rel="stylesheet" href="/cssuetauto/firstvisitpopup.css?s=2" type="text/css" />
+    <script type="5a1e85b58b668adbc5b0d718-text/javascript" src="/jsuetauto/jquery.firstVisitPopup.js?s=1"></script>
+    <script type="5a1e85b58b668adbc5b0d718-text/javascript" src="/jsuetauto/uetautomated.js?s=9"></script>     
+    <script type="5a1e85b58b668adbc5b0d718-text/javascript">
+        /*****************************************************************************************/
+        var gotoTopButton;
+        /*****************************************************************************************/
+        window.onload = function () {
+            gotoTopButton = document.getElementById("gotoTopButton");
+            //scrollFunction();
+            // When the user scrolls down 20px from the top of the document, show the button
+            window.onscroll = function () {
+                scrollFunction();
+                //setStickyMenu();
+            };
+            var menuItems = document.getElementsByClassName('dropdown');
+            for (var i = 0; i < menuItems.length; i++) {
+                menuItems[i].addEventListener('click', menuItemClicked);
+            }
+            setTimeout(function () {
+                var searchbar = document.getElementById('st-launcher-tab');
+                if (searchbar != null)
+                    searchbar.remove();
+            }, 3000);
+            document.querySelectorAll("a:not(a[href])").forEach(element => {
+                element.setAttribute("tabindex", "0")
+            });
+            //lnkSubmissionsHome
+            document.getElementById('lnkSubmissionsHome').addEventListener('click', function(){
+                var elem = document.getElementById('alinksubmission');
+                elem.click();
+                elem.focus();
+            });
+        }
+        /*****************************************************************************************/
+        function scrollFunction() {
+            if (document.body.scrollTop > 150 || document.documentElement.scrollTop > 150) {
+                gotoTopButton.style.display = "block";
+            } else {
+                gotoTopButton.style.display = "none";
+            }
+        }
+        /*****************************************************************************************/
+        function setStickyMenu() {
+            var menu = document.getElementById('sitemenu');
+            var bodyContent = document.getElementById('bodycontent');
+            var offset = menu.offsetTop;
+            if (document.body.scrollTop > offset || document.documentElement.scrollTop > offset) {
+                menu.style.position = 'fixed';
+                menu.style.top = 0;
+                //bodyContent.style.marginTop = '150px';
+            }
+            else {
+                menu.style.position = 'relative';
+                menu.style.top = 0;
+                //bodyContent.style.marginTop = '0px';
+            }
+        }
+        /*****************************************************************************************/
+        // When the user clicks on the button, scroll to the top of the document
+        function topFunction() {
+            document.body.scrollTop = 0; // For Safari
+            document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+        }
+        /*****************************************************************************************/
+        function menuItemClicked(e) {
+            var href = e.target.getAttribute('data-href');
+            var targetDivId = href.substr(href.lastIndexOf('#') + 1);
+            var x = document.getElementById(targetDivId);
+
+            var contentdivs = document.getElementsByClassName('mainpara');
+            for (var i = 0; i < contentdivs.length; i++) {
+                contentdivs[i].className = "mainpara hide";
+            }
+            x.className = "mainpara show";
+        }
+        /*****************************************************************************************/
+
+        /*****************************************************************************************/
+    </script>
+</head>
+<body>
+    <div class="wrapperdiv">
+        <div class="content-wrap">
+            <!-- Header Starts-->
+            <div class="row header nopadding">
+                
+                <div class="col-sm-12 nopadding headertitle">
+                    <div class="maintitle" style="text-align: center">
+
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-xs-12 navbarcontainer" id="sitemenu">
+                <nav class="navbar navbar-default">
+                    <div class="container">
+                        <div class="navbar-header">
+                            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                            </button>
+                        </div>
+                        <div class="collapse navbar-collapse" id="myNavbar">
+                            <ul class="nav navbar-nav">
+                                <li class="dropdown">
+                                    <a data-href="#home">Home</a>
+                                </li>
+                                <li class="dropdown">
+                                    <a data-href="#schedule">Schedule</a>
+                                </li>
+                                <li class="dropdown">
+                                    <a data-href="#medalists">Medalists</a>
+                                </li>
+                                
+                                <li class="dropdown">
+                                    <a data-href="#phdscholars">PhD Scholars</a>
+                                </li>
+                                <li class="dropdown">
+                                    <a data-href="#uetmap" id="alinkmap">Map</a>
+                                </li>
+                                <li class="dropdown">
+                                    <a data-href="#routeparking">Route for Parking</a>
+                                </li>
+                                <li class="dropdown">
+                                    <a data-href="#busroutes">Bus Routes</a>
+                                </li>
+                                <li class="dropdown">
+                                    <a data-href="#previousconvocations">Previous Convocations</a>
+                                </li>
+                                <li class="dropdown">
+                                    <a data-href="#downloads">Downloads</a>
+                                </li>
+                                <li class="dropdown">
+                                    <a data-href="#contactus">Contact us</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
+            </div>           
+            <div class="clearfix"></div>
+            <!-- Body Content -->
+            
+<style type="text/css">
+    .btnstyle {
+        font-size: 18px;
+        font-weight: bold;
+        padding: 10px;
+        color: blueviolet !important;
+    }
+
+    .btnstyle2 {
+        font-size: 18px;
+        font-weight: bold;
+        padding: 10px;
+        color: darkblue !important;
+    }
+
+    .box {
+        font-size: 16px !important;
+    }
+
+    .convul {
+        padding: 20px 40px !important;
+        background-color: white;
+        display: inline-block;
+        border-radius: 40px;
+    }
+
+        .convul li {
+            padding: 8px !important;
+            list-style-type: disc !important;
+        }
+
+            .convul li p {
+                color: black;
+            }
+
+            .convul li a {
+                display: inline-block;
+                padding: 10px !important;
+                float: none !important;
+                display: inline;
+                border-radius: 0 !important;
+                color: blue !important;
+                font-weight: bold !important;
+                padding: 0 !important;
+                margin: 5px;
+            }
+
+    .convulinner {
+        padding: 0px 20px !important;
+        background-color: whitesmoke;
+        display: inline-block;
+    }
+
+        .convulinner li {
+            padding: 5px !important;
+            list-style-type: disc !important;
+        }
+
+            .convulinner li p {
+                color: black;
+            }
+
+    .onediv {
+        clear: both;
+        padding: 0px 0px 50px 0px;
+        background-color: whitesmoke;
+        text-align: center;
+        margin-bottom: 50px;
+        display: inline-block;
+        width: 100%;
+    }
+
+    .sectionheading {
+        text-align: center;
+        font-weight: bold;
+        font-size: 24px;
+        color: black;
+    }
+
+    .sectioncontent {
+        padding: 10px 30px;
+        text-align: left;
+    }
+
+    .medalistsheading {
+        text-align: center;
+        padding: 15px;
+        font-size: 25px;
+        margin-bottom: 0px;
+        font-weight: bold;
+        color: black;
+        background: lightgray;
+        font-family: 'Calibri';
+    }
+
+    .alertmessage {
+        color: #721c24;
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        font-size: 20px;
+        padding: 18px;
+    }
+
+    .studentdata th {
+        font-weight: bold;
+    }
+
+    .studentdata td {
+        vertical-align: middle !important;
+    }
+
+    .picturebox {
+        text-align: center;
+        height: 150px;
+        width: 150px;
+        box-shadow: 0px 0px 6px #6495ed;
+    }
+
+    .pictureimg {
+        max-width: 100%;
+        max-height: 100%;
+    }
+
+    .scholarstable {
+    }
+
+        .scholarstable td p {
+            font-size: 15px;
+        }
+
+        .scholarstable tr td:nth-child(2) {
+            white-space: nowrap;
+        }
+
+        .scholarstable tr td:nth-child(5) {
+            white-space: nowrap;
+        }
+
+    .convocationtable {
+        color: black;
+    }
+
+        .convocationtable td {
+            padding: 5px;
+        }
+
+    .datetd {
+        background-color: lightgreen;
+    }
+
+    .convocationtable td h3 {
+        font-weight: bold;
+        font-size: 18px;
+        text-align: center;
+    }
+
+    .convocationtable td h4 {
+        font-weight: bold;
+        font-size: 16px;
+        text-align: center;
+    }
+
+    .convocationtable td ul {
+        padding-left: 15px;
+    }
+
+        .convocationtable td ul li {
+            list-style-type: lower-roman;
+        }
+</style>
+<div class="container" id="bodycontent">
+    <div>
+        <div class="mainpara show" id="home">
+            <div class="mainheadingdiv">
+                <div class="mainheadingdivinner">
+                    <h2 class="mainparaheading">
+                        The University is organizing its 21<sup style="bottom: 2ex; font-size: 15px;">st</sup> Convocation-2024 on <strong>05-06 January-2024 </strong>at
+                        <strong>UET Taxila.</strong>
+                    </h2>
+                </div>
+            </div>
+            <div class="onediv">
+                <h4 class="sectionheading">Eligible Candidates</h4>
+                <div class="sectioncontent">
+                    <ul class="convul">
+                        <li>
+                            <p>
+                                The Graduates of Entry-2019 (Main Campus Taxila and Sub-Campus Chakwal) who have completed their BSc/BS Degrees
+                                from the University up till 11-Dec-2023 and the Graduates from previous Entries who have completed their Degrees
+                                after the last Convocation (20th Convocation held on 26-Jan-2023<strong>).</strong>
+                            </p>
+                        </li>
+                        <li>
+                            <p>
+                                The Graduates who have completed their MS/MSc &amp; PhD Degrees from the University up till 11-Dec-2023 after the last Convocation
+                                (20th Convocation held on 26-Jan-2023<strong>).</strong>
+                            </p>
+                        </li>
+                        <li>
+                            <p>
+                                The Graduates of the <strong>Affiliated Institutes (APCOMS, SWEDISH, KICSIT)</strong>.
+                            </p>
+                        </li>
+                        <li>
+                            <p>
+                                Only those Graduates will be allowed to attend the Convocation ceremony who will submit their Willingness Form ONLINE
+                                (<a href="https://forms.office.com/r/EPc8aHSxAE">https://forms.office.com/r/EPc8aHSxAE</a> or web.uettaxila.edu.pk)
+                                up till <strong>26-Dec-2023 </strong>and will also attend the <strong>Rehearsal </strong>on <strong>05-Jan-2024</strong>.
+                                <br />
+                                Entry cards and Invitation cards for guests will be issued on the day of rehearsal. There will be no entry in
+                                Convocation ceremony without Entry card.
+                            </p>
+                        </li>
+                        <li>
+                            <p>
+                                <em>
+                                    Graduates of Affiliated Institutes will submit the Willingness Form in
+                                    their respective Institute as per their own rules.
+                                </em>
+                            </p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <p>&nbsp;</p>
+        </div>
+
+        <div class="mainpara" id="schedule">
+            <div class="mainheadingdiv">
+                <div class="mainheadingdivinner">
+                    <h2 class="mainparaheading">Schedule</h2>
+                </div>
+            </div>
+            <div class="onediv">
+                <div class="sectioncontent">
+                    <table class="table table-striped convocationtable" style=" border-collapse: collapse;">
+                        <tr>
+                            <td colspan="2" class="alert alert-success">
+                                <h3>5th January-2024 (Rehearsal Day)</h3>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <h4>1. Students Registration (Convocation Entry card Collection):</h4>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Timings:</td>
+                            <td>08:45 am to 12:30 pm</td>
+                        </tr>
+                        <tr>
+                            <td>Venue:</td>
+                            <td>Central Library UET Taxila</td>
+                        </tr>
+                        <tr>
+                            <td style="white-space: nowrap">Documents Required:</td>
+                            <td>
+                                <ul>
+                                    <li><p>Transcript of Awards (One attested photocopy)</p></li>
+                                    <li><p>Provisional Certificate (One attested photocopy)</p></li>
+                                    <li><p>Computerized National Identity Card (Original and one attested photocopy)</p></li>
+                                    <li><p>Two Recent Photographs 1"x1" Size (Registration No. and Name on backside)</p></li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <h4>2. Gown Collection (For Students): </h4>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Timings:</td>
+                            <td>08:45 am to 12:30 pm</td>
+                        </tr>
+                        <tr>
+                            <td>Venue:</td>
+                            <td>Central Library UET Taxila </td>
+                        </tr>
+                        <tr>
+                            <td>Documents Required:</td>
+                            <td>
+                                <p>
+                                    Rs. 1000/- as rent-cum-security on the day of rehearsal. The security will be refunded on return
+                                    of the robes by deducting the rent after the Convocation ceremony.
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <h4>3. Guest Card Collection:  </h4>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Timings:</td>
+                            <td>08:45 am to 12:30 pm</td>
+                        </tr>
+                        <tr>
+                            <td>Venue:</td>
+                            <td>Central Library UET Taxila</td>
+                        </tr>
+                        <tr>
+                            <td>Documents Required:</td>
+                            <td>
+                                <p>
+                                    Submit/show original payment receipt while collecting Guest Entry Card.
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <h4>4. Rehearsal:  </h4>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Timings:</td>
+                            <td>01:45 pm </td>
+                        </tr>
+                        <tr>
+                            <td>Venue:</td>
+                            <td>Multipurpose Hall UET Taxila</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <div class="alert alert-warning">
+                                    <p>Note: Attendance in Rehearsal is mandatory, failing which students wouldn’t be allowed to attend convocation.</p>
+                                    <p>(All faculty members are requested to follow the rehearsal timings)</p>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="alert alert-success">
+                                <h3>6th January-2024 (Convocation Day)</h3>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Timings:</td>
+                            <td>08:45 am <b>(All entry gates will be closed at 09:45 am)</b></td>
+                        </tr>
+                        <tr>
+                            <td>Venue:</td>
+                            <td>Multipurpose Hall UET Taxila</td>
+                        </tr>
+                        <tr>
+                            <td>Documents Required:</td>
+                            <td>
+                                <ul>
+                                    <li><p>Convocation Entry Cards <b>(For Students only)</b></p></li>
+                                    <li><p>Guest Invitation Cards <b>(For Guests only)</b></p></li>
+                                    <li><p>University Cards & Security Cards, Issued by Directorate of Admin & Security of UET Taxila <b>(For Organizers only)</b></p></li>
+                                    <li><p>Original CNIC <b>(For all above Categories)</b></p></li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <div class="alert alert-warning">
+                                    <p> Note: All participants are required to follow the timings strictly.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <div class="alert-success">
+                                    <p style="padding: 30px;">Note: Parents of a medalist may attend the convocation without any Payment.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <p>&nbsp;</p>
+        </div>
+
+        <div class="mainpara" id="medalists">
+            <div class="mainheadingdiv">
+                <div class="mainheadingdivinner">
+                    <h2 class="mainparaheading">University Medalists</h2>
+                </div>
+            </div>
+            <div class="onediv">
+                <div class="sectioncontent">
+
+<table border="0" cellspacing="0" cellpadding="0" class="table table-striped studentdata">
+    <tbody>
+        <tr>
+            <td>
+                <p>Sr. No.</p>
+            </td>
+            <td>
+                <p>Reg. No.</p>
+            </td>
+            <td>
+                <p>Name of Student</p>
+            </td>
+            <td>
+                <p>Name of Medal</p>
+            </td>
+            <td>
+                <p>Picture</p>
+            </td>
+        </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>1</p>
+                </td>
+                <td valign="bottom">
+                    <p>2021-UET/MSc-TRANS-08</p>
+                </td>
+                <td valign="bottom">
+                    <p>Muhammad Ziad Bacha</p>
+                </td>
+                <td valign="bottom">
+                    <p>Chancellor&#39;s Gold Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/2021-UET-MSc-TRANS-08.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+    </tbody>
+</table>
+
+
+                    <p>&nbsp;</p>
+
+<table border="0" cellspacing="0" cellpadding="0" class="table table-striped studentdata">
+    <tbody>
+        <tr>
+            <td>
+                <p>Sr. No.</p>
+            </td>
+            <td>
+                <p>Reg. No.</p>
+            </td>
+            <td>
+                <p>Name of Student</p>
+            </td>
+            <td>
+                <p>Name of Medal</p>
+            </td>
+            <td>
+                <p>Picture</p>
+            </td>
+        </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>1</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/CE-6</p>
+                </td>
+                <td valign="bottom">
+                    <p>Muhammad Hamza</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Gold Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-CE-06.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>2</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/ENV-3</p>
+                </td>
+                <td valign="bottom">
+                    <p>Noor-Ul-Huda</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Gold Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-ENV-03.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>3</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/EE-6</p>
+                </td>
+                <td valign="bottom">
+                    <p>Narmeen Zia</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Gold Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-EE-06.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>4</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/ENC-1</p>
+                </td>
+                <td valign="bottom">
+                    <p>Laiba Aziz</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Gold Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-ENC-01.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>5</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/ME-95</p>
+                </td>
+                <td valign="bottom">
+                    <p>Muhammad Saad Khokhar</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Gold Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-ME-95.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>6</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/IE-2</p>
+                </td>
+                <td valign="bottom">
+                    <p>Zoha</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Gold Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-IE-02.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>7</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/CP-74</p>
+                </td>
+                <td valign="bottom">
+                    <p>Hamza Iqbal Malik</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Gold Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-CP-74.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>8</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/SE-29</p>
+                </td>
+                <td valign="bottom">
+                    <p>Afras Ahmad</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Gold Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-SE-29.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>9</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/SE-63</p>
+                </td>
+                <td valign="bottom">
+                    <p>Mahnoor Mukhtar</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Gold Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-SE-63.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>10</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/TE-5</p>
+                </td>
+                <td valign="bottom">
+                    <p>Mahnoor Butt</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Gold Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-TE-05.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>11</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/TE-8</p>
+                </td>
+                <td valign="bottom">
+                    <p>Amna Shahid</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Gold Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-TE-08.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>12</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/CS-6</p>
+                </td>
+                <td valign="bottom">
+                    <p>Syeda Anam Bokhari</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Gold Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-CS-06.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>13</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-MCT-6</p>
+                </td>
+                <td valign="bottom">
+                    <p>Kamil Raza</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Gold Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-MCT-06.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+    </tbody>
+</table>
+
+
+                    <p>&nbsp;</p>
+
+<table border="0" cellspacing="0" cellpadding="0" class="table table-striped studentdata">
+    <tbody>
+        <tr>
+            <td>
+                <p>Sr. No.</p>
+            </td>
+            <td>
+                <p>Reg. No.</p>
+            </td>
+            <td>
+                <p>Name of Student</p>
+            </td>
+            <td>
+                <p>Name of Medal</p>
+            </td>
+            <td>
+                <p>Picture</p>
+            </td>
+        </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>1</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/CE-2</p>
+                </td>
+                <td valign="bottom">
+                    <p>Tabreek Muhammad</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Silver Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-CE-02.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>2</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/EE-4</p>
+                </td>
+                <td valign="bottom">
+                    <p>Faiza</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Silver Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-EE-04.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>3</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/ENC-4</p>
+                </td>
+                <td valign="bottom">
+                    <p>Ramla Saif</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Silver Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-ENC-04.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>4</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/ME-39</p>
+                </td>
+                <td valign="bottom">
+                    <p>Hussain Imran Khan</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Silver Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-ME-39.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>5</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/IE-7</p>
+                </td>
+                <td valign="bottom">
+                    <p>Muhammad Mubeen Tahir</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Silver Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-IE-07.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>6</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/CP-49</p>
+                </td>
+                <td valign="bottom">
+                    <p>Sana Nasir</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Silver Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-CP-49.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>7</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/SE-22</p>
+                </td>
+                <td valign="bottom">
+                    <p>Abdullah</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Silver Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-SE-22.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>8</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/TE-17</p>
+                </td>
+                <td valign="bottom">
+                    <p>Maisa Rasool Khan</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Silver Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-TE-17.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>9</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/CS-30</p>
+                </td>
+                <td valign="bottom">
+                    <p>Laraib Fatima</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Silver Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-CS-30.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+    </tbody>
+</table>
+
+
+                    <p>&nbsp;</p>
+
+<table border="0" cellspacing="0" cellpadding="0" class="table table-striped studentdata">
+    <tbody>
+        <tr>
+            <td>
+                <p>Sr. No.</p>
+            </td>
+            <td>
+                <p>Reg. No.</p>
+            </td>
+            <td>
+                <p>Name of Student</p>
+            </td>
+            <td>
+                <p>Name of Medal</p>
+            </td>
+            <td>
+                <p>Picture</p>
+            </td>
+        </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>1</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/CE-46</p>
+                </td>
+                <td valign="bottom">
+                    <p>Faiza Syed</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Bronze  Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-CE-46.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>2</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/EE-7</p>
+                </td>
+                <td valign="bottom">
+                    <p>Fizza Batool</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Bronze  Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-EE-07.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>3</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/EE-10</p>
+                </td>
+                <td valign="bottom">
+                    <p>Afshan Tariq</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Bronze  Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-EE-10.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>4</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/ME-45</p>
+                </td>
+                <td valign="bottom">
+                    <p>Mohammad Awais Ahmed</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Bronze  Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-ME-45.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>5</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/CP-66</p>
+                </td>
+                <td valign="bottom">
+                    <p>Hafsa Ejaz</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Bronze  Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-CP-66.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>6</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/SE-35</p>
+                </td>
+                <td valign="bottom">
+                    <p>Kokab Iqbal</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Bronze  Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-SE-35.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>7</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/TE-25</p>
+                </td>
+                <td valign="bottom">
+                    <p>Ashweena Atif</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Bronze  Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-TE-25.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td valign="bottom">
+                    <p>8</p>
+                </td>
+                <td valign="bottom">
+                    <p>2019-UET/CS-29</p>
+                </td>
+                <td valign="bottom">
+                    <p>Sidra Mukhtar</p>
+                </td>
+                <td valign="bottom">
+                    <p>UET Taxila Bronze  Medal</p>
+                </td>
+                <td>
+                    <div class="picturebox">
+                        <img src="/images/convocation2024/medalists/19-CS-29.jpg?random=639213947322817285" class="pictureimg" />
+                    </div>
+                    
+                </td>
+            </tr>
+    </tbody>
+</table>
+
+
+                    <p>&nbsp;</p>
+                    <div class="alert-success">
+                        <p style="padding: 30px;">Note: Parents of a medalist may attend the convocation without any Payment.</p>
+                    </div>
+                </div>
+            </div>
+            <p>&nbsp;</p>
+        </div>
+
+        <div class="mainpara" id="medalistsmessages">
+            <div class="mainheadingdiv">
+                <div class="mainheadingdivinner">
+                    <h2 class="mainparaheading">⁠Messages from Medalists</h2>
+                </div>
+            </div>
+            <div class="onediv">
+                <div class="sectioncontent">
+                    <div>
+                        <table border="0" cellspacing="0" cellpadding="0" class="table table-striped studentdata" style="display: none">
+                            <thead>
+                                <tr>
+                                    <th>Sr. No.</th>
+                                    <th>Name</th>
+                                    <th>Message</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                    <tr>
+                                        <td>1</td>
+                                        <td><b>Moqadas Fatima</b></td>
+                                        <td>
+                                            <iframe width="480" height="360" src="https://www.youtube.com/embed/lkOnIiHb7lQ?list=PLT3ZoVq1VNGZE9Xa-mN9WxmBKdaaKfNTg" title="Moqadas Fatima" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                                        </td>
+                                    </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <p>&nbsp;</p>
+        </div>
+
+        <div class="mainpara" id="phdscholars">
+            <div class="mainheadingdiv">
+                <div class="mainheadingdivinner">
+                    <h2 class="mainparaheading">⁠ PhD Scholars</h2>
+                </div>
+            </div>
+            <div class="onediv">
+                <div class="sectioncontent">
+                    <table class="table table-striped scholarstable" style=" border-collapse: collapse;">
+                        <thead>
+                            <tr>
+                                <td>
+                                    <p><strong>SR. NO.</strong></p>
+                                </td>
+                                <td>
+                                    <p><strong>NAME</strong></p>
+                                </td>
+                                <td>
+                                    <p><strong>THESIS TITLE</strong></p>
+                                </td>
+                                <td>
+                                    <p><strong>DISCIPLINE </strong></p>
+                                </td>
+                                <td>
+                                    <p><strong>NAME OF SUPERVISOR</strong></p>
+                                </td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    1
+                                </td>
+                                <td>
+                                    <p>SYYED ADNAN RAHEEL SHAH</p>
+                                </td>
+                                <td>
+                                    <p>ANALYSIS OF ROAD TRAFFIC ACCIDENTS WITH REFERENCE TO ROAD GEOMETRIC FEATURES AND TRAFFIC FLOW CHARACTERISTICS</p>
+                                </td>
+                                <td>
+                                    <p>CIVIL ENGINEERING</p>
+                                </td>
+                                <td>
+                                    <p>PROF. DR. NAVEED AHMAD</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    2
+                                </td>
+                                <td>
+                                    <p>MUHAMMAD KHALID HAFIZ</p>
+                                </td>
+                                <td>
+                                    <p>DEVELOPMENT OF A FRAMEWORK FOR ANALYTICAL SEISMIC VULNERABILITY ASSESSMENT OF HIGHWAY BRIDGES</p>
+                                </td>
+                                <td>
+                                    <p>CIVIL ENGINEERING</p>
+                                </td>
+                                <td>
+                                    <p>PROF. DR. QAISER UZ ZAMAN KHAN</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    3
+                                </td>
+                                <td>
+                                    <p>MUHAMMAD NASIR AYAZ KHAN</p>
+                                </td>
+                                <td>
+                                    <p>DEVELOPMENT OF HIGH DENSITY FIRE RESISTANT CONCRETE AS GAMMA RAYS SHIELDING MATERIAL</p>
+                                </td>
+                                <td>
+                                    <p>CIVIL ENGINEERING</p>
+                                </td>
+                                <td>
+                                    <p>PROF. DR. MUHAMMAD YAQUB</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    4
+                                </td>
+                                <td>
+                                    <p>MUHAMMAD TAUSIF ARSHAD</p>
+                                </td>
+                                <td>
+                                    <p>EFFECT OF EXTERNALLY BONDED MATERIALS ON SHEAR STRENGTH OF RC DEEP BEAMS</p>
+                                </td>
+                                <td>
+                                    <p>CIVIL ENGINEERING</p>
+                                </td>
+                                <td>
+                                    <p>PROF. DR. AYUB ELAHI</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    5
+                                </td>
+                                <td>
+                                    <p>SYEDA AAMARA ASIF</p>
+                                </td>
+                                <td>
+                                    <p>FACTORS AFFECTING THE COMPATIBILITY OF DIFFERENT BITUMEN-AGGREGATE COMBINATIONS</p>
+                                </td>
+                                <td>
+                                    <p>CIVIL ENGINEERING</p>
+                                </td>
+                                <td>
+                                    <p>PROF. DR. NAVEED AHMAD</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    6
+                                </td>
+                                <td>
+                                    <p>REHAN LIAQAT</p>
+                                </td>
+                                <td>
+                                    <p>DISAGGREGATION BASED CHARACTERIZATION OF RESIDENTIAL LOADS FOR DEMAND FLEXIBILITY ASSESSMENT</p>
+                                </td>
+                                <td>
+                                    <p>ELECTRICAL ENGINEERING</p>
+                                </td>
+                                <td>
+                                    <p>DR. INTISAR ALI SAJJAD</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    7
+                                </td>
+                                <td>
+                                    <p>NOUMAN QAMAR</p>
+                                </td>
+                                <td>
+                                    <p>SMART ENERGY HUB MANAGEMENT SYSTEM</p>
+                                </td>
+                                <td>
+                                    <p>ELECTRICAL ENGINEERING</p>
+                                </td>
+                                <td>
+                                    <p>PROF. DR. TAHIR NADEEM MALIK</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    8
+                                </td>
+                                <td>
+                                    <p>JAMIL AHMAD KHAN</p>
+                                </td>
+                                <td>
+                                    <p>PROTECTION OF MICROGRIDS WITH UNIFIELD DIVERSE PROTECTION SCHEMES</p>
+                                </td>
+                                <td>
+                                    <p>ELECTRICAL ENGINEERING</p>
+                                </td>
+                                <td>
+                                    <p>PROF. DR. TAHIR MAHMOOD</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    9
+                                </td>
+                                <td>
+                                    <p>ABDUL NASIR</p>
+                                </td>
+                                <td>
+                                    <p>VISION-BASED RECOGNITION OF INVASIVE INSECTS UNDER UNCONSTRAINED FLYING CONDITIONS</p>
+                                </td>
+                                <td>
+                                    <p>ELECTRICAL ENGINEERING</p>
+                                </td>
+                                <td>
+                                    <p>PROF. DR. MUHAMMAD OBAID ULLAH</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    10
+                                </td>
+                                <td>
+                                    <p>KANWAL SAEED</p>
+                                </td>
+                                <td>
+                                    <p>RESILIENT CONTROLLER PLACEMENT IN SOFTWARE DEFINED NETWORKS</p>
+                                </td>
+                                <td>
+                                    <p>ELECTRONICS ENGINEERING</p>
+                                </td>
+                                <td>
+                                    <p>PROF. DR. MUHAMMAD OBAID ULLAH</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    11
+                                </td>
+                                <td>
+                                    <p>MUHAMMAD QASIM</p>
+                                </td>
+                                <td>
+                                    <p>IMAGE DEHAZING USING DEEP CONVOLUTIONAL NEURAL NETWORKS</p>
+                                </td>
+                                <td>
+                                    <p>ELECTRONICS ENGINEERING</p>
+                                </td>
+                                <td>
+                                    <p>PROF. DR. GULISTAN RAJA</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    12
+                                </td>
+                                <td>
+                                    <p>GHULAM MUSTAFA</p>
+                                </td>
+                                <td>
+                                    <p>ADVANCED SURVEILANCE OF ROTATING EQUIPMENT THROUGH ONLINE WIRELESS VIBRATION MONITORING</p>
+                                </td>
+                                <td>
+                                    <p>MECHANICAL ENGINEERING</p>
+                                </td>
+                                <td>
+                                    <p>PROF. DR. SHAHAB KHUSHNOOD</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    13
+                                </td>
+                                <td>
+                                    <p>ZEESHAN ANJUM</p>
+                                </td>
+                                <td>
+                                    <p>INVESTIGATION OF FRETTING FATIGUE OF Ti6AI4V UNDER TRIBOCORROSION CONDITIONS IN PHYSIOLOGICAL SOLUTION</p>
+                                </td>
+                                <td>
+                                    <p>MECHANICAL ENGINEERING</p>
+                                </td>
+                                <td>
+                                    <p>DR. SAYYID MASOODUR RAHMAN SHAH</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    14
+                                </td>
+                                <td>
+                                    <p>ASIF KHAN</p>
+                                </td>
+                                <td>
+                                    <p>PERFORMANCE ANALYSIS OF ULTRA-HYDROPHOBIC MINICHANNEL HEAT SINKS WITH HYBDRID NANOFLUIDS</p>
+                                </td>
+                                <td>
+                                    <p>MECHANICAL ENGINEERING</p>
+                                </td>
+                                <td>
+                                    <p>PROF. DR. RIFFAT ASIM PASHA</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    15
+                                </td>
+                                <td>
+                                    <p>ABID ALI</p>
+                                </td>
+                                <td>
+                                    <p>DEVELOPMENT OF FRAMEWORK FOR ASSESSING THE IMPACT OF AGILE MANUFACTURING IN SME</p>
+                                </td>
+                                <td>
+                                    <p>INDUSTRIAL ENGINEERING</p>
+                                </td>
+                                <td>
+                                    <p>PROF. DR. WASIM AHMAD</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    16
+                                </td>
+                                <td>
+                                    <p>MUHAMMAD JAWAD</p>
+                                </td>
+                                <td>
+                                    <p>INVESTIGATING THE EFFECT OF HYBRID THERMAL TENSIONING AND INTERLAYER ON RESIDUAL STRESSES AND MECHANICAL PROPERTIES OF DISSIMILAR METAL WELDING</p>
+                                </td>
+                                <td>
+                                    <p>INDUSTRIAL ENGINEERING</p>
+                                </td>
+                                <td>
+                                    <p>PROF. DR. MIRZA JAHANZAIB</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    17
+                                </td>
+                                <td>
+                                    <p>AHMAD SAJJAD</p>
+                                </td>
+                                <td>
+                                    <p>DEVELOPMENT OF AN INNOVATIVE COST MODELING SYSTEM FOR METAL CASTING PROCESS UNDER LEAN ENVIRONMENT</p>
+                                </td>
+                                <td>
+                                    <p>ENGINEERING MANAGEMENT</p>
+                                </td>
+                                <td>
+                                    <p>DR. WASIM AHMAD</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    18
+                                </td>
+                                <td>
+                                    <p>AISHA TAYYAB</p>
+                                </td>
+                                <td>
+                                    <p>AN INTELLIGENT PLANNING AND SCHEDULING SYSTEM FOR HOSPITALS-CASE OF OPERATION THEATRE COMPLEX</p>
+                                </td>
+                                <td>
+                                    <p>ENGINEERING MANAGEMENT</p>
+                                </td>
+                                <td>
+                                    <p>DR. SAIF ULLAH</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    19
+                                </td>
+                                <td>
+                                    <p>MUHAMMAD BILAL ASGHAR</p>
+                                </td>
+                                <td>
+                                    <p>PRIVATIZATION OF STATE OWNED ENTERPRISES (SOEs) &amp; THEIR IMPACT ON ORGANIZATIONAL DEVELOPMENT</p>
+                                </td>
+                                <td>
+                                    <p>ENGINEERING MANAGEMENT</p>
+                                </td>
+                                <td>
+                                    <p>PROF. DR. WASIM AHMAD</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    20
+                                </td>
+                                <td>
+                                    <p>MOHAMMAD ASLAM KHAN</p>
+                                </td>
+                                <td>
+                                    <p>DEVELOPMENT OF A FRAMEWORK FOR LEAN IMPLEMENTATION AT LOCAL MANUFACTURING INDUSTRY</p>
+                                </td>
+                                <td>
+                                    <p>ENGINEERING MANAGEMENT</p>
+                                </td>
+                                <td>
+                                    <p>DR. HAFIZ MUHAMMAD KHURRAM ALI</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    21
+                                </td>
+                                <td>
+                                    <p>ABAID ULLAH</p>
+                                </td>
+                                <td>
+                                    <p>SUSTAINABLE AND COST EFFECTIVE TREATMENT OF WASTEWATER</p>
+                                </td>
+                                <td>
+                                    <p>ENGINEERING MANAGEMENT</p>
+                                </td>
+                                <td>
+                                    <p>DR. SALMAN HUSSAIN</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    22
+                                </td>
+                                <td>
+                                    <p>NOSHINA ISHAQUE</p>
+                                </td>
+                                <td>
+                                    <p>RELIABLE DATA TRANSMISSION SCHEME FOR UNDERWATER INTERNET OF THINGS (UIoT)</p>
+                                </td>
+                                <td>
+                                    <p>COMPUTER ENGINEERING</p>
+                                </td>
+                                <td>
+                                    <p>DR. MUHAMMAD AWAIS AZAM</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    23
+                                </td>
+                                <td>
+                                    <p>NOSHEEN SOHAIL</p>
+                                </td>
+                                <td>
+                                    <p>A DEEP NEURAL NETWORK APPROACH FOR BRAIN LESION SEGMENTATION</p>
+                                </td>
+                                <td>
+                                    <p>COMPUTER ENGINEERING</p>
+                                </td>
+                                <td>
+                                    <p>DR. SYED MUHAMMAD ANWAR</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    24
+                                </td>
+                                <td>
+                                    <p>WAQAR AMIN</p>
+                                </td>
+                                <td>
+                                    <p>TOWARDS HIGHLY EFFICIENT MAPPING ALGORITHM FOR ON-CHIP COMMUNICATION</p>
+                                </td>
+                                <td>
+                                    <p>COMPUTER ENGINEERING</p>
+                                </td>
+                                <td>
+                                    <p>DR. FAWAD HUSSAIN</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    25
+                                </td>
+                                <td>
+                                    <p>MUHAMMAD BILAL SHAHNAWAZ</p>
+                                </td>
+                                <td>
+                                    <p>HEART RATE VARIABILITY ANALYSIS OF ECG ABNORMALITIES</p>
+                                </td>
+                                <td>
+                                    <p>SOFTWARE ENGINEERING</p>
+                                </td>
+                                <td>
+                                    <p>DR. HASSAN DAWOOD</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    26
+                                </td>
+                                <td>
+                                    <p>UMER ALI KHAN</p>
+                                </td>
+                                <td>
+                                    <p>A HYBRID FRAMEWORK FOR CONTENT BASED IMAGE RETRIEVAL</p>
+                                </td>
+                                <td>
+                                    <p>SOFTWARE ENGINEERING</p>
+                                </td>
+                                <td>
+                                    <p>DR. ALI JAVED</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    27
+                                </td>
+                                <td>
+                                    <p>MARRIAM NAWAZ</p>
+                                </td>
+                                <td>
+                                    <p>FACE SWAP AND FACE-REENACTMENT DEEP FAKES DETECTION</p>
+                                </td>
+                                <td>
+                                    <p>SOFTWARE ENGINEERING</p>
+                                </td>
+                                <td>
+                                    <p>DR. ALI JAVED</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    28
+                                </td>
+                                <td>
+                                    <p>MUHAMMAD YOUSAF</p>
+                                </td>
+                                <td>
+                                    <p>FLEXIBLE ANTENNAS FOR BIOMEDICAL APPLICATIONS</p>
+                                </td>
+                                <td>
+                                    <p>TELECOMMUNICATION ENGINEERING</p>
+                                </td>
+                                <td>
+                                    <p>PROF. DR. ADEEL AKRAM</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    29
+                                </td>
+                                <td>
+                                    <p>WAQAS AHMAD</p>
+                                </td>
+                                <td>
+                                    <p>ACTIVITY RECOGNITION FOR INTELLIGENT VIDEO SURVEILLANCE</p>
+                                </td>
+                                <td>
+                                    <p>TELECOMMUNICATION ENGINEERING</p>
+                                </td>
+                                <td>
+                                    <p>PROF. DR. MUHAMMAD HAROON YOUSAF</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <p>&nbsp;</p>
+        </div>
+
+        <div class="mainpara" id="uetmap">
+            <div class="mainheadingdiv">
+                <div class="mainheadingdivinner">
+                    <h2 class="mainparaheading">⁠Map</h2>
+                </div>
+            </div>
+            <div class="onediv">
+                <div class="sectioncontent">
+                    <div style="text-align: center;">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6633.712044144946!2d72.82631191266395!3d33.76438621996401!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38dfa436e082015d%3A0xf729c78e5ac28d57!2sUniversity%20of%20Engineering%20and%20Technology%20(UET)%2C%20Taxila!5e0!3m2!1sen!2s!4v1703966863992!5m2!1sen!2s" width="480" height="360" style="border: 0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                </div>
+            </div>
+            <p>&nbsp;</p>
+        </div>
+
+        <div class="mainpara" id="busroutes">
+            <div class="mainheadingdiv">
+                <div class="mainheadingdivinner">
+                    <h2 class="mainparaheading">⁠Bus Routes</h2>
+                </div>
+            </div>
+            <div class="onediv">
+                <div class="sectioncontent">
+                    <div style="text-align: center;">
+                        <img src="/PageContents/21stConvocation2024/BusRoutes21stConvocation2024.jpg" style="border: 0; width: 100%; " />
+                    </div>
+                </div>
+            </div>
+            <p>&nbsp;</p>
+        </div>
+
+        <div class="mainpara" id="routeparking">
+            <div class="mainheadingdiv">
+                <div class="mainheadingdivinner">
+                    <h2 class="mainparaheading">⁠Route for Parking</h2>
+                </div>
+            </div>
+            <div class="onediv">
+                <div class="sectioncontent">
+                    <div class="col-sm-6 col-xs-12">
+                        <div style="text-align: center;">
+                            <iframe src="https://www.google.com/maps/d/embed?mid=1lzKD7cmkvkbSXO9qrHnF8t9b-rv_6LA&ehbc=2E312F" width="480" height="360"></iframe>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-xs-12">
+                        <div style="text-align: center;">
+                            <img src="/PageContents/21stConvocation2024//routeandparking.jpg" class="img-responsive" />
+                            <div>
+                                <span style="color: red; font-weight: bold">Red line indicates parking route</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p>&nbsp;</p>
+        </div>
+
+        <div class="mainpara" id="previousconvocations">
+            <div class="mainheadingdiv">
+                <div class="mainheadingdivinner">
+                    <h2 class="mainparaheading">⁠Previous Convocations</h2>
+                </div>
+            </div>
+            <div class="onediv">
+                <div class="sectioncontent">
+                    <table class="table table-striped previousconvtable" style=" border-collapse: collapse;">
+                        <tbody>
+                            <tr>
+                                <th>Sr. No.</th>
+                                <th>Event</th>
+                                <th>Date</th>
+                            </tr>
+                            <tr>
+                                <td class="col-sm-1">1</td>
+                                <td class="col-sm-9"><a href="/EventDetails/20th-Convocation-2023"><span>20th Convocation 2023</span></a></td>
+                                <td class="col-sm-2"><span style="font-weight: bold">23-02-2023</span></td>
+                            </tr>
+                            <tr>
+                                <td class="col-sm-1">2</td>
+                                <td class="col-sm-9"><a href="/EventDetails/19th-Convocation-2022"><span>19th Convocation 2022</span></a></td>
+                                <td class="col-sm-2"><span style="font-weight: bold">06-01-2022</span></td>
+                            </tr>
+                            <tr>
+                                <td class="col-sm-1">3</td>
+                                <td class="col-sm-9"><a href="/EventDetails/18th-Convocation-2020"><span>18th Convocation 2020</span></a></td>
+                                <td class="col-sm-2"><span style="font-weight: bold">24-02-2020</span></td>
+                            </tr>
+                            <tr>
+                                <td class="col-sm-1">4</td>
+                                <td class="col-sm-9"><a href="/EventDetails/17th-Convocation-2017"><span>17th Convocation 2017</span></a></td>
+                                <td class="col-sm-2"><span style="font-weight: bold">03-11-2017</span></td>
+                            </tr>
+                            <tr>
+                                <td class="col-sm-1">5</td>
+                                <td class="col-sm-9"><a href="/EventDetails/16th-Convocation-2016"><span>16th Convocation 2016</span></a></td>
+                                <td class="col-sm-2"><span style="font-weight: bold">10-12-2016</span></td>
+                            </tr>
+                            <tr>
+                                <td class="col-sm-1">6</td>
+                                <td class="col-sm-9"><a href="/EventDetails/15th-Convocation-2016"><span>15th Convocation 2016</span></a></td>
+                                <td class="col-sm-2"><span style="font-weight: bold">04-03-2016</span></td>
+                            </tr>
+                            <tr>
+                                <td class="col-sm-1">7</td>
+                                <td class="col-sm-9"><a href="/EventDetails/14th-Convocation-2015"><span>14th Convocation 2015</span></a></td>
+                                <td class="col-sm-2"><span style="font-weight: bold">08-12-2015</span></td>
+                            </tr>
+                            <tr>
+                                <td class="col-sm-1">8</td>
+                                <td class="col-sm-9"><a href="/EventDetails/13th-Convocation-2013"><span>13th Convocation 2013</span></a></td>
+                                <td class="col-sm-2"><span style="font-weight: bold">10-12-2013</span></td>
+                            </tr>
+                            <tr>
+                                <td class="col-sm-1">9</td>
+                                <td class="col-sm-9"><a href="/EventDetails/12th-Convocation-2013"><span>12th Convocation 2013</span></a></td>
+                                <td class="col-sm-2"><span style="font-weight: bold">02-02-2013</span></td>
+                            </tr>
+                            <tr>
+                                <td class="col-sm-1">10</td>
+                                <td class="col-sm-9"><a href="/EventDetails/11th-Convocation-2012"><span>11th Convocation 2012</span></a></td>
+                                <td class="col-sm-2"><span style="font-weight: bold">10-12-2012</span></td>
+                            </tr>
+                            <tr>
+                                <td class="col-sm-1">11</td>
+                                <td class="col-sm-9"><a href="/EventDetails/10th-Convocation-2011"><span>10th Convocation 2011</span></a></td>
+                                <td class="col-sm-2"><span style="font-weight: bold">11-10-2011</span></td>
+                            </tr>
+                            <tr>
+                                <td class="col-sm-1">12</td>
+                                <td class="col-sm-9"><a href="/EventDetails/9th-Convocation-2011"><span>9th Convocation 2011</span></a></td>
+                                <td class="col-sm-2"><span style="font-weight: bold">18-04-2011</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <p>&nbsp;</p>
+        </div>
+
+        <div class="mainpara" id="downloads">
+            <div class="mainheadingdiv">
+                <div class="mainheadingdivinner">
+                    <h2 class="mainparaheading">⁠Downloads</h2>
+                </div>
+            </div>
+            <div class="onediv">
+                <div class="sectioncontent">
+                    <div style="text-align: center">
+                        <a class="btn btn-primary" href="/PageContents/21stConvocation2024/Convocation-Advertisement-2024.pdf?s=1">Download Advertisement for Complete Information</a>
+                        <a class="btn btn-primary" href="https://web.uettaxila.edu.pk/PageContents/21stConvocation2024//ListofMedalist2024.pdf">Download List of Medalists for 21st Convocation</a>
+                    </div>
+                </div>
+            </div>
+            <p>&nbsp;</p>
+        </div>
+
+        <div class="mainpara" id="contactus">
+            <div class="mainheadingdiv">
+                <div class="mainheadingdivinner">
+                    <h2 class="mainparaheading">⁠Contact us</h2>
+                </div>
+            </div>
+            <div class="onediv">
+                <div class="sectioncontent">
+                    <div>
+                        <div class="speaker row">
+                            <div class="col-xs-12 col-sm-12 col-md-2">
+                                <img src="/images/convocation2024/20-EE-85-focal-person-whatsapp.jpg" class="profileImg" alt="No Image" style="width: 150px">
+                            </div>
+                            <div class="col-xs-12 col-sm-12 col-md-10 speakerdetails">
+                                <span style="font-weight: bold; font-style: italic; font-size: 20pt">Faisal Shaheen (20-EE-85)</span>
+                                <br />
+                                <span style="font-size: 13pt">
+                                    Contact No: +923036747613
+                                    <br />Leader of the House, NYA UET Taxila
+                                    <br />Focal Person for Information and updates of 21<sup>st</sup> Convocation 2024 UET Taxila
+                                    <br /><a href="https://whatsapp.com/channel/0029VaDgRGR4SpkHhUtdi43m"><img src="/images/convocation2024/whatsapp.png" style="width: 50px" /></a>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <p>&nbsp;</p>
+        </div>
+    </div>
+</div>
+            <!-- Body Content -->
+            <div class="row nopadding text-center" style="display: none;">
+                <div class="col-sm-12 socialiconscontainer">
+                    <div class="container">
+                        <h4>Connect with US</h4>
+                        <ul class="socialiconsmain">
+                            <li><a class="facebook" href="https://www.facebook.com/profile.php?id=61554737883281" target="_blank"><i class="fa fa-facebook fa-2x"></i></a></li>
+                            <li><a class="linkedin" href="https://www.linkedin.com/company/uettaxilaofficial" target="_blank"><i class="fa fa-linkedin fa-2x"></i></a></li>
+                            <li><a class="instagram" href="https://www.instagram.com/uettaxilaofficial" target="_blank"><i class="fa fa-instagram fa-2x"></i></a></li>
+                            <li><a class="twitter" href="https://twitter.com/uettofficial" target="_blank"><i class="fa fa-twitter fa-2x"></i></a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer class="container-fluid text-center">
+            <ul class="faddress">
+                <li><span style="color:#0099CC;">University of Engineering & Technology Taxila, 47050</span></li> 
+            </ul>
+        </footer>
+        <button class="btn removeFromPrint" onclick="if (!window.__cfRLUnblockHandlers) return false; topFunction()" id="gotoTopButton" title="Go to top" data-cf-modified-5a1e85b58b668adbc5b0d718-="">
+            <div class="arrow-up"></div>
+        </button>
+    </div>
+    <div style="display: none">
+        Welcome to International Conference On Advances In Civil And Environmental Engineering (ICACEE-2024)
+        <br />21<sup>st</sup>-22<sup>nd</sup> February 2024  UET Taxila, Pakistan
+    </div>
+<script src="/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="5a1e85b58b668adbc5b0d718-|49" defer></script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"d8564f6d5b4e410eb202d13f98326329","r":1}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a257368e595a339a',t:'MTc4NTc3OTkzNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
+

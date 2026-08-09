@@ -149,7 +149,9 @@ async function executeStreamPhase(
   }, CHAT_TIMEOUT_MS);
   try {
     const dbMessagesRaw = await convex.query(api.messages.list, { threadId });
-    const dbMessages: DbMessage[] = Array.isArray(dbMessagesRaw) ? (dbMessagesRaw as DbMessage[]) : [];
+    const dbMessages: DbMessage[] = Array.isArray(dbMessagesRaw)
+      ? (dbMessagesRaw as DbMessage[])
+      : [];
 
     // Whether the user message for this turn is already persisted. Only treat
     // this as a retry when the caller explicitly requested a retry AND the last

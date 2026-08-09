@@ -1,439 +1,77 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
-import { useConvexAuth, useConvex } from "convex/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useConvexAuth } from "convex/react";
+import * as React from "react";
+import { useConvexConnectionSnapshot } from "@/components/ConvexConnectionMonitor";
 import { useUserData } from "@/hooks/use-user-data";
+import { copyToClipboard } from "@/lib/utils";
 
-// Increased from 10s → 15s to give high-latency Pakistani networks more headroom
-// before declaring a failure. Research shows IPv6 blackhole delays range 10–30s.
-const TIMEOUT_MS = 15_000;
-// Auto-retry countdown shown on the error screen
-const RETRY_COUNTDOWN_S = 30;
+const INITIAL_WAIT_MS = 20_000;
+const OFFLINE_WAIT_MS = 2_500;
 
-// ---------------------------------------------------------------------------
-// Platform detection helpers (client-only, safe inside "use client")
-// ---------------------------------------------------------------------------
-function detectPlatform(): "windows" | "mac" | "android" | "ios" | "other" {
-  if (typeof navigator === "undefined") return "other";
-  const ua = navigator.userAgent.toLowerCase();
-  if (ua.includes("android")) return "android";
-  if (ua.includes("iphone") || ua.includes("ipad")) return "ios";
-  if (ua.includes("win")) return "windows";
-  if (ua.includes("mac")) return "mac";
-  return "other";
+function useOnlineHint(): boolean {
+  const [online, setOnline] = React.useState(true);
+
+  React.useEffect(() => {
+    const update = () => setOnline(navigator.onLine);
+    update();
+    window.addEventListener("online", update);
+    window.addEventListener("offline", update);
+    return () => {
+      window.removeEventListener("online", update);
+      window.removeEventListener("offline", update);
+    };
+  }, []);
+
+  return online;
 }
 
-// ---------------------------------------------------------------------------
-// Reconnect banner – shown after initial successful load if WS drops mid-session
-// ---------------------------------------------------------------------------
 export function ConvexReconnectBanner() {
-  const convex = useConvex();
-  const [isConnected, setIsConnected] = useState(true);
-  const [wasEverConnected, setWasEverConnected] = useState(false);
+  const connection = useConvexConnectionSnapshot();
 
-  useEffect(() => {
-    const unsub = convex.subscribeToConnectionState((state) => {
-      if (state.isWebSocketConnected) {
-        setWasEverConnected(true);
-        setIsConnected(true);
-      } else if (state.hasEverConnected) {
-        setIsConnected(false);
-      }
-    });
-    return unsub;
-  }, [convex]);
-
-  // Only show after a prior successful connection was established then lost
-  if (isConnected || !wasEverConnected) return null;
+  if (connection.connected || !connection.hasEverConnected) return null;
 
   return (
     <div
       role="status"
       aria-live="polite"
-      className="fixed top-0 left-0 right-0 z-[9999] flex items-center justify-center gap-2 px-4 py-2 bg-amber-500/95 backdrop-blur-sm text-black text-xs font-semibold font-sans shadow-lg"
+      aria-atomic="true"
+      className="fixed inset-x-0 top-0 z-[9999] flex items-center justify-center gap-2 bg-amber-500/95 px-4 pb-2 pt-[calc(env(safe-area-inset-top)_+_0.5rem)] text-xs font-semibold text-black shadow-lg backdrop-blur-sm"
     >
-      <span className="relative flex h-2 w-2 shrink-0">
-        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-black opacity-50" />
-        <span className="relative inline-flex rounded-full h-2 w-2 bg-black" />
+      <span className="relative flex h-2 w-2 shrink-0" aria-hidden="true">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-black opacity-50 motion-reduce:animate-none" />
+        <span className="relative inline-flex h-2 w-2 rounded-full bg-black" />
       </span>
-      Reconnecting to server… Your chats are saved.
-      <button
-        type="button"
-        onClick={() => window.location.reload()}
-        className="ml-2 underline underline-offset-2 opacity-80 hover:opacity-100 cursor-pointer"
-      >
-        Reload
-      </button>
+      Live updates are reconnecting. Keep this page open while the connection recovers.
     </div>
   );
 }
 
-// ---------------------------------------------------------------------------
-// Main gate
-// ---------------------------------------------------------------------------
-export function ConvexReadyGate({ children }: { children: React.ReactNode }) {
-  const { isLoaded: isClerkLoaded, user } = useUser();
-  const { isLoading: isConvexLoading } = useConvexAuth();
-  const { convexUser, isConvexLoaded } = useUserData();
-  const [timedOut, setTimedOut] = useState(false);
-  const [networkError, setNetworkError] = useState<string | null>(null);
-  const [diagnosing, setDiagnosing] = useState(false);
-  const [countdown, setCountdown] = useState(RETRY_COUNTDOWN_S);
-  const [copied, setCopied] = useState(false);
-  const platform = useRef<ReturnType<typeof detectPlatform>>("other");
-
-  // Detect platform once on mount (client-only)
-  useEffect(() => {
-    platform.current = detectPlatform();
-  }, []);
-
-  // Ready when Clerk & Convex network are loaded, AND if a Clerk user exists,
-  // their Convex user document has been successfully created and synced by UserSync.
-  const isReady =
-    isClerkLoaded && !isConvexLoading && (!user || (isConvexLoaded && convexUser !== null));
-
-  const checkReachability = useCallback(async (signal: AbortSignal): Promise<string> => {
-    const url = process.env.NEXT_PUBLIC_CONVEX_URL;
-    if (!url) return "ENV_MISSING";
-    try {
-      await fetch(url, { method: "GET", mode: "no-cors", signal });
-      return "DATABASE_REACHABLE";
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        return err.name === "AbortError" ? "TIMEOUT_ERROR" : "UNREACHABLE_ERROR";
-      }
-      return "UNREACHABLE_ERROR";
-    }
-  }, []);
-
-  const runDiagnostics = async () => {
-    setDiagnosing(true);
-    setNetworkError(null);
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), 6000);
-    const result = await checkReachability(controller.signal);
-    clearTimeout(id);
-    setNetworkError(result);
-    setDiagnosing(false);
-  };
-
-  // Fire initial timeout gate
-  useEffect(() => {
-    if (isReady) return;
-    const timer = setTimeout(() => setTimedOut(true), TIMEOUT_MS);
-    return () => clearTimeout(timer);
-  }, [isReady]);
-
-  // Auto-run diagnostics when timeout triggers
-  useEffect(() => {
-    if (!timedOut) return;
-    let cancelled = false;
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 6000);
-
-    (async () => {
-      setDiagnosing(true);
-      setNetworkError(null);
-      const result = await checkReachability(controller.signal);
-      if (!cancelled) {
-        setNetworkError(result);
-        setDiagnosing(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-      clearTimeout(timeoutId);
-      controller.abort();
-    };
-  }, [timedOut, checkReachability]);
-
-  // Auto-retry countdown
-  useEffect(() => {
-    if (!timedOut) return;
-    setCountdown(RETRY_COUNTDOWN_S);
-    const interval = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          window.location.reload();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [timedOut]);
-
-  // Rotate loading subtexts
-  const [loadStep, setLoadStep] = useState(0);
-  useEffect(() => {
-    if (isReady || timedOut) return;
-    const interval = setInterval(() => setLoadStep((p) => (p + 1) % 4), 1500);
-    return () => clearInterval(interval);
-  }, [isReady, timedOut]);
-
-  // Happy path
-  if (isReady) return <>{children}</>;
-
+function LoadingScreen({ step }: { step: number }) {
   const loadingTexts = [
-    "SYS // ESTABLISHING HANDSHAKE…",
-    "AUTH // RESOLVING CLERK IDENTITY…",
-    "CONVEX // SYNCHRONIZING REALTIME ENGINE…",
-    "RAG // INITIALIZING VECTOR WORKSPACE…",
+    "AUTH // RESOLVING IDENTITY…",
+    "CONVEX // ESTABLISHING REALTIME CONNECTION…",
+    "PROFILE // SYNCHRONIZING USER DATA…",
+    "WORKSPACE // PREPARING CHAT SERVICES…",
   ];
 
-  // Derive a human-readable cause for students
-  const isTimeout = networkError === "TIMEOUT_ERROR";
-  const isUnreachable = networkError === "UNREACHABLE_ERROR";
-  const isReachableButBlocked = networkError === "DATABASE_REACHABLE";
-  const isMobile = platform.current === "android" || platform.current === "ios";
-
-  const copyDiagnostics = () => {
-    const text = [
-      `UET GPT Diagnostic Report`,
-      `Time: ${new Date().toISOString()}`,
-      `Platform: ${platform.current}`,
-      `Clerk Auth: ${isClerkLoaded ? "LOADED" : "PENDING"}`,
-      `Convex Sync: ${isConvexLoading ? "CONNECTING" : "CONNECTED"}`,
-      `Server Reachability: ${networkError ?? "UNKNOWN"}`,
-      `URL: ${process.env.NEXT_PUBLIC_CONVEX_URL ?? "not set"}`,
-    ].join("\n");
-    navigator.clipboard.writeText(text)
-      .then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      })
-      .catch((err) => {
-        console.error("Failed to copy diagnostics:", err);
-      });
-  };
-
-  // -------------------------------------------------------------------------
-  // TIMEOUT SCREEN
-  // -------------------------------------------------------------------------
-  if (timedOut) {
-    return (
-      <div className="flex h-full w-full flex-col items-center justify-center bg-[var(--surface-0)] overflow-y-auto py-8 px-4">
-        <div className="w-full max-w-lg space-y-4">
-
-          {/* ── Header card ─────────────────────────────────────────── */}
-          <div className="border border-red-900/40 bg-red-950/20 rounded-lg p-5 text-center">
-            <div className="mx-auto mb-3 w-10 h-10 rounded-full bg-red-900/30 border border-red-700/50 flex items-center justify-center">
-              <span className="text-red-400 text-lg font-bold select-none">!</span>
-            </div>
-            <h1 className="text-base font-bold text-red-300 tracking-tight">
-              Can&apos;t Connect to Server
-            </h1>
-            <p className="mt-1.5 text-sm text-zinc-400 leading-relaxed">
-              {isTimeout
-                ? "Your network is blocking the connection. This is very common on university Wi-Fi and PTCL in Pakistan."
-                : isUnreachable
-                  ? "The server cannot be reached. Check your internet connection."
-                  : isReachableButBlocked
-                    ? "The server is reachable but WebSocket traffic is blocked (firewall or proxy)."
-                    : "Diagnosing your connection…"}
-            </p>
-          </div>
-
-          {/* ── Quickest fix for mobile ──────────────────────────────── */}
-          {isMobile && (
-            <div className="border border-emerald-800/40 bg-emerald-950/20 rounded-lg p-4">
-              <p className="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1">
-                ⚡ Fastest Fix (30 seconds)
-              </p>
-              <p className="text-sm text-zinc-300 leading-relaxed">
-                Turn off Wi-Fi and use your <strong className="text-white">mobile data</strong> instead (Jazz, Zong, or Telenor). University Wi-Fi blocks this app&apos;s connection.
-              </p>
-              <button
-                type="button"
-                onClick={() => window.location.reload()}
-                className="mt-3 w-full py-2 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold transition-colors cursor-pointer"
-              >
-                I switched — retry now
-              </button>
-            </div>
-          )}
-
-          {/* ── Fix steps (timeout / blocked) ───────────────────────── */}
-          {(isTimeout || isReachableButBlocked) && !isMobile && (
-            <div className="border border-zinc-700/50 bg-zinc-900/60 rounded-lg p-4 space-y-4">
-              <p className="text-xs font-semibold text-amber-400 uppercase tracking-wider">
-                How to fix it — pick any option
-              </p>
-
-              {/* Option 1: WARP */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-600 flex items-center justify-center text-white text-[10px] font-bold">1</span>
-                  <p className="text-sm font-semibold text-white">
-                    Install Cloudflare WARP — free, 30 seconds
-                  </p>
-                </div>
-                <p className="text-xs text-zinc-400 ml-7 leading-relaxed">
-                  A free app by Cloudflare that routes your connection through a working path. Fixes university Wi-Fi and PTCL IPv6 issues instantly.
-                </p>
-                <a
-                  href="https://one.one.one.one/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="ml-7 inline-flex items-center gap-2 px-4 py-2 rounded bg-orange-600 hover:bg-orange-500 text-white text-xs font-semibold transition-colors"
-                >
-                  Download Cloudflare WARP (free)
-                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </a>
-              </div>
-
-              <div className="border-t border-zinc-800" />
-
-              {/* Option 2: Disable IPv6 on Windows */}
-              {platform.current === "windows" && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-800 flex items-center justify-center text-white text-[10px] font-bold">2</span>
-                    <p className="text-sm font-semibold text-white">
-                      Disable IPv6 on Windows
-                    </p>
-                  </div>
-                  <ol className="ml-7 text-xs text-zinc-400 space-y-1.5 list-none">
-                    <li className="flex gap-2"><span className="text-zinc-500 font-mono">①</span> Press <kbd className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-200 font-mono text-[10px]">Win + R</kbd>, type <kbd className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-200 font-mono text-[10px]">ncpa.cpl</kbd>, press Enter</li>
-                    <li className="flex gap-2"><span className="text-zinc-500 font-mono">②</span> Right-click your Wi-Fi or Ethernet → <strong className="text-zinc-200">Properties</strong></li>
-                    <li className="flex gap-2"><span className="text-zinc-500 font-mono">③</span> <strong className="text-zinc-200">Uncheck</strong> &ldquo;Internet Protocol Version 6 (TCP/IPv6)&rdquo;</li>
-                    <li className="flex gap-2"><span className="text-zinc-500 font-mono">④</span> Click <strong className="text-zinc-200">OK</strong> and reload this page</li>
-                  </ol>
-                </div>
-              )}
-
-              {/* Option 2 for Mac */}
-              {platform.current === "mac" && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-800 flex items-center justify-center text-white text-[10px] font-bold">2</span>
-                    <p className="text-sm font-semibold text-white">Disable IPv6 on Mac</p>
-                  </div>
-                  <ol className="ml-7 text-xs text-zinc-400 space-y-1.5 list-none">
-                    <li className="flex gap-2"><span className="text-zinc-500 font-mono">①</span> Open <strong className="text-zinc-200">System Settings</strong> → <strong className="text-zinc-200">Network</strong></li>
-                    <li className="flex gap-2"><span className="text-zinc-500 font-mono">②</span> Select your Wi-Fi → <strong className="text-zinc-200">Details</strong> → <strong className="text-zinc-200">TCP/IP</strong></li>
-                    <li className="flex gap-2"><span className="text-zinc-500 font-mono">③</span> Set <strong className="text-zinc-200">Configure IPv6</strong> to <strong className="text-zinc-200">Off</strong></li>
-                    <li className="flex gap-2"><span className="text-zinc-500 font-mono">④</span> Click OK and reload</li>
-                  </ol>
-                </div>
-              )}
-
-              <div className="border-t border-zinc-800" />
-
-              {/* Option 3: Hotspot */}
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-zinc-700 flex items-center justify-center text-white text-[10px] font-bold">3</span>
-                  <p className="text-sm font-semibold text-white">Switch to mobile hotspot</p>
-                </div>
-                <p className="text-xs text-zinc-400 ml-7 leading-relaxed">
-                  Turn on your phone&apos;s hotspot (Jazz / Zong / Telenor) and connect your laptop to it. Mobile data bypasses university network restrictions.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* ── Unreachable (no internet) ────────────────────────────── */}
-          {isUnreachable && (
-            <div className="border border-zinc-700/50 bg-zinc-900/60 rounded-lg p-4">
-              <p className="text-sm text-zinc-300 leading-relaxed">
-                Your device cannot reach the internet. Check your Wi-Fi or mobile data connection, then retry.
-              </p>
-            </div>
-          )}
-
-          {/* ── Diagnostic log (collapsible technical panel) ─────────── */}
-          <details className="border border-zinc-800/60 rounded-lg overflow-hidden group">
-            <summary className="px-4 py-3 text-xs font-mono text-zinc-500 cursor-pointer hover:text-zinc-300 transition-colors select-none flex items-center justify-between">
-              <span>Technical details</span>
-              <span className="group-open:rotate-180 transition-transform">▾</span>
-            </summary>
-            <div className="px-4 pb-4 pt-1 font-mono text-[10px] space-y-2 border-t border-zinc-800">
-              <div className="flex justify-between">
-                <span className="text-zinc-500">Clerk Auth:</span>
-                <span className={isClerkLoaded ? "text-emerald-400" : "text-zinc-400"}>
-                  {isClerkLoaded ? "LOADED" : "PENDING…"}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-zinc-500">Convex Sync:</span>
-                <span className={isConvexLoading ? "text-amber-400" : "text-emerald-400"}>
-                  {isConvexLoading ? "CONNECTING…" : "CONNECTED"}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-zinc-500">Server Reachability:</span>
-                {diagnosing ? (
-                  <span className="text-zinc-400 animate-pulse">TESTING…</span>
-                ) : networkError === "DATABASE_REACHABLE" ? (
-                  <span className="text-emerald-400">REACHABLE (TCP/TLS)</span>
-                ) : networkError === "TIMEOUT_ERROR" ? (
-                  <span className="text-red-400">TIMEOUT</span>
-                ) : networkError === "UNREACHABLE_ERROR" ? (
-                  <span className="text-red-400">UNREACHABLE</span>
-                ) : (
-                  <span className="text-zinc-500">{networkError ?? "CHECKING…"}</span>
-                )}
-              </div>
-              <div className="flex justify-between">
-                <span className="text-zinc-500">Platform:</span>
-                <span className="text-zinc-400">{platform.current}</span>
-              </div>
-            </div>
-          </details>
-
-          {/* ── Action buttons ───────────────────────────────────────── */}
-          <div className="flex flex-col sm:flex-row gap-2">
-            <button
-              type="button"
-              onClick={() => window.location.reload()}
-              className="flex-1 py-2.5 rounded border border-emerald-700/60 bg-emerald-900/30 hover:bg-emerald-900/50 text-emerald-300 text-sm font-semibold transition-colors cursor-pointer"
-            >
-              Retry now ({countdown}s)
-            </button>
-            <button
-              type="button"
-              onClick={runDiagnostics}
-              disabled={diagnosing}
-              className="flex-1 py-2.5 rounded border border-zinc-700 hover:bg-zinc-800 text-zinc-400 text-sm font-semibold transition-colors disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
-            >
-              {diagnosing ? "Diagnosing…" : "Re-run diagnostics"}
-            </button>
-            <button
-              type="button"
-              onClick={copyDiagnostics}
-              title="Copy diagnostic info for support"
-              className="sm:w-auto px-4 py-2.5 rounded border border-zinc-700 hover:bg-zinc-800 text-zinc-500 text-xs font-mono transition-colors cursor-pointer"
-            >
-              {copied ? "Copied!" : "Copy info"}
-            </button>
-          </div>
-
-          <p className="text-center text-[10px] text-zinc-600">
-            The server is healthy — this is a local network issue.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // -------------------------------------------------------------------------
-  // LOADING SCREEN (branded, unchanged)
-  // -------------------------------------------------------------------------
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center bg-[var(--ks-lacquer-black,#070708)] text-zinc-100">
-      <div className="relative flex flex-col items-center gap-12 p-8 w-full max-w-sm">
-        {/* Central Aperture Rings */}
-        <div className="relative w-28 h-28 flex items-center justify-center">
-          {/* Outer Dashed Orbit */}
+    <div
+      className="flex h-full w-full flex-col items-center justify-center bg-[var(--ks-lacquer-black,#070708)] text-zinc-100"
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+    >
+      <span className="sr-only">Loading UETGPT services.</span>
+      <div
+        aria-hidden="true"
+        className="relative flex w-full max-w-sm flex-col items-center gap-12 p-8"
+      >
+        <div className="relative flex h-28 w-28 items-center justify-center" aria-hidden="true">
           <svg
-            className="absolute w-full h-full animate-[spin_12s_linear_infinite]"
+            className="absolute h-full w-full animate-[spin_12s_linear_infinite] motion-reduce:animate-none"
             viewBox="0 0 100 100"
-            aria-hidden="true"
           >
             <circle
               cx="50"
@@ -445,12 +83,9 @@ export function ConvexReadyGate({ children }: { children: React.ReactNode }) {
               strokeDasharray="4 8"
             />
           </svg>
-
-          {/* Middle Gold Track */}
           <svg
-            className="absolute w-[80%] h-[80%] animate-[spin_8s_linear_infinite_reverse]"
+            className="absolute h-[80%] w-[80%] animate-[spin_8s_linear_infinite_reverse] motion-reduce:animate-none"
             viewBox="0 0 100 100"
-            aria-hidden="true"
           >
             <circle
               cx="50"
@@ -463,48 +98,268 @@ export function ConvexReadyGate({ children }: { children: React.ReactNode }) {
               className="opacity-70"
             />
           </svg>
-
-          {/* Inner Geometric Core */}
-          <div className="absolute w-8 h-8 border border-[var(--ks-kinpaku-gold)] rotate-45 flex items-center justify-center transition-all duration-1000 ease-out shadow-[0_0_20px_oklch(84%_0.19_80.46_/_0.15)] bg-[var(--ks-lacquer-deep)]">
-            <div className="w-1.5 h-1.5 bg-[var(--ks-verdigris-patina)] animate-ping absolute" />
-            <div className="w-1 h-1 bg-[var(--ks-champagne)] rounded-full" />
+          <div className="absolute flex h-8 w-8 rotate-45 items-center justify-center border border-[var(--ks-kinpaku-gold)] bg-[var(--ks-lacquer-deep)] shadow-[0_0_20px_oklch(84%_0.19_80.46_/_0.15)]">
+            <span className="absolute h-1.5 w-1.5 animate-ping bg-[var(--ks-verdigris-patina)] motion-reduce:animate-none" />
+            <span className="h-1 w-1 rounded-full bg-[var(--ks-champagne)]" />
           </div>
         </div>
 
-        {/* Console Loading Log */}
-        <div className="w-full flex flex-col items-center gap-4">
-          <div className="flex flex-col items-center gap-1">
-            <span className="font-mono text-[9px] text-[var(--ks-kinpaku-gold)] tracking-[0.3em] uppercase select-none">
-              {"UETGPT // SECURE BOOT"}
+        <div className="flex w-full flex-col items-center gap-4">
+          <div className="flex flex-col items-center gap-1 text-center">
+            <span className="select-none font-mono text-[9px] uppercase tracking-[0.3em] text-[var(--ks-kinpaku-gold)]">
+              UETGPT // SECURE BOOT
             </span>
-            <span className="text-[10px] text-[var(--ks-text-muted)] font-mono tracking-[0.2em] uppercase h-4 text-center select-none">
-              {loadingTexts[loadStep]}
+            <span className="h-4 select-none font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--ks-text-muted)]">
+              {loadingTexts[step]}
             </span>
           </div>
-
-          {/* Glowing loader bar */}
-          <div className="w-48 h-[1px] bg-[var(--ks-rule)] relative overflow-hidden mt-2">
-            <div
-              className="absolute top-0 bottom-0 left-0 w-1/3 bg-[var(--ks-kinpaku-gold)] animate-progress"
-              style={{
-                boxShadow: "0 0 8px var(--ks-kinpaku-gold)",
-                backgroundImage:
-                  "linear-gradient(90deg, transparent, var(--ks-kinpaku-gold), transparent)",
-              }}
-            />
-          </div>
-
-          <div className="flex items-center gap-2 mt-2">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--ks-verdigris-patina)] opacity-75" />
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[var(--ks-verdigris-patina)]" />
-            </span>
-            <span className="font-mono text-[8px] text-[var(--ks-text-faint)] select-none">
-              CONNECTION LIVE
-            </span>
+          <div
+            className="relative mt-2 h-px w-48 overflow-hidden bg-[var(--ks-rule)]"
+            aria-hidden="true"
+          >
+            <span className="absolute inset-y-0 left-0 w-1/3 animate-progress bg-[var(--ks-kinpaku-gold)] motion-reduce:animate-none" />
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+function StatusRow({
+  label,
+  value,
+  state,
+}: {
+  label: string;
+  value: string;
+  state: "ok" | "wait" | "error";
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4 border-b border-zinc-800 py-2 last:border-none">
+      <dt className="text-zinc-500">{label}</dt>
+      <dd
+        className={
+          state === "ok"
+            ? "text-emerald-400"
+            : state === "error"
+              ? "text-red-400"
+              : "text-amber-400"
+        }
+      >
+        {value}
+      </dd>
+    </div>
+  );
+}
+
+export function ConvexReadyGate({ children }: { children: React.ReactNode }) {
+  const { isLoaded: clerkLoaded, user } = useUser();
+  const { isLoading: convexAuthLoading, isAuthenticated } = useConvexAuth();
+  const { convexUser, isConvexLoaded } = useUserData();
+  const connection = useConvexConnectionSnapshot();
+  const onlineHint = useOnlineHint();
+  const [timedOut, setTimedOut] = React.useState(false);
+  const [waitGeneration, setWaitGeneration] = React.useState(0);
+  const [copied, setCopied] = React.useState(false);
+  const copyResetRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const ready =
+    clerkLoaded && !convexAuthLoading && (!user || (isConvexLoaded && convexUser !== null));
+
+  React.useEffect(() => {
+    if (ready) {
+      setTimedOut(false);
+      return;
+    }
+    const timeout = setTimeout(
+      () => setTimedOut(true),
+      onlineHint ? INITIAL_WAIT_MS : OFFLINE_WAIT_MS,
+    );
+    return () => clearTimeout(timeout);
+  }, [ready, waitGeneration, onlineHint]);
+
+  const previousOnlineRef = React.useRef(onlineHint);
+  React.useEffect(() => {
+    const wasOnline = previousOnlineRef.current;
+    previousOnlineRef.current = onlineHint;
+    if (!wasOnline && onlineHint && !ready) {
+      setTimedOut(false);
+      setWaitGeneration((generation) => generation + 1);
+    }
+  }, [onlineHint, ready]);
+
+  const [loadingStep, setLoadingStep] = React.useState(0);
+  React.useEffect(() => {
+    if (ready || timedOut) return;
+    const interval = setInterval(() => setLoadingStep((step) => (step + 1) % 4), 1_600);
+    return () => clearInterval(interval);
+  }, [ready, timedOut]);
+
+  React.useEffect(() => {
+    return () => {
+      if (copyResetRef.current !== null) clearTimeout(copyResetRef.current);
+    };
+  }, []);
+
+  if (ready) return <>{children}</>;
+  if (!timedOut) return <LoadingScreen step={loadingStep} />;
+
+  const deploymentHost = (() => {
+    try {
+      return process.env.NEXT_PUBLIC_CONVEX_URL
+        ? new URL(process.env.NEXT_PUBLIC_CONVEX_URL).host
+        : "not configured";
+    } catch {
+      return "invalid URL";
+    }
+  })();
+
+  const copyDiagnostics = async () => {
+    const report = [
+      "UETGPT connection report",
+      `Time: ${new Date().toISOString()}`,
+      `Browser online hint: ${onlineHint}`,
+      `Clerk loaded: ${clerkLoaded}`,
+      `Convex auth loading: ${convexAuthLoading}`,
+      `Convex authenticated: ${isAuthenticated}`,
+      `Convex WebSocket connected: ${connection.connected}`,
+      `Convex ever connected: ${connection.hasEverConnected}`,
+      `Convex retries: ${typeof connection.retries === "number" ? connection.retries : "unavailable"}`,
+      `User query loaded: ${isConvexLoaded}`,
+      `User document present: ${convexUser != null}`,
+      `Deployment host: ${deploymentHost}`,
+    ].join("\n");
+
+    if (await copyToClipboard(report)) {
+      setCopied(true);
+      if (copyResetRef.current !== null) clearTimeout(copyResetRef.current);
+      copyResetRef.current = setTimeout(() => setCopied(false), 2_000);
+    }
+  };
+
+  const headline = !onlineHint
+    ? "Your browser reports that the device is offline"
+    : !connection.connected
+      ? "The realtime connection is taking longer than expected"
+      : "Account synchronization is taking longer than expected";
+
+  return (
+    <main className="flex h-full w-full items-center justify-center overflow-y-auto bg-[var(--surface-0)] px-4 py-8">
+      <div className="w-full max-w-lg space-y-4">
+        <section
+          role="alert"
+          className="rounded-xl border border-amber-800/40 bg-amber-950/20 p-5 text-center"
+        >
+          <div
+            className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full border border-amber-700/50 bg-amber-900/30 text-lg font-bold text-amber-300"
+            aria-hidden="true"
+          >
+            !
+          </div>
+          <h1 className="text-base font-bold tracking-tight text-amber-200">{headline}</h1>
+          <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+            UETGPT is waiting for Clerk authentication and the required Convex user data. The
+            WebSocket state below helps identify where initialization is delayed.
+          </p>
+        </section>
+
+        <section className="rounded-xl border border-zinc-700/50 bg-zinc-900/60 p-4">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-300">
+            Safe troubleshooting
+          </h2>
+          <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-relaxed text-zinc-400">
+            <li>Confirm that another website loads on this connection.</li>
+            <li>
+              Try a different trusted network if your current firewall or proxy blocks WebSockets.
+            </li>
+            <li>Reload once. If the problem persists, copy the technical report for support.</li>
+          </ol>
+          <p className="mt-3 text-xs leading-relaxed text-zinc-500">
+            The browser’s online flag is only a hint; the WebSocket state below is the more relevant
+            application signal.
+          </p>
+        </section>
+
+        <details className="overflow-hidden rounded-xl border border-zinc-800/60">
+          <summary className="flex cursor-pointer select-none items-center justify-between px-4 py-3 font-mono text-xs text-zinc-500 hover:text-zinc-300">
+            <span>Technical details</span>
+            <span aria-hidden="true">▾</span>
+          </summary>
+          <dl className="border-t border-zinc-800 px-4 py-2 font-mono text-[10px]">
+            <StatusRow
+              label="Browser network hint"
+              value={onlineHint ? "ONLINE" : "OFFLINE"}
+              state={onlineHint ? "ok" : "error"}
+            />
+            <StatusRow
+              label="Clerk"
+              value={clerkLoaded ? "LOADED" : "LOADING"}
+              state={clerkLoaded ? "ok" : "wait"}
+            />
+            <StatusRow
+              label="Convex auth"
+              value={
+                convexAuthLoading ? "LOADING" : isAuthenticated ? "AUTHENTICATED" : "ANONYMOUS"
+              }
+              state={convexAuthLoading ? "wait" : "ok"}
+            />
+            <StatusRow
+              label="Convex WebSocket"
+              value={connection.connected ? "CONNECTED" : "DISCONNECTED"}
+              state={connection.connected ? "ok" : "error"}
+            />
+            <StatusRow
+              label="User record"
+              value={
+                !user
+                  ? "NOT REQUIRED"
+                  : convexUser
+                    ? "READY"
+                    : isConvexLoaded
+                      ? "MISSING"
+                      : "LOADING"
+              }
+              state={!user || convexUser ? "ok" : isConvexLoaded ? "error" : "wait"}
+            />
+            <StatusRow
+              label="Deployment"
+              value={deploymentHost}
+              state={
+                deploymentHost === "not configured" || deploymentHost === "invalid URL"
+                  ? "error"
+                  : "ok"
+              }
+            />
+          </dl>
+        </details>
+
+        <div className="grid gap-2 sm:grid-cols-3">
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="rounded-lg border border-emerald-700/60 bg-emerald-900/30 px-4 py-2.5 text-sm font-semibold text-emerald-300 transition-colors hover:bg-emerald-900/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+          >
+            Reload
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setTimedOut(false);
+              setWaitGeneration((generation) => generation + 1);
+            }}
+            className="rounded-lg border border-zinc-700 px-4 py-2.5 text-sm font-semibold text-zinc-300 transition-colors hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
+          >
+            Keep waiting
+          </button>
+          <button
+            type="button"
+            onClick={() => void copyDiagnostics()}
+            className="rounded-lg border border-zinc-700 px-4 py-2.5 font-mono text-xs text-zinc-400 transition-colors hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
+          >
+            {copied ? "Copied" : "Copy report"}
+          </button>
+        </div>
+      </div>
+    </main>
   );
 }

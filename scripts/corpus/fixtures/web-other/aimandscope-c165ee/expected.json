@@ -1,0 +1,48 @@
+{
+  "_curated": true,
+  "_labelled_by": "scripts/eval/_label_webother.py (web-other expansion \u2014 labels sourced from raw body)",
+  "expected": {
+    "canonical_host": "web.uettaxila.edu.pk",
+    "criticality": "diagnostic",
+    "forbidden_links_contain": [
+      "logout",
+      "login"
+    ],
+    "forbidden_text_blocks": [
+      "Untitled Document"
+    ],
+    "max_duration_ms": 60000,
+    "required_links_contain": [
+      "sheffield.ac.uk"
+    ],
+    "required_resources": [
+      {
+        "crawlable": false,
+        "critical": false,
+        "kind": "page",
+        "nofollow": false,
+        "url_contains": "sheffield.ac.uk"
+      }
+    ],
+    "required_text_blocks": [
+      {
+        "text": "Swarm Intelligence Lab",
+        "why": "a named sub-lab \u2014 proves the body rendered"
+      },
+      {
+        "text": "Disaster Management",
+        "why": "an application domain listed"
+      }
+    ],
+    "resource_min_count": 1,
+    "title_contains": [
+      "Aim and Scope"
+    ],
+    "title_not_contains": [
+      "Untitled",
+      "404"
+    ]
+  },
+  "family": "web-other",
+  "fixture_id": "web-other/aimandscope-c165ee"
+}

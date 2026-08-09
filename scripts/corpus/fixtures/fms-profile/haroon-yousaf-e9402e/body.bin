@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Profile - Faculty Management System - UET Taxila</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/css/bootstrap.min.css" rel="stylesheet" media="all" />
+    <link href="/css/Styles.css?s=1" rel="stylesheet" />
+    <script src="/js/jquery.min.js" type="eea6113b8236c3f93cf68886-text/javascript"></script>
+    <script src="/js/jquery.form-validator.js" type="eea6113b8236c3f93cf68886-text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="eea6113b8236c3f93cf68886-text/javascript"></script>
+    <script src="/js/Profile.js" type="eea6113b8236c3f93cf68886-text/javascript"></script>
+</head>
+<body>
+    <div>
+<nav class="navbar navbar-inverse navbarcustom">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">
+                <img src="/images/uettaxila_logo.png" /></a>
+        </div>
+        <div class="collapse navbar-collapse" id="myNavbar">
+            <ul class="nav navbar-nav headerstyle">
+                <li>Faculty Management System - UET Taxila</li>
+            </ul>
+            <div class="navbar-buttons navbar-header pull-right">
+<a class="btn btn-lg btn-default" href="/Account">Login</a>            </div>
+        </div>
+    </div>
+</nav>
+  
+        <div class="container-fluid text-center contentclass">
+            <div class="row content">
+                 
+            <div class="row viewdiv">
+                <div class="col-sm-12 viewbtn"><input type="radio" checked="checked" name="profileviewtypeid" value="1">List View</div>
+                <div class="col-sm-12 viewbtn"><input type="radio" name="profileviewtypeid" value="2">One Page View</div>
+            </div>
+    <div class="col-sm-12">
+
+    <div id="profileview1">
+        <div class="col-sm-2 sidenav" id="leftmenu">
+<a href="#" data-fieldtype="0">Personal Information</a>
+<a href="#" data-fieldtype="1">Education</a>
+<a href="#" data-fieldtype="2">Research Work</a>
+<a href="#" data-fieldtype="3">Research Intrst</a>
+<a href="#" data-fieldtype="4">Publications</a>
+<a href="#" data-fieldtype="5">Projects</a>
+<a href="#" data-fieldtype="6">Admin Work</a>
+<a href="#" data-fieldtype="7">Development Work</a>
+<a href="#" data-fieldtype="8">Experience</a>
+<a href="#" data-fieldtype="9">Services</a>
+<a href="#" data-fieldtype="10">Membership</a>
+<a href="#" data-fieldtype="11">Teaching</a>
+<a href="#" data-fieldtype="12">Academic Positions</a>
+<a href="#" data-fieldtype="13">Affiliations</a>
+<a href="#" data-fieldtype="14">Awards</a>
+<a href="#" data-fieldtype="15">Conferences</a>
+<a href="#" data-fieldtype="16">Participations</a>
+<a href="#" data-fieldtype="17">Thesis Supervised</a>
+<a href="#" data-fieldtype="18">Workshops/ Courses Attended</a>
+<a href="#" data-fieldtype="19">PostGraduate Students</a>
+<a href="#" data-fieldtype="20">Research Group</a>
+        </div>
+        <div class="col-sm-10 text-left" id="profiledetailsdiv">
+            <div data-displayid="0">
+                <table class="table table-strip" >
+                    <tr>
+                        <td colspan="2">
+                            <img src="../imgs/haroon.yousaf.jpg?random=639212883467318073" class="profileimg" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Name</td>
+                        <td>Dr. Muhammad Haroon Yousaf
+                        </td>                    
+                    </tr>
+                    <tr>
+                        <td>Designation</td>
+                        <td>Professor</td>
+                    </tr>
+                    <tr>
+                        <td>Department</td>
+                        <td>Computer Engineering (Taxila)</td>
+                    </tr>
+                    <tr>
+                        <td>Highest Qualification</td>
+                        <td>PhD Computer Engineering, UET, Taxila</td>
+                    </tr>
+                    <tr>
+                        <td>Specialization</td>
+                        <td>Image Processing, Computer Vision, Video Processing, Gesture Recognition</td>
+                    </tr>
+                    <tr>
+                        <td>Phone No</td>
+                        <td>+92 51 9047568</td>
+                    </tr>
+                    <tr>
+                        <td>Cell No</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Fax No</td>
+                        <td>+92 51 9047420</td>
+                    </tr>
+                    <tr>
+                        <td>Email</td>
+                        <td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2e464f5c4141400057415b5d4f486e5b4b5a5a4f5647424f004b4a5b005e45">[email&#160;protected]</a></td>
+                    </tr>
+                </table>
+            </div>
+            <div data-displayid="1">
+                <p>PhD. Computer Engineering (Major: Computer Vision)</p>
+
+<p>MSc. Computer Engineering</p>
+
+<p>BSc. (Honours)&nbsp;Computer Engineering</p>
+
+            </div>
+            <div data-displayid="2">
+                 <p>Swarm Robotics Lab FB Page: <a href="https://www.facebook.com/swarmroboticslab/">https://www.facebook.com/swarmroboticslab/</a></p>
+
+<p>Swarm Robotics Lab (Promo):&nbsp;<a href="https://www.youtube.com/watch?v=hlDmgtohAz4&amp;t=1s">https://www.youtube.com/watch?v=hlDmgtohAz4&amp;t=1s</a></p>
+
+<p>Google Scholar:&nbsp;<a href="https://scholar.google.com/citations?user=zTgxor0AAAAJ&amp;hl=en&amp;oi=ao">https://scholar.google.com/citations?user=zTgxor0AAAAJ&amp;hl=en&amp;oi=ao</a></p>
+
+<p>Research Gate:&nbsp;<a href="https://www.researchgate.net/profile/Muhammad-Haroon-Yousaf">https://www.researchgate.net/profile/Muhammad-Haroon-Yousaf</a></p>
+
+<p>&nbsp;</p>
+
+            </div>
+            <div data-displayid="3">
+                <p>Computer Vision (Detection and Recognition), Artificial Intelligence, Image analysis and Processing, Action and Activity Recognition, Machine Learning, Deep Learning, Human-Computer Interaction, Robotics and Automation</p>
+
+            </div>
+            <div data-displayid="4">
+                <h3><strong>RESEARCH PUBLICATIONS [Citations=1980+, h-Index=22, i10-Index=46]</strong></h3>
+
+<h3>- SCI-INDEXED Journals &ndash; [48]</h3>
+
+<ol>
+	<li><a name="_Hlk47802806"></a><a name="_Hlk185099711">Ali Raza, Muhammad Haroon Yousaf, Waqar Ahmed, Sergio A. Velastin, Serestina Viriri <strong>&ldquo;Human Fall Detection using Pose Estimation: From Traditional Machine Learning to Vision Transformers&rdquo; Accepted</strong> in Engineering Applications of Artificial Intelligence, 2024. <strong>(IF: 7.5)</strong></a></li>
+	<li>Fiza Saeed Malik, Muhammad Haroon Yousaf, Hassan Ahmed Sial, Serestina Viriri <strong>&ldquo;Exploring Dermoscopic Structures for Melanoma Lesions&#39; Classification&rdquo; Published</strong> in Frontiers in Big Data, 7:1366312. doi: 10.3389/fdata.2024.1366312, 2024. <strong>(IF: 3.1)</strong></li>
+	<li>Awais Akhtar, Rehan Ahmed, Muhammad Haroon Yousaf, Sergio A. Velastin <strong>&ldquo;Real-Time Motorbike Detection: AI on the Edge Perspective&rdquo; Published</strong> in Mathematics, 12(7), 1103 (2024). <strong>(IF: 2.3)</strong></li>
+	<li><a name="_Hlk172445203">Nudrat Nida, Muhammad Haroon Yousaf, Aun Irtaza, Sajid Javed, Sergio A. Velastin <strong>&ldquo;Spatial Deep Feature Augmentation Technique for FER Using Genetic Algorithm&rdquo; Published</strong> in Neural Computing and Applications, Volume 36, pages 4563&ndash;4581, (2024). <strong>(IF: 6.0)</strong></a></li>
+	<li>Sobia Hayee; Fawad Hussain; Muhammad Haroon Yousaf <strong>&ldquo;A Novel FDLSR-Based Technique for View-Independent Vehicle Make and Model Recognition</strong>&rdquo;. Sensors 2023, 23, 7920. <a href="https://doi.org/10.3390/s23187920">https://doi.org/10.3390/s23187920</a>. <strong>(IF: 3.9)</strong></li>
+	<li>Saeed, Zubair, Muhammad Haroon Yousaf, Rehan Ahmed, Sergio A. Velastin, and Serestina Viriri. 2023. &quot;<strong>On-Board Small-Scale Object Detection for Unmanned Aerial Vehicles (UAVs)</strong>&quot; <strong>Published</strong> in Drones 7, no. 5: 310. <a href="https://doi.org/10.3390/drones7050310">https://doi.org/10.3390/drones7050310</a>. <strong>(IF: 4.8)</strong></li>
+	<li>Waqas Ahmed, Muhammad Haroon Yousaf <strong>&ldquo;A Deep Autoencoder based Approach for Suspicious Action Recognition in Surveillance Videos&rdquo;</strong> <strong>Published</strong> in Arabian Journal of Science and Engineering 2023. <strong>(IF: 2.807)</strong></li>
+	<li>Shahzad, Muhammad Muzamal, Zubair Saeed, Asima Akhtar, Hammad Munawar, Muhammad Haroon Yousaf, Naveed Khan Baloach, and Fawad Hussain. 2023. &quot;<strong>A Review of Swarm Robotics in a NutShell</strong>&quot;<strong> Published</strong> in Drones 7, no. 4: 269. <a href="https://doi.org/10.3390/drones7040269">https://doi.org/10.3390/drones7040269</a>. <strong>(IF: 4.8)</strong></li>
+	<li>Abdul Nasir, Muhammad Obaid Ullah, Muhammad Haroon Yousaf <strong>&ldquo;AI in apiculture: A novel framework for recognition of invasive insects under unconstrained flying conditions for smart beehives&rdquo; Published</strong> in Engineering Applications of Artificial Intelligence, Volume 119, 2023, 105784. <strong>(IF: 8.0)</strong></li>
+	<li>Muhammad Ahmed Hassan, Asim Rehmat, Muhammad Usman Ghani, Muhammad Haroon Yousaf <strong>&ldquo;Improvement in Automatic Speech Recognition of South Asian Accent using Transfer learning of Deep Speech 2&rdquo; Published</strong> in Mathematical Problems in Engineering, vol. 2022, Article ID 6825555, 12 pages, 2022. <strong>(IF: 1.305)</strong></li>
+	<li>Muhammad Haroon Asad, Saran Khaliq, Muhammad Haroon Yousaf, Muhammad Obaid Ullah, Afaq Ahmed <strong>&ldquo;Potholes Detection using Deep Learning: A Real-time and AI-on-the-Edge Perspective&rdquo; Published</strong> in Advances in Civil Engineering, Volume 2022, Article ID 9221211, 2022. <strong>(IF: 1.924)</strong></li>
+	<li>Waqas Ahmed, Muhammad Haroon Yousaf, Amanullah Yasin <strong>&ldquo;Robust Suspicious Action Recognition Approach using Pose Descriptor&rdquo; Published</strong> in Mathematical Problems in Engineering, vol. 2021, Article ID 2449603, 12 pages, 2021. <strong>(IF: 1.305)</strong></li>
+	<li>Abdul Nasir, Muhammad Obaid Ullah, Muhammad Haroon Yousaf, Muhammad Asif Aziz <strong>&ldquo;Acquisition of 3-D trajectories with labeling support for multi-species insects under unconstrained flying conditions&rdquo; Published</strong> in Ecological Informatics, Volume 64, 2021, 101381. <strong>(IF: 5.1)</strong></li>
+	<li>Nudrat Nida, Muhammad Haroon Yousaf, Aun Irtaza <strong>&ldquo;A Novel Region-Extreme Convolutional Neural Network for Melanoma Malignancy Recognition&rdquo; Published</strong> in Mathematical Problems in Engineering, vol. 2021, Article ID 6671498, 18 pages, 2021. <strong>(IF: 1.305)</strong></li>
+	<li>Hajra Bint-e-Naeem, Fiza Murtaza, Muhammad Haroon Yousaf, Sergio A. Velastin <strong>&ldquo;T-VLAD: Temporal Vector of Locally Aggregated Descriptor for Multiview Human Action Recognition&rdquo;</strong> <strong>Published</strong> in Pattern Recognition Letters, Volume 148, 2021, Pages 22-28. <strong>(IF: 5.1)</strong></li>
+	<li>Yusra Khalid Bhatti, Afshan Jamil, Nudrat Nida, Muhammad Haroon Yousaf, Serestina Viriri, Sergio A. Velastin <strong>&ldquo;Facial Expression Recognition of Instructor Using Deep Features and Extreme Learning Machine&rdquo; Published</strong> in Computational Intelligence and Neuroscience, vol. 2021, Article ID 5570870, 17 pages, 2021. <strong>(IF: 2.284)</strong></li>
+	<li>Nudrat Nida, Muhammad Haroon Yousaf, Aun Irtaza, Sergio A. Velastin <strong>&ldquo;A video augmentation technique for human action recognition based on genetic algorithm&rdquo; Published</strong> in ETRI Journal, 44(2022), 327&ndash;338. <strong>(IF: 1.094)</strong></li>
+	<li>Saqib Umer, Hassan Dawood, Muhammad Haroon Yousaf, Hussain Dawood, Haseeb Ahmed <strong>&ldquo;Efficient foreground object segmentation from video by Probability Weighted Moments&rdquo; Published</strong> in OptiK, Volume 229, March 2021, 166251. <strong>(IF: 2.187)</strong></li>
+	<li>Adekanmi Adegun, Serestina Viriri, Muhammad Haroon Yousaf &ldquo;<strong>A Probabilistic based Deep Learning Model for Skin Lesion Segmentation&rdquo;</strong> <strong>Published</strong> in Applied Sciences, January 2021, 2021; 11(7):3025. <strong>(IF: 2.217)</strong>.</li>
+	<li>Malik Ali Gul, Muhammad Haroon Yousaf, Shah Nawaz, Zaka Ur Rehman, HyungWon Kim <strong>&ldquo;Patient Monitoring by Abnormal Human Activity Recognition Based on CNN Architecture&rdquo; Published</strong> in Electronics, 2020, 9, 1993. <strong>(IF: 2.412)</strong></li>
+	<li>Saleh Albahli, Nudrat Nida, Aun Irtaza, Muhammad Haroon Yousaf, Muhammad Tariq Mahmood <strong>&ldquo;Melanoma Lesion Detection and Segmentation Using YOLOv4-DarkNet and Active Contour&rdquo; Published</strong> in IEEE Access, 2020, 198403-198414 <strong>(IF: 3.745)</strong></li>
+	<li>Adeeba Kausar, Afshan Jamil, Nudrat Nida, Muhammad Haroon Yousaf <strong>&ldquo;Two-Wheeled Vehicle Detection using Two-Step and Single-Step Deep Learning Models&rdquo;</strong> <strong>Published</strong> in Arabian Journal of Science and Engineering 2020, 45, 10755&ndash;10773. <strong>(IF: 1.518)</strong></li>
+	<li>Adeel Abbas, Muhammad Obaid Ullah, Fiza Murtaza, Muhammad Haroon Yousaf <strong>&ldquo;Space-time Templates based Features for Patient Activity Recognition&rdquo;</strong> <strong>Published</strong> in International Arab Journal of Information Technology, Volume 18, Number 04, pp. 12 - 20, July 2021. <strong>(IF: 0.650)</strong></li>
+	<li>Ammar Mohsin Butt, Muhammad Haroon Yousaf, Fiza Murtaza, Saima Nazir, Serestina Viriri, Sergio A. Velastin, &ldquo;<strong>Agglomerative Clustering and Residual-VLAD Encoding for Human Action Recognition&rdquo;</strong> <strong>Published</strong> in Applied Sciences, Vol 10, 04412, June 2020 <strong>(IF: 2.217)</strong>.</li>
+	<li>Fiza Murtaza, Muhammad Haroon Yousaf, Sergio A. Velastin, Yu Qian &ldquo;<strong>Vectors of Temporally Correlated Snippets for Temporal Action Detection&rdquo;</strong> <strong>Published</strong> in Computers and Electrical Engineering, Volume 85, May 2020 <a href="https://doi.org/10.1016/j.compeleceng.2020.106654">https://doi.org/10.1016/j.compeleceng.2020.106654</a> <strong>(IF: 4.3)</strong>.</li>
+	<li>Hajra Bint-e-Naeem, Fiza Murtaza, Muhammad Haroon Yousaf, Sergio A. Velastin <strong>&ldquo;Multiple batches of motion history images (MB-MHIs) for multiview human action recognition&rdquo;</strong> <strong>Published</strong> in Arabian Journal of Science and Engineering, 45, 6109&ndash;6124 (2020). <strong>(IF: 1.518)</strong></li>
+	<li><a name="_Hlk47802825">Adeel Ahmed Jamil, Fawad Hussain, Muhammad Haroon Yousaf, Ammar Mohsin Butt, Sergio A. Velastin &ldquo;</a><strong>Vehicle Make and Model Recognition Using Bag of Expressions&rdquo;</strong> <strong>Published</strong> in Sensors, Vol. 20, No. 4, 1033, (2019) <strong>(IF: 3.0)</strong>.</li>
+	<li>Nudrat Nida, Muhammad Haroon Yousaf, Aun Irtaza, Sergio A. Velastin <strong>&ldquo;Deep temporal motion descriptor (DTMD) for human action recognition&rdquo; Published</strong> in Turkish Journal of Electrical Engineering and Computer Science, Vol. 28: No. 3, Article 13. <strong>(IF: 0.625)</strong></li>
+	<li>Saima Nazir, Muhammad Haroon Yousaf, Jean-Christophe Nebel, Sergio A. Velastin &ldquo;<strong>Dynamic Spatio-Temporal Bag of Expressions (D-STBoE) Model for Human Action Recognition&rdquo;</strong> <strong>Published</strong> in Sensors, Vol. 19, No. 12, 2790, (2019) <strong>(IF: 3.0)</strong>.</li>
+	<li>Fiza Murtaza, Muhammad Haroon Yousaf, Sergio A. Velastin &ldquo;<strong>TAB: Temporally Aggregated Bag-of-Discriminant-Words for Temporal Action Proposals&rdquo;</strong> <strong>Published</strong> in Computer Vision and Image Understanding, Vol. 183, PP: 42-52, June 2019. <strong>(IF: 4.5)</strong></li>
+	<li>Nudrat Nida, Muhammad Haroon Yousaf, Aun Irtaza, Sergio A. Velastin <strong>&ldquo;Instructor activity recognition through deep spatiotemporal features and feedforward Extreme Learning Machines Published</strong> in Mathematical Problems in Engineering Vol. 2019, 2474865, 2019. <strong>(IF: 1.179)</strong></li>
+	<li>Nudrat Nida, Aun Irtaza, Ali Javed, Muhammad Haroon Yousaf, Muhammad Tariq Javed <strong>&ldquo;Melanoma Lesion Detection and Segmentation using Deep Region based Convolutional Neural Network and Fuzzy C-Means Clustering&rdquo;</strong> <strong>Published</strong> in International Journal of Medical Informatics. Vo. 124, PP: 37-48, April 2019. <strong>(IF: 4.9)</strong></li>
+	<li>Fiza Murtaza, Muhammad Haroon Yousaf, Sergio A. Velastin, Yu Qian &ldquo;<strong>End-to-End Temporal Action Detection using Bag of Discriminant Snippets (BoDS)&rdquo;</strong> <strong>Published</strong> in IEEE Signal Processing Letters, Vol. 26, Issue 2, PP: 272-276 (2019) <strong>(IF: 3.9)</strong>.</li>
+	<li><a name="_Hlk47802856">Abinta Mehmood Mir, Muhammad Haroon Yousaf, Hassan Dawood &ldquo;</a><strong>Criminal Action Recognition Using Spatio-temporal Human Motion Acceleration Descriptor</strong>&rdquo; <strong>Published</strong> in Journal of Electronic Imaging Vol. 27, No. 6, 063016 (2018) <strong>(IF:0.924)</strong>.</li>
+	<li>Muhammad Haroon Yousaf, Kanza Azhar, Fiza Murtaza, Fawad Hussain <strong>&ldquo;Visual Analysis of Asphalt Pavement for Detection and Localization of Potholes&rdquo;</strong> <strong>Published</strong> in Advanced Engineering Informatics, Vol. 38, PP: 527-537 (October 2018).<strong>(IF:8.8)</strong></li>
+	<li>Basharat Hussain, Shah Nawaz, Muhammad Haroon Yousaf &ldquo;<strong>Visual Vehicle Detection Scheme on Low-Powered Embedded GPU</strong>&rdquo; <strong>Published</strong> in Journal of Intelligent and Fuzzy Systems, vol. 36, no. 2, pp. 1867-1877, 2019. <strong>(IF:1.637).</strong></li>
+	<li>Saima Nazir, Muhammad Haroon Yousaf, Sergio A. Velastin &ldquo;<a href="https://www.evise.com/evise/faces/pages/oversight/Oversight.jspx?_adf.ctrl-state=lqhmm3t93_4"><strong>Evaluating Bag of Visual Features Approach using Spatio Temporal Features for Action Recognition</strong></a><strong>&rdquo;</strong> <strong>Published</strong> in Elsevier Computer and Electrical Engineering Vol 72, PP: 660-669 (November 2018) <strong>(IF: 2.189)</strong>.</li>
+	<li>Saima Nazir, Muhammad Haroon Yousaf, Jean-Christophe Nebel, Sergio A. Velastin &ldquo;<strong>A Bag of Expression Framework for Improved Human Action Recognition&rdquo;</strong> <strong>Published</strong> in Pattern Recognition Letters vol. 103, PP:39-45 (February 2018) <strong>(IF: 2.8)</strong>.</li>
+	<li>Fiza Murtaza, Muhammad Haroon Yousaf, Sergio A. Velastin &ldquo;<a href="https://www.evise.com/evise/faces/pages/oversight/Oversight.jspx?_adf.ctrl-state=lqhmm3t93_4"><strong>PMHI:</strong></a><strong> Proposals from Motion History Images for Temporal Segmentation of Action Videos&rdquo;</strong> <strong>Published</strong> in IEEE Signal Processing Letters, Vol. 25, Issue 2, PP: 179.183 (2018) <strong>(IF: 3.268)</strong>.</li>
+	<li>Hina Arshad, Khurram Khurshid, Muhammad Haroon Yousaf &ldquo;<a href="https://www.researchgate.net/publication/311068332_Role_of_Feature_Position_in_Recognition_of_Human_Vehicle_Interaction"><strong>Role of Feature Position in Recognition of Human Vehicle Interaction</strong></a>&rdquo; Published in Journal of Engineering Research, Vol. 5, No. 2 , PP 105-116, June 2017. <strong>(IF: 0.297)</strong></li>
+	<li>Hafiza Sundus Farooq, Muhammad Haroon Yousaf, Fawad Hussain <strong>&ldquo;A Generic Passive Image Forgery Detection Scheme using Local Binary Pattern with Rich Models&rdquo;</strong> <strong>Published</strong> in Elsevier Computers and Electrical Engineering Volume 62, August 2017, Pages 459-472 <strong>(IF: 2.189)</strong>.</li>
+	<li>Fiza Murtaza, Muhammad Haroon Yousaf, Sergio A. Velastin <strong>&ldquo;Multi-view Human Action Recognition using 2D Motion Templates based on MHIs and their HOG Description&rdquo;</strong> <strong>Published</strong> in IET Computer Vision, Vol 10, Issue 7, PP: 758-767, 2016 <strong>(IF: 1.6)</strong>.</li>
+	<li>Saadia Zahid, Fawad Hussain, Muhammad Haroon Yousaf, Hafiz Adnan Habib &ldquo;<strong>Optimized Audio Classification and Segmentation Algorithm by using Ensemble Methods</strong>&rdquo; <strong>Published</strong> in Mathematical Problems in Engineering, vol. 2015, Article ID 209814, 11 pages, 2015. &nbsp;<strong>(IF-01.179)</strong></li>
+	<li>Muhammad Haroon Yousaf, Hafiz Adnan Habib &ldquo;<strong>Virtual Keyboard: Real-time Finger Joints Tracking for Keystroke Detection and Recognition</strong>&rdquo; <strong>Published</strong> in Arabian Journal of Science and Engineering Vol. 39, No. 2, PP:923-934, 2014. <strong>(IF-1.518).</strong></li>
+	<li>Gulistan Raja, Awais Khan, Ahmad Khalil Khan, Muhammad Haroon Yousaf <strong>&ldquo;Performance Analysis of HEVC In-Loop Filter&rdquo;</strong> <strong>Published</strong> in Life Science Journal 10 (11s), 2013. PP: 337:342, <strong>(IF-0.167).</strong></li>
+	<li>Baber Khan, Ahmad Khalil Khan, Gulistan Raja, Muhammad Haroon Yousaf <strong>&ldquo;Implementation of Modified Mean-shift Tracking Algorithm for Occlusion Handling&rdquo;</strong> <strong>Published</strong> in Life Science Journal 10 (11s), 2013. PP: 331:336, <strong>(IF-0.167).</strong></li>
+	<li>Muhammad Haroon Yousaf, Hafiz Adnan Habib, Kanza Azhar, Fawad Hussain, Muhammad Rizwan, Malik M. Asim &ldquo;<strong>Towards The Development of Virtual Keyboard: An Activity Recognition Approach</strong>&rdquo; <strong>Published</strong> in Life Science Journal 10 (10s), 2013. PP: 275:282, <strong>(IF-0.167).</strong></li>
+	<li>Muhammad Haroon Yousaf, Hafiz Adnan Habib, Kanza Azhar &ldquo;<strong>Fuzzy Classification Of Instructor&rsquo;s Morphological Features For Autonomous Lecture Recording System</strong>&rdquo; Published in INFORMATION Journal, Vol. 16, No. 8 (B) PP:6367-6382, August, 2013. <strong>(IF-0.358).</strong></li>
+</ol>
+
+<p>&nbsp;</p>
+
+<h3>- HEC-RECOGNIZED/OTHER Journals &ndash; [18]</h3>
+
+<p><strong>&nbsp;</strong></p>
+
+<ol>
+	<li><a name="_Hlk47802934">Saddam Hussain Khan, Muhammad Haroon Yousaf, Fiza Murtaza, Sergio A. Velastin <strong>&ldquo;Passenger Detection and Counting During Getting On And Off From Public Transport System&rdquo;</strong> <strong>Published</strong> in NED University Journal of Research, Vol. 17, No. 2, PP: 35-46, 2020. <strong>(HEC Recognized- X Category)</strong></a></li>
+	<li>Hassan Ahmed Sial, Muhammad Haroon Yousaf, Fawad Hussain <strong>&ldquo;Spatio-Temporal RGBD Cuboids Feature for Human Activity Recognition&rdquo; Published</strong> in The Nucleus, Vol 55, No. 3, PP:139-149 (2018). <strong>(HEC-Recognized Y-Category)</strong></li>
+	<li>Farrah Aslam, Muhammad Haroon Yousaf, Fawad Hussain &ldquo;<strong>Human Activity Based Video Retrieval Using Optical Flow And Local Binary Patterns&rdquo;</strong> <strong>Published</strong> in NED Journal of Research, Vol 15, No. 4, PP:93-106, 2018. <strong>(HEC Recognized- X Category)</strong></li>
+	<li>Amjad Mehmood, Muhammad Obaid Ullah, Muhammad Haroon Yousaf &ldquo;<strong>A</strong> <strong>proposed real-time feature extraction on field programmable gate array for human detection</strong>&rdquo; <strong>Published</strong> in NED University Journal of Research, Vol 14, No. 2, PP: 47-59, 2017. <strong>(HEC Recognized-X)</strong></li>
+	<li>Muniza Wahid, Sahib Khan, Muhammad Haroon Yousaf &ldquo;<strong>Variable Least Significant Bits Grayscale Image Stegnography</strong>&rdquo; <strong>Published</strong> in Pakistan Journal of Science, 67(3), 281, September 2015 <strong>(HEC Recognized-X)</strong></li>
+	<li>Saira Kanwal, Muhammad Haroon Yousaf &ldquo;<strong>Optimization of Real Time Edge Enhanced Object Tracking Algorithm on Video Processor</strong>&rdquo; <strong>Published</strong> in Technical Journal UET Taxila, Vol. 19, No. IV, PP: 78-88, 2014. <strong>(HEC Recognized</strong><strong>-Y)</strong></li>
+	<li>Mujtaba Hassan, Muhammad Haroon Yousaf &ldquo;<strong>Hand Structure Analysis for Finger Identification and Joint Localization</strong>&rdquo; <strong>Published</strong> in New Horizon by IEEEP Vol: 81, Page 29, 2014. <strong>(HEC Recognized</strong><strong>-Y)</strong></li>
+	<li>Hira Bashir, Muhammad Haroon Yousaf &ldquo;<strong>Selection of Optimal Path Planning Algorithm for Autonomous Robots in Structured Environment</strong>&rdquo; <strong>Published</strong> in The Nucleus 51, No. 4. PP. 397-405 (2014). <strong>(HEC Recognized</strong><strong>-Y)</strong></li>
+	<li>Zain ul abidin, Gulistan Raja, Muhammad Haroon Yousaf <strong>&ldquo;Performance Anslysis of 3-D DWT, 3-D DFT, 3-D DCT, 3-D DHT for Medical Image Compression</strong>&rdquo; <strong>Published</strong> in NEW HORIZON by IEEEP Vol: 79-80, Page 29, 2013. <strong>(HEC Recognized</strong><strong>-Y)</strong></li>
+	<li>Muhammad Haroon Yousaf, Hafiz Adnan Habib, Fawad Hussain, Muhammad Rizwan &ldquo;<strong>Visual Gesture Based Augmented Virtual Keyboard System</strong>&rdquo; <strong>Published</strong> in The Nucleus 50, No. 4 (2013). <strong>(HEC Recognized</strong><strong>-Y)</strong></li>
+	<li>Umair Ullah Tariq, Daud A. Asif, Muhammad Haroon Yousaf, Fawad Hussain &ldquo;<strong>A Review of Vision-Based Perceptive Interfaces: A Mouse Alternative</strong>&rdquo; <strong>Published</strong> in The Nucleus 50, No. 4 (2013). <strong>(HEC Recognized</strong><strong>-Y)</strong></li>
+	<li>Muhammad Haroon Yousaf, Hafiz Adnan Habib &ldquo;<strong>A Novel Interface of Adjustable Pedals for Automotive: A Gesture Recognition Approach</strong>&rdquo; <strong>Published</strong> in Middle East Journal of Scientific Research, 11 (11), 1575-1583, 2012. <strong>(HEC Recognized, ISI MASTER List)</strong></li>
+	<li>M. Abdul Basir, Muhammad Haroon Yousaf <strong>&rdquo;Transparent Compression Scheme for Linux File System&rdquo;</strong> <strong>Published</strong> in The Nucleus 49, No. 2 (2012). <strong>(HEC Recognized</strong><strong>-Y)</strong></li>
+	<li>Asim Raza, Muhammad Haroon Yousaf, Hassan Ahmed Sial, Gulistan Raja &ldquo;<strong>HMM-based Scheme for Instructor Activity Recognition in a Lecture Room Environment</strong>&rdquo; <strong>Published</strong> in Smart Computing Reviews, Korea.</li>
+	<li>Hadia Bashir, Fawad Hussain, Muhammad Haroon Yousaf &ldquo;<strong>Smart Algorithm for 3D Reconstruction and Segmentation of Brain Tumor from MRIs using Slice Selection Mechanism</strong>&rdquo; <strong>Published</strong> in Smart Computing Review. Vol. 5, No. 3, June 2015.</li>
+	<li>Naveed Khan Baloch, Muhammad Haroon Yousaf, Waqar Ahmad, M. Iram Baig <strong>&rdquo;Algorithm for Efficient Attendance Management: Face Recognition based approach&rdquo; </strong><strong>Published</strong> in International Journal of Computer Science Issues (IJCSI), July 2012.</li>
+	<li>Sahib Khan, Muhammad Haroon Yousaf, Jamal Akram <strong>&ldquo;Implementation of Variable Least Significant Bits Steganography Using DDDB Algorithm&rdquo; Published</strong> in International Journal of Computer Science Issues (IJCSI), Vol. 8 Issue 6 No. 3 November 2011</li>
+	<li>Hafiz Adnan Habib, Muhammad Haroon Yousaf, Muid Mufti <strong>&ldquo;Novel Video Lecture Acquisition Framework A Gesture Recognition Approach&rdquo; Published</strong> in WSEAS Transaction on Computer January 2007</li>
+</ol>
+
+<p>&nbsp;</p>
+
+<h3>- Book Chapters &ndash; [1]</h3>
+
+<p>&nbsp;</p>
+
+<ol>
+	<li>Rodrigo Fernandez, Muhammad Haroon Yousaf, Timothy J. Ellis, Zezhi Chen, Sergio A. Velastin <strong>&ldquo;Traffic Flow Analysis&rdquo;</strong> Book Chapter in Computer Vision and Imaging in Intelligent Transportation Systems, PP-131-162, ISBN: 978-1-118-97160-4,March 2017.</li>
+</ol>
+
+<h3>&nbsp;</h3>
+
+<h3>- International Conferences &ndash; [42]</h3>
+
+<ol>
+	<li>Muhammad Saad Saeed, Shah Nawaz, Marta Moscati, Rohan Kumar Das, Muhammad Salman Tahir, Muhammad Zaigham Zaheer, Muhammad Irzam Liaqat, Muhammad Haris Khan, Karthik Nandakumar, Muhammad Haroon Yousaf, and Markus Schedl. 2024. <strong>A Synopsis of FAME 2024 Challenge: Associating Faces with Voices in Multilingual Environments</strong>. <strong>Published</strong> In Proceedings of the 32nd ACM International Conference on Multimedia (MM &#39;24). Association for Computing Machinery, New York, NY, USA, 11333&ndash;11334. https://doi.org/10.1145/3664647.3688978</li>
+	<li>Muhammad Saad Saeed, Muhammad Haris Khan, Shah Nawaz, Muhammad Haroon Yousaf &ldquo;<strong>Single-branch Network for Multimodal Training</strong>&rdquo; <strong>Published</strong> in the proceedings of 2023 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP) Greece, 2023, pp. 1-5.</li>
+	<li>Ali Raza, Muhammad Haroon Yousaf, Sergio A. Velastin, Serestina Viriri &ldquo;<strong>Human Fall Detection from Sequences of Skeleton Features using Vision Transformer&rdquo;</strong> <strong>Published</strong> in the proceedings of 18th International Joint Conference on Computer Vision, Imaging and Computer Graphics Theory and Applications, Portugal 2023.</li>
+	<li>Muhammad Muzamal Shahzad, Muhammad Haroon Asad, Muhammad Haris, Hammad Munawar, Muhammad Haroon Yousaf <strong>&ldquo;Formation Control and sub-Swarm generation of Multirotor UAVs&rdquo;</strong> <strong>Published</strong> in the proceedings of 5th International Conference on Robotics and Automation in Industry (ICRAI) 2023, Peshawar.</li>
+	<li>Muhammad Haroon Asad, Malik Muhammad Asim, Muhammad Naeem Mumtaz Awan, Muhammad Haroon Yousaf <strong>&ldquo;Natural Disaster Damage Assessment using Semantic Segmentation of UAV Imagery&rdquo;</strong> <strong>Published</strong> in the proceedings of 5th International Conference on Robotics and Automation in Industry (ICRAI) 2023, Peshawar.</li>
+	<li><a name="_Hlk161780708">Zubair Saeed, Muhammad Naeem Mumtaz, Muhammad Haroon Yousaf <strong>&ldquo;A Robust Approach for Small-Scale Object Detection From Aerial-View&rdquo;</strong> <strong>Published</strong> in the proceedings of DICTA 2022, Sydney Australia.</a></li>
+	<li>Ans Hussain Qureshi, Saran Khaliq, Muhammad Muzamal Shahzad, Muhammad Saad Saeed, Ahmed Husnain Johar, Muhammad Haroon Yousaf <strong>&ldquo;A Multi-agent Approach to Improve Visual SLAM Performance using Miniature Robots&rdquo;</strong> <strong>Published</strong> in the proceedings of IEEE Tencon 2022, Hongkong.</li>
+	<li>Abeer Toheed, Muhammad Haroon Yousaf, Rabnawaz, Ali Javed &ldquo;<strong>Physical Adversarial Attack Scheme on Object Detectors using 3D Adversarial Object&rdquo;</strong> <strong>Published</strong> in the proceedings of <a name="_Hlk107246630">2nd International Conference on Digital Futures and Transformative Technologies (ICoDT2), June 2022.</a></li>
+	<li>Ali Raza, Muhammad Haroon Yousaf, Sergio A. Velastin &ldquo;<strong>Human Fall Detection using YOLO: A Real-Time and AI-on-the-Edge Perspective&rdquo;</strong> <strong>Published</strong> in the proceedings of 12th International Conference on Pattern Recognition Systems (ICPRS), France, June 2022.</li>
+	<li>Waqas Ahmed, Umair Naeem, Muhammad Haroon Yousaf, Sergio A. Velastin &ldquo;<strong>Lightweight CNN and GRU Network for Real-time Action Recognition&rdquo;</strong> <strong>Published</strong> in the proceedings of 12th <a name="_Hlk107246590">International Conference on Pattern Recognition Systems (ICPRS), France</a>, June 2022.</li>
+	<li>Muhammad Saad Saeed, Muhammad Haris Khan, Shah Nawaz, Muhammad Haroon Yousaf, Alessio Del Bue &ldquo;<strong>Fusion And Orthogonal Projection for Improved Face-Voice Association</strong>&rdquo; <strong>Published</strong> in the proceedings of 2022 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP), Singapore, 2022, pp. 7057-7061.</li>
+	<li>Muhammad Ahmed Raza, Hajra Binte-Naeem, Muhammad Haroon Yousaf, Amanullah Yasin <strong>&ldquo;BirdView Retina-Net: Small-Scale Object Detector for Unmanned Aerial Vehicles&rdquo;</strong> <strong>Published</strong> in the proceedings of 16th International Conference on Emerging Technologies (ICET), Islamabad Pakistan 2021.<strong> </strong></li>
+	<li>Zubair Saeed, Ali Raza, Ans Hussain Qureshi, Muhammad Haroon Yousaf <strong>&ldquo;A Generic Multi-Crop Disease Detection and Classification Approach using CNN&rdquo;</strong> <strong>Published</strong> in Proceedings of <a name="_Hlk107246617">4th International Conference on Robotics and Automation in Industry (ICRAI), Islamabad Pakistan 2021.</a></li>
+	<li>Arslan Ali, Muhammad Muzamal Shahzad, Ans Hussain Qureshi, Mansoor Shaukat, Muhammad Haroon Yousaf <strong>&ldquo;A Decentralized Pattern Formation and Navigation Approach For Swarms: Multi-UAV Perspective&rdquo;</strong> <strong>Published</strong> in Proceedings of 4th International Conference on Robotics and Automation in Industry (ICRAI), Islamabad Pakistan 2021.</li>
+	<li>Mishal Fatima, Muhammad Haroon Yousaf, Amanullah Yasin, Sergio Velastin <strong>&ldquo;Unsupervised Fall Detection Approach Using Human Skeletons&rdquo;</strong> <strong>Published</strong> in Proceedings of 4th International Conference on Robotics and Automation in Industry (ICRAI), Islamabad Pakistan 2021.</li>
+	<li>Shah Nawaz, Muhammad Saad Saeed, Pietro Morerio, Arif Mahmood, Galo Ignazio, Muhammad Haroon Yousaf, Alessio Del Bue &ldquo;<strong>Cross-modal Speaker Verification and Recognition: A Multilingual Perspective</strong>&rdquo; <strong>Published</strong> in the proceedings of 2021 IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (CVPRW), Nashville, TN, USA, 2021 pp. 1682-169.</li>
+	<li><a name="_Hlk70329291">Hajra Binte Naeem, Muhammad Haroon Yousaf, Farhan Hassan Khan, Amanullah Yasin &ldquo;<strong>Vision-Based Real-time Human Malicious Behavior Detection</strong>&rdquo; <strong>Published</strong> in the proceedings of International Conference on Artificial Intelligence 2021, Pakistan.</a></li>
+	<li>M. Qasim Shafiq, Saima Nazir, Muhammad Haroon Yousaf, Sergio A. Velastin &ldquo;<strong>Robust framework for human localization and detection in moving train carriage&rdquo;</strong> <strong>Published</strong> in the proceedings of 9th International Conference on Imaging for Crime Detection and Prevention (ICDP-2019) London, UK, 2019, pp. 26-31.</li>
+	<li>Umber Saba, Fiza Murtaza, Muhammad Haroon Yousaf, Serestina Viriri &ldquo;<strong>Plant Species Identification using Discriminant Bag of Words (DBoW)&rdquo;</strong> <strong>Published</strong> in the proceedings of 15th International Joint Conference on Computer Vision, Imaging and Computer Graphics Theory and Applications (VISIGRAPP 2020) - Volume 5: VISAPP, pages 499-505.</li>
+	<li>Hira Imtiaz, Muhammad Haroon Yousaf <strong>&ldquo;Design and Implementation of Receiver Autonomous Integrity Monitoring Algorithm on DSP for Small UAV Applications&rdquo;</strong> <strong>Published</strong> in the proceedings of International Conference on Frontiers of Information Technology (FIT) 2019 Islamabad, Pakistan.</li>
+	<li><a name="_Hlk86484846">Waqar Ahmed, M. Abubakr, Esha Rashid, Nudrat Nida, Shah Nawaz, Muhammad Haroon Yousaf <strong>&ldquo;Digit Recognition for Meter Reading using Faster R-CNN&rdquo;</strong> <strong>Published</strong> in the proceedings of </a><a name="_Hlk107246674">International Conference on Robotics and Automation in Industry (ICRAI), Islamabad Pakistan 2019</a>.</li>
+	<li><a name="_Hlk48405179">Saima Nazir, Yu Qian, Muhammad Haroon Yousaf, Sergio A. Velastin, Eduard Vazquez, Ebroul Izquierdo &ldquo;</a><strong>Human Action Recognition Using Multi-Kernel Learning for Temporal Residual Network&rdquo;</strong> <strong>Published</strong> in the proceedings of 14th International Joint Conference on Computer Vision, Imaging and Computer Graphics Theory and Applications (VISIGRAPP 2019), pages 420-426.</li>
+	<li>Nudrat Nida, Muhammad Haroon Yousaf, Aun Irtaza, Sergio A. Velastin <strong>&ldquo;Bag of Deep Features for Instructor Activity Recognition in Lecture Room&rdquo;</strong> <strong>Published</strong> in the proceedings of 25th International Conference on Multimedia Modelling, Thessaloniki, Greece. 2019 LNCS, 11296, pp. 481-492.</li>
+	<li>Waqas Ahmad, Muhammad Haroon Yousaf &ldquo;<strong>Robust Activity Recognition Model via Motion Templates&rdquo;</strong> <strong>Published</strong> in the proceedings of IEEE ICE Cube, Quetta Pakistan 2018.</li>
+	<li>Qurat ul Ain Ali, Muhammad Haroon Yousaf &ldquo;<strong>Role of spatio-temporal feature position in recognition of human vehicle interaction&rdquo;</strong> <strong>Published</strong> in the proceedings of IEEE TENCON 2018, pp. 0471-0476.</li>
+	<li>Fiza Murtaza, Muhammad Haroon Yousaf, Sergio A. Velastin &ldquo;<strong>Da-Vlad: Discriminative Action Vector Of Locally Aggregated Descriptors For Action Recognition&rdquo;</strong> <strong>Published</strong> in the proceedings of 2018 25th IEEE International Conference on Image Processing (ICIP), Athens, Greece, 2018, pp. 3993-3997.</li>
+	<li>Saima Nazir, Muhammad Haroon Yousaf, Sergio A. Velastin &ldquo;<strong>Feature Similarity and Frequency Based Weighted Visual Words Codebook Learning Scheme for Human Action Recognition&rdquo;</strong> <strong>Published</strong> in the proceedings of 8th Pacific Rim Symposium on Image and Video Technology, Wuhan China (2017), Lecture Notes in Computer Science, vol 10749. Springer, Cham.</li>
+	<li>Saima Nazir, Muhammad Haroon Yousaf, Sergio A. Velastin &ldquo;<strong>Inter and Intra Class Correlation Analysis (IICCA) for Human Action Recognition in Realistic Scenarios&rdquo;</strong> <strong>Published</strong> in the proceedings of International Conference on Pattern Recognition Systems, Madrid Spain (June 2017).</li>
+	<li>Muhammad Hanif, Fawad Hussain, Muhammad Haroon Yousaf, Sergio A. Velastin, Zezhi Chen <strong>&ldquo;Shadow Detection for Vehicle Detection in Urban Environments&rdquo;</strong> <strong>Published</strong> in the proceedings of International Conference on Image Analysis and Recognition (ICIAR) to held at Montreal Canada in July 2017, Lecture Notes in Computer Science, vol 10317. Springer, Cham..</li>
+	<li>Mubashir Noman, Muhammad Haroon Yousaf, Sergio A. Velastin <strong>&ldquo;An Optimized and Fast Scheme for Real-time Human Detection using Raspberry Pi&rdquo;</strong> <strong>Published</strong> in the proceedings of International Conference on Digital Image Computing: Techniques and Application held at Gold Coast Australia in December 2016.</li>
+	<li>Kanza Azhar, Fiza Murtaza, Muhammad Haroon Yousaf, Hafiz Adnan Habib <strong>&ldquo;Computer Vision Based Detection and Localization of Potholes in Asphalt Pavement Images&rdquo;</strong> <strong>Published</strong> in the proceedings of 29th IEEE Canadian Conference on Electrical and Computer Engineering 2016, Vancouver Canada.</li>
+	<li>Fiza Murtaza, Muhammad Haroon Yousaf, Sergio A. Velastin <strong>&ldquo;Multi-view Human Action Recognition using Histogram of Oriented Gradients (HOG) Description of Motion History Images (MHIs)&rdquo;</strong> <strong>Published</strong> in the proceedings of IEEE Frontiers of Information Technology held at Islamabad in December 2015, pp. 297-302.</li>
+	<li>Muhammad Haroon Yousaf, Kanza Azhar, Hassan Ahmed Sial &ldquo;<strong>A Novel Vision Based Approach for Instructor&#39;s Performance and Behavior Analysis</strong>&rdquo; <strong>Published</strong> in the proceedings of 2nd International Conference on Communications, Signal Processing, and their Applications at UAE, 2015.</li>
+	<li>Akhtar Hanif, Muhammad Haroon Yousaf, Adnan Fazil, Suhail Akhtar &ldquo;<strong>Inflight Helicopter Blade Track Measurement using Computer Vision</strong>&rdquo; <strong>Published</strong> in the proceedings of IEEE TENSYMP 2014, Kuala Lumpur, Malaysia, PP: 56-61.</li>
+	<li>Arslan Mubashar Khan, Waqas Umar, Taimoor Choudhary, Fawad Hussain, Muhammad Haroon Yousaf &ldquo;<strong>A New Algorithmic Approach for Fingers Detection and Identification</strong>&rdquo; Published in Proc. SPIE 8768: International Conference on Graphics and Image Processing; 03/2013.</li>
+	<li>Sahib Khan, Muhammad Haroon Yousaf,<strong> &ldquo;Implementation of VLSB Stegnography using Modular Distance Technique&rdquo; Published</strong> in <a href="http://link.springer.com/book/10.1007/978-1-4614-3535-8">Innovations and Advances in Computer, Information, Systems Sciences, and Engineering</a>, Springer <a href="http://link.springer.com/bookseries/7818">Lecture Notes in Electrical Engineering</a> Volume 152, pp. 511-525, 2012</li>
+	<li>Aiman Nadeem, Muhammad Haroon Yousaf, Hafiz Adnan Habib <strong>&ldquo;Management Information System for Documents Archiving and Organization Security&rdquo; Published</strong> in the proceedings of 3rd International Conference on Advanced Computer Theory and Engineering (ICACTE) 2010, Chengdu, China, pp. V6-1-V6-4.</li>
+	<li>Sameen Shaukat, Muhammad Haroon Yousaf, Hafiz Adnan Habib <strong>&ldquo;Real-Time Feet Movement Detection and Tracking for Controlling a Toy Car&rdquo; Published</strong> in the proceedings of 3rd International Conference on Advanced Computer Theory and Engineering (ICACTE) 2010, Chengdu, China, pp. V6-5-V6-9.</li>
+	<li>Muhammad Haroon Yousaf, Khubab Ahmed, Kanza Haroon, Hafiz Adnan Habib &ldquo;Human Activity Recognition for Intelligent Video Lecture Recording&rdquo; Published in the proceedings of International Conference on Recent Achievements in Mechatronics, Automation, Computer Science and Robotics (MACRO 2010), PP 1010-110 Tirgu-Mures, Romania.</li>
+	<li>Khubab Ahmed, Muhammad Haroon Yousaf, Hafiz Adnan Habib <strong>&ldquo;Autonomous Lecture Recording System for distance Learning&rdquo; </strong>Presented at NCICT 2007 at UST Bannu, Pakistan</li>
+	<li>Hafiz Adnan Habib, Muhammad Haroon Yousaf, Muid Mufti<strong> &ldquo;Gesture and Scene Recognition Based Autonomous Video Lecture Acquisition Framework for Distance Learning&rdquo; Published</strong> in the proceedings of 6th WSEAS International Conference on Distance Learning and Web Engineering (DIWED&#39;06). World Scientific and Engineering Academy and Society (WSEAS), Stevens Point, Wisconsin, USA, 97&ndash;100.</li>
+	<li>Hafiz Adnan Habib, Muhammad Haroon Yousaf, Muhammad Mohibullah<strong> &ldquo;Modifies Laws Texture Energy Measures for Ceramic Tiles&rdquo; Published</strong> in the proceedings of NCET 2004 (Joint Venture of IEEE, ACM ,SZABIST) at Szabist Karachi, Pakistan, PP 137-140.</li>
+</ol>
+
+            </div>
+            <div data-displayid="5">
+                <ol>
+	<li><a name="_Hlk127118576"></a><a name="_Hlk183751829"><strong>Principal Investigator, &ldquo;</strong></a>Democratizing Robotics in Pakistan: Design and Development of Multidimensional Robotic Platform for STEM Education&rdquo; approved by Higher Education Commission Pakistan under Technology Development Fund. <strong>Worth 13 Mn PKR</strong>, <strong>2024-2026</strong>.</li>
+	<li><strong>Lead Person from UET Taxila, </strong>&ldquo;UK-Pakistan Generative AI Nexus for Higher Education (UPGAIN)&rdquo; funded by British Council under TNE Exploratory Grant, <strong>Worth 22500 Pounds 2024-2025</strong>.</li>
+	<li><strong>Co-Principal Investigator, </strong>&ldquo;Mitigating presentation attacks in remote identity proofing (MIMER): Pakistan in Focus&rdquo; funded by UKRI-EPSRC <strong>2024-2026</strong>, <strong>Worth 176,517 Pounds</strong>.</li>
+	<li><strong>Principal Investigator, </strong>Establishment of Swarm Robotics Lab under National Centre for Robotics and Automation. <strong>Worth 108 Mn PKR</strong>, <strong>2018-2025</strong>.</li>
+	<li><a name="_Hlk59568369"><strong>Project Lead, </strong></a>Establishment of Educational Robotics and Artificial Intelligence (ERAL) Lab funded by Higher Education Commission Pakistan. <strong>Worth 29.875 Mn PKR</strong>, <strong>2023</strong>.</li>
+	<li>Mentor/Consultant, Industry Funded Project to Sky Technology and Innovations Pvt. Ltd. <strong>2023-2024.</strong></li>
+	<li><strong>Co-Principal Investigator, </strong>&ldquo;IntelliSurv: An Intelligent Surveillance System for Detection of Anomalies in Real-time Videos&rdquo; funded by SinoPak Centre for Artificial Intelligence (SPCAI), PAF-IAST <strong>2021-2022</strong>, <strong>Worth 5.5 Mn PKR</strong>.</li>
+	<li><strong>Co-Principal Investigator, </strong>&ldquo;GymUstaad: Design and Development of Smart AI-Enabled System for Fitness Coaching&rdquo; funded by Higher Education Commission Pakistan under National Research Programme for Universities (NRPU) <strong>2022-2024</strong>, <strong>Worth 5.1 Mn PKR</strong>.</li>
+	<li><strong>Won 2500 US$</strong> grant from IEEE Signal Processing Society for <strong>2024 Seasonal School on Signal and Image Processing Applications for UAVs (SIP4UAVs) </strong>to be held in September 2024.</li>
+	<li><strong>Won 4000 US$</strong> grant from IEEE Signal Processing Society for <strong>2023 Seasonal School on Computer Vision Applications in Robotics (CVAR).</strong></li>
+	<li><strong>Project Lead </strong>&ldquo;UGo: An Audio-Visual Signal Processing Tool to Improve the Communication and Presentation Skills (22-SPSHAC-02)&rdquo;<strong> </strong>funded by IEEE Signal Processing Society and HAC on Signal Processing Technologies for Local Community Challenges, <strong>2022</strong>, <strong>Worth 1920 US$.</strong></li>
+	<li><strong>Winner, </strong>OPENCV AI Competition <strong>2021</strong> Phase-1 by Intel/OPENCV. <strong>Worth 3498 US$</strong>.</li>
+	<li><strong>Winner</strong>, Robotics and Automation Startup Challenge <strong>2021</strong>, <strong>Worth 0.3 Mn. PKR</strong>.</li>
+	<li><strong>Won 2nd Prize (50000 PKR)</strong> for <strong>Project UGO</strong> at PHEC Innovation Expo <strong>2022.</strong></li>
+	<li>IEEE Region 10 Membership Development Grant <strong>2022, Worth 400 US$.</strong></li>
+	<li><strong>Principal Investigator / Lead </strong>for<strong> Nvidia</strong> GPU Research Grant <strong>2017</strong>. <strong>Won Titan XP GPU</strong>.</li>
+	<li><strong>IGNITE funding of 0.08 Mn Rs.</strong> for 01 x Final Year Projects <strong>2024</strong>.</li>
+	<li><strong>IGNITE funding of 0.068 Mn Rs.</strong> for 01 x Final Year Projects <strong>2023</strong>.</li>
+	<li><strong>IGNITE funding of 0.078 Mn Rs.</strong> for 01 x Final Year Projects <strong>2021</strong>.</li>
+	<li><strong>IGNITE funding of 0.159 Mn Rs.</strong> for 03 x Final Year Projects <strong>2018</strong>.</li>
+	<li><strong>Principal Investigator, </strong>&ldquo;Decentralized Formation Control for Multi-Rotor UAV&#39;s&rdquo; funded by NESCOM Pakistan under Research Academia Coordination (RAC) <strong>2022</strong>, <strong>Worth 0.25 Mn PKR</strong>.</li>
+	<li><strong>Principal Investigator, </strong>&ldquo;Robustifing Object Detectors against Camouflage&rdquo; funded by NESCOM Pakistan under Research Academia Coordination (RAC) <strong>2021</strong>, <strong>Worth 0.20 Mn PKR</strong>.</li>
+	<li><strong>Principal Investigator, </strong>&ldquo;Real-time Behavioral Analysis of an Individual from Live Video Stream&rdquo; funded by NESCOM Pakistan under Research Academia Coordination (RAC) <strong>2020</strong>, <strong>Worth 0.20 Mn PKR</strong>.</li>
+	<li><strong>Principal Investigator, </strong>&ldquo;Real-time Plotting of PTZ Camera Footprint (based on FoV) on Geo-referenced Map/Imagery&rdquo; funded by NESCOM Pakistan under Research Academia Coordination (RAC) <strong>2020</strong>, <strong>Worth 0.15 Mn PKR</strong>.</li>
+	<li><strong>Principal Investigator, </strong>&ldquo;Stereo vision-based disparity mapping and depth calculation of objects from UAV&rdquo; funded by NESCOM Pakistan under Research Academia Coordination (RAC) <strong>2019</strong>, <strong>Worth 0.1 Mn PKR</strong>.</li>
+	<li><strong>Principal Investigator, </strong>&ldquo;Range Measurement Using Stereo Imaging&rdquo; funded by NESCOM Pakistan under Research Academia Coordination (RAC) <strong>2019</strong>, <strong>Worth 0.1 Mn PKR</strong>.</li>
+	<li><strong>Principal Investigator, </strong>&ldquo;Temporal Action Detection in Untrimmed Action Videos&rdquo; funded by ASR &amp; TD, UET Taxila under Faculty Research <strong>2017</strong>, <strong>Worth 0.920 Mn PKR</strong>.</li>
+	<li><strong>Principal Investigator, </strong>&ldquo;Instructor Action Recognition in Classroom Environment&rdquo; funded by ASR &amp; TD, UET Taxila under Faculty Research <strong>2015</strong>, <strong>Worth 0.357 Mn PKR</strong>.</li>
+	<li>Principal Investigator, &ldquo;Instructor Action Recognition in Classroom Environment&rdquo; funded by ASR &amp; TD, UET Taxila under Faculty Research 2013, Worth 0.224 Mn PKR.</li>
+</ol>
+
+            </div>
+            <div data-displayid="6">
+                <h3>- National-Level</h3>
+
+<ul>
+	<li>
+	<ul>
+		<li>
+		<ul style="list-style-type:square">
+			<li><strong>Member/Secretary</strong>, National Curriculum Development Committee (CDC) for National Technology Council (NTC) by Higher Education Commission, Pakistan 2021.</li>
+			<li><strong>Member</strong>, Engineering Curriculum Review and Development Committee (ECRDC) by Pakistan Engineering Council (PEC), Pakistan 2019.</li>
+			<li><strong>Member</strong>, National Curriculum Review Committee (NCRC) by Higher Education Commission, Pakistan 2014.</li>
+			<li><strong>Board Member</strong>, Research Fund NCRA 2020.</li>
+			<li><strong>Judge</strong>, PASHA ICT Awards 2024.</li>
+			<li><strong>Judge, </strong>National Engineering Robotics Competition (NERC) 2022, 2023 and 2024<strong>.</strong></li>
+			<li><strong>Member</strong>, Deliverable Review Committee (DRC), Pakistan Software Export Board (PSEB) 2023.</li>
+			<li><strong>Program Evaluator</strong> (Expert Computer Engineering), Pakistan Engineering Council (PEC).</li>
+			<li><strong>Member</strong>, Subject Expert Committee for HEC Recognized Journals Evaluation 2019</li>
+			<li><strong>Member</strong>, Board of Faculty, Federal Urdu University of Arts, Science and Technology, 2020-2022.</li>
+			<li><strong>Member</strong>, Board of Studies, Computer Science Department UET Peshawar, 2020-2021</li>
+			<li><strong>Member</strong>, Board of Studies, Department of Machine Learning, Pak-Austria Fahochshule, Institute of Applied Sciences and Technology (PAF-IAST), 2022-Present.</li>
+			<li><strong>Expert/Reviewer</strong>, Research Fund NCAI 2020.</li>
+			<li><strong>Expert/Reviewer</strong>, Research Fund SPCAI 2022.</li>
+			<li><strong>Expert/Reviewer</strong>, HEC-NRPU 2019/2020, HEC-TTSF 2020, HEC-LCF 2020, HEC-GCF 2021.</li>
+			<li><strong>Expert/Reviewer</strong>, Pakistan Science Foundation.</li>
+			<li><a name="_Hlk185099797"><strong>Expert,</strong></a> Enrollment Committee, Pakistan Engineering Council 2024.</li>
+		</ul>
+		</li>
+	</ul>
+	</li>
+</ul>
+
+<p>- University-Level</p>
+
+<ul>
+	<li>
+	<ul>
+		<li>
+		<ul style="list-style-type:square">
+			<li><strong>Chairman/HoD</strong>, Department of Computer Engineering, <strong>October 2023-onwards.</strong></li>
+			<li>Worked as <strong>Acting Chairman</strong>, Computer Engineering Department in Summer (2009 &amp; 2012 &amp; 2013 &amp; 2014 &amp; 2015 &amp; 2016) and Spring-2018.</li>
+			<li><strong>Project Director, </strong>Higher Education Management Information System (<strong>HEMIS</strong>): SAP based ERP, <strong>December 2024-onwards</strong></li>
+			<li><strong>Director</strong> Postgraduate Studies, CPED UET Taxila (April 2015-April 2018)</li>
+			<li><strong>General Chair, </strong>IEEE SPS Seasonal School on Signal Processing Applications for UAVs (SIP4UAVs) 2024.</li>
+			<li><strong>General Chair, </strong>IEEE SPS Seasonal School on Computer Vision Applications in Robotics 2023.</li>
+			<li><strong>Convener</strong>, Open House and Job Fair (2016-onwards).</li>
+			<li><strong>Member</strong>, Academic Council, UET Taxila Feb. 2021-onwards.</li>
+			<li><strong>Member</strong>, Board of Faculty (BoF) FTIE, UET Taxila Feb. 2021-onwards.</li>
+			<li><strong>Member</strong>, Board of Faculty (BoF) FEEE, UET Taxila Jan. 2022-onwards.</li>
+			<li><strong>Member</strong>, Affiliation Committee, UET Taxila Jan. 2021-onwards.</li>
+			<li><strong>Member</strong>, University Investment Committee, August 2022 &ndash; onwards.</li>
+			<li><strong>Member</strong>, Board of Postgraduate Studies (BoPGS) CPED, UET Taxila Feb. 2021-onwards.</li>
+			<li><strong>Chair</strong>, Workshop on Robotics and Computer Vision (RCV&rsquo;21) 2021.</li>
+			<li><strong>Warden</strong>, UET Taxila Hostels (Nov 2017-Nov 2018)</li>
+			<li><strong>Member</strong>, Departmental Semester Committee, CPED (2010-2023)</li>
+			<li><strong>Member</strong>, Departmental Committee for the Implementation of OBE Model (2014-2017)</li>
+			<li><strong>Member</strong>, Examination Scrutiny committee UET Taxila (2005-2015)</li>
+			<li><strong>Member</strong>, House Allotment Rules Formation Committee 2016.</li>
+			<li><strong>Member</strong>, University Medical Rules Formation Committee 2016</li>
+			<li><strong>Member</strong>, Central Purchase Committee (CPC), UET Taxila (2017-2022)</li>
+			<li><strong>Member</strong>, Students Societies Selection Committee (2018-2022)</li>
+			<li><strong>Member</strong>, Research Monitoring Committee (CPED, SED)</li>
+			<li><strong>Advisor</strong>, M.Sc. students CPED, UET Taxila. (2010-2015)</li>
+			<li><strong>In-charge</strong>, Admission Committee for induction of MSC. Computer Engineering Students (2011-2017)</li>
+			<li><strong>Member</strong>, Transport committee, UET Taxila (2010-2012) and (2023-onwards)</li>
+			<li><strong>Member</strong>, Board of Faculty of Telecommunication and Information Engineering (2009-2010).</li>
+			<li><strong>Convener</strong>, UAMC (Undergraduate Academics Monitoring Committee) CPED for (2009-2010).&nbsp;</li>
+			<li><strong>Member</strong>, Organizing Committee ICM 2005 (International Conference on Micro Electronics)</li>
+			<li><strong>Student Project Chair</strong>, GRAMI 2006 (International Conference on Graphics, Multimedia and Imaging)</li>
+			<li><strong>Chief Organizer</strong>, CEC (Computing and Engineering Competition 2008) at UET Taxila</li>
+			<li><strong>President</strong>, JAVASOFT 2006 at UET Taxila.</li>
+			<li><strong>Chief Organizer</strong>, JAVASOFT 2005 at UET Taxila.</li>
+			<li><strong>Member</strong>, Student Project committee for DICE 2012 @ UET Taxila</li>
+			<li>Ex-Incharge Trips and tour affairs Computer &amp; Software Engg. Department UET Taxila.</li>
+			<li>Ex-Incharge Store Computer &amp; Software Engg. Department UET Taxila.</li>
+		</ul>
+		</li>
+	</ul>
+	</li>
+</ul>
+
+            </div>
+            <div data-displayid="7">
+                <ol>
+	<li><strong>Development of Swarm Robotics Lab under National Centre of Robotics and Automation (NCRA)</strong></li>
+</ol>
+
+            </div>
+            <div data-displayid="8">
+                <p><strong>Professor </strong>at UET Taxila &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (From 16th Feb. 2021 to&nbsp;Present)</p>
+
+<p><strong>Professor Extraordinarius</strong>, University of South Africa&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (From 7th Feb 202 to Present)</p>
+
+<p><strong>Director, </strong>Swarm Robotics Lab-NCRA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (From 1st Jun. 2018&nbsp; to Present)</p>
+
+<p><strong>Director, </strong>ORIC&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;(From 31st Jul. 2021&nbsp; to Present)</p>
+
+<p><strong>Associate Professor </strong>at UET Taxila &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (From 29th Dec. 2015 to&nbsp;15th Feb. 2021)</p>
+
+<p><strong>Assistant Professor </strong>at UET Taxila &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (From 12th Jul. 2007 to&nbsp;28th Dec. 2015)</p>
+
+<p><strong>Lecturer </strong>at UET Taxila &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (From 16th Feb. 2005 to&nbsp;11th Jul. 2007)</p>
+
+<p><strong>Visiting Lecturer </strong>at UET Taxila &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (From 26th Nov. 2004 to&nbsp;15th Feb. 2005)</p>
+
+            </div>
+            <div data-displayid="9">
+                <p>Associate Editor, IEEE Transactions on Circuits and Systems for Video Technology (TCSVT), 2022-2023.</p>
+
+<p>Academic Editor, Mathematical Problems in Engineering (2020-onwards)</p>
+
+<p>Editor, Technical Journal, UET Taxila (2013-2016)</p>
+
+<p>Editorial Advisory Board, Pakistan Journal of Computers and Information Systems</p>
+
+<p>Editorial Advisory Board, Asian Journal of Emerging Research</p>
+
+<p>Regional Chair, Int. Conf. on Pattern Recognition Systems, 2022 France.</p>
+
+<p>Technical Program Chair, International Conference on Emerging Technologies (ICET&rsquo;2020)</p>
+
+<p>Reviewer, IEEE Transactions on Circuits and Systems for Video Technology</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Reviewer, IEEE Transactions on Cybernetics</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Reviewer, IEEE Transactions on Artificial Intelligence</p>
+
+<p>Reviewer, IEEE Transactions on Human Machine Systems</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Reviewer, IEEE Signal Processing Letters</p>
+
+<p>Reviewer, IEEE Transactions on Human Machine Systems</p>
+
+<p>Reviewer, ACM Transactions on Multimedia Computing, Communications and Applications (TOMM)</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Reviewer, Transactions in Simulation (SAGE Pub)</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Reviewer, International Journal of Pavement Engineering</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Reviewer, Computers and Electronics in Agriculture</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Reviewer, Quality and Quantity&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Reviewer, Neurocomputing</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Reviewer, Pattern Recognition Letters</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Reviewer, Informatics in Medicine Unlocked</p>
+
+<p>Reviewer, Advanced Engineering Informatics</p>
+
+<p>Reviewer, ETRI Journal&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+
+<p>Reviewer, IEEE Access</p>
+
+<p>Reviewer, IET Computer Vision</p>
+
+<p>Reviewer, The Nucleus</p>
+
+<p>Reviewer, The Computer Journal</p>
+
+<p>Reviewer, Elsevier Computers and Electrical Engineering (Outstanding Reviewer Recognition in 2014)</p>
+
+<p>Reviewer, Computing and Informatics Journal</p>
+
+<p>Reviewer, Mehran University Research Journal</p>
+
+<p>Reviewer, Journal of Advanced Transportation</p>
+
+<p>TPC, Int. Conf. on Imaging for Crime Detection 2016-2017, Spain.</p>
+
+<p>TPC, Int. Conf. on Pattern Recognition Systems, 2017 Spain.</p>
+
+<p>TPC, Int. Conf. of Frontiers of Information Technology (FIT), 2017-2019 Islamabad.</p>
+
+<p>TPC, Int. Conf. of Robotics and Automation for Industry (ICRAI), 2019 Islamabad.</p>
+
+<p>TPC, INMIC, 2019 Islamabad.</p>
+
+<p>TPC, Int. Conf. on Pattern Recognition Systems, 2021 Chile.</p>
+
+            </div>
+            <div data-displayid="10">
+                <p><strong>Senior Member IEEE</strong> (92189327), <strong>Professional Engineer PEC</strong> (COMP-5725), <strong>Professional Member</strong> ACM (5511499), <strong>Senior Member IACSIT</strong> (80347001), Member IAENG (102501), Ex- Member IEICE Japan.</p>
+
+            </div>
+            <div data-displayid="11">
+                <p><strong>Graduate and Post-Graduate Level:</strong> Digital Image Processing Techniques, Computer Vision, Human-Computer Interaction, Object Oriented Analysis and Design</p>
+
+<p><strong>Under-Graduate Level:</strong> Digital Image Processing, Object Oriented Programming, Entrepreneurship and Leadership, Computer Architecture, Introduction to Computing, Computer Fundamentals.</p>
+
+            </div>
+            <div data-displayid="12">
+                <p><strong>Professor Extraordinarius, University of South Africa&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (From 7th Feb 202 to Present)</strong></p>
+
+<p><strong>HEC Approved PhD Supervisor</strong><br />
+&nbsp;</p>
+
+            </div>
+            <div data-displayid="13">
+                
+            </div>
+            <div data-displayid="14">
+                <p><strong>Best Research Article Award</strong> by Punjab Higher Education Commission (PHEC), Pakistan in Year <strong>2024</strong>.</p>
+
+<p><strong>Best University Teacher Award</strong> by Higher Education Commission, Pakistan for year 2012-2013</p>
+
+<p><strong>Finalist OPENCV AI Competition 2021</strong> by Intel/OPENCV. Worth 3498 US$.</p>
+
+<p><strong>Winner</strong>, Robotics and Automation Startup Challenge 2021, worth 0.3 Mn. PKR.</p>
+
+<p><strong>Best Paper Award in Professional Category </strong>at IEEE International Conference on Emerging Technologies (ICET) 2021.</p>
+
+<p><strong>Won 4000 US$</strong> grant from <strong>IEEE Signal Processing Society</strong> for <strong>2023 Seasonal School on Computer Vision Applications in Robotics (CVAR).</strong></p>
+
+<p><strong>Won 1920 US$</strong> grant from <strong>IEEE Signal Processing Society and HAC</strong> <strong>on Signal Processing Technologies for Local Community Challenges, 2022.</strong></p>
+
+<p><strong>Secured 2nd Prize (50000 PKR)</strong> for <strong>Project UGO</strong> at PHEC Innovation Expo 2022<strong>.</strong></p>
+
+<p><strong>IEEE Region 10 Membership Development Grant 2022 400 US$.</strong></p>
+
+            </div>
+            <div data-displayid="15">
+                <ol>
+	<li>IEEE/RSJ International Conference on Intelligent Robotic Systems (IROS&rsquo;24), UAE, 14-18 October 2024.</li>
+	<li>Global IT Exhibition (GITEX) 2024, UAE, 13-18 October 2024.</li>
+	<li>IEEE International Conference on Image Processing (ICIP) UAE, 27-30 October 2024.</li>
+	<li>16th IEEE International Conference on Open-Source systems and Technologies (ICOSST), University of Engineering and Technology, Lahore held on 14-15 December 2022.</li>
+	<li>5th International Conference on Robotics and Automation in Industry at UET Peshawar, March 2023.</li>
+	<li>IEEE International Multi-Topic Conference (IMTIC), Mehran University of Engineering and Technology, Jamshoro held on 14-15 April 2023.</li>
+	<li>IEEE International Bhurban Conference on Applied Science and Technology (IBCAST), Bhurban, Murree held on 22-25 August 2023.</li>
+	<li>IEEE International Conference on Image Processing (ICIP) 2023.</li>
+	<li>International Conference on Advanced STEM Education (ICASE), The University of Faisalabad held on 5-6 December 2023.</li>
+	<li>International Conference on Pattern Recognition Systems (ICPRS), France, 2022 as Session/Regional Chair</li>
+	<li>2nd International Conference on Digital Futures and Transformative Technologies (ICoDT2), June 2022 as Session Chair.</li>
+	<li>4th International Conference on Robotics and Automation in Industry (ICRAI), Islamabad Pakistan 2021.</li>
+	<li>3rd International Conference on Robotics and Automation in Industry (ICRAI), Islamabad Pakistan 2019.</li>
+	<li>1st International Conference on Computational Sciences and Technologies (INCCST&rsquo;19), MUET Jamshoro, Pakistan, April 2019.</li>
+	<li>IEEE TENCON 2018, Jeju South Korea.</li>
+	<li>8th Pacific Rim Symposium on Image and Video Technology (PSIVT&rsquo;2017) Wuhan China.</li>
+	<li>International Conference on Digital Image Computing: Techniques and Application held at Gold Coast Australia, December 2016</li>
+	<li>2nd International Conference on Communications, Signal Processing, and their Applications (ICCSPA&rsquo;15), UAE, 2015.</li>
+	<li>Science, Technology and Engineering for Development Conference, Islamabad, 2014</li>
+	<li>IEEE Technical Symposium (TENSYMP) Region 10, Malaysia, 2014.</li>
+	<li>One Day PhD Conference/Seminar, 2013 UET Taxila</li>
+	<li>International Conference on Graphics and Image Processing (ICGIP) Singapore 2012.</li>
+	<li>One Day PhD Conference/Seminar, 2012 UET Taxila</li>
+	<li>International Bhurban Conference on Applied Sciences and Technology (IBCAST) 2012.</li>
+	<li>International Conference on Optical Communication and Networks (ICOCN) 2007.</li>
+	<li>International Conference on Graphics, Multimedia and Imaging (GRAMI) 2006.</li>
+	<li>International Conference on Micro-Electronics (ICM) 2005.</li>
+</ol>
+
+            </div>
+            <div data-displayid="16">
+                <ol>
+	<li><a name="_Hlk90931017"></a><a name="_Hlk161781063"></a><a name="_Hlk127123972"><strong>Tutorial &ldquo;Visual Data Processing for Drone AI Technology: A Practical Perspective&rdquo;</strong></a> <strong>Delivered</strong> at IEEE International Conference on Image Processing 2024, Abu Dhabi, United Arab Emirates.</li>
+	<li><strong>Tutorial &ldquo;Imagining Beyond Pixels: Bridging Modalities for Multimodal Representation and Learning&rdquo;</strong> <strong>Delivered</strong> at IEEE International Conference on Image Processing 2024, Abu Dhabi, United Arab Emirates.</li>
+	<li><strong>Tutorial &ldquo;Edge AI for Aerial Robots: Enhancing Drone Operations with AI&rdquo;</strong> <strong>Delivered</strong> at IEEE/RSJ International Conference on on Intelligent Robots and Systems (IROS&rsquo;24), Abu Dhabi, United Arab Emirates.</li>
+	<li><strong>Trainer</strong> for &ldquo;<strong>Outcome-Based Education: Understanding, Implementation and Accreditation Perspective&rdquo;</strong> at School of Electrical Engineering and Computer Science, NUST Islamabad on 28 August 2024.</li>
+	<li><strong>Invited Speaker</strong> at IEEE International Bhurban Conference on Applied Science and Technology (IBCAST), Bhurban, Murree held on 20-23 August 2024.</li>
+	<li><strong>Trainer</strong> for &ldquo;<strong>Outcome-Based Education: Understanding, Implementation and Accreditation Perspective&rdquo;</strong> at School of Engineering, Bahria University Islamabad on 31 July 2024.</li>
+	<li><strong>Keynote Speaker</strong> at Artificial Intelligence Conference and Expo 2024 (AICE&rsquo;24) at Sino-Pak Centre for Artificial Intelligence, PAF-IAST Haripur, 27-29 May 2024.</li>
+	<li><strong>Keynote Speaker</strong> at Transnational Workshop on Smart Technologies for Societal Health, organized by Anna University, India, and Queen&#39;s University Belfast (QUB), UK. held on 4-5 March 2024.</li>
+	<li><strong>Keynote Speaker</strong> at International Conference on Advanced STEM Education (ICASE), The University of Faisalabad held on 5-6 December 2023.</li>
+	<li><strong>Short Course</strong> &ldquo;<strong>Multimodal Learning: Technical Foundation, Hands-on and Applications</strong>&rdquo; <strong>Delivered</strong> at IEEE International Conference on Image Processing (ICIP) 2023.</li>
+	<li><strong>Tutorial</strong> &ldquo;<strong>Edge Computing for Robot Vision: A Practical Perspective</strong>&rdquo; <strong>Delivered</strong> at IEEE International Conference on Image Processing (ICIP) 2023.</li>
+	<li><strong>Invited Speaker</strong> at 2nd Career Fair 2023, Skardu held on 22-24 September 2023.</li>
+	<li><strong>Invited Speaker</strong> at IEEE International Bhurban Conference on Applied Science and Technology (IBCAST), Bhurban, Murree held on 22-25 August 2023.</li>
+	<li><strong>Invited Speaker</strong> at IEEE International Multi-Topic Conference (IMTIC), Mehran University of Engineering and Technology, Jamshoro held on 14-15 April 2023.</li>
+	<li><strong>Workshop</strong> Title &ldquo;Robot Vision and Edge AI&rdquo; at 5th International Conference on Robotics and Automation in Industry at UET Peshawar, March 2023.</li>
+	<li><strong>Invited Speaker</strong> &ldquo;Swarm Robotics and Edge AI&rdquo; at 16th IEEE International Conference on Open-Source systems and Technologies (ICOSST), University of Engineering and Technology, Lahore held on 14-15 December 2023.</li>
+	<li><strong>Invited Speaker</strong> &ldquo;Swarm Robotics&rdquo; at 21st Pak-German Workshop on Field and Assistive Robotics (WFAR), University of Lahore held on 20-21 October 2022.</li>
+	<li><strong>Keynote Speaker</strong> &ldquo;Computer Vision for Video Surveillance &amp; Monitoring: Applications, Techniques, and Opportunities&rdquo; 2022 IEEE International SPS Seasonal School on Video Surveillance and Monitoring at The Islamia University of Bahawalpur.</li>
+	<li><strong>Invited Speaker</strong> &ldquo;STEM Robotics&rdquo; at 1st Career Fair 2022, Gilgit held on 15-18 August 2022.</li>
+	<li><strong>Guest Speaker</strong> &ldquo;State-of-the-art STEM Robotics&rdquo; at International Workshop on Undergrad Stem Education, BUITEMS Quetta held on 20-24 June 2022.</li>
+	<li><strong>Expert Talk</strong> &ldquo;Research Grants: Proposal Writing and Opportunities&rdquo; at 1st R &amp; D Lounge organized by ORIC, UET Taxila, October 2021.</li>
+	<li><strong>IEEE YP Talk</strong> Title &ldquo;Computer Vision in Robotics: Applications, Tools and Opportunities&rdquo; at 4th International Conference on Robotics and Automation in Industry at CEME-NUST, October 2021.</li>
+	<li><strong>Academic Expert</strong> Talk at 1st National Artificial Intelligence Forum (NAIF&rsquo;21) at Sino-Pak Centre for Artificial Intelligence, PAF-IAST Haripur, September 2021.</li>
+	<li>Continuous Professional Development Workshop &ldquo;Computer Vision: Applications and Trends&rdquo; at Fatima Jinnah Women University, Rawalpindi Pakistan, November 2019.</li>
+	<li><strong>Invited Talk</strong> &ldquo;Human Action Recognition: Techniques and Trends&rdquo; at 1st International Conference on Computational Sciences and Technologies (INCCST&rsquo;19), MUET Jamshoro, Pakistan, April 2019.</li>
+</ol>
+
+            </div>
+            <div data-displayid="17">
+                <h3>PhD SUPERVISION</h3>
+
+<ol>
+	<li><a name="_Hlk59568443">Supervised <strong>Saima Nazir </strong>&ldquo;Bag of Expressions for Human Activity Recognition&rdquo;<strong> </strong><strong>(SED, Completed in 2018)</strong></a></li>
+	<li>Supervised <strong>Fiza Murtaza </strong>&ldquo;Temporal Action Detection in Long and Untrimmed Videos&rdquo;<strong> </strong><strong>(CPED, Completed in 2019)</strong></li>
+	<li>Supervised <strong>Nudrat Nida </strong>&ldquo;Human Action and Behavior Recognition in Lecture Room Environment&rdquo;<strong> </strong>(<strong>CPED, Completed in 2020</strong>)</li>
+	<li><a name="_Hlk161780980">Supervised <strong>Muhammad Waqas </strong>&ldquo;Action Recognition for Intelligent Video Surveillance Systems&rdquo;<strong> </strong>(<strong>TED, completed in 2023</strong>)</a></li>
+	<li>Supervising <strong>Naseer Ahmed </strong>&ldquo;Computer Vision Based Asphalt Pavement Analysis&rdquo;<strong> </strong>(CPED, Started in 2015)</li>
+	<li>Co-Supervised <strong>Abdul Nasir </strong>&ldquo;Vision-based Recognition of Invasive Insects under Unconstrained Flying Conditions&rdquo;<strong> </strong>(<strong>ENCED</strong>, <strong>Completed in 2023</strong>)</li>
+	<li>Co-Supervised <strong>Sobia Hayee </strong>&ldquo;Car Make and Model Recognition in Realistic Environment&rdquo;<strong> </strong>(CPED, Started in 2017)</li>
+	<li>Supervising <strong>Anum Abdus Salam </strong>&ldquo;Computer Vision for Medical Image Processing&rdquo;<strong> </strong>(CPED, Started in 2021)</li>
+	<li>Supervising <strong>Muhammad Sohail </strong>&ldquo;Robot Vision for Aerial Imagery&rdquo;<strong> </strong>(CPED, Started in 2021)</li>
+	<li>Co-Supervising <strong>Vikash Ramharuk </strong>&ldquo;A Cloud Robotic Framework to Assist Robot Swarms with Adaptive Motion Planning to Enhance Human Safety &amp; Work Efficiency&ldquo; <strong>(University of South Africa)</strong></li>
+	<li>Supervising <strong>Talha Saeed </strong>&ldquo;Robot Vision for Aerial Imagery<strong> </strong>(CPED, Started in 2024)</li>
+</ol>
+
+<h3>&nbsp;</h3>
+
+<h3>M.SC. THESIS SUPERVISED</h3>
+
+<ol>
+	<li><strong>Naveed Khan Baloch</strong><strong> </strong>&ldquo;Intelligent System for Attendance Management: Face Recognition Based Approach&rdquo;<strong> </strong>(CPED, Completed in 2010-2011)</li>
+	<li><strong>Sahib Khan</strong><strong> </strong>&ldquo;Implementation of Variable Least Significant Bit Steganography&rdquo;<strong> </strong>(TED, Completed in 2011)</li>
+	<li><strong>Abdul </strong><strong>Basir </strong>&ldquo;Linux Kernal Transparent Compression<strong>&rdquo; </strong>(CPED, Completed in 2012)</li>
+	<li><strong>Mujtaba Hassan</strong><strong> </strong>&ldquo;Hand Structure Analysis for Finger Identification and Joints&rdquo;<strong> </strong>(CPED, Completed in 2012)</li>
+	<li><strong>Saira Kanwal</strong> &ldquo;Optimization of Real Time Edge Enhanced Object Tracking Algorithm on DSP&rdquo;<strong> </strong>(CPED, Completed in 2012-2014)</li>
+	<li><strong>Hira Bashir</strong><strong> </strong>&ldquo;Environment Learning and Automatic Path Planning<strong>&rdquo; </strong>(CPED, Completed in 2012-2013)</li>
+	<li><strong>Asim Raza</strong><strong> </strong>&ldquo;Instructor Activity Recognition using Spatiotemporal Techniques&rdquo;<strong> </strong>(CPED, Completed in 2012-2014)</li>
+	<li><strong>Akhtar Hanif</strong><strong> </strong>&ldquo;Inflight Helicopter Blade Track Measurement using Computer Vision&rdquo;<strong> </strong>(CPED, Completed in 2013-2014)</li>
+	<li><strong>Arubah Hussain</strong><strong> </strong>&rdquo;Sleeping Foreground Problem for People Counting&rdquo;<strong> </strong>(CPED, Completed in 2013-2015)</li>
+	<li><strong>Hassan Ahmed</strong><strong> </strong>&ldquo;Human Activity Recognition using RGBD Bag of Words&rdquo;<strong> </strong>(CPED, Completed in August 2014)</li>
+	<li><strong>M. Qasim </strong><strong>Shafiq </strong>&ldquo;Localization and Tracking of People Moving inside a Train Carriage&rdquo;<strong> </strong>(CPED, Defended in 2013-2016)</li>
+	<li><strong>Fiza Murtaza</strong><strong> </strong>&ldquo;Human Action Recognition Algorithm for a Multi-camera Video Dataset&rdquo;<strong> </strong>(CPED, Completed in 2015)</li>
+	<li><strong>Mubashir Noman</strong><strong> </strong>&ldquo;Real-Time People Detection Algorithm on Raspberry Pi&rdquo;<strong> </strong>(CPED, Completed in 2016)</li>
+	<li><strong>Naseer Ahmed</strong><strong> </strong>&ldquo;Secure Image Steganography Technique for Covert Communication&rdquo;<strong> </strong>(CPED, Completed in 2015)</li>
+	<li><strong>Hafiza Sundus Farooq</strong><strong> </strong>&ldquo;A Generic Forgery Detection Technique&rdquo;<strong> </strong>(CPED, Completed in 2016)</li>
+	<li><strong>Bilal Rasheed</strong><strong> </strong>&ldquo;Vehicle Make and Model Recognition for Intelligent Transportation System&rdquo;<strong> </strong>(CPED, Completed in 2017)</li>
+	<li><strong>Saddam Hussain</strong><strong> </strong>&ldquo;Detection and Counting of Passengers Getting On and Off from Bus&rdquo;<strong> </strong>(CPED, Completed in 2017).</li>
+	<li><strong>Basharat </strong><strong>Hussain </strong>&ldquo;Visual Vehicle Detection Scheme on Low-Powered Embedded GPU<strong>&rdquo; </strong>(CPED, Completed in 2017)</li>
+	<li><strong>Abinta Mehmoor Mir</strong><strong> </strong>&ldquo;Street Crime Scene Recognition in Surveillance Videos&rdquo;<strong> </strong>(CPED, Completed in 2017)</li>
+	<li><strong>Usman </strong><strong>Riaz </strong>&ldquo;Visibility Restoration of Hazy Images Containing White Objects&rdquo;<strong> </strong>(CPED, Completed in 2018)</li>
+	<li><strong>Qurat ul Ain Ali</strong><strong> </strong>&ldquo;Activity Recognition for Human-Vehicle Interaction&rdquo;<strong> </strong>(CPED, Completed in 2018)</li>
+	<li><strong>Malik Ali Gul</strong><strong> </strong>&ldquo;Abnormal Human Activity Recognition for Elderly Patient Care&rdquo;<strong> </strong>(CPED, Completed in 2018)</li>
+	<li><strong>Umber Saba</strong><strong> </strong>&ldquo;Plant Species Recognition using Computer Vision<strong>&rdquo; </strong>(CPED, Completed in 2018)</li>
+	<li><strong>Hira Imtiaz </strong>&ldquo;Design and Implementation of Receiver Autonomous Integrity Monitoring for Small UAV Applications on DSP&rdquo;<strong> </strong>(CPED, Completed in 2019)</li>
+	<li><strong>Haseeb Sultan</strong><strong> </strong>&ldquo;Right Whale Recognition using Computer Vision<strong>&rdquo; </strong>(CPED, Completed in 2019)</li>
+	<li><strong>Hajra Binte Naeem</strong><strong> </strong>&ldquo;Human Action Recognition in Multiview Scenario&rdquo;<strong> </strong>(CPED, Completed in 2020)</li>
+	<li><strong>Ammar Mohsin Butt</strong><strong> </strong>&ldquo;Human Action Recognition using Bag of Expressions<strong>&rdquo; </strong>(CPED, Completed in 2020)</li>
+	<li><strong>Sobia Sarwar</strong><strong> </strong>&ldquo;Computer Vision based Potholes Detection Approach&rdquo;<strong> </strong>(CPED, Completed in 2020)</li>
+	<li><strong>Muhammad Saad Saeed</strong><strong> </strong>&ldquo;Speaker Identification and Verification in the Wild&rdquo;<strong> </strong>(CPED, Completed in 2021)</li>
+	<li><strong>Saqlain Hussain Shah</strong><strong> </strong>&ldquo;Muli-Modal Speaker Recognition and Verification<strong>&rdquo; </strong>(CPED, Completed in 2023)</li>
+	<li><strong>Zubair Saeed</strong><strong> </strong>&ldquo;Real-Time On-Board Small-Scale Object Detector for Unmanned Aerial Vehicles (UAVs)<strong>&rdquo; </strong>(CPED, Completed in 2023)</li>
+	<li><strong>Muhammad Ali Raza</strong><strong> </strong>&ldquo;A Robust Approach for Human Fall Detection using Visual Data&rdquo;<strong> </strong>(CPED, Completed in 2023)</li>
+	<li><strong>Muhammad Haroon Asad</strong><strong> </strong>&ldquo;Natural Disaster Assessment using Aerial Image Processing&rdquo;<strong> </strong>(CPED, Completed in 2023)</li>
+	<li><strong>Fizza Saeed Malik</strong><strong> </strong>&ldquo;Exploring Dermoscopic Structures for Melanoma Skin Lesion Classification&rdquo;<strong> </strong>(CPED, Completed in 2023)</li>
+	<li><strong>Shafaq Rasheed</strong><strong> </strong>&ldquo;AI-Based Trash Detection in Water Bodies&rdquo;<strong> </strong>(CPED, Completed in 2024)</li>
+</ol>
+
+            </div>
+            <div data-displayid="18">
+                <ol>
+	<li><strong>Workshop on Computer Vision and AI-on-the-Edge </strong>by Swarm Robotics Lab-NCRA on 24 September 2024 at UET Taxila.</li>
+	<li><strong>Workshop on Robot Operating System and Computer Vision-on-the-Edge </strong>by Swarm Robotics Lab-NCRA on 14 February 2023 at UET Taxila.</li>
+	<li><strong>Workshop on Robotics and Computer Vision (RCV&rsquo;21) </strong>by Swarm Robotics Lab-NCRA on 24-26 November 2021 at UET Taxila.</li>
+	<li>International Workshop on <strong>&ldquo;Robotics and Assistive Living&rdquo;</strong> by Centre for Water Informatics-LUMS on 13-10. 2018 at LUMS Lahore.</li>
+	<li>International Workshop on <strong>&ldquo;Precision Agriculture and Forestry&rdquo;</strong> by Centre for Water Informatics-LUMS on 12-10. 2018 at LUMS Lahore.</li>
+	<li>International Workshop on <strong>&ldquo;OBA Accreditation Process for Program Evaluators&rdquo;</strong> by PEC on 08-09.02.2018 at PEC HQ Islamabad.</li>
+	<li>International Workshop on <strong>&quot;Outcome Based Education&quot;</strong> by PEC &amp; UET Taxila on 06-07.02.2018 at UET Taxila.</li>
+	<li>Workshop on <strong>&ldquo;Entrepreneurship Skills&rdquo;</strong> by Directorate of Staff Development, UET Taxila on 29.11.2017 at UET Taxila.</li>
+	<li>Training on <strong>&ldquo;OBA Accreditation Process for Program Evaluators&rdquo;</strong> by PEC on 29.04.2017 at PEC HQ Islamabad.</li>
+	<li>International Workshop on <strong>&quot;Outcome Based Education and Implementation&quot;</strong> by PEC &amp; UET Taxila on 01-02.02.2017 at UET Taxila.</li>
+	<li><strong>EDITOR&rsquo;s CAF&Eacute;, </strong>One Day Event by Asian Council of Science Editors,<strong> </strong>18th November 2016, Islamabad.</li>
+	<li><strong>International Symposium on Technology Entrepreneurship and Incubation, </strong>Two Days Symposium in Islamabad September 2016.<strong> </strong></li>
+	<li><strong>ACSE Workshop on Peer Review and Research Integrity, </strong>One day workshop by Asian Council for Science Editors 18th February, 2016 in Islamabad.</li>
+	<li><strong>EDITOR&rsquo;s CAF&Eacute;, </strong>One Day Event by Asian Council of Science Editors,<strong> </strong>21st November 2015, Islamabad.</li>
+	<li><strong>Symposium on Re-Designing Engineering Education in Pakistan </strong>organized by UET Taxila on 19th October 2015.<strong> </strong></li>
+	<li><strong>USAID Workshop on Small Grant Proposal, </strong>14th October 2015, Islamabad</li>
+	<li><strong>International Workshop on &ldquo;Essentials of Entrepreneurship &ndash; A Toolkit for Entrepreneurs&rdquo; </strong>December 9-11, 2014, COMSTECH Islamabad, Pakistan</li>
+	<li><strong>Entrepreneurship Workshop for Engineers and Scientist, </strong>5-days workshop conducted by USIAD, HEC and NUST at NUST from 2nd &ndash; 6th June 2014</li>
+	<li><strong>One Day Workshop (Communication Skills for Teachers)</strong> by Sir Syed Memorial Society Islamabad at Case Islamabad, November, 2011</li>
+	<li><strong>PCEPT (Professional Competancy Enhancement Program for University Teachers)</strong> by Higher Education Commission of Pakistan, September-October, 2011</li>
+	<li><strong>Modeling of Biological and Active Machine Vision in Robotics. </strong>3-days Workshop held by GET Lab, University of Paderborn, Germany and&nbsp; MCS, National University of Science and Technology, Rawalpindi Pakistan in 2008.</li>
+	<li><strong>ICT Centric University Excellence Program (sponsored by Ministry of IT and National ICT R &amp; D Fund) </strong>at Lahore University of Management Sciences (LUMS) Lahore, Pakistan in July-August 2007.&nbsp;<strong>&ldquo;Outstanding&rdquo; </strong>and &ldquo;<strong>Excellent&rdquo;</strong> Grades in Object Oriented Programming and Data Structures respectively.</li>
+</ol>
+
+            </div>
+            <div data-displayid="19">
+                <h3>PhD SUPERVISION</h3>
+
+<ol>
+	<li><a name="_Hlk59568443">Supervised <strong>Saima Nazir </strong>&ldquo;Bag of Expressions for Human Activity Recognition&rdquo;<strong> </strong><strong>(SED, Completed in 2018)</strong></a></li>
+	<li>Supervised <strong>Fiza Murtaza </strong>&ldquo;Temporal Action Detection in Long and Untrimmed Videos&rdquo;<strong> </strong><strong>(CPED, Completed in 2019)</strong></li>
+	<li>Supervised <strong>Nudrat Nida </strong>&ldquo;Human Action and Behavior Recognition in Lecture Room Environment&rdquo;<strong> </strong>(<strong>CPED, Completed in 2020</strong>)</li>
+	<li><a name="_Hlk161780980">Supervised <strong>Muhammad Waqas </strong>&ldquo;Action Recognition for Intelligent Video Surveillance Systems&rdquo;<strong> </strong>(<strong>TED, completed in 2023</strong>)</a></li>
+	<li>Supervising <strong>Naseer Ahmed </strong>&ldquo;Computer Vision Based Asphalt Pavement Analysis&rdquo;<strong> </strong>(CPED, Started in 2015)</li>
+	<li>Co-Supervised <strong>Abdul Nasir </strong>&ldquo;Vision-based Recognition of Invasive Insects under Unconstrained Flying Conditions&rdquo;<strong> </strong>(<strong>ENCED</strong>, <strong>Completed in 2023</strong>)</li>
+	<li>Co-Supervised <strong>Sobia Hayee </strong>&ldquo;Car Make and Model Recognition in Realistic Environment&rdquo;<strong> </strong>(CPED, Started in 2017)</li>
+	<li>Supervising <strong>Anum Abdus Salam </strong>&ldquo;Computer Vision for Medical Image Processing&rdquo;<strong> </strong>(CPED, Started in 2021)</li>
+	<li>Supervising <strong>Muhammad Sohail </strong>&ldquo;Robot Vision for Aerial Imagery&rdquo;<strong> </strong>(CPED, Started in 2021)</li>
+	<li>Co-Supervising <strong>Vikash Ramharuk </strong>&ldquo;A Cloud Robotic Framework to Assist Robot Swarms with Adaptive Motion Planning to Enhance Human Safety &amp; Work Efficiency&ldquo; <strong>(University of South Africa)</strong></li>
+	<li>Supervising <strong>Talha Saeed </strong>&ldquo;Robot Vision for Aerial Imagery<strong> </strong>(CPED, Started in 2024)</li>
+</ol>
+
+<h3>&nbsp;</h3>
+
+<h3>M.SC. THESIS SUPERVISED</h3>
+
+<ol>
+	<li><strong>Naveed Khan Baloch</strong><strong> </strong>&ldquo;Intelligent System for Attendance Management: Face Recognition Based Approach&rdquo;<strong> </strong>(CPED, Completed in 2010-2011)</li>
+	<li><strong>Sahib Khan</strong><strong> </strong>&ldquo;Implementation of Variable Least Significant Bit Steganography&rdquo;<strong> </strong>(TED, Completed in 2011)</li>
+	<li><strong>Abdul </strong><strong>Basir </strong>&ldquo;Linux Kernal Transparent Compression<strong>&rdquo; </strong>(CPED, Completed in 2012)</li>
+	<li><strong>Mujtaba Hassan</strong><strong> </strong>&ldquo;Hand Structure Analysis for Finger Identification and Joints&rdquo;<strong> </strong>(CPED, Completed in 2012)</li>
+	<li><strong>Saira Kanwal</strong> &ldquo;Optimization of Real Time Edge Enhanced Object Tracking Algorithm on DSP&rdquo;<strong> </strong>(CPED, Completed in 2012-2014)</li>
+	<li><strong>Hira Bashir</strong><strong> </strong>&ldquo;Environment Learning and Automatic Path Planning<strong>&rdquo; </strong>(CPED, Completed in 2012-2013)</li>
+	<li><strong>Asim Raza</strong><strong> </strong>&ldquo;Instructor Activity Recognition using Spatiotemporal Techniques&rdquo;<strong> </strong>(CPED, Completed in 2012-2014)</li>
+	<li><strong>Akhtar Hanif</strong><strong> </strong>&ldquo;Inflight Helicopter Blade Track Measurement using Computer Vision&rdquo;<strong> </strong>(CPED, Completed in 2013-2014)</li>
+	<li><strong>Arubah Hussain</strong><strong> </strong>&rdquo;Sleeping Foreground Problem for People Counting&rdquo;<strong> </strong>(CPED, Completed in 2013-2015)</li>
+	<li><strong>Hassan Ahmed</strong><strong> </strong>&ldquo;Human Activity Recognition using RGBD Bag of Words&rdquo;<strong> </strong>(CPED, Completed in August 2014)</li>
+	<li><strong>M. Qasim </strong><strong>Shafiq </strong>&ldquo;Localization and Tracking of People Moving inside a Train Carriage&rdquo;<strong> </strong>(CPED, Defended in 2013-2016)</li>
+	<li><strong>Fiza Murtaza</strong><strong> </strong>&ldquo;Human Action Recognition Algorithm for a Multi-camera Video Dataset&rdquo;<strong> </strong>(CPED, Completed in 2015)</li>
+	<li><strong>Mubashir Noman</strong><strong> </strong>&ldquo;Real-Time People Detection Algorithm on Raspberry Pi&rdquo;<strong> </strong>(CPED, Completed in 2016)</li>
+	<li><strong>Naseer Ahmed</strong><strong> </strong>&ldquo;Secure Image Steganography Technique for Covert Communication&rdquo;<strong> </strong>(CPED, Completed in 2015)</li>
+	<li><strong>Hafiza Sundus Farooq</strong><strong> </strong>&ldquo;A Generic Forgery Detection Technique&rdquo;<strong> </strong>(CPED, Completed in 2016)</li>
+	<li><strong>Bilal Rasheed</strong><strong> </strong>&ldquo;Vehicle Make and Model Recognition for Intelligent Transportation System&rdquo;<strong> </strong>(CPED, Completed in 2017)</li>
+	<li><strong>Saddam Hussain</strong><strong> </strong>&ldquo;Detection and Counting of Passengers Getting On and Off from Bus&rdquo;<strong> </strong>(CPED, Completed in 2017).</li>
+	<li><strong>Basharat </strong><strong>Hussain </strong>&ldquo;Visual Vehicle Detection Scheme on Low-Powered Embedded GPU<strong>&rdquo; </strong>(CPED, Completed in 2017)</li>
+	<li><strong>Abinta Mehmoor Mir</strong><strong> </strong>&ldquo;Street Crime Scene Recognition in Surveillance Videos&rdquo;<strong> </strong>(CPED, Completed in 2017)</li>
+	<li><strong>Usman </strong><strong>Riaz </strong>&ldquo;Visibility Restoration of Hazy Images Containing White Objects&rdquo;<strong> </strong>(CPED, Completed in 2018)</li>
+	<li><strong>Qurat ul Ain Ali</strong><strong> </strong>&ldquo;Activity Recognition for Human-Vehicle Interaction&rdquo;<strong> </strong>(CPED, Completed in 2018)</li>
+	<li><strong>Malik Ali Gul</strong><strong> </strong>&ldquo;Abnormal Human Activity Recognition for Elderly Patient Care&rdquo;<strong> </strong>(CPED, Completed in 2018)</li>
+	<li><strong>Umber Saba</strong><strong> </strong>&ldquo;Plant Species Recognition using Computer Vision<strong>&rdquo; </strong>(CPED, Completed in 2018)</li>
+	<li><strong>Hira Imtiaz </strong>&ldquo;Design and Implementation of Receiver Autonomous Integrity Monitoring for Small UAV Applications on DSP&rdquo;<strong> </strong>(CPED, Completed in 2019)</li>
+	<li><strong>Haseeb Sultan</strong><strong> </strong>&ldquo;Right Whale Recognition using Computer Vision<strong>&rdquo; </strong>(CPED, Completed in 2019)</li>
+	<li><strong>Hajra Binte Naeem</strong><strong> </strong>&ldquo;Human Action Recognition in Multiview Scenario&rdquo;<strong> </strong>(CPED, Completed in 2020)</li>
+	<li><strong>Ammar Mohsin Butt</strong><strong> </strong>&ldquo;Human Action Recognition using Bag of Expressions<strong>&rdquo; </strong>(CPED, Completed in 2020)</li>
+	<li><strong>Sobia Sarwar</strong><strong> </strong>&ldquo;Computer Vision based Potholes Detection Approach&rdquo;<strong> </strong>(CPED, Completed in 2020)</li>
+	<li><strong>Muhammad Saad Saeed</strong><strong> </strong>&ldquo;Speaker Identification and Verification in the Wild&rdquo;<strong> </strong>(CPED, Completed in 2021)</li>
+	<li><strong>Saqlain Hussain Shah</strong><strong> </strong>&ldquo;Muli-Modal Speaker Recognition and Verification<strong>&rdquo; </strong>(CPED, Completed in 2023)</li>
+	<li><strong>Zubair Saeed</strong><strong> </strong>&ldquo;Real-Time On-Board Small-Scale Object Detector for Unmanned Aerial Vehicles (UAVs)<strong>&rdquo; </strong>(CPED, Completed in 2023)</li>
+	<li><strong>Muhammad Ali Raza</strong><strong> </strong>&ldquo;A Robust Approach for Human Fall Detection using Visual Data&rdquo;<strong> </strong>(CPED, Completed in 2023)</li>
+	<li><strong>Muhammad Haroon Asad</strong><strong> </strong>&ldquo;Natural Disaster Assessment using Aerial Image Processing&rdquo;<strong> </strong>(CPED, Completed in 2023)</li>
+	<li><strong>Fizza Saeed Malik</strong><strong> </strong>&ldquo;Exploring Dermoscopic Structures for Melanoma Skin Lesion Classification&rdquo;<strong> </strong>(CPED, Completed in 2023)</li>
+	<li><strong>Shafaq Rasheed </strong>&ldquo;AI-Based Trash Detection in Water Bodies&rdquo;<strong> </strong>(CPED, Completed in 2024)</li>
+</ol>
+
+            </div>
+            <div data-displayid="20">
+                
+            </div> 
+        </div>
+    </div>
+    
+    <div id="profileview2" style="display: none">
+        <fieldset>
+            <legend>Profile Information</legend>
+            <table style="width: 100%" class="table table-hover ">
+                <tr>
+                    <td colspan="2">
+                        <table style="width: 100%">
+                            <tr>
+                                <td class="col-sm-10" style="vertical-align: top">
+                                    <table>
+                                        <tr>
+                                            <td>Name</td>
+                                            <td>Dr. Muhammad Haroon Yousaf</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Designation</td>
+                                            <td>Professor</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Department</td>
+                                            <td>Computer Engineering (Taxila)</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Highest Qualification</td>
+                                            <td>PhD Computer Engineering, UET, Taxila</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Specialization</td>
+                                            <td>Image Processing, Computer Vision, Video Processing, Gesture Recognition</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Phone No</td>
+                                            <td>+92 51 9047568</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Cell No</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Fax No</td>
+                                            <td>+92 51 9047420</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Email</td>
+                                            <td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="83ebe2f1ececedadfaecf6f0e2e5c3f6e6f7f7e2fbeaefe2ade6e7f6adf3e8">[email&#160;protected]</a></td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td class="col-sm-2" style="vertical-align: top; padding-top: 20px;">
+                                    <img src="../imgs/haroon.yousaf.jpg?random=639212883467318073" class="profileimg" />
+                                </td>
+                            </tr>
+
+                        </table>
+                    </td>
+
+                </tr>
+
+                <tr>
+                    <td>Education</td>
+                    <td><p>PhD. Computer Engineering (Major: Computer Vision)</p>
+
+<p>MSc. Computer Engineering</p>
+
+<p>BSc. (Honours)&nbsp;Computer Engineering</p>
+</td>
+                </tr>
+                <tr>
+                    <td>Research Work</td>
+                    <td><p>Swarm Robotics Lab FB Page: <a href="https://www.facebook.com/swarmroboticslab/">https://www.facebook.com/swarmroboticslab/</a></p>
+
+<p>Swarm Robotics Lab (Promo):&nbsp;<a href="https://www.youtube.com/watch?v=hlDmgtohAz4&amp;t=1s">https://www.youtube.com/watch?v=hlDmgtohAz4&amp;t=1s</a></p>
+
+<p>Google Scholar:&nbsp;<a href="https://scholar.google.com/citations?user=zTgxor0AAAAJ&amp;hl=en&amp;oi=ao">https://scholar.google.com/citations?user=zTgxor0AAAAJ&amp;hl=en&amp;oi=ao</a></p>
+
+<p>Research Gate:&nbsp;<a href="https://www.researchgate.net/profile/Muhammad-Haroon-Yousaf">https://www.researchgate.net/profile/Muhammad-Haroon-Yousaf</a></p>
+
+<p>&nbsp;</p>
+</td>
+                </tr>
+                <tr>
+                    <td>Research Interests</td>
+                    <td><p>Computer Vision (Detection and Recognition), Artificial Intelligence, Image analysis and Processing, Action and Activity Recognition, Machine Learning, Deep Learning, Human-Computer Interaction, Robotics and Automation</p>
+</td>
+                </tr>
+                <tr>
+                    <td>Publications</td>
+                    <td><h3><strong>RESEARCH PUBLICATIONS [Citations=1980+, h-Index=22, i10-Index=46]</strong></h3>
+
+<h3>- SCI-INDEXED Journals &ndash; [48]</h3>
+
+<ol>
+	<li><a name="_Hlk47802806"></a><a name="_Hlk185099711">Ali Raza, Muhammad Haroon Yousaf, Waqar Ahmed, Sergio A. Velastin, Serestina Viriri <strong>&ldquo;Human Fall Detection using Pose Estimation: From Traditional Machine Learning to Vision Transformers&rdquo; Accepted</strong> in Engineering Applications of Artificial Intelligence, 2024. <strong>(IF: 7.5)</strong></a></li>
+	<li>Fiza Saeed Malik, Muhammad Haroon Yousaf, Hassan Ahmed Sial, Serestina Viriri <strong>&ldquo;Exploring Dermoscopic Structures for Melanoma Lesions&#39; Classification&rdquo; Published</strong> in Frontiers in Big Data, 7:1366312. doi: 10.3389/fdata.2024.1366312, 2024. <strong>(IF: 3.1)</strong></li>
+	<li>Awais Akhtar, Rehan Ahmed, Muhammad Haroon Yousaf, Sergio A. Velastin <strong>&ldquo;Real-Time Motorbike Detection: AI on the Edge Perspective&rdquo; Published</strong> in Mathematics, 12(7), 1103 (2024). <strong>(IF: 2.3)</strong></li>
+	<li><a name="_Hlk172445203">Nudrat Nida, Muhammad Haroon Yousaf, Aun Irtaza, Sajid Javed, Sergio A. Velastin <strong>&ldquo;Spatial Deep Feature Augmentation Technique for FER Using Genetic Algorithm&rdquo; Published</strong> in Neural Computing and Applications, Volume 36, pages 4563&ndash;4581, (2024). <strong>(IF: 6.0)</strong></a></li>
+	<li>Sobia Hayee; Fawad Hussain; Muhammad Haroon Yousaf <strong>&ldquo;A Novel FDLSR-Based Technique for View-Independent Vehicle Make and Model Recognition</strong>&rdquo;. Sensors 2023, 23, 7920. <a href="https://doi.org/10.3390/s23187920">https://doi.org/10.3390/s23187920</a>. <strong>(IF: 3.9)</strong></li>
+	<li>Saeed, Zubair, Muhammad Haroon Yousaf, Rehan Ahmed, Sergio A. Velastin, and Serestina Viriri. 2023. &quot;<strong>On-Board Small-Scale Object Detection for Unmanned Aerial Vehicles (UAVs)</strong>&quot; <strong>Published</strong> in Drones 7, no. 5: 310. <a href="https://doi.org/10.3390/drones7050310">https://doi.org/10.3390/drones7050310</a>. <strong>(IF: 4.8)</strong></li>
+	<li>Waqas Ahmed, Muhammad Haroon Yousaf <strong>&ldquo;A Deep Autoencoder based Approach for Suspicious Action Recognition in Surveillance Videos&rdquo;</strong> <strong>Published</strong> in Arabian Journal of Science and Engineering 2023. <strong>(IF: 2.807)</strong></li>
+	<li>Shahzad, Muhammad Muzamal, Zubair Saeed, Asima Akhtar, Hammad Munawar, Muhammad Haroon Yousaf, Naveed Khan Baloach, and Fawad Hussain. 2023. &quot;<strong>A Review of Swarm Robotics in a NutShell</strong>&quot;<strong> Published</strong> in Drones 7, no. 4: 269. <a href="https://doi.org/10.3390/drones7040269">https://doi.org/10.3390/drones7040269</a>. <strong>(IF: 4.8)</strong></li>
+	<li>Abdul Nasir, Muhammad Obaid Ullah, Muhammad Haroon Yousaf <strong>&ldquo;AI in apiculture: A novel framework for recognition of invasive insects under unconstrained flying conditions for smart beehives&rdquo; Published</strong> in Engineering Applications of Artificial Intelligence, Volume 119, 2023, 105784. <strong>(IF: 8.0)</strong></li>
+	<li>Muhammad Ahmed Hassan, Asim Rehmat, Muhammad Usman Ghani, Muhammad Haroon Yousaf <strong>&ldquo;Improvement in Automatic Speech Recognition of South Asian Accent using Transfer learning of Deep Speech 2&rdquo; Published</strong> in Mathematical Problems in Engineering, vol. 2022, Article ID 6825555, 12 pages, 2022. <strong>(IF: 1.305)</strong></li>
+	<li>Muhammad Haroon Asad, Saran Khaliq, Muhammad Haroon Yousaf, Muhammad Obaid Ullah, Afaq Ahmed <strong>&ldquo;Potholes Detection using Deep Learning: A Real-time and AI-on-the-Edge Perspective&rdquo; Published</strong> in Advances in Civil Engineering, Volume 2022, Article ID 9221211, 2022. <strong>(IF: 1.924)</strong></li>
+	<li>Waqas Ahmed, Muhammad Haroon Yousaf, Amanullah Yasin <strong>&ldquo;Robust Suspicious Action Recognition Approach using Pose Descriptor&rdquo; Published</strong> in Mathematical Problems in Engineering, vol. 2021, Article ID 2449603, 12 pages, 2021. <strong>(IF: 1.305)</strong></li>
+	<li>Abdul Nasir, Muhammad Obaid Ullah, Muhammad Haroon Yousaf, Muhammad Asif Aziz <strong>&ldquo;Acquisition of 3-D trajectories with labeling support for multi-species insects under unconstrained flying conditions&rdquo; Published</strong> in Ecological Informatics, Volume 64, 2021, 101381. <strong>(IF: 5.1)</strong></li>
+	<li>Nudrat Nida, Muhammad Haroon Yousaf, Aun Irtaza <strong>&ldquo;A Novel Region-Extreme Convolutional Neural Network for Melanoma Malignancy Recognition&rdquo; Published</strong> in Mathematical Problems in Engineering, vol. 2021, Article ID 6671498, 18 pages, 2021. <strong>(IF: 1.305)</strong></li>
+	<li>Hajra Bint-e-Naeem, Fiza Murtaza, Muhammad Haroon Yousaf, Sergio A. Velastin <strong>&ldquo;T-VLAD: Temporal Vector of Locally Aggregated Descriptor for Multiview Human Action Recognition&rdquo;</strong> <strong>Published</strong> in Pattern Recognition Letters, Volume 148, 2021, Pages 22-28. <strong>(IF: 5.1)</strong></li>
+	<li>Yusra Khalid Bhatti, Afshan Jamil, Nudrat Nida, Muhammad Haroon Yousaf, Serestina Viriri, Sergio A. Velastin <strong>&ldquo;Facial Expression Recognition of Instructor Using Deep Features and Extreme Learning Machine&rdquo; Published</strong> in Computational Intelligence and Neuroscience, vol. 2021, Article ID 5570870, 17 pages, 2021. <strong>(IF: 2.284)</strong></li>
+	<li>Nudrat Nida, Muhammad Haroon Yousaf, Aun Irtaza, Sergio A. Velastin <strong>&ldquo;A video augmentation technique for human action recognition based on genetic algorithm&rdquo; Published</strong> in ETRI Journal, 44(2022), 327&ndash;338. <strong>(IF: 1.094)</strong></li>
+	<li>Saqib Umer, Hassan Dawood, Muhammad Haroon Yousaf, Hussain Dawood, Haseeb Ahmed <strong>&ldquo;Efficient foreground object segmentation from video by Probability Weighted Moments&rdquo; Published</strong> in OptiK, Volume 229, March 2021, 166251. <strong>(IF: 2.187)</strong></li>
+	<li>Adekanmi Adegun, Serestina Viriri, Muhammad Haroon Yousaf &ldquo;<strong>A Probabilistic based Deep Learning Model for Skin Lesion Segmentation&rdquo;</strong> <strong>Published</strong> in Applied Sciences, January 2021, 2021; 11(7):3025. <strong>(IF: 2.217)</strong>.</li>
+	<li>Malik Ali Gul, Muhammad Haroon Yousaf, Shah Nawaz, Zaka Ur Rehman, HyungWon Kim <strong>&ldquo;Patient Monitoring by Abnormal Human Activity Recognition Based on CNN Architecture&rdquo; Published</strong> in Electronics, 2020, 9, 1993. <strong>(IF: 2.412)</strong></li>
+	<li>Saleh Albahli, Nudrat Nida, Aun Irtaza, Muhammad Haroon Yousaf, Muhammad Tariq Mahmood <strong>&ldquo;Melanoma Lesion Detection and Segmentation Using YOLOv4-DarkNet and Active Contour&rdquo; Published</strong> in IEEE Access, 2020, 198403-198414 <strong>(IF: 3.745)</strong></li>
+	<li>Adeeba Kausar, Afshan Jamil, Nudrat Nida, Muhammad Haroon Yousaf <strong>&ldquo;Two-Wheeled Vehicle Detection using Two-Step and Single-Step Deep Learning Models&rdquo;</strong> <strong>Published</strong> in Arabian Journal of Science and Engineering 2020, 45, 10755&ndash;10773. <strong>(IF: 1.518)</strong></li>
+	<li>Adeel Abbas, Muhammad Obaid Ullah, Fiza Murtaza, Muhammad Haroon Yousaf <strong>&ldquo;Space-time Templates based Features for Patient Activity Recognition&rdquo;</strong> <strong>Published</strong> in International Arab Journal of Information Technology, Volume 18, Number 04, pp. 12 - 20, July 2021. <strong>(IF: 0.650)</strong></li>
+	<li>Ammar Mohsin Butt, Muhammad Haroon Yousaf, Fiza Murtaza, Saima Nazir, Serestina Viriri, Sergio A. Velastin, &ldquo;<strong>Agglomerative Clustering and Residual-VLAD Encoding for Human Action Recognition&rdquo;</strong> <strong>Published</strong> in Applied Sciences, Vol 10, 04412, June 2020 <strong>(IF: 2.217)</strong>.</li>
+	<li>Fiza Murtaza, Muhammad Haroon Yousaf, Sergio A. Velastin, Yu Qian &ldquo;<strong>Vectors of Temporally Correlated Snippets for Temporal Action Detection&rdquo;</strong> <strong>Published</strong> in Computers and Electrical Engineering, Volume 85, May 2020 <a href="https://doi.org/10.1016/j.compeleceng.2020.106654">https://doi.org/10.1016/j.compeleceng.2020.106654</a> <strong>(IF: 4.3)</strong>.</li>
+	<li>Hajra Bint-e-Naeem, Fiza Murtaza, Muhammad Haroon Yousaf, Sergio A. Velastin <strong>&ldquo;Multiple batches of motion history images (MB-MHIs) for multiview human action recognition&rdquo;</strong> <strong>Published</strong> in Arabian Journal of Science and Engineering, 45, 6109&ndash;6124 (2020). <strong>(IF: 1.518)</strong></li>
+	<li><a name="_Hlk47802825">Adeel Ahmed Jamil, Fawad Hussain, Muhammad Haroon Yousaf, Ammar Mohsin Butt, Sergio A. Velastin &ldquo;</a><strong>Vehicle Make and Model Recognition Using Bag of Expressions&rdquo;</strong> <strong>Published</strong> in Sensors, Vol. 20, No. 4, 1033, (2019) <strong>(IF: 3.0)</strong>.</li>
+	<li>Nudrat Nida, Muhammad Haroon Yousaf, Aun Irtaza, Sergio A. Velastin <strong>&ldquo;Deep temporal motion descriptor (DTMD) for human action recognition&rdquo; Published</strong> in Turkish Journal of Electrical Engineering and Computer Science, Vol. 28: No. 3, Article 13. <strong>(IF: 0.625)</strong></li>
+	<li>Saima Nazir, Muhammad Haroon Yousaf, Jean-Christophe Nebel, Sergio A. Velastin &ldquo;<strong>Dynamic Spatio-Temporal Bag of Expressions (D-STBoE) Model for Human Action Recognition&rdquo;</strong> <strong>Published</strong> in Sensors, Vol. 19, No. 12, 2790, (2019) <strong>(IF: 3.0)</strong>.</li>
+	<li>Fiza Murtaza, Muhammad Haroon Yousaf, Sergio A. Velastin &ldquo;<strong>TAB: Temporally Aggregated Bag-of-Discriminant-Words for Temporal Action Proposals&rdquo;</strong> <strong>Published</strong> in Computer Vision and Image Understanding, Vol. 183, PP: 42-52, June 2019. <strong>(IF: 4.5)</strong></li>
+	<li>Nudrat Nida, Muhammad Haroon Yousaf, Aun Irtaza, Sergio A. Velastin <strong>&ldquo;Instructor activity recognition through deep spatiotemporal features and feedforward Extreme Learning Machines Published</strong> in Mathematical Problems in Engineering Vol. 2019, 2474865, 2019. <strong>(IF: 1.179)</strong></li>
+	<li>Nudrat Nida, Aun Irtaza, Ali Javed, Muhammad Haroon Yousaf, Muhammad Tariq Javed <strong>&ldquo;Melanoma Lesion Detection and Segmentation using Deep Region based Convolutional Neural Network and Fuzzy C-Means Clustering&rdquo;</strong> <strong>Published</strong> in International Journal of Medical Informatics. Vo. 124, PP: 37-48, April 2019. <strong>(IF: 4.9)</strong></li>
+	<li>Fiza Murtaza, Muhammad Haroon Yousaf, Sergio A. Velastin, Yu Qian &ldquo;<strong>End-to-End Temporal Action Detection using Bag of Discriminant Snippets (BoDS)&rdquo;</strong> <strong>Published</strong> in IEEE Signal Processing Letters, Vol. 26, Issue 2, PP: 272-276 (2019) <strong>(IF: 3.9)</strong>.</li>
+	<li><a name="_Hlk47802856">Abinta Mehmood Mir, Muhammad Haroon Yousaf, Hassan Dawood &ldquo;</a><strong>Criminal Action Recognition Using Spatio-temporal Human Motion Acceleration Descriptor</strong>&rdquo; <strong>Published</strong> in Journal of Electronic Imaging Vol. 27, No. 6, 063016 (2018) <strong>(IF:0.924)</strong>.</li>
+	<li>Muhammad Haroon Yousaf, Kanza Azhar, Fiza Murtaza, Fawad Hussain <strong>&ldquo;Visual Analysis of Asphalt Pavement for Detection and Localization of Potholes&rdquo;</strong> <strong>Published</strong> in Advanced Engineering Informatics, Vol. 38, PP: 527-537 (October 2018).<strong>(IF:8.8)</strong></li>
+	<li>Basharat Hussain, Shah Nawaz, Muhammad Haroon Yousaf &ldquo;<strong>Visual Vehicle Detection Scheme on Low-Powered Embedded GPU</strong>&rdquo; <strong>Published</strong> in Journal of Intelligent and Fuzzy Systems, vol. 36, no. 2, pp. 1867-1877, 2019. <strong>(IF:1.637).</strong></li>
+	<li>Saima Nazir, Muhammad Haroon Yousaf, Sergio A. Velastin &ldquo;<a href="https://www.evise.com/evise/faces/pages/oversight/Oversight.jspx?_adf.ctrl-state=lqhmm3t93_4"><strong>Evaluating Bag of Visual Features Approach using Spatio Temporal Features for Action Recognition</strong></a><strong>&rdquo;</strong> <strong>Published</strong> in Elsevier Computer and Electrical Engineering Vol 72, PP: 660-669 (November 2018) <strong>(IF: 2.189)</strong>.</li>
+	<li>Saima Nazir, Muhammad Haroon Yousaf, Jean-Christophe Nebel, Sergio A. Velastin &ldquo;<strong>A Bag of Expression Framework for Improved Human Action Recognition&rdquo;</strong> <strong>Published</strong> in Pattern Recognition Letters vol. 103, PP:39-45 (February 2018) <strong>(IF: 2.8)</strong>.</li>
+	<li>Fiza Murtaza, Muhammad Haroon Yousaf, Sergio A. Velastin &ldquo;<a href="https://www.evise.com/evise/faces/pages/oversight/Oversight.jspx?_adf.ctrl-state=lqhmm3t93_4"><strong>PMHI:</strong></a><strong> Proposals from Motion History Images for Temporal Segmentation of Action Videos&rdquo;</strong> <strong>Published</strong> in IEEE Signal Processing Letters, Vol. 25, Issue 2, PP: 179.183 (2018) <strong>(IF: 3.268)</strong>.</li>
+	<li>Hina Arshad, Khurram Khurshid, Muhammad Haroon Yousaf &ldquo;<a href="https://www.researchgate.net/publication/311068332_Role_of_Feature_Position_in_Recognition_of_Human_Vehicle_Interaction"><strong>Role of Feature Position in Recognition of Human Vehicle Interaction</strong></a>&rdquo; Published in Journal of Engineering Research, Vol. 5, No. 2 , PP 105-116, June 2017. <strong>(IF: 0.297)</strong></li>
+	<li>Hafiza Sundus Farooq, Muhammad Haroon Yousaf, Fawad Hussain <strong>&ldquo;A Generic Passive Image Forgery Detection Scheme using Local Binary Pattern with Rich Models&rdquo;</strong> <strong>Published</strong> in Elsevier Computers and Electrical Engineering Volume 62, August 2017, Pages 459-472 <strong>(IF: 2.189)</strong>.</li>
+	<li>Fiza Murtaza, Muhammad Haroon Yousaf, Sergio A. Velastin <strong>&ldquo;Multi-view Human Action Recognition using 2D Motion Templates based on MHIs and their HOG Description&rdquo;</strong> <strong>Published</strong> in IET Computer Vision, Vol 10, Issue 7, PP: 758-767, 2016 <strong>(IF: 1.6)</strong>.</li>
+	<li>Saadia Zahid, Fawad Hussain, Muhammad Haroon Yousaf, Hafiz Adnan Habib &ldquo;<strong>Optimized Audio Classification and Segmentation Algorithm by using Ensemble Methods</strong>&rdquo; <strong>Published</strong> in Mathematical Problems in Engineering, vol. 2015, Article ID 209814, 11 pages, 2015. &nbsp;<strong>(IF-01.179)</strong></li>
+	<li>Muhammad Haroon Yousaf, Hafiz Adnan Habib &ldquo;<strong>Virtual Keyboard: Real-time Finger Joints Tracking for Keystroke Detection and Recognition</strong>&rdquo; <strong>Published</strong> in Arabian Journal of Science and Engineering Vol. 39, No. 2, PP:923-934, 2014. <strong>(IF-1.518).</strong></li>
+	<li>Gulistan Raja, Awais Khan, Ahmad Khalil Khan, Muhammad Haroon Yousaf <strong>&ldquo;Performance Analysis of HEVC In-Loop Filter&rdquo;</strong> <strong>Published</strong> in Life Science Journal 10 (11s), 2013. PP: 337:342, <strong>(IF-0.167).</strong></li>
+	<li>Baber Khan, Ahmad Khalil Khan, Gulistan Raja, Muhammad Haroon Yousaf <strong>&ldquo;Implementation of Modified Mean-shift Tracking Algorithm for Occlusion Handling&rdquo;</strong> <strong>Published</strong> in Life Science Journal 10 (11s), 2013. PP: 331:336, <strong>(IF-0.167).</strong></li>
+	<li>Muhammad Haroon Yousaf, Hafiz Adnan Habib, Kanza Azhar, Fawad Hussain, Muhammad Rizwan, Malik M. Asim &ldquo;<strong>Towards The Development of Virtual Keyboard: An Activity Recognition Approach</strong>&rdquo; <strong>Published</strong> in Life Science Journal 10 (10s), 2013. PP: 275:282, <strong>(IF-0.167).</strong></li>
+	<li>Muhammad Haroon Yousaf, Hafiz Adnan Habib, Kanza Azhar &ldquo;<strong>Fuzzy Classification Of Instructor&rsquo;s Morphological Features For Autonomous Lecture Recording System</strong>&rdquo; Published in INFORMATION Journal, Vol. 16, No. 8 (B) PP:6367-6382, August, 2013. <strong>(IF-0.358).</strong></li>
+</ol>
+
+<p>&nbsp;</p>
+
+<h3>- HEC-RECOGNIZED/OTHER Journals &ndash; [18]</h3>
+
+<p><strong>&nbsp;</strong></p>
+
+<ol>
+	<li><a name="_Hlk47802934">Saddam Hussain Khan, Muhammad Haroon Yousaf, Fiza Murtaza, Sergio A. Velastin <strong>&ldquo;Passenger Detection and Counting During Getting On And Off From Public Transport System&rdquo;</strong> <strong>Published</strong> in NED University Journal of Research, Vol. 17, No. 2, PP: 35-46, 2020. <strong>(HEC Recognized- X Category)</strong></a></li>
+	<li>Hassan Ahmed Sial, Muhammad Haroon Yousaf, Fawad Hussain <strong>&ldquo;Spatio-Temporal RGBD Cuboids Feature for Human Activity Recognition&rdquo; Published</strong> in The Nucleus, Vol 55, No. 3, PP:139-149 (2018). <strong>(HEC-Recognized Y-Category)</strong></li>
+	<li>Farrah Aslam, Muhammad Haroon Yousaf, Fawad Hussain &ldquo;<strong>Human Activity Based Video Retrieval Using Optical Flow And Local Binary Patterns&rdquo;</strong> <strong>Published</strong> in NED Journal of Research, Vol 15, No. 4, PP:93-106, 2018. <strong>(HEC Recognized- X Category)</strong></li>
+	<li>Amjad Mehmood, Muhammad Obaid Ullah, Muhammad Haroon Yousaf &ldquo;<strong>A</strong> <strong>proposed real-time feature extraction on field programmable gate array for human detection</strong>&rdquo; <strong>Published</strong> in NED University Journal of Research, Vol 14, No. 2, PP: 47-59, 2017. <strong>(HEC Recognized-X)</strong></li>
+	<li>Muniza Wahid, Sahib Khan, Muhammad Haroon Yousaf &ldquo;<strong>Variable Least Significant Bits Grayscale Image Stegnography</strong>&rdquo; <strong>Published</strong> in Pakistan Journal of Science, 67(3), 281, September 2015 <strong>(HEC Recognized-X)</strong></li>
+	<li>Saira Kanwal, Muhammad Haroon Yousaf &ldquo;<strong>Optimization of Real Time Edge Enhanced Object Tracking Algorithm on Video Processor</strong>&rdquo; <strong>Published</strong> in Technical Journal UET Taxila, Vol. 19, No. IV, PP: 78-88, 2014. <strong>(HEC Recognized</strong><strong>-Y)</strong></li>
+	<li>Mujtaba Hassan, Muhammad Haroon Yousaf &ldquo;<strong>Hand Structure Analysis for Finger Identification and Joint Localization</strong>&rdquo; <strong>Published</strong> in New Horizon by IEEEP Vol: 81, Page 29, 2014. <strong>(HEC Recognized</strong><strong>-Y)</strong></li>
+	<li>Hira Bashir, Muhammad Haroon Yousaf &ldquo;<strong>Selection of Optimal Path Planning Algorithm for Autonomous Robots in Structured Environment</strong>&rdquo; <strong>Published</strong> in The Nucleus 51, No. 4. PP. 397-405 (2014). <strong>(HEC Recognized</strong><strong>-Y)</strong></li>
+	<li>Zain ul abidin, Gulistan Raja, Muhammad Haroon Yousaf <strong>&ldquo;Performance Anslysis of 3-D DWT, 3-D DFT, 3-D DCT, 3-D DHT for Medical Image Compression</strong>&rdquo; <strong>Published</strong> in NEW HORIZON by IEEEP Vol: 79-80, Page 29, 2013. <strong>(HEC Recognized</strong><strong>-Y)</strong></li>
+	<li>Muhammad Haroon Yousaf, Hafiz Adnan Habib, Fawad Hussain, Muhammad Rizwan &ldquo;<strong>Visual Gesture Based Augmented Virtual Keyboard System</strong>&rdquo; <strong>Published</strong> in The Nucleus 50, No. 4 (2013). <strong>(HEC Recognized</strong><strong>-Y)</strong></li>
+	<li>Umair Ullah Tariq, Daud A. Asif, Muhammad Haroon Yousaf, Fawad Hussain &ldquo;<strong>A Review of Vision-Based Perceptive Interfaces: A Mouse Alternative</strong>&rdquo; <strong>Published</strong> in The Nucleus 50, No. 4 (2013). <strong>(HEC Recognized</strong><strong>-Y)</strong></li>
+	<li>Muhammad Haroon Yousaf, Hafiz Adnan Habib &ldquo;<strong>A Novel Interface of Adjustable Pedals for Automotive: A Gesture Recognition Approach</strong>&rdquo; <strong>Published</strong> in Middle East Journal of Scientific Research, 11 (11), 1575-1583, 2012. <strong>(HEC Recognized, ISI MASTER List)</strong></li>
+	<li>M. Abdul Basir, Muhammad Haroon Yousaf <strong>&rdquo;Transparent Compression Scheme for Linux File System&rdquo;</strong> <strong>Published</strong> in The Nucleus 49, No. 2 (2012). <strong>(HEC Recognized</strong><strong>-Y)</strong></li>
+	<li>Asim Raza, Muhammad Haroon Yousaf, Hassan Ahmed Sial, Gulistan Raja &ldquo;<strong>HMM-based Scheme for Instructor Activity Recognition in a Lecture Room Environment</strong>&rdquo; <strong>Published</strong> in Smart Computing Reviews, Korea.</li>
+	<li>Hadia Bashir, Fawad Hussain, Muhammad Haroon Yousaf &ldquo;<strong>Smart Algorithm for 3D Reconstruction and Segmentation of Brain Tumor from MRIs using Slice Selection Mechanism</strong>&rdquo; <strong>Published</strong> in Smart Computing Review. Vol. 5, No. 3, June 2015.</li>
+	<li>Naveed Khan Baloch, Muhammad Haroon Yousaf, Waqar Ahmad, M. Iram Baig <strong>&rdquo;Algorithm for Efficient Attendance Management: Face Recognition based approach&rdquo; </strong><strong>Published</strong> in International Journal of Computer Science Issues (IJCSI), July 2012.</li>
+	<li>Sahib Khan, Muhammad Haroon Yousaf, Jamal Akram <strong>&ldquo;Implementation of Variable Least Significant Bits Steganography Using DDDB Algorithm&rdquo; Published</strong> in International Journal of Computer Science Issues (IJCSI), Vol. 8 Issue 6 No. 3 November 2011</li>
+	<li>Hafiz Adnan Habib, Muhammad Haroon Yousaf, Muid Mufti <strong>&ldquo;Novel Video Lecture Acquisition Framework A Gesture Recognition Approach&rdquo; Published</strong> in WSEAS Transaction on Computer January 2007</li>
+</ol>
+
+<p>&nbsp;</p>
+
+<h3>- Book Chapters &ndash; [1]</h3>
+
+<p>&nbsp;</p>
+
+<ol>
+	<li>Rodrigo Fernandez, Muhammad Haroon Yousaf, Timothy J. Ellis, Zezhi Chen, Sergio A. Velastin <strong>&ldquo;Traffic Flow Analysis&rdquo;</strong> Book Chapter in Computer Vision and Imaging in Intelligent Transportation Systems, PP-131-162, ISBN: 978-1-118-97160-4,March 2017.</li>
+</ol>
+
+<h3>&nbsp;</h3>
+
+<h3>- International Conferences &ndash; [42]</h3>
+
+<ol>
+	<li>Muhammad Saad Saeed, Shah Nawaz, Marta Moscati, Rohan Kumar Das, Muhammad Salman Tahir, Muhammad Zaigham Zaheer, Muhammad Irzam Liaqat, Muhammad Haris Khan, Karthik Nandakumar, Muhammad Haroon Yousaf, and Markus Schedl. 2024. <strong>A Synopsis of FAME 2024 Challenge: Associating Faces with Voices in Multilingual Environments</strong>. <strong>Published</strong> In Proceedings of the 32nd ACM International Conference on Multimedia (MM &#39;24). Association for Computing Machinery, New York, NY, USA, 11333&ndash;11334. https://doi.org/10.1145/3664647.3688978</li>
+	<li>Muhammad Saad Saeed, Muhammad Haris Khan, Shah Nawaz, Muhammad Haroon Yousaf &ldquo;<strong>Single-branch Network for Multimodal Training</strong>&rdquo; <strong>Published</strong> in the proceedings of 2023 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP) Greece, 2023, pp. 1-5.</li>
+	<li>Ali Raza, Muhammad Haroon Yousaf, Sergio A. Velastin, Serestina Viriri &ldquo;<strong>Human Fall Detection from Sequences of Skeleton Features using Vision Transformer&rdquo;</strong> <strong>Published</strong> in the proceedings of 18th International Joint Conference on Computer Vision, Imaging and Computer Graphics Theory and Applications, Portugal 2023.</li>
+	<li>Muhammad Muzamal Shahzad, Muhammad Haroon Asad, Muhammad Haris, Hammad Munawar, Muhammad Haroon Yousaf <strong>&ldquo;Formation Control and sub-Swarm generation of Multirotor UAVs&rdquo;</strong> <strong>Published</strong> in the proceedings of 5th International Conference on Robotics and Automation in Industry (ICRAI) 2023, Peshawar.</li>
+	<li>Muhammad Haroon Asad, Malik Muhammad Asim, Muhammad Naeem Mumtaz Awan, Muhammad Haroon Yousaf <strong>&ldquo;Natural Disaster Damage Assessment using Semantic Segmentation of UAV Imagery&rdquo;</strong> <strong>Published</strong> in the proceedings of 5th International Conference on Robotics and Automation in Industry (ICRAI) 2023, Peshawar.</li>
+	<li><a name="_Hlk161780708">Zubair Saeed, Muhammad Naeem Mumtaz, Muhammad Haroon Yousaf <strong>&ldquo;A Robust Approach for Small-Scale Object Detection From Aerial-View&rdquo;</strong> <strong>Published</strong> in the proceedings of DICTA 2022, Sydney Australia.</a></li>
+	<li>Ans Hussain Qureshi, Saran Khaliq, Muhammad Muzamal Shahzad, Muhammad Saad Saeed, Ahmed Husnain Johar, Muhammad Haroon Yousaf <strong>&ldquo;A Multi-agent Approach to Improve Visual SLAM Performance using Miniature Robots&rdquo;</strong> <strong>Published</strong> in the proceedings of IEEE Tencon 2022, Hongkong.</li>
+	<li>Abeer Toheed, Muhammad Haroon Yousaf, Rabnawaz, Ali Javed &ldquo;<strong>Physical Adversarial Attack Scheme on Object Detectors using 3D Adversarial Object&rdquo;</strong> <strong>Published</strong> in the proceedings of <a name="_Hlk107246630">2nd International Conference on Digital Futures and Transformative Technologies (ICoDT2), June 2022.</a></li>
+	<li>Ali Raza, Muhammad Haroon Yousaf, Sergio A. Velastin &ldquo;<strong>Human Fall Detection using YOLO: A Real-Time and AI-on-the-Edge Perspective&rdquo;</strong> <strong>Published</strong> in the proceedings of 12th International Conference on Pattern Recognition Systems (ICPRS), France, June 2022.</li>
+	<li>Waqas Ahmed, Umair Naeem, Muhammad Haroon Yousaf, Sergio A. Velastin &ldquo;<strong>Lightweight CNN and GRU Network for Real-time Action Recognition&rdquo;</strong> <strong>Published</strong> in the proceedings of 12th <a name="_Hlk107246590">International Conference on Pattern Recognition Systems (ICPRS), France</a>, June 2022.</li>
+	<li>Muhammad Saad Saeed, Muhammad Haris Khan, Shah Nawaz, Muhammad Haroon Yousaf, Alessio Del Bue &ldquo;<strong>Fusion And Orthogonal Projection for Improved Face-Voice Association</strong>&rdquo; <strong>Published</strong> in the proceedings of 2022 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP), Singapore, 2022, pp. 7057-7061.</li>
+	<li>Muhammad Ahmed Raza, Hajra Binte-Naeem, Muhammad Haroon Yousaf, Amanullah Yasin <strong>&ldquo;BirdView Retina-Net: Small-Scale Object Detector for Unmanned Aerial Vehicles&rdquo;</strong> <strong>Published</strong> in the proceedings of 16th International Conference on Emerging Technologies (ICET), Islamabad Pakistan 2021.<strong> </strong></li>
+	<li>Zubair Saeed, Ali Raza, Ans Hussain Qureshi, Muhammad Haroon Yousaf <strong>&ldquo;A Generic Multi-Crop Disease Detection and Classification Approach using CNN&rdquo;</strong> <strong>Published</strong> in Proceedings of <a name="_Hlk107246617">4th International Conference on Robotics and Automation in Industry (ICRAI), Islamabad Pakistan 2021.</a></li>
+	<li>Arslan Ali, Muhammad Muzamal Shahzad, Ans Hussain Qureshi, Mansoor Shaukat, Muhammad Haroon Yousaf <strong>&ldquo;A Decentralized Pattern Formation and Navigation Approach For Swarms: Multi-UAV Perspective&rdquo;</strong> <strong>Published</strong> in Proceedings of 4th International Conference on Robotics and Automation in Industry (ICRAI), Islamabad Pakistan 2021.</li>
+	<li>Mishal Fatima, Muhammad Haroon Yousaf, Amanullah Yasin, Sergio Velastin <strong>&ldquo;Unsupervised Fall Detection Approach Using Human Skeletons&rdquo;</strong> <strong>Published</strong> in Proceedings of 4th International Conference on Robotics and Automation in Industry (ICRAI), Islamabad Pakistan 2021.</li>
+	<li>Shah Nawaz, Muhammad Saad Saeed, Pietro Morerio, Arif Mahmood, Galo Ignazio, Muhammad Haroon Yousaf, Alessio Del Bue &ldquo;<strong>Cross-modal Speaker Verification and Recognition: A Multilingual Perspective</strong>&rdquo; <strong>Published</strong> in the proceedings of 2021 IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (CVPRW), Nashville, TN, USA, 2021 pp. 1682-169.</li>
+	<li><a name="_Hlk70329291">Hajra Binte Naeem, Muhammad Haroon Yousaf, Farhan Hassan Khan, Amanullah Yasin &ldquo;<strong>Vision-Based Real-time Human Malicious Behavior Detection</strong>&rdquo; <strong>Published</strong> in the proceedings of International Conference on Artificial Intelligence 2021, Pakistan.</a></li>
+	<li>M. Qasim Shafiq, Saima Nazir, Muhammad Haroon Yousaf, Sergio A. Velastin &ldquo;<strong>Robust framework for human localization and detection in moving train carriage&rdquo;</strong> <strong>Published</strong> in the proceedings of 9th International Conference on Imaging for Crime Detection and Prevention (ICDP-2019) London, UK, 2019, pp. 26-31.</li>
+	<li>Umber Saba, Fiza Murtaza, Muhammad Haroon Yousaf, Serestina Viriri &ldquo;<strong>Plant Species Identification using Discriminant Bag of Words (DBoW)&rdquo;</strong> <strong>Published</strong> in the proceedings of 15th International Joint Conference on Computer Vision, Imaging and Computer Graphics Theory and Applications (VISIGRAPP 2020) - Volume 5: VISAPP, pages 499-505.</li>
+	<li>Hira Imtiaz, Muhammad Haroon Yousaf <strong>&ldquo;Design and Implementation of Receiver Autonomous Integrity Monitoring Algorithm on DSP for Small UAV Applications&rdquo;</strong> <strong>Published</strong> in the proceedings of International Conference on Frontiers of Information Technology (FIT) 2019 Islamabad, Pakistan.</li>
+	<li><a name="_Hlk86484846">Waqar Ahmed, M. Abubakr, Esha Rashid, Nudrat Nida, Shah Nawaz, Muhammad Haroon Yousaf <strong>&ldquo;Digit Recognition for Meter Reading using Faster R-CNN&rdquo;</strong> <strong>Published</strong> in the proceedings of </a><a name="_Hlk107246674">International Conference on Robotics and Automation in Industry (ICRAI), Islamabad Pakistan 2019</a>.</li>
+	<li><a name="_Hlk48405179">Saima Nazir, Yu Qian, Muhammad Haroon Yousaf, Sergio A. Velastin, Eduard Vazquez, Ebroul Izquierdo &ldquo;</a><strong>Human Action Recognition Using Multi-Kernel Learning for Temporal Residual Network&rdquo;</strong> <strong>Published</strong> in the proceedings of 14th International Joint Conference on Computer Vision, Imaging and Computer Graphics Theory and Applications (VISIGRAPP 2019), pages 420-426.</li>
+	<li>Nudrat Nida, Muhammad Haroon Yousaf, Aun Irtaza, Sergio A. Velastin <strong>&ldquo;Bag of Deep Features for Instructor Activity Recognition in Lecture Room&rdquo;</strong> <strong>Published</strong> in the proceedings of 25th International Conference on Multimedia Modelling, Thessaloniki, Greece. 2019 LNCS, 11296, pp. 481-492.</li>
+	<li>Waqas Ahmad, Muhammad Haroon Yousaf &ldquo;<strong>Robust Activity Recognition Model via Motion Templates&rdquo;</strong> <strong>Published</strong> in the proceedings of IEEE ICE Cube, Quetta Pakistan 2018.</li>
+	<li>Qurat ul Ain Ali, Muhammad Haroon Yousaf &ldquo;<strong>Role of spatio-temporal feature position in recognition of human vehicle interaction&rdquo;</strong> <strong>Published</strong> in the proceedings of IEEE TENCON 2018, pp. 0471-0476.</li>
+	<li>Fiza Murtaza, Muhammad Haroon Yousaf, Sergio A. Velastin &ldquo;<strong>Da-Vlad: Discriminative Action Vector Of Locally Aggregated Descriptors For Action Recognition&rdquo;</strong> <strong>Published</strong> in the proceedings of 2018 25th IEEE International Conference on Image Processing (ICIP), Athens, Greece, 2018, pp. 3993-3997.</li>
+	<li>Saima Nazir, Muhammad Haroon Yousaf, Sergio A. Velastin &ldquo;<strong>Feature Similarity and Frequency Based Weighted Visual Words Codebook Learning Scheme for Human Action Recognition&rdquo;</strong> <strong>Published</strong> in the proceedings of 8th Pacific Rim Symposium on Image and Video Technology, Wuhan China (2017), Lecture Notes in Computer Science, vol 10749. Springer, Cham.</li>
+	<li>Saima Nazir, Muhammad Haroon Yousaf, Sergio A. Velastin &ldquo;<strong>Inter and Intra Class Correlation Analysis (IICCA) for Human Action Recognition in Realistic Scenarios&rdquo;</strong> <strong>Published</strong> in the proceedings of International Conference on Pattern Recognition Systems, Madrid Spain (June 2017).</li>
+	<li>Muhammad Hanif, Fawad Hussain, Muhammad Haroon Yousaf, Sergio A. Velastin, Zezhi Chen <strong>&ldquo;Shadow Detection for Vehicle Detection in Urban Environments&rdquo;</strong> <strong>Published</strong> in the proceedings of International Conference on Image Analysis and Recognition (ICIAR) to held at Montreal Canada in July 2017, Lecture Notes in Computer Science, vol 10317. Springer, Cham..</li>
+	<li>Mubashir Noman, Muhammad Haroon Yousaf, Sergio A. Velastin <strong>&ldquo;An Optimized and Fast Scheme for Real-time Human Detection using Raspberry Pi&rdquo;</strong> <strong>Published</strong> in the proceedings of International Conference on Digital Image Computing: Techniques and Application held at Gold Coast Australia in December 2016.</li>
+	<li>Kanza Azhar, Fiza Murtaza, Muhammad Haroon Yousaf, Hafiz Adnan Habib <strong>&ldquo;Computer Vision Based Detection and Localization of Potholes in Asphalt Pavement Images&rdquo;</strong> <strong>Published</strong> in the proceedings of 29th IEEE Canadian Conference on Electrical and Computer Engineering 2016, Vancouver Canada.</li>
+	<li>Fiza Murtaza, Muhammad Haroon Yousaf, Sergio A. Velastin <strong>&ldquo;Multi-view Human Action Recognition using Histogram of Oriented Gradients (HOG) Description of Motion History Images (MHIs)&rdquo;</strong> <strong>Published</strong> in the proceedings of IEEE Frontiers of Information Technology held at Islamabad in December 2015, pp. 297-302.</li>
+	<li>Muhammad Haroon Yousaf, Kanza Azhar, Hassan Ahmed Sial &ldquo;<strong>A Novel Vision Based Approach for Instructor&#39;s Performance and Behavior Analysis</strong>&rdquo; <strong>Published</strong> in the proceedings of 2nd International Conference on Communications, Signal Processing, and their Applications at UAE, 2015.</li>
+	<li>Akhtar Hanif, Muhammad Haroon Yousaf, Adnan Fazil, Suhail Akhtar &ldquo;<strong>Inflight Helicopter Blade Track Measurement using Computer Vision</strong>&rdquo; <strong>Published</strong> in the proceedings of IEEE TENSYMP 2014, Kuala Lumpur, Malaysia, PP: 56-61.</li>
+	<li>Arslan Mubashar Khan, Waqas Umar, Taimoor Choudhary, Fawad Hussain, Muhammad Haroon Yousaf &ldquo;<strong>A New Algorithmic Approach for Fingers Detection and Identification</strong>&rdquo; Published in Proc. SPIE 8768: International Conference on Graphics and Image Processing; 03/2013.</li>
+	<li>Sahib Khan, Muhammad Haroon Yousaf,<strong> &ldquo;Implementation of VLSB Stegnography using Modular Distance Technique&rdquo; Published</strong> in <a href="http://link.springer.com/book/10.1007/978-1-4614-3535-8">Innovations and Advances in Computer, Information, Systems Sciences, and Engineering</a>, Springer <a href="http://link.springer.com/bookseries/7818">Lecture Notes in Electrical Engineering</a> Volume 152, pp. 511-525, 2012</li>
+	<li>Aiman Nadeem, Muhammad Haroon Yousaf, Hafiz Adnan Habib <strong>&ldquo;Management Information System for Documents Archiving and Organization Security&rdquo; Published</strong> in the proceedings of 3rd International Conference on Advanced Computer Theory and Engineering (ICACTE) 2010, Chengdu, China, pp. V6-1-V6-4.</li>
+	<li>Sameen Shaukat, Muhammad Haroon Yousaf, Hafiz Adnan Habib <strong>&ldquo;Real-Time Feet Movement Detection and Tracking for Controlling a Toy Car&rdquo; Published</strong> in the proceedings of 3rd International Conference on Advanced Computer Theory and Engineering (ICACTE) 2010, Chengdu, China, pp. V6-5-V6-9.</li>
+	<li>Muhammad Haroon Yousaf, Khubab Ahmed, Kanza Haroon, Hafiz Adnan Habib &ldquo;Human Activity Recognition for Intelligent Video Lecture Recording&rdquo; Published in the proceedings of International Conference on Recent Achievements in Mechatronics, Automation, Computer Science and Robotics (MACRO 2010), PP 1010-110 Tirgu-Mures, Romania.</li>
+	<li>Khubab Ahmed, Muhammad Haroon Yousaf, Hafiz Adnan Habib <strong>&ldquo;Autonomous Lecture Recording System for distance Learning&rdquo; </strong>Presented at NCICT 2007 at UST Bannu, Pakistan</li>
+	<li>Hafiz Adnan Habib, Muhammad Haroon Yousaf, Muid Mufti<strong> &ldquo;Gesture and Scene Recognition Based Autonomous Video Lecture Acquisition Framework for Distance Learning&rdquo; Published</strong> in the proceedings of 6th WSEAS International Conference on Distance Learning and Web Engineering (DIWED&#39;06). World Scientific and Engineering Academy and Society (WSEAS), Stevens Point, Wisconsin, USA, 97&ndash;100.</li>
+	<li>Hafiz Adnan Habib, Muhammad Haroon Yousaf, Muhammad Mohibullah<strong> &ldquo;Modifies Laws Texture Energy Measures for Ceramic Tiles&rdquo; Published</strong> in the proceedings of NCET 2004 (Joint Venture of IEEE, ACM ,SZABIST) at Szabist Karachi, Pakistan, PP 137-140.</li>
+</ol>
+</td>
+                </tr>
+                <tr>
+                    <td>Projects</td>
+                    <td><ol>
+	<li><a name="_Hlk127118576"></a><a name="_Hlk183751829"><strong>Principal Investigator, &ldquo;</strong></a>Democratizing Robotics in Pakistan: Design and Development of Multidimensional Robotic Platform for STEM Education&rdquo; approved by Higher Education Commission Pakistan under Technology Development Fund. <strong>Worth 13 Mn PKR</strong>, <strong>2024-2026</strong>.</li>
+	<li><strong>Lead Person from UET Taxila, </strong>&ldquo;UK-Pakistan Generative AI Nexus for Higher Education (UPGAIN)&rdquo; funded by British Council under TNE Exploratory Grant, <strong>Worth 22500 Pounds 2024-2025</strong>.</li>
+	<li><strong>Co-Principal Investigator, </strong>&ldquo;Mitigating presentation attacks in remote identity proofing (MIMER): Pakistan in Focus&rdquo; funded by UKRI-EPSRC <strong>2024-2026</strong>, <strong>Worth 176,517 Pounds</strong>.</li>
+	<li><strong>Principal Investigator, </strong>Establishment of Swarm Robotics Lab under National Centre for Robotics and Automation. <strong>Worth 108 Mn PKR</strong>, <strong>2018-2025</strong>.</li>
+	<li><a name="_Hlk59568369"><strong>Project Lead, </strong></a>Establishment of Educational Robotics and Artificial Intelligence (ERAL) Lab funded by Higher Education Commission Pakistan. <strong>Worth 29.875 Mn PKR</strong>, <strong>2023</strong>.</li>
+	<li>Mentor/Consultant, Industry Funded Project to Sky Technology and Innovations Pvt. Ltd. <strong>2023-2024.</strong></li>
+	<li><strong>Co-Principal Investigator, </strong>&ldquo;IntelliSurv: An Intelligent Surveillance System for Detection of Anomalies in Real-time Videos&rdquo; funded by SinoPak Centre for Artificial Intelligence (SPCAI), PAF-IAST <strong>2021-2022</strong>, <strong>Worth 5.5 Mn PKR</strong>.</li>
+	<li><strong>Co-Principal Investigator, </strong>&ldquo;GymUstaad: Design and Development of Smart AI-Enabled System for Fitness Coaching&rdquo; funded by Higher Education Commission Pakistan under National Research Programme for Universities (NRPU) <strong>2022-2024</strong>, <strong>Worth 5.1 Mn PKR</strong>.</li>
+	<li><strong>Won 2500 US$</strong> grant from IEEE Signal Processing Society for <strong>2024 Seasonal School on Signal and Image Processing Applications for UAVs (SIP4UAVs) </strong>to be held in September 2024.</li>
+	<li><strong>Won 4000 US$</strong> grant from IEEE Signal Processing Society for <strong>2023 Seasonal School on Computer Vision Applications in Robotics (CVAR).</strong></li>
+	<li><strong>Project Lead </strong>&ldquo;UGo: An Audio-Visual Signal Processing Tool to Improve the Communication and Presentation Skills (22-SPSHAC-02)&rdquo;<strong> </strong>funded by IEEE Signal Processing Society and HAC on Signal Processing Technologies for Local Community Challenges, <strong>2022</strong>, <strong>Worth 1920 US$.</strong></li>
+	<li><strong>Winner, </strong>OPENCV AI Competition <strong>2021</strong> Phase-1 by Intel/OPENCV. <strong>Worth 3498 US$</strong>.</li>
+	<li><strong>Winner</strong>, Robotics and Automation Startup Challenge <strong>2021</strong>, <strong>Worth 0.3 Mn. PKR</strong>.</li>
+	<li><strong>Won 2nd Prize (50000 PKR)</strong> for <strong>Project UGO</strong> at PHEC Innovation Expo <strong>2022.</strong></li>
+	<li>IEEE Region 10 Membership Development Grant <strong>2022, Worth 400 US$.</strong></li>
+	<li><strong>Principal Investigator / Lead </strong>for<strong> Nvidia</strong> GPU Research Grant <strong>2017</strong>. <strong>Won Titan XP GPU</strong>.</li>
+	<li><strong>IGNITE funding of 0.08 Mn Rs.</strong> for 01 x Final Year Projects <strong>2024</strong>.</li>
+	<li><strong>IGNITE funding of 0.068 Mn Rs.</strong> for 01 x Final Year Projects <strong>2023</strong>.</li>
+	<li><strong>IGNITE funding of 0.078 Mn Rs.</strong> for 01 x Final Year Projects <strong>2021</strong>.</li>
+	<li><strong>IGNITE funding of 0.159 Mn Rs.</strong> for 03 x Final Year Projects <strong>2018</strong>.</li>
+	<li><strong>Principal Investigator, </strong>&ldquo;Decentralized Formation Control for Multi-Rotor UAV&#39;s&rdquo; funded by NESCOM Pakistan under Research Academia Coordination (RAC) <strong>2022</strong>, <strong>Worth 0.25 Mn PKR</strong>.</li>
+	<li><strong>Principal Investigator, </strong>&ldquo;Robustifing Object Detectors against Camouflage&rdquo; funded by NESCOM Pakistan under Research Academia Coordination (RAC) <strong>2021</strong>, <strong>Worth 0.20 Mn PKR</strong>.</li>
+	<li><strong>Principal Investigator, </strong>&ldquo;Real-time Behavioral Analysis of an Individual from Live Video Stream&rdquo; funded by NESCOM Pakistan under Research Academia Coordination (RAC) <strong>2020</strong>, <strong>Worth 0.20 Mn PKR</strong>.</li>
+	<li><strong>Principal Investigator, </strong>&ldquo;Real-time Plotting of PTZ Camera Footprint (based on FoV) on Geo-referenced Map/Imagery&rdquo; funded by NESCOM Pakistan under Research Academia Coordination (RAC) <strong>2020</strong>, <strong>Worth 0.15 Mn PKR</strong>.</li>
+	<li><strong>Principal Investigator, </strong>&ldquo;Stereo vision-based disparity mapping and depth calculation of objects from UAV&rdquo; funded by NESCOM Pakistan under Research Academia Coordination (RAC) <strong>2019</strong>, <strong>Worth 0.1 Mn PKR</strong>.</li>
+	<li><strong>Principal Investigator, </strong>&ldquo;Range Measurement Using Stereo Imaging&rdquo; funded by NESCOM Pakistan under Research Academia Coordination (RAC) <strong>2019</strong>, <strong>Worth 0.1 Mn PKR</strong>.</li>
+	<li><strong>Principal Investigator, </strong>&ldquo;Temporal Action Detection in Untrimmed Action Videos&rdquo; funded by ASR &amp; TD, UET Taxila under Faculty Research <strong>2017</strong>, <strong>Worth 0.920 Mn PKR</strong>.</li>
+	<li><strong>Principal Investigator, </strong>&ldquo;Instructor Action Recognition in Classroom Environment&rdquo; funded by ASR &amp; TD, UET Taxila under Faculty Research <strong>2015</strong>, <strong>Worth 0.357 Mn PKR</strong>.</li>
+	<li>Principal Investigator, &ldquo;Instructor Action Recognition in Classroom Environment&rdquo; funded by ASR &amp; TD, UET Taxila under Faculty Research 2013, Worth 0.224 Mn PKR.</li>
+</ol>
+</td>
+                </tr>
+                <tr>
+                    <td>Admin Work</td>
+                    <td><h3>- National-Level</h3>
+
+<ul>
+	<li>
+	<ul>
+		<li>
+		<ul style="list-style-type:square">
+			<li><strong>Member/Secretary</strong>, National Curriculum Development Committee (CDC) for National Technology Council (NTC) by Higher Education Commission, Pakistan 2021.</li>
+			<li><strong>Member</strong>, Engineering Curriculum Review and Development Committee (ECRDC) by Pakistan Engineering Council (PEC), Pakistan 2019.</li>
+			<li><strong>Member</strong>, National Curriculum Review Committee (NCRC) by Higher Education Commission, Pakistan 2014.</li>
+			<li><strong>Board Member</strong>, Research Fund NCRA 2020.</li>
+			<li><strong>Judge</strong>, PASHA ICT Awards 2024.</li>
+			<li><strong>Judge, </strong>National Engineering Robotics Competition (NERC) 2022, 2023 and 2024<strong>.</strong></li>
+			<li><strong>Member</strong>, Deliverable Review Committee (DRC), Pakistan Software Export Board (PSEB) 2023.</li>
+			<li><strong>Program Evaluator</strong> (Expert Computer Engineering), Pakistan Engineering Council (PEC).</li>
+			<li><strong>Member</strong>, Subject Expert Committee for HEC Recognized Journals Evaluation 2019</li>
+			<li><strong>Member</strong>, Board of Faculty, Federal Urdu University of Arts, Science and Technology, 2020-2022.</li>
+			<li><strong>Member</strong>, Board of Studies, Computer Science Department UET Peshawar, 2020-2021</li>
+			<li><strong>Member</strong>, Board of Studies, Department of Machine Learning, Pak-Austria Fahochshule, Institute of Applied Sciences and Technology (PAF-IAST), 2022-Present.</li>
+			<li><strong>Expert/Reviewer</strong>, Research Fund NCAI 2020.</li>
+			<li><strong>Expert/Reviewer</strong>, Research Fund SPCAI 2022.</li>
+			<li><strong>Expert/Reviewer</strong>, HEC-NRPU 2019/2020, HEC-TTSF 2020, HEC-LCF 2020, HEC-GCF 2021.</li>
+			<li><strong>Expert/Reviewer</strong>, Pakistan Science Foundation.</li>
+			<li><a name="_Hlk185099797"><strong>Expert,</strong></a> Enrollment Committee, Pakistan Engineering Council 2024.</li>
+		</ul>
+		</li>
+	</ul>
+	</li>
+</ul>
+
+<p>- University-Level</p>
+
+<ul>
+	<li>
+	<ul>
+		<li>
+		<ul style="list-style-type:square">
+			<li><strong>Chairman/HoD</strong>, Department of Computer Engineering, <strong>October 2023-onwards.</strong></li>
+			<li>Worked as <strong>Acting Chairman</strong>, Computer Engineering Department in Summer (2009 &amp; 2012 &amp; 2013 &amp; 2014 &amp; 2015 &amp; 2016) and Spring-2018.</li>
+			<li><strong>Project Director, </strong>Higher Education Management Information System (<strong>HEMIS</strong>): SAP based ERP, <strong>December 2024-onwards</strong></li>
+			<li><strong>Director</strong> Postgraduate Studies, CPED UET Taxila (April 2015-April 2018)</li>
+			<li><strong>General Chair, </strong>IEEE SPS Seasonal School on Signal Processing Applications for UAVs (SIP4UAVs) 2024.</li>
+			<li><strong>General Chair, </strong>IEEE SPS Seasonal School on Computer Vision Applications in Robotics 2023.</li>
+			<li><strong>Convener</strong>, Open House and Job Fair (2016-onwards).</li>
+			<li><strong>Member</strong>, Academic Council, UET Taxila Feb. 2021-onwards.</li>
+			<li><strong>Member</strong>, Board of Faculty (BoF) FTIE, UET Taxila Feb. 2021-onwards.</li>
+			<li><strong>Member</strong>, Board of Faculty (BoF) FEEE, UET Taxila Jan. 2022-onwards.</li>
+			<li><strong>Member</strong>, Affiliation Committee, UET Taxila Jan. 2021-onwards.</li>
+			<li><strong>Member</strong>, University Investment Committee, August 2022 &ndash; onwards.</li>
+			<li><strong>Member</strong>, Board of Postgraduate Studies (BoPGS) CPED, UET Taxila Feb. 2021-onwards.</li>
+			<li><strong>Chair</strong>, Workshop on Robotics and Computer Vision (RCV&rsquo;21) 2021.</li>
+			<li><strong>Warden</strong>, UET Taxila Hostels (Nov 2017-Nov 2018)</li>
+			<li><strong>Member</strong>, Departmental Semester Committee, CPED (2010-2023)</li>
+			<li><strong>Member</strong>, Departmental Committee for the Implementation of OBE Model (2014-2017)</li>
+			<li><strong>Member</strong>, Examination Scrutiny committee UET Taxila (2005-2015)</li>
+			<li><strong>Member</strong>, House Allotment Rules Formation Committee 2016.</li>
+			<li><strong>Member</strong>, University Medical Rules Formation Committee 2016</li>
+			<li><strong>Member</strong>, Central Purchase Committee (CPC), UET Taxila (2017-2022)</li>
+			<li><strong>Member</strong>, Students Societies Selection Committee (2018-2022)</li>
+			<li><strong>Member</strong>, Research Monitoring Committee (CPED, SED)</li>
+			<li><strong>Advisor</strong>, M.Sc. students CPED, UET Taxila. (2010-2015)</li>
+			<li><strong>In-charge</strong>, Admission Committee for induction of MSC. Computer Engineering Students (2011-2017)</li>
+			<li><strong>Member</strong>, Transport committee, UET Taxila (2010-2012) and (2023-onwards)</li>
+			<li><strong>Member</strong>, Board of Faculty of Telecommunication and Information Engineering (2009-2010).</li>
+			<li><strong>Convener</strong>, UAMC (Undergraduate Academics Monitoring Committee) CPED for (2009-2010).&nbsp;</li>
+			<li><strong>Member</strong>, Organizing Committee ICM 2005 (International Conference on Micro Electronics)</li>
+			<li><strong>Student Project Chair</strong>, GRAMI 2006 (International Conference on Graphics, Multimedia and Imaging)</li>
+			<li><strong>Chief Organizer</strong>, CEC (Computing and Engineering Competition 2008) at UET Taxila</li>
+			<li><strong>President</strong>, JAVASOFT 2006 at UET Taxila.</li>
+			<li><strong>Chief Organizer</strong>, JAVASOFT 2005 at UET Taxila.</li>
+			<li><strong>Member</strong>, Student Project committee for DICE 2012 @ UET Taxila</li>
+			<li>Ex-Incharge Trips and tour affairs Computer &amp; Software Engg. Department UET Taxila.</li>
+			<li>Ex-Incharge Store Computer &amp; Software Engg. Department UET Taxila.</li>
+		</ul>
+		</li>
+	</ul>
+	</li>
+</ul>
+</td>
+                </tr>
+                <tr>
+                    <td>Development Work</td>
+                    <td><ol>
+	<li><strong>Development of Swarm Robotics Lab under National Centre of Robotics and Automation (NCRA)</strong></li>
+</ol>
+</td>
+                </tr>
+                <tr>
+                    <td>Experience</td>
+                    <td><p><strong>Professor </strong>at UET Taxila &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (From 16th Feb. 2021 to&nbsp;Present)</p>
+
+<p><strong>Professor Extraordinarius</strong>, University of South Africa&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (From 7th Feb 202 to Present)</p>
+
+<p><strong>Director, </strong>Swarm Robotics Lab-NCRA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (From 1st Jun. 2018&nbsp; to Present)</p>
+
+<p><strong>Director, </strong>ORIC&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;(From 31st Jul. 2021&nbsp; to Present)</p>
+
+<p><strong>Associate Professor </strong>at UET Taxila &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (From 29th Dec. 2015 to&nbsp;15th Feb. 2021)</p>
+
+<p><strong>Assistant Professor </strong>at UET Taxila &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (From 12th Jul. 2007 to&nbsp;28th Dec. 2015)</p>
+
+<p><strong>Lecturer </strong>at UET Taxila &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (From 16th Feb. 2005 to&nbsp;11th Jul. 2007)</p>
+
+<p><strong>Visiting Lecturer </strong>at UET Taxila &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (From 26th Nov. 2004 to&nbsp;15th Feb. 2005)</p>
+</td>
+                </tr>
+                <tr>
+                    <td>Services</td>
+                    <td><p>Associate Editor, IEEE Transactions on Circuits and Systems for Video Technology (TCSVT), 2022-2023.</p>
+
+<p>Academic Editor, Mathematical Problems in Engineering (2020-onwards)</p>
+
+<p>Editor, Technical Journal, UET Taxila (2013-2016)</p>
+
+<p>Editorial Advisory Board, Pakistan Journal of Computers and Information Systems</p>
+
+<p>Editorial Advisory Board, Asian Journal of Emerging Research</p>
+
+<p>Regional Chair, Int. Conf. on Pattern Recognition Systems, 2022 France.</p>
+
+<p>Technical Program Chair, International Conference on Emerging Technologies (ICET&rsquo;2020)</p>
+
+<p>Reviewer, IEEE Transactions on Circuits and Systems for Video Technology</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Reviewer, IEEE Transactions on Cybernetics</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Reviewer, IEEE Transactions on Artificial Intelligence</p>
+
+<p>Reviewer, IEEE Transactions on Human Machine Systems</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Reviewer, IEEE Signal Processing Letters</p>
+
+<p>Reviewer, IEEE Transactions on Human Machine Systems</p>
+
+<p>Reviewer, ACM Transactions on Multimedia Computing, Communications and Applications (TOMM)</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Reviewer, Transactions in Simulation (SAGE Pub)</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Reviewer, International Journal of Pavement Engineering</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Reviewer, Computers and Electronics in Agriculture</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Reviewer, Quality and Quantity&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Reviewer, Neurocomputing</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Reviewer, Pattern Recognition Letters</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Reviewer, Informatics in Medicine Unlocked</p>
+
+<p>Reviewer, Advanced Engineering Informatics</p>
+
+<p>Reviewer, ETRI Journal&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+
+<p>Reviewer, IEEE Access</p>
+
+<p>Reviewer, IET Computer Vision</p>
+
+<p>Reviewer, The Nucleus</p>
+
+<p>Reviewer, The Computer Journal</p>
+
+<p>Reviewer, Elsevier Computers and Electrical Engineering (Outstanding Reviewer Recognition in 2014)</p>
+
+<p>Reviewer, Computing and Informatics Journal</p>
+
+<p>Reviewer, Mehran University Research Journal</p>
+
+<p>Reviewer, Journal of Advanced Transportation</p>
+
+<p>TPC, Int. Conf. on Imaging for Crime Detection 2016-2017, Spain.</p>
+
+<p>TPC, Int. Conf. on Pattern Recognition Systems, 2017 Spain.</p>
+
+<p>TPC, Int. Conf. of Frontiers of Information Technology (FIT), 2017-2019 Islamabad.</p>
+
+<p>TPC, Int. Conf. of Robotics and Automation for Industry (ICRAI), 2019 Islamabad.</p>
+
+<p>TPC, INMIC, 2019 Islamabad.</p>
+
+<p>TPC, Int. Conf. on Pattern Recognition Systems, 2021 Chile.</p>
+</td>
+                </tr>
+                <tr>
+                    <td>Memberships</td>
+                    <td><p><strong>Senior Member IEEE</strong> (92189327), <strong>Professional Engineer PEC</strong> (COMP-5725), <strong>Professional Member</strong> ACM (5511499), <strong>Senior Member IACSIT</strong> (80347001), Member IAENG (102501), Ex- Member IEICE Japan.</p>
+</td>
+                </tr>
+                <tr>
+                    <td>Teaching</td>
+                    <td><p><strong>Graduate and Post-Graduate Level:</strong> Digital Image Processing Techniques, Computer Vision, Human-Computer Interaction, Object Oriented Analysis and Design</p>
+
+<p><strong>Under-Graduate Level:</strong> Digital Image Processing, Object Oriented Programming, Entrepreneurship and Leadership, Computer Architecture, Introduction to Computing, Computer Fundamentals.</p>
+</td>
+                </tr>
+                <tr>
+                    <td>Academic Positions</td>
+                    <td><p><strong>Professor Extraordinarius, University of South Africa&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (From 7th Feb 202 to Present)</strong></p>
+
+<p><strong>HEC Approved PhD Supervisor</strong><br />
+&nbsp;</p>
+</td>
+                </tr>
+                <tr>
+                    <td>Affiliations</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Awards</td>
+                    <td><p><strong>Best Research Article Award</strong> by Punjab Higher Education Commission (PHEC), Pakistan in Year <strong>2024</strong>.</p>
+
+<p><strong>Best University Teacher Award</strong> by Higher Education Commission, Pakistan for year 2012-2013</p>
+
+<p><strong>Finalist OPENCV AI Competition 2021</strong> by Intel/OPENCV. Worth 3498 US$.</p>
+
+<p><strong>Winner</strong>, Robotics and Automation Startup Challenge 2021, worth 0.3 Mn. PKR.</p>
+
+<p><strong>Best Paper Award in Professional Category </strong>at IEEE International Conference on Emerging Technologies (ICET) 2021.</p>
+
+<p><strong>Won 4000 US$</strong> grant from <strong>IEEE Signal Processing Society</strong> for <strong>2023 Seasonal School on Computer Vision Applications in Robotics (CVAR).</strong></p>
+
+<p><strong>Won 1920 US$</strong> grant from <strong>IEEE Signal Processing Society and HAC</strong> <strong>on Signal Processing Technologies for Local Community Challenges, 2022.</strong></p>
+
+<p><strong>Secured 2nd Prize (50000 PKR)</strong> for <strong>Project UGO</strong> at PHEC Innovation Expo 2022<strong>.</strong></p>
+
+<p><strong>IEEE Region 10 Membership Development Grant 2022 400 US$.</strong></p>
+ </td>
+                </tr>
+                <tr>
+                    <td>Conferences</td>
+                    <td><ol>
+	<li>IEEE/RSJ International Conference on Intelligent Robotic Systems (IROS&rsquo;24), UAE, 14-18 October 2024.</li>
+	<li>Global IT Exhibition (GITEX) 2024, UAE, 13-18 October 2024.</li>
+	<li>IEEE International Conference on Image Processing (ICIP) UAE, 27-30 October 2024.</li>
+	<li>16th IEEE International Conference on Open-Source systems and Technologies (ICOSST), University of Engineering and Technology, Lahore held on 14-15 December 2022.</li>
+	<li>5th International Conference on Robotics and Automation in Industry at UET Peshawar, March 2023.</li>
+	<li>IEEE International Multi-Topic Conference (IMTIC), Mehran University of Engineering and Technology, Jamshoro held on 14-15 April 2023.</li>
+	<li>IEEE International Bhurban Conference on Applied Science and Technology (IBCAST), Bhurban, Murree held on 22-25 August 2023.</li>
+	<li>IEEE International Conference on Image Processing (ICIP) 2023.</li>
+	<li>International Conference on Advanced STEM Education (ICASE), The University of Faisalabad held on 5-6 December 2023.</li>
+	<li>International Conference on Pattern Recognition Systems (ICPRS), France, 2022 as Session/Regional Chair</li>
+	<li>2nd International Conference on Digital Futures and Transformative Technologies (ICoDT2), June 2022 as Session Chair.</li>
+	<li>4th International Conference on Robotics and Automation in Industry (ICRAI), Islamabad Pakistan 2021.</li>
+	<li>3rd International Conference on Robotics and Automation in Industry (ICRAI), Islamabad Pakistan 2019.</li>
+	<li>1st International Conference on Computational Sciences and Technologies (INCCST&rsquo;19), MUET Jamshoro, Pakistan, April 2019.</li>
+	<li>IEEE TENCON 2018, Jeju South Korea.</li>
+	<li>8th Pacific Rim Symposium on Image and Video Technology (PSIVT&rsquo;2017) Wuhan China.</li>
+	<li>International Conference on Digital Image Computing: Techniques and Application held at Gold Coast Australia, December 2016</li>
+	<li>2nd International Conference on Communications, Signal Processing, and their Applications (ICCSPA&rsquo;15), UAE, 2015.</li>
+	<li>Science, Technology and Engineering for Development Conference, Islamabad, 2014</li>
+	<li>IEEE Technical Symposium (TENSYMP) Region 10, Malaysia, 2014.</li>
+	<li>One Day PhD Conference/Seminar, 2013 UET Taxila</li>
+	<li>International Conference on Graphics and Image Processing (ICGIP) Singapore 2012.</li>
+	<li>One Day PhD Conference/Seminar, 2012 UET Taxila</li>
+	<li>International Bhurban Conference on Applied Sciences and Technology (IBCAST) 2012.</li>
+	<li>International Conference on Optical Communication and Networks (ICOCN) 2007.</li>
+	<li>International Conference on Graphics, Multimedia and Imaging (GRAMI) 2006.</li>
+	<li>International Conference on Micro-Electronics (ICM) 2005.</li>
+</ol>
+</td>
+                </tr>
+                <tr>
+                    <td>Participations</td>
+                    <td><ol>
+	<li><a name="_Hlk90931017"></a><a name="_Hlk161781063"></a><a name="_Hlk127123972"><strong>Tutorial &ldquo;Visual Data Processing for Drone AI Technology: A Practical Perspective&rdquo;</strong></a> <strong>Delivered</strong> at IEEE International Conference on Image Processing 2024, Abu Dhabi, United Arab Emirates.</li>
+	<li><strong>Tutorial &ldquo;Imagining Beyond Pixels: Bridging Modalities for Multimodal Representation and Learning&rdquo;</strong> <strong>Delivered</strong> at IEEE International Conference on Image Processing 2024, Abu Dhabi, United Arab Emirates.</li>
+	<li><strong>Tutorial &ldquo;Edge AI for Aerial Robots: Enhancing Drone Operations with AI&rdquo;</strong> <strong>Delivered</strong> at IEEE/RSJ International Conference on on Intelligent Robots and Systems (IROS&rsquo;24), Abu Dhabi, United Arab Emirates.</li>
+	<li><strong>Trainer</strong> for &ldquo;<strong>Outcome-Based Education: Understanding, Implementation and Accreditation Perspective&rdquo;</strong> at School of Electrical Engineering and Computer Science, NUST Islamabad on 28 August 2024.</li>
+	<li><strong>Invited Speaker</strong> at IEEE International Bhurban Conference on Applied Science and Technology (IBCAST), Bhurban, Murree held on 20-23 August 2024.</li>
+	<li><strong>Trainer</strong> for &ldquo;<strong>Outcome-Based Education: Understanding, Implementation and Accreditation Perspective&rdquo;</strong> at School of Engineering, Bahria University Islamabad on 31 July 2024.</li>
+	<li><strong>Keynote Speaker</strong> at Artificial Intelligence Conference and Expo 2024 (AICE&rsquo;24) at Sino-Pak Centre for Artificial Intelligence, PAF-IAST Haripur, 27-29 May 2024.</li>
+	<li><strong>Keynote Speaker</strong> at Transnational Workshop on Smart Technologies for Societal Health, organized by Anna University, India, and Queen&#39;s University Belfast (QUB), UK. held on 4-5 March 2024.</li>
+	<li><strong>Keynote Speaker</strong> at International Conference on Advanced STEM Education (ICASE), The University of Faisalabad held on 5-6 December 2023.</li>
+	<li><strong>Short Course</strong> &ldquo;<strong>Multimodal Learning: Technical Foundation, Hands-on and Applications</strong>&rdquo; <strong>Delivered</strong> at IEEE International Conference on Image Processing (ICIP) 2023.</li>
+	<li><strong>Tutorial</strong> &ldquo;<strong>Edge Computing for Robot Vision: A Practical Perspective</strong>&rdquo; <strong>Delivered</strong> at IEEE International Conference on Image Processing (ICIP) 2023.</li>
+	<li><strong>Invited Speaker</strong> at 2nd Career Fair 2023, Skardu held on 22-24 September 2023.</li>
+	<li><strong>Invited Speaker</strong> at IEEE International Bhurban Conference on Applied Science and Technology (IBCAST), Bhurban, Murree held on 22-25 August 2023.</li>
+	<li><strong>Invited Speaker</strong> at IEEE International Multi-Topic Conference (IMTIC), Mehran University of Engineering and Technology, Jamshoro held on 14-15 April 2023.</li>
+	<li><strong>Workshop</strong> Title &ldquo;Robot Vision and Edge AI&rdquo; at 5th International Conference on Robotics and Automation in Industry at UET Peshawar, March 2023.</li>
+	<li><strong>Invited Speaker</strong> &ldquo;Swarm Robotics and Edge AI&rdquo; at 16th IEEE International Conference on Open-Source systems and Technologies (ICOSST), University of Engineering and Technology, Lahore held on 14-15 December 2023.</li>
+	<li><strong>Invited Speaker</strong> &ldquo;Swarm Robotics&rdquo; at 21st Pak-German Workshop on Field and Assistive Robotics (WFAR), University of Lahore held on 20-21 October 2022.</li>
+	<li><strong>Keynote Speaker</strong> &ldquo;Computer Vision for Video Surveillance &amp; Monitoring: Applications, Techniques, and Opportunities&rdquo; 2022 IEEE International SPS Seasonal School on Video Surveillance and Monitoring at The Islamia University of Bahawalpur.</li>
+	<li><strong>Invited Speaker</strong> &ldquo;STEM Robotics&rdquo; at 1st Career Fair 2022, Gilgit held on 15-18 August 2022.</li>
+	<li><strong>Guest Speaker</strong> &ldquo;State-of-the-art STEM Robotics&rdquo; at International Workshop on Undergrad Stem Education, BUITEMS Quetta held on 20-24 June 2022.</li>
+	<li><strong>Expert Talk</strong> &ldquo;Research Grants: Proposal Writing and Opportunities&rdquo; at 1st R &amp; D Lounge organized by ORIC, UET Taxila, October 2021.</li>
+	<li><strong>IEEE YP Talk</strong> Title &ldquo;Computer Vision in Robotics: Applications, Tools and Opportunities&rdquo; at 4th International Conference on Robotics and Automation in Industry at CEME-NUST, October 2021.</li>
+	<li><strong>Academic Expert</strong> Talk at 1st National Artificial Intelligence Forum (NAIF&rsquo;21) at Sino-Pak Centre for Artificial Intelligence, PAF-IAST Haripur, September 2021.</li>
+	<li>Continuous Professional Development Workshop &ldquo;Computer Vision: Applications and Trends&rdquo; at Fatima Jinnah Women University, Rawalpindi Pakistan, November 2019.</li>
+	<li><strong>Invited Talk</strong> &ldquo;Human Action Recognition: Techniques and Trends&rdquo; at 1st International Conference on Computational Sciences and Technologies (INCCST&rsquo;19), MUET Jamshoro, Pakistan, April 2019.</li>
+</ol>
+ </td>
+                </tr>
+                <tr>
+                    <td>Thesis Supervised</td>
+                    <td><h3>PhD SUPERVISION</h3>
+
+<ol>
+	<li><a name="_Hlk59568443">Supervised <strong>Saima Nazir </strong>&ldquo;Bag of Expressions for Human Activity Recognition&rdquo;<strong> </strong><strong>(SED, Completed in 2018)</strong></a></li>
+	<li>Supervised <strong>Fiza Murtaza </strong>&ldquo;Temporal Action Detection in Long and Untrimmed Videos&rdquo;<strong> </strong><strong>(CPED, Completed in 2019)</strong></li>
+	<li>Supervised <strong>Nudrat Nida </strong>&ldquo;Human Action and Behavior Recognition in Lecture Room Environment&rdquo;<strong> </strong>(<strong>CPED, Completed in 2020</strong>)</li>
+	<li><a name="_Hlk161780980">Supervised <strong>Muhammad Waqas </strong>&ldquo;Action Recognition for Intelligent Video Surveillance Systems&rdquo;<strong> </strong>(<strong>TED, completed in 2023</strong>)</a></li>
+	<li>Supervising <strong>Naseer Ahmed </strong>&ldquo;Computer Vision Based Asphalt Pavement Analysis&rdquo;<strong> </strong>(CPED, Started in 2015)</li>
+	<li>Co-Supervised <strong>Abdul Nasir </strong>&ldquo;Vision-based Recognition of Invasive Insects under Unconstrained Flying Conditions&rdquo;<strong> </strong>(<strong>ENCED</strong>, <strong>Completed in 2023</strong>)</li>
+	<li>Co-Supervised <strong>Sobia Hayee </strong>&ldquo;Car Make and Model Recognition in Realistic Environment&rdquo;<strong> </strong>(CPED, Started in 2017)</li>
+	<li>Supervising <strong>Anum Abdus Salam </strong>&ldquo;Computer Vision for Medical Image Processing&rdquo;<strong> </strong>(CPED, Started in 2021)</li>
+	<li>Supervising <strong>Muhammad Sohail </strong>&ldquo;Robot Vision for Aerial Imagery&rdquo;<strong> </strong>(CPED, Started in 2021)</li>
+	<li>Co-Supervising <strong>Vikash Ramharuk </strong>&ldquo;A Cloud Robotic Framework to Assist Robot Swarms with Adaptive Motion Planning to Enhance Human Safety &amp; Work Efficiency&ldquo; <strong>(University of South Africa)</strong></li>
+	<li>Supervising <strong>Talha Saeed </strong>&ldquo;Robot Vision for Aerial Imagery<strong> </strong>(CPED, Started in 2024)</li>
+</ol>
+
+<h3>&nbsp;</h3>
+
+<h3>M.SC. THESIS SUPERVISED</h3>
+
+<ol>
+	<li><strong>Naveed Khan Baloch</strong><strong> </strong>&ldquo;Intelligent System for Attendance Management: Face Recognition Based Approach&rdquo;<strong> </strong>(CPED, Completed in 2010-2011)</li>
+	<li><strong>Sahib Khan</strong><strong> </strong>&ldquo;Implementation of Variable Least Significant Bit Steganography&rdquo;<strong> </strong>(TED, Completed in 2011)</li>
+	<li><strong>Abdul </strong><strong>Basir </strong>&ldquo;Linux Kernal Transparent Compression<strong>&rdquo; </strong>(CPED, Completed in 2012)</li>
+	<li><strong>Mujtaba Hassan</strong><strong> </strong>&ldquo;Hand Structure Analysis for Finger Identification and Joints&rdquo;<strong> </strong>(CPED, Completed in 2012)</li>
+	<li><strong>Saira Kanwal</strong> &ldquo;Optimization of Real Time Edge Enhanced Object Tracking Algorithm on DSP&rdquo;<strong> </strong>(CPED, Completed in 2012-2014)</li>
+	<li><strong>Hira Bashir</strong><strong> </strong>&ldquo;Environment Learning and Automatic Path Planning<strong>&rdquo; </strong>(CPED, Completed in 2012-2013)</li>
+	<li><strong>Asim Raza</strong><strong> </strong>&ldquo;Instructor Activity Recognition using Spatiotemporal Techniques&rdquo;<strong> </strong>(CPED, Completed in 2012-2014)</li>
+	<li><strong>Akhtar Hanif</strong><strong> </strong>&ldquo;Inflight Helicopter Blade Track Measurement using Computer Vision&rdquo;<strong> </strong>(CPED, Completed in 2013-2014)</li>
+	<li><strong>Arubah Hussain</strong><strong> </strong>&rdquo;Sleeping Foreground Problem for People Counting&rdquo;<strong> </strong>(CPED, Completed in 2013-2015)</li>
+	<li><strong>Hassan Ahmed</strong><strong> </strong>&ldquo;Human Activity Recognition using RGBD Bag of Words&rdquo;<strong> </strong>(CPED, Completed in August 2014)</li>
+	<li><strong>M. Qasim </strong><strong>Shafiq </strong>&ldquo;Localization and Tracking of People Moving inside a Train Carriage&rdquo;<strong> </strong>(CPED, Defended in 2013-2016)</li>
+	<li><strong>Fiza Murtaza</strong><strong> </strong>&ldquo;Human Action Recognition Algorithm for a Multi-camera Video Dataset&rdquo;<strong> </strong>(CPED, Completed in 2015)</li>
+	<li><strong>Mubashir Noman</strong><strong> </strong>&ldquo;Real-Time People Detection Algorithm on Raspberry Pi&rdquo;<strong> </strong>(CPED, Completed in 2016)</li>
+	<li><strong>Naseer Ahmed</strong><strong> </strong>&ldquo;Secure Image Steganography Technique for Covert Communication&rdquo;<strong> </strong>(CPED, Completed in 2015)</li>
+	<li><strong>Hafiza Sundus Farooq</strong><strong> </strong>&ldquo;A Generic Forgery Detection Technique&rdquo;<strong> </strong>(CPED, Completed in 2016)</li>
+	<li><strong>Bilal Rasheed</strong><strong> </strong>&ldquo;Vehicle Make and Model Recognition for Intelligent Transportation System&rdquo;<strong> </strong>(CPED, Completed in 2017)</li>
+	<li><strong>Saddam Hussain</strong><strong> </strong>&ldquo;Detection and Counting of Passengers Getting On and Off from Bus&rdquo;<strong> </strong>(CPED, Completed in 2017).</li>
+	<li><strong>Basharat </strong><strong>Hussain </strong>&ldquo;Visual Vehicle Detection Scheme on Low-Powered Embedded GPU<strong>&rdquo; </strong>(CPED, Completed in 2017)</li>
+	<li><strong>Abinta Mehmoor Mir</strong><strong> </strong>&ldquo;Street Crime Scene Recognition in Surveillance Videos&rdquo;<strong> </strong>(CPED, Completed in 2017)</li>
+	<li><strong>Usman </strong><strong>Riaz </strong>&ldquo;Visibility Restoration of Hazy Images Containing White Objects&rdquo;<strong> </strong>(CPED, Completed in 2018)</li>
+	<li><strong>Qurat ul Ain Ali</strong><strong> </strong>&ldquo;Activity Recognition for Human-Vehicle Interaction&rdquo;<strong> </strong>(CPED, Completed in 2018)</li>
+	<li><strong>Malik Ali Gul</strong><strong> </strong>&ldquo;Abnormal Human Activity Recognition for Elderly Patient Care&rdquo;<strong> </strong>(CPED, Completed in 2018)</li>
+	<li><strong>Umber Saba</strong><strong> </strong>&ldquo;Plant Species Recognition using Computer Vision<strong>&rdquo; </strong>(CPED, Completed in 2018)</li>
+	<li><strong>Hira Imtiaz </strong>&ldquo;Design and Implementation of Receiver Autonomous Integrity Monitoring for Small UAV Applications on DSP&rdquo;<strong> </strong>(CPED, Completed in 2019)</li>
+	<li><strong>Haseeb Sultan</strong><strong> </strong>&ldquo;Right Whale Recognition using Computer Vision<strong>&rdquo; </strong>(CPED, Completed in 2019)</li>
+	<li><strong>Hajra Binte Naeem</strong><strong> </strong>&ldquo;Human Action Recognition in Multiview Scenario&rdquo;<strong> </strong>(CPED, Completed in 2020)</li>
+	<li><strong>Ammar Mohsin Butt</strong><strong> </strong>&ldquo;Human Action Recognition using Bag of Expressions<strong>&rdquo; </strong>(CPED, Completed in 2020)</li>
+	<li><strong>Sobia Sarwar</strong><strong> </strong>&ldquo;Computer Vision based Potholes Detection Approach&rdquo;<strong> </strong>(CPED, Completed in 2020)</li>
+	<li><strong>Muhammad Saad Saeed</strong><strong> </strong>&ldquo;Speaker Identification and Verification in the Wild&rdquo;<strong> </strong>(CPED, Completed in 2021)</li>
+	<li><strong>Saqlain Hussain Shah</strong><strong> </strong>&ldquo;Muli-Modal Speaker Recognition and Verification<strong>&rdquo; </strong>(CPED, Completed in 2023)</li>
+	<li><strong>Zubair Saeed</strong><strong> </strong>&ldquo;Real-Time On-Board Small-Scale Object Detector for Unmanned Aerial Vehicles (UAVs)<strong>&rdquo; </strong>(CPED, Completed in 2023)</li>
+	<li><strong>Muhammad Ali Raza</strong><strong> </strong>&ldquo;A Robust Approach for Human Fall Detection using Visual Data&rdquo;<strong> </strong>(CPED, Completed in 2023)</li>
+	<li><strong>Muhammad Haroon Asad</strong><strong> </strong>&ldquo;Natural Disaster Assessment using Aerial Image Processing&rdquo;<strong> </strong>(CPED, Completed in 2023)</li>
+	<li><strong>Fizza Saeed Malik</strong><strong> </strong>&ldquo;Exploring Dermoscopic Structures for Melanoma Skin Lesion Classification&rdquo;<strong> </strong>(CPED, Completed in 2023)</li>
+	<li><strong>Shafaq Rasheed</strong><strong> </strong>&ldquo;AI-Based Trash Detection in Water Bodies&rdquo;<strong> </strong>(CPED, Completed in 2024)</li>
+</ol>
+ </td>
+                </tr>
+                <tr>
+                    <td>Workshops/Courses Attended</td>
+                    <td><ol>
+	<li><strong>Workshop on Computer Vision and AI-on-the-Edge </strong>by Swarm Robotics Lab-NCRA on 24 September 2024 at UET Taxila.</li>
+	<li><strong>Workshop on Robot Operating System and Computer Vision-on-the-Edge </strong>by Swarm Robotics Lab-NCRA on 14 February 2023 at UET Taxila.</li>
+	<li><strong>Workshop on Robotics and Computer Vision (RCV&rsquo;21) </strong>by Swarm Robotics Lab-NCRA on 24-26 November 2021 at UET Taxila.</li>
+	<li>International Workshop on <strong>&ldquo;Robotics and Assistive Living&rdquo;</strong> by Centre for Water Informatics-LUMS on 13-10. 2018 at LUMS Lahore.</li>
+	<li>International Workshop on <strong>&ldquo;Precision Agriculture and Forestry&rdquo;</strong> by Centre for Water Informatics-LUMS on 12-10. 2018 at LUMS Lahore.</li>
+	<li>International Workshop on <strong>&ldquo;OBA Accreditation Process for Program Evaluators&rdquo;</strong> by PEC on 08-09.02.2018 at PEC HQ Islamabad.</li>
+	<li>International Workshop on <strong>&quot;Outcome Based Education&quot;</strong> by PEC &amp; UET Taxila on 06-07.02.2018 at UET Taxila.</li>
+	<li>Workshop on <strong>&ldquo;Entrepreneurship Skills&rdquo;</strong> by Directorate of Staff Development, UET Taxila on 29.11.2017 at UET Taxila.</li>
+	<li>Training on <strong>&ldquo;OBA Accreditation Process for Program Evaluators&rdquo;</strong> by PEC on 29.04.2017 at PEC HQ Islamabad.</li>
+	<li>International Workshop on <strong>&quot;Outcome Based Education and Implementation&quot;</strong> by PEC &amp; UET Taxila on 01-02.02.2017 at UET Taxila.</li>
+	<li><strong>EDITOR&rsquo;s CAF&Eacute;, </strong>One Day Event by Asian Council of Science Editors,<strong> </strong>18th November 2016, Islamabad.</li>
+	<li><strong>International Symposium on Technology Entrepreneurship and Incubation, </strong>Two Days Symposium in Islamabad September 2016.<strong> </strong></li>
+	<li><strong>ACSE Workshop on Peer Review and Research Integrity, </strong>One day workshop by Asian Council for Science Editors 18th February, 2016 in Islamabad.</li>
+	<li><strong>EDITOR&rsquo;s CAF&Eacute;, </strong>One Day Event by Asian Council of Science Editors,<strong> </strong>21st November 2015, Islamabad.</li>
+	<li><strong>Symposium on Re-Designing Engineering Education in Pakistan </strong>organized by UET Taxila on 19th October 2015.<strong> </strong></li>
+	<li><strong>USAID Workshop on Small Grant Proposal, </strong>14th October 2015, Islamabad</li>
+	<li><strong>International Workshop on &ldquo;Essentials of Entrepreneurship &ndash; A Toolkit for Entrepreneurs&rdquo; </strong>December 9-11, 2014, COMSTECH Islamabad, Pakistan</li>
+	<li><strong>Entrepreneurship Workshop for Engineers and Scientist, </strong>5-days workshop conducted by USIAD, HEC and NUST at NUST from 2nd &ndash; 6th June 2014</li>
+	<li><strong>One Day Workshop (Communication Skills for Teachers)</strong> by Sir Syed Memorial Society Islamabad at Case Islamabad, November, 2011</li>
+	<li><strong>PCEPT (Professional Competancy Enhancement Program for University Teachers)</strong> by Higher Education Commission of Pakistan, September-October, 2011</li>
+	<li><strong>Modeling of Biological and Active Machine Vision in Robotics. </strong>3-days Workshop held by GET Lab, University of Paderborn, Germany and&nbsp; MCS, National University of Science and Technology, Rawalpindi Pakistan in 2008.</li>
+	<li><strong>ICT Centric University Excellence Program (sponsored by Ministry of IT and National ICT R &amp; D Fund) </strong>at Lahore University of Management Sciences (LUMS) Lahore, Pakistan in July-August 2007.&nbsp;<strong>&ldquo;Outstanding&rdquo; </strong>and &ldquo;<strong>Excellent&rdquo;</strong> Grades in Object Oriented Programming and Data Structures respectively.</li>
+</ol>
+ </td>
+                </tr>
+                <tr>
+                    <td>PostGraduate Students</td>
+                    <td><h3>PhD SUPERVISION</h3>
+
+<ol>
+	<li><a name="_Hlk59568443">Supervised <strong>Saima Nazir </strong>&ldquo;Bag of Expressions for Human Activity Recognition&rdquo;<strong> </strong><strong>(SED, Completed in 2018)</strong></a></li>
+	<li>Supervised <strong>Fiza Murtaza </strong>&ldquo;Temporal Action Detection in Long and Untrimmed Videos&rdquo;<strong> </strong><strong>(CPED, Completed in 2019)</strong></li>
+	<li>Supervised <strong>Nudrat Nida </strong>&ldquo;Human Action and Behavior Recognition in Lecture Room Environment&rdquo;<strong> </strong>(<strong>CPED, Completed in 2020</strong>)</li>
+	<li><a name="_Hlk161780980">Supervised <strong>Muhammad Waqas </strong>&ldquo;Action Recognition for Intelligent Video Surveillance Systems&rdquo;<strong> </strong>(<strong>TED, completed in 2023</strong>)</a></li>
+	<li>Supervising <strong>Naseer Ahmed </strong>&ldquo;Computer Vision Based Asphalt Pavement Analysis&rdquo;<strong> </strong>(CPED, Started in 2015)</li>
+	<li>Co-Supervised <strong>Abdul Nasir </strong>&ldquo;Vision-based Recognition of Invasive Insects under Unconstrained Flying Conditions&rdquo;<strong> </strong>(<strong>ENCED</strong>, <strong>Completed in 2023</strong>)</li>
+	<li>Co-Supervised <strong>Sobia Hayee </strong>&ldquo;Car Make and Model Recognition in Realistic Environment&rdquo;<strong> </strong>(CPED, Started in 2017)</li>
+	<li>Supervising <strong>Anum Abdus Salam </strong>&ldquo;Computer Vision for Medical Image Processing&rdquo;<strong> </strong>(CPED, Started in 2021)</li>
+	<li>Supervising <strong>Muhammad Sohail </strong>&ldquo;Robot Vision for Aerial Imagery&rdquo;<strong> </strong>(CPED, Started in 2021)</li>
+	<li>Co-Supervising <strong>Vikash Ramharuk </strong>&ldquo;A Cloud Robotic Framework to Assist Robot Swarms with Adaptive Motion Planning to Enhance Human Safety &amp; Work Efficiency&ldquo; <strong>(University of South Africa)</strong></li>
+	<li>Supervising <strong>Talha Saeed </strong>&ldquo;Robot Vision for Aerial Imagery<strong> </strong>(CPED, Started in 2024)</li>
+</ol>
+
+<h3>&nbsp;</h3>
+
+<h3>M.SC. THESIS SUPERVISED</h3>
+
+<ol>
+	<li><strong>Naveed Khan Baloch</strong><strong> </strong>&ldquo;Intelligent System for Attendance Management: Face Recognition Based Approach&rdquo;<strong> </strong>(CPED, Completed in 2010-2011)</li>
+	<li><strong>Sahib Khan</strong><strong> </strong>&ldquo;Implementation of Variable Least Significant Bit Steganography&rdquo;<strong> </strong>(TED, Completed in 2011)</li>
+	<li><strong>Abdul </strong><strong>Basir </strong>&ldquo;Linux Kernal Transparent Compression<strong>&rdquo; </strong>(CPED, Completed in 2012)</li>
+	<li><strong>Mujtaba Hassan</strong><strong> </strong>&ldquo;Hand Structure Analysis for Finger Identification and Joints&rdquo;<strong> </strong>(CPED, Completed in 2012)</li>
+	<li><strong>Saira Kanwal</strong> &ldquo;Optimization of Real Time Edge Enhanced Object Tracking Algorithm on DSP&rdquo;<strong> </strong>(CPED, Completed in 2012-2014)</li>
+	<li><strong>Hira Bashir</strong><strong> </strong>&ldquo;Environment Learning and Automatic Path Planning<strong>&rdquo; </strong>(CPED, Completed in 2012-2013)</li>
+	<li><strong>Asim Raza</strong><strong> </strong>&ldquo;Instructor Activity Recognition using Spatiotemporal Techniques&rdquo;<strong> </strong>(CPED, Completed in 2012-2014)</li>
+	<li><strong>Akhtar Hanif</strong><strong> </strong>&ldquo;Inflight Helicopter Blade Track Measurement using Computer Vision&rdquo;<strong> </strong>(CPED, Completed in 2013-2014)</li>
+	<li><strong>Arubah Hussain</strong><strong> </strong>&rdquo;Sleeping Foreground Problem for People Counting&rdquo;<strong> </strong>(CPED, Completed in 2013-2015)</li>
+	<li><strong>Hassan Ahmed</strong><strong> </strong>&ldquo;Human Activity Recognition using RGBD Bag of Words&rdquo;<strong> </strong>(CPED, Completed in August 2014)</li>
+	<li><strong>M. Qasim </strong><strong>Shafiq </strong>&ldquo;Localization and Tracking of People Moving inside a Train Carriage&rdquo;<strong> </strong>(CPED, Defended in 2013-2016)</li>
+	<li><strong>Fiza Murtaza</strong><strong> </strong>&ldquo;Human Action Recognition Algorithm for a Multi-camera Video Dataset&rdquo;<strong> </strong>(CPED, Completed in 2015)</li>
+	<li><strong>Mubashir Noman</strong><strong> </strong>&ldquo;Real-Time People Detection Algorithm on Raspberry Pi&rdquo;<strong> </strong>(CPED, Completed in 2016)</li>
+	<li><strong>Naseer Ahmed</strong><strong> </strong>&ldquo;Secure Image Steganography Technique for Covert Communication&rdquo;<strong> </strong>(CPED, Completed in 2015)</li>
+	<li><strong>Hafiza Sundus Farooq</strong><strong> </strong>&ldquo;A Generic Forgery Detection Technique&rdquo;<strong> </strong>(CPED, Completed in 2016)</li>
+	<li><strong>Bilal Rasheed</strong><strong> </strong>&ldquo;Vehicle Make and Model Recognition for Intelligent Transportation System&rdquo;<strong> </strong>(CPED, Completed in 2017)</li>
+	<li><strong>Saddam Hussain</strong><strong> </strong>&ldquo;Detection and Counting of Passengers Getting On and Off from Bus&rdquo;<strong> </strong>(CPED, Completed in 2017).</li>
+	<li><strong>Basharat </strong><strong>Hussain </strong>&ldquo;Visual Vehicle Detection Scheme on Low-Powered Embedded GPU<strong>&rdquo; </strong>(CPED, Completed in 2017)</li>
+	<li><strong>Abinta Mehmoor Mir</strong><strong> </strong>&ldquo;Street Crime Scene Recognition in Surveillance Videos&rdquo;<strong> </strong>(CPED, Completed in 2017)</li>
+	<li><strong>Usman </strong><strong>Riaz </strong>&ldquo;Visibility Restoration of Hazy Images Containing White Objects&rdquo;<strong> </strong>(CPED, Completed in 2018)</li>
+	<li><strong>Qurat ul Ain Ali</strong><strong> </strong>&ldquo;Activity Recognition for Human-Vehicle Interaction&rdquo;<strong> </strong>(CPED, Completed in 2018)</li>
+	<li><strong>Malik Ali Gul</strong><strong> </strong>&ldquo;Abnormal Human Activity Recognition for Elderly Patient Care&rdquo;<strong> </strong>(CPED, Completed in 2018)</li>
+	<li><strong>Umber Saba</strong><strong> </strong>&ldquo;Plant Species Recognition using Computer Vision<strong>&rdquo; </strong>(CPED, Completed in 2018)</li>
+	<li><strong>Hira Imtiaz </strong>&ldquo;Design and Implementation of Receiver Autonomous Integrity Monitoring for Small UAV Applications on DSP&rdquo;<strong> </strong>(CPED, Completed in 2019)</li>
+	<li><strong>Haseeb Sultan</strong><strong> </strong>&ldquo;Right Whale Recognition using Computer Vision<strong>&rdquo; </strong>(CPED, Completed in 2019)</li>
+	<li><strong>Hajra Binte Naeem</strong><strong> </strong>&ldquo;Human Action Recognition in Multiview Scenario&rdquo;<strong> </strong>(CPED, Completed in 2020)</li>
+	<li><strong>Ammar Mohsin Butt</strong><strong> </strong>&ldquo;Human Action Recognition using Bag of Expressions<strong>&rdquo; </strong>(CPED, Completed in 2020)</li>
+	<li><strong>Sobia Sarwar</strong><strong> </strong>&ldquo;Computer Vision based Potholes Detection Approach&rdquo;<strong> </strong>(CPED, Completed in 2020)</li>
+	<li><strong>Muhammad Saad Saeed</strong><strong> </strong>&ldquo;Speaker Identification and Verification in the Wild&rdquo;<strong> </strong>(CPED, Completed in 2021)</li>
+	<li><strong>Saqlain Hussain Shah</strong><strong> </strong>&ldquo;Muli-Modal Speaker Recognition and Verification<strong>&rdquo; </strong>(CPED, Completed in 2023)</li>
+	<li><strong>Zubair Saeed</strong><strong> </strong>&ldquo;Real-Time On-Board Small-Scale Object Detector for Unmanned Aerial Vehicles (UAVs)<strong>&rdquo; </strong>(CPED, Completed in 2023)</li>
+	<li><strong>Muhammad Ali Raza</strong><strong> </strong>&ldquo;A Robust Approach for Human Fall Detection using Visual Data&rdquo;<strong> </strong>(CPED, Completed in 2023)</li>
+	<li><strong>Muhammad Haroon Asad</strong><strong> </strong>&ldquo;Natural Disaster Assessment using Aerial Image Processing&rdquo;<strong> </strong>(CPED, Completed in 2023)</li>
+	<li><strong>Fizza Saeed Malik</strong><strong> </strong>&ldquo;Exploring Dermoscopic Structures for Melanoma Skin Lesion Classification&rdquo;<strong> </strong>(CPED, Completed in 2023)</li>
+	<li><strong>Shafaq Rasheed </strong>&ldquo;AI-Based Trash Detection in Water Bodies&rdquo;<strong> </strong>(CPED, Completed in 2024)</li>
+</ol>
+</td>
+                </tr>
+                <tr>
+                    <td>Research Group</td>
+                    <td></td>
+                </tr>
+            </table>
+        </fieldset>
+
+    </div>
+    </div>
+
+
+            </div>
+        </div>
+<footer class="container-fluid text-center">
+    <p>&copy; 2018. Developed by NARC, UET Taxila.</p>
+</footer>
+  
+    </div>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="eea6113b8236c3f93cf68886-|49" defer></script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a24d113e4d01ce46',t:'MTc4NTY3MzU0OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"d8564f6d5b4e410eb202d13f98326329","r":1}' crossorigin="anonymous"></script>
+</body>
+</html>

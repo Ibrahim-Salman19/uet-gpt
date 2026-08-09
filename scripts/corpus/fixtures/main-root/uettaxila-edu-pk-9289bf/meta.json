@@ -1,0 +1,12 @@
+{
+  "body_sha256": "52e0f65574fe7618d2439a378a1678bc2fceb4aabcfec561444a67104d57b9d2",
+  "body_size": 99782,
+  "content_type": "text/html; charset=utf-8",
+  "elapsed_ms": 2249,
+  "fetched_at": "2026-08-02T12:25:59+00:00",
+  "final_url": "https://uettaxila.edu.pk/",
+  "redirect_chain": [],
+  "remote_ip": "104.21.50.7,172.67.198.179",
+  "requested_url": "https://uettaxila.edu.pk/",
+  "status": 200
+}

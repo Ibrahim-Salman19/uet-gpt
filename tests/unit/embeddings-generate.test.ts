@@ -31,7 +31,8 @@ describe("embeddings:generate", () => {
     // Production embedder uses 768-dim vectors (convex/embeddings/generate.ts
     // requests outputDimensionality: EMBEDDING_DIMENSION=768; schema vectorIndex
     // is dimensions: 768; generate.ts validates emb.length === 768). Keep in sync.
-    const dummyEmbedding = new Array(768).fill(0.1);
+    const unitVal = 1 / Math.sqrt(768);
+    const dummyEmbedding = new Array(768).fill(unitVal);
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
       headers: new Headers({ "content-type": "application/json" }),

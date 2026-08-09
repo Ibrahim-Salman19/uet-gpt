@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UET Taxila Undergraduate Admissions </title>
+    <!-- <php echo date("Y"); ?> -->
+    <link href="assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap-icons/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=1">
+    <script type="f7e0154f17df806697ac856b-text/javascript" src="../js/jquery.js"></script>
+</head>
+
+<body>
+
+<!-- Dynamic Announcement Bar -->
+<div class="py-3 text-center fw-semibold" style="background: #dc3545; color: white; font-size: 1.1rem;">
+    🚨 Undergraduate Admissions Fall 2026 | Registration Started  <!-- Applicationsare now open — Apply Today!  <php echo date("Y"); ?>-->
+</div>
+
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="index.php">
+            <img src="https://admissions.uettaxila.edu.pk/images/UETLogo.png" class="logo me-3" alt="UET Taxila Logo">
+            <span class="fw-bold">
+                UET Taxila<br>
+                <small style="font-size: 0.85rem; opacity: 0.9;">Undergraduate Admissions</small>
+                 <!-- <php echo date("Y"); ?> -->
+            </span>
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="nav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="index.php">Home</a></li>
+                 <li class="nav-item"><a class="nav-link" href="ProgramsOffered.php">Programs</a></li>
+               <!-- <li class="nav-item"><a class="nav-link" href="#Discover">Discover</a></li>
+                <li class="nav-item"><a class="nav-link" href="#Facilities">Facilities</a></li>
+                -->
+                <li class="nav-item"><a class="nav-link" href="explore.php">Explore Campus</a></li>
+                <li class="nav-item"><a class="nav-link" href="FAQS.php">FAQs</a></li>
+                <li class="nav-item"><a class="nav-link" href="Downloads.php">Downloads</a></li>
+                <li class="nav-item"><a class="nav-link" href="#Contact">Contact Us</a></li>
+                  <!-- <php
+                        if (session_status() === PHP_SESSION_NONE) {
+                                session_start();
+                                }
+
+                    if (empty($_SESSION)) {
+                                                   echo '<li class="nav-item"><a class="nav-link" href="My_UET.php">My UET</a></li>';
+                                        } else {
+                                                    echo '<li class="nav-item"><a class="nav-link" href="Logout.php">Logout</a></li>';
+                                            }
+                    ?> -->
+                    <li class="nav-item"><a class="nav-link " id="applylink" href="https://admission.uettaxila.edu.pk/application/index.php">Apply Now</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<script type="f7e0154f17df806697ac856b-text/javascript">
+  $(document).ready(function() {
+    $(".btnapply").click(function(e) {
+      e.preventDefault(); // prevent link navigation
+      alert("Registeration Opening Soon");
+    });
+  });
+</script>
+<div class="container mt-5 pt-5">
+
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <h1 class="fw-bold display-6">Fee Structure</h1>
+        <p class="text-muted">
+            Bachelor of Engineering Technology Programs — 2026        </p>
+        <div class="mx-auto" style="width:70px;height:4px;background:var(--uet-accent);border-radius:10px;"></div>
+    </div>
+
+    <!-- MAIN FEE TABLE -->
+    <div class="card shadow-lg border-0 rounded-4 overflow-hidden mb-5">
+
+        <div class="card-header bg-light">
+            <h5 class="mb-0 fw-semibold text-success">Fee Breakdown</h5>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle text-center mb-0">
+
+                <thead class="table-light">
+                    <tr>
+                        <th>Sr#</th>
+                        <th class="text-start">Particulars</th>
+                        <th>Resident</th>
+                        <th>Non-Resident</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <!-- Non Recurring -->
+                    <tr class="table-secondary fw-semibold text-start">
+                        <td colspan="4">Non-Recurring Charges (At Admission)</td>
+                    </tr>
+
+                    <tr>
+                        <td>1</td>
+                        <td class="text-start">Admission Charges</td>
+                        <td>3,500</td>
+                        <td>3,500</td>
+                    </tr>
+
+                    <!-- KEEP HIDDEN ROWS -->
+                    <tr style="display: none;">
+                        <td>2</td>
+                        <td>Re-admission Charges</td>
+                        <td>4,000</td>
+                        <td>4,000</td>
+                    </tr>
+
+                    <tr style="display:none;">
+                        <td>3</td>
+                        <td>Students Bus Card Charges</td>
+                        <td>500</td>
+                        <td>500</td>
+                    </tr>
+
+                    <tr>
+                        <td>4</td>
+                        <td class="text-start">Students ID Card Charges</td>
+                        <td>2,000</td>
+                        <td>2,000</td>
+                    </tr>
+
+                    <tr>
+                        <td>5</td>
+                        <td class="text-start">Document Verification Fee</td>
+                        <td>3,000</td>
+                        <td>3,000</td>
+                    </tr>
+
+                    <tr style="display:none;">
+                        <td>6</td>
+                        <td>Library Security (Refundable)</td>
+                        <td>2,000</td>
+                        <td>2,000</td>
+                    </tr>
+
+                    <!-- Recurring -->
+                    <tr class="table-secondary fw-semibold text-start">
+                        <td colspan="4">Recurring Charges (Per Semester)</td>
+                    </tr>
+
+                    <tr>
+                        <td>7</td>
+                        <td class="text-start">Registration Charges</td>
+                        <td>1,000</td>
+                        <td>1,000</td>
+                    </tr>
+
+                    <tr>
+                        <td>8</td>
+                        <td class="text-start">Tuition Charges</td>
+                        <td class="fw-semibold">25,000</td>
+                        <td class="fw-semibold">25,000</td>
+                    </tr>
+
+                    <!-- KEEP ALL display:none rows unchanged -->
+                    <tr style="display:none;">
+                        <td>9</td>
+                        <td>Sports Charges</td>
+                        <td>2,000</td>
+                        <td>2,000</td>
+                    </tr>
+
+                    <tr style="display:none;">
+                        <td>10</td>
+                        <td>Magazine Charges</td>
+                        <td>1,000</td>
+                        <td>1,000</td>
+                    </tr>
+
+                    <tr style="display:none;">
+                        <td>11</td>
+                        <td>Medical Charges</td>
+                        <td>3,000</td>
+                        <td>3,000</td>
+                    </tr>
+
+                    <tr>
+                        <td>12</td>
+                        <td class="text-start">Laboratory Charges</td>
+                        <td>3,000</td>
+                        <td>3,000</td>
+                    </tr>
+
+                    <tr>
+                        <td>13</td>
+                        <td class="text-start">Examination Charges</td>
+                        <td>3,000</td>
+                        <td>3,000</td>
+                    </tr>
+
+                    <tr>
+                        <td>14</td>
+                        <td class="text-start">Smart & Safe Campus Charges</td>
+                        <td>3,000</td>
+                        <td>3,000</td>
+                    </tr>
+
+                    <tr>
+                        <td>15</td>
+                        <td class="text-start"><sup style="color:red;font-size: 11px;">2&nbsp;</sup>Bus Fare (Non-Resident)</td>
+                        <td>--</td>
+                        <td class="">25,000</td>
+                    </tr>
+
+                    <tr>
+                        <td>16</td>
+                        <td class="text-start"><sup style="color:red;font-size: 11px;">2&nbsp;</sup>Bus Fare (Resident)</td>
+                        <td>10,000</td>
+                        <td>--</td>
+                    </tr>
+
+                    <tr>
+                        <td>17</td>
+                        <td class="text-start">SAP Charges</td>
+                        <td>1,800</td>
+                        <td>1,800</td>
+                    </tr>
+
+                    <!-- TOTAL -->
+                    <tr class="table-dark text-white fw-bold">
+                        <td colspan="2">Total</td>
+                        <td>55,300</td>
+                        <td>70,300</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+
+    <!-- Hostel Section -->
+    <div class="card border-0 shadow-sm rounded-4 mb-5">
+
+        <div class="card-header bg-light fw-semibold">
+            Hostel & Additional Charges
+        </div>
+
+        <div class="table-responsive">
+            <table class="table text-center mb-0">
+                <tr>
+                    <th>Sr#</th>
+                    <th class="text-start">Particular</th>
+                    <th>Amount</th>
+                </tr>
+
+                <tr>
+                    <td>1</td>
+                    <td class="text-start">Hostel Security (Refundable)</td>
+                    <td>8,000</td>
+                </tr>
+
+                <tr>
+                    <td>2</td>
+                    <td class="text-start">Mess Security (Refundable)</td>
+                    <td>8,000</td>
+                </tr>
+
+                <tr>
+                    <td>3</td>
+                    <td class="text-start">Service & Contingencies</td>
+                    <td>3,000</td>
+                </tr>
+
+                <tr>
+                    <td>4</td>
+                    <td class="text-start"><sup style="color:red;font-size: 11px;">3&nbsp;</sup>Room Rent</td>
+                    <td>5,000</td>
+                </tr>
+
+                <tr>
+                    <td>5</td>
+                    <td class="text-start"><sup style="color:red;font-size: 11px;">3&nbsp;</sup>Electricity Charges</td>
+                    <td>10,000</td>
+                </tr>
+
+                <tr class="table-light fw-bold">
+                    <td colspan="2">Total</td>
+                    <td>36,000</td>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-5">
+        <h5 class="fw-semibold mb-3">Important Notes</h5>
+
+        <p class="text-danger small mb-2">
+            <sup style="font-size:10px;">2</sup>If You need Transport facility then you have to submit Rs- 25000/- On seprate Bank Challan, and submit paid challan in Transport section.
+        </p>
+
+        <p class="text-danger small mb-2">
+            <sup style="font-size:10px;">3</sup> These charges are dependant on the prevailing rates of fuel, electricity and gas fixed by the government. At the start of every semester these charges will be decided by the VC on the recommandations Treasurer and PD. 
+        </p>
+
+        <ul class="mb-0">
+            <li>Note: In case of admission withdrawl Admission charges will not be refunded.</li>
+        </ul>
+    </div>
+
+</div>
+
+
+<!-- FOOTER -->
+<div class="footer mt-5 pt-5 pb-3" id="Contact">
+<div class="container">
+
+<div class="row">
+
+<div class="col-md-4">
+<h5>📞 Contact Us</h5>
+<p>
+University of Engineering & Technology Taxila<br>
+Taxila, Punjab, Pakistan
+</p>
+<p>
+📧 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b2c7d59cd3d6dfdbc1c1dbdddcf2c7d7c6c6d3cadbded39cd7d6c79cc2d9">[email&#160;protected]</a><br>
+📞 +92-51-9047400-412
+</p>
+<p>
+For Admission Related Quries, Create Query from Admission Portal Profile usign "Ask Admission" Link<br>
+</p>
+</div>
+
+<div class="col-md-4">
+<h5>🔗 Quick Links</h5>
+<ul class="list-unstyled">
+<li><a href="Schedule.php">Fall 2026 Important Dates</a></li>
+<li><a href="whyus.php">Why Us</a></li>
+<li><a href="Seats_Allocation.php">Seats Allocation</a></li>
+<li><a href="ProgramsOffered.php">Undergraduate Programs</a></li>
+<li><a href="explore.php">Explore</a></li>
+<li><a href="Downloads.php">Downloads</a></li>
+<li><a href="FAQS.php">FAQS</a></li>
+<li><a href="Calculator.php">Percentage Calculator</a></li>
+</ul>
+</div>
+<div class="col-md-4">
+    <h5>🔗 Quick Links</h5>
+    <ul class="list-unstyled">
+<li><a href="Admission_Eligibility.php">Admission Eligibility</a></li>
+</ul>
+    </div>
+
+<!-- <div class="col-md-4">
+<h5>✉️ Send Message</h5>
+
+<form action="send.php" method="POST">
+<input type="text" name="name" class="form-control mb-2" placeholder="Your Name" required>
+<input type="email" name="email" class="form-control mb-2" placeholder="Your Email" required>
+<textarea name="message" class="form-control mb-2" placeholder="Message" rows="3" required></textarea>
+<button type="submit" class="btn btn-light w-100">Send</button>
+</form>
+
+</div> -->
+
+</div>
+
+<hr style="background:white;">
+<p class="text-center mb-0">© 2026 UET Taxila Undergraduate Admissions Portal</p>
+
+</div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="assets/bootstrap/js/bootstrap.bundle.min.js" type="f7e0154f17df806697ac856b-text/javascript"></script>
+<script src="assets/js/app.js" type="f7e0154f17df806697ac856b-text/javascript"></script>
+<script src="/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="f7e0154f17df806697ac856b-|49" defer></script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"d8564f6d5b4e410eb202d13f98326329","r":1}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a24d10d8dddafd36',t:'MTc4NTY3MzUzMg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

@@ -1,0 +1,1858 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <title>
+        Software Engineering Technology Program | Department of Telecommunication Engineering, UET Taxila
+
+    </title>
+    <link href="css/MainTED.css?20260802172309" type="text/css" rel="Stylesheet">
+<link rel="stylesheet" href="css/stylesMenu.css" />
+<meta name="description" content="Department of Telecommunication Engineering, UET Taxila">
+<meta name="keywords" content="Telecommunication Engineering, Telecom Engineering, Telecom Engineering UET Taxila">
+<script type="d414bd3c9e3c8c5b5663cdc7-text/javascript" src="jquery.min.js"></script>
+
+    <link href="css/betse.css?20260802172309" type="text/css" rel="Stylesheet">
+</head>
+
+<body>
+     <table width="100%" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tr> 
+    <td height="37" bgcolor="#666666"> 
+      <table width="972" border="0" align="center" cellpadding="0" cellspacing="0">
+        <tr> 
+          <td width="19" valign="top"><br></td>
+          <td width="953" valign="middle" class="siteTopHeading">University of 
+            Engineering and Technology, Taxila </td>
+        </tr>
+        <tr> 
+          <td colspan="2" valign="top"> <p><img src="images/spacer.gif" width="5" height="2" hspace="0"></p></td>
+        </tr>
+      </table></td>
+  </tr>
+</table>
+<table width="100%" height="119" border="0" cellpadding="0" cellspacing="0">
+  <tr> 
+    <td height="100" valign="top" bgcolor="#E6E4DB"> <table width="936" border="0" align="center" cellpadding="0" cellspacing="0" style=" margin-left:200px;">
+        <tr> 
+          <td colspan="3"><img src="images/spacer.gif" width="10" height="10"></td>
+        </tr>
+        <tr> 
+          <td width="67" valign="top"><img src="images/logoUETT.jpg" width="67" height="65"><br></td>
+          <td width="587" valign="middle"><div align="right"><img src="images/TEDhd.jpg" width="580" height="65" alt="UET Taxila"></div></td>
+          <td width="282" valign="middle"><table width="280" border="0" align="right" cellpadding="0" cellspacing="0">
+              <tr> 
+                <td width="71" class="quickLinks">&nbsp;</td>
+                <td width="125" class="quickLinks"> <div align="right"><a href="quickLinks.asp">Quick 
+                    Links</a></div></td>
+                <td width="84" class="quickLinks"> <div align="right"><a href="contact.asp#contact"> 
+                    Contact Info</a></div></td>
+              </tr>
+              <tr> 
+                <td height="30" colspan="3" valign="bottom"> <form name="search" action="http://www.google.com/search" method="get" onSubmit="if (!window.__cfRLUnblockHandlers) return false; Gsitesearch(this)" data-cf-modified-d414bd3c9e3c8c5b5663cdc7-="">
+                    <div align="right"> 
+                      <input name="q" type="hidden" />
+                      <input type="text" name="qfront" class=searchField onblur="if (!window.__cfRLUnblockHandlers) return false; this.value == '' ? this.value = 'Search this site...' :  this.value = this.value;" onclick="if (!window.__cfRLUnblockHandlers) return false; this.value == 'Search this site...' ? this.value = '' : this.value = this.value ;" value="Search this site..." size="20" maxlength=50 data-cf-modified-d414bd3c9e3c8c5b5663cdc7-="">
+                      <input name="submit" type="submit" class="sectionHead" value=" Search ">
+                    </div>
+                  </form></td>
+              </tr>
+            </table></td>
+        </tr>
+        <tr> 
+          <td colspan="3" valign="top"> <p><img src="images/spacer.gif" width="5" height="2" hspace="0"></p></td>
+        </tr>
+      </table>
+    </td>
+</tr>
+    </table> 
+<table cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+        <td style="background-color: #E6E4DB; text-align: center;">
+            <nav class="navigation" style="display: initial; margin: 0;">
+                <ul class="menu">
+
+                    <li id="home"><a class="after" href="index.asp#home">About</a></li>
+                    <li id="faculty"><a href="faculty.asp#faculty">Faculty</a></li>
+                    <li id="academics"><a href="academics.asp">Academics</a></li>
+                    <li id="programs"><a href="programs.asp">Programs</a>
+                        <ul class="dropdown" aria-label="submenu">
+                            <li><a href="#">Engineering Programs</a>
+                                <ul class="dropdown" aria-label="submenu">
+                                    <li><a href="TelecomEngineeringProgram.asp">Telecom Engineering</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="#">Engineering Technology Programs</a>
+                                <ul class="dropdown" aria-label="submenu">
+                                    <li><a href="BETCyberSecurity.asp">Cyber Security Engineering Technology</a></li>
+                                    <li><a href="BETInformationTechnology.asp">Information Engineering Technology</a></li>
+                                    <li><a href="BETSoftwareEngineering.asp">Software Engineering Technology</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="#">Professional Continuing Education</a>
+                                <ul class="dropdown" aria-label="submenu">
+                                    <li>
+                                        <div>NAVTTC</div>
+                                    </li>
+                                    <li>
+                                        <div>Huawei</div>
+                                    </li>
+                                    <li>
+                                        <div>ZTE</div>
+                                    </li>
+                                    <li><div>Cisco</div> </li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    </li>
+                    <li id="contact"><a href="contact.asp">Contact us</a></li>
+                    <li id="downloads"><a href="downloads.asp">Downloads</a></li>
+                </ul>
+            </nav>
+        </td>
+    </tr>
+</table>
+
+
+
+    <table width="972" border="0" align="center" cellpadding="0" cellspacing="0">
+        <tr>
+            <td>
+                <table width="972" border="0">
+                    <tr>
+                        <td width="750" valign="top" class="homeMainText">
+                            <h1 style="text-align: center; font-size: 24px !important; margin-bottom: 10px;">Software Engineering Technology Program</h1>
+							<h3 style="text-align: center; padding: 5px;">
+								Engr. Iqra Jabeen (<a href="http://fms.uettaxila.edu.pk/Profile/iqra.jabeen" target="_blank">View Profile</a>)<br>
+								(Program Coordinator, Software Engineering Technology)
+							</h3>
+                            <div style="text-align: center; padding: 35px; background-color: whitesmoke; color: darkblue;">
+                                <div class="indexpageheading" style="text-align: center; font-size: 28px"><strong>Vision</strong></div>
+                                <p style="padding: 8px; font-weight: bold; font-size: 18px; font-style: italic">
+                                    To be a leading hub of innovation and excellence in computing, producing skilled professionals equipped with essential
+                                     knowledge and market-relevant expertise capable of implementing transformative solutions in the dynamic world of technology.
+                                </p>
+                            </div>
+                            <hr />
+                            <div style="text-align: center; padding: 35px; background-color: whitesmoke; color: darkgreen;">
+                                <div class="indexpageheading" style="text-align: center; font-size: 28px"><strong>Program Mission</strong></div>
+                                <p style="padding: 8px; font-weight: bold; font-size: 18px; font-style: italic">
+                                    To empower our graduates with hands-on software engineering technology competencies, enabling them to
+                                     implement innovative, technology-driven solutions that address global challenges. The program emphasizes 
+                                    high-quality teaching, industrial training, and experiential learning while fostering ethical integrity and collaborative excellence.
+                                </p>
+                            </div>
+                            <hr />
+                            <div class="indexpageheading"><strong>Program Description</strong></div>
+                            <div>
+                                <p>
+                                    In today's technology-driven world, software has become an integral part of everyday life, powering critical sectors 
+                                    such as communication, healthcare, finance, transportation, education, governance, information security, and artificial 
+                                    intelligence. With rapid globalization and digital transformation, organizations increasingly rely on software-driven 
+                                    solutions to enhance efficiency, improve user experiences, and maintain a competitive edge. As a result, software engineering 
+                                    technology has emerged as a cornerstone of modern socio-economic development, creating a growing global demand for skilled 
+                                    software engineering technologists with strong practical and industry-relevant expertise. The Software Engineering Technology 
+                                    program is designed to address these evolving industry needs by equipping students with solid theoretical foundations and 
+                                    extensive hands-on experience. The program focuses on the design, development, testing, deployment, and maintenance of 
+                                    software systems using best software engineering practices and engineering technology principles. A distinguishing feature 
+                                    of the program is its field training component, which provides direct exposure to real-world industrial environments and 
+                                    professional practices. In addition to technical competence, the program fosters professional ethics, teamwork, and 
+                                    management skills, preparing graduates to work effectively in multidisciplinary and dynamic settings.
+                                </p>
+                            </div>
+                            <hr />
+                            <div class="indexpageheading"><strong>State-of-the art Laboratories </strong></div>
+                            <div>
+                                <p>
+                                    The Department of Software Engineering Technology is equipped with advanced computing facilities and industry-standard tools, 
+                                    providing a dynamic environment for hands-on learning and research. Students actively engage in real-world problem-solving 
+                                    by designing, developing, and testing innovative software solutions. These facilities promote creativity, collaboration, and 
+                                    technical expertise, effectively preparing students to meet the challenges of the evolving software industry.
+                                </p>
+                            </div>
+                            <hr />
+                            <div class="indexpageheading"><strong>Scholarships and Financial Assistance</strong></div>
+                            <div>
+                                <ul style="padding-left: 30px;">
+                                    <li>Merit-based</li>
+                                    <li>Need-based(Relevant data is required for this section.)</li>
+                                </ul>
+                            </div>
+                            <hr />
+                            <div class="indexpageheading"><strong>Program Educational Objectives (PEOs)</strong></div>
+                            <div>
+                                <table class="table tablebordered tabelplo">
+                                    <tr>
+                                        <td style="white-space: nowrap">PEO-1</td>
+                                        <td>Apply technical knowledge and state-of-the-art skills to solve broadly defined problems in the areas 
+                                            of software engineering technology, thereby producing marketable software products through lifelong learning.
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>PEO-2</td>
+                                        <td>Communicate, manage, and carry out technopreneurial activities in the areas of software engineering technologies
+                                             and support economic sustainability.
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>PEO-3</td>
+                                        <td>Work individually and with global teams in the software industry, demonstrating professional integrity and 
+                                            commitment to environmental sustainability.
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <hr />
+                            <div class="indexpageheading"><strong>Program Learning Outcomes (PLOs)</strong></div>
+                            <div>
+                                <table class="table tablebordered tabelplo">
+                                    <tbody>
+                                        <tr>
+                                            <td style="white-space: nowrap">
+                                                <p><strong><span>PLO-1: Engineering Technology Knowledge</span></strong></p>
+                                            </td>
+                                            <td>
+                                                <p>
+                                                    An ability to apply knowledge of mathematics, natural science, Engineering Technology fundamentals, and Engineering 
+                                                    Technology specialization to define and apply Engineering Technology procedures, processes, systems, or methodologies.
+                                                </p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p><strong>PLO-2: Problem Analysis</strong></p>
+                                            </td>
+                                            <td>
+                                                <p>
+                                                    An ability to identify, formulate, research literature, and analyze broadly defined Engineering Technology problems, 
+                                                    reaching substantiated conclusions using analytical tools appropriate to the discipline or area of specialization.
+                                                </p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p><strong>PLO-3: Design/Development of Solutions</strong></p>
+                                            </td>
+                                            <td>
+                                                <p>
+                                                    An ability to design solutions for Broadly Defined Engineering Technology Problems that help design of systems, components or 
+                                                    processes that meet specified needs, while being cognizant of public health and safety issues, and conscious of cultural,
+                                                     societal, and environmental considerations.
+                                                </p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p><strong>PLO-4: Investigation </strong></p>
+                                            </td>
+                                            <td>
+                                                <p>
+                                                    An ability to conduct investigations of broadly defined problems; locate, search, and select relevant data from codes, 
+                                                    databases, and literature, design and conduct experiments to provide valid conclusions.
+                                                </p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p><strong>PLO-5: Tool Usage</strong></p>
+                                            </td>
+                                            <td>
+                                                <p>
+                                                    An ability to select and apply appropriate techniques, resources, and modern technology and IT tools, including 
+                                                    prediction and modelling, to broadly define Engineering Technology problems, with an understanding of the limitations.
+                                                </p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p><strong>PLO-6: he Engineering Technologist and Society</strong></p>
+                                            </td>
+                                            <td>An ability to demonstrate understanding of the societal, health, safety, legal, and cultural issues and the consequent
+                                                 responsibilities relevant to Engineering Technology practice and solutions to broadly defined Engineering Technology problems.
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p><strong>PLO-7: Environment and Sustainability</strong></p>
+                                            </td>
+                                            <td>
+                                                <p>
+                                                    An ability to understand and evaluate the sustainability and impact of Engineering Technology work in the solution of 
+                                                    broadly defined Engineering Technology problems in societal and environmental contexts.
+                                                </p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p><strong>PLO-8: Ethics</strong></p>
+                                            </td>
+                                            <td>
+                                                <p>Understand and commit to professional ethics and responsibilities and norms of Engineering Technology practice.</p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p><strong>PLO-9: Individual and Team Work</strong></p>
+                                            </td>
+                                            <td>
+                                                <p>An ability to function effectively as an individual, and as a member or leader in diverse teams.</p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p><strong>PLO-10: Communication</strong></p>
+                                            </td>
+                                            <td>
+                                                <p>
+                                                    An ability to communicate effectively on broadly defined Engineering Technology activities with the Engineering 
+                                                    Technologist community and with society at large, by being able to comprehend and write effective reports and
+                                                     design documentation, make effective presentations, and give and receive clear instructions.
+                                                </p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p><strong>PLO-11: Project Management</strong></p>
+                                            </td>
+                                            <td>
+                                                <p>
+                                                   An ability to demonstrate knowledge and understanding of Engineering Technology management principles and 
+                                                    apply these to one's own work, as a member or leader in a team, and to manage projects in multidisciplinary environments.
+                                                </p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p><strong>PLO-12: Lifelong Learning</strong></p>
+                                            </td>
+                                            <td>
+                                                <p>An ability to recognize the need for and have the ability to engage in independent and life-long learning in 
+                                                    specialist Engineering Technologies.</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <hr />
+                            <div class="indexpageheading"><strong>Proposed Curriculum /Scheme of Studies</strong></div> 
+                            <div>
+                                <p class="semesterheading"><strong>SEMESTER &ndash; I</strong></p>
+<table class="table tableborderedcurriculum">
+    <thead>
+        <tr>
+            <th>
+                <p><strong>Sr. No</strong></p>
+            </th>
+            <th>
+                <p><strong>Course </strong><strong>Code</strong></p>
+            </th>
+            <th>
+                <p><strong>Course Title</strong></p>
+            </th>
+            <th>
+                <p><strong>Knowledge Area/Domain</strong></p>
+            </th>
+            <th colspan="2">
+                <p><strong>Credit Hours</strong></p>
+            </th>
+        </tr>
+        <tr>
+            <th colspan="4">
+                <p>&nbsp;</p>
+            </th>
+            <th>
+                <p><strong>Theory</strong></p>
+            </th>
+            <th>
+                <p><strong>Practical</strong></p>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                <p>1.</p>
+            </td>
+            <td>
+                <p>NS-101</p>
+            </td>
+            <td>
+                <p>Calculus &amp; Analytical Geometry</p>
+            </td>
+            <td>
+                <p>Natural Sciences</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+            <td>
+                <p>0</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>2.</p>
+            </td>
+            <td>
+                <p>HS-102</p>
+            </td>
+            <td>
+                <p>Islamic Studies / Ethics</p>
+            </td>
+            <td>
+                <p>Humanities and Social Sciences</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+            <td>
+                <p>0</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>3.</p>
+            </td>
+            <td>
+                <p>NS-103</p>
+            </td>
+            <td>
+                <p>Applied Physics</p>
+            </td>
+            <td>
+                <p>Natural Sciences</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+            <td>
+                <p>1</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>4.</p>
+            </td>
+            <td>
+                <p>ID-101</p>
+            </td>
+            <td>
+                <p>Occupational Health and Safety</p>
+            </td>
+            <td>
+                <p>Interdisciplinary Distribution (IDE)</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+            <td>
+                <p>0</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>5.</p>
+            </td>
+            <td>
+                <p>HU-107</p>
+            </td>
+            <td>
+                <p>Applications of Information and Communication Technologies</p>
+            </td>
+            <td>
+                <p>General Education</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+            <td>
+                <p>1</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>6.</p>
+            </td>
+            <td>
+                <p>SET-101</p>
+            </td>
+            <td>
+                <p>Computer Programming</p>
+            </td>
+            <td>
+                <p>Computing-I</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <th colspan="4">
+                <p><strong>Total</strong></p>
+            </th>
+            <th>
+                <p>12</p>
+            </th>
+            <th>
+                <p>4</p>
+            </th>
+        </tr>
+        <tr>
+            <th colspan="4">
+                <p><strong>Grand Total</strong></p>
+            </th>
+            <th colspan="2">
+                <p>16</p>
+            </th>
+        </tr>
+    </tfoot>
+</table>
+<p aria-hidden="true">&nbsp;</p>
+<p class="semesterheading"><strong>SEMESTER &ndash; II</strong></p>
+<table class="table tableborderedcurriculum">
+    <thead>
+        <tr>
+            <th>
+                <p><strong>Sr. No</strong></p>
+            </th>
+            <th>
+                <p><strong>Course </strong><strong>Code</strong></p>
+            </th>
+            <th>
+                <p><strong>Course Title</strong></p>
+            </th>
+            <th>
+                <p><strong>Knowledge Area/Domain</strong></p>
+            </th>
+            <th colspan="2">
+                <p><strong>Credit Hours</strong></p>
+            </th>
+        </tr>
+        <tr>
+            <th colspan="4">
+                <p>&nbsp;</p>
+            </th>
+            <th>
+                <p><strong>Theory</strong></p>
+            </th>
+            <th>
+                <p><strong>Practical</strong></p>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                <p>1.</p>
+            </td>
+            <td>
+                <p>HS-109</p>
+            </td>
+            <td>
+                <p>Ideology and Constitution of Pakistan</p>
+            </td>
+            <td>
+                <p>General Education</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+            <td>
+                <p>0</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>2.</p>
+            </td>
+            <td>
+                <p>SS-106</p>
+            </td>
+            <td>
+                <p>Economics</p>
+            </td>
+            <td>
+                <p>Social Science-I</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+            <td>
+                <p>0</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>3.</p>
+            </td>
+            <td>
+                <p>CS-110</p>
+            </td>
+            <td>
+                <p>Discrete Structures</p>
+            </td>
+            <td>
+                <p>Computing</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+            <td>
+                <p>0</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>4.</p>
+            </td>
+            <td>
+                <p>SET-103</p>
+            </td>
+            <td>
+                <p>Software Configuration Management Technologies</p>
+            </td>
+            <td>
+                <p>Software Engineering Technology Foundation-II</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+            <td>
+                <p>1</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>5.</p>
+            </td>
+            <td>
+                <p>CS-109</p>
+            </td>
+            <td>
+                <p>Object-Oriented Programming</p>
+            </td>
+            <td>
+                <p>Computing</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>6.</p>
+            </td>
+            <td>
+                <p>SET-105</p>
+            </td>
+            <td>
+                <p>Software Development Life Cycle</p>
+            </td>
+            <td>
+                <p>Software Engineering Technology Foundation-IV</p>
+            </td>
+            <td>
+                <p>3</p>
+            </td>
+            <td>
+                <p>0</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>7.</p>
+            </td>
+            <td>
+                <p>HQ-107</p>
+            </td>
+            <td>
+                <p>Teaching of Holy Quran Translation-I</p>
+            </td>
+            <td>
+                <p>Art and Humanities-I</p>
+            </td>
+            <td>
+                <p>1</p>
+            </td>
+            <td>
+                <p>0</p>
+            </td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <th colspan="4">
+                <p><strong>Total</strong></p>
+            </th>
+            <th>
+                <p>14</p>
+            </th>
+            <th>
+                <p>3</p>
+            </th>
+        </tr>
+        <tr>
+            <th colspan="4">
+                <p><strong>Grand Total</strong></p>
+            </th>
+            <th colspan="2">
+                <p>17</p>
+            </th>
+        </tr>
+    </tfoot>
+</table>
+<p aria-hidden="true">&nbsp;</p>
+<p class="semesterheading"><strong>SEMESTER &ndash; III</strong></p>
+<table class="table tableborderedcurriculum">
+    <thead>
+        <tr>
+            <th>
+                <p><strong>Sr. No</strong></p>
+            </th>
+            <th>
+                <p><strong>Course </strong><strong>Code</strong></p>
+            </th>
+            <th>
+                <p><strong>Course Title</strong></p>
+            </th>
+            <th>
+                <p><strong>Knowledge Area/Domain</strong></p>
+            </th>
+            <th colspan="2">
+                <p><strong>Credit Hours</strong></p>
+            </th>
+        </tr>
+        <tr>
+            <th colspan="4">
+                <p>&nbsp;</p>
+            </th>
+            <th>
+                <p><strong>Theory</strong></p>
+            </th>
+            <th>
+                <p><strong>Practical</strong></p>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                <p>1.</p>
+            </td>
+            <td>
+                <p>NS-206</p>
+            </td>
+            <td>
+                <p>Probability and Statistics</p>
+            </td>
+            <td>
+                <p>Natural Sciences</p>
+            </td>
+            <td>
+                <p>3</p>
+            </td>
+            <td>
+                <p>0</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>2.</p>
+            </td>
+            <td>
+                <p>CS-201</p>
+            </td>
+            <td>
+                <p>Data Structures and Algorithms</p>
+            </td>
+            <td>
+                <p>Computing</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+            <td>
+                <p>1</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>3.</p>
+            </td>
+            <td>
+                <p>SET-202</p>
+            </td>
+            <td>
+                <p>Software Requirements and Design</p>
+            </td>
+            <td>
+                <p>Software Engineering Technology Foundation-VI</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+            <td>
+                <p>1</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>4.</p>
+            </td>
+            <td>
+                <p>HS-105</p>
+            </td>
+            <td>
+                <p>Functional English</p>
+            </td>
+            <td>
+                <p>General Education</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+            <td>
+                <p>0</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>5.</p>
+            </td>
+            <td>
+                <p>CS-208</p>
+            </td>
+            <td>
+                <p>Database Systems</p>
+            </td>
+            <td>
+                <p>Computing</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+            <td>
+                <p>1</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>6.</p>
+            </td>
+            <td>
+                <p>HS-205</p>
+            </td>
+            <td>
+                <p>Civics and Community Engagement</p>
+            </td>
+            <td>
+                <p>General Education</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+            <td>
+                <p>0</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>7.</p>
+            </td>
+            <td>
+                <p>AH-204</p>
+            </td>
+            <td>
+                <p>Basic Chinese Language</p>
+            </td>
+            <td>
+                <p>Art &amp; Humanities-II</p>
+            </td>
+            <td>
+                <p>1</p>
+            </td>
+            <td>
+                <p>1</p>
+            </td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <th colspan="4">
+                <p><strong>Total</strong></p>
+            </th>
+            <th>
+                <p>14</p>
+            </th>
+            <th>
+                <p>4</p>
+            </th>
+        </tr>
+        <tr>
+            <th colspan="4">
+                <p><strong>Grand Total</strong></p>
+            </th>
+            <th colspan="2">
+                <p>18</p>
+            </th>
+        </tr>
+    </tfoot>
+</table>
+<p aria-hidden="true">&nbsp;</p>
+<p class="semesterheading"><strong>SEMESTER &ndash; IV</strong></p>
+<table class="table tableborderedcurriculum">
+    <thead>
+        <tr>
+            <th>
+                <p><strong>Sr. No</strong></p>
+            </th>
+            <th>
+                <p><strong>Course </strong><strong>Code</strong></p>
+            </th>
+            <th>
+                <p><strong>Course Title</strong></p>
+            </th>
+            <th>
+                <p><strong>Knowledge Area/Domain</strong></p>
+            </th>
+            <th colspan="2">
+                <p><strong>Credit Hours</strong></p>
+            </th>
+        </tr>
+        <tr>
+            <th colspan="4">
+                <p>&nbsp;</p>
+            </th>
+            <th>
+                <p><strong>Theory</strong></p>
+            </th>
+            <th>
+                <p><strong>Practical</strong></p>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                <p>1.</p>
+            </td>
+            <td>
+                <p>SET-204</p>
+            </td>
+            <td>
+                <p>Breadth Elective-1</p>
+            </td>
+            <td>
+                <p>Software Engineering Technology Breadth &ndash;I</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+            <td>
+                <p>1</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>2.</p>
+            </td>
+            <td>
+                <p>MS-204</p>
+            </td>
+            <td>
+                <p>Entrepreneurship</p>
+            </td>
+            <td>
+                <p>General Education</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+            <td>
+                <p>0</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>3.</p>
+            </td>
+            <td>
+                <p>SET-205</p>
+            </td>
+            <td>
+                <p>Web Development Technologies</p>
+            </td>
+            <td>
+                <p>Software Engineering Technology Breadth - II</p>
+            </td>
+            <td>
+                <p>1</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>4.</p>
+            </td>
+            <td>
+                <p>SET-206</p>
+            </td>
+            <td>
+                <p>Software Operations and Maintenance</p>
+            </td>
+            <td>
+                <p>Software Engineering Technology Breadth- III</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+            <td>
+                <p>1</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>5.</p>
+            </td>
+            <td>
+                <p>SET-207</p>
+            </td>
+            <td>
+                <p>Software Testing Technologies</p>
+            </td>
+            <td>
+                <p>Software Engineering Technology Foundation-VIII</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+            <td>
+                <p>1</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>6.</p>
+            </td>
+            <td>
+                <p>CS-209</p>
+            </td>
+            <td>
+                <p>Operating Systems</p>
+            </td>
+            <td>
+                <p>Computing</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+            <td>
+                <p>1</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>7.</p>
+            </td>
+            <td>
+                <p>HQ-206</p>
+            </td>
+            <td>
+                <p>Teaching of Holy Quran Translation-II</p>
+            </td>
+            <td>
+                <p>Art and Humanities-III</p>
+            </td>
+            <td>
+                <p>1</p>
+            </td>
+            <td>
+                <p>0</p>
+            </td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <th colspan="4">
+                <p><strong>Total</strong></p>
+            </th>
+            <th>
+                <p>12</p>
+            </th>
+            <th>
+                <p>6</p>
+            </th>
+        </tr>
+        <tr>
+            <th colspan="4">
+                <p><strong>Grand Total</strong></p>
+            </th>
+            <th colspan="2">
+                <p>18</p>
+            </th>
+        </tr>
+    </tfoot>
+</table>
+<p aria-hidden="true">&nbsp;</p>
+<p class="semesterheading"><strong>SEMESTER &ndash; V</strong></p>
+<table class="table tableborderedcurriculum">
+    <thead>
+        <tr>
+            <th>
+                <p><strong>Sr. No</strong></p>
+            </th>
+            <th>
+                <p><strong>Course </strong><strong>Code</strong></p>
+            </th>
+            <th>
+                <p><strong>Course Title</strong></p>
+            </th>
+            <th>
+                <p><strong>Knowledge Area/Domain</strong></p>
+            </th>
+            <th colspan="2">
+                <p><strong>Credit Hours</strong></p>
+            </th>
+        </tr>
+        <tr>
+            <th colspan="4">
+                <p>&nbsp;</p>
+            </th>
+            <th>
+                <p><strong>Theory</strong></p>
+            </th>
+            <th>
+                <p><strong>Practical</strong></p>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                <p>1.</p>
+            </td>
+            <td>
+                <p>HU-305</p>
+            </td>
+            <td>
+                <p>Expository Writing</p>
+            </td>
+            <td>
+                <p>Expository Writing &ndash; I</p>
+            </td>
+            <td>
+                <p>3</p>
+            </td>
+            <td>
+                <p>0</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>2.</p>
+            </td>
+            <td>
+                <p>SET-301</p>
+            </td>
+            <td>
+                <p>Breadth Elective-II</p>
+            </td>
+            <td>
+                <p>Software Engineering Technology Breadth &ndash;IV</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+            <td>
+                <p>1</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>3.</p>
+            </td>
+            <td>
+                <p>ID-301</p>
+            </td>
+            <td>
+                <p>IDTE-I</p>
+            </td>
+            <td>
+                <p>Interdisciplinary Technology Elective-I</p>
+            </td>
+            <td>
+                <p>1</p>
+            </td>
+            <td>
+                <p>1</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>4.</p>
+            </td>
+            <td>
+                <p>SET-302</p>
+            </td>
+            <td>
+                <p>Software Project Management</p>
+            </td>
+            <td>
+                <p>Software Engineering Technology Breadth &ndash;V</p>
+            </td>
+            <td>
+                <p>1</p>
+            </td>
+            <td>
+                <p>1</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>5.</p>
+            </td>
+            <td>
+                <p>SET-303</p>
+            </td>
+            <td>
+                <p>Information Security</p>
+            </td>
+            <td>
+                <p>Software Engineering Technology Breadth - VI</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+            <td>
+                <p>0</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>6.</p>
+            </td>
+            <td>
+                <p>IET-203</p>
+            </td>
+            <td>
+                <p>Computer Networking Technologies</p>
+            </td>
+            <td>
+                <p>Computing</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+            <td>
+                <p>1</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>7.</p>
+            </td>
+            <td>
+                <p>CP-301</p>
+            </td>
+            <td>
+                <p>Capstone Project -I</p>
+            </td>
+            <td>
+                <p>Software Engineering Technology Domain Project</p>
+            </td>
+            <td>
+                <p>0</p>
+            </td>
+            <td>
+                <p>3</p>
+            </td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <th colspan="4">
+                <p><strong>Total</strong></p>
+            </th>
+            <th>
+                <p>11</p>
+            </th>
+            <th>
+                <p>7</p>
+            </th>
+        </tr>
+        <tr>
+            <th colspan="4">
+                <p><strong>Grand Total</strong></p>
+            </th>
+            <th colspan="2">
+                <p>18</p>
+            </th>
+        </tr>
+    </tfoot>
+</table>
+<p><strong>&nbsp;</strong></p>
+<p class="semesterheading"><strong>SEMESTER &ndash; VI</strong></p>
+<table class="table tableborderedcurriculum">
+    <thead>
+        <tr>
+            <th>
+                <p><strong>Sr. No</strong></p>
+            </th>
+            <th>
+                <p><strong>Course </strong><strong>Code</strong></p>
+            </th>
+            <th>
+                <p><strong>Course Title</strong></p>
+            </th>
+            <th>
+                <p><strong>Knowledge Area/Domain</strong></p>
+            </th>
+            <th colspan="2">
+                <p><strong>Credit Hours</strong></p>
+            </th>
+        </tr>
+        <tr>
+            <th colspan="4">
+                <p>&nbsp;</p>
+            </th>
+            <th>
+                <p><strong>Theory</strong></p>
+            </th>
+            <th>
+                <p><strong>Practical</strong></p>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                <p>1.</p>
+            </td>
+            <td>
+                <p>ID-302</p>
+            </td>
+            <td>
+                <p>Technopreneurship</p>
+            </td>
+            <td>
+                <p>Interdisciplinary Distribution (IDE)</p>
+            </td>
+            <td>
+                <p>3</p>
+            </td>
+            <td>
+                <p>0</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>2.</p>
+            </td>
+            <td>
+                <p>SET-305</p>
+            </td>
+            <td>
+                <p>Depth Elective-I</p>
+            </td>
+            <td>
+                <p>Software Engineering Technology Depth -III</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+            <td>
+                <p>1</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>3.</p>
+            </td>
+            <td>
+                <p>SET-306</p>
+            </td>
+            <td>
+                <p>Depth Elective-II</p>
+            </td>
+            <td>
+                <p>Software Engineering Technology Depth - IV</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+            <td>
+                <p>1</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>4.</p>
+            </td>
+            <td>
+                <p>SET-307</p>
+            </td>
+            <td>
+                <p>Depth Elective-III</p>
+            </td>
+            <td>
+                <p>Software Engineering Technology Depth -V</p>
+            </td>
+            <td>
+                <p>2</p>
+            </td>
+            <td>
+                <p>1</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>5.</p>
+            </td>
+            <td>
+                <p>ID-303</p>
+            </td>
+            <td>
+                <p>IDTE-II</p>
+            </td>
+            <td>
+                <p>Interdisciplinary Technology Elective-II</p>
+            </td>
+            <td>
+                <p>1</p>
+            </td>
+            <td>
+                <p>1</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>6.</p>
+            </td>
+            <td>
+                <p>CP-302</p>
+            </td>
+            <td>
+                <p>Capstone Project-II</p>
+            </td>
+            <td>
+                <p>Software Engineering Technology Domain Project</p>
+            </td>
+            <td>
+                <p>0</p>
+            </td>
+            <td>
+                <p>3</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>7.</p>
+            </td>
+            <td>
+                <p>HQ-302</p>
+            </td>
+            <td>
+                <p>Teaching of Holy Quran Translation-III</p>
+            </td>
+            <td>
+                <p>Art and Humanities-III</p>
+            </td>
+            <td>
+                <p>1</p>
+            </td>
+            <td>
+                <p>0</p>
+            </td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <th colspan="4">
+                <p><strong>Total</strong></p>
+            </th>
+            <th>
+                <p>11</p>
+            </th>
+            <th>
+                <p>7</p>
+            </th>
+        </tr>
+        <tr>
+            <th colspan="4">
+                <p><strong>Grand Total</strong></p>
+            </th>
+            <th colspan="2">
+                <p>18</p>
+            </th>
+        </tr>
+    </tfoot>
+</table>
+<p><strong>&nbsp;</strong></p>
+<p class="semesterheading"><strong>SEMESTER &ndash; VII</strong></p>
+<table class="table tableborderedcurriculum">
+    <thead>
+        <tr>
+            <th>
+                <p><strong>Sr. No</strong></p>
+            </th>
+            <th>
+                <p><strong>Course </strong><strong>Code</strong></p>
+            </th>
+            <th>
+                <p><strong>Course Title</strong></p>
+            </th>
+            <th>
+                <p><strong>Knowledge Area/Domain</strong></p>
+            </th>
+            <th colspan="2">
+                <p><strong>Credit Hours</strong></p>
+            </th>
+        </tr>
+        <tr>
+            <th colspan="4">
+                <p>&nbsp;</p>
+            </th>
+            <th>
+                <p><strong>Theory</strong></p>
+            </th>
+            <th>
+                <p><strong>Practical</strong></p>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                <p>1.</p>
+            </td>
+            <td>
+                <p>SET-401</p>
+            </td>
+            <td>
+                <p><strong>Supervised Industrial Training-I</strong></p>
+            </td>
+            <td>
+                <p>Software Engineering Technology Domain Industrial Training</p>
+            </td>
+            <td>
+                <p>0</p>
+            </td>
+            <td>
+                <p>16</p>
+            </td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <th colspan="4">
+                <p><strong>Total</strong></p>
+            </th>
+            <th>
+                <p>0</p>
+            </th>
+            <th>
+                <p>16</p>
+            </th>
+        </tr>
+        <tr>
+            <th colspan="4">
+                <p><strong>Grand Total</strong></p>
+            </th>
+            <th colspan="2">
+                <p>16</p>
+            </th>
+        </tr>
+    </tfoot>
+</table>
+<p><strong>&nbsp;</strong></p>
+<p class="semesterheading"><strong>SEMESTER &ndash; VIII</strong></p>
+<table class="table tableborderedcurriculum">
+    <thead>
+        <tr>
+            <th>
+                <p><strong>Sr. No</strong></p>
+            </th>
+            <th>
+                <p><strong>Course </strong><strong>Code</strong></p>
+            </th>
+            <th>
+                <p><strong>Course Title</strong></p>
+            </th>
+            <th>
+                <p><strong>Knowledge Area/Domain</strong></p>
+            </th>
+            <th colspan="2">
+                <p><strong>Credit Hours</strong></p>
+            </th>
+        </tr>
+        <tr>
+            <th colspan="4">
+                <p>&nbsp;</p>
+            </th>
+            <th>
+                <p><strong>Theory</strong></p>
+            </th>
+            <th>
+                <p><strong>Practical</strong></p>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                <p>1.</p>
+            </td>
+            <td>
+                <p>SET-402</p>
+            </td>
+            <td>
+                <p><strong>Supervised Industrial Training- II</strong></p>
+            </td>
+            <td>
+                <p>Software Engineering Technology Domain Industrial Training</p>
+            </td>
+            <td>
+                <p>0</p>
+            </td>
+            <td>
+                <p>16</p>
+            </td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <th colspan="4">
+                <p><strong>Total</strong></p>
+            </th>
+            <th>
+                <p>0</p>
+            </th>
+            <th>
+                <p>16</p>
+            </th>
+        </tr>
+        <tr>
+            <th colspan="4">
+                <p><strong>Grand Total</strong></p>
+            </th>
+            <th colspan="2">
+                <p>16</p>
+            </th>
+        </tr>
+    </tfoot>
+</table>
+
+                            </div>
+                            <hr />
+                            <div>
+                                <p class="semesterheading"><strong>List of Elective Courses</strong></p>
+<p>&nbsp;</p>
+<table class="table tablebordered tableelectives">
+    <thead>
+        <tr>
+            <th>Breadth Electives</th>
+            <th>Interdisciplinary Technology Electives</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                <p>Software Quality Assurance and Quality Control</p>
+                <p>Software Modeling Technologies</p>
+                <p>Agile Software Development</p>
+                <p>Mobile Application Development</p>
+                <p>Artificial Intelligence Technology</p>
+            </td>
+            <td>
+                <p>Electronic Devices and Circuits</p>
+                <p>Digital Logic &amp; Design</p>
+                <p>BioInformatics</p>
+                <p>Agricultural Technologies</p>
+                <p>Financial Technologies</p>
+                <p>Financial Accounting</p>
+            </td>
+        </tr>
+    </tbody>
+</table>
+<p>&nbsp;</p>
+<table class="table tablebordered tableelectives">
+    <thead>
+        <tr>
+            <th>
+                <p><strong>Depth Electives</strong></p>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                <p>Cloud Application Development</p>
+                <p>Cyber Security</p>
+                <p>Computer Organization and Architecture</p>
+                <p>Machine Learning</p>
+                <p>Digital Forensics</p>
+                <p>Social Network Analysis</p>
+                <p>Design and Analysis of Algorithms</p>
+                <p>E-Business</p>
+                <p>Artificial Neural Networks</p>
+                <p>Data Warehousing &amp; Data Mining</p>
+                <p>Internet of Things</p>
+                <p>Signals &amp; Systems</p>
+                <p>Distributed Database Systems</p>
+                <p>Mobile and Wireless Networks</p>
+                <p>Big Data Analytics</p>
+                <p>Deep Learning</p>
+                <p>Game Application Development</p>
+                <p>Visual Programming</p>
+                <p>Digital Image Processing</p>
+                <p>Simulation and Modelling</p>
+                <p>Human-Computer Interaction</p>
+                <p>Cloud Computing</p>
+                <p>Formal Methods in Software Engineering</p>
+                <p>Navigational Aids</p>
+                <p>Software Testing &amp; Implementation</p>
+                <p>Software Metrics</p>
+                <p>Business Process Automation</p>
+                <p>Embedded Systems</p>
+                <p>Real Time Systems</p>
+                <p>Data Security &amp; Encryption</p>
+                <p>Computer Graphics</p>
+                <p>Agent-based Software Engineering</p>
+                <p>Management Information Systems</p>
+                <p>Natural Language Processing</p>
+                <p>Multimedia and Animation</p>
+            </td>
+        </tr>
+    </tbody>
+</table>
+<p>&nbsp;</p>
+
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+                <p>&nbsp;</p>
+            </td>
+        </tr>
+    </table>
+    <script src="js/totop.js" type="d414bd3c9e3c8c5b5663cdc7-text/javascript"></script>
+<style type="text/css">
+    .quickLinks {
+        color: black;
+    }
+    .quickLinks a,.quickLinks a:link{
+        text-decoration: underline;
+        cursor: pointer;
+    }
+</style>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+  <tr> 
+    <td height="62" bgcolor="#E6E4DB">
+<table width="972" border="0" align="center" cellpadding="0" cellspacing="0">
+        <tr> 
+          <td width="25">&nbsp;</td>
+          <td><table width="707" border="0" cellpadding="0" cellspacing="0">
+              <tr> 
+                <td width="87" class="quickLinks"> <div align="left"><a href="quickLinks.asp">Quick Links</a></div></td>
+                <td width="620" class="quickLinks"> <div align="left"><a href="contact.asp#contact"> 
+                    Contact Info</a></div></td>
+              </tr>
+              <tr> 
+                <td height="20" colspan="2" valign="bottom" class="footerText"><strong>University 
+                  of Engineering and Technology Taxila</strong>, Department of 
+                  Telecommunication Engineering, 051 9047917</td>
+              </tr>
+            </table></td>
+        </tr>
+      </table> </td>
+  </tr>
+</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tdbgFooter">
+  <tr> 
+    <td height="140" valign="top"> 
+      <table width="972" height="127" border="0" align="center" cellpadding="0" cellspacing="0">
+        <tr> 
+          <td width="210" height="19"  class="siteFooterItem"><img src="images/spacer.gif" alt="" width="10" height="10"></td>
+          <td width="210"><span class="siteFooterItem"><img src="images/spacer.gif" alt="" width="10" height="10"></span></td>
+          <td width="208"><span class="siteFooterItem"><img src="images/spacer.gif" alt="" width="10" height="10"></span></td>
+          <td width="344">&nbsp;</td>
+        </tr>
+        <tr> 
+          <td height="108" valign="top"  class="siteFooterItem"> 
+            <table width="98%" height="96" border="0" align="right" cellpadding="0" cellspacing="0">
+              <tr> 
+                <td width="192" height="26" valign="top"><p><SPAN>About the university</SPAN></p></td>
+              </tr>
+              <tr> 
+                <td valign="top" class="quickLinksRight"><a href="http://web.uettaxila.edu.pk/uet/UETsub/about.htm">The 
+                  University campus is located on the outskirts of Taxila at a 
+                  distance of 5 km from the city. It is situated near railway 
+                  station Mohra Shah Wali Shah on Taxila-Havelian branch line....</a></td>
+              </tr>
+            </table>
+            
+          </td>
+          <td valign="top"><table width="98%" height="96" border="0" align="right" cellpadding="0" cellspacing="0">
+              <tr> 
+                <td width="192" height="26" valign="top"><p class="siteFooterItem"><SPAN>Important 
+                    websites</SPAN></p></td>
+              </tr>
+              <tr> 
+                <td valign="top" class="quickLinksRight"><table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr> 
+                      <td width="95%" valign="top"><img src="images/footePointer.jpg" alt="" width="6" height="6"><a href="http://www.hec.gov.pk/"> 
+                        HEC Pakistan<br>
+                        Higher Education Commission Pakistan </a></td>
+                    </tr>
+                    <tr> 
+                      <td valign="top"><img src="images/footePointer.jpg" alt="" width="6" height="6"> 
+                        <a href="http://www.pec.org.pk/">PEC Pakistan<br>
+                        Pakistan Engineering Council</a></td>
+                    </tr>
+                  </table></td>
+              </tr>
+            </table></td>
+          <td valign="top"><table width="98%" height="96" border="0" cellpadding="0" cellspacing="0">
+              <tr> 
+                <td width="192" height="26" valign="top"><p class="siteFooterItem"><SPAN>About 
+                    Telecom Engg. Dept.</SPAN></p></td>
+              </tr>
+              <tr> 
+                <td valign="top" class="quickLinksRight"><a href="index.asp#home">Department 
+                  of Telecommunication Engineering, is concerned with the theory, 
+                  design, development and applications of computer networks and 
+                  telecom systems....</a></td>
+              </tr>
+            </table></td>
+          <td valign="top"><table width="90%" border="0" align="right" cellpadding="0" cellspacing="0">
+              <tr> 
+                <td height="50" colspan="3" valign="top">&nbsp;</td>
+              </tr>
+              <tr> 
+                <td width="80%" class="copyright"><div align="right" class="quickLinksTitle"><SPAN>© 
+                    2026, www.uettaxila.edu.pk</SPAN></div></td>
+                <td width="3%"><img src="images/seperator.gif" alt="" width="13" height="15"></td>
+                <td width="17%"><img src="images/logoCopyright.png" alt="UET Taxila" width="37" height="38" align="right"></td>
+              </tr>
+            </table></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table> 
+<a href="#" class="scrollup">Scroll</a><!-- end scroll to top of the page-->
+<script src="/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="d414bd3c9e3c8c5b5663cdc7-|49" defer></script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"d8564f6d5b4e410eb202d13f98326329","r":1}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a24d0d666ab3a550',t:'MTc4NTY3MzM5MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

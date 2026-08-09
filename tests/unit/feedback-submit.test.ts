@@ -15,6 +15,7 @@ interface MockMutationCtx {
     insert: ReturnType<typeof vi.fn>;
     query: ReturnType<typeof vi.fn>;
   };
+  runQuery: ReturnType<typeof vi.fn>;
 }
 
 function makeChain(value: unknown) {
@@ -47,6 +48,7 @@ describe("feedback:submit", () => {
         insert: mockInsert,
         query: mockQuery,
       },
+      runQuery: vi.fn().mockResolvedValue([{ _id: "messages_id_123", threadId: "thread_123", userId: "clerk_test_123" }]),
     };
 
     const mockArgs = {

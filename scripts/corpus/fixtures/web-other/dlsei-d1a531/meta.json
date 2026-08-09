@@ -1,0 +1,12 @@
+{
+  "body_sha256": "34e43c41fb96bad18aa20614b964e2c0163cb5f26f8962b9436c1237fbc50a15",
+  "body_size": 69727,
+  "content_type": "text/html; charset=utf-8",
+  "elapsed_ms": 2045,
+  "fetched_at": "2026-08-03T17:58:31+00:00",
+  "final_url": "https://web.uettaxila.edu.pk/dlsei",
+  "redirect_chain": [],
+  "remote_ip": "104.21.50.7,172.67.198.179,2606:4700:3031::6815:3207,2606:4700:3032::ac43:c6b3",
+  "requested_url": "https://web.uettaxila.edu.pk/dlsei",
+  "status": 200
+}

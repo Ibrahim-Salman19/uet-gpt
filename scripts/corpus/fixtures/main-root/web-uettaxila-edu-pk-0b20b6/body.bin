@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+    <title>University of Engineering and Technology Taxila</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic,700,700italic,800,800italic" type="text/css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:100,200,300,400,500,600,700,800,900" type="text/css">
+    <link rel="stylesheet" href="/cssuetauto/reset.css" type="text/css">
+    <link rel="stylesheet" href="/cssuetauto/style.css?random=639212883529335762" type="text/css">
+    <link rel="stylesheet" href="/cssuetauto/uetautomated.css?random=639212883529335762" type="text/css">
+    <link rel="stylesheet" href="/cssuetauto/font-awesome/css/font-awesome.min.css" type="text/css" media="all">
+    <!-- responsive devices styles -->
+    <link rel="stylesheet" href="/cssuetauto/responsive-leyouts.css" type="text/css" media="screen">
+    <!-- animations -->
+    <link rel="stylesheet" href="/cssuetauto/colors/darkred.css?random=639212883529335762" type="text/css">
+    <link rel="stylesheet" href="/cssuetauto/bg-patterns/pattern-ten.css?random=639212883529335762" type="text/css">
+    <!-- mega menu -->
+    <link rel="stylesheet" href="/cssuetauto/mainmenu/stickytwo.css?random=639212883529335762" type="text/css">
+    <link rel="stylesheet" href="/cssuetauto/mainmenu/bootstrap.min.css?random=639212883529335762" type="text/css">
+    <link rel="stylesheet" href="/cssuetauto/mainmenu/demo.css?random=639212883529335762" type="text/css">
+    <link rel="stylesheet" href="/cssuetauto/mainmenu/menu.css?random=639212883529335762" type="text/css">
+    <!-- Master Slider -->
+    <link rel="stylesheet" href="/cssuetauto/masterslider/style/masterslider.css?s=4" type="text/css">
+    <link rel="stylesheet" href="/cssuetauto/masterslider/skins/default/style.css?random=639212883529335762" type="text/css">
+    <link rel="stylesheet" href="/cssuetauto/masterslider/style.css?random=639212883529335762" type="text/css">
+    <!-- tabs -->
+    <link rel="stylesheet" href="/css/bootstrap-theme.css?random=639212883529335762" type="text/css">
+    <link rel="stylesheet" href="/cssuetauto/tabs/assets/css/responsive-tabs3.css?random=639212883529335762" type="text/css">
+    <link rel="stylesheet" href="/cssuetauto/carousel/skin.css" type="text/css">
+    <!-- accordion -->
+    <link rel="stylesheet" href="/cssuetauto/accordion/accordion.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/cssuetauto/firstvisitpopup.css?random=639212883529335762" type="text/css">
+    <link rel="stylesheet" href="/css/toastr.css" type="text/css">
+    <!-- ######### JS FILES ######### -->
+    <script src="/jsuetauto/universal/jquery.js" type="2c270cd0a0f617833c52cfc3-text/javascript"></script>
+    <script src="/jsuetauto/masterslider/jquery.easing.min.js" type="2c270cd0a0f617833c52cfc3-text/javascript"></script>
+    <script src="/jsuetauto/masterslider/masterslider.min.js" type="2c270cd0a0f617833c52cfc3-text/javascript"></script>
+    <script src="/jsuetauto/bootstrap.min.js" type="2c270cd0a0f617833c52cfc3-text/javascript"></script>
+    <script src="/jsuetauto/tabs/assets/js/responsive-tabs.min.js" type="2c270cd0a0f617833c52cfc3-text/javascript"></script>
+    <script src="/jsuetauto/accordion/custom.js" type="2c270cd0a0f617833c52cfc3-text/javascript"></script>
+    <script src="/jsuetauto/jquery.firstVisitPopup.js?s=1" type="2c270cd0a0f617833c52cfc3-text/javascript"></script>
+    <script src="/jsuetauto/uetautomated.js?random=639212883529335762" type="2c270cd0a0f617833c52cfc3-text/javascript"></script>
+
+    <!-- Horizontal Slider -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Architects+Daughter" type="text/css">
+    <link rel="stylesheet" href="/css/horizontalslider/carouselTicker.css" type="text/css" media="screen">
+
+    <script src="/js/horizontalslider/jquery.carouselTicker.js" type="2c270cd0a0f617833c52cfc3-text/javascript"></script>
+    <script src="/js/horizontalslider/start.js" type="2c270cd0a0f617833c52cfc3-text/javascript"></script>
+
+    <script src="/js/toastr.js" type="2c270cd0a0f617833c52cfc3-text/javascript"></script>
+    <link rel="stylesheet" href="/jsuetauto/animations/css/animations.css" type="text/css">
+    <script src="/jsuetauto/animations/js/animations.js" type="2c270cd0a0f617833c52cfc3-text/javascript"></script>
+    <script src="/jsuetauto/animations/js/smoothscroll.js" type="2c270cd0a0f617833c52cfc3-text/javascript"></script> 
+    <link rel="stylesheet" href="/css/indexmainnews.css?random=639212883529335762" type="text/css">
+</head>
+<body>
+    <div class="site_wrapper">
+<header id="header">
+    <div class="wrapper">
+        <div class="logoarea row" style="margin: 0px">
+            <div class="container-fluid">
+                <div class="col-md-7 col-sm-12 col-xs-12" style="padding: 0px">
+                    <div class="col-md-2 col-sm-12 col-xs-12 logodiv">
+                        <a href="/" id="logo" title="Home Page">
+                            <img src="/images/Logos/uettaxila_logo.png" alt="University Logo" class="logo-img">
+                        </a>
+                    </div>
+                    <div class="col-md-10 col-sm-12 col-xs-12 logo-text" style="">
+                        <span class="logofulltext">University of Engineering and Technology, Taxila</span>
+                    </div>
+                </div>
+                <div class="col-md-5 col-sm-12 col-xs-12 right_links">
+                    <ul class="row center" style="width: 100%">
+                        <li class="link col-md-2 col-sm-2 col-xs-2"><a href="http://amsys.uettaxila.edu.pk/" class="bordered" target="_blank" title="Academic Management System">AMSYS</a></li>
+                        <li class="link col-md-2 col-sm-2 col-xs-2"><a href="http://erp.uettaxila.edu.pk/" class="bordered" target="_blank" title="ERP">ERP</a></li>
+                        <li class="link col-md-2 col-sm-2 col-xs-2"><a href="https://aka.ms/devtoolsforteaching" class="bordered" target="_blank" title="Software">Software</a></li>
+                        <li class="link col-md-2 col-sm-2 col-xs-2"><a href="http://helpdesk.uettaxila.edu.pk" class="bordered" target="_blank" title="Help Desk">Help</a></li>
+                        <li style="display: none">
+                            <div class="weatherdata">
+                                <a href="https://web.uettaxila.edu.pk/Weather_Data">
+                                    <span style="color: #fff; font-size: 16px; display: block">
+                                        <img src="/images/MainPage/weatherData.png" alt="Weather Data" width="28" height="29" style="vertical-align: middle" title="Weather Data">Weather Data
+                                    </span>
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                    <ul class="row center" style="width: 100%">
+                        <li class="link col-md-2 col-sm-2 col-xs-2"><a href="https://outlook.office.com/mail/" class="bordered" target="_blank" title="Mail">Mail</a></li>
+                        <li class="link col-md-2 col-sm-2 col-xs-2"><a href="https://web.uettaxila.edu.pk/ITservices" class="bordered" target="_blank" title="IT Services">IT Services</a></li>
+                        <li class="link col-md-2 col-sm-2 col-xs-2"><a href="https://web.uettaxila.edu.pk/Alumni/Index" class="bordered" target="_blank" title="Alumni">Alumni</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="menu_main" style="clear: both;">
+            <div class="container-fluid">
+                <div class="navbar yamm navbar-default">
+                    <div class="container-fluid">
+                        <div class="navbar-header">
+                            <div class="navbar-toggle .navbar-collapse .pull-right " data-toggle="collapse" data-target="#navbar-collapse-1">
+                                <span>Menu</span>
+                                <button type="button" aria-label="Menu"><i class="fa fa-bars"></i></button>
+                            </div>
+                        </div>
+                        <div id="navbar-collapse-1" class="navbar-collapse collapse">
+                            <ul class="nav navbar-nav">
+                                <li><a href="/" class="active">Home</a></li>
+                                <li class="dropdown yamm-fw">
+                                    <a href="#" data-toggle="dropdown" class="dropdown-toggle" title="About">About</a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <div class="yamm-content">
+                                                <div class="row">
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>About</p>
+                                                        </li>
+                                                        <li>
+                                                            <img src="/images/Menu/menuAbout.jpg" alt="About" class="img_left4">
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                        </li>
+                                                    </ul>
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Overview</p>
+                                                        </li>
+                                                        <li><a href="/AboutUs" title="About Us"><i class="fa fa-angle-right"></i>About UET Taxila</a></li>
+                                                        <li><a href="/Mission_Vision" title="Mission Vision"><i class="fa fa-angle-right"></i>Vision, Mission & Core Values</a></li>
+                                                        <li><a href="/Rules" title="Rules"><i class="fa fa-angle-right"></i>Rules, Regulations & Statutes</a></li>
+                                                        <li><a href="/Womenact" title="Women Act"><i class="fa fa-angle-right"></i>Women Harassment Act 2010</a></li>
+                                                        <li><a href="/CodeofConduct" title="Code of Conduct"><i class="fa fa-angle-right"></i>Code of Conduct Peace &amp; Security</a></li>
+                                                        <li><a href="/Budget" title="Budget"><i class="fa fa-angle-right"></i>Budget</a></li>
+                                                    </ul>
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Administrative Bodies</p>
+                                                        </li>
+                                                        <li><a href="/Syndicate.aspx" title="Syndicate"><i class="fa fa-angle-right"></i>Syndicate</a></li>
+                                                        <li><a href="/AcademicCouncil.aspx" title="Academic Council"><i class="fa fa-angle-right"></i>Academic Council</a> </li>
+                                                        <li><a href="/SelectionBoard.aspx" title="Selection Board"><i class="fa fa-angle-right"></i>Selection Board</a></li>
+                                                        <li><a href="/BoardofFaculties.aspx" title="Board of Faculties"><i class="fa fa-angle-right"></i>Board of Faculties</a></li>
+                                                        <li><a href="/BoardofStudies.aspx" title="Board of Studies"><i class="fa fa-angle-right"></i>Board of Studies</a> </li>
+                                                        <li><a href="/MinutesofMeetings.aspx" title="Minutes of Meetings"><i class="fa fa-angle-right"></i>Minutes of Meetings</a> </li>
+                                                    </ul>
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Administration</p>
+                                                        </li>
+                                                        <li><a href="vcoffice.aspx" title="VC Office"><i class="fa fa-angle-right"></i>About Vice Chancellor</a> </li>
+                                                        <li><a href="/Leadership.aspx" title="Leadership"><i class="fa fa-angle-right"></i>Leadership & Core Team</a></li>
+                                                        <li><a href="/VCOffice.aspx" title="VC Office"><i class="fa fa-angle-right"></i>Vice Chancellor's Office</a> </li>
+                                                        <li><a href="/RegistrarOffice.aspx" title="Registrar Office"><i class="fa fa-angle-right"></i>Registrar Office</a> </li>
+                                                        <li><a href="/TreasurerOffice.aspx" title="Treasurer Office"><i class="fa fa-angle-right"></i>Treasurer Office</a> </li>
+                                                        <li><a href="/NARC.aspx" title="NARC"><i class="fa fa-angle-right"></i>NARC Office</a> </li>
+                                                        <li><a href="/ControllerExamOffice.aspx" title="Controller Exam Office"><i class="fa fa-angle-right"></i>Controller of Examinations Office</a> </li>
+                                                        <li><a href="/PDOffice.aspx" title="PD Office"><i class="fa fa-angle-right"></i>Planning & Development Office</a> </li>
+                                                        <li><a href="/EstateOffice.aspx" title="Estate Office"><i class="fa fa-angle-right"></i>Estate Office</a> </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown yamm-fw">
+                                    <a href="/#" data-toggle="dropdown" class="dropdown-toggle" title="Admissions">Admissions</a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <div class="yamm-content">
+                                                <div class="row">
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Admissions</p>
+                                                        </li>
+                                                        <li>
+                                                            <img src="/images/Menu/menuAdmissions.jpg?s=1" alt="Admissions" class="img_left4">
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                        </li>
+                                                    </ul>
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Programs</p>
+                                                        </li>
+                                                        <li><a href="/UGprogram.aspx" title="UG Program"><i class="fa fa-angle-right"></i>Undergraduate Programs</a></li>
+                                                        <li><a href="/PGprogram.aspx" title="PG Program"><i class="fa fa-angle-right"></i>Graduate/Post Graduate</a></li>
+                                                        <li><a href="/PhDprogram.aspx" title="PhD Program"><i class="fa fa-angle-right"></i>Doctoral</a></li>
+                                                        <li><a href="/Certifications.aspx" title="Certifications"><i class="fa fa-angle-right"></i>Certifications</a></li>
+                                                    </ul>
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Procedures</p>
+                                                        </li>
+                                                        <li><a href="http://admissions.uettaxila.edu.pk/ProcedureAndRequirements.php" title="How to Apply for admission"><i class="fa fa-angle-right"></i>How to Apply</a> </li>
+                                                        <li><a href="http://admissions.uettaxila.edu.pk/My_UET.php" title="Apply for Admissions"><i class="fa fa-angle-right"></i>Online Admissions</a> </li>
+                                                        <li><a href="http://admissions.uettaxila.edu.pk/Seats_Allocation.php" title="Seats Allocation"><i class="fa fa-angle-right"></i>Categories & Seats</a> </li>
+                                                        <li><a href="http://admissions.uettaxila.edu.pk/Fees.php" title="Fees"><i class="fa fa-angle-right"></i>Fee</a> </li>
+                                                    </ul>
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Information</p>
+                                                        </li>
+                                                        <li><a href="http://admissions.uettaxila.edu.pk/Merit_List.php" title="Merit Lists"><i class="fa fa-angle-right"></i>Merit Lists</a></li>
+                                                        <li><a href="/MigrationRules.aspx" title="Migration Rules"><i class="fa fa-angle-right"></i>Migration Rules</a></li>
+                                                        <li><a href="http://admissions.uettaxila.edu.pk" title="Admission Notices"><i class="fa fa-angle-right"></i>Admission Notices</a></li>
+                                                        <li><a href="http://admissions.uettaxila.edu.pk/Schedule.php" title="Admission Schedule"><i class="fa fa-angle-right"></i>Admission Schedule</a></li>
+                                                        <li><a href="http://admissions.uettaxila.edu.pk/ProcedureAndRequirements2.php" title="Entry Test Requirements"><i class="fa fa-angle-right"></i>Entry Test</a></li>
+                                                        <li><a href="https://admissions.uettaxila.edu.pk/ProspectusAvailability.php" title="Undergraduate Prospectus"><i class="fa fa-angle-right"></i>Undergraduate Prospectus</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown yamm-fw">
+                                    <a href="#" data-toggle="dropdown" class="dropdown-toggle" title="Academics">Academics</a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <div class="yamm-content">
+                                                <div class="row">
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Academics</p>
+                                                        </li>
+                                                        <li>
+                                                            <img src="/images/Menu/menuAcademics.jpg" alt="Academics" class="img_left4">
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                        </li>
+                                                    </ul>
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Main Links</p>
+                                                        </li>
+                                                        <li><a href="/AcademicHeads.aspx" title="Academic Heads"><i class="fa fa-angle-right"></i>Academic Heads</a></li>
+                                                        <li><a href="/Departments.aspx" title="Departments"><i class="fa fa-angle-right"></i>Departments</a></li>
+                                                        <li><a href="/Programs.aspx" title="Programs"><i class="fa fa-angle-right"></i>Programs</a></li>
+                                                        <li><a href="https://web.uettaxila.edu.pk/iat/index.asp" title="Institute of Applied Technologies"><i class="fa fa-angle-right"></i>Institute of Applied Technologies</a></li>
+                                                        <li><a href="/AcademicSchedule.aspx" title="Academic Schedule"><i class="fa fa-angle-right"></i>Academic Schedule</a></li>
+                                                        <li><a href="http://amsys.uettaxila.edu.pk/" title="Academics Management System"><i class="fa fa-angle-right"></i>AMSYS</a></li>
+                                                        <li><a href="http://erp.uettaxila.edu.pk/" title="ERP"><i class="fa fa-angle-right"></i>ERP Application</a></li>
+                                                    </ul>
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Faculties</p>
+                                                        </li>
+                                                        <li><a href="/Faculty/FBSH.aspx" title="Faculty of Basic Sciences & Humanities"><i class="fa fa-angle-right"></i>Basic Sciences & Humanities</a> </li>
+                                                        <li><a href="/Faculty/FCEE.aspx" title="Faculty of Civil & Environmental Engineering"><i class="fa fa-angle-right"></i>Civil & Environmental Engineering</a> </li>
+                                                        <li><a href="/Faculty/FEEE.aspx" title="Faculty of Electronics & Electrical Engineering"><i class="fa fa-angle-right"></i>Electronics & Electrical Engineering</a> </li>
+                                                        <li><a href="/Faculty/FMAE.aspx" title="Faculty of Mechanical & Aeronautical Engineering"><i class="fa fa-angle-right"></i>Mechanical & Aeronautical Engineering</a> </li>
+                                                        <li><a href="/Faculty/FTIE.aspx" title="Faculty of Telecom & Information Engineering"><i class="fa fa-angle-right"></i>Telecom & Information Engineering</a> </li>
+                                                        <li><a href="/Faculty/FIE.aspx" title="Faculty of Industrial Engineering"><i class="fa fa-angle-right"></i>Industrial Engineering</a> </li>
+                                                    </ul>
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Information</p>
+                                                        </li>
+                                                        <li><a href="http://lms.uettaxila.edu.pk/" title="LMS Portal"><i class="fa fa-angle-right"></i>LMS Portal</a></li>
+                                                        <li><a href="/internationallinkages.aspx" title="International Linkages"><i class="fa fa-angle-right"></i>International Linkages</a></li>
+                                                        <li><a href="https://dlsei.hec.gov.pk/" title="Digital Learning & Skills Enrichment"><i class="fa fa-angle-right"></i>Digital Learning & Skills Enrichment</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown yamm-fw">
+                                    <a href="#" data-toggle="dropdown" class="dropdown-toggle" title="Research">Research</a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <div class="yamm-content">
+                                                <div class="row">
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Research</p>
+                                                        </li>
+                                                        <li>
+                                                            <img src="/images/Menu/menuResearch.jpg" alt="Research" class="img_left4">
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                        </li>
+                                                    </ul>
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Research Office</p>
+                                                        </li>
+                                                        <li><a href="/ORIC.aspx" title="ORIC"><i class="fa fa-angle-right"></i>ORIC</a></li>
+                                                        <li><a href="/ASRTD.aspx" title="ASR & TD"><i class="fa fa-angle-right"></i>ASR & TD</a></li>
+                                                        <li><a href="http://tj.uettaxila.edu.pk/index.php/technical-journal" title="Technical Journal"><i class="fa fa-angle-right"></i>Technical Journal</a></li>
+                                                        <li><a href="https://cpec-centre.pk" title="CoE-CPEC"><i class="fa fa-angle-right"></i>CoE-CPEC </a></li>
+                                                    </ul>
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Research & Projects</p>
+                                                        </li>
+                                                        <li style="display: none;"><a href="http://publications.uettaxila.edu.pk/" title="Research & Publications"><i class="fa fa-angle-right"></i>Research & Publications</a></li>
+                                                        <li><a href="#" title="Research Grants"><i class="fa fa-angle-right"></i>Research Grants</a></li>
+                                                        <li><a href="/PageContents/ASRTD/Faculty_Research_grants_finacial_year_14-15.doc" title="Under Implementation"><i class="fa fa-angle-right"></i>Under Implementation</a> </li>
+                                                        <li><a href="/PageContents/ASRTD/Faculty_Research_grants_finacial_year_15-16.doc" title="Approved for Year 2015-16"><i class="fa fa-angle-right"></i>Approved for Year 2015-16</a> </li>
+                                                        <li><a href="/PageContents/ASRTD/Factulty_Research_Proposal_Performa.doc" title="Forms & Guidelines"><i class="fa fa-angle-right"></i>Forms & Guidelines</a> </li>
+                                                    </ul>
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>HEC Databases</p>
+                                                        </li>
+                                                        <li><a href="/HECDatabases.aspx" title="HEC Databases"><i class="fa fa-angle-right"></i>HEC Databases</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown yamm-fw">
+                                    <a href="#" data-toggle="dropdown" class="dropdown-toggle" title="Students">Students</a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <div class="yamm-content">
+                                                <div class="row">
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>At UET Taxila</p>
+                                                        </li>
+                                                        <li>
+                                                            <img src="/images/Menu/menuLifetUETT.jpg" alt="Students" class="img_left4">
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                        </li>
+                                                    </ul>
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Students</p>
+                                                        </li>
+                                                        <li><a href="/DuesSection.aspx" title="Dues & Financial Aid Services"><i class="fa fa-angle-right"></i>Dues & Financial Aid Services</a></li>
+                                                        <li><a href="/ScholarshipsNotices.aspx" title="Scholarships"><i class="fa fa-angle-right"></i>Scholarships</a></li>
+                                                        <li><a href="/DSA/index" title="Directorate of Students Affairs"><i class="fa fa-angle-right"></i>Directorate of Students Affairs</a></li>
+                                                        <li><a href="/DSA/Societies" title="Societies"><i class="fa fa-angle-right"></i>Societies</a></li>
+                                                        <li><a href="/DSA/societydetails?societyId=7" title="Rashid Cheema Health and Blood Donors Society"><i class="fa fa-angle-right"></i>Rashid Cheema Health and Blood Donors Society</a></li>
+                                                        <li><a href="/AcademicSchedule.aspx" title="Academic Schedule Notification"><i class="fa fa-angle-right"></i>Academic Schedule Notification</a></li>
+                                                        <li><a href="/ds/students/default.asp" title=">Students Reistrations"><i class="fa fa-angle-right"></i>Students Reistrations</a></li>
+                                                        <li><a href="/AcademicCalendar.aspx" title="Academic Calendar"><i class="fa fa-angle-right"></i>Academic Calendar</a></li>
+                                                    </ul>
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Main Events</p>
+                                                        </li>
+														<li><img src="images/newicon.gif" style="float: left;margin-top: 2px;" title="New"><a href="Huawei-ICT-Competition-UET-Taxila-2025-26" title="Huawei ICT Competition UET Taxila 2025-26"><i class="fa fa-angle-right"></i>Huawei ICT Competition UET Taxila 2025-26</a></li>
+														
+                                                        <li><a href="/Events/Conference" title="Conferences"><i class="fa fa-angle-right"></i>Conferences</a></li>
+                                                        <li><a href="/Events/Workshop" title="Workshops"><i class="fa fa-angle-right"></i>Workshops</a> </li>
+                                                        <li><a href="/Events/CEOtalk" title="CEO Talks"><i class="fa fa-angle-right"></i>CEO Talks</a> </li>
+                                                        <li><a href="/Events/Convocation" title="Convocations"><i class="fa fa-angle-right"></i>Convocations</a> </li>
+                                                        <li><a href="/Events/Seminar" title="Seminars"><i class="fa fa-angle-right"></i>Seminars</a> </li>
+                                                        <li>--------------------------------------</li>
+                                                        <li><a href="/Events/All" title="All Events"><i class="fa fa-angle-right"></i><strong>All Events</strong></a> </li>
+                                                    </ul>
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>On Campus Facilities</p>
+                                                        </li>
+                                                        <li><a href="/Library.aspx" title="Library"><i class="fa fa-angle-right"></i>Library</a></li>
+                                                        <li><a href="/Cafeteria.aspx" title="Cafeterias"><i class="fa fa-angle-right"></i>Cafeterias</a></li>
+                                                        <li><a href="/Hostels.aspx" title="Hostels"><i class="fa fa-angle-right"></i>Hostels</a></li>
+                                                        <li><a href="/MedicalFacilities.aspx" title="Medical Centre"><i class="fa fa-angle-right"></i>Medical Centre</a></li>
+                                                        <li><a href="/Transport.aspx" title="Transport"><i class="fa fa-angle-right"></i>Transport</a> </li>
+                                                        <li>
+                                                            <p>Activities</p>
+                                                        </li>
+                                                        <li><a href="/Sports.aspx" title="Sports"><i class="fa fa-angle-right"></i>Sports</a></li>
+                                                        <li><a href="/LiteraryOlympaid2015.aspx" title="Activities at UET"><i class="fa fa-angle-right"></i>Activities at UET</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown yamm-fw">
+                                    <a href="#" data-toggle="dropdown" class="dropdown-toggle" title="Advertisements">Advertisements</a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <div class="yamm-content">
+                                                <div class="row">
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Advertisements</p>
+                                                        </li>
+                                                        <li>
+                                                            <img src="/images/Menu/menuAdvertisement.jpg" alt="Advertisements" class="img_left4">
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                        </li>
+                                                    </ul>
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Posts Vacant</p>
+                                                        </li>
+                                                        <li><a href="https://web.uettaxila.edu.pk/OR/postsVacant.asp" title="Admin Positions"><i class="fa fa-angle-right"></i>Admin Positions</a></li>
+                                                        <li><a href="https://web.uettaxila.edu.pk/OR/postsVacant.asp" title="Faculty Positions"><i class="fa fa-angle-right"></i>Faculty Positions</a></li>
+                                                        <li><a href="https://web.uettaxila.edu.pk/OR/postsVacant.asp" title="Staff Required"><i class="fa fa-angle-right"></i>Staff Required</a></li>
+                                                    </ul>
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Tenders</p>
+                                                        </li>
+                                                        <li><a href="/Tenders" title="Central Purchase Committee"><i class="fa fa-angle-right"></i>Central Purchase Committee</a></li>
+                                                    </ul>
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Tenders/Pre-Qualification</p>
+                                                        </li>
+                                                        <li><a href="https://web.uettaxila.edu.pk/BWD/tenders.asp#tenders" title="Building & Works"><i class="fa fa-angle-right"></i>Building & Works</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown yamm-fw">
+                                    <a href="#" data-toggle="dropdown" class="dropdown-toggle" title="Projects">Projects</a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <div class="yamm-content">
+                                                <div class="row">
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Development Projects</p>
+                                                        </li>
+                                                        <li>
+                                                            <img src="/images/Menu/menuSubCampus.jpg" alt="Projects" class="img_left4">
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                        </li>
+                                                    </ul>
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p style="font-size: 13px;">Strengthening and UpGradation of UET Taxila and its Sub Campus</p>
+                                                        </li>
+                                                        <li><a href="/SAUG.aspx" title="300-Boys Hostel"><i class="fa fa-angle-right"></i>300-Boys Hostel</a></li>
+                                                        <li><a href="/SAUG.aspx" title="Combined Academic Block"><i class="fa fa-angle-right"></i>Combined Academic Block</a></li>
+                                                        <li><a href="/SAUG.aspx" title="Overhead/ Underground Water Tank"><i class="fa fa-angle-right"></i>Overhead/ Underground Water Tank</a></li>
+                                                        <li><a href="/SAUG.aspx" title="Sewerage & Disposal"><i class="fa fa-angle-right"></i>Sewerage & Disposal</a></li>
+                                                    </ul>
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p style="font-size: 13px;">Provision of Basic Infrastructure & Establishment of Telecom Engg. Dept.</p>
+                                                        </li>
+                                                        <li><a href="/PBET.aspx" title="About Project"><i class="fa fa-angle-right"></i>About Project</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown yamm-fw">
+                                    <a href="#" data-toggle="dropdown" class="dropdown-toggle" title="Main Sites">Main Sites</a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <div class="yamm-content">
+                                                <div class="row">
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Main Sites</p>
+                                                        </li>
+                                                        <li>
+                                                            <img src="/images/Menu/menuAbout.jpg" alt="Main Sites" class="img_left4">
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                        </li>
+                                                    </ul>
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Sub-Campuses</p>
+                                                        </li>
+                                                        <li><a href="#" title="Sub-Campus PD Khan"><i class="fa fa-angle-right"></i>Sub-Campus PD Khan</a></li>
+                                                    </ul>
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Main Sites</p>
+                                                        </li>
+                                                        <li><a href="http://e-filing.uettaxila.edu.pk/" title="File Tracking System"><i class="fa fa-angle-right"></i>File Tracking System</a></li>
+                                                        <li><a href="https://web.uettaxila.edu.pk/OR/index.asp?pageLink=link_A#a" title="Registrar Office"><i class="fa fa-angle-right"></i>Registrar Office</a></li>
+                                                        <li><a href="http://tj.uettaxila.edu.pk/index.php/technical-journal" title=">Technical Journal"><i class="fa fa-angle-right"></i>Technical Journal</a></li>
+                                                        <li><a href="https://web.uettaxila.edu.pk/qec/aboutQEC.htm" title="Quality Enhancement Cell"><i class="fa fa-angle-right"></i>Quality Enhancement Cell</a></li>
+                                                        <li><a href="https://web.uettaxila.edu.pk/BWD/index.asp" title="Building and Works"><i class="fa fa-angle-right"></i>Building and Works</a></li>
+                                                        <li><a href="https://web.uettaxila.edu.pk/PDD/index.asp" title="Planning & Development"><i class="fa fa-angle-right"></i>Planning & Development</a></li>
+                                                    </ul>
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Main Sites</p>
+                                                        </li>
+                                                        <li><a href="https://web.uettaxila.edu.pk/Alumni/Index" title="Alumni UET Taxila"><i class="fa fa-angle-right"></i>Alumni UET Taxila</a></li>
+                                                        <li><a href="https://web.uettaxila.edu.pk/ieee/index.html" title="IEEE Student Branch"><i class="fa fa-angle-right"></i>IEEE Student Branch</a></li>
+                                                        <li><a href="http://uettaxila.rozee.pk/" title="Career Development"><i class="fa fa-angle-right"></i>Career Development</a></li>
+                                                        <li><a href="/CenterSocialEntrepreneurship.aspx" title="Center for Social Entrepreneurship"><i class="fa fa-angle-right"></i>Center for Social Entrepreneurship</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown yamm-fw">
+                                    <a href="#" data-toggle="dropdown" class="dropdown-toggle" title="Examinations">Examinations</a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <div class="yamm-content">
+                                                <div class="row">
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Examinations</p>
+                                                        </li>
+                                                        <li>
+                                                            <img src="/images/Menu/menuExamination.jpg" alt="Examinations" class="img_left4">
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                        </li>
+                                                    </ul>
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Main</p>
+                                                        </li>
+                                                        <li><a href="/Examinations.aspx" title="Introduction"><i class="fa fa-angle-right"></i>Introduction</a></li>
+                                                        <li><a href="/ControllerExamOffice.aspx" title="Controller of Examinations"><i class="fa fa-angle-right"></i>Controller of Examinations</a></li>
+                                                        <li><a href="/AcademicSchedule.aspx" title="Academic Schedule"><i class="fa fa-angle-right"></i>Academic Schedule</a></li>
+                                                        <li><a href="/Events/Convocation.aspx" title="Convocations"><i class="fa fa-angle-right"></i>Convocations</a></li>
+                                                        <li style="display: none"><a href="https://web.uettaxila.edu.pk/ExaminationsNews.asp" title="News"><i class="fa fa-angle-right"></i>News</a></li>
+                                                        <li><a href="/DownloadExaminationForms" title="Downloads (Forms/Formats)"><i class="fa fa-angle-right"></i>Downloads (Forms/Formats)</a></li>
+                                                    </ul>
+                                                    
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Date Sheets</p>
+                                                        </li>
+                                                        <li>
+                                                            <a href="/Examinations/Results" title=">Date Sheet BSc Engineering"><i class="fa fa-angle-right"></i>Date Sheet BSc Engineering</a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="/Examinations/Results" title="Date Sheet MSc/MS/PhD"><i class="fa fa-angle-right"></i>Date Sheet MSc/MS/PhD</a>
+                                                        </li>
+                                                        <li><a href="/ExamsFAQ.aspx" style="font-size: 1.1em; font-weight: bold;" title="Exams FAQs"><i class="fa fa-angle-right"></i>Exams FAQs</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown yamm-fw">
+                                    <a href="#" data-toggle="dropdown" class="dropdown-toggle" title="Contact">Contact</a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <div class="yamm-content">
+                                                <div class="row">
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Contact Information</p>
+                                                        </li>
+                                                        <li>
+                                                            <img src="/images/Menu/menuContact.jpg" alt="Contact" class="img_left4">
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                        </li>
+                                                    </ul>
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Directory</p>
+                                                        </li>
+                                                        <li><a href="/TelephoneDirectory.aspx" title="Telephone Directory"><i class="fa fa-angle-right"></i>Telephone Directory</a></li>
+                                                    </ul>
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Map</p>
+                                                        </li>
+                                                        <li><a href="/ContactUs.aspx" title="Google Map"><i class="fa fa-angle-right"></i>Google Map</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown yamm-fw">
+                                    <a href="/RTI">RTI</a>
+                                </li>
+                                <li class="dropdown yamm-fw">
+                                    <a href="/Home/Downloads">Downloads</a>
+                                </li>
+                                <li class="dropdown yamm-fw" style="display: none">
+                                    <a href="#" data-toggle="dropdown" class="dropdown-toggle" title="Convocation">Convocation</a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <div class="yamm-content">
+                                                <div class="row">
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Convocations</p>
+                                                        </li>
+                                                        <li>
+                                                            <img src="/images/Menu/menuConvocation.jpg" alt="Convocation" class="img_left4">
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                            <br>
+                                                        </li>
+                                                    </ul>
+                                                    <ul class="col-sm-6 col-md-3 list-unstyled ">
+                                                        <li>
+                                                            <p>Events</p>
+                                                        </li>
+                                                        <li><a href="/21stConvocation2024" title="21st Convocation 2024"><i class="fa fa-angle-right"></i>21st Convocation 2024</a></li>
+                                                        <li><a href="/Events/Convocation" title="Previous Convocations"><i class="fa fa-angle-right"></i>Previous Convocations</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <img src="images/newicon.gif" style="float: left;margin-top: 2px; display: none" title="New">
+</header>
+        
+
+     <div class="welcome-message-admission" id="welcome-message-admission">
+
+        <div><style type="text/css">
+    .admul {
+        padding-left: 30px;
+    }
+
+        .admul li {
+            font-size: 19px;
+            list-style-type: disc;
+        }
+
+        .admul sup {
+            font-size: 18px;
+        }
+</style>
+<div class="onedivarea">
+    <div style="margin: 0 auto; text-align: center;">
+        <h2 style="color: navy">Important Information</h2>
+        <a style="color: darkgreen; text-decoration: underline; font-size: 18px;" href="https://admissions.uettaxila.edu.pk/">
+            Click here for TCAT and Admission Processing Fee
+        </a>
+<br>
+<a style="color: darkgreen; text-decoration: underline; font-size: 18px;" href="https://admissions.uettaxila.edu.pk/">
+            Click here for TCAT-V candidates lists
+        </a>
+    </div>
+</div>
+<hr>
+<div style="margin: 0 auto; text-align: center;">
+    <h2 style="color: navy">Undergraduate Admissions 2026 – Merit List</h2>
+    <a style="color: darkgreen; text-decoration: underline; font-size: 18px;" href="https://admissions.uettaxila.edu.pk">
+        The Undergraduate Admissions 2026 merit list has been uploaded to the Admission Portal. Applicants are advised to log in to their accounts to view their admission status and the offered program (if applicable).
+        The schedule for document submission will be uploaded on the Admissions website. Applicants are advised to regularly check the website and plan their visit to the Admissions Office accordingly.
+    </a>
+</div>
+<hr />
+<div class="onedivarea">
+    <div style="margin: 0 auto; text-align: center" class="col-sm-6">
+        <a style="color: navy; text-decoration: underline;" href="https://admissions.uettaxila.edu.pk/">
+            <img src="downloadFiles/UG-Admission-AD-Fall-2026-ENP.jpg" title="UG Admissions" style="max-width: 100%" />
+        </a>
+    </div>
+    <div style="margin: 0 auto; text-align: center" class="col-sm-6">
+        <a style="color: navy; text-decoration: underline;" href="https://entrytest.uettaxila.edu.pk/">
+            <img src="https://admissions.uettaxila.edu.pk/images/TCAT-V.png?v1" title="TCAT" style="max-width: 100%" />
+        </a>
+    </div>
+</div>
+<hr />
+<div class="onedivarea">
+    <div style="margin: 0 auto; text-align: center" class="col-sm-6">
+        <a style="color: navy; text-decoration: underline;" href="https://admissions.uettaxila.edu.pk/">
+            <img src="https://admissions.uettaxila.edu.pk/images/S-category-AD.png?v1" title="UG Admissions" style="max-width: 100%" />
+        </a>
+    </div>
+    <div style="margin: 0 auto; text-align: center" class="col-sm-6">
+        <a style="color: navy; text-decoration: underline;" href="https://admissions.uettaxila.edu.pk/">
+            <img src="downloadFiles/UG-Technology-Programs-AD-Fall-2026.jpg" title="UG Admissions" style="max-width: 100%" />
+        </a>
+    </div>
+</div>
+<hr />
+<div class="onedivarea" style=";">
+    <h2 style="color: navy">UET Taxila is offering a Condensed Course in Mathematics for FSc Pre-Medical</h2>
+    <div class="parabtn col-sm-12">
+        <div class="col-sm-6"><a href="/downloadFiles/condensed-mathematics-course-2026-phase1.pdf" target="_blank">View Details</a> </div>
+        <div class="col-sm-6"><a href="https://admissions.uettaxila.edu.pk/Downloads/condenced_maths_admission_form.pdf" target="_blank">Download Admission form</a></div>
+    </div>
+</div>
+</div>
+     </div>
+
+<div class="container_full slidertop" style="max-width: 1600px; display: inline; float: none">
+    <div class="master-slider ms-skin-default myslider" id="MainSlider">
+
+    <div class="ms-slide slide-1" data-delay="6">
+        <img src="/images/blank.gif" data-src="/images/MainSlider//16-07-2026_postgraduate-admissions-fall-2026.JPG?random=639212883529178939" alt="Postgraduate Admissions Fall 2026" title="Postgraduate Admissions Fall 2026">
+            <h1 class="ms-layer stext4" style="left: 100px; bottom: 30px;" data-type="text" data-duration="900" data-delay="400" data-ease="easeOutExpo" data-effect="bottom(30)">
+                <a href="https://web.uettaxila.edu.pk/pgAdmissions" target="_blank" title="Postgraduate Admissions Fall 2026">Postgraduate Admissions Fall 2026</a>
+            </h1>
+    </div>
+    <div class="ms-slide slide-2" data-delay="6">
+        <img src="/images/blank.gif" data-src="/images/MainSlider//10-07-2026_cisco-ad-10-07-2026.jpg?random=639212883529178939" alt="CCNA" title="CCNA">
+            <h1 class="ms-layer stext4" style="left: 100px; bottom: 30px;" data-type="text" data-duration="900" data-delay="400" data-ease="easeOutExpo" data-effect="bottom(30)">
+                <a href="https://web.uettaxila.edu.pk/PageContents/Certifications/cisco-ad-10-07-2026.jpg" target="_blank" title="CCNA">CCNA</a>
+            </h1>
+    </div>
+    <div class="ms-slide slide-3" data-delay="6">
+        <img src="/images/blank.gif" data-src="/images/MainSlider//26-03-2026_celebratingtop2percent2026-hec.jpg?random=639212883529178939" alt="Celebrating Pakistani Researchers Among the World&#39;s Top 2% Scientists" title="Celebrating Pakistani Researchers Among the World&#39;s Top 2% Scientists">
+            <h1 class="ms-layer stext4" style="left: 100px; bottom: 30px;" data-type="text" data-duration="900" data-delay="400" data-ease="easeOutExpo" data-effect="bottom(30)">
+                <a href="https://web.uettaxila.edu.pk/NewsDetails/Celebrating-Pakistani-Researchers-Among-the-Worlds-Top-2-Scientists" target="_blank" title="Celebrating Pakistani Researchers Among the World&#39;s Top 2% Scientists">Celebrating Pakistani Researchers Among the World&#39;s Top 2% Scientists</a>
+            </h1>
+    </div>
+    <div class="ms-slide slide-4" data-delay="6">
+        <img src="/images/blank.gif" data-src="/images/MainSlider//19-02-2026_Top-2-percent-Scientists-Researchers-around-the-World-2025.jpg?random=639212883529178939" alt="Top 2 % Scientists/Researchers around the World" title="Top 2 % Scientists/Researchers around the World">
+    </div>
+    <div class="ms-slide slide-5" data-delay="6">
+        <img src="/images/blank.gif" data-src="/images/MainSlider//23-12-2025_mainpagebanner.JPG?random=639212883529178939" alt="22nd Convocation 2025" title="22nd Convocation 2025">
+            <h1 class="ms-layer stext4" style="left: 100px; bottom: 30px;" data-type="text" data-duration="900" data-delay="400" data-ease="easeOutExpo" data-effect="bottom(30)">
+                <a href="https://web.uettaxila.edu.pk/EventDetails/22nd-Convocation-2025" target="_blank" title="22nd Convocation 2025">22nd Convocation 2025</a>
+            </h1>
+    </div>
+    <div class="ms-slide slide-6" data-delay="6">
+        <img src="/images/blank.gif" data-src="/images/MainSlider//02-12-2025_NAVTTC-2025.jpg?random=639212883529178939" alt="Prime Minister’s Youth Skill Development Program (PMYSDP) Batch III" title="Prime Minister’s Youth Skill Development Program (PMYSDP) Batch III">
+            <h1 class="ms-layer stext4" style="left: 100px; bottom: 30px;" data-type="text" data-duration="900" data-delay="400" data-ease="easeOutExpo" data-effect="bottom(30)">
+                <a href="https://nsis.navttc.gov.pk/sign-in" target="_blank" title="Prime Minister’s Youth Skill Development Program (PMYSDP) Batch III">Prime Minister’s Youth Skill Development Program (PMYSDP) Batch III</a>
+            </h1>
+    </div>
+    <div class="ms-slide slide-7" data-delay="6">
+        <img src="/images/blank.gif" data-src="/images/MainSlider//30-09-2025_007.jpg?random=639212883529178939" alt="Strategic Academia-Industry Collaboration Between UET Taxila and Fast Cables Limited" title="Strategic Academia-Industry Collaboration Between UET Taxila and Fast Cables Limited">
+            <h1 class="ms-layer stext4" style="left: 100px; bottom: 30px;" data-type="text" data-duration="900" data-delay="400" data-ease="easeOutExpo" data-effect="bottom(30)">
+                <a href="https://web.uettaxila.edu.pk/EventDetails/Strategic-Academia-Industry-Collaboration-Between-UET-Taxila-and-Fast-Cables-Limited#gallery-8" target="_blank" title="Strategic Academia-Industry Collaboration Between UET Taxila and Fast Cables Limited">Strategic Academia-Industry Collaboration Between UET Taxila and Fast Cables Limited</a>
+            </h1>
+    </div>
+    <div class="ms-slide slide-8" data-delay="6">
+        <img src="/images/blank.gif" data-src="/images/MainSlider//04-02-2022_DLSEI-Main-Page.jpg?random=639212883529178939" alt="Digital Learning and Skill Enrichment Initiative" title="Digital Learning and Skill Enrichment Initiative">
+            <h1 class="ms-layer stext4" style="left: 100px; bottom: 30px;" data-type="text" data-duration="900" data-delay="400" data-ease="easeOutExpo" data-effect="bottom(30)">
+                <a href="https://web.uettaxila.edu.pk/dlsei" target="_blank" title="Digital Learning and Skill Enrichment Initiative">Digital Learning and Skill Enrichment Initiative</a>
+            </h1>
+    </div>
+
+<script type="2c270cd0a0f617833c52cfc3-text/javascript">
+    $(document).ready(function () {
+        $('.ms-slide').each(function (index, item) {
+            $(item).css('cursor', 'pointer');
+            $(item).on('click', function () {
+                var alink = $(this).find('a').attr('href');
+                window.location.href = alink;
+            });
+        })
+    });
+</script>
+    </div>
+</div>
+<div class="clearfix"></div>
+<div class="features_sec18" style="background: url('/images/bg/news.jpg'); background-repeat: no-repeat; background-size: cover;">
+    <div class="container-fluid">
+
+<div id="carouselTicker" class="carouselTicker">
+    <ul class="carouselTicker__list">
+            <li class="carouselTicker__item">
+                <a href="downloadFiles/PhD-Viva-Notification-2019-UET-PhD-ME-20.pdf" target="_blank" title="PhD Viva Notification 2019-UET-PhD-ME-20">
+                    <img src="/images/MainNewsSlider/default.jpg?s=4" alt="PhD Viva Notification 2019-UET-PhD-ME-20" title="PhD Viva Notification 2019-UET-PhD-ME-20">
+                    <div class="newsdiv">
+                        <span class="linktitle">PhD Viva Notification 2019-UET-PhD-ME-20</span>                       
+                        <div class="divdate">31-07-2026</div>
+                    </div>
+                </a>
+            </li>
+            <li class="carouselTicker__item">
+                <a href="/Alumni/Alumni-Association-Elections-2026" target="_blank" title="Alumni Association Elections 2026">
+                    <img src="/images/MainNewsSlider/default.jpg?s=4" alt="Alumni Association Elections 2026" title="Alumni Association Elections 2026">
+                    <div class="newsdiv">
+                        <span class="linktitle">Alumni Association Elections 2026</span>                       
+                        <div class="divdate">23-07-2026</div>
+                    </div>
+                </a>
+            </li>
+            <li class="carouselTicker__item">
+                <a href="downloadFiles/condensed-mathematics-course-2026-phase1.pdf" target="_blank" title="UET Taxila is offering Condensed Course in Mathematics">
+                    <img src="/images/MainNewsSlider/default.jpg?s=4" alt="UET Taxila is offering Condensed Course in Mathematics" title="UET Taxila is offering Condensed Course in Mathematics">
+                    <div class="newsdiv">
+                        <span class="linktitle">UET Taxila is offering Condensed Course in Mathematics</span>                       
+                        <div class="divdate">26-12-2025</div>
+                    </div>
+                </a>
+            </li>
+            <li class="carouselTicker__item">
+                <a href="https://web.uettaxila.edu.pk/huawei-ict-competition-2025-2026.asp" target="_blank" title="Huawei ICT Competition 2025-2026">
+                    <img src="/images/MainNewsSlider/3706.jpg?s=4" alt="Huawei ICT Competition 2025-2026" title="Huawei ICT Competition 2025-2026">
+                    <div class="newsdiv">
+                        <span class="linktitle">Huawei ICT Competition 2025-2026</span>                       
+                        <div class="divdate">21-07-2025</div>
+                    </div>
+                </a>
+            </li>
+            <li class="carouselTicker__item">
+                <a href="https://web.uettaxila.edu.pk/CMPunjabLaptopScheme2025" target="_blank" title="CM Punjab Laptop Scheme 2025">
+                    <img src="/images/MainNewsSlider/default.jpg?s=4" alt="CM Punjab Laptop Scheme 2025" title="CM Punjab Laptop Scheme 2025">
+                    <div class="newsdiv">
+                        <span class="linktitle">CM Punjab Laptop Scheme 2025</span>                       
+                        <div class="divdate">04-05-2025</div>
+                    </div>
+                </a>
+            </li>
+            <li class="carouselTicker__item">
+                <a href="https://web.uettaxila.edu.pk/EventDetails/MoU-signing-ceremony-between-UET-Taxila-and-VU-Pakistan" target="_blank" title="MoU signing ceremony between UET Taxila and VU Pakistan">
+                    <img src="/images/MainNewsSlider/3669.jpg?s=4" alt="MoU signing ceremony between UET Taxila and VU Pakistan" title="MoU signing ceremony between UET Taxila and VU Pakistan">
+                    <div class="newsdiv">
+                        <span class="linktitle">MoU signing ceremony between UET Taxila and VU Pakistan</span>                       
+                        <div class="divdate">11-02-2025</div>
+                    </div>
+                </a>
+            </li>
+
+        
+    </ul>
+</div>
+
+
+    </div>
+</div>
+<div class="clearfix"></div>
+<div class="vcmessage">
+    <div class="container-fluid">
+        <div class="row nomargin nopadding" style="margin: 0px !important; text-align: center;">
+            <span title="VC Message" class="vcmessagetitle">Vice Chancellor's Message</span>
+        </div>
+        <div class="row nomargin nopadding vcmessagecontent" style="margin: 0px !important">
+            <div class="col-md-3 col-sm-12 center">
+                <img class="" src="/images/MainPage/vc-dr.inayat-ullah-khan.png" style="max-width: 100%" alt="Vice Chancellor" title="Vice Chancellor">
+                <span title="VC Name" class="vcname">Prof. Dr. Muhammad Inayatullah Khan</span>
+            </div>
+            <div class="col-md-9 col-sm-12">
+                <div class="vcmessagetext">
+                    <p>
+                        A warm and heartfelt welcome to all of you as you embark on an exciting journey at UET, Taxila. &nbsp;As the
+                        Vice Chancellor of this esteemed institution, it gives me immense pleasure to greet you all and extend my best wishes
+                        for the academic years ahead.
+                    </p>
+                    <p>&nbsp;</p>
+                    <p>
+                        Entering the doors of UET, Taxila, you are stepping into an environment dedicated to fostering innovation, creativity,
+                        and excellence in engineering education. Our university prides itself on a rich legacy of academic brilliance, coupled with
+                        a strong commitment to holistic development.
+                    </p>
+                    <p>&nbsp;</p>
+                    <p>
+                        <a href="VCMessage" class="readmore btn btn-primary btn-lg" title="Read more about VC Message">Read more about VC Message</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="fusection6 facilities">
+    <div class="container-fluid">
+        <h2 class="untext">Facilities & <strong>Services</strong></h2>
+        <ul class="tt-wrapper">
+            <li class="animate zoom  col-sm-2" data-anim-type="zoomIn" data-anim-delay="200">
+                <a href="Hostels.aspx">
+                    <img src="../images/MainPage/Facilities/hostel.png" alt="Hostels" title="Hostels">
+                    <div class="facilitiessubtitle">Student Hostels</div>
+                    <span>Hostel accommodation is available at campus for students.</span>
+                </a>
+            </li>
+            <li class="animate zoom  col-sm-2" data-anim-type="zoomIn" data-anim-delay="300">
+                <a href="library.aspx">
+                    <img src="../images/MainPage/Facilities/library.png" alt="Central Library" title="Central Library">
+                    <div class="facilitiessubtitle">Library</div>
+                    <span>The Central Library of the University plays a vital role in dissemination of knowledge.</span>
+                </a>
+            </li>
+            <li class="animate zoom  col-sm-2" data-anim-type="zoomIn" data-anim-delay="400">
+                <a href="Mosque.aspx">
+                    <img src="../images/MainPage/Facilities/Mosque.png" alt="Mosque" title="Mosque">
+                    <div class="facilitiessubtitle">Mosque</div>
+                    <span>Main Jamaiya Mosque for pryers.</span>
+                </a>
+            </li>
+            <li class="animate zoom  col-sm-2" data-anim-type="zoomIn" data-anim-delay="500">
+                <a href="MedicalFacilities.aspx">
+                    <img src="../images/MainPage/Facilities/MedicalFacilities.png" alt="Medical Facilities" title="Medical Facilities">
+                    <div class="facilitiessubtitle">Health Facilities</div>
+                    <span>The University provides medical facilities to its employees and students.</span>
+                </a>
+            </li>
+            <li class="animate zoom  col-sm-2" data-anim-type="zoomIn" data-anim-delay="600">
+                <a href="Cafeteria.aspx">
+                    <img src="../images/MainPage/Facilities/Cafeteria.png" alt="Cafeteria" title="Cafeteria">
+                    <div class="facilitiessubtitle">Cafeteria</div>
+                    <span>Main Cafeteria facility for students.</span>
+                </a>
+            </li>
+            <li class="animate zoom  col-sm-2" data-anim-type="zoomIn" data-anim-delay="700">
+                <a href="Transport.aspx">
+                    <img src="../images/MainPage/Facilities/Transport.png" alt="Transport" title="Transport">
+                    <div class="facilitiessubtitle">Transport</div>
+                    <span>Adequate transport facility is provided for students and the busses are plying between Rawalpindi, Islamabad, Hassan Abdal, Wah Cantt.</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+<div class="fusection4 affiliated" style="border-top: solid 2px gray; border-bottom: solid 2px gray;">
+    <div class="container">
+        <h2 class="untext"><a href="AffiliatedInstitutes.aspx" style="color: white">Affiliated <strong>Institutes</strong></a> </h2>
+        <div class="one_half ">
+            <div>
+                <ul class="slides">
+                    <li style="display: inline-flex;">
+                        <div class="peoplesays">
+                            <img src="images/mainpage/affiliations/affiliation.jpg" alt="Affiliation" title="Affiliation">
+                        </div>
+                        <div style="color: white">
+                            <p>
+                                > <strong><a href="https://www.scetwah.edu.pk" target="_blank" style="color: white" title="Swedish College of Engineering and Technology">Swedish</a></strong> College of Engineering and Technology<br>
+                            </p>
+                            <p>
+                                > <strong><a href="http://www.apcoms.edu.pk" target="_blank" style="color: white" title="Army Public College of Management and Sciences">APCOMS</a></strong> Army Public College of Management and Sciences<br>
+                            </p>
+                            <p style="display: none;">
+                                > <strong><a href="https://infinity.edu.pk" target="_blank" style="color: white" title="Infinity Institute of Technology">IIT</a></strong> Infinity Institute of Technology<br>
+                            </p>
+                            <p>
+                                > <strong><a href="#" target="_blank" style="color: white" title="Metropolitan International United College, Kohistan Enclave">MIUC</a></strong> Metropolitan International United College, Kohistan Enclave
+                            </p>							
+                            <p>
+                                > <strong><a href="http://www.corvitinstitute.com/" target="_blank" style="color: white" title="CORVIT Institute of Information Technology and Management Sciences">CORVIT Institute of Information Technology and Management Sciences</a></strong> 
+                            </p>
+                            <br>
+                            <strong style="display: none">- Affilation Committee <i>&nbsp;&nbsp;&nbsp;UET Taxila</i></strong>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="one_half last animate" data-anim-type="fadeIn" data-anim-delay="200">
+            <ul class="clients_home" style="background-color: white; width: 410px; text-align: center; padding: 16px">
+                <li class="zoom"><a href="https://www.scetwah.edu.pk/" target="_blank" title="Swedish College of Engineering and Technology"><img src="images/mainpage/affiliations/swedish.png" alt="Swedish College of Engineering and Technology"></a></li>
+                <li class="zoom"><a href="http://www.apcoms.edu.pk" target="_blank" title="Army Public College of Management and Sciences"><img src="images/mainpage/affiliations/apcoms.png" alt="Army Public College of Management and Sciences"></a></li>
+                <li class="zoom" style="display: none;"><a href="https://infinity.edu.pk" target="_blank" title="Infinity Institute of Technology"><img src="images/mainpage/affiliations/iit.png" alt="Infinity Institute of Technology"></a></li>
+                <li class="zoom"><a href="#" target="_blank" title="Metropolitan International United College, Kohistan Enclave"><img src="images/mainpage/affiliations/miuc.jpeg?s=1" alt="Metropolitan International United College, Kohistan Enclave" style="width: auto"></a></li>
+				<li class="zoom"><a href="http://www.corvitinstitute.com/" target="_blank" title="CORVIT Institute of Information Technology and Management Sciences"><img src="images/mainpage/affiliations/corvit-logo.png" alt="CORVIT Institute of Information Technology and Management Sciences"></a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="clearfix"></div>
+<div class="fusection5 centres">
+    <div class="container">
+        <div class="one_third animate onecentre" data-anim-type="fadeInUp" data-anim-delay="200">
+            <img src="images/MainPage/Centers/narc.jpg" alt="Network Administration and Research Center">
+            <span class="centrename">NARC</span>
+            <p class="centredescription">Network Administration and Research Center, providing IT Services to UET Taxila</p>
+            <a href="NARC.aspx" title="Network Administration and Research Center">Read More about NARC</a>
+        </div>
+        <div class="one_third animate onecentre" data-anim-type="fadeInUp" data-anim-delay="350">
+            <img src="images/MainPage/Centers/QEC.jpg" alt="Quality Enhancement Cell">
+            <span class="centrename">Quality Enhancement Cell</span>
+            <p class="centredescription">Developing quality assurance processes and methods at UET Taxila </p>
+            <a href="http://web.uettaxila.edu.pk/qec/aboutQEC.htm" title="Quality Enhancement Cell">Read More about QEC</a>
+        </div>
+        <div class="one_third last animate onecentre" data-anim-type="fadeInUp" data-anim-delay="500">
+            <img src="images/Mainpage/Centers/ibm.png" alt="IBM Academic Initiative">
+            <span class="centrename">IBM Academic Initiative</span>
+            <p class="centredescription">Harness the Power of IBM</p>
+            <a href="https://developer.ibm.com/students/" title="Read More about IBM Academic Initiative">Read More about IBM Academic Initiative</a>
+        </div>
+    </div>
+</div>
+
+<div class="clearfix"></div>
+<div class="fusection8 quicklinks">
+    <div class="container">
+<div style="display: none">
+	
+</div>
+
+<div class="two_third animate" data-anim-type="fadeIn" data-anim-delay="250">
+    <h3>Main Docs</h3>
+    <br>
+    <ul class="tabs3">
+        <li><a href="#tab-1" target="_self" title="Technical Journal">Technical Journal</a></li>
+        <li><a href="#tab-2" target="_self" title="Prospectus">Prospectus</a></li>
+        <li><a href="#tab-3" target="_self" title="Magazines">Magazines</a></li>
+        <li><a href="#tab-4" target="_self" title="Varsity News">Varsity News</a></li>
+    </ul>
+
+    <div class="tabs-content3 two">
+        <div id="tab-1" class="tabs-panel3">
+            <img src="images/MainPage/MainDocs/TechnicalJournal.jpg" alt="Technical Journal" class="img_left2">
+            <p>
+                <strong>ISSN: 1813 - 1786 (Print); 2313-7770 (Online)</strong> <strong>[<a href="http://tj.uettaxila.edu.pk/index.php/technical-journal" title="Technical Journal">Technical Journal</a>]</strong><br>
+
+                <strong>Indexed with:</strong><br>
+                >> PASTIC SCIENCE ABSTRACTS
+                <br>
+                >> AGRIS DATABASE
+                <br>
+                >> ProQuest Products
+                <br>
+                >> EBSCO Databases
+                <br>
+                and 19 other HEC approved indexing and abstracting agencies.
+                <br>
+
+                <strong>Review Type:</strong> Peer Review
+                <br>
+
+                <strong>Frequency: </strong>Quarterly
+                <br>
+                <strong>Publication charges: Free of cost </strong>
+                <br>
+                <br>
+
+                <strong>Aim &amp; Scope:</strong>Technical journal is a multidisciplinary journal in the field of engineering science and technology that offers platform for researchers, engineers and scientists to publish their original and to date research of high scientific value.
+            </p>
+        </div>
+        <!-- end tab 1 -->
+
+        <div id="tab-2" class="tabs-panel3">
+            <p>
+                Download Proscpectus for Postgraduate Programs.
+                <br>
+                >> <a href="/Downloads/PGAdmissions/Prospectus-PG-2021-onwards.pdf" target="_blank" title="Postgraduate Prospectus 2021 onwards">Postgraduate Prospectus 2021 onwards</a>
+                <br>
+                <br>
+                Download Proscpectus for Undergraduate Programs.
+                <br>
+                >> <a href="https://admissions.uettaxila.edu.pk/Downloads/UET-Prospectus-2024.pdf" target="_blank" title="Undergraduate Prospectus 2024">Undergraduate Prospectus 2024</a>
+                <br>
+                <br>
+                Download Proscpectus for Undergraduate Programs.
+                <br>
+                >> <a href="https://admissions.uettaxila.edu.pk/Downloads/Rule-Book-2023.pdf" target="_blank" title="Admission 2023 Rule Book">Admission 2023 Rule Book</a>
+            </p>
+        </div>
+        <!-- end tab 2 -->
+        <div id="tab-3" class="tabs-panel3">
+            <img src="images/MainPage/MainDocs/mags.gif" alt="University Magazine" class="img_left2">
+            <p>
+                <strong>UET Taxila Year Book 2014</strong><br>
+                - <a href="http://web.uettaxila.edu.pk/uetSub/YearBook_2014.htm" target="_blank" title="Download Year Book 2014">Download Year Book 2014</a><br>
+                - Part 1 - Page 1-41<br>
+                - Part 2 - Page 41-80<br>
+                - Part 3-Page 81-121<br>
+                <br>
+                <strong>ALMOHANDIS 2014</strong><br>
+                - <a href="Almohandis.aspx" target="_blank" title="Almohandis Urdu Version and English Version">Download Almohandis</a><br>
+                - Urdu Version and English Version<br>
+            </p>
+        </div>
+        <!-- end tab 3 -->
+        <div id="tab-4" class="tabs-panel3">
+            <p>
+                <strong> December 2023 Issue</strong><br>
+                - <a href="/Downloads/VarsityNews/Varsity-News-Sep-Dec-2023.pdf" target="_blank" title="Varsity News">Download Varsity News</a><br> 
+                <br> 
+            </p>
+        </div>
+        <!-- end tab 4 -->
+    </div>
+    <!-- end all tabs -->
+</div>
+<!-- end section -->
+
+<div class="one_fourth last animate" data-anim-type="fadeIn" data-anim-delay="300">
+    <h3>Quick Links!</h3>
+    <br>
+    <div class="clearfix"></div>
+    <div class="accrodation">
+        <!-- section 1 -->
+        <span class="acc-trigger active"><a href="#" title="Directorate of ASR&TD">Directorate of ASR&TD</a></span>
+        <div class="acc-container">
+            <div class="content">
+                <p>- <a href="http://web.uettaxila.edu.pk/ASRTD.aspx" title="Directorate of ASR&TD">Directorate of Advanced Studies, Research and Technological Development (ASR&TD)</a></p>
+            </div>
+        </div>
+
+        <!-- section 1 -->
+        <span class="acc-trigger active"><a href="#" title="Staff Development Center">Staff Development Center</a></span>
+        <div class="acc-container">
+            <div class="content">
+                <p>- <a href="http://web.uettaxila.edu.pk/facultystaffdevelopment.aspx" title="Staff Development Center">Staff Development Center</a></p>
+            </div>
+        </div>
+
+        <!-- section 2 -->
+        <span class="acc-trigger"><a href="#" title="Examination Branch">Examination Branch</a></span>
+        <div class="acc-container">
+            <div class="content">
+                <p>- <a href="https://web.uettaxila.edu.pk/DownloadExaminationForms" title="Examination Branch Dwonloads">Downloads</a></p>
+            </div>
+        </div>
+
+        <!-- section 3 -->
+        <span class="acc-trigger"><a href="#" title="Dues Section">Dues Section</a></span>
+        <div class="acc-container">
+            <div class="content">
+                <p>- <a href="http://web.uettaxila.edu.pk/DuesSection.aspx" title="Dues Section">Dues section</a></p>
+                <p>- <a href="http://web.uettaxila.edu.pk/ScholarshipsNotices.aspx" title="Scholarships">Scholarships</a></p>
+            </div>
+        </div>
+
+        <!-- section 4 -->
+        <span class="acc-trigger"><a href="#" title="Telephone Directory">Directory</a></span>
+        <div class="acc-container">
+            <div class="content">
+                <p>- <a href="TelephoneDirectory.aspx" title="Telephone Directory">Download Directory</a></p>
+            </div>
+        </div>
+
+        <!-- section 5 -->
+        <span class="acc-trigger"><a href="#" title="Alumni">Alumni</a></span>
+        <div class="acc-container">
+            <div class="content">
+                <p>
+                    - <a href="https://web.uettaxila.edu.pk/alumni/index" title="Alumni">Alumni Website</a><br>
+	    - <a href="https://mis.uettaxila.edu.pk/Alumni/Login/Login.aspx" title="Alumni">Alumni Portal Login</a><br>
+                    - <a href="https://docs.google.com/forms/d/1eKdLwsefEweKi5n-A-eiOtHyEnoyDVJm6K4eS2N8oy4/viewform?c=0&amp;w=1&amp;usp=mail_form_link" title="Alumni Feedback">Alumni Feedback</a>
+                </p>
+            </div>
+        </div> 
+
+        <!-- section 7 -->
+        <span class="acc-trigger"><a href="#" title="Prospective Students">Prospective Students</a></span>
+        <div class="acc-container">
+            <div class="content">
+                <p>- <a href="http://admissions.uettaxila.edu.pk/index.php" title="Admission Notices">Admission Notices</a></p>
+                <p> - <a href="http://admissions.uettaxila.edu.pk/Schedule.php" title="Admission Schedule">Admission Schedule</a> </p> 
+                <p>- <a href="https://admissions.uettaxila.edu.pk/Merit_List.php" title="Merit List">Merit List</a> </p>
+                <p>- <a href="http://admissions.uettaxila.edu.pk/Schedule2.php" title="Entry Test Schedule">Entry Test Schedule</a></p>
+            </div>
+        </div>
+
+        <span class="acc-trigger"><a href="#" title="CMS">CMS</a></span>
+        <div class="acc-container">
+            <div class="content">
+                <p>
+                    - <a href="http://mis.uettaxila.edu.pk/dsa/" target="_blank" title="Student/Faculty/Staff Profiles">Student/Faculty/Staff Profiles </a>
+                </p>
+                <p> - <a href="http://mis.uettaxila.edu.pk/academics/" target="_blank" title="Academics & OBE System">Academics & OBE System </a> </p>
+            </div>
+        </div>
+    </div>
+ </div> 
+    </div>
+</div>
+<div class="clearfix"></div>
+
+<div class="footer1">
+    <div class="container socialiconscontainer">
+        <div>
+            <h4 class="lmb" style="float: left; padding-top: 7px;">Connect with US</h4>
+            <div style="float: left">
+                <ul class="socialiconsmain">
+                    <li style="background-color: #3b5999"><a class="facebook" href="https://www.facebook.com/profile.php?id=61554737883281" target="_blank" title="Facebook Sharing"><i class="fa fa-facebook fa-2x"></i></a></li>
+                    <li style="background-color: #0a66c2"><a class="linkedin" href="https://www.linkedin.com/company/uettaxilaofficial" target="_blank" title="LinkedIn Sharing"><i class="fa fa-linkedin fa-2x"></i></a></li>
+                    <li style="background-color: #517fa4"><a class="instagram" href="https://www.instagram.com/uettaxilaofficial" target="_blank" title="Instagram Sharing"><i class="fa fa-instagram fa-2x"></i></a></li>
+                    <li style="background-color: #000"><a class="twitter" href="https://twitter.com/uettofficial" target="_blank" title="Twitter Sharing"><i class="fa fa-twitter fa-2x"></i></a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="one_third animate" data-anim-type="fadeInUp" data-anim-delay="200">
+            <h4 class="lmb">UET Taxila</h4>
+            <ul class="faddress">
+                <li><i class="fa fa-map-marker fa-lg"></i>&nbsp; <span style="color:#0099CC;">University of Engineering & <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Technology Taxila, 47050</span></li>
+                <li><i class="fa fa-phone"></i>&nbsp;<span style="color:#0099CC;">+92 51-9047-400</span></li>
+                <li><i class="fa fa-print"></i>&nbsp;<span style="color:#0099CC;">+92 51-9047-420</span></li>
+                <!--<li><img src="_images/footer-wmap.png" alt="Footer Map"></li>-->
+            </ul>
+        </div><!-- end address -->
+        <div class="one_third animate" data-anim-type="fadeInUp" data-anim-delay="400">
+            <div class="siteinfo">
+                <h4 class="lmb">About UET Taxila</h4>
+                <p><span style="color:#0099CC;">With phenomenal increase in students' enrollment in 1970's, a plan to establish additional campuses of the University of Engineering and Technology Lahore was conceived. As a result of that, the University College of Engineering Taxila was established.</span></p>
+                <br>
+                <a href="AboutUs.aspx" title="About the University">Read more about the University<i class="fa fa-long-arrow-right"></i></a>
+            </div>
+        </div><!-- end site info -->
+        <div class="one_third last animate center" data-anim-type="fadeInUp" data-anim-delay="500">
+            <h4>Important Links</h4>
+            <div id="flickr_badge_wrapper">
+                <ul>
+                    <li><a href="http://hed.punjab.gov.pk/" target="_blank" title="Higher Education Department"><img src="/images/Logos/HED_logo.jpg" alt="Higher Education Department"></a></li>
+                    <li><a href="http://www.peef.org.pk/" target="_blank" title="The Punjab Educational Endowment Fund"><img src="/images/Logos/peefLogo.jpg" alt="The Punjab Educational Endowment Fund"></a></li>
+                </ul>
+            </div>
+        </div><!-- end flickr -->
+    </div>
+</div><!-- end footer -->
+<div class="clearfix"></div>
+<div class="copyright_info four">
+    <div class="container">
+        <div class="one_half">
+            Copyright © 2026. University of Engineering and Technology, Taxila. site designed by <a href="NARC.aspx" title="Network Administration and Research Center">NARC</a>
+        </div>
+        <div class="one_half last">
+            <div style="float: right; font-size: 10px;">Images courtesy: <a href="https://www.freepik.com/" target="_blank" style="font-size: 10px;" title="Freepik">https://www.freepik.com/</a></div>
+        </div>
+    </div>
+</div><!-- end copyright info -->
+        <a href="#" class="scrollup" id="linkScrollToTop" aria-label="Scroll to Top">Scroll</a><!-- end scroll to top of the page-->
+    </div>
+<script src="/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="2c270cd0a0f617833c52cfc3-|49" defer></script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a24d116788a6ce46',t:'MTc4NTY3MzU1NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"d8564f6d5b4e410eb202d13f98326329","r":1}' crossorigin="anonymous"></script>
+</body>
+</html>

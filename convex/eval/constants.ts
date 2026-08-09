@@ -1,4 +1,4 @@
-export const EVAL_MODEL = "llama-3.1-8b-instant";
+export const EVAL_MODEL = "openai/gpt-oss-20b";
 
 export const EVAL_TOP_K = 8;
 

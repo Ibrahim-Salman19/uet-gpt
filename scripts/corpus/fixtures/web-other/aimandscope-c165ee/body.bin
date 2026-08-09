@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+    <title>Aim and Scope | University of Engineering and Technology, Taxila</title>
+    <link href="/css/bootstrap3.4.min.css" rel="stylesheet" />
+    <script src="/js/jquery3.4.min.js" type="ff7052448808afb8c2fc34a3-text/javascript"></script>
+    <script src="/js/bootstrap3.4.min.js" type="ff7052448808afb8c2fc34a3-text/javascript"></script>
+    <script type="ff7052448808afb8c2fc34a3-text/javascript" src="/js/labs.js"></script>
+    
+<link href="../css/labTemplate.css?s=4" rel="stylesheet" type="text/css" media="all" />
+    
+</head>
+<body>
+    <header class="container-fluid text-center col-sm-12 uetheader">
+        <div class="col-sm-1">
+    <a class="navbar-brand" href="#">
+        <img src="../images/Logos/uettaxila_logo.png" height="75" />
+    </a>
+</div>
+<div class="col-sm-11 headertitle">
+    <h2>Swarm Robotics Lab</h2>
+</div>
+<div class="col-sm-11" style="margin-top: 20px">
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <div class="collapse navbar-collapse" id="myNavbar">
+                <ul class="nav navbar-nav">
+                    <li><a href="Index">Home</a></li>
+                    <li><a href="AimandScope">Aim and Scope</a></li>
+                    <li><a href="SubLabs">Sub-Labs</a></li>
+                    <li><a href="Team">Team</a></li>
+                    <li><a href="PotentialPartnership">Potential Partnerships</a></li>
+                    <li><a href="Collaborations">Collaborations</a></li>
+                    <li><a href="Achievements">Achievements</a></li>
+                    <li><a href="Projects">Projects</a></li>
+                    <li><a href="Publications">Publications</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</div>
+
+
+    </header>
+    <div class="clearboth"></div>
+    <div class="container">
+        <div class="maincontent">
+            
+
+<h1 class="pageheading">Aim and Scope</h1>
+<div class="pagecontent">
+    <div class="content">
+        To establish a scaling solution for NCRA by providing an application agnostic swarm intelligence platform. The lab is composed of three sub-labs, i.e., Swarm Intelligence Lab, Computer Vision and AI Lab and Decentralized Communications Lab. The most important aspect of this lab would be to generate a generic scaling solution that would work for any kind of application that is able to benefit from a multi-agent robotic system in an optimal way. Such an undertaking will be achieved using the state-of-the-art swarm intelligence algorithms. Key Application areas are:
+        <ul class="ulfancy">
+            <li class="col-sm-11">Disaster Management</li>
+            <li class="col-sm-11">Water Quality Monitoring</li>
+            <li class="col-sm-11">Intelligent Video Surveillance</li>
+        </ul>
+    </div>
+    <div class="imgdiv">
+        <ul class="ulimages row">
+            <li class="col-sm-3">
+                <img src="../images/swarmroboticslabs/aim1.jpg" width="200px" />
+                <span>Robot Swarm by University of Sheffield</span>
+                <a href="https://www.sheffield.ac.uk/faculty/engineering/news/prog-robots-1.553813">https://www.sheffield.ac.uk/faculty/engineering/news/prog-robots-1.553813</a>
+            </li>
+            <li class="col-sm-3">
+                <img src="../images/swarmroboticslabs/aim2.jpg" width="200px" />
+                <span>Multi-UAV coordination by Helicomicro</span>
+                <a href="https://www.helicomicro.com">https://www.helicomicro.com</a>
+            </li>
+            <li class="col-sm-3">
+                <img src="../images/swarmroboticslabs/aim3.jpg" width="200px" />
+                <span>Multiagent team of Robotic Swans</span>
+                <a href="https://www.channelnewsasia.com/news/singapore/robot-swans-bring-new-advanced-technology-to-water-testing-8229798">https://www.channelnewsasia.com/news/singapore/robot-swans-bring-new-advanced-technology-to-water-testing-8229798</a>
+            </li>
+        </ul>
+    </div>
+</div>
+        </div>
+    </div>
+    <footer class="container-fluid text-center col-sm-12 uetfooter">
+        <div class="col-sm-12 footerbg">
+    <span class="col-sm-12">&copy; 2026 University of Engineering and Technology, Taxila</span>
+</div>
+    </footer>
+<script src="/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="ff7052448808afb8c2fc34a3-|49" defer></script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"d8564f6d5b4e410eb202d13f98326329","r":1}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25736e12dc3f853',t:'MTc4NTc3OTk0Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

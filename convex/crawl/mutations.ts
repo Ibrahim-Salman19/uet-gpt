@@ -165,7 +165,7 @@ async function enqueueNewChunks(
 
   await embeddingPool.enqueueActionBatch(ctx, internal.crawl.actions.embedSingleChunk, argsArray, {
     onComplete: internal.crawl.mutations.onChunkEmbedded,
-    context: { jobId },
+    context: { jobId, documentId: docId, url },
   });
 }
 
@@ -622,19 +622,21 @@ async function handleEmbeddingFailure(
 
 async function routeChunkResult(
   ctx: MutationCtx,
-  contextJobId: string,
+  context: { jobId: string; url?: string; documentId?: string },
   result: { kind: string; returnValue?: Record<string, unknown>; error?: string },
 ) {
   const returnValue = result.kind === "success" ? result.returnValue : null;
-  const url = returnValue?.url as string | undefined;
-  const documentId = returnValue?.documentId as Id<"documents"> | undefined;
+  const url = returnValue?.url as string | undefined ?? context.url;
+  const documentId =
+    (returnValue?.documentId as Id<"documents"> | undefined) ??
+    (context.documentId as Id<"documents"> | undefined);
   const contentHash = returnValue?.contentHash as string | undefined;
   // Prefer the jobId the chunk itself reports. The DLQ-retry path enqueues a batch of
   // entries that may belong to MANY different jobs under a single onComplete context
   // jobId; routing DLQ updates by the batch-level context jobId would clear/insert rows
   // under the wrong (jobId, url), corrupting failure accounting. Fall back to the context
   // jobId only when the chunk did not report one (e.g. a hard failure with no returnValue).
-  const chunkJobId = (returnValue?.jobId as string | undefined) ?? contextJobId;
+  const chunkJobId = (returnValue?.jobId as string | undefined) ?? context.jobId;
 
   if (result.kind === "success" && returnValue?.success && returnValue.ragId && url) {
     // Clear only the specific chunk's DLQ row that just succeeded (per-chunk rows).
@@ -655,10 +657,12 @@ export const onChunkEmbedded = internalMutation({
   args: vOnCompleteArgs(
     v.object({
       jobId: v.string(),
+      url: v.optional(v.string()),
+      documentId: v.optional(v.string()),
     }),
   ),
   handler: async (ctx, args) => {
-    await routeChunkResult(ctx, args.context.jobId, args.result);
+    await routeChunkResult(ctx, args.context, args.result);
   },
 });
 
@@ -931,7 +935,7 @@ export const enqueueDocumentChunks = internalMutation({
         argsArray,
         {
           onComplete: internal.crawl.mutations.onChunkEmbedded,
-          context: { jobId: "ingest-job" },
+          context: { jobId: "ingest-job", documentId: documentId as unknown as string, url },
         },
       );
     }

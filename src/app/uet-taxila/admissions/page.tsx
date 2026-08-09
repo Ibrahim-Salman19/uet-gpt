@@ -85,10 +85,7 @@ export default function UetTaxilaAdmissionsPage() {
             <span className="font-semibold text-base">UET GPT</span>
           </div>
           <nav className="flex items-center gap-4">
-            <Link
-              href="/"
-              className="text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
-            >
+            <Link href="/" className="text-sm text-zinc-400 hover:text-zinc-200 transition-colors">
               UET GPT Home
             </Link>
             <Link

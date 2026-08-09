@@ -156,10 +156,7 @@ export function assertCacheEntryCompatible(
     entry.retrievalPolicyVersion &&
     entry.retrievalPolicyVersion !== currentPolicy.retrievalPolicyVersion
   ) {
-    throw new InvariantViolationError(
-      "CACHE_POLICY_MISMATCH",
-      "Retrieval policy version mismatch",
-    );
+    throw new InvariantViolationError("CACHE_POLICY_MISMATCH", "Retrieval policy version mismatch");
   }
   if (
     entry.evidencePolicyVersion &&

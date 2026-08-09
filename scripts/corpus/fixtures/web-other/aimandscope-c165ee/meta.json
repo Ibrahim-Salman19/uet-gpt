@@ -1,0 +1,12 @@
+{
+  "body_sha256": "60005fd41a151ced826a3bb8a8aece4c559e5fcce6b07aaf7355d7b1e7c6f682",
+  "body_size": 6307,
+  "content_type": "text/html; charset=utf-8",
+  "elapsed_ms": 903,
+  "fetched_at": "2026-08-03T17:59:07+00:00",
+  "final_url": "https://web.uettaxila.edu.pk/swarmroboticslab/AimandScope",
+  "redirect_chain": [],
+  "remote_ip": "104.21.50.7,172.67.198.179,2606:4700:3031::6815:3207,2606:4700:3032::ac43:c6b3",
+  "requested_url": "https://web.uettaxila.edu.pk/swarmroboticslab/AimandScope",
+  "status": 200
+}

@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UET Taxila Undergraduate Admissions </title>
+    <!-- <php echo date("Y"); ?> -->
+    <link href="assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap-icons/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=1">
+    <script type="196cc23adaf77ad6744e24df-text/javascript" src="../js/jquery.js"></script>
+</head>
+
+<body>
+
+<!-- Dynamic Announcement Bar -->
+<div class="py-3 text-center fw-semibold" style="background: #dc3545; color: white; font-size: 1.1rem;">
+    🚨 Undergraduate Admissions Fall 2026 | Registration Started  <!-- Applicationsare now open — Apply Today!  <php echo date("Y"); ?>-->
+</div>
+
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="index.php">
+            <img src="https://admissions.uettaxila.edu.pk/images/UETLogo.png" class="logo me-3" alt="UET Taxila Logo">
+            <span class="fw-bold">
+                UET Taxila<br>
+                <small style="font-size: 0.85rem; opacity: 0.9;">Undergraduate Admissions</small>
+                 <!-- <php echo date("Y"); ?> -->
+            </span>
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="nav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="index.php">Home</a></li>
+                 <li class="nav-item"><a class="nav-link" href="ProgramsOffered.php">Programs</a></li>
+               <!-- <li class="nav-item"><a class="nav-link" href="#Discover">Discover</a></li>
+                <li class="nav-item"><a class="nav-link" href="#Facilities">Facilities</a></li>
+                -->
+                <li class="nav-item"><a class="nav-link" href="explore.php">Explore Campus</a></li>
+                <li class="nav-item"><a class="nav-link" href="FAQS.php">FAQs</a></li>
+                <li class="nav-item"><a class="nav-link" href="Downloads.php">Downloads</a></li>
+                <li class="nav-item"><a class="nav-link" href="#Contact">Contact Us</a></li>
+                  <!-- <php
+                        if (session_status() === PHP_SESSION_NONE) {
+                                session_start();
+                                }
+
+                    if (empty($_SESSION)) {
+                                                   echo '<li class="nav-item"><a class="nav-link" href="My_UET.php">My UET</a></li>';
+                                        } else {
+                                                    echo '<li class="nav-item"><a class="nav-link" href="Logout.php">Logout</a></li>';
+                                            }
+                    ?> -->
+                    <li class="nav-item"><a class="nav-link " id="applylink" href="https://admission.uettaxila.edu.pk/application/index.php">Apply Now</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<script type="196cc23adaf77ad6744e24df-text/javascript">
+  $(document).ready(function() {
+    $(".btnapply").click(function(e) {
+      e.preventDefault(); // prevent link navigation
+      alert("Registeration Opening Soon");
+    });
+  });
+</script>
+<div class="container mt-5 pt-5">
+
+    <!-- Page Header -->
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold text-dark">Frequently Asked Questions (FAQs)</h1>
+        <p class="lead text-muted">Undergraduate Admissions 2026 — University of Engineering & Technology Taxila</p>
+        <div style="width: 90px; height: 5px; background: var(--uet-accent); margin: 25px auto; border-radius: 3px;"></div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+
+            <!-- FAQ Accordion -->
+            <div class="accordion" id="faqAccordion">
+
+                <div class="accordion-item mb-3 border-0 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#q1">
+                            How can I apply for Undergraduate Admissions at UET Taxila?
+                        </button>
+                    </h2>
+                    <div id="q1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Visit the official admission portal <strong>admissions.uettaxila.edu.pk</strong> and click on “MY UET”. Register using your CNIC/Form-B number, fill the online application form, and deposit the Rs. 4000 application processing fee through HBL Konnect or Internet Banking.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item mb-3 border-0 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#q2">
+                            What is the Application Processing Fee and how do I pay it?
+                        </button>
+                    </h2>
+                    <div id="q2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <!-- <div class="accordion-body">
+                            The application processing fee is <strong>Rs. 4,000</strong>. It can be paid through HBL Konnect App, HBL Internet Banking, or any HBL branch by selecting “UET Taxila Admission Processing”.
+                        </div> -->
+                       <div class="accordion-body">
+                            The application processing fee is <strong>Rs. 4,000</strong>. It can be paid by using following methods after generating Admission Processing Fee voucher from admission portal,<br/>
+                            Payment Methods: <br />
+                            i.   HBL Mobile App: Go to payments, Select 1-Bill Invoice, Enter Consumer Number (Prefix+Voucher No) and Process payment. ,take screen shoot of successfull transaction.<br />
+                           <!--  ii.  Jazz Cash App:-  Go to Corporate payments in Other payment & Services Section, Select 1-Bill, Enter Voucher Number (Prefix+Voucher) Proceed payment,take screen shoot of successfull transaction,.<br />  -->
+                            ii. Bank Of Punjab Branch:- Print Admission Processing Fee Voucher, Visit the BOP branch submit the fee, upload the paid fee challan/ Paid Fee Proof to admission Portal.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item mb-3 border-0 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#q3">
+                            What are the eligibility criteria for admission?
+                        </button>
+                    </h2>
+                    <div id="q3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            You must have passed F.Sc (Pre-Engineering) / ICS / DAE (relevant field) or equivalent with at least <strong>60% marks</strong> for Engineering programs and <strong>50% marks</strong> for BS Math/ Physics /Computer Science / Engineering Technology programs. You must also appear in the TCAT/ECAT/Equivalent test.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item mb-3 border-0 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#q4">
+                            What is TCAT/ECAT/Equivalent and when is the test held?
+                        </button>
+                    </h2>
+                    <div id="q4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            TCAT/ECAT/Equivalent (Engineering University Admission Test) is conducted by UET Lahore. Registration usually starts in February/March. Register at <a href="https://admission.uet.edu.pk" target="_blank">admission.uet.edu.pk</a>.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item mb-3 border-0 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#q5">
+                            How is the merit calculated?
+                        </button>
+                    </h2>
+                    <div id="q5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Merit Formula:<br>
+                            • HSSC-I / DAE (1st and 2nd Year)/ Equivalent = 50%<br>
+                            • TCAT/ECAT/Equivalent / Entry Test = 33%<br>
+                            • SSC / Matric = 17%
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item mb-3 border-0 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#q11">
+                             Can HSSC Pre-Medical students apply for Engineering programs?
+                        </button>
+                    </h2>
+                    <div id="q11" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Yes, HSSC Pre-Medical students can apply for Engineering programs. However, they must qualify the ECAT/ TCAT / or an equivalent 
+                            test with Mathematics as an additional subject/combination. Applicants are also required to provide the result of the Additional 
+                            Mathematics paper or the Condensed Mathematics course, as per the admission requirements of the respective university.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item mb-3 border-0 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#q6">
+                            What is the fee structure for the first semester?
+                        </button>
+                    </h2>
+                    <div id="q6" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            • Regular (Subsidized) ≈ Rs. 104,800 (without hostel)<br>
+                            • Partial-Subsidized (S & X categories) ≈ Rs. 339,800+<br>
+                            Exact fee is mentioned in the prospectus and on the fee structure page.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item mb-3 border-0 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#q7">
+                            Is hostel facility available?
+                        </button>
+                    </h2>
+                    <div id="q7" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Limited hostel seats are available for male students on merit basis. Female students have very limited accommodation. Hostel dues are approximately Rs. 36,000 – 40,000 1<sup>st</sup> semester.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item mb-3 border-0 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#q8">
+                            What documents are required at the time of admission?
+                        </button>
+                    </h2>
+                    <div id="q8" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Original + attested photocopies of 
+                            1. SSC
+                            2. HSSC/DAE / Equivalent
+                            3. TCAT/ECAT/Equivalent result card
+                            4. CNIC/Form-B
+                            5. Father’s CNIC
+                            6. Domicile
+                            7. recent passport size photographs
+                            For More Information kindly read the propectus available online to check the needed documents.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item mb-3 border-0 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#q9">
+                            Can DAE students apply for admission?
+                        </button>
+                    </h2>
+                    <div id="q9" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Yes, DAE holders in relevant technologies from PBTE are eligible to apply in Engineering and Engineering Technology programs. They must appear in TCAT/ECAT/Equivalent.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item mb-3 border-0 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#q10">
+                            When are the merit lists announced?
+                        </button>
+                    </h2>
+                    <div id="q10" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Multiple merit lists are displayed after the TCAT/ECAT/Equivalent result. You must regularly check your “MY UET” account on the admission portal.
+                        </div>
+                    </div>
+                </div>
+                 
+                <div class="accordion-item mb-3 border-0 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#q11">
+                            What undergraduate programs are offered?
+                        </button>
+                    </h2>
+                    <div id="q11" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            <strong>Engineering:</strong> Civil, Electrical, Mechanical, Computer, Software, Telecommunication, Electronics, Industrial, Environmental, Mechatronics<br>
+                            <strong>Computer Science:</strong> BS Computer Science<br>
+                            <strong>Engineering Technology (Afternoon):</strong> Cyber Security, Software<br>
+                            <strong>Basic Sciences:</strong> BS Physics, BS Mathematics
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item mb-3 border-0 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#q12">
+                            How can I contact the Admission Office?
+                        </button>
+                    </h2>
+                    <div id="q12" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            <strong>Email:</strong> <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f88d9fd6999c95918b8b919796b88d9d8c8c9980919499d69d9c8dd68893">[email&#160;protected]</a><br>
+                            <strong>Phone:</strong> +92-51-9047400–412<br>
+                            Office Timing: Monday to Friday (9:00 AM – 3:00 PM)
+                        </div>
+                    </div>
+                </div>
+                 <div class="accordion-item mb-3 border-0 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#q13">
+                            What steps need to follow after merit list?
+                        </button>
+                    </h2>
+                    <div id="q13" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Students who have been offered admission need to complete the following steps: </br>
+                                            1. Pay the semester fee to secure your seat.</br>
+                                            2. After paying the semester fee, upload the paid challan form on admission portal, scrutiny team will verify the uploaded documents.</br>
+                                            3. Candidate needs to check his/her email and admission portal  regularly for re-upload documents/ upcoming merit lists.</br>
+                                            4. Wait for the original document submission plan, it will be available in the end of July or start of August.</br>
+                                            
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Still Have Questions Section (Fixed - No overlap with footer) -->
+            
+
+        </div> <!-- End col-lg-10 -->
+
+    </div> <!-- End row -->
+<div class="card shadow-sm mt-5 border-0 mb-5">
+                <div class="card-body text-center p-5">
+                    <h5 class="fw-bold text-success mb-3">Still have questions?</h5>
+                    <p class="lead text-muted mb-4">Our admission team is ready to help you.</p>
+                    
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <a href="#Contact" class="btn btn-success btn-lg px-5 py-3" style="width:320px; min-width: 360px;text-align: center;">
+                            <!-- <i class="bi bi-envelope me-2"></i> -->Contact Us
+                        </a>
+                        <a href="Downloads.php" class="btn btn-outline-success btn-lg px-5 py-3" style="width:320px; min-width: 360px;text-align: center;">
+                            <!-- <i class="bi bi-download me-2"></i> -->
+                            Download Prospectus
+                        </a>
+                    </div>
+                </div>
+            </div>
+</div> <!-- End container -->
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="196cc23adaf77ad6744e24df-text/javascript">
+
+document.addEventListener('DOMContentLoaded', function () {
+    const hash = window.location.hash;
+
+    if (hash) {
+        const target = document.querySelector(hash);
+
+        if (target) {
+            const bsCollapse = new bootstrap.Collapse(target, {
+                toggle: true
+            });
+
+            // Optional: scroll to the accordion
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    }
+});
+</script>
+</script>
+
+<!-- FOOTER -->
+<div class="footer mt-5 pt-5 pb-3" id="Contact">
+<div class="container">
+
+<div class="row">
+
+<div class="col-md-4">
+<h5>📞 Contact Us</h5>
+<p>
+University of Engineering & Technology Taxila<br>
+Taxila, Punjab, Pakistan
+</p>
+<p>
+📧 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="1164763f70757c786262787e7f51647465657069787d703f7475643f617a">[email&#160;protected]</a><br>
+📞 +92-51-9047400-412
+</p>
+<p>
+For Admission Related Quries, Create Query from Admission Portal Profile usign "Ask Admission" Link<br>
+</p>
+</div>
+
+<div class="col-md-4">
+<h5>🔗 Quick Links</h5>
+<ul class="list-unstyled">
+<li><a href="Schedule.php">Fall 2026 Important Dates</a></li>
+<li><a href="whyus.php">Why Us</a></li>
+<li><a href="Seats_Allocation.php">Seats Allocation</a></li>
+<li><a href="ProgramsOffered.php">Undergraduate Programs</a></li>
+<li><a href="explore.php">Explore</a></li>
+<li><a href="Downloads.php">Downloads</a></li>
+<li><a href="FAQS.php">FAQS</a></li>
+<li><a href="Calculator.php">Percentage Calculator</a></li>
+</ul>
+</div>
+<div class="col-md-4">
+    <h5>🔗 Quick Links</h5>
+    <ul class="list-unstyled">
+<li><a href="Admission_Eligibility.php">Admission Eligibility</a></li>
+</ul>
+    </div>
+
+<!-- <div class="col-md-4">
+<h5>✉️ Send Message</h5>
+
+<form action="send.php" method="POST">
+<input type="text" name="name" class="form-control mb-2" placeholder="Your Name" required>
+<input type="email" name="email" class="form-control mb-2" placeholder="Your Email" required>
+<textarea name="message" class="form-control mb-2" placeholder="Message" rows="3" required></textarea>
+<button type="submit" class="btn btn-light w-100">Send</button>
+</form>
+
+</div> -->
+
+</div>
+
+<hr style="background:white;">
+<p class="text-center mb-0">© 2026 UET Taxila Undergraduate Admissions Portal</p>
+
+</div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="assets/bootstrap/js/bootstrap.bundle.min.js" type="196cc23adaf77ad6744e24df-text/javascript"></script>
+<script src="assets/js/app.js" type="196cc23adaf77ad6744e24df-text/javascript"></script>
+<script src="/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="196cc23adaf77ad6744e24df-|49" defer></script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a24d10a6fa1d55e4',t:'MTc4NTY3MzUyNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"d8564f6d5b4e410eb202d13f98326329","r":1}' crossorigin="anonymous"></script>
+</body>
+</html>

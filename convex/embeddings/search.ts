@@ -12,6 +12,15 @@ import { type AdaptiveWeights, estimateIdf } from "./idf";
 const FAQ_WEIGHT = 1.0;
 const RRF_K = 60;
 
+import {
+  candidateLimit,
+  classifyFreshness,
+  classifyQueryRisk,
+  DEFAULT_STALE_SCORE_MULTIPLIER,
+  isRetrievalEligibleStatus,
+  shouldAbstainOnStaleOnly,
+} from "../shared/freshnessPolicy";
+
 type VectorSearchResult = { entryId: string; score?: number; content?: { text: string }[] };
 type TextSearchResult = { ragId: string; text: string; score: number };
 type FaqResult = {
@@ -29,6 +38,11 @@ type EnrichedResult = {
   title: string;
   relevanceScore: number;
   headingPath: string[];
+  freshnessState: "fresh" | "aged" | "unknown";
+  applicability: "current" | "unknown";
+  crawledAt?: number;
+  freshnessTier?: string;
+  isStale?: boolean;
 };
 type FusedItem = { id: string; score: number };
 type DocMeta = {
@@ -36,6 +50,9 @@ type DocMeta = {
   title: string;
   crawledAt?: number;
   freshnessTier?: string;
+  isStale?: boolean;
+  status?: string;
+  lastVerifiedAt?: number;
   parentText?: string;
   headingPath?: string[];
   contextualizedText?: string;
@@ -98,6 +115,9 @@ async function batchFetchDocMeta(
         title: doc.title,
         crawledAt: doc.crawledAt,
         freshnessTier: doc.freshnessTier,
+        isStale: doc.isStale,
+        status: doc.status,
+        lastVerifiedAt: doc.lastVerifiedAt,
         parentText: doc.parentText,
         headingPath: doc.headingPath,
         contextualizedText: doc.contextualizedText,
@@ -105,16 +125,6 @@ async function batchFetchDocMeta(
     }
   }
   return docMap;
-}
-
-function computeDecayedScore(score: number, docMeta: DocMeta | undefined): number {
-  if (!docMeta || docMeta.crawledAt === undefined) return score;
-  const daysSinceCrawled = (Date.now() - docMeta.crawledAt) / (1000 * 60 * 60 * 24);
-  let lambda = 0.0077;
-  if (docMeta.freshnessTier === "high") lambda = 0.023;
-  if (docMeta.freshnessTier === "low") lambda = 0.0039;
-  const decay = Math.max(0.2, Math.exp(-lambda * daysSinceCrawled));
-  return score * decay;
 }
 
 function pickBestContent(
@@ -139,14 +149,19 @@ async function fetchActiveFaqs(
   ctx: ActionCtx,
   queryText: string,
 ): Promise<
-  Array<{ entryId: string; content: string; url: string; title: string; relevanceScore: number }>
+  Array<{
+    entryId: string;
+    content: string;
+    url: string;
+    title: string;
+    relevanceScore: number;
+    freshnessState: "fresh" | "aged" | "unknown";
+    applicability: "current" | "unknown";
+  }>
 > {
   try {
     const now = Date.now();
     const faqs = await ctx.runQuery(internal.faq.searchFaqs, { query: queryText, now });
-    // searchFaqs returns results already ordered by BM25 relevance, so use the
-    // rank position to compute a reciprocal-rank score on the same scale as the
-    // fused document results, instead of a raw BM25 _score * constant.
     return faqs
       .filter((f: FaqResult) => !f.expiresAt || f.expiresAt > now)
       .map((faq: FaqResult, rank: number) => ({
@@ -155,6 +170,8 @@ async function fetchActiveFaqs(
         url: faq.sourceUrl || "Verified FAQ Database",
         title: faq.question,
         relevanceScore: FAQ_WEIGHT * (1 / (RRF_K + rank)),
+        freshnessState: "fresh" as const,
+        applicability: "current" as const,
       }));
   } catch (err) {
     console.error("FAQ search failed, falling back to empty FAQ list:", err);
@@ -162,10 +179,6 @@ async function fetchActiveFaqs(
   }
 }
 
-// internalAction: only callable server-side via
-// internal.embeddings.search.searchDocumentsAction from the already-authenticated
-// RAG retrieval pipeline. Removing it from the public API surface prevents
-// unauthenticated vector/full-text/FAQ search + HyDE LLM cost-amplification.
 export const searchDocumentsAction = internalAction({
   args: {
     queryText: v.string(),
@@ -182,13 +195,30 @@ export const searchDocumentsAction = internalAction({
       title: v.string(),
       relevanceScore: v.number(),
       headingPath: v.optional(v.array(v.string())),
+      freshnessState: v.optional(v.string()),
+      applicability: v.optional(v.string()),
+      crawledAt: v.optional(v.number()),
+      freshnessTier: v.optional(v.string()),
+      isStale: v.optional(v.boolean()),
     }),
   ),
   handler: async (
     ctx,
     args,
   ): Promise<
-    Array<{ entryId: string; content: string; url: string; title: string; relevanceScore: number }>
+    Array<{
+      entryId: string;
+      content: string;
+      url: string;
+      title: string;
+      relevanceScore: number;
+      headingPath?: string[];
+      freshnessState?: string;
+      applicability?: string;
+      crawledAt?: number;
+      freshnessTier?: string;
+      isStale?: boolean;
+    }>
   > => {
     const timer = recordTiming();
     const limit = args.limit ?? 8;
@@ -210,15 +240,9 @@ export const searchDocumentsAction = internalAction({
       }
     }
 
-    const searchLimit = 20;
+    // Amendment #5: Candidate overfetch to prevent post-filter top-k starvation.
+    const searchLimit = candidateLimit(limit);
 
-    // Run vector search. Stage-1 candidate generation needs only the matched
-    // chunk's ID + score for RRF fusion; neighbor expansion (before/after) was
-    // pulling up to 3× the result count in full chunk text from the vector index
-    // for candidates that get discarded by fusion. {before:0, after:0} keeps the
-    // candidate set to exactly `searchLimit` chunks. Full content is fetched
-    // later only for the post-fusion top-K via batchFetchDocMeta. If a retrieval
-    // eval shows a recall regression, restore {before:1, after:0} as a middle ground.
     const vectorRes = await rag.search(ctx, {
       namespace: "uet-global",
       query: args.queryEmbedding ?? finalQueryText,
@@ -231,7 +255,6 @@ export const searchDocumentsAction = internalAction({
       (r: VectorSearchResult) => ({ id: r.entryId, score: r.score ?? 0 }),
     );
 
-    // Text search and chunk-level full-text search in parallel
     const [textResRaw, chunkTextResRaw] = await Promise.all([
       ctx.runQuery(internal.crawl.queries.fullTextSearch, {
         query: finalQueryText,
@@ -239,7 +262,7 @@ export const searchDocumentsAction = internalAction({
       }),
       ctx.runQuery(internal.embeddings.chunkTextSearch.run, {
         query: finalQueryText,
-        limit: 10,
+        limit: Math.min(20, searchLimit),
       }),
     ]);
 
@@ -249,16 +272,39 @@ export const searchDocumentsAction = internalAction({
     const textRanked = textRes.map((r) => ({ id: r.ragId, score: r.score }));
     const chunkRanked = chunkTextRes.map((r) => ({ id: r.ragId, score: r.score }));
 
-    // 3-way RRF fusion: vector + text + chunk text search
+    // 3-way RRF fusion across overfetched candidate pools
     const fused = hybridRank(vectorRanked, textRanked, RRF_K, adaptiveWeights, "reciprocal", [
       { results: chunkRanked, weight: adaptiveWeights.text * 0.5 },
-    ]).slice(0, limit);
+    ]);
 
     const docMap = await batchFetchDocMeta(ctx, fused);
+    const now = Date.now();
 
-    const enrichedResults = fused.map((item: FusedItem) => {
+    // Amendment #4 & #5: Hard-exclude invalid statuses before scoring, apply freshness decay
+    const enrichedResults: EnrichedResult[] = [];
+    for (const item of fused) {
       const docMeta = docMap.get(item.id);
-      const score = computeDecayedScore(item.score, docMeta);
+
+      // Amendment #4: Hard exclusion by status
+      if (docMeta?.status && !isRetrievalEligibleStatus(docMeta.status)) {
+        continue;
+      }
+
+      const decision = classifyFreshness({
+        status: docMeta?.status,
+        isStale: docMeta?.isStale,
+        crawledAt: docMeta?.crawledAt,
+        freshnessTier: docMeta?.freshnessTier,
+        now,
+      });
+
+      if (!decision.eligible) {
+        continue;
+      }
+
+      const finalScore = decision.penalized
+        ? item.score * DEFAULT_STALE_SCORE_MULTIPLIER
+        : item.score;
       const content = pickBestContent(
         docMeta,
         vectorRes.results as VectorSearchResult[],
@@ -266,37 +312,70 @@ export const searchDocumentsAction = internalAction({
         chunkTextRes,
         item.id,
       );
-      return {
+
+      enrichedResults.push({
         entryId: item.id,
         content,
         url: docMeta?.url ?? "",
         title: docMeta?.title ?? "",
-        relevanceScore: score,
+        relevanceScore: finalScore,
         headingPath: docMeta?.headingPath ?? [],
-      };
+        freshnessState: decision.state,
+        applicability: decision.applicability,
+        crawledAt: docMeta?.crawledAt,
+        freshnessTier: docMeta?.freshnessTier,
+        isStale: docMeta?.isStale,
+      });
+    }
+
+    const sortedEnriched = enrichedResults.sort((a, b) => b.relevanceScore - a.relevanceScore);
+
+    // Check query risk & staleness abstention (Amendment #6)
+    const queryRisk = classifyQueryRisk(args.queryText);
+    const anyFreshSource = sortedEnriched.some((r) => r.freshnessState === "fresh");
+    const allSourcesAgedOrUnknown = sortedEnriched.length > 0 && !anyFreshSource;
+    const mustAbstain = shouldAbstainOnStaleOnly({
+      risk: queryRisk,
+      anyFreshSource,
+      allSourcesAgedOrUnknown,
     });
 
-    const sortedEnriched = enrichedResults.sort(
-      (a: EnrichedResult, b: EnrichedResult) => b.relevanceScore - a.relevanceScore,
-    );
+    if (mustAbstain) {
+      console.warn("[SEARCH] High-impact query with only stale/unknown evidence -> abstaining", {
+        query: args.queryText,
+        risk: queryRisk,
+        resultsCount: sortedEnriched.length,
+      });
+    }
 
     const faqResults = (await fetchActiveFaqs(ctx, args.queryText)).slice(0, 2);
     const combinedResults = [...faqResults, ...sortedEnriched].sort(
       (a, b) => b.relevanceScore - a.relevanceScore,
     );
 
-    const finalResults = combinedResults.slice(0, limit).map((r) => ({
-      entryId: r.entryId,
-      content: r.content,
-      url: r.url,
-      title: r.title,
-      relevanceScore: r.relevanceScore,
-      headingPath: "headingPath" in r ? (r.headingPath ?? []) : [],
-    }));
+    const finalResults = combinedResults.slice(0, limit).map((r) => {
+      const isDoc = "headingPath" in r;
+      const doc = isDoc ? (r as EnrichedResult) : undefined;
+      return {
+        entryId: r.entryId,
+        content: r.content,
+        url: r.url,
+        title: r.title,
+        relevanceScore: r.relevanceScore,
+        headingPath: doc?.headingPath ?? [],
+        freshnessState: r.freshnessState as string | undefined,
+        applicability: r.applicability as string | undefined,
+        crawledAt: doc?.crawledAt,
+        freshnessTier: doc?.freshnessTier,
+        isStale: doc?.isStale,
+      };
+    });
 
     const searchLatency = timer.end();
     console.log("[SEARCH] Hybrid search complete", {
       latencyMs: searchLatency,
+      queryRisk,
+      mustAbstain,
       vectorResults: vectorRanked.length,
       textResults: textRes.length,
       fusedResults: fused.length,

@@ -5,6 +5,9 @@ import { buildAdminMocks } from "./helpers/admin-mocks";
 // Mock global fetch for all tests
 global.fetch = vi.fn();
 
+// Mock server-only package so server utilities can be tested in Vitest
+vi.mock("server-only", () => ({}));
+
 (globalThis as any).buildAdminMocks = buildAdminMocks;
 
 // Restore/reset mocks after every test so suites cannot leak fetch (or any

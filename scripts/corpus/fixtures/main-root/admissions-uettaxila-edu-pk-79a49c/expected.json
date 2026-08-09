@@ -1,0 +1,42 @@
+{
+  "_curated": true,
+  "expected": {
+    "canonical_host": "admissions.uettaxila.edu.pk",
+    "forbidden_links_contain": [
+      "logout",
+      "login"
+    ],
+    "forbidden_text_blocks": [],
+    "required_links_contain": [
+      "entrytest.uettaxila.edu.pk"
+    ],
+    "required_text_blocks": [
+      {
+        "text": "Application Processing Fee",
+        "why": "critical admissions info"
+      },
+      {
+        "text": "4,000",
+        "why": "the fee amount"
+      }
+    ],
+    "resource_min_count": 0,
+    "title_contains": [
+      "Undergraduate Admissions 2026"
+    ],
+    "title_not_contains": [
+      "Untitled",
+      "404"
+    ],
+    "criticality": "critical",
+    "required_resources": [
+      {
+        "url_contains": "condensed",
+        "kind": "pdf",
+        "crawlable": true
+      }
+    ]
+  },
+  "family": "main-root",
+  "fixture_id": "main-root/admissions-uettaxila-edu-pk-79a49c"
+}

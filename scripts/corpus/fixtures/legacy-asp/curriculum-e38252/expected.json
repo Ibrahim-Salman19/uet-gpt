@@ -1,0 +1,38 @@
+{
+  "_curated": true,
+  "_labelled_by": "scripts/eval/_label_vacuous.py (Deliverable 2 grounded labels)",
+  "expected": {
+    "canonical_host": "web.uettaxila.edu.pk",
+    "criticality": "standard",
+    "forbidden_links_contain": [
+      "logout",
+      "login"
+    ],
+    "forbidden_text_blocks": [],
+    "required_links_contain": [],
+    "required_text_blocks": [
+      {
+        "text": "Elective",
+        "why": "page title: List of Elective Courses"
+      },
+      {
+        "text": "Mechatronics",
+        "why": "department name"
+      },
+      {
+        "text": "Semester",
+        "why": "curriculum structure keyword"
+      }
+    ],
+    "resource_min_count": 0,
+    "title_contains": [
+      "Elective"
+    ],
+    "title_not_contains": [
+      "Untitled",
+      "404"
+    ]
+  },
+  "family": "legacy-asp",
+  "fixture_id": "legacy-asp/curriculum-e38252"
+}

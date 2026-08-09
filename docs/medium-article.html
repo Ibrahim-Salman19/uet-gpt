@@ -1,0 +1,123 @@
+<h1>How We Built an Open-Source RAG Chatbot for a Pakistani University Using Next.js, Convex &amp; Groq</h1>
+<p><em>Students at UET Taxila needed fast answers about admissions, fees, and merit lists. So we built UET GPT, an open-source AI chatbot grounded in official university data.</em></p>
+<hr />
+<h2>The Problem</h2>
+<p>Every admissions season, University of Engineering and Technology (UET) Taxila students face the same chaos:</p>
+<ul>
+<li><strong>&ldquo;What&rsquo;s the ECAT merit formula?&rdquo;</strong></li>
+<li><strong>&ldquo;How much is the BS fee structure?&rdquo;</strong></li>
+<li><strong>&ldquo;When do admissions close?&rdquo;</strong></li>
+</ul>
+<p>The answers exist, scattered across PDF prospectuses, university websites, and WhatsApp forwards. But there&rsquo;s no single place to ask a question and get a fast, accurate, <em>cited</em> answer.</p>
+<p>We wanted to fix that.</p>
+<hr />
+<h2>What We Built</h2>
+<p><a href="https://uet-gpt.vercel.app">UET GPT</a> is a free, open-source AI chatbot that answers any question about UET Taxila: admissions, ECAT, merit formulas, fee structures, departments, hostel allotment, scholarships, and campus life.</p>
+<p>The key difference from a generic ChatGPT prompt: <strong>every answer is grounded in official UET Taxila documents.</strong> No hallucinations. Every response links back to its source.</p>
+<h3>Tech Stack</h3>
+<table>
+<thead>
+<tr><th>Layer</th><th>Technology</th></tr>
+</thead>
+<tbody>
+<tr><td>Frontend</td><td>Next.js 16, Tailwind CSS, TypeScript</td></tr>
+<tr><td>Backend</td><td>Convex (real-time database + serverless functions)</td></tr>
+<tr><td>Auth</td><td>Clerk</td></tr>
+<tr><td>AI Models</td><td>Llama 4 Scout, Llama 3.1 8B (via Groq)</td></tr>
+<tr><td>Vector Search</td><td>Convex vector indexes + Gemini embedding-2</td></tr>
+<tr><td>Crawler</td><td>Python (curl_cffi, trafilatura)</td></tr>
+<tr><td>Deployment</td><td>Vercel</td></tr>
+</tbody>
+</table>
+<hr />
+<h2>How the RAG Pipeline Works</h2>
+<p>RAG (Retrieval-Augmented Generation) is the core pattern. Here&rsquo;s how it flows:</p>
+<h3>Step 1: Crawl Official Sources</h3>
+<p>A Python crawler continuously fetches content from:</p>
+<ul>
+<li><code>web.uettaxila.edu.pk</code> (main university site)</li>
+<li><code>admissions.uettaxila.edu.pk</code> (admissions portal)</li>
+</ul>
+<p>It extracts clean text from HTML pages and PDF prospectuses using <code>trafilatura</code>.</p>
+<h3>Step 2: Chunk &amp; Embed</h3>
+<p>The crawled markdown gets split into overlapping chunks (~500 tokens each). Each chunk is embedded using <strong>Gemini embedding-2</strong> and stored in Convex vector indexes.</p>
+<h3>Step 3: Retrieve on Query</h3>
+<p>When a student asks &ldquo;What is the merit formula for CS?&rdquo;, the system:</p>
+<ol>
+<li><strong>Classifies intent</strong>, recognizes this as an admissions/merit query</li>
+<li><strong>Hybrid search</strong>, runs vector similarity + BM25 keyword search</li>
+<li><strong>RRF fusion</strong>, combines results using Reciprocal Rank Fusion</li>
+<li><strong>Reranks</strong>, applies a multi-tier reranker for precision</li>
+</ol>
+<h3>Step 4: Generate with Citations</h3>
+<p>The top retrieved chunks are injected into the LLM prompt using a &ldquo;Sandwich Strategy&rdquo; (context before and after the query). The model generates a clear answer and explicitly cites its sources.</p>
+<hr />
+<h2>Key Technical Decisions</h2>
+<h3>Why Convex?</h3>
+<p>We needed real-time updates (students see answers appear live) and a serverless backend that scales automatically. Convex gave us both, plus built-in vector search that eliminated the need for a separate Pinecone/Weaviate instance.</p>
+<h3>Why Groq?</h3>
+<p>Latency matters for a chatbot. Groq&rsquo;s LPU inference gives us:</p>
+<ul>
+<li><strong>Llama 4 Scout</strong>: ~50 tokens/sec for deep reasoning</li>
+<li><strong>Llama 3.1 8B</strong>: ~100 tokens/sec for fast responses</li>
+</ul>
+<p>Students get answers in under 2 seconds.</p>
+<h3>Why Not Just Fine-Tune?</h3>
+<p>Fine-tuning a model on UET data would give us a model that <em>memorizes</em> facts but can&rsquo;t cite sources and goes stale when admissions change. RAG lets us:</p>
+<ul>
+<li>Update the knowledge base without retraining</li>
+<li>Cite exact source documents</li>
+<li>Maintain a clear boundary between &ldquo;what the model knows&rdquo; and &ldquo;what the documents say&rdquo;</li>
+</ul>
+<hr />
+<h2>What We Learned Building It</h2>
+<h3>1. The Crawler Is the Hardest Part</h3>
+<p>Everyone focuses on the LLM. But the real work is building a reliable crawler that handles:</p>
+<ul>
+<li>University websites with broken HTML</li>
+<li>PDF prospectuses with inconsistent formatting</li>
+<li>Admissions portals that change URLs every semester</li>
+<li>CAPTCHAs and rate limiting</li>
+</ul>
+<p>We use <code>curl_cffi</code> (TLS fingerprint rotation) and <code>trafilatura</code> (clean text extraction) to handle most of this.</p>
+<h3>2. Chunking Strategy Matters More Than Model Choice</h3>
+<p>Bad chunks = bad retrieval = bad answers. We experimented with:</p>
+<ul>
+<li>Fixed-size chunking (too aggressive, splits sentences)</li>
+<li>Recursive splitting by headers (better, preserves context)</li>
+<li>Context-enriched chunks (adds surrounding context to each chunk)</li>
+</ul>
+<p>Winner: <strong>Recursive splitting with context enrichment.</strong> Each chunk gets a summary of its parent section, so the retriever has more signal to work with.</p>
+<h3>3. Anti-Hallucination Is a Pipeline Problem, Not a Prompt Problem</h3>
+<p>Adding &ldquo;don&rsquo;t hallucinate&rdquo; to the prompt helps marginally. What actually works:</p>
+<ul>
+<li><strong>CRAG (Corrective RAG)</strong>: An LLM judge evaluates retrieved results. If confidence is low, it tells the model to say &ldquo;I don&rsquo;t have enough information&rdquo; instead of guessing.</li>
+<li><strong>Source verification</strong>: Every answer must reference a retrieved chunk. No chunk = no answer.</li>
+<li><strong>Conservative temperature</strong>: We run at 0.3, factual, not creative.</li>
+</ul>
+<h3>4. Students Want Speed, Not Features</h3>
+<p>Our initial design had fancy UI animations, multi-step forms, and a complex thread system. User testing showed students just want:</p>
+<ol>
+<li>Type a question</li>
+<li>Get an answer fast</li>
+<li>See where it came from</li>
+</ol>
+<p>We simplified ruthlessly. The chat input is always visible. Answers stream in real-time. Sources are one click away.</p>
+<hr />
+<h2>Open Source &amp; Community</h2>
+<p>UET GPT is released under AGPL-3.0. The full source is on <a href="https://github.com/devhms/uet_gpt">GitHub</a>.</p>
+<p>We built this as a community project, student-built, student-maintained, free for everyone. If you&rsquo;re a UET Taxila student, faculty member, or prospective applicant, try it out at <a href="https://uet-gpt.vercel.app">uet-gpt.vercel.app</a>.</p>
+<p>If you&rsquo;re building something similar for your university, we&rsquo;d love to help you get started. The architecture is designed to be portable, swap the crawler seeds and you have a RAG chatbot for any institution.</p>
+<hr />
+<h2>What&rsquo;s Next</h2>
+<ul>
+<li><strong>More sources</strong>: Adding examination schedules, library catalogs, and transport routes</li>
+<li><strong>Multilingual support</strong>: Urdu answers for students who prefer it</li>
+<li><strong>Mobile app</strong>: Native iOS/Android experience</li>
+<li><strong>Community contributions</strong>: PRs welcome, especially for crawling new UET Taxila pages</li>
+</ul>
+<hr />
+<p><em>Built with love by UET Taxila students. Free forever.</em></p>
+<p><strong>Try it:</strong> <a href="https://uet-gpt.vercel.app">uet-gpt.vercel.app</a><br />
+<strong>Source code:</strong> <a href="https://github.com/devhms/uet_gpt">github.com/devhms/uet_gpt</a><br />
+<strong>Questions?</strong> Visit my <a href="https://portfoliofinal-lyart-tau.vercel.app/">portfolio</a> or reach out on Twitter.</p>

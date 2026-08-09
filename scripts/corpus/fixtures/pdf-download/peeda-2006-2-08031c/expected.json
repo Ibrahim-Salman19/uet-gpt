@@ -1,0 +1,37 @@
+{
+  "_curated": true,
+  "_labelled_by": "scripts/eval/_label_vacuous.py (Deliverable 2 grounded labels)",
+  "expected": {
+    "canonical_host": "web.uettaxila.edu.pk",
+    "criticality": "standard",
+    "forbidden_links_contain": [],
+    "forbidden_text_blocks": [],
+    "max_duration_ms": 60000,
+    "required_links_contain": [],
+    "required_text_blocks": [
+      {
+        "text": "PUNJAB EMPLOYEES EFFICIENCY, DISCIPLINE AND ACCOUNTABILITY ACT",
+        "why": "act title"
+      },
+      {
+        "text": "NOTIFICATION",
+        "why": "notification section"
+      },
+      {
+        "text": "Discipline",
+        "why": "core act subject"
+      },
+      {
+        "text": "Efficiency",
+        "why": "core act subject"
+      }
+    ],
+    "resource_min_count": 0,
+    "title_contains": [],
+    "title_not_contains": [
+      "Untitled"
+    ]
+  },
+  "family": "pdf-download",
+  "fixture_id": "pdf-download/peeda-2006-2-08031c"
+}

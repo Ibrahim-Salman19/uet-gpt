@@ -1,0 +1,12 @@
+{
+  "body_sha256": "c914eab630dc728690c2e848b71b01c0b2c6a26f37052c617082f34575ee065c",
+  "body_size": 16359,
+  "content_type": "text/html; charset=utf-8",
+  "elapsed_ms": 1113,
+  "fetched_at": "2026-08-02T12:25:31+00:00",
+  "final_url": "https://admissions.uettaxila.edu.pk/FeesForTechnologyPrograms.php",
+  "redirect_chain": [],
+  "remote_ip": "104.21.50.7,172.67.198.179",
+  "requested_url": "https://admissions.uettaxila.edu.pk/FeesForTechnologyPrograms.php",
+  "status": 200
+}

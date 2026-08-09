@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UET Taxila Undergraduate Admissions </title>
+    <!-- <php echo date("Y"); ?> -->
+    <link href="assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap-icons/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=1">
+    <script type="5c8b03bd520129362e6a4e4f-text/javascript" src="../js/jquery.js"></script>
+</head>
+
+<body>
+
+<!-- Dynamic Announcement Bar -->
+<div class="py-3 text-center fw-semibold" style="background: #dc3545; color: white; font-size: 1.1rem;">
+    🚨 Undergraduate Admissions Fall 2026 | Registration Started  <!-- Applicationsare now open — Apply Today!  <php echo date("Y"); ?>-->
+</div>
+
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="index.php">
+            <img src="https://admissions.uettaxila.edu.pk/images/UETLogo.png" class="logo me-3" alt="UET Taxila Logo">
+            <span class="fw-bold">
+                UET Taxila<br>
+                <small style="font-size: 0.85rem; opacity: 0.9;">Undergraduate Admissions</small>
+                 <!-- <php echo date("Y"); ?> -->
+            </span>
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="nav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="index.php">Home</a></li>
+                 <li class="nav-item"><a class="nav-link" href="ProgramsOffered.php">Programs</a></li>
+               <!-- <li class="nav-item"><a class="nav-link" href="#Discover">Discover</a></li>
+                <li class="nav-item"><a class="nav-link" href="#Facilities">Facilities</a></li>
+                -->
+                <li class="nav-item"><a class="nav-link" href="explore.php">Explore Campus</a></li>
+                <li class="nav-item"><a class="nav-link" href="FAQS.php">FAQs</a></li>
+                <li class="nav-item"><a class="nav-link" href="Downloads.php">Downloads</a></li>
+                <li class="nav-item"><a class="nav-link" href="#Contact">Contact Us</a></li>
+                  <!-- <php
+                        if (session_status() === PHP_SESSION_NONE) {
+                                session_start();
+                                }
+
+                    if (empty($_SESSION)) {
+                                                   echo '<li class="nav-item"><a class="nav-link" href="My_UET.php">My UET</a></li>';
+                                        } else {
+                                                    echo '<li class="nav-item"><a class="nav-link" href="Logout.php">Logout</a></li>';
+                                            }
+                    ?> -->
+                    <li class="nav-item"><a class="nav-link " id="applylink" href="https://admission.uettaxila.edu.pk/application/index.php">Apply Now</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<script type="5c8b03bd520129362e6a4e4f-text/javascript">
+  $(document).ready(function() {
+    $(".btnapply").click(function(e) {
+      e.preventDefault(); // prevent link navigation
+      alert("Registeration Opening Soon");
+    });
+  });
+</script>
+<div class="container mt-5 pt-5">
+
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <h1 class="fw-bold display-6">Admission Eligibility</h1>
+        <p class="text-muted">Undergraduate Programs — UET Taxila</p>
+        <div class="mx-auto" style="width:70px;height:4px;background:var(--uet-accent);border-radius:10px;"></div>
+    </div>
+
+    <!-- Intro -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-5">
+        <p class="mb-0">
+            <strong>a.</strong> An applicant for admission to any Bachelor’s degree program must fulfill the following requirements:
+        </p>
+    </div>
+
+    <!-- TABLE -->
+    <div class="card shadow-lg border-0 rounded-4 overflow-hidden mb-5">
+
+        <div class="card-header bg-light">
+            <h5 class="mb-0 fw-semibold">Eligibility Criteria by Program</h5>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle mb-0 text-center">
+
+                <thead class="table-light">
+                    <tr>
+                        <th>Sr#</th>
+                        <th>Group</th>
+                        <th class="text-start">Department</th>
+                        <th>HSSC / Equivalent</th>
+                        <th>Min %</th>
+                        <th>ECAT</th>
+                        <th>Merit Formula</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <!-- Group 01 -->
+                    <tr>
+                        <td>1</td>
+                        <td rowspan="11" class="fw-semibold">Group 01</td>
+                        <td class="text-start">Civil Engineering</td>
+                        <td rowspan="10" class="text-start">
+                            1. HSSC (Mathematics, Physics and Chemistry / Computer Science/ Equivalent)<br>
+                            2. HSSC (Pre-Medical with condensed math course) / Equivalent<br>
+                            3. DAE in relevant technology (PBTE)<br>
+                            4. Registeration Of condensed Mathematics course is open & will continue till availabilty of seats <br>
+                            5. TCAT / ECAT / Equivalent acceptable to PEC & UET Taxila
+                        </td>
+                        <td rowspan="10">60%</td>
+                        <td rowspan="11">Required</td>
+                        <td rowspan="11" class="text-start">
+                            50% HSSC (Part-I)<br>
+                            33% ECAT<br>
+                            17% SSC
+                        </td>
+                    </tr>
+
+                    <tr><td>2</td><td class="text-start">Environmental Engineering</td></tr>
+                    <tr><td>3</td><td class="text-start">Electrical Engineering</td></tr>
+                    <tr><td>4</td><td class="text-start">Mechanical Engineering</td></tr>
+                    <tr><td>5</td><td class="text-start">Industrial Engineering</td></tr>
+                    <tr><td>6</td><td class="text-start">Electronics Engineering</td></tr>
+                    <tr><td>7</td><td class="text-start">Computer Engineering</td></tr>
+                    <tr><td>8</td><td class="text-start">Software Engineering</td></tr>
+                    <tr><td>9</td><td class="text-start">Telecom Engineering</td></tr>
+                    <tr><td>10</td><td class="text-start">Mechatronics Engineering</td></tr>
+
+                    <!-- Computer Science -->
+                    <tr>
+                        <td>11</td>
+                        <td class="text-start">Computer Science</td>
+                        <td class="text-start">
+                            Any combination with Mathematics OR Physics, Biology, Chemistry OR DAE
+                        </td>
+                        <td rowspan="5">50%</td>
+                    </tr>
+
+                    <!-- Group 02 -->
+                    <tr>
+                        <td>12</td>
+                        <td rowspan="2" class="fw-semibold">Group 02</td>
+                        <td class="text-start">Mathematics</td>
+                        <td class="text-start">
+                            Any combination with Mathematics OR DAE
+                        </td>
+                        <td rowspan="2">Not Required</td>
+                        <td rowspan="2" class="text-start">
+                            70% HSSC (Part-I)<br>
+                            30% SSC
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>14</td>
+                        <td class="text-start">Physics</td>
+                        <td class="text-start">
+                            Any combination with Physics OR DAE
+                        </td>
+                    </tr>
+                    <!-- Group 03 -->
+                     <tr>
+                        <td>15</td>
+                        <td rowspan="2" class="fw-semibold">Group 03</td>
+                         <td class="text-start">Cyber Security Engineering Technology</td>
+                         <td rowspan="2" class="text-start">
+                            1. Any HSSC combination with Mathematics/ <br>
+                            2. HSSC (Pre-Medical)/ ICS/ A-Level / Equivalent<br>
+                            3. DAE in relevant technology (PBTE)<br>
+                            4. TCAT / ECAT / Equivalent acceptable to PEC & UET Taxila
+                            5. Applicants from all over the Pakistan including AJK are eligible to apply
+                            6. Diploma in relevant technology passed from Technical Boards of all provinces with a minimum of 50% marks.
+                        </td>
+                        <td rowspan="2"> Required</td>
+                          <td rowspan="2" class="text-start">
+                            50% HSSC (Part-I)<br>
+                            33% ECAT<br>
+                            17% SSC
+                        </td>
+                     </tr>
+                      <tr>
+                        <td>16</td>
+                        
+                         <td class="text-start">Software Engineering Technology</td>
+                     </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Important Notes -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-5">
+        <h5 class="fw-semibold mb-3">Important Conditions</h5>
+
+        <ul class="mb-0">
+            <li>Marks of NCC and Hifz-e-Quran are only for merit, not eligibility.</li>
+            <li class="text-danger">Rounding off percentage to reach eligibility is not allowed.</li>
+            <li>Applicant must be a bonafide resident of the relevant area.</li>
+            <li>Medical fitness (Form F-V) is required.</li>
+            <li>Applicant must appear in Entry Test (TCAT / ECAT or equivalent).</li>
+        </ul>
+    </div>
+
+    <!-- Equivalent Exams -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-5">
+        <h5 class="fw-semibold mb-3">Equivalent Examinations</h5>
+
+        <ul class="mb-3">
+            <li>Intermediate (Pre-Engineering) — BISE / AJK</li>
+            <li>F.Sc (Pre-Medical) with Mathematics</li>
+            <li>Cambridge A-Level (Physics, Chemistry, Mathematics)</li>
+            <li>British A-Level</li>
+            <li>American High School Diploma</li>
+            <li>Any IBCC-recognized equivalent qualification</li>
+        </ul>
+
+        <div class="bg-light p-3 rounded">
+            <strong>IBCC Contact:</strong><br>
+            Inter Board Committee of Chairmen<br>
+            G-10/4, Islamabad<br>
+            Phone: 051-9330251
+        </div>
+    </div>
+
+    <!-- Additional Links -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-5">
+        <h5 class="fw-semibold mb-3">Additional Information</h5>
+
+        <p>
+            Eligibility for DAE-based admission:
+            <a href="Diploma_Holders.php" class="fw-semibold">Click Here</a>
+        </p>
+
+        <p class="mb-0">
+            Both male and female candidates are eligible. 
+            See <a href="Seats_Allocation.php" class="fw-semibold">Seats Allocation Chart</a>.
+        </p>
+    </div>
+
+</div>
+
+
+<!-- FOOTER -->
+<div class="footer mt-5 pt-5 pb-3" id="Contact">
+<div class="container">
+
+<div class="row">
+
+<div class="col-md-4">
+<h5>📞 Contact Us</h5>
+<p>
+University of Engineering & Technology Taxila<br>
+Taxila, Punjab, Pakistan
+</p>
+<p>
+📧 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f68391d897929b9f85859f9998b683938282978e9f9a97d8939283d8869d">[email&#160;protected]</a><br>
+📞 +92-51-9047400-412
+</p>
+<p>
+For Admission Related Quries, Create Query from Admission Portal Profile usign "Ask Admission" Link<br>
+</p>
+</div>
+
+<div class="col-md-4">
+<h5>🔗 Quick Links</h5>
+<ul class="list-unstyled">
+<li><a href="Schedule.php">Fall 2026 Important Dates</a></li>
+<li><a href="whyus.php">Why Us</a></li>
+<li><a href="Seats_Allocation.php">Seats Allocation</a></li>
+<li><a href="ProgramsOffered.php">Undergraduate Programs</a></li>
+<li><a href="explore.php">Explore</a></li>
+<li><a href="Downloads.php">Downloads</a></li>
+<li><a href="FAQS.php">FAQS</a></li>
+<li><a href="Calculator.php">Percentage Calculator</a></li>
+</ul>
+</div>
+<div class="col-md-4">
+    <h5>🔗 Quick Links</h5>
+    <ul class="list-unstyled">
+<li><a href="Admission_Eligibility.php">Admission Eligibility</a></li>
+</ul>
+    </div>
+
+<!-- <div class="col-md-4">
+<h5>✉️ Send Message</h5>
+
+<form action="send.php" method="POST">
+<input type="text" name="name" class="form-control mb-2" placeholder="Your Name" required>
+<input type="email" name="email" class="form-control mb-2" placeholder="Your Email" required>
+<textarea name="message" class="form-control mb-2" placeholder="Message" rows="3" required></textarea>
+<button type="submit" class="btn btn-light w-100">Send</button>
+</form>
+
+</div> -->
+
+</div>
+
+<hr style="background:white;">
+<p class="text-center mb-0">© 2026 UET Taxila Undergraduate Admissions Portal</p>
+
+</div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="assets/bootstrap/js/bootstrap.bundle.min.js" type="5c8b03bd520129362e6a4e4f-text/javascript"></script>
+<script src="assets/js/app.js" type="5c8b03bd520129362e6a4e4f-text/javascript"></script>
+<script src="/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="5c8b03bd520129362e6a4e4f-|49" defer></script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"d8564f6d5b4e410eb202d13f98326329","r":1}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a24d10ba0ac79aa3',t:'MTc4NTY3MzUyNw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

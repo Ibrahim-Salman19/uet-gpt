@@ -1,0 +1,45 @@
+{
+  "_curated": true,
+  "_labelled_by": "scripts/eval/_label_vacuous.py (Deliverable 2 grounded labels)",
+  "_note": "max_duration_ms=300000 accommodates the isolated worker's TWO-pass extraction (determinism fingerprint): single pass measures ~124s on this 4.8MB PDF, so two passes + spawn overhead need ~282s. The earlier 180000ms budget fit one pass but timed out on two. CI runners are typically faster; if a slower machine times out, raise this rather than disabling determinism.",
+  "expected": {
+    "canonical_host": "admissions.uettaxila.edu.pk",
+    "criticality": "critical",
+    "forbidden_links_contain": [],
+    "forbidden_text_blocks": [],
+    "max_duration_ms": 300000,
+    "required_links_contain": [],
+    "required_text_blocks": [
+      {
+        "text": "UG PROSPECTUS 2024",
+        "why": "document identity"
+      },
+      {
+        "text": "Disclaimer",
+        "why": "front-matter section"
+      },
+      {
+        "text": "Vision",
+        "why": "university vision heading"
+      },
+      {
+        "text": "Mission",
+        "why": "university mission heading"
+      },
+      {
+        "text": "Undergraduate",
+        "why": "admissions scope"
+      }
+    ],
+    "resource_min_count": 0,
+    "title_contains": [
+      "Prospectus"
+    ],
+    "title_not_contains": [
+      "Untitled",
+      "404"
+    ]
+  },
+  "family": "pdf-download",
+  "fixture_id": "pdf-download/uet-prospectus-2024-d60577"
+}

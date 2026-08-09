@@ -1,0 +1,48 @@
+{
+  "_curated": true,
+  "_labelled_by": "scripts/eval/_label_webother.py (web-other expansion \u2014 labels sourced from raw body)",
+  "expected": {
+    "canonical_host": "web.uettaxila.edu.pk",
+    "criticality": "standard",
+    "forbidden_links_contain": [
+      "logout",
+      "login"
+    ],
+    "forbidden_text_blocks": [
+      "Untitled Document"
+    ],
+    "max_duration_ms": 60000,
+    "required_links_contain": [
+      "doi.org"
+    ],
+    "required_resources": [
+      {
+        "crawlable": false,
+        "critical": false,
+        "kind": "page",
+        "nofollow": false,
+        "url_contains": "doi.org"
+      }
+    ],
+    "required_text_blocks": [
+      {
+        "text": "Swarm Robotics Lab",
+        "why": "lab identity \u2014 the site's subject"
+      },
+      {
+        "text": "Publications",
+        "why": "the page section"
+      }
+    ],
+    "resource_min_count": 1,
+    "title_contains": [
+      "Publications"
+    ],
+    "title_not_contains": [
+      "Untitled",
+      "404"
+    ]
+  },
+  "family": "web-other",
+  "fixture_id": "web-other/publications-da50b5"
+}

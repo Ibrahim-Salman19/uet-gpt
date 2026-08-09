@@ -39,7 +39,7 @@ export const classifyQueryAction = internalAction({
 
     try {
       const { object } = await generateObject({
-        model: getGroq()("llama-3.1-8b-instant"),
+        model: getGroq()("openai/gpt-oss-20b"),
         schema: z.object({
           intent: z
             .enum([...INTENT_ENUM] as [string, ...string[]])
@@ -69,7 +69,7 @@ export const rewriteQueryAction = internalAction({
 
     try {
       const { text } = await generateText({
-        model: getGroq()("llama-3.1-8b-instant"),
+        model: getGroq()("openai/gpt-oss-20b"),
         system:
           "You are a search expert. Rewrite the user's query to be a concise keyword-rich search query. " +
           "If the query is written in Roman Urdu (Urdu language written using Latin/English characters, e.g., 'fees kitni hai', 'daakhila kab hoga', 'hostel kahan hai', 'documents kya chahiye'), detect it, translate it to English first, and then rewrite it into keyword-rich English search terms. " +
@@ -99,9 +99,9 @@ export const hydeQueryAction = internalAction({
       if (geminiKey) {
         const { createGoogleGenerativeAI } = await import("@ai-sdk/google");
         const google = createGoogleGenerativeAI({ apiKey: geminiKey });
-        model = google("gemini-2.5-flash");
+        model = google("gemini-3.5-flash-lite");
       } else if (process.env.GROQ_API_KEY) {
-        model = getGroq()("llama-3.1-8b-instant");
+        model = getGroq()("openai/gpt-oss-20b");
       } else {
         return args.query;
       }

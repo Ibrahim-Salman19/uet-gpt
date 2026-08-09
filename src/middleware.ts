@@ -28,7 +28,11 @@ const isPublicRoute = createRouteMatcher([
 const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
-  if (process.env.PLAYWRIGHT_TEST === "true" || (process.env.NODE_ENV === "development" && req.nextUrl?.searchParams?.get("mock_auth") === "true")) {
+  if (
+    process.env.PLAYWRIGHT_TEST === "true" ||
+    (process.env.NODE_ENV === "development" &&
+      req.nextUrl?.searchParams?.get("mock_auth") === "true")
+  ) {
     return NextResponse.next();
   }
 

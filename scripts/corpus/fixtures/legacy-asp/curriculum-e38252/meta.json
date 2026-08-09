@@ -1,0 +1,12 @@
+{
+  "body_sha256": "9632bdce7676d1d8aecaae0340b7838c16fc5a142e3934ede0ab9fddeacdaad6",
+  "body_size": 126151,
+  "content_type": "text/html",
+  "elapsed_ms": 2432,
+  "fetched_at": "2026-08-02T12:23:58+00:00",
+  "final_url": "https://web.uettaxila.edu.pk/MCED/Curriculum.asp",
+  "redirect_chain": [],
+  "remote_ip": "104.21.50.7,172.67.198.179",
+  "requested_url": "https://web.uettaxila.edu.pk/MCED/Curriculum.asp",
+  "status": 200
+}

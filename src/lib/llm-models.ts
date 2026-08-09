@@ -16,9 +16,9 @@ interface ModelConfig {
 }
 
 export const LLM_FALLBACK_CHAIN: ModelConfig[] = [
-  // Groq: primary — highly reliable, fast, free tier
-  { id: "llama-3.3-70b-versatile", provider: "groq" },
-  { id: "llama-3.1-8b-instant", provider: "groq" },
+  // Groq: primary — highly reliable, fast, free tier (replacement models for deprecated Llama)
+  { id: "openai/gpt-oss-120b", provider: "groq" },
+  { id: "openai/gpt-oss-20b", provider: "groq" },
   // Cerebras: secondary — llama models deprecated May 2026; use active models
   { id: "gemma-4-31b", provider: "cerebras" },
   { id: "gpt-oss-120b", provider: "cerebras" },

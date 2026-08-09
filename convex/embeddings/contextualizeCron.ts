@@ -36,7 +36,9 @@ function readRecoveryControls(): { allowBackfill: boolean; dailyLimit: number } 
 
   const capRaw = Number.parseInt(process.env.MAX_DOCUMENTS_PER_RECOVERY_BATCH ?? "", 10);
   const dailyLimit =
-    Number.isFinite(capRaw) && capRaw >= 1 ? Math.min(capRaw, DEFAULT_DAILY_LIMIT) : DEFAULT_DAILY_LIMIT;
+    Number.isFinite(capRaw) && capRaw >= 1
+      ? Math.min(capRaw, DEFAULT_DAILY_LIMIT)
+      : DEFAULT_DAILY_LIMIT;
 
   return { allowBackfill, dailyLimit };
 }

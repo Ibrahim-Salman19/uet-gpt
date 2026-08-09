@@ -17,7 +17,14 @@ export const metadata: Metadata = {
       "UET Taxila history, campuses, faculties, departments, admissions, and how UET GPT helps students.",
     url: `${siteUrl}/uet-taxila`,
     type: "website",
-    images: [{ url: `${siteUrl}/opengraph-image`, width: 1200, height: 630, alt: "UET GPT — AI Assistant for UET Taxila" }],
+    images: [
+      {
+        url: `${siteUrl}/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: "UET GPT — AI Assistant for UET Taxila",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",

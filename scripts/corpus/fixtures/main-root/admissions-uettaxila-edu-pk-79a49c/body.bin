@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UET Taxila Undergraduate Admissions </title>
+    <!-- <php echo date("Y"); ?> -->
+    <link href="assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap-icons/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=1">
+    <script type="3fbea16f65bacec2e83fd49f-text/javascript" src="../js/jquery.js"></script>
+</head>
+
+<body>
+
+<!-- Dynamic Announcement Bar -->
+<div class="py-3 text-center fw-semibold" style="background: #dc3545; color: white; font-size: 1.1rem;">
+    🚨 Undergraduate Admissions Fall 2026 | Registration Started  <!-- Applicationsare now open — Apply Today!  <php echo date("Y"); ?>-->
+</div>
+
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="index.php">
+            <img src="https://admissions.uettaxila.edu.pk/images/UETLogo.png" class="logo me-3" alt="UET Taxila Logo">
+            <span class="fw-bold">
+                UET Taxila<br>
+                <small style="font-size: 0.85rem; opacity: 0.9;">Undergraduate Admissions</small>
+                 <!-- <php echo date("Y"); ?> -->
+            </span>
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="nav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="index.php">Home</a></li>
+                 <li class="nav-item"><a class="nav-link" href="ProgramsOffered.php">Programs</a></li>
+               <!-- <li class="nav-item"><a class="nav-link" href="#Discover">Discover</a></li>
+                <li class="nav-item"><a class="nav-link" href="#Facilities">Facilities</a></li>
+                -->
+                <li class="nav-item"><a class="nav-link" href="explore.php">Explore Campus</a></li>
+                <li class="nav-item"><a class="nav-link" href="FAQS.php">FAQs</a></li>
+                <li class="nav-item"><a class="nav-link" href="Downloads.php">Downloads</a></li>
+                <li class="nav-item"><a class="nav-link" href="#Contact">Contact Us</a></li>
+                  <!-- <php
+                        if (session_status() === PHP_SESSION_NONE) {
+                                session_start();
+                                }
+
+                    if (empty($_SESSION)) {
+                                                   echo '<li class="nav-item"><a class="nav-link" href="My_UET.php">My UET</a></li>';
+                                        } else {
+                                                    echo '<li class="nav-item"><a class="nav-link" href="Logout.php">Logout</a></li>';
+                                            }
+                    ?> -->
+                    <li class="nav-item"><a class="nav-link " id="applylink" href="https://admission.uettaxila.edu.pk/application/index.php">Apply Now</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<script type="3fbea16f65bacec2e83fd49f-text/javascript">
+  $(document).ready(function() {
+    $(".btnapply").click(function(e) {
+      e.preventDefault(); // prevent link navigation
+      alert("Registeration Opening Soon");
+    });
+  });
+</script>
+<!-- MODERN IMAGE GALLERY POPUP -->
+<style>
+    .custom-modal {
+  max-width: 80vw;
+  width: 80vw;
+}
+</style>
+    <div class="modal fade" id="admissionPopup" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered custom-modal">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            
+            <!-- Header -->
+            <div class="modal-header border-0 pb-0" style="background: linear-gradient(135deg, var(--uet-green), #004d00);">
+                <h5 class="modal-title text-white fw-bold fs-3">Fall 2026 </h5>
+                <!-- <h5 class="modal-title text-white fw-bold fs-3">TCAT-II Registration</h5> -->
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body p-4">
+                
+                                 <div style="margin: 0 auto;border: 3px dotted cadetblue;">
+                <h2 class="fw-bold text-danger"> The Undergraduate Admissions 2026 Second merit list has been uploaded to the Admission Portal on 30th July 2026. Applicants are advised to log in to their accounts to view their admission status and the offered program.</h2>
+                </div>
+                <!--  <div style="margin: 0 auto;">
+                        <h2 class="fw-bold text-danger" style="text-align: center;"> TCAT-  Candidate List</h2>
+                         <a target="_blank" href="Downloads/TCATList/27 July Batch-I.pdf"> 27-07-2026  Batch - I </a><br>
+                         <a target="_blank" href="Downloads/TCATList/27 July Batch-II.pdf"> 27-07-2026  Batch - II </a><br>
+                         <a target="_blank" href="Downloads/TCATList27 July Batch-III.pdf"> 27-07-2026  Batch - III </a><br>
+                         <a target="_blank" href="Downloads/TCATList/Day 07 Batch-IV.pdf"> 17-07-2026  Batch - IV </a><br>
+                        <a target="_blank" href="Downloads/TCATList/Day 03 Batch-I.pdf"> 10-07-2026 (08:00 AM) Day - III  Batch - I </a><br>
+                         <a target="_blank" href="Downloads/TCATList/Day 03 Batch-II.pdf"> 10-07-2026 (10:30 AM) Day - III  Batch - II </a><br>
+                         <a target="_blank" href="Downloads/TCATList/Day 04 Batch-I.pdf"> 13-07-2026 (08:00 AM) Day - IV  Batch - I </a><br>
+                         <a target="_blank" href="Downloads/TCATList/Day 04 Batch-II.pdf"> 13-07-2026 (10:30 AM) Day - IV  Batch - II </a><br>
+                        </div> 
+                <hr/> 
+               <div style="margin: 0 auto; border: 3px dotted cadetblue;">
+                            <h2 class="fw-bold text-danger" style="text-align: center;">Notice for Candidates</h2>
+                            Candidates who wish to apply for Freezing or Downgrading of their admission are requested to send an email to <strong>ug.admission@uettaxila.edu.pk</strong> using their registered email address (the email address used on the Admission Portal).<br>
+                            Please use the following subject line: "<strong>Application for Downgrading/Freezing</strong>"<br>
+                            In the body of the email, kindly mention your Admission Tracking ID along with your request.<br>
+                            Your email must be sent no later than Sunday, 11:59 PM. Requests received after the deadline may not be considered.<br>
+                
+           </div>
+           <hr/>-->
+                        <!-- <hr/>
+                <div style="margin: 0 auto;">
+                        <h2 class="fw-bold text-danger" style="text-align: center;"> Undergraduate Admissions 2026 – Merit List </h2>
+                            
+                            
+                           Students who have been offered admission need to complete the following steps: </br>
+                                            1. Pay the semester fee to secure your seat.</br>
+                                            2. After paying the semester fee, upload the paid challan form on admission portal, scrutiny team will verify the uploaded documents.</br>
+                                            3. Candidate needs to check his/her email and admission portal  regularly for re-upload documents/ upcoming merit lists.</br>
+                                            4. Please wait for the original document submission schedule. It will be announced at the end of July or the beginning of August.</br>
+                
+           </div>  -->
+        
+                    <!-- <div style="margin: 0 auto;">
+                       <h2 class="fw-bold text-danger" style="text-align: center;">Important Info</h2>
+                        Admission Application Processing Fee: Rs. 4,000/- (Non-Refundable)<br>
+                        Apply at:  <a target="_blank" href="https://admission.uettaxila.edu.pk/application/index.php">https://admission.uettaxila.edu.pk/application/index.php</a> <br/>
+                        Great news! Due to the overwhelming response, the application deadline for the Engineering Technology Program has been extended until 24<sup>th</sup> July. Don't miss this opportunity—apply now!
+                        </div> -->
+                            
+                        <div class="row g-4">
+                            
+                            <div class="col-6 g-4" style="border: 3px dotted cadetblue;">
+                            
+                                 <div style="margin: 0 auto;">
+                       <h2 class="fw-bold text-danger" style="text-align: center;">Important Info</h2>
+                        Admission Application Processing Fee: Rs. 4,000/- (Non-Refundable)<br>
+                        Apply at:  <a target="_blank" href="https://admission.uettaxila.edu.pk/application/index.php">https://admission.uettaxila.edu.pk/application/index.php</a> <br/>
+                       
+                        </div>
+                                            
+
+                           <!--h6 class="fw-bold text-success"> The Undergraduate Admissions 2026 First merit list has been uploaded to the Admission Portal on 8th June 2026. Applicants are advised to log in to their accounts to view their admission status and the offered program (if applicable).
+                             
+                                The schedule for document submission will be uploaded on the Admissions website. Applicants are advised to regularly check the website and plan their visit to the Admissions Office accordingly.</h6-->
+                     <img src="images/UG-Admission-AD-Fall-2026-ENP.png" class="card-img-top" alt="Main Campus" class="card-img-top" style="height: 90%;">
+                            <!-- <div class=" text-center">
+                                <h5 class="fw-bold text-success"> <a target="_blank" href="https://entrytest.uettaxila.edu.pk/">Learn More </a></h5>
+                            </div> -->
+                       
+                    </div>
+                     <div class="col-6 g-4" style="border: 3px dotted cadetblue;">
+                            <div style="margin: 0 auto;">
+
+                        <h2 class="fw-bold text-danger" style="text-align: center;">Important Info</h2>
+                         TCAT Registration Fee: Rs. 3,000/- (Non-Refundable) <br>
+                            Apply at: <a target="_blank" href="https://entrytest.uettaxila.edu.pk/"> https://entrytest.uettaxila.edu.pk/</a><br></div>
+                        <a target="_blank" href="https://entrytest.uettaxila.edu.pk/"> <img src="images/TCAT-V.png?v1" class="card-img-top" alt="Main Campus" ></a>
+
+                            <!-- <div class=" text-center">
+                                <h5 class="fw-bold text-success"> <a target="_blank" href="https://entrytest.uettaxila.edu.pk/">Learn More </a></h5>
+                            </div>  -->
+                            </div>
+                   
+                    <hr />
+                    <!-- Image 2 -->
+                      <div class="row g-4">
+                         <div class="col-6 g-4" style="border: 3px dotted cadetblue;">
+                         <img src="images/S-category-AD.png?v1" class="card-img-top" alt="Main Campus" class="card-img-top" style="height: 90%;">
+                          </div>
+                    
+                        <div class="col-6 g-4" style="border: 3px dotted cadetblue;">
+                                  <div style="margin: 0 auto;">
+                                    <h2 class="fw-bold text-danger" style="text-align: center;">Important Info</h2>
+                        Great news! Due to the overwhelming response, the application deadline for the Engineering Technology Program has been extended until 24<sup>th</sup> July. Don't miss this opportunity—apply now!
+                        </div>
+                                 
+                         <img src="images/UG-Technology Programs AD-Fall 2026.png?v1" class="card-img-top" alt="Main Campus" class="card-img-top" style="height: 90%;">
+                          </div>
+                        
+                         
+                            </div>
+                    
+                </div>
+            </div>
+            
+            <!-- Footer with CTA -->
+            <!-- <div class="modal-footer border-0 justify-content-center pb-5 pt-0">
+                <div class="text-center">
+                    <p class="lead fw-semibold mb-3">Ready to be part of UET Taxila?</p>
+                    <a href="#" class="btn btn-success btn-lg px-5 py-3 fw-bold">Apply Now for Fall 2026</a>
+                    <br><br>
+                    <a href="programs.php" class="btn btn-outline-success">Explore All Programs</a>
+                </div>
+            </div> -->
+        </div>
+    </div>
+</div>
+<section class="hero">
+    <video autoplay muted loop playsinline>
+        <source src="assets/videos/uetTaxilaVideo_v2.MP4" type="video/mp4">
+    </video>
+
+    <div class="hero-content position-absolute top-50 start-50 translate-middle w-100">
+        <div class="container">
+            <h1 class="display-3 fw-bold mb-3" style="text-shadow: 0 4px 30px rgba(0,0,0,0.7);">
+                Undergraduate Admissions <span class="text-warning">2026</span>
+                <!-- <php echo date("Y"); ?> -->
+            </h1>
+            <p class="lead fs-3 mb-5 mx-auto" style="max-width: 780px;">
+                Join Pakistan's premier Engineering University.<br>
+                Shape the future with Innovation, Technology & Excellence.
+            </p>
+            
+            <div class="d-flex justify-content-center gap-4 flex-wrap">
+                <a href="https://admission.uettaxila.edu.pk/application/index.php" class="btn btn-light btn-lg px-5 py-3 fw-semibold shadow " style="width:280px; min-width: 220px;text-align: center;"> Apply Now </a>
+                <a href="Admission_Eligibility.php" class="btn btn-outline-light btn-lg px-5 py-3 fw-semibold" style=" min-width: 220px;text-align: center;">Admission Eligibility</a>
+                <a href="whyus.php" class="btn btn-outline-light btn-lg px-5 py-3 fw-semibold" style="width:280px; min-width: 220px;text-align: center;"> Why UET Taxila? </a>
+                <a href="ProgramsOffered.php" class="btn btn-outline-light btn-lg px-5 py-3 fw-semibold" style=" min-width: 220px;text-align: center;">Explore All Programs</a>
+                
+            </div>
+            
+            <!-- <div class="mt-5 pt-4">
+                <a href="#Programs" class="text-white text-decoration-none d-inline-flex align-items-center gap-2 fs-5">
+                    Discover Programs <i class="bi bi-arrow-down-circle"></i>
+                </a>
+            </div> -->
+        </div>
+    </div>
+</section>
+
+<!-- ANNOUNCEMENTS -->
+<div class="container mt-5 pt-5">
+    <h3 class="section-title text-center">📢 Important Announcements</h3>
+    
+    <div class="card shadow-sm border-0 overflow-hidden no-hover">
+        <div class="card-body p-0">
+            <div class="announcement-list">
+                
+                                  <a href="https://admission.uettaxila.edu.pk/application/index.php" class="announcement-item">
+                    <div class="icon">
+                        <i class="bi bi-megaphone" style="color:red;"></i>
+                    </div>
+                    <div class="content">
+                        <!-- <h6 style="color:red;">Due to the Eid holidays, 1st Merit List of Undergraduate Admissions Fall 2026 will be displayed on the website on 4th June 2026.</h6> -->
+                         <h6 style="color:red;">The Undergraduate Admissions 2026 Second merit list has been uploaded to the Admission Portal on 30th July 2026. Applicants are advised to log in to their accounts to view their admission status and the offered program.</h6>
+                        <!-- <php echo date("Y"); ?> -->
+                    </div>
+                     <span class="date">30 July 2026</span> 
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+                 <a href="https://admissions.uettaxila.edu.pk/Schedule.php" class="announcement-item">
+                    <div class="icon">
+                        <i class="bi bi-megaphone" style="color:red;"></i>
+                    </div>
+                    <div class="content">
+                        <h6>Hifz-e-Quran Test (Venue: Jamia Masjid Bilal U.E.T. Taxila)  </h6>
+                       
+                    </div>
+                    <span class="date">04 July 2026</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+                <a href="http://entrytest.uettaxila.edu.pk/" target="_blank" class="announcement-item">
+    <div class="icon">
+        <i class="bi bi-megaphone"></i>
+    </div>
+
+    <div class="content">
+        <h6>Phase III Registration is live for TCAT-2026 (Conducted by UET Taxila) <span style="color: blue; text-decoration: underline; cursor: pointer;" onclick="if (!window.__cfRLUnblockHandlers) return false; window.open('images/TCAT-V.png?v1', '_blank'); event.stopPropagation();" data-cf-modified-3fbea16f65bacec2e83fd49f-="">
+            View Advertisement
+        </span></h6>
+
+        
+    </div>
+
+    <i class="bi bi-arrow-right">Apply Now</i>
+</a>
+                   <!-- <a href="https://entrytest.uettaxila.edu.pk/" target="_blank" class="announcement-item">
+                    <div class="icon">
+                        <i class="bi bi-megaphone"></i>
+                    </div>
+                    <div class="content">
+                        <h6>Phase III Registration is live for TCAT-2026 (Conducted by UET Taxila)  </h6>
+                       
+                          <a href="images/TCATAd.png" >View Advertisment</a>
+                    </div>
+                    <i class="bi bi-arrow-right"></i>
+                </a> -->
+                 <a href="https://admissions.uettaxila.edu.pk/FAQS.php#q13" class="announcement-item">
+                    <div class="icon">
+                        <i class="bi bi-megaphone" style="color:red;"></i>
+                    </div>
+                    <div class="content">
+                        <!-- <h6 style="color:red;">Due to the Eid holidays, 1st Merit List of Undergraduate Admissions Fall 2026 will be displayed on the website on 4th June 2026.</h6> -->
+                         <h6 style="color:red;">What to do next After Merit List? check FAQs.</h6>
+                        <!-- <php echo date("Y"); ?> -->
+                    </div>
+                    <!-- <span class="date">24 May 2026</span> -->
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+                  <!-- <a href="https://admission.uettaxila.edu.pk/application/index.php" class="announcement-item">
+                    <div class="icon">
+                        <i class="bi bi-megaphone" style="color:red;"></i>
+                    </div>
+                    <div class="content">
+                       
+                         <h6 style="color:red;">The Undergraduate Admissions 2026 merit list has been uploaded to the Admission Portal. Applicants are advised to log in to their accounts to view their admission status and the offered program (if applicable).</h6>
+                       
+                    </div>
+                    
+                    <i class="bi bi-arrow-right"></i>
+                </a> -->
+                <a href="Schedule.php" class="announcement-item">
+                    <div class="icon">
+                        <i class="bi bi-megaphone" style="color:red;"></i>
+                    </div>
+                    <div class="content">
+                        <h6>The schedule for document submission will be uploaded on the Admissions website. Applicants are advised to regularly check the website and plan their visit to the Admissions Office accordingly.</h6>
+                        <!-- <php echo date("Y"); ?> -->
+                    </div>
+                    <!-- <span class="date">24 May 2026</span> -->
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+                 <a href="Schedule.php" class="announcement-item">
+                    <div class="icon">
+                        <i class="bi bi-megaphone" style="color:red;"></i>
+                    </div>
+                    <div class="content">
+                        <h6>Fall -2026 Important Dates  </h6>
+                        <!-- <php echo date("Y"); ?> -->
+                    </div>
+                    <!-- <span class="date">24 May 2026</span> -->
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+                <a href="FAQS.php" class="announcement-item">
+                    <div class="icon">
+                        <i class="bi bi-megaphone" style="color:red;"></i>
+                    </div>
+                    <div class="content">
+                        <h6>Fall -2026 Admission Processing Fee submission Information  </h6>
+                        <!-- <php echo date("Y"); ?> -->
+                    </div>
+                    <!-- <span class="date">24 May 2026</span> -->
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+                 <!-- <a href="https://admissions.uettaxila.edu.pk/Schedule.php" class="announcement-item">
+                    <div class="icon">
+                        <i class="bi bi-megaphone" style="color:red;"></i>
+                    </div>
+                    <div class="content">
+                        <h6>Hifz-e-Quran Test (Venue: Jamia Masjid Bilal U.E.T. Taxila)  </h6>
+                       
+                    </div>
+                    <span class="date">24 May 2026</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a> -->
+                
+                <a href="https://admissions.uettaxila.edu.pk/assets/videos/how_To_Apply.mp4" target="_blank" class="announcement-item">
+                    <div class="icon">
+                        <i class="bi bi-megaphone"></i>
+                    </div>
+                    <div class="content">
+                        <h6> How to fill out an Application Form? </h6>
+                        <!-- <php echo date("Y"); ?> -->
+                    </div>
+                    <!-- <span class="date">05 May 2025</span> -->
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+
+                <a href="https://admission.uet.edu.pk/Modules/EntryTest/Default.aspx" class="announcement-item">
+                    <div class="icon">
+                        <i class="bi bi-megaphone"></i>
+                    </div>
+                    <div class="content">
+                        <h6>Phase II Registration is live for ECAT-2026 (Conducted by UET Lahore)  </h6>
+                        <!-- <php echo date("Y"); ?></php> -->
+                    </div>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+
+                <a href="../Downloads/Condensed_Course_Ad_2026.pdf" class="announcement-item">
+                    <div class="icon">
+                        <i class="bi bi-megaphone"></i>
+                    </div>
+                    <div class="content">
+                        <h6>UET Taxila is offering a Condensed Course in Mathematics for FSc Pre-Medical</h6>
+                    </div>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+
+                <a href="../Downloads/condenced_maths_admission_form.pdf" class="announcement-item">
+                    <div class="icon">
+                        <i class="bi bi-megaphone"></i>
+                    </div>
+                    <div class="content">
+                        <h6>Admission form for Condensed Course In Mathematics</h6>
+                    </div>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+
+            </div>
+           <!-- <div class="card-footer bg-white border-0 text-center py-3">
+            <a href="announcements.php" class="btn btn-outline-success px-5 py-2">
+                View All Announcements 
+                <i class="bi bi-arrow-right ms-2"></i>
+            </a>
+        </div> -->
+        </div>
+    </div>
+</div>
+    <!-- <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card announcement-card p-4 border-start border-danger">
+                <h6 class="fw-bold">ECAT Registration <php echo date("Y"); ?></h6>
+                <p class="mb-1">Check official portal for latest dates</p>
+                <small class="text-muted">Register early to secure your test slot</small>
+                <a href="https://admission.uet.edu.pk/Modules/EntryTest/Default.aspx" class="btn btn-outline-success btn-sm px-4">View Details</a>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card announcement-card p-4 border-start border-warning">
+                <h6 class="fw-bold">Merit Lists</h6>
+                <p class="mb-1">Regularly check the admission portal</p>
+                <small class="text-muted">Stay updated with latest merit lists</small>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card announcement-card p-4 border-start border-success">
+                <h6 class="fw-bold">Scholarships</h6>
+                <p class="mb-1">Honhaar & other scholarships available</p>
+                <small class="text-muted">Apply during the admission process</small>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card announcement-card p-4 border-start border-primary">
+                <h6 class="fw-bold">Important Note</h6>
+                <p class="mb-1">Fall / Spring Admissions <php echo date("Y"); ?></p>
+                <small class="text-muted">Visit MyUET portal for complete schedule</small>
+            </div>
+        </div>
+    </div> </div>-->
+
+
+<div class="container mt-5 pt-5" id="Programs">
+    <h3 class="section-title text-center">🎓 Programs Offered</h3>
+    
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="card program-card text-center h-100">
+                <div class="card-body p-4">
+                    <div class="icon">⚙️</div>
+                    <h5 class="fw-bold mb-3">Engineering</h5>
+                    <ul class="list-unstyled text-start small">
+                        <li>• <a target="_blank" href="http://web.uettaxila.edu.pk/SED/index.asp"> Software Engineering </a></li>
+                        <li>• <a target="_blank" href="http://web.uettaxila.edu.pk/cped/index.asp"> Computer Engineering </a></li>
+                        <li>• <a target="_blank" href="https://web.uettaxila.edu.pk/telecom/index.asp"> Telecommunication Engineering </a></li>
+                        <li>• <a target="_blank" href="https://web.uettaxila.edu.pk/MCED/index.asp"> Mechatronics Engineering </a></li>
+                        <li>• <a target="_blank" href="https://web.uettaxila.edu.pk/CED/index.asp"> Civil Engineering</a></li>
+                        <li>• <a target="_blank" href="https://web.uettaxila.edu.pk/EED/index.asp"> Electrical Engineering  </a><span style="font-size: 10px;">with specializations in Power, Communication, Electric Vehicles and Computer Systems </span></li>
+                        <li>• <a target="_blank" href="https://web.uettaxila.edu.pk/MED/index.asp"> Mechanical Engineering </a></li>
+                        <li>• <a target="_blank" href="https://web.uettaxila.edu.pk/MED/index.asp"> Industrial Engineering </a></li>
+                        <li>• <a target="_blank" href="https://web.uettaxila.edu.pk/ENV/index.asp"> Environmental Engineering </a></li>
+                        <li>• <a target="_blank" href="https://web.uettaxila.edu.pk/EncED/index.asp"> Electronics Engineering </a></li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-transparent border-0 pb-4">
+                    <a href="ProgramsOffered.php" class="btn btn-outline-success btn-sm px-4">View Details</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card program-card text-center h-100">
+                <div class="card-body p-4">
+                    <div class="icon">💻</div>
+                    <h5 class="fw-bold mb-3">Computer Science</h5>
+                    <p class="text-start small"><a target="_blank" href="https://web.uettaxila.edu.pk/cs/index.asp"> B.S. Computer Science </a><br>with tracks in AI & Data Science </p>
+                </div>
+                <div class="card-footer bg-transparent border-0 pb-4">
+                    <a href="ProgramsOffered.php" class="btn btn-outline-success btn-sm px-4">View Details</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card program-card text-center h-100">
+                <div class="card-body p-4">
+                    <div class="icon">🔐</div>
+                    <h5 class="fw-bold mb-3">Engineering Technology<span clas="small"> (Afternoon Programs)</span></h5>
+                    <ul class="list-unstyled text-start small">
+                        <li>• <a target="_blank" href="https://web.uettaxila.edu.pk/telecom/BETCyberSecurity.asp"> Cyber Security Engineering Technology </a></li>
+                        <li>• <a target="_blank" href="https://web.uettaxila.edu.pk/telecom/BETSoftwareEngineering.asp"> Software Engineering Technology </a></li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-transparent border-0 pb-4">
+                    <a href="ProgramsOffered.php" class="btn btn-outline-success btn-sm px-4">View Details</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card program-card text-center h-100">
+                <div class="card-body p-4">
+                    <div class="icon">📐</div>
+                    <h5 class="fw-bold mb-3">Basic Sciences</h5>
+                    <ul class="list-unstyled text-start small">
+                        <li>• <a target="_blank" href="https://web.uettaxila.edu.pk/bsd/index.asp"> Mathematics </a></li> 
+                        <li>• <a target="_blank" href="https://web.uettaxila.edu.pk/bsd/index.asp"> Physics </a></li>
+                        </ul>
+                </div>
+                <div class="card-footer bg-transparent border-0 pb-4">
+                    <a href="ProgramsOffered" class="btn btn-outline-success btn-sm px-4">View Details</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- DISCOVER UET TAXILA -->
+<div class="container mt-5 pt-5" id="Discover">
+    <h3 class="section-title text-center">🌍 Discover UET Taxila</h3>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card text-center h-100">
+                <div class="card-body p-5">
+                    <h5 class="fw-bold">Vibrant Campus Life</h5>
+                    <p class="mt-3">Societies, sports, cultural events and a lively student community</p>
+                </div>
+                <div class="card-footer bg-transparent border-0 pb-4">
+                    <a href="explore.php" class="btn btn-outline-success btn-sm px-4">View Details</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center h-100">
+                <div class="card-body p-5">
+                    <h5 class="fw-bold">State-of-the-Art Library</h5>
+                    <p class="mt-3">Digital resources, research journals and peaceful study spaces</p>
+                </div>
+                <div class="card-footer bg-transparent border-0 pb-4">
+                    <a href="https://www.uettaxila.edu.pk/library.aspx" class="btn btn-outline-success btn-sm px-4">View Details</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center h-100">
+                <div class="card-body p-5">
+                    <h5 class="fw-bold">Advanced Research Labs</h5>
+                    <p class="mt-3">Modern laboratories equipped for cutting-edge engineering research</p>
+                    <ul class="list-unstyled text-start small">
+                        <li>• <a target="_blank" href="http://msplab.uettaxila.edu.pk/"> MSP Lab </a></li> 
+                        <li>• <a target="_blank" href="http://web.uettaxila.edu.pk/swarmroboticslab/index"> Swarm Robotics Lab </a></li> 
+                        </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+<!-- FACILITIES -->
+<div class="container mt-5 pt-5" id="Facilities">
+    <h3 class="section-title text-center">🏢 Our Facilities</h3>
+    <div class="row g-4 text-center">
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body p-4"><h5 class="fw-bold">Hostels</h5></div>
+                <div class="card-footer bg-transparent border-0 pb-4">
+                    <a href="https://www.uettaxila.edu.pk/Hostels.aspx" class="btn btn-outline-success btn-sm px-4">View Details</a>
+            </div>
+            </div>
+             
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body p-4"><h5 class="fw-bold">Central Library</h5></div>
+                  <div class="card-footer bg-transparent border-0 pb-4">
+                    <a href="https://www.uettaxila.edu.pk/library.aspx" class="btn btn-outline-success btn-sm px-4">View Details</a>
+            </div>
+        </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body p-4"><h5 class="fw-bold">Mosque</h5></div>
+            <div class="card-footer bg-transparent border-0 pb-4">
+                    <a href="https://www.uettaxila.edu.pk/Mosque.aspx" class="btn btn-outline-success btn-sm px-4">View Details</a>
+            </div>
+            </div>
+           
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body p-4"><h5 class="fw-bold">Transport Services</h5></div>
+                 <div class="card-footer bg-transparent border-0 pb-4">
+                    <a href="https://www.uettaxila.edu.pk/Transport.aspx" class="btn btn-outline-success btn-sm px-4">View Details</a>
+            </div>
+        </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body p-4"><h5 class="fw-bold">Cafeteria</h5></div>
+                 <div class="card-footer bg-transparent border-0 pb-4">
+                    <a href="https://web.uettaxila.edu.pk/Cafeteria.aspx" class="btn btn-outline-success btn-sm px-4">View Details</a>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+</div>
+<!-- ADMISSION COMMITTEE & STAFF -->
+<div class="container mt-5 pt-5">
+    <h3 class="section-title text-center">🏢 Admission Team</h3>
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="card">
+                <img src="assets/images/AdmissionCommitee/1.jpg" class="card-img-top img-fluid" alt="Convenor" style="height: 250px;object-fit: contain;background-color: #f8f9fa;">
+                <div class="card-body text-center">
+                    <h6 class="fw-bold">Convener Admissions <br> Dr. Ali Javed, Associate Professor</h6>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <img src="https://www.uettaxila.edu.pk/PageContents/ControllerExamOffice/Controller-Kashif-Iqbal.jpg" class="card-img-top img-fluid" alt="Deputy Convenor" style="height: 250px;object-fit: contain;background-color: #f8f9fa;">
+                <div class="card-body text-center">
+                    <h6 class="fw-bold">Deputy Convener Admissions <br>Engr. Muhammad Kashif Iqbal</h6>
+                </div>
+            </div>
+        </div>
+   
+
+         <div class="col-md-3">
+            <div class="card">
+                <img src="assets/images/AdmissionStaff/1.jpeg" class="card-img-top img-fluid" alt="Programmer" >
+                <div class="card-body text-center">
+                    <h6 class="fw-bold">Jr. Programmer <br /> Rana Ghazanfar Ali</h6>
+                </div>
+            </div>
+        </div> 
+        <div class="col-md-3">
+            <div class="card">
+                <img src="assets/images/AdmissionStaff/2n.jpeg" class="card-img-top img-fluid" alt="Assistant" >
+                <div class="card-body text-center">
+                    <h6 class="fw-bold">Assistant <br> Abdul Waheed</h6>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <img src="assets/images/AdmissionStaff/3.jpg" class="card-img-top img-fluid" alt="Clerk" >
+                <div class="card-body text-center">
+                    <h6 class="fw-bold">Clerk <br> Ghulam Dastagir</h6>
+                </div>
+            </div>
+        </div>
+         
+          <div class="col-md-3">
+            <div class="card">
+                <img src="assets/images/AdmissionStaff/4.jpg" class="card-img-top img-fluid" alt="Attendant" style="">
+                <div class="card-body text-center">
+                    <h6 class="fw-bold"> Hafiz Muhammad Shahid</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- FOOTER -->
+<div class="footer mt-5 pt-5 pb-3" id="Contact">
+<div class="container">
+
+<div class="row">
+
+<div class="col-md-4">
+<h5>📞 Contact Us</h5>
+<p>
+University of Engineering & Technology Taxila<br>
+Taxila, Punjab, Pakistan
+</p>
+<p>
+📧 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="1f6a78317e7b72766c6c7670715f6a7a6b6b7e6776737e317a7b6a316f74">[email&#160;protected]</a><br>
+📞 +92-51-9047400-412
+</p>
+<p>
+For Admission Related Quries, Create Query from Admission Portal Profile usign "Ask Admission" Link<br>
+</p>
+</div>
+
+<div class="col-md-4">
+<h5>🔗 Quick Links</h5>
+<ul class="list-unstyled">
+<li><a href="Schedule.php">Fall 2026 Important Dates</a></li>
+<li><a href="whyus.php">Why Us</a></li>
+<li><a href="Seats_Allocation.php">Seats Allocation</a></li>
+<li><a href="ProgramsOffered.php">Undergraduate Programs</a></li>
+<li><a href="explore.php">Explore</a></li>
+<li><a href="Downloads.php">Downloads</a></li>
+<li><a href="FAQS.php">FAQS</a></li>
+<li><a href="Calculator.php">Percentage Calculator</a></li>
+</ul>
+</div>
+<div class="col-md-4">
+    <h5>🔗 Quick Links</h5>
+    <ul class="list-unstyled">
+<li><a href="Admission_Eligibility.php">Admission Eligibility</a></li>
+</ul>
+    </div>
+
+<!-- <div class="col-md-4">
+<h5>✉️ Send Message</h5>
+
+<form action="send.php" method="POST">
+<input type="text" name="name" class="form-control mb-2" placeholder="Your Name" required>
+<input type="email" name="email" class="form-control mb-2" placeholder="Your Email" required>
+<textarea name="message" class="form-control mb-2" placeholder="Message" rows="3" required></textarea>
+<button type="submit" class="btn btn-light w-100">Send</button>
+</form>
+
+</div> -->
+
+</div>
+
+<hr style="background:white;">
+<p class="text-center mb-0">© 2026 UET Taxila Undergraduate Admissions Portal</p>
+
+</div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="assets/bootstrap/js/bootstrap.bundle.min.js" type="3fbea16f65bacec2e83fd49f-text/javascript"></script>
+<script src="assets/js/app.js" type="3fbea16f65bacec2e83fd49f-text/javascript"></script>
+<script src="/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="3fbea16f65bacec2e83fd49f-|49" defer></script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a24d1178fb85ff86',t:'MTc4NTY3MzU1Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"d8564f6d5b4e410eb202d13f98326329","r":1}' crossorigin="anonymous"></script>
+</body>
+</html>
+<!-- Simple Popup Script - Shows immediately when page loads -->
+<script type="3fbea16f65bacec2e83fd49f-text/javascript">
+document.addEventListener('DOMContentLoaded', function() {
+    // Show popup immediately (no delay)
+    const modal = new bootstrap.Modal(document.getElementById('admissionPopup'), {
+        backdrop: 'static',
+        keyboard: true
+    });
+    modal.show();
+
+    // Optional: Don't show again for 24 hours on same device
+    localStorage.setItem('popupLastShown', Date.now().toString());
+});
+
+</script>
