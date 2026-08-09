@@ -20,21 +20,25 @@ function generateSignature(timestamp: string, body: string, secret: string): str
 function createMockCtx() {
   let webhookProcessed = false;
   return {
-    runMutation: vi.fn().mockImplementation(async (ref: any, args: any) => {
+    runMutation: vi.fn().mockImplementation(async (ref: any, _args: any) => {
       let refName = "";
       if (typeof ref === "string") {
         refName = ref;
       } else if (ref && (typeof ref === "object" || typeof ref === "function")) {
-        const sym = Symbol.for("functionName");
+        // Convex function references are Proxy objects. The `has` trap may
+        // return false even when the `get` trap returns the correct value, so
+        // we skip the `in` guard and access the Symbol directly.
         try {
-          if (sym in ref && typeof ref[sym] === "string") {
-            refName = ref[sym];
-          } else if ("name" in ref && typeof ref.name === "string") {
+          const sym = Symbol.for("functionName");
+          const val = ref[sym];
+          if (typeof val === "string") {
+            refName = val;
+          } else if (typeof ref.name === "string") {
             refName = ref.name;
           } else {
             refName = Object.prototype.toString.call(ref);
           }
-        } catch (e) {
+        } catch {
           refName = "";
         }
       }
@@ -179,12 +183,13 @@ describe("Crawl Webhook Integration & Load Testing", () => {
     expect(processedCall).toBeDefined();
 
     // The on-domain page must actually be chunked + queued for embedding.
+    // queueChunksForEmbedding takes parent/child chunks (WS-1 refactor), not a flat `chunks` array.
     const queuedCall = mutationCalls.find(
-      (c: any[]) => c[1] && Array.isArray(c[1].chunks) && c[1].url?.includes("uettaxila.edu.pk"),
+      (c: any[]) => c[1] && Array.isArray(c[1].children) && c[1].url?.includes("uettaxila.edu.pk"),
     );
     expect(queuedCall).toBeDefined();
 
-    // Second webhook delivery - mark-first pattern prevents race condition
+    // Second webhook delivery — mark-first pattern prevents race condition
     ctx.runQuery.mockResolvedValue(null);
     ctx.runMutation.mockResolvedValue(undefined);
 
@@ -197,7 +202,7 @@ describe("Crawl Webhook Integration & Load Testing", () => {
   }, 30000);
 
   it("enforces the domain allowlist: off-domain pages are skipped, not ingested", async () => {
-    // SECURITY (OWASP LLM01 - ingestion poisoning): crawlWebhook must NOT
+    // SECURITY (OWASP LLM01 — ingestion poisoning): crawlWebhook must NOT
     // chunk/embed pages from domains outside uettaxila.edu.pk, even when the
     // signature is valid. The job is still acknowledged (200), but no chunks
     // are queued for the off-domain page. This pins the allowlist contract so a

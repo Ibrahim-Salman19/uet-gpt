@@ -134,15 +134,33 @@ function pickBestContent(
   chunkTextRes: TextSearchResult[],
   itemId: string,
 ): string {
-  if (docMeta?.contextualizedText) return docMeta.contextualizedText;
-  if (docMeta?.parentText) return docMeta.parentText;
-  const vecMatch = vectorRes.find((r) => r.entryId === itemId);
-  if (vecMatch && vecMatch.content) return vecMatch.content.map((c) => c.text).join("\n");
-  const textMatch = textRes.find((r) => r.ragId === itemId);
-  if (textMatch) return textMatch.text;
-  const chunkMatch = chunkTextRes.find((r) => r.ragId === itemId);
-  if (chunkMatch) return chunkMatch.text;
-  return "";
+  // Determine base detailed content (prioritize parent document chunk for context richness)
+  let baseContent = "";
+  if (docMeta?.parentText) {
+    baseContent = docMeta.parentText;
+  } else {
+    const vecMatch = vectorRes.find((r) => r.entryId === itemId);
+    if (vecMatch && vecMatch.content) {
+      baseContent = vecMatch.content.map((c) => c.text).join("\n");
+    } else {
+      const textMatch = textRes.find((r) => r.ragId === itemId);
+      if (textMatch) {
+        baseContent = textMatch.text;
+      } else {
+        const chunkMatch = chunkTextRes.find((r) => r.ragId === itemId);
+        if (chunkMatch) {
+          baseContent = chunkMatch.text;
+        }
+      }
+    }
+  }
+
+  // Prepend contextualized summary to the detailed text (Anthropic Contextual Retrieval pattern)
+  if (docMeta?.contextualizedText && baseContent) {
+    return `Context: ${docMeta.contextualizedText}\n\n${baseContent}`;
+  }
+
+  return baseContent || docMeta?.contextualizedText || "";
 }
 
 async function fetchActiveFaqs(

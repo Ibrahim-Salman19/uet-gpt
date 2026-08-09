@@ -137,12 +137,14 @@ describe("AdminCrawlsPage", () => {
     });
   });
 
-  it("renders Refresh button", async () => {
+  it("renders LIVE auto-update indicator", async () => {
+    // Manual refresh was replaced by Convex's reactive queries — the page
+    // shows a disabled "LIVE" badge instead of a Refresh button.
     mockConvex.query.mockReturnValue([]);
     vi.mocked(useMutation).mockReturnValue(Object.assign(vi.fn(), { withOptimisticUpdate: vi.fn() }));
     render(<AdminCrawlsPage />);
     await waitFor(() => {
-      expect(screen.getByText("REFRESH")).toBeInTheDocument();
+      expect(screen.getByText("LIVE")).toBeInTheDocument();
     });
   });
 

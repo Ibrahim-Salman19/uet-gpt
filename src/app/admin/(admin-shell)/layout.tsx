@@ -107,8 +107,8 @@ export default function AdminShellLayout({ children }: { children: React.ReactNo
         <div className="flex flex-1 flex-col overflow-hidden min-w-0 bg-[var(--surface-base)]">
           <header className="flex h-14 items-center border-b border-[var(--surface-5)] px-6 shrink-0 bg-[var(--surface-1)]/60 backdrop-blur-md">
             <h1 className="text-sm font-semibold text-zinc-100 font-sans tracking-tight">
-              {navItems.find((i) => pathname === i.href || pathname.startsWith(i.href + "/"))
-                ?.label ?? "Admin"}
+              {(navItems.find((i) => pathname === i.href) ??
+                navItems.find((i) => pathname.startsWith(i.href + "/")))?.label ?? "Admin"}
             </h1>
           </header>
           <main className="flex-1 overflow-auto p-6 bg-transparent">

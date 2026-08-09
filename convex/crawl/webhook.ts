@@ -218,7 +218,16 @@ function extractPageInfo(
   const url = result.url || payloadUrl;
   const canonicalUrl = canonicalizeUrl(url);
   const isPdf = url.toLowerCase().endsWith(".pdf") || result.media_type === "pdf";
-  const content = result.markdown || result.html || result.text;
+  
+  // Safe extraction supporting both legacy Crawl4AI (string) and v0.5+ (structured object with fit_markdown)
+  const content =
+    (result.markdown && typeof result.markdown === "object"
+      ? result.markdown.fit_markdown || result.markdown.raw_markdown
+      : result.markdown) ||
+    result.html ||
+    result.text ||
+    "";
+
   const title = result.metadata?.title || "Untitled";
   const etag = result.headers?.etag || undefined;
   const lastModified = result.headers?.["last-modified"] || undefined;

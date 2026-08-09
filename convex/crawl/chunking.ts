@@ -257,13 +257,19 @@ function processSmallBlock(
 }
 
 export function normalizeContent(text: string): string {
-  return text
+  let cleaned = text
     .replace(/\r\n/g, "\n")
     .replace(/[ \t]+\n/g, "\n")
+    // Remove lines that are just navigation links typical of header/sidebar menus
+    .replace(/^[ \t]*[\*•-]?\s*\[?(Home|Admissions?|Academics?|Departments?|Faculties|Contact\s*Us|Downloads?|Gallery|Sitemap|Examinations?|Registrar|Careers?|About\s*Us|Research|News|Events|Notice\s*Board|Administration|Vice\s*Chancellor)\]?\(.*?\)[ \t]*\n?/gim, "")
+    // Remove social media sharing / contact links
+    .replace(/^[ \t]*[\*•-]?\s*\[?(Facebook|Twitter|LinkedIn|Instagram|Youtube|Pinterest|Google\+|RSS|Mail)\]?\(.*?\)[ \t]*\n?/gim, "")
     .replace(/^[ \t]*\[[^\]]*\]\(#[^)]*\)[ \t]*\n?/gm, "")
-    .replace(/^[ \t]*\|[ \t]*\|[ \t]*\n?/gm, "")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
+    .replace(/^[ \t]*\|[ \t]*\|[ \t]*\n?/gm, "");
+
+  // Clean up excessive whitespace
+  cleaned = cleaned.replace(/\n{3,}/g, "\n\n").trim();
+  return cleaned;
 }
 
 export function assignFreshnessTier(url: string): "high" | "medium" | "low" {
@@ -338,12 +344,18 @@ export async function sha256(text: string): Promise<string> {
 
 export async function generateContextSummary(text: string): Promise<string | null> {
   try {
-    if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) return null;
+    const geminiKey =
+      process.env.GEMINI_API_KEY ||
+      process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
+      process.env.GEMINI_API_KEY_1 ||
+      process.env.GEMINI_API_KEY_2;
+    if (!geminiKey) return null;
     if (text.split(/\s+/).length <= 500) return null;
     const { generateText } = await import("ai");
-    const { google } = await import("@ai-sdk/google");
+    const { createGoogleGenerativeAI } = await import("@ai-sdk/google");
+    const googleInstance = createGoogleGenerativeAI({ apiKey: geminiKey });
     const { text: summary } = await generateText({
-      model: google("gemini-2.5-flash"),
+      model: googleInstance("gemini-2.5-flash"),
       prompt: `Write a 1-sentence summary of this document to provide context for vector search chunks. Document text:\n\n${text.slice(0, 2000)}`,
     });
     return summary.trim();

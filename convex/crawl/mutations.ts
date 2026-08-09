@@ -422,13 +422,13 @@ export const saveEmbedding = internalMutation({
       const newCount = (doc.chunksEmbedded || 0) + 1;
       const updates: Partial<Doc<"documents">> = { chunksEmbedded: newCount };
 
-      // Check if all chunks are processed (either embedded or failed). Count failed
-      // chunks scoped to THIS job + URL so stale rows from earlier re-crawls do not
-      // inflate the count and prematurely mark the doc indexed.
-      const chunkCount = doc.chunkCount ?? 1;
-      const failedCount = args.jobId ? await countFailedChunks(ctx, args.jobId, doc.url) : 0;
-
-      if (doc.chunkCount !== undefined && newCount + failedCount >= doc.chunkCount) {
+      // We ONLY check if successful chunks meet the chunkCount to mark as indexed.
+      // We removed countFailedChunks() from this hot path because scanning the DLQ table
+      // via .collect() for every single chunk causes a massive OCC conflict multiplier
+      // and exhausts the Convex database IO limit.
+      // Documents with failed chunks will naturally remain in 'processing' state until
+      // retried or cleaned up by background crons.
+      if (doc.chunkCount !== undefined && newCount >= doc.chunkCount) {
         if (doc.status !== "indexed") {
           updates.status = "indexed";
           updates.updatedAt = Date.now();

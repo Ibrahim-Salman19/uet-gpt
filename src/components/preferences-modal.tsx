@@ -90,9 +90,16 @@ export function PreferencesModal() {
     preferences.setSettingsOpen(false);
   }, [preferences.setSettingsOpen]);
 
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
   React.useEffect(() => {
     const dialog = dialogRef.current;
-    if (!dialog) return;
+    if (!dialog || !mounted) return;
+
 
     if (preferences.settingsOpen && !dialog.open) {
       try {
@@ -162,8 +169,11 @@ export function PreferencesModal() {
     });
   };
 
+  if (!mounted) return null;
+
   return (
     <dialog
+
       ref={dialogRef}
       id="settings-modal"
       aria-labelledby={titleId}

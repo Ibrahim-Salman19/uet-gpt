@@ -218,7 +218,7 @@ function buildCrawlPayload(
     crawler_config: {
       type: "CrawlerRunConfig",
       params: {
-        word_count_threshold: 50,
+        word_count_threshold: 10, // Lowered from 50 to preserve small tables and bullet points
         magic: true,
         simulate_user: true,
         mean_delay: 1.0,
@@ -227,6 +227,31 @@ function buildCrawlPayload(
         max_pages: UET_CRAWL_CONFIG.maxPages,
         include_patterns: [...UET_CRAWL_CONFIG.includePaths],
         exclude_patterns: [...UET_CRAWL_CONFIG.excludePaths],
+        excluded_tags: ["nav", "aside", "footer", "header", "form", "iframe", "style", "script", "noscript"],
+        table_score_threshold: 1, // Set to 1 to extract even smaller tables
+        remove_overlay_elements: true,
+        process_iframes: false,
+        exclude_external_images: true, // 2026 SOTA: Network-level resource drop to block tracking pixels and irrelevant styling
+        exclude_social_media_links: true, // 2026 SOTA: Shed boilerplate out-links
+        markdown_generator: {
+          type: "DefaultMarkdownGenerator",
+          params: {
+            content_filter: {
+              type: "PruningContentFilter",
+              params: {
+                threshold: 0.45,
+                threshold_type: "dynamic",
+                min_word_threshold: 10
+              }
+            },
+            options: {
+              body_width: 0, // Prevents wrapping table cells, preserving table layout in markdown
+              ignore_links: false,
+              ignore_images: false,
+              content_source: "fit_html"
+            }
+          }
+        },
         deep_crawl_strategy: {
           type: "BFSDeepCrawlStrategy",
           params: {

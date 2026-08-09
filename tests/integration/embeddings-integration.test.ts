@@ -11,6 +11,11 @@ vi.mock("../../convex/_generated/server", () => ({
 
 import { generate } from "../../convex/embeddings/generate";
 
+// Production embedder enforces the L2-normalized-vector invariant
+// (convex/shared/invariants.ts assertFiniteVector), so mock embeddings must be unit vectors.
+const UNIT_EMBEDDING = new Array(768).fill(1 / Math.sqrt(768));
+const UNIT_EMBEDDING_2 = new Array(768).fill(1).map((_, i) => (i === 0 ? 1 : 0));
+
 function createMockResponse(body: any, status = 200) {
   return {
     ok: status >= 200 && status < 300,
@@ -46,7 +51,7 @@ describe("Embedding Generation Integration", () => {
           outputDimensionality: 768,
         });
         return createMockResponse({
-          embedding: { values: new Array(768).fill(0.1) },
+          embedding: { values: UNIT_EMBEDDING },
         });
       });
 
@@ -54,7 +59,7 @@ describe("Embedding Generation Integration", () => {
         text: "Test embedding generation",
       });
 
-      expect(embeddings).toEqual(new Array(768).fill(0.1));
+      expect(embeddings).toEqual(UNIT_EMBEDDING);
     });
 
     it("retries on 5xx errors", async () => {
@@ -65,7 +70,7 @@ describe("Embedding Generation Integration", () => {
           return createMockResponse({ error: { message: "Internal server error" } }, 500);
         }
         return createMockResponse({
-          embedding: { values: new Array(768).fill(0.1) },
+          embedding: { values: UNIT_EMBEDDING },
         });
       });
 
@@ -74,7 +79,7 @@ describe("Embedding Generation Integration", () => {
       });
 
       expect(callCount).toBe(2);
-      expect(result).toEqual(new Array(768).fill(0.1));
+      expect(result).toEqual(UNIT_EMBEDDING);
     });
 
     it("retries on 429 rate limit errors", async () => {
@@ -85,7 +90,7 @@ describe("Embedding Generation Integration", () => {
           return createMockResponse({ error: { message: "Too many requests" } }, 429);
         }
         return createMockResponse({
-          embedding: { values: new Array(768).fill(0.4) },
+          embedding: { values: UNIT_EMBEDDING_2 },
         });
       });
 
@@ -94,7 +99,7 @@ describe("Embedding Generation Integration", () => {
       });
 
       expect(callCount).toBe(2);
-      expect(result).toEqual(new Array(768).fill(0.4));
+      expect(result).toEqual(UNIT_EMBEDDING_2);
     });
 
     it("throws immediately on 4xx client errors", async () => {

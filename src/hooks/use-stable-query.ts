@@ -1,13 +1,24 @@
 "use client";
 
 import { useQuery } from "convex/react";
+import { getFunctionName } from "convex/server";
 import type { FunctionReference } from "convex/server";
 import { useRef } from "react";
 
-const functionNameSymbol = Symbol.for("functionName");
-
 function getQueryName(query: FunctionReference<"query">): string {
-  return (query as any)[functionNameSymbol] as string;
+  try {
+    return getFunctionName(query);
+  } catch (e) {
+    if (query && typeof query === "object") {
+      if ("_name" in query && typeof query._name === "string") return query._name;
+      if ("name" in query && typeof query.name === "string") return query.name;
+    }
+    try {
+      return String(query);
+    } catch (err) {
+      return "unknown-query";
+    }
+  }
 }
 
 export function useStableQuery<Query extends FunctionReference<"query">>(

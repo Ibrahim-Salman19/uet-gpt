@@ -46,15 +46,15 @@ try {
     try {
       fs.writeFileSync(tempFilePath, value, { encoding: 'utf8', mode: 0o600 });
 
-      const vercelCmd = process.platform === 'win32' ? 'npx.cmd vercel' : 'npx vercel';
+      const vercelCmd = process.platform === 'win32' ? 'pnpm.cmd exec vercel' : 'pnpm exec vercel';
 
       const shellCommandProd = process.platform === 'win32'
-        ? `cmd.exe /c "${vercelCmd} env add ${key} production --yes --force < _temp_env_val.txt"`
-        : `"${vercelCmd}" env add ${key} production --yes --force < _temp_env_val.txt`;
-
+        ? `cmd.exe /c "${vercelCmd} env add ${key} production --yes --force --value \"${value.replace(/"/g, '\\"')}\""`
+        : `${vercelCmd} env add ${key} production --yes --force --value '${value.replace(/'/g, "'\\''")}'`;
+ 
       const shellCommandDev = process.platform === 'win32'
-        ? `cmd.exe /c "${vercelCmd} env add ${key} development --yes --force < _temp_env_val.txt"`
-        : `"${vercelCmd}" env add ${key} development --yes --force < _temp_env_val.txt`;
+        ? `cmd.exe /c "${vercelCmd} env add ${key} development --yes --force --value \"${value.replace(/"/g, '\\"')}\""`
+        : `${vercelCmd} env add ${key} development --yes --force --value '${value.replace(/'/g, "'\\''")}'`;
 
       console.log(`Adding ${key} to production...`);
       try {
