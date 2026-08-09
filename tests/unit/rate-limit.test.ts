@@ -46,7 +46,11 @@ describe("rate-limit", () => {
     process.env = { ...originalEnv };
   });
 
-  it("allows when UPSTASH_REDIS_REST_URL is missing (fail-open for chat)", async () => {
+  // checkChatRateLimit is intentionally FAIL-OPEN: when Redis is unconfigured
+  // (missing URL/token) it lets the request through with a synthetic allowance
+  // rather than blocking users — availability over throttling. Only
+  // checkAdminActionRateLimit fails closed. See src/lib/rate-limit.ts:94-103.
+  it("allows requests when UPSTASH_REDIS_REST_URL is missing (fail-open)", async () => {
     delete process.env.UPSTASH_REDIS_REST_URL;
     delete process.env.UPSTASH_REDIS_REST_TOKEN;
     const { checkChatRateLimit } = await import("../../src/lib/rate-limit");
@@ -57,11 +61,21 @@ describe("rate-limit", () => {
     expect(result!.remaining).toBe(100);
   });
 
-  it("allows when UPSTASH_REDIS_REST_TOKEN is missing (fail-open for chat)", async () => {
+  it("allows requests when UPSTASH_REDIS_REST_TOKEN is missing (fail-open)", async () => {
     process.env.UPSTASH_REDIS_REST_URL = "https://test.upstash.io";
     delete process.env.UPSTASH_REDIS_REST_TOKEN;
     const { checkChatRateLimit } = await import("../../src/lib/rate-limit");
     const result = await checkChatRateLimit("test_user");
+    expect(result).not.toBeNull();
+    expect(result!.success).toBe(true);
+    expect(result!.limit).toBe(100);
+    expect(result!.remaining).toBe(100);
+  });
+
+  it("allows requests for unconfigured chat rate limiter (fail-open for availability)", async () => {
+    delete process.env.UPSTASH_REDIS_REST_URL;
+    const { checkChatRateLimit } = await import("../../src/lib/rate-limit");
+    const result = await checkChatRateLimit("test_user_42", "user");
     expect(result).not.toBeNull();
     expect(result!.success).toBe(true);
     expect(result!.limit).toBe(100);

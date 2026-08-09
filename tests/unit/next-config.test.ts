@@ -32,11 +32,10 @@ async function getHeaderMap(): Promise<Map<string, string>> {
 }
 
 describe("next config", () => {
-  it("defines headers and optional redirects", () => {
+  it("defines security headers", () => {
+    // `redirects` was intentionally removed from next.config.mjs; only
+    // `headers` is defined now.
     expect(typeof config.headers).toBe("function");
-    if (config.redirects) {
-      expect(typeof config.redirects).toBe("function");
-    }
   });
 
   it("sets the baseline security headers", async () => {

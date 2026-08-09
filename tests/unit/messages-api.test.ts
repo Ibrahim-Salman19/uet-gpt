@@ -125,19 +125,20 @@ describe("messages api - authorization & ownership", () => {
     expect(id).toBe("msg_new");
   });
 
+  // list() returns null gracefully (instead of throwing) for unauthorized or
+  // unauthenticated callers so a stale/redirected client cannot crash the React
+  // tree. See convex/messages.ts:115-135 for the null-return guard rationale.
   it("list returns null when the caller does not own the thread", async () => {
     const { ctx } = makeCtx({
       identity: { subject: "clerk_1" },
       user: { _id: "u1", clerkId: "clerk_1", isActive: true },
       thread: { _id: "t1", userId: "clerk_OTHER" },
     });
-    const result = await handler(list)(ctx, { threadId: "t1" });
-    expect(result).toBeNull();
+    await expect(handler(list)(ctx, { threadId: "t1" })).resolves.toBeNull();
   });
 
   it("list returns null for unauthenticated callers", async () => {
     const { ctx } = makeCtx({ identity: null, user: null });
-    const result = await handler(list)(ctx, { threadId: "t1" });
-    expect(result).toBeNull();
+    await expect(handler(list)(ctx, { threadId: "t1" })).resolves.toBeNull();
   });
 });
