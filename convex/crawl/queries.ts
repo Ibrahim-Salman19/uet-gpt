@@ -35,13 +35,17 @@ export const fullTextSearch = internalQuery({
   },
 });
 
-export const getChunkByHash = internalQuery({
-  args: { documentId: v.id("documents"), contentHash: v.string() },
+// Phase 6.21A Part 2/8: replaces the old getChunkByHash (content-keyed) with a
+// structural-position lookup, so embedSingleChunk's existing-chunk
+// short-circuit distinguishes two different positions that happen to share
+// byte-identical text (T7) instead of collapsing them.
+export const getChunkByKey = internalQuery({
+  args: { documentId: v.id("documents"), chunkKey: v.string() },
   handler: async (ctx, args) => {
     return await ctx.db
       .query("crawledChunks")
-      .withIndex("by_documentId_and_contentHash", (q) =>
-        q.eq("documentId", args.documentId).eq("contentHash", args.contentHash),
+      .withIndex("by_documentId_and_chunkKey", (q) =>
+        q.eq("documentId", args.documentId).eq("chunkKey", args.chunkKey),
       )
       .first();
   },

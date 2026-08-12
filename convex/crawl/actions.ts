@@ -9,6 +9,7 @@ import { internal } from "../_generated/api";
 import type { Doc, Id } from "../_generated/dataModel";
 import { internalAction } from "../_generated/server";
 import { rag } from "../rag/instance";
+import { computeRagVersionKey } from "./chunkKey";
 import { isPdfVirtualUrl } from "./chunking";
 
 // legacy processWebhookResult removed
@@ -394,6 +395,11 @@ export const embedSingleChunk = internalAction({
     url: v.string(),
     chunkText: v.string(),
     contentHash: v.string(),
+    // Phase 6.21A Part 2/8: structural position identity - see
+    // computeChunkKey in crawl/chunkKey.ts.
+    chunkKey: v.string(),
+    // Phase 6.21A Part 5: the ingestion round this work item belongs to.
+    ingestionGeneration: v.number(),
     jobId: v.string(),
     parentId: v.optional(v.id("chunkParents")),
     headingPath: v.optional(v.array(v.string())),
@@ -410,16 +416,22 @@ export const embedSingleChunk = internalAction({
         sourceHost = "unknown";
       }
 
-      // Check for existing chunk to prevent orphaned vectors on retries
-      const existing: any = await ctx.runQuery(internal.crawl.queries.getChunkByHash, {
+      // Check for existing chunk to prevent orphaned vectors on retries.
+      // Phase 6.21A Part 2/8: keyed by chunkKey (structural position), not
+      // contentHash - two different positions with byte-identical text (T7)
+      // must both proceed to their own rag.add() call instead of collapsing
+      // into one shared entry.
+      const existing: any = await ctx.runQuery(internal.crawl.queries.getChunkByKey, {
         documentId: args.documentId,
-        contentHash: args.contentHash,
+        chunkKey: args.chunkKey,
       });
-      if (existing) {
+      if (existing && existing.contentHash === args.contentHash) {
         return {
           success: true,
           ragId: existing.ragId,
           contentHash: args.contentHash,
+          chunkKey: args.chunkKey,
+          ingestionGeneration: args.ingestionGeneration,
           documentId: args.documentId,
           url: args.url,
           // Echo this chunk's own jobId so the onComplete handler routes DLQ
@@ -437,24 +449,105 @@ export const embedSingleChunk = internalAction({
         args.headingPath && args.headingPath.length > 0
           ? `Section: ${args.headingPath.join(" > ")}\n\n`
           : "";
-      const result = await rag.add(ctx, {
-        namespaceId: args.namespaceId as unknown as NamespaceId,
-        text: contextPrefix + args.chunkText,
-        filterValues: [
-          { name: "category", value: "crawled" },
-          { name: "source", value: sourceHost },
-        ],
+
+      // Generation-scoped RAG identity (stale rag.add race remediation): a
+      // DIFFERENT key per (position, document, ingestionGeneration), never
+      // just per position. Source-verified against the installed
+      // @convex-dev/rag@0.7.5: its own (namespace, key) "replace" logic has
+      // no concept of generation ordering, so a stale generation's rag.add()
+      // call sharing a key with a newer generation's entry could silently
+      // replace it with no callback ever telling the newer generation's
+      // owner - see computeRagVersionKey in chunkKey.ts for the full
+      // source-level rationale. args.chunkKey remains the STABLE structural
+      // position identity ("baseChunkKey") - unchanged across generations,
+      // so callers/DLQ/progress accounting keyed on it are unaffected.
+      const ragVersionKey = await computeRagVersionKey(
+        args.chunkKey,
+        args.documentId,
+        args.ingestionGeneration,
+      );
+
+      // Stage the raw chunk text for onRagEntryComplete (below) to commit
+      // with. RAG's OnCompleteArgs carries only its own Entry shape (no text
+      // field), and duplicating full chunk text into RAG's own entry
+      // metadata is deliberately avoided - see onRagEntryComplete in
+      // crawl/mutations.ts.
+      await ctx.runMutation(internal.crawl.mutations.stagePendingChunkText, {
+        ragVersionKey,
+        chunkText: args.chunkText,
       });
 
-      await ctx.runMutation(internal.crawl.mutations.saveEmbedding, {
-        documentId: args.documentId,
-        chunkText: args.chunkText,
-        contentHash: args.contentHash,
-        ragId: result.entryId,
-        jobId: args.jobId,
-        parentId: args.parentId,
-        headingPath: args.headingPath,
-      });
+      let result: Awaited<ReturnType<typeof rag.add>>;
+      try {
+        result = await rag.add(ctx, {
+          namespaceId: args.namespaceId as unknown as NamespaceId,
+          key: ragVersionKey,
+          // Safe and beneficial here (source-verified against
+          // component/entries.js's findExistingEntry + entryIsSame): 0.7.5
+          // scopes contentHash dedup to (namespace, key) - it can never
+          // collapse two DIFFERENT keys sharing content, only let a true
+          // retry of the SAME ragVersionKey (i.e. provably the same
+          // position+document+generation) converge onto the existing ready
+          // entry without creating a new version or re-running onComplete.
+          contentHash: args.contentHash,
+          text: contextPrefix + args.chunkText,
+          filterValues: [
+            { name: "category", value: "crawled" },
+            { name: "source", value: sourceHost },
+          ],
+          // Bounded identity only - no chunk text (Part 4's own constraint).
+          // createdAtMs backs reconciliation.ts's GC grace-period check: the
+          // public rag.list() Entry shape exposes no creation timestamp of
+          // its own, so an app-controlled one is the only way to tell a
+          // genuinely-stale orphan apart from an entry that is merely
+          // between "ready" and its onComplete callback actually running.
+          metadata: {
+            documentId: args.documentId,
+            baseChunkKey: args.chunkKey,
+            ingestionGeneration: args.ingestionGeneration,
+            parentId: args.parentId ?? "",
+            headingPath: args.headingPath ?? [],
+            createdAtMs: Date.now(),
+          },
+          onComplete: internal.crawl.mutations.onRagEntryComplete,
+        });
+      } catch (addError) {
+        // Deliberately does NOT delete the staged text here either - same
+        // retry-storm hazard as the created:false branch below: a
+        // concurrent sibling at this exact ragVersionKey may still be
+        // in-flight and need the SAME shared staged row to commit from.
+        // Workpool will retry this failed attempt (re-staging fresh text of
+        // its own); a permanently-abandoned row is a bounded, text-only,
+        // GC-sweepable residual, not a correctness issue.
+        throw addError;
+      }
+
+      // rag.defineOnComplete's callback fires synchronously within this
+      // same awaited rag.add() call whenever the entry actually transitions
+      // out of "pending" (source-verified: component/entries.js's `add`
+      // handler calls promoteToReadyHandler - which runs onComplete - inline
+      // before returning, when allChunks is populated). The one case it does
+      // NOT fire is the contentHash fast-dedup path (created: false, entry
+      // already ready and unchanged) - commit inline here instead, since
+      // nothing else ever will. Deliberately does NOT delete the staged text
+      // here (retry-storm race): ragVersionKey is shared by every concurrent
+      // caller targeting this exact (position, generation), and this call's
+      // own chunkText already came from args, not from the staged row - it
+      // has no need to consume it. A concurrent sibling still resolving via
+      // its OWN onComplete may still need that SAME staged row to commit
+      // from; only that success path (mutations.ts) is safe to clean it up.
+      if (!result.created) {
+        await ctx.runMutation(internal.crawl.mutations.commitCurrentGenerationChunk, {
+          documentId: args.documentId,
+          baseChunkKey: args.chunkKey,
+          ingestionGeneration: args.ingestionGeneration,
+          contentHash: args.contentHash,
+          chunkText: args.chunkText,
+          ragId: result.entryId,
+          parentId: args.parentId,
+          headingPath: args.headingPath,
+        });
+      }
 
       // Durably schedule contextualization instead of firing a non-awaited
       // ctx.runAction (a floating promise can be cut off when this action returns,
@@ -470,6 +563,8 @@ export const embedSingleChunk = internalAction({
         success: true,
         ragId: result.entryId,
         contentHash: args.contentHash,
+        chunkKey: args.chunkKey,
+        ingestionGeneration: args.ingestionGeneration,
         documentId: args.documentId,
         url: args.url,
         jobId: args.jobId,
@@ -484,6 +579,8 @@ export const embedSingleChunk = internalAction({
           success: false,
           skipped: true,
           contentHash: args.contentHash,
+          chunkKey: args.chunkKey,
+          ingestionGeneration: args.ingestionGeneration,
           documentId: args.documentId,
           url: args.url,
           chunkText: args.chunkText,

@@ -297,7 +297,7 @@ async function processSinglePage(
     const summary = await generateContextSummary(normalized);
     if (summary) contextPrefix += `Context: ${summary}\n\n`;
 
-    const { parents, children } = await generateChunks(normalized, contextPrefix);
+    const { parents, children } = await generateChunks(normalized, contextPrefix, info.canonicalUrl);
 
     const freshnessTier = assignFreshnessTier(info.canonicalUrl);
     await ctx.runMutation(internal.crawl.mutations.queueChunksForEmbedding, {
@@ -536,7 +536,7 @@ async function processIngestContent(
   const summary = await generateContextSummary(normalized);
   if (summary) contextPrefix += `Context: ${summary}\n\n`;
 
-  const { parents, children } = await generateChunks(normalized, contextPrefix);
+  const { parents, children } = await generateChunks(normalized, contextPrefix, url);
 
   await ctx.runMutation(internal.crawl.mutations.enqueueDocumentChunks, {
     documentId: result.documentId,
@@ -552,8 +552,16 @@ export const ingestWebhook = httpAction(async (ctx, request) => {
     const payload = await parseAndValidateIngestRequest(rawBody, request);
     if (payload instanceof Response) return payload;
 
+    // Same canonicalization the crawl path applies (extractPageInfo, above)
+    // before the URL is used for document identity or chunk-key computation
+    // - without it, the same logical page re-ingested with a differently
+    // formatted URL (trailing slash, query string) would fail upsertDocument's
+    // exact-string by_url lookup and be inserted as a brand-new document
+    // instead of being recognized as an update.
+    const url = canonicalizeUrl(payload.url);
+
     const result = await ctx.runMutation(internal.crawl.mutations.upsertDocument, {
-      url: payload.url,
+      url,
       markdown: payload.markdown,
       contentHash: payload.contentHash,
       crawlSessionId: payload.crawlSessionId,
@@ -569,7 +577,7 @@ export const ingestWebhook = httpAction(async (ctx, request) => {
       });
     }
 
-    await processIngestContent(ctx, result, payload.url, payload.title, payload.markdown);
+    await processIngestContent(ctx, result, url, payload.title, payload.markdown);
 
     return new Response(JSON.stringify({ success: true, action: result.action }), {
       status: 200,

@@ -228,6 +228,23 @@ export default defineSchema({
     ),
     academicSession: v.optional(v.string()),
     documentVersionId: v.optional(v.string()),
+    // Phase 6.21A Part 4/5: monotonic per-document ingestion-round counter.
+    // Bumped every time a content-changed ingestion round starts (never on the
+    // unchanged fast path). Work items enqueued for a round carry the round's
+    // generation number; a completion whose generation no longer matches this
+    // field is stale and MUST NOT mutate crawledChunks, RAG, or document status
+    // (see saveEmbedding in crawl/mutations.ts). Absent on legacy rows created
+    // before this field existed - treated as generation 0 by readers.
+    ingestionGeneration: v.optional(v.number()),
+    // Phase 6.21A Part 7: hash of every indexing-pipeline setting (chunking
+    // version/sizes, context-prefix version, embedding model/dimensions - see
+    // computeIndexingFingerprint in crawl/chunkKey.ts) that was active the last
+    // time this document was fully indexed. The unchanged-document fast path
+    // requires BOTH contentHash and indexingFingerprint to match; a pipeline
+    // change alone (source content unchanged) now forces a rebuild instead of
+    // being silently skipped. Absent on legacy rows - treated as never-matching
+    // (forces one rebuild the first time a legacy row is re-ingested).
+    indexingFingerprint: v.optional(v.string()),
   })
     .index("by_url", ["url"])
     .index("by_entryId", ["entryId"])
@@ -265,6 +282,13 @@ export default defineSchema({
       contentHash: v.optional(v.string()),
       jobId: v.string(),
       chunkText: v.optional(v.string()),
+      // Phase 6.21A Part 2/5: carried through so a DLQ retry re-enqueues
+      // under the correct structural identity and generation instead of
+      // falling back to undefined (which would break the
+      // by_documentId_and_chunkKey lookup and generation fencing on retry).
+      // Absent on rows written before this field existed.
+      chunkKey: v.optional(v.string()),
+      ingestionGeneration: v.optional(v.number()),
     }),
     status: v.union(
       v.literal("pending_retry"),
@@ -287,9 +311,23 @@ export default defineSchema({
     parentId: v.optional(v.id("chunkParents")), // Normalized parent reference (WS-1): replaces per-child parentText duplication
     headingPath: v.optional(v.array(v.string())), // R-7: Section heading hierarchy (e.g. ["Admissions", "Fee Structure"])
     contextualizedText: v.optional(v.string()), // R-9: Gemini-contextualized version of chunk text
+    // Phase 6.21A Part 2/8: structural (position-stable) chunk identity - see
+    // computeChunkKey in crawl/chunkKey.ts. LEGACY rows written before this
+    // field existed have no chunkKey and are only reachable via the
+    // by_documentId_and_contentHash index until they are naturally replaced by
+    // a future re-crawl (no forced backfill, same convention as parentText
+    // above and migrateParentTextToTable's lazy-migration precedent).
+    chunkKey: v.optional(v.string()),
+    // Phase 6.21A Part 5: the ingestionGeneration this row's content was last
+    // written under. Lets completion-contract checks count distinct chunkKeys
+    // actually committed under the CURRENT generation (see
+    // isGenerationComplete in crawl/mutations.ts) rather than trusting an
+    // over-incrementable counter alone.
+    ingestionGeneration: v.optional(v.number()),
   })
     .index("by_documentId", ["documentId"])
     .index("by_documentId_and_contentHash", ["documentId", "contentHash"])
+    .index("by_documentId_and_chunkKey", ["documentId", "chunkKey"])
     .index("by_ragId", ["ragId"])
     .index("by_contextualizedText", ["contextualizedText"])
     .searchIndex("search_text", { searchField: "text" }),
@@ -308,6 +346,27 @@ export default defineSchema({
   })
     .index("by_documentId", ["documentId"])
     .index("by_documentId_and_contentHash", ["documentId", "contentHash"]),
+
+  // Transient staging for the RAG onComplete commit boundary (see
+  // onRagEntryComplete in crawl/mutations.ts). rag.defineOnComplete's
+  // callback only receives RAG's own Entry shape - no raw chunk text field -
+  // and duplicating full chunk text into RAG's own entry metadata is
+  // deliberately avoided, so embedSingleChunk stages the raw text here
+  // (keyed by ragVersionKey) immediately before its rag.add() call.
+  // Deliberately NOT read-and-deleted synchronously (retry-storm race, Part
+  // 15): ragVersionKey is shared by every concurrent attempt at one
+  // (position, generation), and RAG's own same-key promotion chain
+  // (component/entries.js's promoteToReadyHandler) can produce several
+  // successive "ready" entries that each independently need this SAME
+  // staged row to run their own commit - deleting it after the FIRST one
+  // strands every later chain link with nothing staged. _creationTime is
+  // the GC grace-period clock instead (see gcOrphanedPendingChunkText in
+  // reconciliation.ts), which is the ONLY thing that ever deletes these
+  // rows, well after any concurrent attempt could still be in flight.
+  pendingChunkText: defineTable({
+    ragVersionKey: v.string(),
+    chunkText: v.string(),
+  }).index("by_ragVersionKey", ["ragVersionKey"]),
 
   crawlStats: defineTable({
     statsId: v.string(), // singleton e.g., 'global'
@@ -384,6 +443,14 @@ export default defineSchema({
       total: v.number(),
     }),
     lastUpdatedAt: v.number(),
+    // Phase 6.21A Part 9: cursor-driven rebuild coalescing/stuck-build
+    // detection. computeDashboardStats (the cron entry point) refuses to
+    // start a second rebuild while buildInProgress is true and recent; the
+    // documentStats/userStats/etc. fields above are only ever patched by the
+    // FINAL step of a rebuild, so a partial or crashed run never overwrites
+    // the last good snapshot.
+    buildInProgress: v.optional(v.boolean()),
+    buildStartedAt: v.optional(v.number()),
   }).index("by_statsId", ["statsId"]),
 
   sourceRegistry: defineTable({

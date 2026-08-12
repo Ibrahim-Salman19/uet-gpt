@@ -166,8 +166,43 @@ async function embedNativeGemini(texts: string[], apiKey: string): Promise<numbe
   }
 }
 
+// Phase 6.21A: local-test-only bypass for real Gemini embedding calls, so
+// storage/lifecycle tests (which only need SOME deterministic 768-dim
+// vector, not a semantically meaningful one) can run against a local Convex
+// backend without a paid API key or real network calls. Default DISABLED.
+// Must be the EXACT string "1" (not just truthy) - and is only ever read
+// per-deployment via `npx convex env set`, which does not propagate between
+// deployments, so this can only activate where a human deliberately set it
+// on that specific deployment. The real GEMINI_API_KEY path below is
+// completely unmodified and unconditional on every other deployment,
+// including production.
+function generateDeterministicFakeEmbedding(text: string): number[] {
+  // FNV-1a hash → xorshift32 PRNG. Deterministic and dependency-free; this
+  // vector's semantic content is irrelevant to storage/lifecycle tests.
+  let hash = 2166136261;
+  for (let i = 0; i < text.length; i++) {
+    hash ^= text.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  let seed = hash >>> 0 || 1;
+  const next = () => {
+    seed ^= seed << 13;
+    seed ^= seed >>> 17;
+    seed ^= seed << 5;
+    seed >>>= 0;
+    return seed / 4294967296;
+  };
+  const vec = Array.from({ length: EMBEDDING_DIMENSION }, () => next() * 2 - 1);
+  const norm = Math.sqrt(vec.reduce((sum, x) => sum + x * x, 0)) || 1;
+  return vec.map((x) => x / norm);
+}
+
 export async function generateEmbeddingsInternal(texts: string[]): Promise<number[][]> {
   if (texts.length === 0) return [];
+
+  if (process.env.FAKE_EMBEDDINGS_FOR_LOCAL_TEST === "1") {
+    return texts.map((t) => generateDeterministicFakeEmbedding(t));
+  }
 
   const sanitizedTexts = texts.map((t) => t.substring(0, MAX_EMBED_CHARS));
 

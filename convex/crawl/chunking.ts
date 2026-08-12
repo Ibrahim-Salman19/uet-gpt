@@ -1,3 +1,11 @@
+import {
+  CHILD_CHUNK_OVERLAP,
+  CHILD_CHUNK_SIZE,
+  computeChunkKey,
+  PARENT_CHUNK_OVERLAP,
+  PARENT_CHUNK_SIZE,
+} from "./chunkKey";
+
 const MAX_SAFE_CHARS = 7200;
 
 export function guardChunkSize(text: string): string[] {
@@ -374,11 +382,22 @@ export type ParentChunk = {
 // A child chunk. Carries parentContentHash (resolved to parentId by the caller
 // mutation after the parent is upserted) instead of the full parentText - this
 // removes the previous K× duplication of parent text across siblings.
+//
+// chunkKey (Phase 6.21A Part 2/8) is the chunk's STRUCTURAL identity - its
+// position (heading breadcrumb + ordinal under that heading), independent of
+// its text. contentHash remains the VALUE at that position: unchanged
+// chunkKey + unchanged contentHash means truly nothing to do; unchanged
+// chunkKey + changed contentHash means patch-in-place; a chunkKey with no
+// prior row means a genuinely new position. This is what lets two
+// byte-identical chunks at different positions both be stored (they get
+// different chunkKeys), where the old contentHash-only identity collapsed
+// them into one.
 export type ChildChunk = {
   text: string;
   contentHash: string;
   parentContentHash: string;
   headingPath?: string[];
+  chunkKey: string;
 };
 
 export type GenerateChunksResult = {
@@ -389,10 +408,17 @@ export type GenerateChunksResult = {
 export async function generateChunks(
   normalized: string,
   contextPrefix: string,
+  documentUrl: string,
 ): Promise<GenerateChunksResult> {
-  const parentChunks = chunkMarkdown(normalized, 3000, 300);
+  const parentChunks = chunkMarkdown(normalized, PARENT_CHUNK_SIZE, PARENT_CHUNK_OVERLAP);
   const parents: ParentChunk[] = [];
   const children: ChildChunk[] = [];
+  // Tracks how many child chunks have already been produced under each exact
+  // heading breadcrumb, in document order, across ALL parent blocks - the
+  // ordinalWithinHeading component of chunkKey. Declared once per document
+  // (not reset per-parent) so a heading path that legitimately recurs later
+  // in the document still gets distinct, incrementing ordinals.
+  const ordinalByHeading = new Map<string, number>();
 
   for (const parentChunk of parentChunks) {
     // Store each parent ONCE. Compute its hash once and reuse for all children
@@ -400,16 +426,25 @@ export async function generateChunks(
     const parentContentHash = await sha256(parentChunk.text);
     parents.push({ contentHash: parentContentHash, text: parentChunk.text });
 
-    const childChunks = chunkMarkdown(parentChunk.text, 800, 100, parentChunk.headingPath);
+    const childChunks = chunkMarkdown(
+      parentChunk.text,
+      CHILD_CHUNK_SIZE,
+      CHILD_CHUNK_OVERLAP,
+      parentChunk.headingPath,
+    );
     for (const childChunk of childChunks) {
       const baseText = contextPrefix + childChunk.text;
       const guardedParts = guardChunkSize(baseText);
       for (const part of guardedParts) {
+        const headingKey = (childChunk.headingPath ?? []).join(">");
+        const ordinal = ordinalByHeading.get(headingKey) ?? 0;
+        ordinalByHeading.set(headingKey, ordinal + 1);
         children.push({
           text: part,
           contentHash: await sha256(part),
           parentContentHash,
           headingPath: childChunk.headingPath,
+          chunkKey: await computeChunkKey(documentUrl, childChunk.headingPath, ordinal),
         });
       }
     }

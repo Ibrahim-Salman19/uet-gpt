@@ -125,13 +125,33 @@ export const reembedPendingBatch = internalMutation({
         paginationCursor = page.continueCursor;
       }
 
-      if (existingChunks.length > 0) {
-        const argsArray = existingChunks.map((chunk) => ({
+      // Phase 6.21A Part 2: only chunks that already carry a chunkKey can be
+      // routed through the structural-identity contract embedSingleChunk/
+      // saveEmbedding now require. A legacy row without one predates this
+      // field and is skipped (same disposition as a legacy DLQ row in
+      // retryDeadLetterQueue) rather than forced through with an invented key.
+      const reembeddable = existingChunks.filter((c) => c.chunkKey !== undefined);
+      const skippedLegacy = existingChunks.length - reembeddable.length;
+      if (skippedLegacy > 0) {
+        console.warn(
+          `reembedPendingBatch: skipping ${skippedLegacy} legacy chunk(s) with no chunkKey ` +
+            `for document ${doc._id} - re-crawl required to migrate them.`,
+        );
+      }
+
+      if (reembeddable.length > 0) {
+        // Phase 6.21A Part 4/5: new ingestion round for this recovery pass.
+        const newGeneration = (doc.ingestionGeneration ?? 0) + 1;
+        const argsArray = reembeddable.map((chunk) => ({
           documentId: doc._id,
           url: doc.url,
           chunkText: chunk.text,
           contentHash: chunk.contentHash,
+          chunkKey: chunk.chunkKey!,
+          ingestionGeneration: newGeneration,
           jobId: "reembed-job",
+          parentId: chunk.parentId,
+          headingPath: chunk.headingPath,
           namespaceId: namespaceIdStr,
         }));
 
@@ -141,23 +161,34 @@ export const reembedPendingBatch = internalMutation({
           argsArray,
           {
             onComplete: internal.crawl.mutations.onChunkEmbedded,
-            context: { jobId: "reembed-job" },
+            context: { jobId: "reembed-job", ingestionGeneration: newGeneration },
           },
         );
-        queued += existingChunks.length;
+        queued += reembeddable.length;
+
+        await ctx.db.patch(doc._id, {
+          status: "processing",
+          // chunkCount must match what's actually being tracked toward
+          // completion (reembeddable.length) - skipped legacy chunks will
+          // never increment chunksEmbedded, so counting them here would
+          // make the completion contract unsatisfiable.
+          chunkCount: reembeddable.length,
+          chunksEmbedded: 0,
+          ingestionGeneration: newGeneration,
+          updatedAt: Date.now(),
+        });
       } else if (doc.chunkCount && doc.chunkCount > 0) {
         await ctx.db.patch(doc._id, {
           status: "failed",
           error: "No chunk text available for re-embedding. Re-crawl required.",
         });
-        continue;
+      } else {
+        await ctx.db.patch(doc._id, {
+          status: "processing",
+          chunkCount: 0,
+          updatedAt: Date.now(),
+        });
       }
-
-      await ctx.db.patch(doc._id, {
-        status: "processing",
-        chunkCount: existingChunks.length,
-        updatedAt: Date.now(),
-      });
     }
 
     return {

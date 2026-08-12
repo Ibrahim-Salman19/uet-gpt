@@ -623,6 +623,30 @@ describe("ingestWebhook", () => {
     expect(enqueueCalls.length).toBeGreaterThanOrEqual(1);
   });
 
+  it("canonicalizes the URL (trailing slash, query string) before using it for document identity and chunking", async () => {
+    // Without canonicalization, re-ingesting the same logical page with a
+    // differently-formatted URL would fail upsertDocument's exact-string
+    // by_url lookup and create a duplicate document instead of updating it.
+    mockCtx.runMutation.mockResolvedValue({ action: "inserted", documentId: "doc789" as any });
+    const req = createRequest({
+      url: "https://web.uettaxila.edu.pk/academics/?utm_source=test#section",
+      markdown: "## Academics\n\nThe university offers many programs across engineering disciplines. This content has enough words to pass the quality filter and generate multiple chunks for embedding purposes.",
+      contentHash: "hash-canon",
+      crawlSessionId: "session-canon",
+      sourceType: "html",
+    }, "test-auth-token");
+    const res = await ingestWebhook(mockCtx, req);
+    expect(res.status).toBe(200);
+    const upsertCalls = mockCtx.runMutation.mock.calls.filter(
+      (c: any[]) => c[1] && c[1].crawlSessionId === "session-canon",
+    );
+    expect(upsertCalls[0][1].url).toBe("https://web.uettaxila.edu.pk/academics");
+    const enqueueCalls = mockCtx.runMutation.mock.calls.filter(
+      (c: any[]) => c[1] && Array.isArray(c[1].children),
+    );
+    expect(enqueueCalls[0][1].url).toBe("https://web.uettaxila.edu.pk/academics");
+  });
+
   it("returns skipped action when content is unchanged", async () => {
     mockCtx.runMutation.mockResolvedValue({ action: "skipped", documentId: "doc123" as any });
     const req = createRequest({

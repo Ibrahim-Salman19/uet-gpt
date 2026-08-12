@@ -6,25 +6,73 @@ import type { MutationCtx } from "../_generated/server";
 import { internalMutation, internalQuery } from "../_generated/server";
 import { rag } from "../rag/instance";
 import { isPdfVirtualUrl, sha256 } from "./chunking";
+import { computeIndexingFingerprint, EMBEDDING_MODEL_ID } from "./chunkKey";
 import { embeddingPool } from "./workpools";
+
+// Phase 6.21A Part 10: every real or synthetic document observed in this
+// corpus's sizing reconciliation tops out at a few hundred chunks (see
+// docs referenced in the Phase 6.21A final report). 5000 is a generous
+// ceiling - reaching it would require a single document producing an order
+// of magnitude more chunks than anything this pipeline has ever chunked.
+// Guards the accumulation below rather than the surrounding mutation's total
+// transaction budget, which Convex enforces independently regardless of how
+// the rows are read.
+const MAX_CHUNKS_PER_DOCUMENT_SYNC = 5000;
 
 async function getAllChunksByDocumentId(
   ctx: MutationCtx,
   documentId: Id<"documents">,
 ): Promise<Doc<"crawledChunks">[]> {
+  // Phase 6.21A Part 10: replaced a manual `while (!done) { .paginate() }`
+  // accumulation loop with the Convex-recommended `for await` async
+  // iteration (convex/_generated/ai/guidelines.md, "Query guidelines": don't
+  // manually drive .collect()/.take() via repeated calls in async
+  // iteration - use `for await`). The explicit ceiling below turns runaway
+  // growth into a loud, immediate error instead of an ever-growing
+  // in-memory accumulation with no bound.
   const chunks: Doc<"crawledChunks">[] = [];
-  let cursor: string | null = null;
-  let done = false;
-  while (!done) {
-    const page = await ctx.db
-      .query("crawledChunks")
-      .withIndex("by_documentId", (q) => q.eq("documentId", documentId))
-      .paginate({ numItems: 500, cursor });
-    chunks.push(...page.page);
-    done = page.isDone;
-    cursor = page.continueCursor;
+  const query = ctx.db
+    .query("crawledChunks")
+    .withIndex("by_documentId", (q) => q.eq("documentId", documentId));
+  for await (const chunk of query) {
+    chunks.push(chunk);
+    if (chunks.length > MAX_CHUNKS_PER_DOCUMENT_SYNC) {
+      throw new Error(
+        `Document ${documentId} has more than ${MAX_CHUNKS_PER_DOCUMENT_SYNC} crawledChunks ` +
+          "rows; synchronous diff/replace is unsafe at this scale and exceeds every real or " +
+          "synthetic document size observed in this corpus. Investigate before raising this ceiling.",
+      );
+    }
   }
   return chunks;
+}
+
+/**
+ * Bounded count of crawledChunks rows currently stored for a document.
+ * Used only at the moment a generation's expected chunk count has
+ * apparently been reached (Phase 6.21A Part 6 completion contract), as an
+ * independent cross-check against the chunksEmbedded counter before
+ * committing to "indexed". Shares the same ceiling/rationale as
+ * getAllChunksByDocumentId above; a document that trips the ceiling here
+ * throws rather than silently under-counting.
+ */
+async function countChunksByDocumentId(
+  ctx: MutationCtx,
+  documentId: Id<"documents">,
+): Promise<number> {
+  let count = 0;
+  const query = ctx.db
+    .query("crawledChunks")
+    .withIndex("by_documentId", (q) => q.eq("documentId", documentId));
+  for await (const _chunk of query) {
+    count++;
+    if (count > MAX_CHUNKS_PER_DOCUMENT_SYNC) {
+      throw new Error(
+        `Document ${documentId} has more than ${MAX_CHUNKS_PER_DOCUMENT_SYNC} crawledChunks rows.`,
+      );
+    }
+  }
+  return count;
 }
 
 function buildMetadataPatch(
@@ -40,6 +88,7 @@ function buildMetadataPatch(
 type ChunkInput = {
   text: string;
   contentHash: string;
+  chunkKey: string;
   parentContentHash?: string;
   parentId?: Id<"chunkParents">;
   headingPath?: string[];
@@ -105,23 +154,51 @@ async function deleteStaleParents(
   return deleted;
 }
 
+/**
+ * Phase 6.21A Part 2/8: diffs by chunkKey (structural position), not
+ * contentHash. A chunkKey present in both old and new sets with the SAME
+ * contentHash is genuinely unchanged (pre-credited, never re-embedded). A
+ * chunkKey present in both with a DIFFERENT contentHash is a same-position
+ * edit - queued for embedding, and saveEmbedding patches the existing row
+ * in place rather than leaking an orphan. A chunkKey with no prior row is a
+ * new position. An old row whose chunkKey no longer appears is stale and
+ * deleted (its RAG entry AND its crawledChunks row).
+ *
+ * Legacy rows written before chunkKey existed (chunkKey === undefined) can't
+ * be matched positionally; they are treated as stale so a real re-crawl
+ * naturally migrates the document off contentHash-only identity, without a
+ * forced backfill (same convention as parentText's lazy migration below).
+ */
 async function diffAndDeleteStaleChunks(
   ctx: MutationCtx,
   existingChunks: Doc<"crawledChunks">[],
   chunks: ChunkInput[],
   url: string,
-): Promise<{ chunksToEmbed: ChunkInput[]; chunksToDelete: Doc<"crawledChunks">[] }> {
-  const existingHashSet = new Set(existingChunks.map((c) => c.contentHash));
-  const newHashSet = new Set(chunks.map((c) => c.contentHash));
-  const chunksToEmbed = chunks.filter((nc) => !existingHashSet.has(nc.contentHash));
-  // O(n) lookup via the newHashSet instead of the previous O(n×m) `.some()` scan;
-  // matters on documents with many chunks during a re-crawl diff.
-  const chunksToDelete = existingChunks.filter((ec) => !newHashSet.has(ec.contentHash));
+): Promise<{
+  chunksToEmbed: ChunkInput[];
+  chunksToDelete: Doc<"crawledChunks">[];
+  unchangedCount: number;
+}> {
+  const existingByKey = new Map(
+    existingChunks.filter((c) => c.chunkKey !== undefined).map((c) => [c.chunkKey!, c]),
+  );
+  const newKeySet = new Set(chunks.map((c) => c.chunkKey));
+  const legacyRows = existingChunks.filter((c) => c.chunkKey === undefined);
+
+  const chunksToEmbed = chunks.filter((nc) => {
+    const existingRow = existingByKey.get(nc.chunkKey);
+    return !existingRow || existingRow.contentHash !== nc.contentHash;
+  });
+  const unchangedCount = chunks.length - chunksToEmbed.length;
+  const chunksToDelete = [
+    ...legacyRows,
+    ...existingChunks.filter((ec) => ec.chunkKey !== undefined && !newKeySet.has(ec.chunkKey)),
+  ];
 
   await Promise.all(
     chunksToDelete.map(async (staleChunk) => {
       try {
-        await rag.delete(ctx, {
+        await rag.deleteAsync(ctx, {
           entryId: staleChunk.ragId as unknown as import("@convex-dev/rag").EntryId,
         });
         await ctx.db.delete(staleChunk._id);
@@ -132,10 +209,11 @@ async function diffAndDeleteStaleChunks(
   );
 
   console.log(
-    `Chunk Diff for ${url}: ${chunksToEmbed.length} new chunks, ${chunksToDelete.length} deleted chunks`,
+    `Chunk Diff for ${url}: ${chunksToEmbed.length} new/changed chunks, ` +
+      `${unchangedCount} unchanged (pre-credited), ${chunksToDelete.length} deleted chunks`,
   );
 
-  return { chunksToEmbed, chunksToDelete };
+  return { chunksToEmbed, chunksToDelete, unchangedCount };
 }
 
 async function enqueueNewChunks(
@@ -144,6 +222,7 @@ async function enqueueNewChunks(
   url: string,
   chunksToEmbed: ChunkInput[],
   jobId: string,
+  ingestionGeneration: number,
 ): Promise<void> {
   if (chunksToEmbed.length === 0) return;
 
@@ -157,6 +236,8 @@ async function enqueueNewChunks(
     url,
     chunkText: chunk.text,
     contentHash: chunk.contentHash,
+    chunkKey: chunk.chunkKey,
+    ingestionGeneration,
     jobId,
     parentId: chunk.parentId,
     headingPath: chunk.headingPath,
@@ -165,7 +246,7 @@ async function enqueueNewChunks(
 
   await embeddingPool.enqueueActionBatch(ctx, internal.crawl.actions.embedSingleChunk, argsArray, {
     onComplete: internal.crawl.mutations.onChunkEmbedded,
-    context: { jobId, documentId: docId, url },
+    context: { jobId, documentId: docId, url, ingestionGeneration },
   });
 }
 
@@ -174,6 +255,8 @@ async function upsertDocumentForCrawl(
   url: string,
   title: string,
   contentHash: string,
+  indexingFingerprint: string,
+  ingestionGeneration: number,
   freshnessTier: "high" | "medium" | "low" | undefined,
   lastModified: string | undefined,
   etag: string | undefined,
@@ -183,10 +266,15 @@ async function upsertDocumentForCrawl(
     const metadataPatch = buildMetadataPatch(lastModified, etag);
     await ctx.db.patch(existing._id, {
       contentHash,
+      indexingFingerprint,
+      ingestionGeneration,
       crawledAt: Date.now(),
       updatedAt: Date.now(),
       status: "processing",
-      chunksEmbedded: 0,
+      // chunksEmbedded is intentionally NOT reset here - the caller
+      // (queueChunksForEmbedding) sets it once, after the diff is known, to
+      // the correct pre-credited value (Phase 6.21A Part 2's "unchanged-chunk
+      // progress pre-credit"). Writing 0 here first would just be overwritten.
       ...(metadataPatch ? { metadata: { ...existing.metadata, ...metadataPatch } } : {}),
     });
     return existing._id;
@@ -205,9 +293,10 @@ async function upsertDocumentForCrawl(
     source: sourceHost,
     category: "crawled",
     contentHash,
+    indexingFingerprint,
+    ingestionGeneration,
     freshnessTier,
     status: "processing",
-    chunksEmbedded: 0,
     crawledAt: Date.now(),
     updatedAt: Date.now(),
     ...(metadata ? { metadata } : {}),
@@ -284,6 +373,9 @@ export const queueChunksForEmbedding = internalMutation({
       v.object({
         text: v.string(),
         contentHash: v.string(),
+        // Phase 6.21A Part 2/8: structural position identity - see
+        // computeChunkKey in crawl/chunkKey.ts.
+        chunkKey: v.string(),
         parentContentHash: v.string(),
         headingPath: v.optional(v.array(v.string())),
       }),
@@ -297,7 +389,19 @@ export const queueChunksForEmbedding = internalMutation({
       .withIndex("by_url", (q) => q.eq("url", url))
       .unique();
 
-    if (existing && existing.contentHash === contentHash) {
+    // Phase 6.21A Part 7: the fast path requires BOTH contentHash AND
+    // indexingFingerprint to match. A pipeline change (chunking version,
+    // embedding model/dimensions, context-prefix template, etc.) with
+    // unchanged source content must still force a rebuild instead of being
+    // silently skipped - a legacy row with no stored fingerprint never
+    // matches, so it gets exactly one forced rebuild the first time it is
+    // re-ingested under the new code.
+    const currentFingerprint = await computeIndexingFingerprint();
+    if (
+      existing &&
+      existing.contentHash === contentHash &&
+      existing.indexingFingerprint === currentFingerprint
+    ) {
       console.log(`Document unchanged (Fast Path): ${url}`);
       const metadata = buildMetadataPatch(lastModified, etag);
       await ctx.db.patch(existing._id, {
@@ -309,11 +413,27 @@ export const queueChunksForEmbedding = internalMutation({
       return { status: "unchanged", chunksQueued: 0 };
     }
 
+    // Phase 6.21A Part 4/5: a new ingestion round always begins here,
+    // immediately - never deferred or silently dropped, even if a previous
+    // round for this same document is still mid-flight
+    // (existing?.status === "processing"). The generation number is the
+    // single source of truth for "which round is canonical"; saveEmbedding
+    // and checkDocumentForFailure fence out any straggling completion from
+    // an older generation. This is a deliberate design choice: the installed
+    // @convex-dev/workpool has no keyed-serialization primitive (verified
+    // against node_modules/@convex-dev/workpool's type definitions), and
+    // blocking this mutation/webhook handler on a prior round's async
+    // embedding work would be operationally harmful. See the Phase 6.21A
+    // final report's "Generation model" section for the full rationale.
+    const newGeneration = (existing?.ingestionGeneration ?? 0) + 1;
+
     const docId = await upsertDocumentForCrawl(
       ctx,
       url,
       title,
       contentHash,
+      currentFingerprint,
+      newGeneration,
       freshnessTier,
       lastModified,
       etag,
@@ -325,20 +445,21 @@ export const queueChunksForEmbedding = internalMutation({
     const resolvedChildren: ChunkInput[] = children.map((c) => ({
       text: c.text,
       contentHash: c.contentHash,
+      chunkKey: c.chunkKey,
       parentContentHash: c.parentContentHash,
       parentId: parentIdByHash.get(c.parentContentHash),
       headingPath: c.headingPath,
     }));
 
     const existingChunks = existing ? await getAllChunksByDocumentId(ctx, existing._id) : [];
-    const { chunksToEmbed, chunksToDelete } = await diffAndDeleteStaleChunks(
+    const { chunksToEmbed, chunksToDelete, unchangedCount } = await diffAndDeleteStaleChunks(
       ctx,
       existingChunks,
       resolvedChildren,
       url,
     );
 
-    await enqueueNewChunks(ctx, docId, url, chunksToEmbed, args.jobId);
+    await enqueueNewChunks(ctx, docId, url, chunksToEmbed, args.jobId, newGeneration);
 
     // WS-1: drop parents whose contentHash no longer appears among surviving children.
     const survivingParentHashes = new Set(
@@ -346,8 +467,15 @@ export const queueChunksForEmbedding = internalMutation({
     );
     await deleteStaleParents(ctx, docId, survivingParentHashes);
 
+    // Phase 6.21A Part 2: unchanged-chunk progress pre-credit. Chunks whose
+    // chunkKey+contentHash both matched need no embedding work this round,
+    // so they never flow through saveEmbedding's increment - pre-seed the
+    // counter with their count now so a round where every remaining chunk
+    // is genuinely unchanged (only the document-level trigger fired, e.g. a
+    // metadata-only republish) still reaches "indexed" correctly.
     await ctx.db.patch(docId, {
       chunkCount: children.length,
+      chunksEmbedded: unchangedCount,
       status: chunksToEmbed.length === 0 ? "indexed" : "processing",
     });
 
@@ -359,84 +487,398 @@ export const queueChunksForEmbedding = internalMutation({
   },
 });
 
-export const saveEmbedding = internalMutation({
-  args: {
-    documentId: v.id("documents"),
-    chunkText: v.string(),
-    contentHash: v.string(),
-    ragId: v.string(),
-    jobId: v.optional(v.string()),
-    parentId: v.optional(v.id("chunkParents")),
-    headingPath: v.optional(v.array(v.string())),
-  },
+/**
+ * Phase 6.21A Part 6 completion contract. chunksEmbedded is pre-seeded (see
+ * queueChunksForEmbedding) with the count of chunks that needed no write
+ * this round, then incremented exactly once per DISTINCT chunkKey actually
+ * written by saveEmbedding (every early-return path in saveEmbedding
+ * returns before reaching this helper, so retries/duplicates/stale
+ * generations never double-count - this is what closes the Phase 6.11-6.20
+ * chunksEmbedded-overcounting finding). When the running count first
+ * reaches chunkCount, this cross-checks against the REAL row count before
+ * committing to "indexed" rather than trusting the counter alone.
+ */
+async function bumpDocumentProgress(
+  ctx: MutationCtx,
+  documentId: Id<"documents">,
+  doc: Doc<"documents">,
+  ingestionGeneration: number,
+): Promise<void> {
+  const newCount = (doc.chunksEmbedded || 0) + 1;
+  const updates: Partial<Doc<"documents">> = { chunksEmbedded: newCount };
+
+  if (doc.chunkCount !== undefined && newCount >= doc.chunkCount && doc.status !== "indexed") {
+    // Bounded re-verification, not a hot-path scan: this only runs at the
+    // moment the counter APPEARS to have reached completion (typically the
+    // last one or two chunks of a document), not on every chunk save - a
+    // narrower cost than the DLQ-scan pattern deliberately avoided above in
+    // checkDocumentForFailure.
+    const actualRowCount = await countChunksByDocumentId(ctx, documentId);
+    if (actualRowCount === doc.chunkCount) {
+      updates.status = "indexed";
+      updates.updatedAt = Date.now();
+    } else {
+      console.warn(
+        `Document ${documentId} generation ${ingestionGeneration}: chunksEmbedded counter ` +
+          `(${newCount}) reached chunkCount (${doc.chunkCount}) but actual row count is ` +
+          `${actualRowCount}; deferring "indexed" transition.`,
+      );
+    }
+  }
+  await ctx.db.patch(documentId, updates);
+}
+
+export const stagePendingChunkText = internalMutation({
+  args: { ragVersionKey: v.string(), chunkText: v.string() },
   handler: async (ctx, args) => {
-    const existingChunk = await ctx.db
-      .query("crawledChunks")
-      .withIndex("by_documentId_and_contentHash", (q) =>
-        q.eq("documentId", args.documentId).eq("contentHash", args.contentHash),
-      )
-      .first();
-    if (existingChunk) {
-      console.log(`Chunk ${args.contentHash} already indexed, skipping.`);
+    await ctx.db.insert("pendingChunkText", args);
+  },
+});
+
+async function deletePendingChunkTextImpl(ctx: MutationCtx, ragVersionKey: string): Promise<void> {
+  const rows = await ctx.db
+    .query("pendingChunkText")
+    .withIndex("by_ragVersionKey", (q) => q.eq("ragVersionKey", ragVersionKey))
+    .collect();
+  await Promise.all(rows.map((row) => ctx.db.delete(row._id)));
+}
+
+/**
+ * The single commit primitive for "this RAG entry is confirmed
+ * current-generation, make it the active one for baseChunkKey." Called from
+ * exactly two places - onRagEntryComplete's current-generation branch below,
+ * and embedSingleChunk's created:false fallback (actions.ts) - both of
+ * which have ALREADY established that ingestionGeneration is current and
+ * that any replacedEntry was safe to discard (or there was none) before
+ * reaching here. This function does no generation checking of its own; by
+ * the time it is called that decision has already been made upstream. This
+ * replaces the old saveEmbedding, which made BOTH decisions itself - stale
+ * generations reached the SAME unconditional replacedEntryId cleanup as
+ * current ones, which is exactly the ordering that let a stale generation's
+ * rag.add() call physically delete a newer generation's already-committed
+ * RAG entry (see chunkKey.ts's computeRagVersionKey for the full
+ * source-verified rationale).
+ */
+async function commitCurrentGenerationChunkImpl(
+  ctx: MutationCtx,
+  args: {
+    documentId: Id<"documents">;
+    baseChunkKey: string;
+    ingestionGeneration: number;
+    contentHash: string;
+    chunkText: string;
+    ragId: string;
+    parentId?: Id<"chunkParents">;
+    headingPath?: string[];
+  },
+): Promise<void> {
+  // Idempotency no-op: ragVersionKey's generation-scoping plus RAG's own
+  // (namespace, key) contentHash dedup already prevent a genuine duplicate
+  // vector from being created for a true retry (source-verified against
+  // component/entries.js's findExistingEntry+entryIsSame), but a stray
+  // double-call of this primitive for the same already-committed ragId must
+  // still not double-write or double-credit progress.
+  const existingByRagId = await ctx.db
+    .query("crawledChunks")
+    .withIndex("by_ragId", (q) => q.eq("ragId", args.ragId))
+    .first();
+  if (existingByRagId) return;
+
+  const doc = await ctx.db.get(args.documentId);
+
+  // Stale-generation guard: embedSingleChunk's created:false fast-dedup
+  // fallback (actions.ts) calls this primitive directly, WITHOUT going
+  // through onRagEntryComplete's own generation fence, because created:false
+  // never invokes onComplete at all (source-verified against
+  // component/entries.js). A caller whose ragVersionKey already has a ready
+  // entry from an earlier same-generation commit can therefore reach here
+  // for a generation that is no longer current (retry-storm race: Test B,
+  // 25 stale + 25 current concurrent retries). args.ragId here is a
+  // PRE-EXISTING entry this call does not own - possibly still shared with
+  // other same-generation retries in flight - so the correct action on
+  // staleness is to touch nothing at all (not even delete args.ragId),
+  // mirroring onRagEntryComplete's own "do NOT patch crawledChunks, do NOT
+  // bump progress" stale-generation rule.
+  if (!doc || doc.ingestionGeneration !== args.ingestionGeneration) {
+    console.warn(
+      `Stale commitCurrentGenerationChunk ignored for document ${args.documentId}: ` +
+        `call generation ${args.ingestionGeneration} != current ${doc?.ingestionGeneration ?? "(deleted)"}.`,
+    );
+    return;
+  }
+
+  // Phase 6.21A Part 2/8 (preserved): chunk identity lookup by structural
+  // position (baseChunkKey), not contentHash - two different positions with
+  // byte-identical text (T7) must both get their own row.
+  const existingByKey = await ctx.db
+    .query("crawledChunks")
+    .withIndex("by_documentId_and_chunkKey", (q) =>
+      q.eq("documentId", args.documentId).eq("chunkKey", args.baseChunkKey),
+    )
+    .first();
+
+  // Generation-scoped ragVersionKeys mean two DIFFERENT generations' entries
+  // never share a RAG-component key, so RAG's own replace-by-key mechanism
+  // never sees them as related and never produces a replacedEntry for this
+  // case (onRagEntryComplete's replacedEntry cleanup only ever sees a prior
+  // attempt at the SAME generation, since only same-generation retries share
+  // a key). Whenever this commit is about to repoint an existing row at a
+  // DIFFERENT generation's entry, the row's old ragId is therefore an
+  // orphan-to-be unless explicitly retired here - nothing else ever will.
+  async function retireSupersededCrossGenerationVector(oldRow: Doc<"crawledChunks">) {
+    if (oldRow.ragId === args.ragId || oldRow.ingestionGeneration === args.ingestionGeneration) {
       return;
     }
+    try {
+      await rag.deleteAsync(ctx, {
+        entryId: oldRow.ragId as unknown as import("@convex-dev/rag").EntryId,
+      });
+    } catch (err) {
+      console.warn(`Failed to delete superseded cross-generation vector ${oldRow.ragId}:`, err);
+    }
+  }
 
-    // TOCTOU guard: a concurrent retry of this same chunk may have already won
-    // the rag.add() race in actions.ts (embedSingleChunk) and created a SECOND
-    // vector with the SAME ragId before this mutation committed. If a row for
-    // this ragId already exists, this run lost the race - delete the duplicate
-    // vector we just created in rag.add() so it doesn't linger as an orphan
-    // (paid storage, never queried). This makes saveEmbedding idempotent across
-    // the action/mutation boundary regardless of retry interleaving.
-    const existingByRagId = await ctx.db
-      .query("crawledChunks")
-      .withIndex("by_ragId", (q) => q.eq("ragId", args.ragId))
-      .first();
-    if (existingByRagId) {
-      console.warn(
-        `Duplicate vector detected for ragId ${args.ragId} (contentHash ${args.contentHash}); ` +
-          "deleting the duplicate vector created by this retry to prevent an orphan.",
-      );
-      try {
-        await rag.delete(ctx, {
-          entryId: args.ragId as unknown as import("@convex-dev/rag").EntryId,
-        });
-      } catch (err) {
-        console.warn(`Failed to delete duplicate vector ${args.ragId}:`, err);
+  if (existingByKey && existingByKey.contentHash === args.contentHash) {
+    if (existingByKey.ingestionGeneration === args.ingestionGeneration) {
+      // Already credited THIS generation's progress for this position - but
+      // existingByKey.ragId can still be STALE (retry-storm race: many
+      // concurrent rag.add() calls at one brand-new ragVersionKey can create
+      // several pending entries that chain-promote - RAG's own
+      // promoteToReadyHandler unconditionally marks whatever is CURRENTLY
+      // ready as replaced with zero awareness of crawledChunks, source-
+      // verified against component/entries.js). The row was last patched by
+      // an EARLIER entry in that same-generation chain; that entry has since
+      // been superseded and deleted via its own onComplete (status:
+      // "replaced" branch above), while args.ragId (this call's own entry)
+      // is the currently-alive survivor. The existingByRagId check at the
+      // top of this function already proves existingByKey.ragId !==
+      // args.ragId whenever we reach here, so repoint unconditionally - no
+      // retireSupersededCrossGenerationVector call needed, since the OLD
+      // same-key entry's cleanup is already guaranteed by its own onComplete
+      // independent of this patch, and do NOT bump progress again (this
+      // position was already credited earlier in the chain).
+      if (existingByKey.ragId !== args.ragId) {
+        await ctx.db.patch(existingByKey._id, { ragId: args.ragId });
       }
       return;
     }
+    // A DIFFERENT (older) generation already wrote this exact value - this
+    // round's diff independently re-derived identical content for this
+    // position. Adopt the row into the current generation (and its new
+    // ragId) so this position gets credited instead of leaving the counter
+    // permanently short of chunkCount.
+    await retireSupersededCrossGenerationVector(existingByKey);
+    await ctx.db.patch(existingByKey._id, {
+      ingestionGeneration: args.ingestionGeneration,
+      ragId: args.ragId,
+    });
+    if (doc) await bumpDocumentProgress(ctx, args.documentId, doc, args.ingestionGeneration);
+    return;
+  }
 
+  if (existingByKey) {
+    // Same position, DIFFERENT value: patch in place instead of leaving the
+    // old row and creating a second one at the same logical position.
+    await retireSupersededCrossGenerationVector(existingByKey);
+    await ctx.db.patch(existingByKey._id, {
+      contentHash: args.contentHash,
+      text: args.chunkText,
+      ragId: args.ragId,
+      embeddingModel: EMBEDDING_MODEL_ID,
+      parentId: args.parentId,
+      headingPath: args.headingPath,
+      ingestionGeneration: args.ingestionGeneration,
+    });
+  } else {
     await ctx.db.insert("crawledChunks", {
       documentId: args.documentId,
       contentHash: args.contentHash,
       text: args.chunkText,
       ragId: args.ragId,
-      embeddingModel: "gemini-embedding-2",
+      embeddingModel: EMBEDDING_MODEL_ID,
       parentId: args.parentId,
       headingPath: args.headingPath,
+      chunkKey: args.baseChunkKey,
+      ingestionGeneration: args.ingestionGeneration,
     });
+  }
 
-    const doc = await ctx.db.get(args.documentId);
-    if (doc) {
-      const newCount = (doc.chunksEmbedded || 0) + 1;
-      const updates: Partial<Doc<"documents">> = { chunksEmbedded: newCount };
+  if (doc) {
+    await bumpDocumentProgress(ctx, args.documentId, doc, args.ingestionGeneration);
+  }
+}
 
-      // We ONLY check if successful chunks meet the chunkCount to mark as indexed.
-      // We removed countFailedChunks() from this hot path because scanning the DLQ table
-      // via .collect() for every single chunk causes a massive OCC conflict multiplier
-      // and exhausts the Convex database IO limit.
-      // Documents with failed chunks will naturally remain in 'processing' state until
-      // retried or cleaned up by background crons.
-      if (doc.chunkCount !== undefined && newCount >= doc.chunkCount) {
-        if (doc.status !== "indexed") {
-          updates.status = "indexed";
-          updates.updatedAt = Date.now();
-        }
-      }
-      await ctx.db.patch(args.documentId, updates);
-    }
+export const commitCurrentGenerationChunk = internalMutation({
+  args: {
+    documentId: v.id("documents"),
+    baseChunkKey: v.string(),
+    ingestionGeneration: v.number(),
+    contentHash: v.string(),
+    chunkText: v.string(),
+    ragId: v.string(),
+    parentId: v.optional(v.id("chunkParents")),
+    headingPath: v.optional(v.array(v.string())),
   },
+  handler: async (ctx, args) => {
+    await commitCurrentGenerationChunkImpl(ctx, args);
+  },
+});
+
+/**
+ * The canonical commit boundary for the RAG lifecycle (stale rag.add race
+ * remediation). Registered as rag.add()'s onComplete - fires whenever an
+ * entry leaves "pending", whether it becomes "ready" or gets "replaced"
+ * along the way (see the OnComplete JSDoc in
+ * node_modules/@convex-dev/rag/dist/client/index.d.ts) - including for
+ * OTHER entries this call's own rag.add() replaces while still pending
+ * (source-verified against component/entries.js's promoteToReadyHandler).
+ * This is now the ONLY place that decides whether a RAG entry becomes the
+ * active one for its baseChunkKey; embedSingleChunk (actions.ts) no longer
+ * makes that decision itself except for the contentHash fast-dedup path
+ * (created: false), which routes through the SAME commitCurrentGenerationChunk
+ * primitive below rather than a competing implementation.
+ *
+ * Because the RAG-facing key (ragVersionKey - see computeRagVersionKey in
+ * chunkKey.ts) is generation-scoped, replacedEntry here can ONLY ever be a
+ * prior attempt at THIS SAME generation (a different generation could never
+ * have shared this key), and a stale generation's own entry can never be
+ * the one crawledChunks currently points at for the CURRENT generation -
+ * deleting it is always safe.
+ */
+export const onRagEntryComplete = rag.defineOnComplete(async (ctx: MutationCtx, args) => {
+  const { entry, replacedEntry, error } = args;
+  const ragVersionKey = entry.key ?? "";
+
+  if (error) {
+    // Error path: never leave a failed entry (and its own vector rows)
+    // permanently behind. Deliberately does NOT touch pendingChunkText
+    // (retry-storm race): ragVersionKey is shared by every concurrent
+    // attempt at this exact (position, generation) - another still-in-flight
+    // sibling may be the one that eventually reaches "ready" and needs the
+    // SAME staged row to commit from. Only the successful commit path below
+    // (which has proven this ragVersionKey is fully settled, since no future
+    // commit will ever be attempted again for it) is safe to clean it up.
+    try {
+      await rag.deleteAsync(ctx, { entryId: entry.entryId });
+    } catch (err) {
+      console.warn(`Failed to delete errored RAG entry ${entry.entryId}:`, err);
+    }
+    return;
+  }
+
+  if (entry.status === "replaced") {
+    // This exact entry lost a same-generation promotion race (a CONCURRENT
+    // retry of the identical ragVersionKey got promoted first and swept
+    // this one from "pending" straight to "replaced" - source-verified
+    // against component/entries.js's promoteToReadyHandler, which fires
+    // onComplete for swept pending entries too, with their OWN now-replaced
+    // state as `entry` and `replacedEntry: null`). It can never be the
+    // entry crawledChunks currently points at (nothing ever committed a
+    // not-yet-ready entry), so there is nothing to fence by generation -
+    // just retire it. Whichever retry DID win gets its own onComplete call
+    // with status "ready", which is what actually commits.
+    // Deliberately does NOT touch pendingChunkText - see the error path's
+    // comment above for why (the entry that DID win this same-key race may
+    // still need the shared staged row to commit from).
+    try {
+      await rag.deleteAsync(ctx, { entryId: entry.entryId });
+    } catch (err) {
+      console.warn(`Failed to delete swept same-generation entry ${entry.entryId}:`, err);
+    }
+    return;
+  }
+
+  // Only "ready" remains (onComplete only fires for a pending->ready or
+  // pending->replaced transition, never while still "pending").
+  const metadata = (entry.metadata ?? {}) as {
+    documentId?: Id<"documents">;
+    baseChunkKey?: string;
+    ingestionGeneration?: number;
+    parentId?: Id<"chunkParents"> | "";
+    headingPath?: string[];
+  };
+  const { documentId, baseChunkKey, ingestionGeneration } = metadata;
+
+  if (documentId === undefined || baseChunkKey === undefined || ingestionGeneration === undefined) {
+    // Cannot safely act without identity - embedSingleChunk always attaches
+    // this metadata before calling rag.add(), so this should never happen.
+    // Surface it loudly rather than guessing, and do NOT delete an entry we
+    // cannot prove ownership of (Part 8's own caution) - it is "ready" and
+    // stays retrievable, just not linked into crawledChunks.
+    console.error("onRagEntryComplete: entry missing required identity metadata", {
+      entryId: entry.entryId,
+      metadata: entry.metadata,
+    });
+    return;
+  }
+
+  const doc = await ctx.db.get(documentId);
+  const currentGeneration = doc?.ingestionGeneration ?? 0;
+
+  if (!doc || ingestionGeneration !== currentGeneration) {
+    // Stale-generation path. Do NOT patch crawledChunks, do NOT bump
+    // progress, do NOT touch document status, do NOT delete anything other
+    // than this entry's own (generation-scoped, therefore provably-not-
+    // current) vector.
+    console.warn(
+      `Stale RAG entry completion ignored for document ${documentId}: ` +
+        `entry generation ${ingestionGeneration} != current ${currentGeneration}.`,
+    );
+    try {
+      await rag.deleteAsync(ctx, { entryId: entry.entryId });
+    } catch (err) {
+      console.warn(`Failed to delete stale-generation RAG entry ${entry.entryId}:`, err);
+    }
+    await deletePendingChunkTextImpl(ctx, ragVersionKey);
+    return;
+  }
+
+  // Current-generation path: replacedEntry (if any) is provably a prior
+  // attempt at this SAME generation - safe to clean up unconditionally.
+  if (replacedEntry) {
+    try {
+      await rag.deleteAsync(ctx, { entryId: replacedEntry.entryId });
+    } catch (err) {
+      console.warn(`Failed to delete same-generation replacedEntry ${replacedEntry.entryId}:`, err);
+    }
+  }
+
+  const staged = await ctx.db
+    .query("pendingChunkText")
+    .withIndex("by_ragVersionKey", (q) => q.eq("ragVersionKey", ragVersionKey))
+    .first();
+  if (!staged) {
+    // embedSingleChunk always stages text before calling rag.add() - without
+    // it there is nothing safe to commit (writing empty/wrong chunkText
+    // would be worse than not committing). Surface loudly.
+    console.error(`onRagEntryComplete: no staged text found for ragVersionKey ${ragVersionKey}`);
+    return;
+  }
+
+  await commitCurrentGenerationChunkImpl(ctx, {
+    documentId,
+    baseChunkKey,
+    ingestionGeneration,
+    contentHash: entry.contentHash ?? "",
+    chunkText: staged.chunkText,
+    ragId: entry.entryId,
+    parentId: metadata.parentId || undefined,
+    headingPath: metadata.headingPath,
+  });
+  // Deliberately does NOT delete the staged row here (retry-storm race): a
+  // same-generation chain (many concurrent rag.add() calls at one brand-new
+  // ragVersionKey can create several pending entries that successively
+  // promote and replace each other - RAG's own promoteToReadyHandler,
+  // source-verified against component/entries.js) means a LATER chain link
+  // can still need this SAME shared staged row to run its own repoint commit
+  // (see commitCurrentGenerationChunkImpl's "already credited this
+  // generation" branch) even after an EARLIER link already committed
+  // successfully. Deleting here the first time would strand every later
+  // link with nothing staged, leaving crawledChunks.ragId pointing at
+  // whichever link committed first instead of the actual final survivor.
+  // pendingChunkText rows are swept later by reconciliation.ts's GC mode
+  // instead, once enough time has passed that no concurrent attempt could
+  // still be in flight.
 });
 
 async function getDLQEntriesForUrl(ctx: MutationCtx, jobId: string, url: string) {
@@ -519,6 +961,8 @@ async function updateOrCreateDLQEntry(
   contentHash: string | undefined,
   errorMsg: string,
   chunkText?: string,
+  chunkKey?: string,
+  ingestionGeneration?: number,
 ) {
   const MAX_RETRIES = 5;
   // One DLQ row per failed chunk (jobId, url, contentHash) so completion accounting
@@ -541,7 +985,7 @@ async function updateOrCreateDLQEntry(
       failureReason: errorMsg,
       failureCount: 1,
       lastAttemptAt: Date.now(),
-      payload: { documentId, url, contentHash, jobId, chunkText },
+      payload: { documentId, url, contentHash, jobId, chunkText, chunkKey, ingestionGeneration },
       status: "pending_retry",
     });
   }
@@ -553,42 +997,58 @@ async function checkDocumentForFailure(
   url: string,
   jobId: string,
   errorMsg: string,
+  ingestionGeneration: number | undefined,
 ) {
   const doc = await ctx.db.get(documentId);
-  if (doc && doc.status !== "failed") {
-    const chunkCount = doc.chunkCount ?? 1;
-    if (chunkCount <= 1) {
-      await ctx.db.patch(documentId, {
-        status: "failed",
-        error: errorMsg,
-        updatedAt: Date.now(),
-      });
-    } else {
-      // Count DISTINCT failed chunks scoped to THIS job + URL (one DLQ row per
-      // failed chunk). Using by_url across all jobs/statuses previously both
-      // under-counted multi-chunk failures and over-counted stale re-crawl rows.
-      const failedCount = await countFailedChunks(ctx, jobId, url);
-      const embeddedCount = doc.chunksEmbedded || 0;
+  if (!doc || doc.status === "failed") return;
 
-      if (failedCount + embeddedCount >= chunkCount) {
-        if (embeddedCount === 0) {
-          await ctx.db.patch(documentId, {
-            status: "failed",
-            error: `All ${chunkCount} chunks failed. Last error: ${errorMsg}`,
-            updatedAt: Date.now(),
-          });
-        } else {
-          await ctx.db.patch(documentId, {
-            status: "indexed",
-            error: `Completed with ${failedCount} failed chunks. Last error: ${errorMsg}`,
-            updatedAt: Date.now(),
-          });
-        }
+  // Phase 6.21A Part 5: a failure belonging to a superseded ingestion round
+  // must never affect the CURRENT round's status - the failing chunk's
+  // position has already been re-diffed under the new generation (it is
+  // either unchanged, or has its own independent in-flight replacement).
+  // Mixing a stale generation's failure count into the current generation's
+  // chunkCount/chunksEmbedded math would corrupt its completion decision.
+  const currentGeneration = doc.ingestionGeneration ?? 0;
+  if (ingestionGeneration !== undefined && ingestionGeneration !== currentGeneration) {
+    console.warn(
+      `Stale generation failure ignored for document ${documentId}: ` +
+        `work item generation ${ingestionGeneration} != current ${currentGeneration}.`,
+    );
+    return;
+  }
+
+  const chunkCount = doc.chunkCount ?? 1;
+  if (chunkCount <= 1) {
+    await ctx.db.patch(documentId, {
+      status: "failed",
+      error: errorMsg,
+      updatedAt: Date.now(),
+    });
+  } else {
+    // Count DISTINCT failed chunks scoped to THIS job + URL (one DLQ row per
+    // failed chunk). Using by_url across all jobs/statuses previously both
+    // under-counted multi-chunk failures and over-counted stale re-crawl rows.
+    const failedCount = await countFailedChunks(ctx, jobId, url);
+    const embeddedCount = doc.chunksEmbedded || 0;
+
+    if (failedCount + embeddedCount >= chunkCount) {
+      if (embeddedCount === 0) {
+        await ctx.db.patch(documentId, {
+          status: "failed",
+          error: `All ${chunkCount} chunks failed. Last error: ${errorMsg}`,
+          updatedAt: Date.now(),
+        });
       } else {
-        console.warn(
-          `Chunk ${failedCount}/${chunkCount} failed for ${url} - document stays in processing`,
-        );
+        await ctx.db.patch(documentId, {
+          status: "indexed",
+          error: `Completed with ${failedCount} failed chunks. Last error: ${errorMsg}`,
+          updatedAt: Date.now(),
+        });
       }
+    } else {
+      console.warn(
+        `Chunk ${failedCount}/${chunkCount} failed for ${url} - document stays in processing`,
+      );
     }
   }
 }
@@ -599,7 +1059,13 @@ async function handleEmbeddingFailure(
   url: string,
   documentId: Id<"documents">,
   result: { kind: string; error?: string },
-  returnValue: { contentHash?: string; skipped?: boolean; chunkText?: string } | null,
+  returnValue: {
+    contentHash?: string;
+    skipped?: boolean;
+    chunkText?: string;
+    chunkKey?: string;
+  } | null,
+  ingestionGeneration: number | undefined,
 ) {
   const { errorMsg, isSkipped } = getEmbeddingErrorDetails(result, returnValue);
 
@@ -614,19 +1080,21 @@ async function handleEmbeddingFailure(
       returnValue?.contentHash,
       errorMsg,
       returnValue?.chunkText,
+      returnValue?.chunkKey,
+      ingestionGeneration,
     );
   }
 
-  await checkDocumentForFailure(ctx, documentId, url, jobId, errorMsg);
+  await checkDocumentForFailure(ctx, documentId, url, jobId, errorMsg, ingestionGeneration);
 }
 
 async function routeChunkResult(
   ctx: MutationCtx,
-  context: { jobId: string; url?: string; documentId?: string },
+  context: { jobId: string; url?: string; documentId?: string; ingestionGeneration?: number },
   result: { kind: string; returnValue?: Record<string, unknown>; error?: string },
 ) {
   const returnValue = result.kind === "success" ? result.returnValue : null;
-  const url = returnValue?.url as string | undefined ?? context.url;
+  const url = (returnValue?.url as string | undefined) ?? context.url;
   const documentId =
     (returnValue?.documentId as Id<"documents"> | undefined) ??
     (context.documentId as Id<"documents"> | undefined);
@@ -637,6 +1105,13 @@ async function routeChunkResult(
   // under the wrong (jobId, url), corrupting failure accounting. Fall back to the context
   // jobId only when the chunk did not report one (e.g. a hard failure with no returnValue).
   const chunkJobId = (returnValue?.jobId as string | undefined) ?? context.jobId;
+  // Phase 6.21A Part 5: prefer the generation the chunk itself reports
+  // (present on success/skip returnValues); a hard-thrown failure has no
+  // returnValue at all, so fall back to the batch-level enqueue-time
+  // context, which every work item in the batch shares and which is always
+  // present regardless of outcome.
+  const ingestionGeneration =
+    (returnValue?.ingestionGeneration as number | undefined) ?? context.ingestionGeneration;
 
   if (result.kind === "success" && returnValue?.success && returnValue.ragId && url) {
     // Clear only the specific chunk's DLQ row that just succeeded (per-chunk rows).
@@ -649,6 +1124,7 @@ async function routeChunkResult(
       documentId,
       result,
       (returnValue || null) as any,
+      ingestionGeneration,
     );
   }
 }
@@ -659,6 +1135,7 @@ export const onChunkEmbedded = internalMutation({
       jobId: v.string(),
       url: v.optional(v.string()),
       documentId: v.optional(v.string()),
+      ingestionGeneration: v.optional(v.number()),
     }),
   ),
   handler: async (ctx, args) => {
@@ -716,6 +1193,19 @@ export const retryDeadLetterQueue = internalMutation({
         invalidDLQ.push(dlq);
         return false;
       }
+      // Phase 6.21A Part 2/5: a DLQ row written before chunkKey/
+      // ingestionGeneration existed can't be safely retried under the new
+      // structural-identity + generation-fencing contract - it would either
+      // fail saveEmbedding's required args or retry with no generation to
+      // fence against. Same disposition as the pre-existing missing-chunkText
+      // case: abandon rather than retry incorrectly.
+      if (!dlq.payload?.chunkKey) {
+        console.warn(
+          `Skipping DLQ entry ${dlq._id} - no chunkKey available for retry (legacy row).`,
+        );
+        invalidDLQ.push(dlq);
+        return false;
+      }
       return true;
     });
 
@@ -723,8 +1213,9 @@ export const retryDeadLetterQueue = internalMutation({
       invalidDLQ.map((dlq) =>
         ctx.db.patch(dlq._id, {
           status: "abandoned",
-          failureReason:
-            "No chunk text payload for retry (context was minimized to save bandwidth).",
+          failureReason: !dlq.payload?.chunkText
+            ? "No chunk text payload for retry (context was minimized to save bandwidth)."
+            : "No chunkKey payload for retry (legacy pre-Phase-6.21A DLQ row).",
           lastAttemptAt: Date.now(),
         }),
       ),
@@ -750,6 +1241,8 @@ export const retryDeadLetterQueue = internalMutation({
         url: dlq.payload.url,
         chunkText: dlq.payload.chunkText,
         contentHash: dlq.payload.contentHash,
+        chunkKey: dlq.payload.chunkKey!,
+        ingestionGeneration: dlq.payload.ingestionGeneration ?? 0,
         jobId: dlq.payload.jobId,
         namespaceId: namespaceIdStr,
       }));
@@ -760,7 +1253,17 @@ export const retryDeadLetterQueue = internalMutation({
         argsArray,
         {
           onComplete: internal.crawl.mutations.onChunkEmbedded,
-          context: { jobId: validDLQ[0]!.payload.jobId },
+          // NOTE (pre-existing limitation, unchanged by Phase 6.21A): this
+          // context is shared across the WHOLE retry batch, which may span
+          // many different documents/generations (see routeChunkResult's
+          // jobId comment for the same caveat). It is only a fallback for
+          // the no-returnValue hard-failure case; the per-chunk
+          // ingestionGeneration above (echoed back via returnValue on
+          // success/skip) is the primary source routeChunkResult uses.
+          context: {
+            jobId: validDLQ[0]!.payload.jobId,
+            ingestionGeneration: validDLQ[0]!.payload.ingestionGeneration,
+          },
         },
       );
     }
@@ -810,9 +1313,15 @@ export const upsertDocument = internalMutation({
 
     const title = args.title ?? args.url;
     const personType = classifyDocument(args.url, title) ?? undefined;
+    // Phase 6.21A Part 7: same fast-path contract as queueChunksForEmbedding
+    // - both contentHash AND indexingFingerprint must match for "unchanged".
+    const currentFingerprint = await computeIndexingFingerprint();
 
     if (existing) {
-      if (existing.contentHash === args.contentHash) {
+      if (
+        existing.contentHash === args.contentHash &&
+        existing.indexingFingerprint === currentFingerprint
+      ) {
         await ctx.db.patch(existing._id, {
           crawlSessionId: args.crawlSessionId,
           status: "active",
@@ -824,6 +1333,11 @@ export const upsertDocument = internalMutation({
         return { action: "skipped", documentId: existing._id };
       }
 
+      // Phase 6.21A Part 4/5: new ingestion round - see
+      // queueChunksForEmbedding's Part 4/5 comment for the full rationale
+      // (accept immediately, fence stale completions rather than block).
+      const newGeneration = (existing.ingestionGeneration ?? 0) + 1;
+
       const oldChunks = await getAllChunksByDocumentId(ctx, existing._id);
       const BATCH_SIZE = 50;
       for (let i = 0; i < oldChunks.length; i += BATCH_SIZE) {
@@ -831,7 +1345,7 @@ export const upsertDocument = internalMutation({
         await Promise.all(
           batch.map(async (chunk) => {
             try {
-              await rag.delete(ctx, {
+              await rag.deleteAsync(ctx, {
                 entryId: chunk.ragId as unknown as import("@convex-dev/rag").EntryId,
               });
               await ctx.db.delete(chunk._id);
@@ -847,8 +1361,10 @@ export const upsertDocument = internalMutation({
 
       await ctx.db.patch(existing._id, {
         contentHash: args.contentHash,
+        indexingFingerprint: currentFingerprint,
+        ingestionGeneration: newGeneration,
         crawlSessionId: args.crawlSessionId,
-        title: args.title,
+        title,
         status: "pending_embed",
         updatedAt: Date.now(),
         freshnessTier: args.freshnessTier,
@@ -874,6 +1390,8 @@ export const upsertDocument = internalMutation({
       source,
       category: "crawled",
       contentHash: args.contentHash,
+      indexingFingerprint: currentFingerprint,
+      ingestionGeneration: 1,
       crawlSessionId: args.crawlSessionId,
       title: title,
       status: "pending_embed",
@@ -901,6 +1419,7 @@ export const enqueueDocumentChunks = internalMutation({
       v.object({
         text: v.string(),
         contentHash: v.string(),
+        chunkKey: v.string(),
         parentContentHash: v.string(),
         headingPath: v.optional(v.array(v.string())),
       }),
@@ -908,6 +1427,14 @@ export const enqueueDocumentChunks = internalMutation({
   },
   handler: async (ctx, args) => {
     const { documentId, url, parents, children } = args;
+
+    // Phase 6.21A Part 4/5: read the CURRENT generation directly rather than
+    // threading it through upsertDocument's return value - this mutation
+    // always runs immediately after upsertDocument bumped it (see
+    // webhook.ts's ingestWebhook/processIngestContent), so the document's
+    // own field is the authoritative, always-correct source.
+    const doc = await ctx.db.get(documentId);
+    const ingestionGeneration = doc?.ingestionGeneration ?? 0;
 
     // WS-1: upsert parents once + resolve parentId for each child.
     const parentIdByHash = await upsertParentsAndResolve(ctx, documentId, parents);
@@ -923,6 +1450,8 @@ export const enqueueDocumentChunks = internalMutation({
         url,
         chunkText: chunk.text,
         contentHash: chunk.contentHash,
+        chunkKey: chunk.chunkKey,
+        ingestionGeneration,
         jobId: "ingest-job",
         parentId: parentIdByHash.get(chunk.parentContentHash),
         headingPath: chunk.headingPath,
@@ -935,13 +1464,23 @@ export const enqueueDocumentChunks = internalMutation({
         argsArray,
         {
           onComplete: internal.crawl.mutations.onChunkEmbedded,
-          context: { jobId: "ingest-job", documentId: documentId as unknown as string, url },
+          context: {
+            jobId: "ingest-job",
+            documentId: documentId as unknown as string,
+            url,
+            ingestionGeneration,
+          },
         },
       );
     }
 
     await ctx.db.patch(documentId, {
       chunkCount: children.length,
+      // upsertDocument's full delete-then-reinsert means every child this
+      // round is genuinely new to saveEmbedding's per-chunkKey lookup (no
+      // prior row survives) - there is no "unchanged, pre-credited" set to
+      // seed here, unlike queueChunksForEmbedding's diff-based path.
+      chunksEmbedded: 0,
       status: children.length === 0 ? "indexed" : "processing",
     });
   },
