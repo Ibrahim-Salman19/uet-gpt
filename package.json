@@ -26,6 +26,7 @@
     "@convex-dev/rag": "^0.7.4",
     "@convex-dev/workflow": "^0.4.2",
     "@convex-dev/workpool": "^0.4.6",
+    "@libsql/client": "^0.17.4",
     "@radix-ui/react-scroll-area": "^1.2.10",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-separator": "^1.1.8",
@@ -79,6 +80,7 @@
     "jsdom": "^29.1.1",
     "tailwindcss": "^4",
     "typescript": "^5",
+    "undici": "^7.27.2",
     "vercel": "^54.17.1",
     "vitest": "^4.1.7"
   }
