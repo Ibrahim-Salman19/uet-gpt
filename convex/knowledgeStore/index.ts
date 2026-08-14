@@ -1,7 +1,9 @@
 import { createClient } from "@libsql/client";
+import { MilvusClient } from "@zilliz/milvus2-sdk-node";
 import { convexKnowledgeStore } from "./convexAdapter";
 import { createTursoKnowledgeStore } from "./tursoAdapter";
 import type { KnowledgeStore } from "./types";
+import { createZillizKnowledgeStore } from "./zillizAdapter";
 
 // Server-only backend selection (migration brief §8). Convex action code
 // never ships to the browser bundle, so plain process.env reads here are
@@ -28,6 +30,22 @@ function getTursoStore(): KnowledgeStore {
   return tursoStoreSingleton;
 }
 
+let zillizStoreSingleton: KnowledgeStore | null = null;
+
+function getZillizStore(): KnowledgeStore {
+  if (!zillizStoreSingleton) {
+    const address = process.env.ZILLIZ_ENDPOINT;
+    const token = process.env.ZILLIZ_API_KEY;
+    if (!address || !token) {
+      throw new Error(
+        "KNOWLEDGE_STORE_BACKEND=zilliz requires ZILLIZ_ENDPOINT and ZILLIZ_API_KEY to be set.",
+      );
+    }
+    zillizStoreSingleton = createZillizKnowledgeStore(new MilvusClient({ address, token }));
+  }
+  return zillizStoreSingleton;
+}
+
 export function getKnowledgeStore(): KnowledgeStore {
   // Unset defaults to "convex" (the current, unchanged, production backend)
   // rather than throwing, so this factory is safe to introduce before every
@@ -40,9 +58,11 @@ export function getKnowledgeStore(): KnowledgeStore {
       return convexKnowledgeStore;
     case "turso":
       return getTursoStore();
+    case "zilliz":
+      return getZillizStore();
     default:
       throw new Error(
-        `Unknown KNOWLEDGE_STORE_BACKEND: "${backend}" (expected "convex" or "turso").`,
+        `Unknown KNOWLEDGE_STORE_BACKEND: "${backend}" (expected "convex", "turso", or "zilliz").`,
       );
   }
 }

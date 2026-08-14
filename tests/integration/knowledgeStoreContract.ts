@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { EMBEDDING_DIMENSION } from "../../convex/embeddings/dimension";
 import type { KnowledgeChunkInput, KnowledgeStore } from "../../convex/knowledgeStore/types";
 
 // Shared, backend-agnostic contract test suite (migration brief §7: "deterministic
@@ -7,9 +8,20 @@ import type { KnowledgeChunkInput, KnowledgeStore } from "../../convex/knowledge
 // passed straight through untouched — the Turso adapter ignores it, a future
 // Convex-adapter test file passes a real ActionCtx from its own test harness.
 
-function embedding(seed: number, dim = 8): Float32Array {
+function embedding(seed: number, dim = EMBEDDING_DIMENSION): Float32Array {
   // Deterministic, distinguishable-by-seed vectors - not meant to resemble
   // real Gemini embeddings, just distinct enough for nearest-neighbor checks.
+  // Dimension defaults to the REAL production dimension, not an arbitrary
+  // small one - Turso/Convex never enforced the declared vector dimension
+  // so an earlier, smaller default (8) went unnoticed there for a long
+  // time, but Zilliz's schema does enforce it strictly and silently
+  // rejects (no thrown exception - a mutation-result error status the
+  // adapter wasn't checking) any row whose vector length doesn't match,
+  // which surfaced as every downstream read of that chunk correctly
+  // reporting "not found" - the chunk was simply never written. Confirmed
+  // directly: upserting an 8-dim vector into Zilliz's 768-dim field
+  // returns error_code "IllegalArgument", "the length(8) of float data
+  // should divide the dim(768)".
   const v = new Float32Array(dim);
   v[seed % dim] = 1;
   return v;
@@ -221,6 +233,49 @@ export function runKnowledgeStoreContractTests(
         for (const hostile of ['scholarship OR NOT *', '"unterminated', "col:injection", "a - b"]) {
           await expect(store.lexicalSearch(ctx as never, hostile, { topK: 5 })).resolves.not.toThrow();
         }
+      } finally {
+        await cleanup();
+      }
+    });
+
+    it("denseSearch's category filter excludes chunks from other categories", async () => {
+      const { store, ctx, cleanup } = await createStore();
+      try {
+        const docA = await store.upsertDocument(ctx as never, {
+          canonicalUrl: "https://web.uettaxila.edu.pk/filter-test-crawled",
+          title: "Filter Test Crawled",
+          contentHash: "hash-1",
+          indexingFingerprint: "fp-1",
+          category: "crawled",
+        });
+        const docB = await store.upsertDocument(ctx as never, {
+          canonicalUrl: "https://web.uettaxila.edu.pk/filter-test-manual",
+          title: "Filter Test Manual",
+          contentHash: "hash-1",
+          indexingFingerprint: "fp-1",
+          category: "manual",
+        });
+        // Same embedding on purpose - without the filter both would tie for
+        // first place, so a filter that silently no-ops would still "pass"
+        // a weaker test that only checked ordering.
+        await store.upsertChunks(ctx as never, docA.documentId, docA.generation, "crawled", [
+          chunk({ chunkKey: "filter-test-crawled-chunk", text: "shared searchable content", embedding: embedding(12) }),
+        ]);
+        await store.upsertChunks(ctx as never, docB.documentId, docB.generation, "manual", [
+          chunk({ chunkKey: "filter-test-manual-chunk", text: "shared searchable content", embedding: embedding(12) }),
+        ]);
+        await store.commitGeneration(ctx as never, docA.documentId, docA.generation);
+        await store.commitGeneration(ctx as never, docB.documentId, docB.generation);
+
+        const filtered = await store.denseSearch(ctx as never, embedding(12), {
+          topK: 10,
+          filter: { category: "crawled" },
+        });
+        expect(filtered.some((r) => r.chunkKey === "filter-test-crawled-chunk")).toBe(true);
+        expect(filtered.some((r) => r.chunkKey === "filter-test-manual-chunk")).toBe(false);
+
+        const unfiltered = await store.denseSearch(ctx as never, embedding(12), { topK: 10 });
+        expect(unfiltered.some((r) => r.chunkKey === "filter-test-manual-chunk")).toBe(true);
       } finally {
         await cleanup();
       }
