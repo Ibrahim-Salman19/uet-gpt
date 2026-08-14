@@ -1,0 +1,141 @@
+Scales: 1000, 5000, 10000, 20652  Configs: diskann_f8, diskann_f16  D=768
+Generating synthetic corpus at max scale (reused/sliced for smaller rungs)...
+
+--- Rebuilding + verifying bench_exact (ground truth) from this run's corpus ---
+  rows: 20652 (need >= 20652, match=true)
+  duplicates: false
+  deterministic top-k: true
+  latency p50=228ms p95=259ms p99=284ms (n=30)
+
+CONFIGURATION: exact (ground truth)
+SCALE: 20652
+STATUS: PASS
+BUILD: N/A (no index)
+INTEGRITY: rowCount=20652 needAtLeast=20652 match=true, duplicates=false, deterministic=true
+RECALL: ground truth (N/A)
+LATENCY: p50=228ms p95=259ms p99=284ms n=30
+STORAGE: not re-measured (unchanged since prior successful run)
+CLEANUP: N/A - bench_exact is retained as the persistent ground-truth table
+EVIDENCE: direct query results, this run
+INTERPRETATION: bench_exact is a valid, unaffected ground-truth source - confirms the incident is isolated to bench_default_uncompressed, not database-wide.
+NEXT ACTION: proceed to ANN configs
+
+
+=== diskann_f8 @ scale=1000 ===
+
+CONFIGURATION: diskann_f8
+SCALE: 1000
+STATUS: PASS
+BUILD: SUCCESS in 134183ms
+INTEGRITY: rowCount=1000 expected=1000 match=true, duplicateFree=true
+RECALL: recall@5=1.000 recall@10=1.000 recall@20=1.000
+LATENCY: p50=119ms p95=240ms p99=240ms n=30
+STORAGE: index-only: 70246400 bytes (70246 bytes/vector), base: 4108288 bytes
+CLEANUP: SUCCESS
+EVIDENCE: table=bench_diskann_f8_1000
+INTERPRETATION: Meets the pre-declared Recall@10 >= 0.98 gate.
+NEXT ACTION: proceed to next scale/config
+
+
+=== diskann_f8 @ scale=5000 ===
+
+CONFIGURATION: diskann_f8
+SCALE: 5000
+STATUS: PASS
+BUILD: SUCCESS in 579378ms
+INTEGRITY: rowCount=5000 expected=5000 match=true, duplicateFree=true
+RECALL: recall@5=1.000 recall@10=1.000 recall@20=0.988
+LATENCY: p50=263ms p95=594ms p99=781ms n=30
+STORAGE: index-only: 351215616 bytes (70243 bytes/vector), base: 20529152 bytes
+CLEANUP: SUCCESS
+EVIDENCE: table=bench_diskann_f8_5000
+INTERPRETATION: Meets the pre-declared Recall@10 >= 0.98 gate.
+NEXT ACTION: proceed to next scale/config
+
+
+=== diskann_f8 @ scale=10000 ===
+
+CONFIGURATION: diskann_f8
+SCALE: 10000
+STATUS: CONDITIONAL
+BUILD: SUCCESS in 1413046ms
+INTEGRITY: rowCount=10000 expected=10000 match=true, duplicateFree=true
+RECALL: recall@5=0.953 recall@10=0.963 recall@20=0.967
+LATENCY: p50=412ms p95=1153ms p99=1242ms n=30
+STORAGE: index-only: 702345216 bytes (70235 bytes/vector), base: 41054208 bytes
+CLEANUP: SUCCESS
+EVIDENCE: table=bench_diskann_f8_10000
+INTERPRETATION: Recall@10 = 0.963 is below the pre-declared 0.98 gate.
+NEXT ACTION: review before treating this configuration as viable
+
+
+=== diskann_f8 @ scale=20652 ===
+
+CONFIGURATION: diskann_f8
+SCALE: 20652
+STATUS: FAIL
+BUILD: FAILED after 1803472ms - CLIENT_TIMEOUT: fetch failed
+INTEGRITY: NOT EXECUTED
+RECALL: NOT EXECUTED
+LATENCY: NOT EXECUTED
+STORAGE: NOT EXECUTED
+CLEANUP: NOT EXECUTED
+EVIDENCE: table=bench_diskann_f8_20652
+INTERPRETATION: Index build failed (CLIENT_TIMEOUT). Table bench_diskann_f8_20652 may contain partial/orphaned structures - NOT auto-cleaning per incident policy.
+NEXT ACTION: Inspect bench_diskann_f8_20652 manually before any further action. Do not retry automatically.
+
+Stopping diskann_f8's scaling ladder after a FAIL at scale=20652 - not proceeding to larger scales for this config.
+
+=== diskann_f16 @ scale=1000 ===
+
+CONFIGURATION: diskann_f16
+SCALE: 1000
+STATUS: PASS
+BUILD: SUCCESS in 190957ms
+INTEGRITY: rowCount=1000 expected=1000 match=true, duplicateFree=true
+RECALL: recall@5=1.000 recall@10=1.000 recall@20=1.000
+LATENCY: p50=220ms p95=302ms p99=452ms n=30
+STORAGE: index-only: 135200768 bytes (135201 bytes/vector), base: 4108288 bytes
+CLEANUP: SUCCESS
+EVIDENCE: table=bench_diskann_f16_1000
+INTERPRETATION: Meets the pre-declared Recall@10 >= 0.98 gate.
+NEXT ACTION: proceed to next scale/config
+
+
+=== diskann_f16 @ scale=5000 ===
+
+CONFIGURATION: diskann_f16
+SCALE: 5000
+STATUS: PASS
+BUILD: SUCCESS in 1445949ms
+INTEGRITY: rowCount=5000 expected=5000 match=true, duplicateFree=true
+RECALL: recall@5=0.993 recall@10=0.987 recall@20=0.990
+LATENCY: p50=545ms p95=1605ms p99=2128ms n=30
+STORAGE: index-only: 675954688 bytes (135191 bytes/vector), base: 20529152 bytes
+CLEANUP: SUCCESS
+EVIDENCE: table=bench_diskann_f16_5000
+INTERPRETATION: Meets the pre-declared Recall@10 >= 0.98 gate.
+NEXT ACTION: proceed to next scale/config
+
+
+=== diskann_f16 @ scale=10000 ===
+
+CONFIGURATION: diskann_f16
+SCALE: 10000
+STATUS: FAIL
+BUILD: FAILED after 1803526ms - CLIENT_TIMEOUT: fetch failed
+INTEGRITY: NOT EXECUTED
+RECALL: NOT EXECUTED
+LATENCY: NOT EXECUTED
+STORAGE: NOT EXECUTED
+CLEANUP: NOT EXECUTED
+EVIDENCE: table=bench_diskann_f16_10000
+INTERPRETATION: Index build failed (CLIENT_TIMEOUT). Table bench_diskann_f16_10000 may contain partial/orphaned structures - NOT auto-cleaning per incident policy.
+NEXT ACTION: Inspect bench_diskann_f16_10000 manually before any further action. Do not retry automatically.
+
+Stopping diskann_f16's scaling ladder after a FAIL at scale=10000 - not proceeding to larger scales for this config.
+
+Machine-readable results written to /tmp/turso-ann-benchmark-1786636235436.json
+
+Done.
+EXIT:0
