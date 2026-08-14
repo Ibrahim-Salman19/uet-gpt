@@ -1,0 +1,165 @@
+{
+  "candidate": "Pinecone Starter (serverless, OnDemand read-capacity mode)",
+  "status": "RESEARCH COMPLETE - HARD GATE PASSED - NOT YET IMPLEMENTED OR BENCHMARKED",
+  "researched_by": "background research agent, in-session, retrieved 2026-08 (dates below per source)",
+  "classification": "OFFICIAL_VENDOR_FACT unless otherwise noted per item",
+  "pre_approval_note": "This research clears the hard idle-lifecycle gate. It does NOT constitute production approval. Pinecone must still pass every remaining acceptance gate (dense ANN recall, lexical parity, lifecycle/concurrency correctness, storage/usage headroom, real retrieval baseline) before any verdict is reached - see ../acceptance-gates.json.",
+
+  "hard_gate_idle_lifecycle": {
+    "question": "Does Pinecone Starter suspend, archive, or delete indexes after inactivity, in a way comparable to Zilliz Free's auto-suspend?",
+    "answer": "NO DISQUALIFYING IDLE-LIFECYCLE BEHAVIOR FOUND",
+    "gate_result": "PASS",
+    "basis": [
+      {
+        "fact": "\"Idle indexes cost nothing.\"",
+        "source": "https://docs.pinecone.io/guides/manage-cost/understanding-cost",
+        "classification": "OFFICIAL_VENDOR_FACT"
+      },
+      {
+        "fact": "The only documented automatic data-deletion triggers are: (1) user-initiated deletion (soft-deleted, retained up to 90 days), (2) non-payment account deactivation (data retained 30 days before permanent deletion), (3) full account/service closure. Mere inactivity is not among them.",
+        "source": "https://docs.pinecone.io/guides/production/data-deletion",
+        "classification": "OFFICIAL_VENDOR_FACT"
+      },
+      {
+        "fact": "No inactivity/pause/suspend/archive clause found in any current lifecycle-relevant doc checked: reference/quotas-and-limits, reference/api/database-limits, reference/quotas-and-rate-limits, guides/manage-cost/understanding-cost, guides/manage-data/manage-indexes, guides/organizations/manage-billing/manage-your-billing-plan, guides/production/data-deletion, pinecone.io/pricing.",
+        "classification": "DERIVED (absence-of-evidence across an exhaustive, named page set, not a single positive citation)"
+      }
+    ],
+    "historical_context_important": {
+      "note": "Pinecone's OLD pod-based free tier DID have an inactivity policy. This is the likely source of confusion with stale blog posts and forum threads, and is recorded here precisely so it is not mistaken for current behavior.",
+      "timeline": [
+        {
+          "date": "2023-04-26",
+          "event": "Official blog states inactive indexes on the free plan 'will be archived after 7 days of inactivity' (1 day for ephemeral/Auto-GPT-style indexes); archived indexes became collections, recreatable 'within a few minutes'.",
+          "source": "https://www.pinecone.io/blog/updated-free-plan/",
+          "classification": "OFFICIAL_VENDOR_FACT (historical, superseded)"
+        },
+        {
+          "date": "2023-07-12",
+          "event": "Official blog: Pinecone REMOVED this policy - 'No more auto-archiving of inactive indexes,' allowing free indexes to be kept indefinitely.",
+          "source": "https://www.pinecone.io/blog/gcp-starter/",
+          "classification": "OFFICIAL_VENDOR_FACT (historical)"
+        },
+        {
+          "note": "No evidence found that the policy was ever reinstated. Today's Starter plan is serverless-only; the old pod-based gcp-starter tier is legacy, with a dedicated migration doc confirming the architecture change (idle serverless compute isn't billed/reclaimed the way pod-based always-on compute was, which is plausibly why the old policy doesn't carry over).",
+          "source": "https://docs.pinecone.io/guides/indexes/convert-a-gcp-starter-index-to-serverless",
+          "classification": "DERIVED"
+        }
+      ]
+    },
+    "unverified_claims_explicitly_debunked": {
+      "claim": "\"Indexes on the Starter plan are paused after 3 weeks of inactivity\" - repeated by several SEO/review sites (layer3labs.io, costbench.com, ranksquire.com, pecollective.com) and surfaced by search-engine synthesis as if factual.",
+      "finding": "Could not be traced to any primary source. The specific review pages a search engine cited as the origin were fetched directly and neither actually contains the claim - it appears to be an artifact of search-tool synthesis, not a real citation.",
+      "classification": "INFERENCE (specifically: identified and rejected as unsupported)",
+      "separately": "A 2022 Pinecone Community thread has a staff reply claiming indexes were 'deleted after 7 days of inactivity' - but this predates serverless entirely (pod-based only) and predates even the 2023 policy history above, so it is obsolete and not current-state evidence."
+    },
+    "ondemand_clarification": {
+      "finding": "\"OnDemand\" in current Pinecone docs is a read-capacity BILLING mode for serverless indexes (pay-per-read-unit, the default), contrasted with paid \"Dedicated\" (always-warm Dedicated Read Nodes) - it is not a cluster-suspend/resume mechanism. No documented 'index sleeps, then a control-plane resume takes N minutes' pattern (the Zilliz-style behavior) was found anywhere.",
+      "nuance": "A real but much smaller effect exists: per-namespace query-path caching. 'Warm namespaces' (queried regularly, cached locally) get lower latency; 'cold-start queries' to an infrequently-accessed namespace have higher latency. No documented numeric cold-start duration was found. Pinecone's Dedicated Read Nodes product page frames itself as eliminating 'cold start latency regressions' that OnDemand can exhibit for cold namespaces - the closest official acknowledgment that OnDemand has some latency variability, but this is a per-query-path effect, not an outage/resume event, and nothing suggests multi-minute magnitude.",
+      "classification": "OFFICIAL_VENDOR_FACT (existence of the effect) + explicit absence of a duration figure (not fabricated)",
+      "implication_for_benchmarking": "The 2026-08-15 mandate's idle/cold-query benchmark requirement (distinguishing warm vs. first-query-after-idle vs. subsequent-warm) is still worth executing empirically even though no vendor-documented duration exists - see task #38."
+    }
+  },
+
+  "starter_plan_limits": [
+    { "item": "Cost", "value": "$0/month", "source": "pinecone.io/pricing" },
+    { "item": "Serverless storage", "value": "Up to 2 GB", "source": "pinecone.io/pricing; docs.pinecone.io/reference/quotas-and-limits" },
+    { "item": "Read units (RU)", "value": "Up to 1,000,000/mo", "source": "pinecone.io/pricing; docs.pinecone.io/reference/quotas-and-limits" },
+    { "item": "Write units (WU)", "value": "Up to 2,000,000/mo", "source": "pinecone.io/pricing; docs.pinecone.io/reference/quotas-and-limits" },
+    { "item": "Egress", "value": "Up to 1GB/mo; exceeding it blocks in-scope reads with RESOURCE_EXHAUSTED (429) and an upgrade prompt", "source": "pinecone.io/pricing; docs.pinecone.io/guides/manage-cost/understanding-cost" },
+    { "item": "Max serverless indexes", "value": "5 per project", "source": "docs.pinecone.io/reference/quotas-and-limits" },
+    { "item": "Namespaces per index", "value": "100 (Builder tier: 1,000; Standard/Enterprise: 100,000)", "source": "docs.pinecone.io/reference/api/database-limits" },
+    { "item": "Region", "value": "Starter restricted to AWS us-east-1 only (general serverless availability also includes us-west-2/eu-west-1, not available on Starter)", "source": "docs.pinecone.io/reference/quotas-and-limits" },
+    { "item": "Filterable metadata per record", "value": "40 KB (excludes full-text-search fields; fixed across all plans)", "source": "docs.pinecone.io/reference/api/database-limits" },
+    { "item": "Record ID max length", "value": "512 characters", "source": "docs.pinecone.io/reference/api/database-limits" },
+    { "item": "Dense vector dimensionality", "value": "up to 20,000 (UETGPT uses 768, well within range)", "source": "docs.pinecone.io/reference/api/database-limits" },
+    { "item": "Sparse vector", "value": "up to 2,048 non-zero values; dimensionality up to 4.2 billion", "source": "docs.pinecone.io/reference/api/database-limits" },
+    { "item": "Individual document max size", "value": "2 MB", "source": "docs.pinecone.io/reference/api/database-limits" },
+    { "item": "Upsert batch", "value": "2 MB or 1000 records with vectors; 96 records with text (integrated-embedding path); max 1000 documents/request", "source": "docs.pinecone.io/reference/api/database-limits" },
+    { "item": "Delete", "value": "max 1,000 record IDs/request; throughput 5,000 deletes/sec (namespace- or index-scoped)", "source": "docs.pinecone.io/reference/api/database-limits" },
+    { "item": "Query", "value": "max top_k=10,000; max result size 4MB; max values per $in/$nin filter=10,000", "source": "docs.pinecone.io/reference/api/database-limits" },
+    { "item": "Current API version", "value": "2026-04 (labeled \"the latest stable version\" by the versioning doc's own example)", "source": "docs.pinecone.io/reference/api/versioning" },
+    { "item": "Node SDK", "value": "@pinecone-database/pinecone v8.2.0 (npm, confirmed live), maps to API 2026-04", "source": "docs.pinecone.io/reference/pinecone-sdks; npm registry" },
+    { "item": "Credit card to sign up", "value": "NOT CONFIRMED from a primary source either way. Official quickstart says only 'sign up and choose a plan' with 'free access to most features'. A Community thread suggests the AWS Marketplace signup path may differ from direct app.pinecone.io signup - unresolved.", "classification": "NOT_EXECUTED / unconfirmed - report explicitly as unverified rather than asserted", "source": "docs.pinecone.io/guides/get-started/quickstart; community.pinecone.io/t/aws-marketplace-asking-for-credit-card/1162" }
+  ],
+  "context_not_requested": {
+    "note": "A paid 'Builder' tier ($20/mo, 10GB storage/5M WU/2M RU/10GB egress/1000 namespaces) exists between Starter and Standard. Recorded for context only - out of scope, this evaluation is Starter-specific per the $0 mandate."
+  },
+
+  "api_maturity": [
+    {
+      "api": "Dense vector API (index create/upsert/query)",
+      "version": "2026-04",
+      "status": "GA/Stable by strong inference",
+      "confidence_note": "No literal 'this is GA' sentence found; conclusion rests on total absence of any preview/alpha marker on core data-plane docs, plus its presence in the standard quarterly-stable versioning channel (first stable was 2024-04).",
+      "classification": "DERIVED from OFFICIAL_VENDOR_FACT (absence of a preview badge + versioning-channel membership)",
+      "source": "docs.pinecone.io/reference/api/versioning; docs.pinecone.io/guides/index-data/create-an-index"
+    },
+    {
+      "api": "Sparse vector API (sparse/sparse-dense indexes)",
+      "version": "n/a (covered by main API version)",
+      "status": "AMBIGUOUS - reported honestly, not asserted either way",
+      "confidence_note": "Original launch (2025-08-15, pinecone.io/learn/sparse-retrieval) explicitly called it 'public preview'. The CURRENT create-an-index guide shows no preview badge on the sparse option (only the document-schema option carries one on the same page). No explicit GA-graduation announcement found either way.",
+      "classification": "NOT_EXECUTED (status could not be confirmed)",
+      "source": "pinecone.io/learn/sparse-retrieval; docs.pinecone.io/guides/index-data/create-an-index"
+    },
+    {
+      "api": "pinecone-sparse-english-v0 (hosted sparse embedding model)",
+      "version": "n/a",
+      "status": "No explicit status badge found; listed alongside dense models with no preview caveat",
+      "starter_availability": "YES - 5M tokens/mo included (confirmed independently via pricing page + web search cross-check)",
+      "max_sequence_length": "512 tokens default, configurable up to 2048 via max_tokens_per_sequence",
+      "overage_price": "$0.08 / 1M tokens",
+      "batch_size_limit": "NOT FOUND / not documented in any accessible page - required before P1 sparse ingestion cost calculation per mandate section 30; must be discovered empirically or via support before full sparse ingestion",
+      "classification": "OFFICIAL_VENDOR_FACT (limits) + NOT_EXECUTED (batch limit undocumented)",
+      "source": "pinecone.io/pricing; docs.pinecone.io/models/pinecone-sparse-english-v0"
+    },
+    {
+      "api": "Document-schema / integrated full-text BM25 API",
+      "version": "2026-01.alpha",
+      "status": "PUBLIC PREVIEW - has NOT reached GA",
+      "verbatim_quote": "Full-text search is in [public preview]. APIs may continue to evolve before general availability. Indexes with document schemas are in public preview and use API version 2026-01.alpha.",
+      "sdk_support": "No Node/TypeScript SDK support exists. Verbatim: 'Full-text search is available in the standard pinecone Python SDK under the pc.preview.* namespace' - Node/TS users would need raw REST calls with the alpha header (X-Pinecone-Api-Version: 2026-01.alpha).",
+      "classification": "OFFICIAL_VENDOR_FACT",
+      "mandate_implication": "This is P3 in the candidate architecture framing (mandate section 12-13) - research-only, NOT production-recommended, since it rests on an alpha API with no Node SDK. Do not build P3 as anything but a documented research note unless the user explicitly accepts alpha-API risk.",
+      "source": "docs.pinecone.io/guides/search/full-text-search"
+    }
+  ],
+
+  "sources": [
+    "https://docs.pinecone.io/reference/quotas-and-limits",
+    "https://docs.pinecone.io/reference/api/database-limits",
+    "https://docs.pinecone.io/reference/quotas-and-rate-limits",
+    "https://www.pinecone.io/pricing/",
+    "https://docs.pinecone.io/guides/manage-cost/understanding-cost",
+    "https://docs.pinecone.io/guides/production/data-deletion",
+    "https://docs.pinecone.io/guides/manage-data/manage-indexes",
+    "https://docs.pinecone.io/guides/organizations/manage-billing/manage-your-billing-plan",
+    "https://docs.pinecone.io/reference/api/versioning",
+    "https://docs.pinecone.io/reference/pinecone-sdks",
+    "https://docs.pinecone.io/guides/get-started/quickstart",
+    "https://docs.pinecone.io/guides/index-data/create-an-index",
+    "https://docs.pinecone.io/guides/search/full-text-search",
+    "https://docs.pinecone.io/guides/data/upsert-sparse-dense-vectors",
+    "https://docs.pinecone.io/models/pinecone-sparse-english-v0",
+    "https://docs.pinecone.io/models",
+    "https://www.pinecone.io/blog/gcp-starter/ (2023-07-12, historical)",
+    "https://www.pinecone.io/blog/updated-free-plan/ (2023-04-26, historical)",
+    "https://www.pinecone.io/blog/introducing-pinecone-api-versioning/ (2024-07-18)",
+    "https://www.pinecone.io/learn/sparse-retrieval/ (2025-08-15)",
+    "npm registry: @pinecone-database/pinecone",
+    "community.pinecone.io threads (labeled non-authoritative, used only for historical corroboration/dating, not as current-state fact)"
+  ],
+  "raw_report": "pinecone-research-raw-report.md (full unedited agent output, persisted for provenance)",
+
+  "next_steps_per_mandate_decision_order": [
+    "Pinecone credential preflight (task #35) - PINECONE_API_KEY not present in .env.local as of last check; BLOCKED pending user-supplied credentials",
+    "Once credentials exist: verify account/index tier is genuinely Starter/serverless/OnDemand before any implementation work",
+    "Small dense adapter implementation (task #36)",
+    "Lifecycle and concurrency correctness (task #37)",
+    "Full dense-corpus benchmark (task #38)",
+    "P2 minimal-Convex footprint measurement (task #40)",
+    "P1 sparse feasibility/token-budget check BEFORE any sparse ingestion (task #39)",
+    "Real retrieval baseline and P1 vs P2 comparison (task #41)"
+  ]
+}

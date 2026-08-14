@@ -1,0 +1,51 @@
+{
+  "suite": "KnowledgeStore contract: zilliz",
+  "test_file": "tests/integration/knowledgeStore-zilliz.test.ts",
+  "shared_contract_source": "tests/integration/knowledgeStoreContract.ts (the same vendor-neutral contract run against every KnowledgeStore backend - Convex, Turso, Zilliz)",
+  "classification": "EXECUTED",
+  "run": {
+    "start": "2026-08-15T01:51:40Z",
+    "duration_ms": 84330,
+    "duration_breakdown": "transform 703ms, setup 8.18s, import 24.32s, tests 46.75s, environment 0ms",
+    "vitest_binary": "node_modules/.pnpm/vitest@4.1.8_.../node_modules/vitest/dist/cli.js",
+    "target_cluster": "Zilliz Cloud serverless, region aws-eu-central-1, deploymentOption: Free (confirmed via Describe Cluster control-plane API per source code comment in knowledgeStore-zilliz.test.ts). Cluster host redacted in the copied raw log (contract-suite-run.log) - not a credential, but unnecessary to retain.",
+    "test_collections": ["knowledge_documents_test", "knowledge_chunks_test"],
+    "exit_code": 1,
+    "raw_log": "contract-suite-run.log",
+    "raw_log_sha256_of_source_before_redaction": "e38bf1d51e2c2d5064763418e3fef1930d2c4be88a93af68e3a9c8dbcec24cd8"
+  },
+  "summary": {
+    "test_files": "1 failed (1)",
+    "tests": "1 failed | 9 passed (10)",
+    "total_tests": 10,
+    "passed": 9,
+    "failed": 1
+  },
+  "tests": [
+    { "name": "fresh ingest: upsertDocument -> upsertChunks -> commitGeneration makes chunks searchable", "result": "PASS" },
+    { "name": "identical replay: same contentHash+fingerprint hits the fast path, generation unchanged", "result": "PASS" },
+    { "name": "changed document: new chunks appear, unchanged-key chunks persist, stale chunks are gone after commitGeneration", "result": "PASS" },
+    { "name": "deleteDocument removes chunks from both dense and lexical retrieval", "result": "PASS" },
+    { "name": "chunk keys never collide across two different documents sharing the same heading+ordinal shape", "result": "PASS" },
+    { "name": "lexicalSearch does not throw on FTS operator characters in raw user input", "result": "PASS" },
+    { "name": "denseSearch's category filter excludes chunks from other categories", "result": "PASS" },
+    { "name": "health() reports ok:true against a reachable store", "result": "PASS" },
+    { "name": "interrupted ingest (upsertChunks with no commitGeneration) converges to exactly one authoritative generation after a full retry", "result": "PASS" },
+    {
+      "name": "concurrent re-ingestion of the same changed document never regresses the generation and never leaves a stale-tagged chunk behind",
+      "result": "FAIL",
+      "duration_ms": 4008,
+      "failure_location": "tests/integration/knowledgeStoreContract.ts:380:39",
+      "failed_assertion": "expect(roundA.generation).not.toBe(roundB.generation)",
+      "assertion_error_verbatim": "AssertionError: expected 2 not to be 2 // Object.is equality",
+      "what_the_test_does": "Commits an initial document generation, then races two concurrent upsertDocument calls for the SAME canonical URL with different content via Promise.all, exercising the adapter's real compare-and-swap retry path (not a mock/isolated unit). The required safety property: two racing rounds must never be assigned the same generation number - if they were, commitGeneration's fencing logic would be unable to distinguish which round's chunks are authoritative.",
+      "why_it_failed": "Both concurrent upsertDocument calls computed the next generation as 2 and both wrote it. Convex and Turso (relational/transactional backends) can implement this fencing with a native atomic compare-and-swap or transactional increment on the generation counter. Milvus/Zilliz has no native compare-and-swap or transactional conditional-update primitive exposed via the SDK used (@zilliz/milvus2-sdk-node@3.0.4) - a plain upsert is last-write-wins with no conditional check, so two concurrent readers of 'current generation' can both compute and write the same 'next generation' value with nothing to detect or reject the loser at the datastore level.",
+      "root_cause_category": "STRUCTURAL_LIMITATION_NOT_BUG - this is not a defect in the Zilliz adapter's implementation; it is the documented absence of a mechanism (native CAS) that the other tested backends happen to provide. See ../acceptance-gates.json's MECHANISM vs REQUIRED SEMANTIC INVARIANT distinction (2026-08-15 mandate section 5): Zilliz does not need to expose the same primitive, but must preserve the same correctness property, and on this one test it measurably does not."
+    }
+  ],
+  "other_findings_from_source_code_comments": {
+    "consistency_note": "No manual flush is used anywhere in the Zilliz adapter or this test file. Every read sets consistency_level: Strong explicitly, confirmed sufficient via an isolated no-flush/no-sleep reproduction (upsert -> Strong query sees it; upsert-over-same-key -> Strong query sees the update not the stale value; delete -> Strong query confirms absence; Strong search with ignore_growing:false finds current state).",
+    "flush_history_note": "An earlier version of the test file called flushSync() after every write, following Milvus's general troubleshooting docs - identified afterward as the wrong primary source for this specific deployment. Zilliz Cloud's own docs (docs.zilliz.com/docs/limits) advise against manual flush ('Zilliz Cloud clusters handle it gracefully for you'), and the flush-rate-limit that manual flushing was hitting (0.1 requests/second/collection) is documented as applying to Serverless and Dedicated(beta) clusters specifically, not Free - confirmed via the Describe Cluster API showing deploymentOption: \"Free\" for this project's cluster.",
+    "collection_budget_note": "Free tier caps at 5 collections. This test suite's 2 disposable *_test collections plus the real benchmark pair (knowledge_documents/knowledge_chunks) is 4, leaving headroom."
+  }
+}

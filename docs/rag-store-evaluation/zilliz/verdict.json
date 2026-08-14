@@ -1,0 +1,64 @@
+{
+  "candidate": "Zilliz Cloud Free (Milvus, via @zilliz/milvus2-sdk-node@3.0.4)",
+  "verdict": "ZILLIZ FREE REJECTED FOR UETGPT PRODUCTION",
+  "reason": "Hard gate: operational availability under realistic inactivity.",
+  "evidence_classification": "EXECUTED / MEASURED / OFFICIAL_VENDOR_FACT (mixed, see individual facts below)",
+  "scope_note": "Unlike Turso, Zilliz's rejection is NOT primarily a retrieval-quality or build-behavior failure. The functional KnowledgeStore contract suite passed 9 of its 10 tests, and core CRUD/search behavior is confirmed working. The rejection is operational: a Free-tier Zilliz cluster auto-suspends after a period of inactivity that is realistic for UETGPT's actual traffic level, and resuming it requires an explicit action rather than the cluster remaining transparently available - a shape of unavailability this project's acceptance gates and its own mandate explicitly refuse to work around with synthetic traffic.",
+  "functional_evidence": {
+    "summary": "9 of 10 KnowledgeStore contract tests passed. Core create/read/update/delete, dense search, lexical (FTS) search, category filtering, chunk-key collision safety, interrupted-ingest recovery, and health checks are all confirmed working against a real Zilliz Cloud Free cluster.",
+    "classification": "EXECUTED",
+    "source": "contract-results.json, contract-suite-run.log",
+    "the_one_failure": {
+      "test": "concurrent re-ingestion of the same changed document never regresses the generation and never leaves a stale-tagged chunk behind",
+      "result": "Two concurrent upsertDocument calls for the same document both computed and wrote generation=2 (AssertionError: expected 2 not to be 2).",
+      "attribution": "Structural limitation, not an implementation bug: Milvus/Zilliz has no native compare-and-swap or conditional-update primitive exposed via the SDK used. Convex and Turso (relational/transactional backends) can fence concurrent generation-commit rounds with a native atomic operation; a plain Milvus upsert is last-write-wins with nothing to detect or reject a racing loser at the datastore level.",
+      "not_overstated_as": "This is not claimed as 'Zilliz's write path is broken' or 'Zilliz cannot handle concurrent writes' in general - only that the specific generation-fencing invariant the shared KnowledgeStore contract requires is not satisfiable with Zilliz's exposed primitives without additional application-level protocol work (the same class of vendor-neutral stale-generation protocol the 2026-08-15 mandate specifies for Pinecone, section 21-23)."
+    }
+  },
+  "operational_rejection_basis": {
+    "vendor_fact_confirmed": {
+      "fact": "Free-tier Zilliz Cloud clusters are automatically suspended after a period of inactivity, and resuming a suspended cluster requires an explicit resume action rather than the cluster remaining continuously available.",
+      "classification": "OFFICIAL_VENDOR_FACT",
+      "source": "docs.zilliz.com/docs/manage-cluster (fetched during the original Zilliz research phase), quoted verbatim below",
+      "verbatim_quote_1": "Free clusters are automatically suspended with notice after 7 days of inactivity. Resume: You can always resume the clusters when necessary. Charges During Suspension: When your cluster is suspended, you will only be charged for storage, not computing.",
+      "verbatim_quote_2_same_source_area_different_fetch_pass": "Free clusters are automatically suspended after 7 days of inactivity and can be resumed anytime. Zilliz Cloud automatically suspends databases that have been inactive for 14 consecutive days. If you still have credits remaining, suspending the database will help you to use these free credits in the future without deleting any of your data. When a cluster is suspended, only storage charges apply when a Dedicated cluster is suspended.",
+      "discrepancy_note": "The two quotes disagree on the exact inactivity window (7 days, stated specifically for Free clusters, vs. 14 consecutive days, stated in a more general sentence in the same source area, possibly referring to a different suspension mechanism or an inconsistency in the vendor's own docs). This discrepancy is preserved as-is rather than silently resolved. Both figures are well within the realistic idle window for UETGPT's traffic level, so the discrepancy does not change the verdict."
+    },
+    "resume_duration_not_independently_confirmed": {
+      "note": "No recovered research artifact contains a vendor-quoted specific resume DURATION (e.g. 'resume takes N minutes/seconds'). The original research agent's own prompt explicitly asked 'Is there a delay/latency before the cluster is usable again?' and the recovered answer text does not state a number - only that resume is possible ('you can always resume the clusters when necessary'). A prior verbal characterization of resume as taking 'several minutes' should be attributed to the evaluation mandate's own framing, not to an independently verified vendor quote, and is NOT asserted here as OFFICIAL_VENDOR_FACT.",
+      "classification": "EVIDENCE_LOST for the specific duration figure; the qualitative suspend/explicit-resume behavior itself remains OFFICIAL_VENDOR_FACT",
+      "why_this_does_not_change_the_verdict": "The gate failure does not depend on the exact resume duration. UETGPT is a low-traffic production chat service with no human operator watching for a 'cluster suspended' state. Any auto-suspend policy realistically triggered by the project's actual traffic pattern, combined with an architecture where a live user chat query is what would first discover the suspended state, is an availability risk regardless of whether resume takes 30 seconds or 30 minutes - the failure mode (a real user's query hitting a non-serving cluster with no automated recovery path) is the same in kind."
+    },
+    "keep_warm_traffic_prohibition": {
+      "rule_verbatim": "Do not create artificial periodic traffic merely to evade a provider's inactivity policy unless: (1) provider policy clearly permits it; and (2) the user explicitly approves it.",
+      "source": "acceptance-gates.json, section 33 (original mandate) and independently reaffirmed by the 2026-08-15 mandate",
+      "action_taken": "No synthetic keep-warm traffic was implemented or proposed. Neither precondition (clear vendor permission, explicit user approval) was established, so this workaround was correctly not pursued.",
+      "classification": "DERIVED - rejecting the keep-warm workaround as out of scope is a direct, unambiguous application of a rule that was already given, not a new judgment call"
+    }
+  },
+  "gate_failures": [
+    {
+      "gate": "operational",
+      "requirement": "Viable for an occasionally-idle production university service; synthetic keep-warm traffic is not an allowed workaround",
+      "result": "FAIL - Free-tier auto-suspend after realistic inactivity, with no permitted workaround, is incompatible with unattended production availability"
+    },
+    {
+      "gate": "reliability (partial)",
+      "requirement": "Lifecycle torture tests must pass",
+      "result": "9/10 passed; 1 failure isolated to a documented structural limitation (no native CAS), not a general reliability defect"
+    }
+  ],
+  "not_claimed": [
+    "That Zilliz's retrieval quality, dense search, or lexical search is deficient - all functional tests other than the concurrency-fencing one passed",
+    "That the concurrent-generation failure is a bug in the adapter implementation - it is attributed specifically to the absence of a native compare-and-swap primitive, a structural property of Milvus, not a defect",
+    "A specific resume-duration figure as vendor-confirmed fact - see resume_duration_not_independently_confirmed above",
+    "That Zilliz Cloud Free could not be made to work with additional application-level engineering (e.g., an external fencing protocol plus a keep-warm strategy) - only that, under this project's actual constraints (no synthetic keep-warm traffic permitted, $0 budget, low/unattended traffic), the auto-suspend behavior alone is a hard gate failure as configured"
+  ],
+  "acceptance_gates_reference": "../acceptance-gates.json",
+  "raw_artifacts": [
+    "contract-results.json",
+    "contract-suite-run.log"
+  ],
+  "decided_on": "2026-08-15 (contract suite executed 2026-08-15T01:51:40Z per the run's own log; evidence formally closed 2026-08-15)",
+  "fallback_action_per_gate_34": "Per the pre-existing fallback sequence (acceptance-gates.json, section 34), Pinecone Starter/serverless is the next candidate under evaluation, on the explicit condition that it is empirically tested and not pre-approved - see ../pinecone/."
+}

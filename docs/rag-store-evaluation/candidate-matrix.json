@@ -1,0 +1,63 @@
+{
+  "purpose": "Single-glance status of every KnowledgeStore backend candidate evaluated for UETGPT. Detail lives in each candidate's own subdirectory; this file is an index, not a substitute.",
+  "acceptance_gates": "./acceptance-gates.json",
+  "guiding_question": "What is now the simplest, safest, sustainable $0 retrieval architecture for UETGPT?",
+  "fixed_project_facts": {
+    "corpus": "~992 documents, ~20,652 chunks",
+    "embeddings": "Gemini, 768-dimensional dense vectors",
+    "retrieval": "hybrid dense + lexical, application-level RRF, reranking, citations, freshness logic",
+    "backend": "Convex, Next.js/React, Clerk",
+    "traffic": "very low",
+    "corpus_rebuildability": "rebuildable",
+    "budget": "$0 recurring infrastructure cost unless the user explicitly changes it"
+  },
+  "candidates": [
+    {
+      "name": "Convex (@convex-dev/rag)",
+      "role": "current production backend",
+      "status": "PRODUCTION - unchanged and untouched by this entire evaluation",
+      "note": "Remains the default (KNOWLEDGE_STORE_BACKEND=convex) throughout. No candidate evaluation replaces it until an explicit, evidence-backed production cutover decision is made - none has been made."
+    },
+    {
+      "name": "Turso Cloud / libSQL (DiskANN)",
+      "role": "candidate #1",
+      "status": "REJECTED",
+      "verdict_summary": "Tested DiskANN configurations failed the required combination of retrieval quality, build behavior, and operational recoverability.",
+      "verdict_file": "./turso/verdict.json",
+      "key_evidence": "Recall@10=0.963 at 10,000-row scale (below the 0.98 gate); index build did not complete at the full 20,652-row production scale in either compression mode tested within a 30-minute client timeout."
+    },
+    {
+      "name": "Zilliz Cloud Free (Milvus)",
+      "role": "candidate #2 (fallback after Turso rejection, per pre-existing mandate section 33)",
+      "status": "REJECTED",
+      "verdict_summary": "Hard gate: operational availability under realistic inactivity. Functional KnowledgeStore contract suite passed 9/10 (the 1 failure is a documented structural limitation - no native compare-and-swap - not a general defect).",
+      "verdict_file": "./zilliz/verdict.json",
+      "key_evidence": "Free-tier clusters auto-suspend after 7 (or, per a second same-source quote, 14) days of inactivity, requiring an explicit resume action; no synthetic keep-warm traffic is permitted as a workaround."
+    },
+    {
+      "name": "Pinecone Starter (serverless, OnDemand)",
+      "role": "candidate #3 (fallback after both Turso and Zilliz rejected, per pre-existing mandate section 34) - NOT pre-approved",
+      "status": "RESEARCH COMPLETE, HARD GATE PASSED - implementation and benchmarking not yet started",
+      "verdict_summary": "No verdict yet. Idle-lifecycle hard gate (the specific reason Zilliz failed) is PASSED: no auto-suspend/archive/delete-on-inactivity policy found on current Starter/serverless docs, unlike Zilliz. This clears the way to proceed, but does not itself constitute a pass on any other gate (dense ANN recall, lexical parity, lifecycle/concurrency correctness, storage/usage headroom, real retrieval baseline) - all remain to be executed.",
+      "research_file": "./pinecone/research-findings.json",
+      "blocking_status": "Implementation is BLOCKED pending user-supplied PINECONE_API_KEY (absent from .env.local as of last check). Research and evidence-organization work is not blocked by this and has proceeded.",
+      "architectures_to_evaluate_independently": [
+        {
+          "id": "P1",
+          "description": "Convex application state + Pinecone dense + Pinecone sparse, combined via UETGPT's existing RRF + reranker + citations. The main fully-external candidate."
+        },
+        {
+          "id": "P2",
+          "description": "Convex application state + minimal canonical/lexical corpus (corrected footprint, not the historically bloated multi-representation state) + Pinecone dense vectors only, combined via existing RRF. Explicitly flagged as potentially 'the simplest and safest UETGPT design' if the minimal Convex footprint measures out comfortably - must be measured, not assumed."
+        },
+        {
+          "id": "P3",
+          "description": "Pinecone document-schema/BM25 index. Research-only per current findings: the integrated full-text API is still Public Preview (2026-01.alpha) with no Node/TypeScript SDK. Not a production candidate unless the user explicitly accepts alpha-API risk."
+        }
+      ]
+    }
+  ],
+  "self_hosted_fallback_note": "Per acceptance-gates.json section 35: if no managed $0 service satisfies the required lifecycle and capacity, a self-hosted Qdrant (knowledge corpus) + Convex (app state) split may be evaluated, but only if a reliable, already-available $0 hosting machine exists - a VPS must never be assumed free. This has not been triggered and is not under evaluation while Pinecone remains untested.",
+  "decision_discipline": "Do not reopen Turso or Zilliz unless new evidence proves the prior test itself was invalid. Do not jump to a candidate #4 (Upstash, self-hosted, etc.) if Pinecone fails - that requires a fresh, explicit decision. Pinecone must pass or fail on its own merits, evaluated against the same acceptance gates as every other candidate.",
+  "last_updated": "2026-08-15"
+}

@@ -1,0 +1,57 @@
+{
+  "incident": "turso-default-diskann-fullscale-build-failure",
+  "status": "OPEN",
+  "note": "This record was reconstructed after a Claude Code session restart wiped /tmp (session-scoped scratchpad). The underlying facts are unchanged - reconstructed from conversation context, not re-derived. The Turso database and the git repo (persistent filesystem) were unaffected by the restart.",
+  "database": { "region": "aws-ap-south-1" },
+  "versions": {
+    "node": "v22.22.2",
+    "@libsql/client": "0.17.4",
+    "libsql_native_binding": "0.5.29",
+    "@libsql/hrana-client": "0.10.0",
+    "transport": "libsql:// (HTTP/hrana)"
+  },
+  "corpus": { "vectors": 20652, "dimensions": 768, "embeddingType": "synthetic clustered unit vectors, NOT real corpus content" },
+  "primaryError": "vector index: unable to update global metadata table",
+  "rootCauseAssessment": {
+    "selfInflictedContribution": "LIKELY_SIGNIFICANT",
+    "reasoning": "Original benchmark script wrapped ALL client.execute/batch calls (including CREATE INDEX) in a uniform network-error retry. Attempt 1 of CREATE INDEX for default/uncompressed DiskANN on the full 20,652x768 table got an ambiguous 'fetch failed' (client-side, does not prove the server never received/started the request); the wrapper retried 550ms later; attempt 2 failed with 'unable to update global metadata table' - consistent with the retry colliding with a still-in-flight or partially-committed first attempt (H3+H4)."
+  },
+  "postFailureState": {
+    "orphanedObjects": ["bench_default_uncompressed_idx_shadow (table)", "bench_default_uncompressed_idx_shadow_idx (index)"],
+    "primaryIndexNeverCreated": true,
+    "cleanupAttempts": 2,
+    "cleanupResult": "FAILED_OR_TIMED_OUT (each ~5min)",
+    "currentlyStillPresentUnresolved": true,
+    "decision": "STOP retrying cleanup. Preserve as forensic evidence. Move all further benchmark configs to differently-named tables (never touch bench_default_uncompressed again) in the SAME database (justified fallback tier - no platform API access to create new Turso databases, only a database-scoped connection token)."
+  },
+  "researchFindings": {
+    "exactErrorTextInGithubIssues": "NOT FOUND in tursodatabase/libsql or tursodatabase/turso via GitHub search API across multiple query angles",
+    "relatedHistory": "Confirmed real historical shadow-table consistency bugs exist (closed PR #1641: 'fix behaviour of VACUUM for vector indices to make rowid consistent between shadow tables and base table'), supporting plausibility of the mechanism without confirming this exact incident",
+    "interpretation": "Absence of a matching report supports the self-inflicted-retry-collision hypothesis over a widely-known platform bug"
+  },
+  "storageModel": {
+    "theoreticalUncompressedPctOf5GB": "99.3%",
+    "measuredExtrapolatedUncompressedPctOf5GB": "61.9%",
+    "theoreticalF16PctOf5GB": "50.3%",
+    "measuredExtrapolatedF16PctOf5GB": "52.0%",
+    "theoreticalF8PctOf5GB": "26.1%",
+    "measuredExtrapolatedF8PctOf5GB": "27.0%",
+    "note": "extrapolated from N=300 measurement prior to full scaling-ladder results"
+  },
+  "postFixFindings": {
+    "codeFix": "CREATE INDEX now goes through executeOnce() with zero automatic retry. default_uncompressed permanently excluded from the active config set. Scaling ladder (1000/5000/10000/20652) added. Structured per-run report block added. Error classification added.",
+    "n1000_diskann_f8": { "status": "PASS", "buildMs": 49076, "recallAt10": 1.0, "storageBytesPerVector": 70242 },
+    "n1000_diskann_f16": { "status": "PASS", "buildMs": 274796, "recallAt10": 1.0, "storageBytesPerVector": 135201 },
+    "n5000_diskann_f8_and_f16_default_timeout": {
+      "status": "CLIENT_TIMEOUT at ~300813ms / 300811ms",
+      "criticalDifferenceFromOriginalIncident": "ZERO orphaned structures left behind (confirmed via direct sqlite_master inspection immediately after) - a clean timeout, not corrupted partial state. Because CREATE INDEX was never retried, there was no second attempt to collide with the first."
+    },
+    "n5000_extended_timeout_retest": {
+      "method": "Single un-retried CREATE INDEX attempt, client fetch timeout extended to 20min (later 30min) via undici setGlobalDispatcher (NOT a custom fetch injection - that approach hit a Request/Response cross-realm bug, same class as the one fixed in tests/integration/knowledgeStore-turso-cloud.test.ts)",
+      "result": "BOTH bench_diskann_f8_5000_idx and bench_diskann_f16_5000_idx completed successfully server-side, confirmed by direct sqlite_master + row-count + functional-query inspection after a session restart lost local log tracking (Turso DB state is external/persistent, unaffected)",
+      "f8SpotCheckRecall": "10/10 on a single query, consistent with the table's data matching the run's own freshly-rebuilt bench_exact",
+      "f16SpotCheckRecall": "0/10 across 5 queries - DIAGNOSED AS STALE CROSS-RUN DATA, not a real quality problem: bench_diskann_f16_5000 was built by an earlier (pre-restart) full-ladder run's corpus, while bench_exact was later rebuilt fresh (different random corpus, no fixed seed) by a subsequent partial single-config run that only touched diskann_f8. Both stale tables (f8_5000 and f16_5000) were dropped cleanly and quickly (1.9s, 13.0s - notably NOT hung like the original incident's corrupted table, confirming these were healthy structures, just semantically stale) and are being rebuilt together in one consistent run.",
+      "conclusion": "N=5000 build TIME succeeds given enough client-side patience (exact duration not captured due to session restart, bounded to <20min for f8/f16). This is a genuine, reportable finding regardless of the recall artifact: default client/library timeouts (~5min) are insufficient for index builds at this scale, with real implications for any production architecture that would build/rebuild this index synchronously (e.g. inside a single Convex action)."
+    }
+  }
+}

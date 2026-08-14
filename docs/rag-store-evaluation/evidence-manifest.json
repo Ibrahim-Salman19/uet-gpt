@@ -1,0 +1,124 @@
+{
+  "purpose": "Complete index of every evidence artifact in this directory tree, with SHA-256 hashes and classification tags, so an independent auditor (Agent B) can verify file integrity and provenance without access to this project's conversation history.",
+  "classification_taxonomy": {
+    "EXECUTED": "A command/test/benchmark was actually run and its real output is what's recorded.",
+    "MEASURED": "A quantitative result (recall, latency, storage bytes, counts) came from an actual execution, not an estimate.",
+    "OFFICIAL_VENDOR_FACT": "Sourced from a vendor's own current official documentation, ideally with a verbatim quote and URL.",
+    "DERIVED": "A conclusion computed/reasoned from other recorded EXECUTED/MEASURED/OFFICIAL_VENDOR_FACT evidence.",
+    "INFERENCE": "A reasonable but not directly-verified judgment call, labeled as such.",
+    "NOT_EXECUTED": "Explicitly not run/verified - a gap, honestly labeled rather than hidden or implied.",
+    "EVIDENCE_LOST": "Known from prior conversation context but the original supporting artifact no longer exists; not re-fabricated to look pristine."
+  },
+  "generated": "2026-08-15",
+  "generated_at_git_head": "2397c7adc7005d26198a8690b5c4d4689fb9fcfd",
+  "files": [
+    {
+      "path": "acceptance-gates.json",
+      "sha256": "ceea3b3d93c884349e558643a26507a3cc8e840584426a98e4a6762f8e17e05d",
+      "classification": "Recovered verbatim from session transcript (direct grep, not reconstructed from memory). See file's own recovery_provenance block for exact partial/full recovery status per section.",
+      "describes": "Original acceptance gates that every KnowledgeStore backend candidate is measured against."
+    },
+    {
+      "path": "acceptance-gates.md",
+      "sha256": "98a7e661ab3053872e3be7ce9bdf535fcff8bb2e82196fa005ab048997c11469",
+      "classification": "Human-readable narration of acceptance-gates.json. Non-authoritative if it ever disagrees with the JSON.",
+      "describes": "Same as acceptance-gates.json, narrated."
+    },
+    {
+      "path": "candidate-matrix.json",
+      "sha256": "030398a647f0588374bcb680bc628b078f2717ca72aaa37b59e057db9c6b4407",
+      "classification": "DERIVED - an index/summary composed from the verdict files it points to; carries no evidence of its own.",
+      "describes": "Single-glance status of all candidates (Convex/Turso/Zilliz/Pinecone)."
+    },
+    {
+      "path": "convex-generation-lifecycle-PASS-evidence.json",
+      "sha256": "701651a54aee8c5d5b9056d1531517c3485b265e8130dcb50e655cde7b935b47",
+      "classification": "EXECUTED / MEASURED",
+      "describes": "5-generation sequential lifecycle test of the Convex adapter's generation-scoped chunk identity mechanism (fast-path replay detection, superseded-ragId retirement, no unbounded growth, cleanup). Not Turso- or Zilliz-specific - it validates the underlying generation-tracking mechanism that downstream adapters' concurrency semantics build on. Companion timestamp: originally captured 2026-08-13T21:54:09Z (see conversation record; the timestamp file itself was not duplicated into this directory since the JSON's own content is the artifact of record)."
+    },
+    {
+      "path": "tsc-noEmit-evidence.log",
+      "sha256": "734edbfa92837c1cb11890a8ccbc0189f8bb24eb8a5589f9ebdec79fac27c90e",
+      "classification": "EXECUTED",
+      "describes": "Fresh, fully-instrumented `npx tsc --noEmit` run against the exact evidence-checkpoint working tree. Command, PWD, HEAD, branch, dirty-file-count, START, raw output, END, and EXIT are all recorded in the file itself. EXIT=0 (clean pass), run to completion (START 2026-08-14T21:45:58Z, END 2026-08-14T21:50:53Z, ~5 minutes, not wrapped in a timeout that could produce a false pass). HEAD recorded in the log (2397c7adc7005d26198a8690b5c4d4689fb9fcfd) matches the mandate's approved checkpoint exactly. This is the supporting artifact for the 'types' acceptance gate.",
+      "satisfies_gate": "types"
+    },
+    {
+      "path": "turso/benchmark-results.json",
+      "sha256": "028b2c47e52317da742bded642a0b9134583b9342ffd6e3d3a8853d8bcde8fa3",
+      "classification": "EXECUTED / MEASURED",
+      "describes": "Full DiskANN scaling-ladder benchmark: exact-cosine ground truth (20,652 rows) plus 7 per-configuration runs (diskann_f8 and diskann_f16 at scales 1000/5000/10000/[20652 for f8 only]), each with recall@{5,10,20}, 30-sample latency arrays, build time, and index storage bytes.",
+      "copied_byte_identical_from": "session scratchpad (verified via diff before commit); also independently verified byte-identical to /tmp/turso-ann-benchmark-1786636235436.json"
+    },
+    {
+      "path": "turso/incident-diskann-001.json",
+      "sha256": "be4e1e2abd0d6a65fd39af17d0feb764301d88638b32fb086655005babd74224",
+      "classification": "EXECUTED / MEASURED, self-disclosed by the artifact as reconstructed-after-a-session-restart (facts claimed unchanged, not re-derived) - see the file's own 'note' field for the exact disclosure",
+      "describes": "Root-cause record for the original uncompressed-DiskANN full-scale build failure: error text, root-cause assessment (self-inflicted retry-collision, LIKELY_SIGNIFICANT), orphaned-object state, GitHub research findings, storage model percentages, and post-fix findings including the n=5000 extended-timeout retest."
+    },
+    {
+      "path": "turso/clean-full-ladder.log",
+      "sha256": "daafd017f315b394092bbbb45dfd1b86f38efe47acf0058854c406b320736990",
+      "classification": "EXECUTED",
+      "describes": "Human-readable structured log of the clean (post-fix) scaling-ladder run, matching benchmark-results.json. Ends with confirmation of the exact output path and EXIT:0 for the benchmark script itself."
+    },
+    {
+      "path": "turso/verdict.json",
+      "sha256": "e9a85dd660a80c973917647832d6dd2121ba403a940f0d5f5215d03ce7980048",
+      "classification": "DERIVED from the EXECUTED/MEASURED evidence in this same directory",
+      "describes": "TURSO REJECTED FOR UETGPT'S PRIMARY VECTOR STORE. Full reasoning, gate-by-gate failures, and an explicit not_claimed section bounding the verdict's scope."
+    },
+    {
+      "path": "turso/verdict.md",
+      "sha256": "c356d409a32a46a6be56661f435bff71a9669138a1150c8d2c541c6d5de87773",
+      "classification": "Human-readable narration of turso/verdict.json. Non-authoritative if it ever disagrees with the JSON.",
+      "describes": "Same as turso/verdict.json, narrated."
+    },
+    {
+      "path": "zilliz/contract-results.json",
+      "sha256": "2ccca70990cedb286f3ab5988159f36092264851e645c2d30fb99766e23de537",
+      "classification": "EXECUTED, with the individual test names cross-verified directly against the test source file (tests/integration/knowledgeStoreContract.ts) rather than reconstructed from log text alone",
+      "describes": "All 10 KnowledgeStore contract test results (9 PASS, 1 FAIL), the exact failing assertion, and its structural (not-a-bug) attribution."
+    },
+    {
+      "path": "zilliz/contract-suite-run.log",
+      "sha256": "babaed41b2c0465249bdec10ed34250d1a1fd96227d6fd74fc75412151bb4f2c",
+      "classification": "EXECUTED",
+      "describes": "Raw vitest run output for the Zilliz contract suite (10 tests, 1 failed), run 2026-08-15T01:51:40Z, 84.33s. The Zilliz cluster hostname was redacted (sed-replaced with a placeholder) before this copy was made - not a credential, but unnecessary infrastructure detail to retain in a committed file. No API key or auth token appears anywhere in the log (grepped and confirmed absent before committing)."
+    },
+    {
+      "path": "zilliz/verdict.json",
+      "sha256": "b99823994812c23697c569213a82ccac1c5d3ccba878d24a5948c017206402b6",
+      "classification": "DERIVED from EXECUTED evidence (contract suite) + OFFICIAL_VENDOR_FACT (Zilliz Cloud documentation quotes)",
+      "describes": "ZILLIZ FREE REJECTED FOR UETGPT PRODUCTION. Distinguishes the functional 9/10 pass from the decisive operational (auto-suspend) rejection basis; explicitly flags where a claimed fact (resume duration) could NOT be independently vendor-confirmed."
+    },
+    {
+      "path": "zilliz/verdict.md",
+      "sha256": "b4ad573a29c69fd068864ea786bf289c8461b9ce15ad5516b170db4b08af9879",
+      "classification": "Human-readable narration of zilliz/verdict.json. Non-authoritative if it ever disagrees with the JSON.",
+      "describes": "Same as zilliz/verdict.json, narrated."
+    },
+    {
+      "path": "pinecone/research-findings.json",
+      "sha256": "2946b1ed362a94ffdc81b35a961ebb3b1423666cda8e8950b2fba7d33e9d445d",
+      "classification": "OFFICIAL_VENDOR_FACT (majority), with per-item classification for the minority of ambiguous/unconfirmed items (see the file itself - e.g. sparse API GA status is explicitly NOT_EXECUTED/unresolved, credit-card requirement is explicitly unconfirmed)",
+      "describes": "Pinecone Starter plan limits, the idle-lifecycle hard-gate analysis (PASSED - no disqualifying behavior found, unlike Zilliz), and API maturity per surface (dense/sparse/document-schema)."
+    },
+    {
+      "path": "pinecone/research-findings.md",
+      "sha256": "be10eaadf4714c452801a4aba5ad779796725abed3ba791d9aea7b4be5cddf79",
+      "classification": "Human-readable narration of pinecone/research-findings.json. Non-authoritative if it ever disagrees with the JSON.",
+      "describes": "Same as pinecone/research-findings.json, narrated."
+    },
+    {
+      "path": "pinecone/pinecone-research-raw-report.md",
+      "sha256": "4b4e96adaf62e2ccb1edda49f4964a447db14cb03472c2e064b05456b4345ce2",
+      "classification": "EXECUTED (raw research-agent output, unedited)",
+      "describes": "The complete, unedited output of the background research agent that produced pinecone/research-findings.json. Kept verbatim so the structured JSON's claims can be checked against their original phrasing and source list."
+    }
+  ],
+  "known_gaps_not_yet_covered_by_this_manifest": [
+    "Pinecone implementation, lifecycle/concurrency tests, full-corpus benchmark, P1 sparse feasibility, P2 Convex-footprint measurement, and the real retrieval baseline are all NOT_EXECUTED as of this manifest's generation - see candidate-matrix.json and tasks #35-41. This manifest will be extended as that work produces artifacts; it is not being backfilled or predicted now.",
+    "The lifecycle torture-test matrix's full 7-scenario coverage (fresh load, exact replay, changed document, removed chunk, removed document, interrupted ingestion+retry, concurrent generations) has not been executed as a single complete matrix against any backend - convex-generation-lifecycle-PASS-evidence.json and the KnowledgeStore contract suites cover overlapping but not identical ground. Recorded here as an honest gap, not papered over."
+  ]
+}

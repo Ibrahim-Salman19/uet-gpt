@@ -1,0 +1,96 @@
+{
+  "$schema_note": "Acceptance gates for evaluating any vendor-neutral KnowledgeStore backend candidate (Turso, Zilliz, Pinecone, or any future candidate) for UETGPT. These are the ORIGINAL gates established before the Turso and Zilliz results were known, recovered verbatim from the session's own transcript (not re-derived from memory, not weakened, not authored after the fact). A superseding, more detailed mandate document (2026-08-15) reaffirms and extends these gates for the Pinecone evaluation phase; where the two differ only in level of detail, both are recorded here.",
+  "recovery_provenance": {
+    "method": "Direct grep of this session's own JSONL transcript file for the original mandate's numbered sections (31-36), performed because the original mandate document itself was never saved to a durable repo location and existed only in conversation history.",
+    "recovery_status": "PARTIAL",
+    "fully_recovered_sections": ["32 (Turso acceptance gates)", "33 (Zilliz fallback trigger)", "34 (Pinecone/Upstash)", "35 (self-hosted fallback)"],
+    "partially_recovered_sections": [
+      "31 (mission/authority statement) - only the tail (numbered items 5-9 plus the 'implementer, not final release authority' clause and long-term target) was recovered; items 1-4 are EVIDENCE_LOST",
+      "36 (test architecture) - Unit and Integration subsections fully recovered; Lifecycle subsection cuts off after two bullet points ('concurrent generations; partial...'); remainder is EVIDENCE_LOST"
+    ],
+    "note": "The gaps do not weaken enforcement: the newer 2026-08-15 mandate document independently re-specifies an equivalent-or-stricter lifecycle test matrix (7 named scenarios) and evidence-rigor requirements that supersede the lost fragment of section 36. No gate criterion itself (integrity/idempotency/recall/lexical/retrieval/storage/usage/reliability/types/tests) has any missing or ambiguous text - all ten are recovered in full."
+  },
+  "gates": [
+    {
+      "id": "integrity",
+      "name": "Integrity",
+      "criterion_verbatim": "Must be perfect: 0 duplicate logical chunk IDs; 0 cross-document chunk collisions; 0 unexplained orphan chunks; 0 stale deleted-document chunks; 0 stale FTS entries; authoritative corpus ledger matches.",
+      "tolerance": "zero, no exceptions"
+    },
+    {
+      "id": "idempotency",
+      "name": "Idempotency",
+      "criterion_verbatim": "Repeated identical ingestion: logical row count unchanged, except documented database/index implementation overhead that does not grow unboundedly.",
+      "tolerance": "logical growth = 0; only bounded, documented physical overhead permitted"
+    },
+    {
+      "id": "dense_ann_recall",
+      "name": "Dense ANN recall",
+      "criterion_verbatim": "Recommended target: Recall@10 >= 0.98 against exact cosine nearest-neighbor ground truth. If you propose a different gate, declare and justify it BEFORE running the final benchmark.",
+      "tolerance": "Recall@10 >= 0.98, must be declared before results are seen, not adjusted after",
+      "reaffirmed_by_2026-08-15_mandate": true
+    },
+    {
+      "id": "lexical_retrieval",
+      "name": "Lexical retrieval",
+      "criterion_verbatim": "No unexplained regressions on authoritative exact-term test cases.",
+      "tolerance": "zero unexplained regressions"
+    },
+    {
+      "id": "end_to_end_retrieval_quality",
+      "name": "End-to-end retrieval quality",
+      "criterion_verbatim": "Must not materially regress versus the existing baseline. Do not pick the tolerance after seeing results.",
+      "tolerance": "no material regression vs. baseline; tolerance fixed in advance"
+    },
+    {
+      "id": "storage",
+      "name": "Storage",
+      "criterion_verbatim": "Full corpus must fit with meaningful free-tier headroom.",
+      "tolerance": "meaningful headroom, not a bare fit (2026-08-15 mandate quantifies this as target <=60% of relevant free-tier limit, warn at >=80%)"
+    },
+    {
+      "id": "usage",
+      "name": "Usage",
+      "criterion_verbatim": "Projected reads/writes under reasonable traffic must have substantial headroom.",
+      "tolerance": "substantial headroom under projected traffic"
+    },
+    {
+      "id": "reliability",
+      "name": "Reliability",
+      "criterion_verbatim": "Lifecycle torture tests must pass.",
+      "tolerance": "pass, not partial pass"
+    },
+    {
+      "id": "operational",
+      "name": "Operational (added by 2026-08-15 mandate, consistent with section 33's 'account explicitly for Free-cluster inactivity suspension')",
+      "criterion_verbatim": "Viable for an occasionally-idle production university service. Do not create artificial periodic traffic merely to evade a provider's inactivity policy unless: (1) provider policy clearly permits it; and (2) the user explicitly approves it.",
+      "tolerance": "hard gate; synthetic keep-warm traffic is disallowed as a workaround"
+    },
+    {
+      "id": "types",
+      "name": "Types",
+      "criterion_verbatim": "npx tsc --noEmit (or the repository-equivalent TypeScript check) must pass.",
+      "tolerance": "exit code 0, run to completion, not wrapped in a timeout that could produce a false pass",
+      "repo_equivalent_command": "npm run typecheck (package.json script: \"typecheck\": \"tsc --noEmit\")"
+    },
+    {
+      "id": "tests",
+      "name": "Tests",
+      "criterion_verbatim": "Relevant scoped tests must pass. Broader test failures must be classified rather than hidden.",
+      "tolerance": "relevant tests pass; unrelated failures documented, not swept under the rug"
+    },
+    {
+      "id": "evidence",
+      "name": "Evidence (2026-08-15 mandate addition)",
+      "criterion_verbatim": "All conclusions independently auditable by Agent B without access to conversation history.",
+      "tolerance": "machine-readable artifacts must be sufficient to recompute every claimed metric"
+    }
+  ],
+  "fallback_sequence_verbatim": {
+    "section_33_zilliz_fallback_trigger": "If Turso fails a HARD acceptance gate, do not manipulate the benchmark until Turso \"wins.\" Mark: TURSO REJECTED for that configuration. Then implement the same KnowledgeStore contract against Zilliz Cloud. Preserve: Gemini embeddings; existing chunker; IDs; metadata; existing RRF; existing reranker; citation semantics. Benchmark Zilliz using its mature dense + BM25 capabilities. Account explicitly for Free-cluster inactivity suspension. Do not create artificial periodic traffic merely to evade a provider's inactivity policy unless: (1) provider policy clearly permits it; and (2) the user explicitly approves it.",
+    "section_34_pinecone_upstash": "Do not expand scope to every database unless Turso and Zilliz both fail. Pinecone may become more attractive if its current full-text API has reached GA. Upstash may become attractive if its current Free plan unambiguously provides the required hybrid/BM25 capability. If investigated, verify their current live product capability rather than relying on marketing copy or stale documentation.",
+    "section_35_self_hosted_fallback": "If managed $0 services cannot satisfy the required lifecycle and capacity: evaluate Convex -> app/realtime state, self-hosted Qdrant -> knowledge corpus, only if a reliable, already-available $0 hosting machine exists. Do not assume a VPS is free. Do not self-host the entire Convex stack merely because the RAG corpus needs more storage."
+  },
+  "authority_statement_verbatim_tail": "...5. verify ingestion correctness, lifecycle safety, retrieval quality, latency and storage; 6. reject Turso if it does not meet the predetermined acceptance gates; 7. use Zilliz Cloud as the next benchmark candidate if Turso fails; 8. leave an extremely simple rollback path; 9. produce reproducible evidence for an independent Agent B audit. You are an implementer, not the final release authority. Even if every test passes, you MUST NOT self-certify the system as \"production ready.\" Agent B will independently audit the exact commit SHA and evidence [...EVIDENCE_LOST: remainder of this sentence...] condition. Long-term target: Convex -> application state, Turso -> canonical rebuildable knowledge state, not two permanent authoritative corpus stores.",
+  "long_term_target_note": "The original mandate's long-term target names Turso specifically (it was the first candidate under evaluation at the time this text was authored). Both Turso and Zilliz were subsequently rejected on their own merits - see turso/verdict.json and zilliz/verdict.json. The underlying architectural principle (Convex owns application/realtime state; a separate rebuildable store owns the bulk knowledge corpus) is vendor-neutral and is the same principle the 2026-08-15 mandate applies to the Pinecone evaluation."
+}

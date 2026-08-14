@@ -1,0 +1,89 @@
+{
+  "candidate": "Turso Cloud / libSQL (DiskANN vector index)",
+  "verdict": "TURSO REJECTED FOR UETGPT'S PRIMARY VECTOR STORE",
+  "reason": "Tested DiskANN configurations failed the required combination of retrieval quality, build behavior, and operational recoverability.",
+  "evidence_classification": "EXECUTED / MEASURED",
+  "scope_note": "This verdict is narrow and specific to the exact DiskANN configurations tested (diskann_f8 and diskann_f16, on a synthetic 768-dim clustered-random corpus at scales 1000/5000/10000/20652, against a libSQL/Turso Cloud database in aws-ap-south-1). It does NOT claim 'Turso cannot store 20,652 vectors' as a general proposition - that broader claim was never tested and is not asserted here. Raw storage capacity was separately modeled (see incident-diskann-001.json storageModel) and was not the failure mode.",
+  "supporting_facts": [
+    {
+      "fact": "Ground truth (exact cosine, brute force) over the full real-scale row count of 20,652 vectors was deterministic, duplicate-free, row-count-matched, with latency p50=228ms / p95=259ms / p99=284ms (n=30 samples).",
+      "classification": "EXECUTED",
+      "source": "benchmark-results.json#exact"
+    },
+    {
+      "fact": "diskann_f8 at scale=1000: PASS. Recall@5=1.000, Recall@10=1.000, Recall@20=1.000. Build 134,183ms. Storage 70,246,400 bytes index-only (70,246 bytes/vector).",
+      "classification": "EXECUTED / MEASURED",
+      "source": "benchmark-results.json#runs[0]"
+    },
+    {
+      "fact": "diskann_f8 at scale=5000: PASS. Recall@5=1.000, Recall@10=1.000, Recall@20=0.988. Build 579,378ms. Storage 351,215,616 bytes index-only (70,243 bytes/vector).",
+      "classification": "EXECUTED / MEASURED",
+      "source": "benchmark-results.json#runs[1]"
+    },
+    {
+      "fact": "diskann_f8 at scale=10000: CONDITIONAL - FAILS the pre-declared Recall@10 >= 0.98 gate. Recall@5=0.953, Recall@10=0.963, Recall@20=0.967. Build 1,413,046ms (~23.5 min). Storage 702,345,216 bytes index-only (70,235 bytes/vector).",
+      "classification": "EXECUTED / MEASURED",
+      "source": "benchmark-results.json#runs[2]",
+      "gate_result": "FAIL (dense_ann_recall gate: Recall@10 >= 0.98; measured 0.963)"
+    },
+    {
+      "fact": "diskann_f8 at scale=20652 (the real production corpus size): FAIL. Build failed after 1,803,472ms (~30 min) with CLIENT_TIMEOUT: fetch failed. No integrity/recall/latency/storage/cleanup could be executed as a result. Table bench_diskann_f8_20652 may contain partial/orphaned structures; deliberately not auto-cleaned per incident containment policy.",
+      "classification": "EXECUTED (build attempt) / NOT_EXECUTED (all downstream measurements, because the build itself did not complete)",
+      "source": "benchmark-results.json#runs[3]",
+      "gate_result": "FAIL (reliability gate: build did not complete at production scale)"
+    },
+    {
+      "fact": "diskann_f16 at scale=1000: PASS. Recall@10=1.000. Build 190,957ms. Storage 135,200,768 bytes index-only (135,201 bytes/vector).",
+      "classification": "EXECUTED / MEASURED",
+      "source": "benchmark-results.json#runs[4]"
+    },
+    {
+      "fact": "diskann_f16 at scale=5000: PASS (against the 0.98 gate). Recall@5=0.993, Recall@10=0.987, Recall@20=0.990. Build 1,445,949ms (~24 min). Storage 675,954,688 bytes index-only (135,191 bytes/vector).",
+      "classification": "EXECUTED / MEASURED",
+      "source": "benchmark-results.json#runs[5]"
+    },
+    {
+      "fact": "diskann_f16 at scale=10000: FAIL. Build failed after 1,803,526ms (~30 min) with CLIENT_TIMEOUT: fetch failed. f16 was consequently never attempted at the full 20,652 scale, since it had already failed at a smaller scale.",
+      "classification": "EXECUTED (build attempt) / NOT_EXECUTED (20652 scale, and all downstream measurements at 10000)",
+      "source": "benchmark-results.json#runs[6]",
+      "gate_result": "FAIL (reliability gate: build did not complete even at 10,000, well short of production scale)"
+    },
+    {
+      "fact": "A separate, earlier incident (turso-default-diskann-fullscale-build-failure, status OPEN) occurred when building an uncompressed DiskANN index at the full 20,652 scale: the build failed with 'unable to update global metadata table', root-cause-assessed as LIKELY_SIGNIFICANT self-inflicted (a blind retry wrapper was applied uniformly to all client.execute/batch calls, including CREATE INDEX DDL; a second attempt collided with a still-in-flight or partially-committed first attempt). This left orphaned shadow-table structures (bench_default_uncompressed_idx_shadow and its index) that resisted 2 cleanup attempts (~5 min each, FAILED_OR_TIMED_OUT), forcing a containment decision to preserve them as forensic evidence and never touch that table again rather than a clean rollback.",
+      "classification": "EXECUTED / MEASURED, self-disclosed by the artifact as reconstructed-after-restart (facts unchanged, not re-derived) - see incident-diskann-001.json's own 'note' field",
+      "source": "incident-diskann-001.json",
+      "gate_result": "Contributes to operational-recoverability failure, but is explicitly NOT the sole basis for REJECTED - the clean re-run (after fixing the retry bug) still failed to complete a build at full scale in either compression mode, which is the primary, code-fix-independent basis for rejection."
+    },
+    {
+      "fact": "After the retry-collision bug was fixed (CREATE INDEX routed through a no-retry executeOnce()), a re-test at n=5000 still required client fetch timeouts extended to 20-30 minutes (via undici setGlobalDispatcher) to complete, versus a default client timeout of approximately 5 minutes. This is a genuine, code-fix-independent finding: default client/library timeouts are insufficient for DiskANN index builds at this corpus scale, with direct implications for any production architecture that would need to build or rebuild this index synchronously.",
+      "classification": "EXECUTED / MEASURED",
+      "source": "incident-diskann-001.json#postFixFindings.n5000_extended_timeout_retest",
+      "gate_result": "Independently corroborates the reliability/build-behavior failure mode seen in the clean full ladder run."
+    }
+  ],
+  "gate_failures": [
+    {
+      "gate": "dense_ann_recall",
+      "requirement": "Recall@10 >= 0.98 vs exact cosine ground truth",
+      "result": "FAIL at scale=10000 for diskann_f8 (measured 0.963); scale=20652 (the real production size) never produced a measurable result for either config because the index build itself did not complete"
+    },
+    {
+      "gate": "reliability",
+      "requirement": "Lifecycle torture tests must pass",
+      "result": "FAIL - index build did not complete at production scale (20,652 vectors) for diskann_f8, and did not complete even at 10,000 vectors for diskann_f16, within a 30-minute client timeout"
+    }
+  ],
+  "not_claimed": [
+    "That Turso/libSQL cannot physically store 20,652 vectors (storage capacity was modeled separately and was not the observed failure mode)",
+    "That every possible DiskANN parameterization or a non-DiskANN approach would necessarily fail the same way (only diskann_f8, diskann_f16, and default_uncompressed were tested)",
+    "That the CLIENT_TIMEOUT failures prove a hard server-side limit rather than a client-configuration limit (the postFixFindings n5000 retest shows the same class of build DOES complete given a sufficiently extended client timeout at smaller scale; whether comparable extension would eventually succeed at the full 20,652 scale was not tested to completion and is not claimed either way)"
+  ],
+  "acceptance_gates_reference": "../acceptance-gates.json",
+  "raw_artifacts": [
+    "benchmark-results.json",
+    "incident-diskann-001.json",
+    "clean-full-ladder.log"
+  ],
+  "decided_on": "2026-08-13 (benchmark execution), evidence formally closed 2026-08-15",
+  "fallback_action_per_gate_33": "Per the pre-existing fallback sequence (acceptance-gates.json, section 33), Zilliz Cloud was then evaluated as the next candidate - see ../zilliz/verdict.json."
+}

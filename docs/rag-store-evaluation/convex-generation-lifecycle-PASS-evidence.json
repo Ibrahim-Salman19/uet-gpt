@@ -1,0 +1,70 @@
+{
+  "ok": true,
+  "steps": [
+    {
+      "detail": "documentId=k97c077ktpmqqnm98at65r8e5n8cd6fn generation=1 ragId=j976he10dg6fsrmywpbcdzz1gx8cdmgw rowGeneration=1",
+      "name": "gen1: commit",
+      "ok": true
+    },
+    {
+      "detail": "documentId=k97c077ktpmqqnm98at65r8e5n8cd6fn generation=2 ragId=j972dhmytaf27nx0meekbszcyh8cdhnz rowGeneration=2",
+      "name": "gen2: commit",
+      "ok": true
+    },
+    {
+      "detail": "documentId=k97c077ktpmqqnm98at65r8e5n8cd6fn generation=3 ragId=j977v2mkz2qjedp4ky40cvfcnn8cd2zd rowGeneration=3",
+      "name": "gen3: commit",
+      "ok": true
+    },
+    {
+      "detail": "fastPathEligible=true generation=3",
+      "name": "replay: identical content hits fast path",
+      "ok": true
+    },
+    {
+      "detail": "documentId=k97c077ktpmqqnm98at65r8e5n8cd6fn generation=4 ragId=j97f6wx1gvpf5aencv1vgd1qsd8cdxg4 rowGeneration=4",
+      "name": "gen4: commit",
+      "ok": true
+    },
+    {
+      "detail": "documentId=k97c077ktpmqqnm98at65r8e5n8cd6fn generation=5 ragId=j976f0btvkarh3z1bh8hq1vd4x8cds47 rowGeneration=5",
+      "name": "gen5: commit",
+      "ok": true
+    },
+    {
+      "detail": "checked after 1 attempt(s) (~1s)",
+      "name": "retirement: superseded ragId j976he10... is gone",
+      "ok": true
+    },
+    {
+      "detail": "checked after 1 attempt(s) (~1s)",
+      "name": "retirement: superseded ragId j972dhmy... is gone",
+      "ok": true
+    },
+    {
+      "detail": "checked after 1 attempt(s) (~1s)",
+      "name": "retirement: superseded ragId j977v2mk... is gone",
+      "ok": true
+    },
+    {
+      "detail": "checked after 1 attempt(s) (~1s)",
+      "name": "retirement: superseded ragId j97f6wx1... is gone",
+      "ok": true
+    },
+    {
+      "detail": "distinctRagIds=5 superseded=4 allRetired=true",
+      "name": "no unbounded growth: distinct ragIds across 5 generations == 5, only the last survives",
+      "ok": true
+    },
+    {
+      "detail": "entryId=j976f0btvkarh3z1bh8hq1vd4x8cds47 status=ready",
+      "name": "final generation's RAG entry is still alive pre-cleanup",
+      "ok": true
+    },
+    {
+      "detail": "deletedChunks=1 finalEntryStillPresent=false",
+      "name": "cleanup: deleteDocument removes the final generation's entry synchronously",
+      "ok": true
+    }
+  ]
+}
