@@ -1,0 +1,136 @@
+{
+  "purpose": "Frozen requirements specification for UETGPT's market-wide RAG storage architecture screen, established BEFORE vendor research began. Every requirement is classified per the mandate's own taxonomy so it is clear which facts can eliminate a candidate outright versus which only inform scoring after hard-gate survivors are known. Not modified after seeing candidate results.",
+  "frozen_before_research": true,
+  "fixed_project_facts": {
+    "corpus": "~992 documents, ~20,652 chunks",
+    "embeddings": "Gemini, 768-dimensional dense vectors",
+    "raw_dense_payload_bytes": "~63MB (20,652 vectors x 768 dims x 4 bytes float32)",
+    "growth_scenarios": {
+      "2x": "~41,300 vectors, ~127MB raw",
+      "3x": "~62,000 vectors, ~190MB raw"
+    },
+    "retrieval": "dense + lexical, application-level RRF, reranker, citation hydration",
+    "backend": "Convex, Next.js/React, Clerk",
+    "traffic": "very low, with realistic long idle periods (university holidays/semester breaks)",
+    "corpus_rebuildability": "rebuildable",
+    "budget": "$0 recurring infrastructure cost unless the user explicitly changes it",
+    "self_hosted_infrastructure_assumption": "No reliable always-on host exists beyond the developer's Windows/WSL machine, per direct user confirmation. Self-hosted candidates (Family C) are therefore treated as conceptual-only in this screen, not researched to the same depth as managed candidates."
+  },
+  "knowledge_store_interface_reference": {
+    "file": "convex/knowledgeStore/types.ts",
+    "methods": ["upsertDocument", "upsertChunks", "commitGeneration", "deleteDocument", "denseSearch", "lexicalSearch", "getChunks", "health", "stats", "verifyIntegrity"],
+    "note": "CRUD and concurrency requirements below are written directly against this real interface, not a generic paraphrase."
+  },
+  "requirements": [
+    {
+      "id": "permanent_zero_cost",
+      "classification": "HARD_GATE",
+      "statement": "A genuinely permanent $0 tier for the current workload - not trial credits, not a time-boxed trial, not one-time node-hours.",
+      "distinguish": ["permanent free tier", "free quota (recurring)", "free credits (one-time or time-boxed)", "free trial", "pay-as-you-go with a free allowance"],
+      "rejection_rule": "If the only zero-cost availability is temporary trial credits or a time-boxed trial, reject unless another genuinely permanent free tier exists."
+    },
+    {
+      "id": "capacity",
+      "classification": "HARD_GATE",
+      "statement": "Comfortably supports 20,652 x 768-dim vectors plus ANN/index overhead, metadata, chunk IDs, filter indexes, canonical text if stored there, lexical index, temporary rebuild overhead, and old generations during replacement - not just raw vector bytes.",
+      "target_utilization": "<=60% of the applicable free-tier limit",
+      "flag_utilization": ">=80%",
+      "growth_tolerance": "should preferably tolerate ~2-3x current corpus without redesign"
+    },
+    {
+      "id": "idle_durability",
+      "classification": "HARD_GATE",
+      "statement": "No auto-deletion after inactivity; no suspension requiring multi-minute or manual/dashboard/API resume before serving a real user request. The single gate that eliminated the most candidates in this screen.",
+      "not_automatically_disqualifying": "Transparent, fully automatic scale-to-zero that resumes within seconds on the next request.",
+      "likely_disqualifying": "Explicit manual resume, or any resume latency beyond a few seconds, or any policy leading to permanent data deletion after a realistic idle window.",
+      "prohibited_workaround": "Synthetic/artificial keep-warm traffic to evade a provider's inactivity policy is not permitted."
+    },
+    {
+      "id": "no_surprise_billing",
+      "classification": "HARD_GATE",
+      "statement": "Exceeding the free quota must fail closed (hard block/throttle, no card required, no surprise charges) or offer a hard spending cap. Automatic uncapped paid overage is a serious risk for a strict-$0 architecture."
+    },
+    {
+      "id": "vector_support",
+      "classification": "HARD_GATE",
+      "statement": "Supports >=768 dense dimensions, the current vector count, a usable distance metric (must verify what the existing system actually uses rather than assume cosine), stable custom IDs, and metadata filtering. Do not change UETGPT's embedding model merely to fit a provider's free tier."
+    },
+    {
+      "id": "crud_semantics",
+      "classification": "HARD_GATE",
+      "statement": "Must be capable of implementing all ten KnowledgeStore methods (insert/upsert/update/delete/bulk-ingest/replay-idempotency/document-replacement/stale-chunk-deletion) without permanent accumulation."
+    },
+    {
+      "id": "concurrency_invariant",
+      "classification": "HARD_GATE",
+      "statement": "Not literally 'must expose compare-and-swap.' The actual invariant: a stale ingestion generation must never become the authoritative retrieval result after a newer generation has committed. Native CAS/transactions satisfy this outright; otherwise a generation-scoped-ID + authoritative-generation-filtering protocol must be credible. If no credible mechanism exists at all, that is a FAIL."
+    },
+    {
+      "id": "runtime_compatibility",
+      "classification": "HARD_GATE",
+      "statement": "Must work from a Convex action: Node.js runtime, fetch/HTTPS-based, no raw TCP, no assumed persistent connection pool. A provider that only works from a normal VM but cannot cleanly operate from this execution environment is not viable."
+    },
+    {
+      "id": "credential_safety",
+      "classification": "HARD_GATE",
+      "statement": "Credentials must be able to remain server-side. Reject designs requiring privileged database credentials in a browser bundle, public environment variables, or client JavaScript."
+    },
+    {
+      "id": "fewer_moving_parts",
+      "classification": "PREFERENCE",
+      "statement": "Prefer one store over three services/scheduler/keep-alive/custom-sync-daemon/special-proxy for similar capability. Architecture complexity is an operational cost even at $0 invoice cost."
+    },
+    {
+      "id": "portable_retrieval_semantics",
+      "classification": "PREFERENCE",
+      "statement": "Prefer designs where chunk IDs, embeddings, RRF, reranker, and the evaluation dataset remain under UETGPT's control. Avoid unnecessary dependency on proprietary ranking semantics when existing application logic already works."
+    },
+    {
+      "id": "preserve_convex_lexical_if_immature",
+      "classification": "PREFERENCE",
+      "statement": "If an external provider's lexical subsystem is immature or expensive, retaining Convex lexical retrieval may be the better design. Quantify Convex's minimal storage, lexical-index storage, and rebuild IO before dismissing this architecture."
+    },
+    {
+      "id": "exit_strategy",
+      "classification": "PREFERENCE",
+      "statement": "For any finalist: can vectors be exported, can canonical text remain outside, is the data model portable, is there an open-source/self-host equivalent. Do not select a free tier that creates an expensive future trap without documenting it."
+    },
+    {
+      "id": "dense_ann_recall",
+      "classification": "BENCHMARK_GATE",
+      "statement": "Recall@10 >= 0.98 against exact-cosine ground truth, using the same methodology already established for Turso (scripts/turso-ann-benchmark.mjs). Not executed in this screening phase."
+    },
+    {
+      "id": "latency",
+      "classification": "BENCHMARK_GATE",
+      "statement": "p50/p95/p99 latency with full context (sample count, index size, topK, metadata in/out, region, network env). Not executed in this screening phase."
+    },
+    {
+      "id": "real_retrieval_quality",
+      "classification": "BENCHMARK_GATE",
+      "statement": "HitRate@K, MRR, nDCG via scripts/stage_e_retrieval_eval.py in backend-export mode against the real corpus exported via convex/crawl/exportCorpus.ts, compared to a frozen Convex baseline. Not executed in this screening phase."
+    },
+    {
+      "id": "lifecycle_matrix",
+      "classification": "BENCHMARK_GATE",
+      "statement": "Full 7-scenario lifecycle matrix (fresh load, exact replay, changed document, removed chunk, removed document, interrupted ingestion+retry, concurrent generations) plus a concurrent-generation torture test. Not executed in this screening phase."
+    },
+    {
+      "id": "api_maturity",
+      "classification": "INFORMATIONAL",
+      "statement": "Per-feature classification: GA/Stable/Public Preview/Beta/Alpha/Private Preview/Deprecated. A production recommendation should preferably not depend on a Public Preview/Alpha retrieval primitive; if it must, classify the candidate CONDITIONAL, not an unconditional winner."
+    },
+    {
+      "id": "practitioner_evidence",
+      "classification": "INFORMATIONAL",
+      "statement": "Community/practitioner findings (GitHub issues, forums, case studies) labeled ANECDOTAL or PRODUCTION_CASE_STUDY, never used as proof of current quotas or lifecycle behavior - only official current documentation is authoritative for those facts."
+    },
+    {
+      "id": "popularity_not_a_factor",
+      "classification": "INFORMATIONAL",
+      "statement": "Community popularity, vendor marketing claims ('fastest', 'enterprise-grade'), and vendor benchmark rankings are not decision factors."
+    }
+  ],
+  "source_document": "See ../../CLAUDE.md-adjacent conversational mandate 'UETGPT — EXHAUSTIVE MARKET-WIDE RAG STORAGE ARCHITECTURE SELECTION' (2026-08-15) for the full 78-section original specification this file distills.",
+  "not_reopened_without_new_evidence": ["Turso", "Zilliz Cloud Free"]
+}

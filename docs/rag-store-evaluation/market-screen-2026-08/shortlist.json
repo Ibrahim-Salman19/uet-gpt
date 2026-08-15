@@ -1,0 +1,117 @@
+{
+  "purpose": "Final shortlist from the 2026-08 market-wide RAG storage screen, selected after a strict correction pass. Classification terminology is deliberate and must be preserved exactly in any downstream reference: these are SCREENING-level results only, not production or benchmark verdicts. No adapter code has been written for either finalist; no benchmark, lifecycle test, or concurrency mechanism has been implemented or executed.",
+  "classification_legend": {
+    "SCREENING_PASS": "Every named hard gate resolves favorably at the market-comparison/documentation-research level.",
+    "BENCHMARK_PENDING": "The BENCHMARK_GATE requirements (Recall@10, latency, real retrieval-quality metrics, lifecycle matrix, concurrency torture test - see requirements.json) have not been executed for this candidate.",
+    "PRODUCTION_NOT_APPROVED": "Explicit, standing statement that screening-level evidence does not constitute a production readiness verdict. No implementer may self-certify production readiness from this document alone.",
+    "SCREENING_PASS_WITH_CAPACITY_RISK": "Every named hard gate except capacity/growth-headroom resolves favorably; that one gate remains genuinely open pending measurement."
+  },
+  "finalists": [
+    {
+      "rank": 1,
+      "architecture": "Pinecone OnDemand dense vectors + existing Convex lexical/canonical layer",
+      "classification": "SCREENING_PASS / BENCHMARK_PENDING / PRODUCTION_NOT_APPROVED",
+      "provider": "Pinecone Starter (serverless)",
+      "why_selected": [
+        "Every named hard gate that was checked resolves favorably with strong, current, official, multi-source evidence - the most rigorously evidenced idle-durability result of the entire market screen ('idle indexes cost nothing' plus three explicitly named non-inactivity deletion triggers, not silence).",
+        "Largest capacity margin of any candidate studied: 2GB free storage vs ~63MB raw dense payload at current scale (3.2% utilization), ~9.5% even at 3x corpus growth.",
+        "Fails closed on overage (429 RESOURCE_EXHAUSTED, no automatic billing).",
+        "Confirmed cosine-compatible dense vector API with no Starter-tier restriction on metric choice.",
+        "This is the specific architecture the user flagged for re-evaluation: Pinecone's full-text/BM25 API immaturity (public preview, no Node SDK) is NOT a hard dependency for this design, since it never calls that API - only the dense vector API, which is GA/stable by strong inference."
+      ],
+      "gates_resolved": ["permanent_zero_cost", "capacity", "idle_durability", "no_surprise_billing", "vector_support"],
+      "gates_pending_for_benchmark_or_implementation_not_screening": [
+        {
+          "gate": "concurrency_invariant",
+          "status": "A generation-scoped-ID + authoritative-generation-filtering protocol was designed in detail in a prior session's mandate for exactly this purpose, but has never been implemented or tested. This is scoped design-and-test work, not an open research question.",
+          "classification": "NOT_EXECUTED"
+        },
+        {
+          "gate": "write_visibility_consistency",
+          "status": "An LSN-style freshness-header mechanism was specified in a prior session's mandate; has not been verified against the current Pinecone API.",
+          "classification": "NOT_EXECUTED"
+        },
+        { "gate": "dense_ann_recall", "status": "Not executed - BENCHMARK_GATE, out of scope for this screening phase.", "classification": "NOT_EXECUTED" },
+        { "gate": "real_retrieval_quality", "status": "Not executed - BENCHMARK_GATE, out of scope for this screening phase.", "classification": "NOT_EXECUTED" },
+        { "gate": "lifecycle_matrix", "status": "Not executed - BENCHMARK_GATE, out of scope for this screening phase.", "classification": "NOT_EXECUTED" }
+      ],
+      "confidence": "MEDIUM-HIGH",
+      "what_could_overturn_this": "Pinecone's concurrency protocol or consistency mechanism not holding up once actually implemented and tested; failing the dense-ANN recall (>=0.98) or real retrieval-quality benchmarks; an undiscovered capacity/quota interaction once real ingestion volume is measured."
+    },
+    {
+      "rank": 2,
+      "architecture": "Neon pgvector dense vectors (split variant) + existing Convex lexical/canonical layer",
+      "classification": "SCREENING_PASS_WITH_CAPACITY_RISK / BENCHMARK_PENDING",
+      "provider": "Neon Free (Postgres + pgvector)",
+      "variant_note": "The SPLIT variant specifically (Neon holds dense vectors only; Convex retains the existing lexical/canonical layer) - NOT the all-in-one 'Neon PostgreSQL + pgvector + PostgreSQL FTS' variant, which was also considered but has meaningfully worse storage headroom for the same 500MB cap since it would also carry a full-text index.",
+      "why_selected": [
+        "Rests on the most battle-tested underlying technology of any candidate studied: pgvector has been a real, widely-deployed Postgres extension since 2021, a meaningfully lower novel-implementation-risk profile than Turso's newer DiskANN (the exact risk class that sank the prior candidate).",
+        "Idle-durability gate is resolved with real, current, official, specific evidence: automatic 5-minute scale-to-zero, sub-second resume, fully automatic with no manual action ever - years-long product positioning, not a recently-changed policy.",
+        "Real ACID transactions give it the strongest native (not application-level-workaround) answer to the concurrency invariant of any candidate studied.",
+        "Fails closed on overage (writes blocked / compute suspended until upgrade, no card on file).",
+        "Native tsvector/GIN full-text search is core, GA PostgreSQL - a credible fallback location for lexical retrieval if the split architecture doesn't hold up, though the shortlisted design keeps lexical in Convex."
+      ],
+      "gates_resolved": ["permanent_zero_cost", "idle_durability", "no_surprise_billing", "vector_support"],
+      "open_gate": {
+        "gate": "capacity",
+        "status": "PASS at current scale (1x) only. At 2x growth, estimated 68-82% utilization of the 500MB free-tier cap depending on which end of a community-sourced HNSW overhead heuristic is real; at 3x, the estimate (500-620MB) likely exceeds the cap outright. A targeted follow-up attempt to find a more authoritative Neon-specific or pgvector-maintainer-sourced storage formula failed on a session usage limit before its finding could be captured - genuinely UNKNOWN pending either a more precise documentation source or, more likely, direct empirical measurement against the real corpus.",
+        "classification": "UNKNOWN - not forced to a false-precision answer",
+        "why_this_does_not_disqualify_the_candidate": "The gap is narrow and bounded (current-scale fit is solid; only growth tolerance is open) and is the kind of question implementation-phase measurement resolves quickly and cheaply, unlike Weaviate's or LambdaDB's more fundamental open items."
+      },
+      "gates_pending_for_benchmark_or_implementation_not_screening": [
+        { "gate": "concurrency_invariant", "status": "Real ACID transactions should satisfy the generation-fencing invariant cleanly in principle, but this is design confidence, not EXECUTED evidence - never implemented or tested.", "classification": "NOT_EXECUTED" },
+        { "gate": "dense_ann_recall", "status": "Not executed - BENCHMARK_GATE, out of scope for this screening phase.", "classification": "NOT_EXECUTED" },
+        { "gate": "real_retrieval_quality", "status": "Not executed - BENCHMARK_GATE, out of scope for this screening phase.", "classification": "NOT_EXECUTED" },
+        { "gate": "lifecycle_matrix", "status": "Not executed - BENCHMARK_GATE, out of scope for this screening phase.", "classification": "NOT_EXECUTED" }
+      ],
+      "confidence": "MEDIUM",
+      "what_could_overturn_this": "Growth headroom turning out too tight in practice once measured; failing the dense-ANN recall or real retrieval-quality benchmarks; the pgvector HNSW index build behaving differently than expected at the real 20,652-row scale (the same class of risk that sank Turso, though pgvector's maturity makes this less likely)."
+    }
+  ],
+  "convergent_finding": "Both finalists independently converge on the same high-level architectural shape: an external store holding dense vectors ONLY, with Convex retaining the existing lexical/canonical layer - not an all-in-one vendor. This is a real finding, not a coincidence forced by the write-up: every all-in-one candidate researched (Weaviate dense+BM25, TiDB, the Neon-with-Postgres-FTS variant) carries either an unresolved hard gate or a vendor-flagged maturity concern that the split shape avoids by depending on less from any single new vendor.",
+  "documented_alternates_not_promoted": [
+    {
+      "architecture": "Weaviate dense + BM25 (all-in-one, native hybrid)",
+      "classification": "UNKNOWN/CONDITIONAL - not promoted",
+      "reason_held_back": "Idle-durability (Gate 3) - the single most consequential gate in this entire study - remains genuinely UNKNOWN after two real research passes, blocked specifically on this session's exhausted WebSearch budget (200/200 used) rather than on Weaviate's documentation being conclusively silent or unfavorable. Two direct URL guesses at Weaviate's Terms of Service both returned HTTP 404.",
+      "revisit_condition": "A fresh research session with WebSearch budget available, specifically to locate and read Weaviate's actual current Terms of Service / legal pages."
+    },
+    {
+      "architecture": "LambdaDB dense + native hybrid BM25 (all-in-one)",
+      "classification": "UNKNOWN/CONDITIONAL - not promoted",
+      "reason_held_back": "LambdaDB's own live Quickstart documentation currently states 'LambdaDB Cloud is in public preview' - a whole-product maturity concern, more severe than TiDB's single-feature preview label on an otherwise-GA database. Gates 5-10 (distance metrics, ID model, filtering, lexical maturity, consistency model, concurrency mechanism, runtime/SDK details) remain unresearched.",
+      "revisit_condition": "If the product graduates from public preview with published, stable terms, and a full gates-5-10 deep dive is completed."
+    },
+    {
+      "architecture": "Lantern (pgvector-based, same family as Neon)",
+      "classification": "UNKNOWN/CONDITIONAL - not promoted",
+      "reason_held_back": "Free-tier storage/disk capacity - a HARD_GATE - remains genuinely unpublished anywhere found across two real research attempts (official docs, ToS, GitHub, Wayback Machine, YC company page). Has the single most explicit anti-inactivity-suspension marketing claim of the whole study ('a free tier that never pauses'), which survives a ToS check, but an unresolved capacity gate is independently disqualifying under strict methodology regardless of how credible the idle-durability story is.",
+      "revisit_condition": "If the storage cap is ever published, or if direct account signup (not performed in this research-only phase) reveals it."
+    },
+    {
+      "architecture": "TiDB Cloud (Starter) dense + native search",
+      "classification": "CONDITIONAL - a real fallback, not a first choice",
+      "reason_held_back": "Every named hard gate resolves, but PingCAP's own documentation explicitly labels the vector-search feature 'experimental... not recommended for production' - the same immature-vector-bolted-onto-general-SQL-DB risk class that sank Turso, just with an explicit vendor warning instead of a failure discovered the hard way.",
+      "revisit_condition": "If both Pinecone and Neon fail benchmarking, or if TiDB's vector search feature reaches GA."
+    },
+    {
+      "architecture": "Cloudflare Vectorize dense + Convex lexical",
+      "classification": "Soft-fail at strict $0",
+      "reason_held_back": "Fails the true-$0 reading of the permanent-cost gate (317% of the free 5M-stored-dimension quota at current scale), but resolves comfortably for a flat ~$5/month (Workers Paid plan, even at 3x growth). Not promoted because the requirement as specified is $0 unless the user explicitly changes it.",
+      "revisit_condition": "If the user explicitly accepts a small fixed monthly fee as within the spirit of the $0 requirement."
+    },
+    {
+      "architecture": "LanceDB Cloud dense + native BM25 (all-in-one)",
+      "classification": "FAIL - revisit at GA",
+      "reason_held_back": "The single most technically capable candidate found on paper (genuine OCC/MVCC concurrency, confirmed strong consistency, native BM25) but no committed post-beta pricing exists at all - only a 'free during beta, usage-based at GA' framing.",
+      "revisit_condition": "If/when LanceDB Cloud reaches GA with published, permanent free-tier terms."
+    }
+  ],
+  "next_phase_execution_order": {
+    "status": "Not started - requires separate user authorization",
+    "step_1": "Run scripts/stage_e_retrieval_eval.py to completion against the current Convex production-equivalent retrieval path and freeze the real baseline metrics/artifact hashes BEFORE implementing any new candidate.",
+    "step_2": "Implement and benchmark Pinecone dense + Convex lexical FIRST.",
+    "step_3": "Only if Pinecone fails an established acceptance gate, proceed to Neon pgvector dense + Convex lexical.",
+    "rule": "Sequential only, never parallel. Do not implement both simultaneously. Do not start a third provider if either succeeds - a new candidate requires a fresh, explicit decision, not scope drift."
+  }
+}
