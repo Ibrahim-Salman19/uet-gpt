@@ -1,0 +1,115 @@
+{
+  "purpose": "Control verification for scripts/stage_e_retrieval_eval.py, performed BEFORE any execution, per explicit instruction: prove the evaluator's configuration matches current production retrieval semantics before treating its output as an authoritative Convex baseline. No baseline was executed. No files were modified. No adapter code was written.",
+  "verdict": "BASELINE TOOLING DEFECT FOUND — BENCHMARK NOT AUTHORIZED",
+  "method": "Direct, line-level reading of scripts/stage_e_retrieval_eval.py in full (2844 lines) cross-referenced against the real production retrieval pipeline: convex/embeddings/generate.ts, convex/rag/instance.ts, convex/embeddings/dimension.ts, convex/embeddings/search.ts, convex/embeddings/idf.ts, convex/crawl/queries.ts, convex/shared/freshnessPolicy.ts, convex/crawl/exportCorpus.ts, convex/rag/retrieval.ts, and scripts/uet_crawler/url_policy.py. No file was modified during this review.",
+  "confirmed_matches": [
+    {
+      "dimension": "embedding_model_name",
+      "finding": "Both sides use the literal string \"gemini-embedding-2\".",
+      "evaluator": "scripts/stage_e_retrieval_eval.py:105 (DEFAULT_MODEL), enforced via a hard parser.error if --model differs (lines 509-513)",
+      "production": "convex/embeddings/generate.ts:104,132,141 (API endpoint/model field); convex/rag/instance.ts:11 (modelId)",
+      "status": "MATCH"
+    },
+    {
+      "dimension": "embedding_dimensions",
+      "finding": "Both sides use 768.",
+      "evaluator": "scripts/stage_e_retrieval_eval.py:106 (DEFAULT_DIMENSIONS)",
+      "production": "convex/embeddings/dimension.ts:20 (EMBEDDING_DIMENSION = 768 as const); convex/rag/instance.ts:20 (embeddingDimension: 768)",
+      "status": "MATCH"
+    },
+    {
+      "dimension": "rrf_k_constant",
+      "finding": "Both sides default to 60.",
+      "evaluator": "scripts/stage_e_retrieval_eval.py:115 (DEFAULT_RRF_K = 60)",
+      "production": "convex/embeddings/search.ts:13 (const RRF_K = 60)",
+      "status": "MATCH - but see rrf_fusion_topology below; the shared constant does not mean the fusion algorithms match"
+    }
+  ],
+  "confirmed_defects": [
+    {
+      "id": "embedding-prefix-mismatch",
+      "severity": "HIGH - directly corrupts the dense-similarity numbers the whole evaluation is built on",
+      "dimension": "query_and_document_embedding_input_formatting",
+      "finding": "The evaluator prepends Gemini-recommended retrieval-task prefixes to every embedding input: queries become 'task: {task} | query: {text}' and documents become 'title: {title} | text: {text}' (prepare_embedding_input, scripts/stage_e_retrieval_eval.py:552-567). Production sends the RAW, unprefixed text with no wrapping whatsoever - convex/embeddings/generate.ts's embedNativeGemini() (lines 100-167) posts only {content: {parts: [{text: <raw text>}]}, outputDimensionality: 768}. Production's own code comment at generate.ts:15 states explicitly: 'Note: taskType parameter has no effect on gemini-embedding-2 (confirmed bug)' - i.e. this is a deliberate, investigated choice, not an oversight left to fix.",
+      "consequence": "The evaluator computes embeddings in a genuinely different region of the model's latent space than production does for the same text. Cosine similarities, and therefore every dense/hybrid ranking and every downstream metric (Recall/MRR/nDCG for the dense and hybrid strategies), do not represent production's real retrieval behavior.",
+      "evidence": [
+        "scripts/stage_e_retrieval_eval.py:16-19 (docstring claims this prefixing is 'recommended by Google')",
+        "scripts/stage_e_retrieval_eval.py:552-567 (prepare_embedding_input)",
+        "convex/embeddings/generate.ts:9,15 (model comment, 'confirmed bug' note)",
+        "convex/embeddings/generate.ts:100-167 (embedNativeGemini - raw text only)"
+      ],
+      "requires": "A fix to the evaluator (send raw, unprefixed text, matching production exactly) with its own justification and a red-to-green verification pass, OR an explicit, informed decision by the user to keep the prefix and treat this as an intentionally different (Google-recommended, not production-matched) configuration - not something to resolve silently."
+    },
+    {
+      "id": "rrf-fusion-topology-mismatch",
+      "severity": "HIGH - the evaluator's hybrid strategy is a materially different algorithm from production's",
+      "dimension": "rrf_parameters_and_channel_topology",
+      "finding": "The evaluator's hybrid strategy is a 2-channel, fixed-implicit-weight-1.0 Reciprocal Rank Fusion of (a) dense chunk similarity collapsed to per-document best score, and (b) a custom Python BM25 index, both fused at the DOCUMENT level (reciprocal_rank_fusion, scripts/stage_e_retrieval_eval.py:1907-1925, called from evaluate() at 2215-2219). Production's real hybridRank() (convex/embeddings/search.ts:61-99, invoked at 294-296) is a 3-channel fusion - vector results, a document-level fullTextSearch channel, and a SEPARATE chunk-level chunkTextSearch channel (weighted at adaptiveWeights.text * 0.5) - using QUERY-DEPENDENT ADAPTIVE WEIGHTS from estimateIdf() (convex/embeddings/idf.ts:116-152, e.g. {vector:1.5,text:0.5} for short queries scaling to {vector:0.5,text:1.5} for long ones), not a fixed 1.0/1.0 split. Production also injects up to 2 FAQ results (fetchActiveFaqs, search.ts:166-198) via a SEPARATE scoring formula (FAQ_WEIGHT * 1/(RRF_K+rank)) merged by a plain numeric sort AFTER the RRF fusion (search.ts:369-372), which the evaluator has no equivalent of at all.",
+      "consequence": "The evaluator's 'hybrid' strategy answers 'what would a naive, fixed-weight, 2-channel RRF over exact-BM25 produce', not 'what does production's adaptive-weighted, 3-channel, FAQ-aware fusion produce'. The two can rank the same corpus differently, particularly for very short or very long queries where production's adaptive weights diverge most from a fixed 1.0/1.0 split.",
+      "evidence": [
+        "scripts/stage_e_retrieval_eval.py:1907-1925 (reciprocal_rank_fusion)",
+        "scripts/stage_e_retrieval_eval.py:2199-2219 (evaluate() - confirms only 2 channels are ever computed)",
+        "convex/embeddings/search.ts:61-99 (hybridRank - 3-channel, weighted)",
+        "convex/embeddings/search.ts:244,261-296 (adaptive weight computation + 3-way fusion call site)",
+        "convex/embeddings/idf.ts:116-152 (estimateIdf - the adaptive weight formula)",
+        "convex/embeddings/search.ts:166-198,369-372 (FAQ injection, no evaluator equivalent)"
+      ],
+      "requires": "A fix to the evaluator's hybrid strategy to reproduce the real 3-channel adaptive-weight topology (and a decision on whether FAQ injection is in scope for a KnowledgeStore-backend comparison, since FAQs are not backend-specific corpus content), with its own justification and red-to-green verification - or an explicit decision to treat the evaluator's simpler hybrid strategy as a deliberately different, simplified proxy, clearly labeled as such in every report this tool produces."
+    },
+    {
+      "id": "freshness-filtering-absent",
+      "severity": "HIGH - the evaluator's corpus and ranking logic have no way to reproduce a core piece of production retrieval behavior",
+      "dimension": "candidate_eligibility_and_freshness_semantics",
+      "finding": "Production hard-excludes documents whose status is stale/failed/pending/processing/pending_embed from retrieval entirely, and applies a 0.3x score penalty to eligible-but-aged documents (isRetrievalEligibleStatus + classifyFreshness, convex/shared/freshnessPolicy.ts:107-256, applied at convex/embeddings/search.ts:301-325). The corpus exported by convex/crawl/exportCorpus.ts (lines 29-39) does not include status, isStale, freshnessTier, or crawledAt on either documents or chunks at all - the evaluator has no data with which to reproduce this filtering even in principle, and does not attempt to.",
+      "consequence": "The evaluator's ranking can surface a document that production would hard-exclude (wrong status) or heavily penalize (stale), producing metrics that look better or worse than what a real user would actually receive, in either direction depending on which corpus documents happen to be stale/ineligible.",
+      "evidence": [
+        "convex/shared/freshnessPolicy.ts:84-101 (candidateLimit - the overfetch this filtering requires)",
+        "convex/shared/freshnessPolicy.ts:107-135 (RETRIEVAL_ELIGIBLE_STATUSES / RETRIEVAL_EXCLUDED_STATUSES)",
+        "convex/shared/freshnessPolicy.ts:192-256 (classifyFreshness)",
+        "convex/embeddings/search.ts:301-325 (hard-exclusion + stale-multiplier application)",
+        "convex/crawl/exportCorpus.ts:29-39 (exported fields - no status/isStale/freshnessTier/crawledAt)"
+      ],
+      "requires": "Extend exportCorpus.ts to include status/isStale/freshnessTier/crawledAt per document, and extend the evaluator to hard-exclude/penalize accordingly before ranking - with its own justification and red-to-green verification. Until then, the evaluator's corpus is not the same eligible-document set production actually searches over."
+    }
+  ],
+  "unresolved_assumptions_lower_confidence": [
+    {
+      "id": "bm25-algorithm-fidelity",
+      "dimension": "lexical_bm25_behavior",
+      "finding": "The evaluator implements a textbook Okapi BM25 (k1=1.5, b=0.75, standard IDF formula) over its own regex/casefold tokenizer (scripts/stage_e_retrieval_eval.py:1823-1876). Production's lexical channel is Convex's built-in, proprietary .withSearchIndex() full-text search (convex/crawl/queries.ts:8-36) - an opaque ranking algorithm Convex documents only informally as BM25-like, with no published k1/b or tokenization spec to verify against. Note that the raw scores from this channel are NOT used numerically by production's RRF fusion (fusion is rank-only, per hybridRank's decay() function) - so the concern is specifically whether the ORDERING each algorithm produces over the same corpus and query would diverge, not that the numeric scores differ.",
+      "status": "UNVERIFIED - plausible source of ranking divergence, not confirmed to actually diverge for this corpus/query set",
+      "requires": "Either treat as an accepted, documented approximation (the evaluator's docstring should say so explicitly, it currently implies parity), or empirically compare the evaluator's BM25 ranking against production's fullTextSearch ranking for the same queries to check for material divergence before trusting the 'bm25' strategy's numbers as production-equivalent."
+    },
+    {
+      "id": "candidate-overfetch-cap-difference",
+      "dimension": "candidate_counts",
+      "finding": "Production overfetches a BOUNDED candidate pool per channel before filtering/reranking - candidateLimit(k) = min(256, max(k*3, 30)) (convex/shared/freshnessPolicy.ts:84-101), e.g. 30 candidates for the default limit=8 search. The evaluator scores the ENTIRE corpus for every query with no candidate-pool bound at all (evaluate(), scripts/stage_e_retrieval_eval.py:2171-2275) - it is exhaustive/exact rather than bounded.",
+      "status": "LOWER RISK in practice for this corpus's likely relevant-document density, but structurally different and unverified at scale",
+      "consequence_if_it_matters": "If a truly relevant chunk ranks outside production's top-30-per-channel candidate pool (plausible as the corpus grows, e.g. under the 2-3x growth scenarios already tracked in the market screen), production would never surface it at all while the evaluator's exhaustive scan would - the evaluator would then look BETTER than production actually performs for the same query.",
+      "requires": "No fix strictly required for a full-corpus exhaustive evaluation (this is the same 'exact ground truth' pattern already used for the Turso dense-ANN benchmark), but this must be documented as an intentional design choice - the evaluator measures exhaustive/exact retrieval quality, not production's bounded-candidate-pool behavior - and not silently conflated with 'this is exactly what production returns'."
+    },
+    {
+      "id": "canonical-url-query-string-normalization",
+      "dimension": "canonical_url_handling",
+      "finding": "The evaluator's comparison_url() (scripts/stage_e_retrieval_eval.py:292-315) normalizes scheme/host/port/path/userinfo but passes the URL's query string through UNMODIFIED (parsed.query, verbatim). Production's crawler canonicalize() (scripts/uet_crawler/url_policy.py:593 onward) performs additional query-string normalization (_normalize_query_items, referencing strip_params and sort_query_params configuration) that the evaluator does not replicate.",
+      "status": "UNVERIFIED - not observed to cause an actual mismatch with the current 6-query default set (all use single, unambiguous query parameters), but a real, uninspected gap in URL-identity semantics",
+      "requires": "Either confirm strip_params/sort_query_params are no-ops for every URL that actually appears in the real corpus and query set (in which case no fix is needed, just documentation), or align comparison_url() with the crawler's actual normalization before trusting relevance-label URL matching for any future query set with multi-parameter URLs."
+    }
+  ],
+  "intentional_boundary_requiring_explicit_documentation_not_a_defect": [
+    {
+      "id": "reranking-boundary",
+      "dimension": "reranking_boundaries",
+      "finding": "The evaluator's dense/bm25/hybrid strategies all stop at the raw RRF-fused ranking - equivalent to convex/rag/retrieval.ts's searchVectorDB() call into searchDocumentsAction (limit 8). Production's real user-facing pipeline does NOT stop there: rerankSearchResults() (convex/rag/retrieval.ts:209-241) then calls cascadeRerank (convex/reranking/cascade.ts) to narrow 8 candidates to a topK of 4, followed by a further CRAG LLM-judge relevance/confidence pass (evaluateWithCrag, referenced at retrieval.ts:254 onward) that this review did not trace to completion.",
+      "assessment": "This is plausibly a CORRECT, deliberate scope boundary for a KnowledgeStore-backend comparison specifically (the reranker is meant to be an unchanged, constant downstream stage applied equally regardless of which backend supplies the candidates - see docs/rag-store-evaluation/acceptance-gates.json's existing_reranker preference and the original Pinecone mandate's 'existing reranker' framing), NOT necessarily a defect. But it means every metric this evaluator produces describes PRE-RERANK candidate-pool quality, not what a real user actually receives after Cascade+CRAG narrow and re-score the top 8 down to a final 4.",
+      "requires": "No evaluator code change required, but every report this tool produces must state explicitly and prominently that its metrics measure the pre-reranking retrieval-layer candidate pool, not final user-facing answer quality - this was not previously stated anywhere in the script's docstring or output artifacts as reviewed."
+    }
+  ],
+  "relevance_label_provenance": {
+    "finding": "The evaluator's built-in default query set (DEFAULT_QUERY_ROWS, scripts/stage_e_retrieval_eval.py:147-198) contains exactly 6 queries (q1-q6). The script's own comment (line ~145-146) states: 'These preserve the original manual judgments, but use exact URLs rather than unsafe substring fragments. Review these labels with a domain expert before treating the scores as an acceptance benchmark.'",
+    "classification": "EXISTING_TEST, not HUMAN_VERIFIED without further evidence - the script's own comment indicates these are carried-over manual judgments from an earlier session, explicitly flagged as still needing domain-expert review before being trusted as an acceptance benchmark. No record was found in this review confirming that review has since happened.",
+    "sample_size_note": "6 queries is a small evaluation set for a project-wide retrieval baseline. The script does include bootstrap confidence-interval machinery (bootstrap_interval, paired_bootstrap_difference) specifically to quantify uncertainty at this sample size, which is good practice, but does not substitute for a larger, more representative query set if one is later required."
+  },
+  "not_executed": "No baseline run was performed. No embeddings were generated. No Gemini API calls were made. No artifacts (JSON/CSV/Markdown) were produced by the evaluator itself. The corpus export endpoint (GET /api/export/corpus) was not called. No sanity checks against a real corpus export (count parity, duplicate chunk IDs, etc.) were performed, since there is no exported corpus yet - these remain NOT_EXECUTED pending resolution of the defects above.",
+  "recommendation": "Do not execute the baseline against these three confirmed HIGH-severity defects. Each requires either (a) a fix to the evaluator with its own explicit justification and a red-to-green verification pass, per the standing instruction not to silently alter methodology after seeing results, or (b) an explicit, informed decision by the user to accept a specific divergence as intentional and clearly document it in every artifact this tool subsequently produces. The lower-confidence unresolved assumptions and the reranking boundary should also be explicitly acknowledged before the baseline is treated as authoritative, even if they don't block a first execution attempt the way the three HIGH-severity defects do."
+}
