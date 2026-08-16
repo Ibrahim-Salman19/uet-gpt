@@ -27,12 +27,15 @@ function makeDoc(overrides: any = {}) {
 
 function createMockDb(documents: any[]) {
   const patched: Record<string, any> = {};
+  // The take/withIndex/query mocks must be created ONCE and reused - not
+  // freshly per call - so a test's own `db.query().withIndex().take` capture
+  // is the SAME instance the handler later invokes internally, not a
+  // disconnected mock that happens to have an identical shape.
+  const take = vi.fn(async (n: number) => documents.slice(0, n));
+  const withIndex = vi.fn(() => ({ take }));
+  const query = vi.fn(() => ({ withIndex }));
   return {
-    query: vi.fn(() => ({
-      withIndex: vi.fn(() => ({
-        take: vi.fn(async (n: number) => documents.slice(0, n)),
-      })),
-    })),
+    query,
     patch: vi.fn(async (id: string, updates: any) => {
       patched[id] = updates;
     }),

@@ -10,7 +10,7 @@ vi.mock("../../convex/_generated/server", () => ({
 }));
 
 import { isNonRetryableError } from "@convex-dev/workpool";
-import { generate } from "../../convex/embeddings/generate";
+import { generate, generateEmbeddingsInternal } from "../../convex/embeddings/generate";
 
 interface MockCtx {
   runQuery: ReturnType<typeof vi.fn>;
@@ -120,19 +120,26 @@ describe("embeddings:generate", () => {
   // the same large Workpool/DLQ retry budget as transient ones. These prove
   // the actual thrown-error CLASS, not just the message, since that is what
   // Workpool's isNonRetryableError() checks before deciding whether to retry.
+  //
+  // Tests generateEmbeddingsInternal directly, NOT the `generate` action
+  // above - `generate` is the query-time embedding wrapper used synchronously
+  // from the RAG retrieval pipeline (not via Workpool, so retry-classification
+  // is moot for it), and its pre-existing catch block unconditionally
+  // rewraps every error into a plain ConvexError carrying only the message,
+  // discarding any special error type including NonRetryableError. That
+  // behavior predates this remediation and is out of scope here. The actual
+  // crawl/embedding path this remediation targets is embedSingleChunk
+  // (crawl/actions.ts) -> rag.add() -> the custom embedder in
+  // rag/instance.ts -> generateEmbeddingsInternal directly, with no
+  // equivalent rewrapping in between - confirmed by reading that chain.
   describe("non-retryable failure classification", () => {
     async function captureThrown(): Promise<unknown> {
-      const mockCtx: MockCtx = { runQuery: vi.fn() };
       try {
-        await (
-          generate as unknown as {
-            handler: (ctx: MockCtx, args: { text: string }) => Promise<number[]>;
-          }
-        ).handler(mockCtx, { text: "test" });
+        await generateEmbeddingsInternal(["test"]);
       } catch (err) {
         return err;
       }
-      throw new Error("expected handler to throw");
+      throw new Error("expected generateEmbeddingsInternal to throw");
     }
 
     it("marks a missing GEMINI_API_KEY as non-retryable (no retry budget can ever fix a config error)", async () => {

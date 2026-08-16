@@ -46,6 +46,9 @@ vi.mock("../../../convex/_generated/api", () => ({
       },
       queries: { getChunkByKey: "getChunkByKey" as any },
       actions: {},
+      bulkOperationsControl: {
+        checkBulkOperationsEnabled: "checkBulkOperationsEnabled" as any,
+      },
     },
     embeddings: { contextualize: { contextualizeNewChunk: "contextualizeNewChunk" as any } },
   },
@@ -69,7 +72,11 @@ describe("embedSingleChunk fault injection (rag.add and the created:false follow
     embedSingleChunk = mod.embedSingleChunk;
     mockCtx = {
       runMutation: vi.fn().mockResolvedValue(undefined),
-      runQuery: vi.fn().mockResolvedValue(null), // no existing chunk at this key
+      // Default: bulk operations enabled (matches production's "absence
+      // means enabled"), no existing chunk at this key for anything else.
+      runQuery: vi.fn().mockImplementation((fnRef: string) =>
+        Promise.resolve(fnRef === "checkBulkOperationsEnabled" ? true : null),
+      ),
       runAction: vi.fn(),
       auth: { getUserIdentity: vi.fn() },
       scheduler: { runAfter: vi.fn().mockResolvedValue(undefined) },

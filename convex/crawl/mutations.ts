@@ -244,7 +244,10 @@ export const PENDING_EMBEDDING_BACKLOG_CEILING = 500;
 async function assertEmbeddingBacklogHasRoom(ctx: MutationCtx): Promise<void> {
   await assertBulkOperationsEnabled(ctx);
   const sample = await ctx.db.query("pendingChunkText").take(PENDING_EMBEDDING_BACKLOG_CEILING + 1);
-  if (sample.length > PENDING_EMBEDDING_BACKLOG_CEILING) {
+  // >=, not >: the ceiling is the maximum the backlog should ever reach, so
+  // an existing count already AT the ceiling must block further growth (not
+  // only once it's already been exceeded by one).
+  if (sample.length >= PENDING_EMBEDDING_BACKLOG_CEILING) {
     // Controlled failure, not a silent drop: the caller is an httpAction
     // (crawlWebhook/ingestWebhook) that returns this as a 500, and the
     // external crawler already retries a failed push on its own

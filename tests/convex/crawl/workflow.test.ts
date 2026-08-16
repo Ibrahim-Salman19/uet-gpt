@@ -8,6 +8,10 @@
  */
 vi.mock("../../../convex/_generated/server", () => ({
   internalMutation: (opts: { handler: Function }) => ({ handler: opts.handler }),
+  // workflow.ts imports isBulkOperationsEnabled from bulkOperationsControl.ts,
+  // which also exports an internalQuery - the mock must provide it even
+  // though this file only directly needs internalMutation.
+  internalQuery: (opts: { handler: Function }) => ({ handler: opts.handler }),
 }));
 
 vi.mock("../../../convex/crawl/workpools", () => ({
@@ -36,6 +40,7 @@ function createMockDb(resultMap: Record<string, any[]> = {}) {
           );
           return {
             first: vi.fn(async () => filtered[0] ?? null),
+            unique: vi.fn(async () => filtered[0] ?? null),
             order: vi.fn(() => ({ first: vi.fn(async () => filtered[0] ?? null) })),
           };
         }),
