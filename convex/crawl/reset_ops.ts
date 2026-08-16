@@ -3,6 +3,7 @@ import { internal } from "../_generated/api";
 import type { Doc } from "../_generated/dataModel";
 import { internalMutation } from "../_generated/server";
 import { rag } from "../rag/instance";
+import { assertBulkOperationsEnabled } from "./bulkOperationsControl";
 import { embeddingPool } from "./workpools";
 
 async function deleteChunksBatch(
@@ -98,6 +99,12 @@ export const resetFailedDocuments = internalMutation({
 export const reembedPendingBatch = internalMutation({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, { limit }) => {
+    // Resource-safety mandate section 10, "before embedding enqueue" - also
+    // matters structurally: embeddingPool.enqueueActionBatch resends this
+    // pool's configured maxParallelism on every call (see workpools.ts's
+    // Workpool constructor options), which would silently override an
+    // emergency stop's maxParallelism:0 if this ran while stopped.
+    await assertBulkOperationsEnabled(ctx);
     const batchSize = limit ?? 10;
     const pendingDocs = await ctx.db
       .query("documents")
@@ -142,6 +149,12 @@ export const reembedPendingBatch = internalMutation({
       if (reembeddable.length > 0) {
         // Phase 6.21A Part 4/5: new ingestion round for this recovery pass.
         const newGeneration = (doc.ingestionGeneration ?? 0) + 1;
+        // August 2026 incident remediation (resource-safety mandate section
+        // 11): a shared hardcoded literal here would make every document's
+        // recovery batch indistinguishable in the DLQ/completion records.
+        // Each document's reembed pass is its own logical run, so it gets
+        // its own identity (timestamp + document, not just "reembed-job").
+        const jobId = `reembed-${Date.now()}-${doc._id}`;
         const argsArray = reembeddable.map((chunk) => ({
           documentId: doc._id,
           url: doc.url,
@@ -149,7 +162,7 @@ export const reembedPendingBatch = internalMutation({
           contentHash: chunk.contentHash,
           chunkKey: chunk.chunkKey!,
           ingestionGeneration: newGeneration,
-          jobId: "reembed-job",
+          jobId,
           parentId: chunk.parentId,
           headingPath: chunk.headingPath,
           namespaceId: namespaceIdStr,
@@ -161,7 +174,7 @@ export const reembedPendingBatch = internalMutation({
           argsArray,
           {
             onComplete: internal.crawl.mutations.onChunkEmbedded,
-            context: { jobId: "reembed-job", ingestionGeneration: newGeneration },
+            context: { jobId, ingestionGeneration: newGeneration },
           },
         );
         queued += reembeddable.length;

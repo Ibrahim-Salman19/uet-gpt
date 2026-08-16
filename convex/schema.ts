@@ -146,6 +146,7 @@ export default defineSchema({
       v.literal("metrics.performance"),
       v.literal("staleness.check"),
       v.literal("role.change"),
+      v.literal("bulk_operations.resume"),
     ),
     target: v.optional(v.string()),
     details: v.optional(
@@ -359,13 +360,24 @@ export default defineSchema({
   // (component/entries.js's promoteToReadyHandler) can produce several
   // successive "ready" entries that each independently need this SAME
   // staged row to run their own commit - deleting it after the FIRST one
-  // strands every later chain link with nothing staged. _creationTime is
-  // the GC grace-period clock instead (see gcOrphanedPendingChunkText in
-  // reconciliation.ts), which is the ONLY thing that ever deletes these
-  // rows, well after any concurrent attempt could still be in flight.
+  // strands every later chain link with nothing staged.
+  //
+  // stagePendingChunkText upserts by ragVersionKey (August 2026 incident
+  // remediation) instead of always inserting, so every Workpool retry and
+  // DLQ re-enqueue of the same logical chunk refreshes ONE row instead of
+  // appending a duplicate - this is what previously inflated ~700 struggling
+  // chunks into ~17,000 staged rows. `updatedAt` (not the immutable
+  // _creationTime) is the GC grace-period clock: it keeps advancing as long
+  // as the chunk is still being actively retried at any layer, and only
+  // stops once retries genuinely end (success or DLQ abandonment), which is
+  // exactly when the row becomes safe to GC. See gcOrphanedPendingChunkText
+  // in reconciliation.ts, the ONLY thing that ever deletes these rows.
   pendingChunkText: defineTable({
     ragVersionKey: v.string(),
     chunkText: v.string(),
+    // Optional: rows written before this field existed have no value here
+    // and fall back to _creationTime in the GC check (see reconciliation.ts).
+    updatedAt: v.optional(v.number()),
   }).index("by_ragVersionKey", ["ragVersionKey"]),
 
   crawlStats: defineTable({
@@ -377,6 +389,23 @@ export default defineSchema({
     pendingDocuments: v.number(),
     lastUpdatedAt: v.number(),
   }).index("by_statsId", ["statsId"]),
+
+  // Durable, server-side kill switch for expensive crawl/embedding
+  // operations (August 2026 incident remediation - resource-safety mandate
+  // section 40: "kill switch must not depend only on process memory"). A
+  // row's ABSENCE means "nobody has ever needed emergency stop" (the normal
+  // state for a healthy system), not an unknown/unsafe condition, so
+  // isBulkOperationsEnabled (crawl/bulkOperationsControl.ts) defaults to
+  // enabled=true when no row exists. Once a row exists, its value is
+  // authoritative and is checked before every expensive producer-side
+  // action - see that file for the full list of call sites.
+  bulkOperationsControl: defineTable({
+    key: v.string(), // singleton, "global"
+    enabled: v.boolean(),
+    updatedAt: v.number(),
+    updatedBy: v.optional(v.id("users")),
+    reason: v.optional(v.string()),
+  }).index("by_key", ["key"]),
 
   faqs: defineTable({
     question: v.string(),

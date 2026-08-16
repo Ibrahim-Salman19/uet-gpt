@@ -13,6 +13,9 @@ vi.mock("../../../convex/_generated/api", () => ({
       },
       queries: { getJobById: "getJobById" as any, getChunkByKey: "getChunkByKey" as any },
       actions: {},
+      bulkOperationsControl: {
+        checkBulkOperationsEnabled: "checkBulkOperationsEnabled" as any,
+      },
     },
     embeddings: {
       contextualize: {
@@ -245,7 +248,13 @@ describe("embedSingleChunk", () => {
 
     mockCtx = {
       runMutation: vi.fn().mockResolvedValue(undefined),
-      runQuery: vi.fn(),
+      // Default: bulk operations enabled (matches the "absence means
+      // enabled" production default), getChunkByKey/anything else undefined
+      // (no existing chunk) - individual tests below override per-call via
+      // .mockImplementation or .mockResolvedValueOnce as needed.
+      runQuery: vi.fn().mockImplementation((fnRef: string) =>
+        Promise.resolve(fnRef === "checkBulkOperationsEnabled" ? true : undefined),
+      ),
       runAction: vi.fn().mockResolvedValue(undefined),
       auth: { getUserIdentity: vi.fn() },
       scheduler: {
@@ -372,6 +381,45 @@ describe("embedSingleChunk", () => {
       "deletePendingChunkText",
       expect.anything(),
     );
+  });
+
+  // August 2026 incident remediation: resource-safety mandate section 10,
+  // "before external embedding call."
+  describe("bulk-operations kill switch", () => {
+    it("refuses to call the external embedding API when bulk operations are disabled", async () => {
+      mockCtx.runQuery.mockImplementation((fnRef: string) =>
+        Promise.resolve(fnRef === "checkBulkOperationsEnabled" ? false : undefined),
+      );
+
+      await expect((embedSingleChunk as any).handler(mockCtx, defaultArgs)).rejects.toThrow(
+        /disabled/i,
+      );
+      expect(ragModule.rag.add).not.toHaveBeenCalled();
+    });
+
+    it("still allows the cheap contentHash dedup fast-path even when bulk operations are disabled (no external call made either way)", async () => {
+      mockCtx.runQuery.mockImplementation((fnRef: string) =>
+        Promise.resolve(
+          fnRef === "checkBulkOperationsEnabled"
+            ? false
+            : { ragId: "rag-existing", contentHash: defaultArgs.contentHash },
+        ),
+      );
+
+      const result = await (embedSingleChunk as any).handler(mockCtx, defaultArgs);
+
+      expect(result).toEqual(expect.objectContaining({ success: true, ragId: "rag-existing" }));
+      expect(ragModule.rag.add).not.toHaveBeenCalled();
+    });
+
+    it("proceeds normally when bulk operations are enabled (the default)", async () => {
+      ragModule.rag.add.mockResolvedValue({ entryId: "rag-entry-1", created: true, replacedEntry: null });
+
+      await expect(
+        (embedSingleChunk as any).handler(mockCtx, defaultArgs),
+      ).resolves.toEqual(expect.objectContaining({ success: true }));
+      expect(ragModule.rag.add).toHaveBeenCalledTimes(1);
+    });
   });
 
   it("short-circuits via getChunkByKey when an existing row already has the SAME contentHash at this chunkKey", async () => {

@@ -1,5 +1,6 @@
 // fallow-ignore-file security-sink
 "use node";
+import { NonRetryableError } from "@convex-dev/workpool";
 import { ConvexError, v } from "convex/values";
 import { internalAction } from "../_generated/server";
 import { recordTiming } from "../observability/metrics";
@@ -97,6 +98,43 @@ function isKeySpecificStatus(status: number): boolean {
   return status === 401 || status === 403 || status === 429;
 }
 
+// Pure, side-effect-free request-body construction for a single embedContent
+// call. Extracted so the retrieval-baseline evaluator (scripts/
+// stage_e_retrieval_eval.py) can be tested for byte-for-byte parity against
+// this exact function via scripts/print_embedding_request.mts, rather than
+// against a hand-copied spec that could silently drift from the real code.
+// No task-type prefix, no title wrapping - raw text only, matching what this
+// project's own investigation found: "taskType parameter has no effect on
+// gemini-embedding-2 (confirmed bug)" (see the model comment above).
+export function buildGeminiEmbedContentRequestBody(
+  text: string,
+  dimensions: number,
+): { content: { parts: [{ text: string }] }; outputDimensionality: number } {
+  return {
+    content: {
+      parts: [{ text }],
+    },
+    outputDimensionality: dimensions,
+  };
+}
+
+// Same extraction rationale as buildGeminiEmbedContentRequestBody above, for the
+// batchEmbedContents per-item shape instead (used when texts.length >= BATCH_THRESHOLD).
+// Unlike the single embedContent call, each batch item must carry its own "model"
+// field since the model isn't otherwise implied by a per-item URL path.
+export function buildGeminiBatchEmbedContentsRequestItem(
+  text: string,
+  dimensions: number,
+): { model: string; content: { parts: [{ text: string }] }; outputDimensionality: number } {
+  return {
+    model: "models/gemini-embedding-2",
+    content: {
+      parts: [{ text }],
+    },
+    outputDimensionality: dimensions,
+  };
+}
+
 async function embedNativeGemini(texts: string[], apiKey: string): Promise<number[][]> {
   // Single endpoint is faster for small batches; batch API for 2+
   if (texts.length < BATCH_THRESHOLD) {
@@ -108,12 +146,7 @@ async function embedNativeGemini(texts: string[], apiKey: string): Promise<numbe
         "Content-Type": "application/json",
         "x-goog-api-key": apiKey,
       },
-      body: JSON.stringify({
-        content: {
-          parts: [{ text: texts[0] }],
-        },
-        outputDimensionality: EMBEDDING_DIMENSION,
-      }),
+      body: JSON.stringify(buildGeminiEmbedContentRequestBody(texts[0]!, EMBEDDING_DIMENSION)),
     });
     if (!response.ok) {
       const errText = await response.text();
@@ -137,13 +170,9 @@ async function embedNativeGemini(texts: string[], apiKey: string): Promise<numbe
         "x-goog-api-key": apiKey,
       },
       body: JSON.stringify({
-        requests: texts.map((text) => ({
-          model: "models/gemini-embedding-2",
-          content: {
-            parts: [{ text }],
-          },
-          outputDimensionality: EMBEDDING_DIMENSION,
-        })),
+        requests: texts.map((text) =>
+          buildGeminiBatchEmbedContentsRequestItem(text, EMBEDDING_DIMENSION),
+        ),
       }),
     });
     if (!response.ok) {
@@ -214,7 +243,13 @@ export async function generateEmbeddingsInternal(texts: string[]): Promise<numbe
   ].filter((k): k is string => !!k);
 
   if (geminiKeys.length === 0) {
-    throw new ConvexError("GEMINI_API_KEY environment variable is not set");
+    // Permanent configuration error - no retry, however many Workpool
+    // attempts or DLQ cycles are configured, will ever fix a missing key.
+    // August 2026 incident remediation: previously this was a plain
+    // ConvexError, indistinguishable to Workpool from a transient failure,
+    // so a misconfigured deployment would burn its full retry budget on
+    // every single chunk before anything surfaced the real cause.
+    throw new NonRetryableError("GEMINI_API_KEY environment variable is not set");
   }
 
   const errors: string[] = [];
@@ -233,7 +268,15 @@ export async function generateEmbeddingsInternal(texts: string[]): Promise<numbe
       // response): retrying the same input against every other key just wastes
       // quota/latency and hides the real cause. Only rotate on auth/quota errors.
       if (err instanceof GeminiHttpError && !isKeySpecificStatus(err.status)) {
-        throw new ConvexError(`Gemini embedding request failed (non-retryable): ${errMsg}`);
+        // Deterministic input/request error (e.g. 400): the same text will
+        // fail identically on every retry. Conservative by design - only
+        // this already-fail-fast branch is promoted to NonRetryableError.
+        // 401/403/429 (isKeySpecificStatus) and network errors stay ordinary
+        // ConvexErrors below, since those genuinely can succeed on a later
+        // attempt (key rotation, backoff, or a quota window resetting).
+        throw new NonRetryableError(
+          `Gemini embedding request failed (non-retryable): ${errMsg}`,
+        );
       }
       console.warn(`Native Gemini Embeddings failed for key: ${errMsg}`);
       errors.push(`Gemini: ${errMsg}`);

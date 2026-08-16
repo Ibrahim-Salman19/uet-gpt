@@ -441,6 +441,22 @@ export const embedSingleChunk = internalAction({
         };
       }
 
+      // Resource-safety mandate section 10: "before external embedding
+      // call." The dedup fast-path above is cheap and DB-only, so it's
+      // allowed to proceed even while stopped; only the real external
+      // Gemini call is gated. Ordinary (retryable) ConvexError, not
+      // NonRetryableError - the switch being off is expected to be
+      // temporary and operator-controlled, unlike a permanent config error.
+      const bulkOperationsEnabled = await ctx.runQuery(
+        internal.crawl.bulkOperationsControl.checkBulkOperationsEnabled,
+        {},
+      );
+      if (!bulkOperationsEnabled) {
+        throw new ConvexError(
+          "Bulk crawl/embedding operations are currently disabled (emergency stop engaged).",
+        );
+      }
+
       // Contextual retrieval: embed the chunk WITH its section breadcrumb so the vector
       // captures context the raw chunk may lack (e.g. "It is Rs. 38,000" under
       // "Admissions > Fee Structure > BS"). Only the embedded/stored vector text is

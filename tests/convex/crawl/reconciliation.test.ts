@@ -477,9 +477,14 @@ describe("gcOrphanedPendingChunkText", () => {
   // pendingChunkText synchronously anymore (a same-generation chain link can
   // still need the shared staged row after an earlier link already
   // committed), so this GC sweep is the ONLY thing that ever removes these
-  // rows, gated purely by _creationTime age.
+  // rows. August 2026 incident remediation: stagePendingChunkText now
+  // upserts by ragVersionKey and refreshes `updatedAt` on every Workpool
+  // retry and DLQ re-enqueue, so the GC clock is `updatedAt ?? _creationTime`
+  // (not _creationTime alone) - a row only ages out once retries genuinely
+  // stop touching it, whether that's because the chunk succeeded or because
+  // it was permanently abandoned to the DLQ.
   const NOW = 1_800_000_000_000;
-  const GRACE_MS = 15 * 60 * 1000;
+  const GRACE_MS = 6 * 60 * 60 * 1000; // PENDING_CHUNK_TEXT_GC_GRACE_PERIOD_MS
 
   beforeEach(() => {
     vi.mocked(requireAdmin).mockClear();
@@ -558,6 +563,58 @@ describe("gcOrphanedPendingChunkText", () => {
 
     expect(result.deletedOrWouldDelete).toBe(0);
     expect(deleted).toHaveLength(0);
+    vi.spyOn(Date, "now").mockRestore();
+  });
+
+  it("does not delete a row whose updatedAt was refreshed by a recent retry, even though it was originally staged long ago", async () => {
+    // This is the scenario the whole updatedAt fix exists for: a chunk that
+    // has been cycling through DLQ retries for hours has an old
+    // _creationTime, but stagePendingChunkText refreshes updatedAt on every
+    // retry attempt. The row must survive - "retryable intermediate failure
+    // -> staging remains available when needed."
+    vi.spyOn(Date, "now").mockReturnValue(NOW + GRACE_MS + 1000);
+    const { ctx, deleted } = makeGcTextCtx([
+      makePendingRow({
+        _id: "actively-retrying",
+        _creationTime: NOW - 20 * 60 * 60 * 1000, // staged 20h ago
+        updatedAt: NOW + GRACE_MS - 1000, // but retried again just under a moment ago
+      }),
+    ]);
+
+    const result = await (gcOrphanedPendingChunkText as any).handler(ctx, { dryRun: false });
+
+    expect(result.deletedOrWouldDelete).toBe(0);
+    expect(deleted).toHaveLength(0);
+    vi.spyOn(Date, "now").mockRestore();
+  });
+
+  it("deletes a row once updatedAt itself goes past the grace period (success or terminal DLQ abandonment - nothing is retrying it anymore)", async () => {
+    vi.spyOn(Date, "now").mockReturnValue(NOW + GRACE_MS + 1000);
+    const { ctx, deleted } = makeGcTextCtx([
+      makePendingRow({
+        _id: "settled",
+        _creationTime: NOW - 60 * 60 * 1000,
+        updatedAt: NOW, // last touched exactly at NOW - now stale
+      }),
+    ]);
+
+    const result = await (gcOrphanedPendingChunkText as any).handler(ctx, { dryRun: false });
+
+    expect(result.deletedOrWouldDelete).toBe(1);
+    expect(deleted).toEqual(["settled"]);
+    vi.spyOn(Date, "now").mockRestore();
+  });
+
+  it("falls back to _creationTime for a legacy row with no updatedAt field", async () => {
+    vi.spyOn(Date, "now").mockReturnValue(NOW + GRACE_MS + 1000);
+    const { ctx, deleted } = makeGcTextCtx([
+      makePendingRow({ _id: "legacy-row", _creationTime: NOW, updatedAt: undefined }),
+    ]);
+
+    const result = await (gcOrphanedPendingChunkText as any).handler(ctx, { dryRun: false });
+
+    expect(result.deletedOrWouldDelete).toBe(1);
+    expect(deleted).toEqual(["legacy-row"]);
     vi.spyOn(Date, "now").mockRestore();
   });
 

@@ -21,6 +21,7 @@ const auditActionValidator = v.union(
   v.literal("metrics.performance"),
   v.literal("staleness.check"),
   v.literal("role.change"),
+  v.literal("bulk_operations.resume"),
 );
 
 // Mirror of the documents.status union in schema.ts - keep in sync.

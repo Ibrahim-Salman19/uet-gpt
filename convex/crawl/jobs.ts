@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import type { Id } from "../_generated/dataModel";
 import { internalMutation } from "../_generated/server";
+import { sweepPendingChunkTextPage } from "./reconciliation";
 import { rag } from "../rag/instance";
 
 async function deleteAbandonedDLQ(
@@ -210,5 +211,21 @@ export const trimDlqPayloads = internalMutation({
     const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
     const trimmed = await trimStaleDLQPayloads(ctx, batchSize, SEVEN_DAYS_MS);
     return { trimmed, remaining: trimmed >= batchSize ? "more" : "done" };
+  },
+});
+
+// August 2026 incident remediation: the admin-facing gcOrphanedPendingChunkText
+// in reconciliation.ts defaults to dry-run and requires a human to invoke it,
+// which is exactly why the ~17,000-row pendingChunkText backlog was never
+// automatically cleaned up. This is the same sweep, actually running
+// unattended (non-dry-run) so staged text for successfully-committed or
+// permanently-abandoned chunks does not accumulate indefinitely. Still-
+// retrying chunks are protected by PENDING_CHUNK_TEXT_GC_GRACE_PERIOD_MS
+// (reconciliation.ts), not by this cron being cautious.
+export const sweepPendingChunkTextCron = internalMutation({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, { limit }) => {
+    const result = await sweepPendingChunkTextPage(ctx, { limit, dryRun: false });
+    return { deleted: result.deletedOrWouldDelete, remaining: result.isDone ? "done" : "more" };
   },
 });

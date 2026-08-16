@@ -1,11 +1,12 @@
 import { vOnCompleteArgs } from "@convex-dev/workpool";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { internal } from "../_generated/api";
 import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
 import { internalMutation, internalQuery } from "../_generated/server";
 import { rag } from "../rag/instance";
 import { isPdfVirtualUrl, sha256 } from "./chunking";
+import { assertBulkOperationsEnabled, isBulkOperationsEnabled } from "./bulkOperationsControl";
 import { computeIndexingFingerprint, EMBEDDING_MODEL_ID } from "./chunkKey";
 import { embeddingPool } from "./workpools";
 
@@ -18,6 +19,16 @@ import { embeddingPool } from "./workpools";
 // transaction budget, which Convex enforces independently regardless of how
 // the rows are read.
 const MAX_CHUNKS_PER_DOCUMENT_SYNC = 5000;
+
+// Total per-chunk retry budget (August 2026 incident remediation): the DLQ
+// abandon threshold, deliberately co-tuned with embeddingPool's
+// EMBEDDING_WORKPOOL_MAX_ATTEMPTS in crawl/workpools.ts (see that file's
+// comment for the full worst-case-HTTP-calls math), not set independently.
+// MAX_RETRIES=2 means a chunk is abandoned after its original job exhausts
+// Workpool's internal attempts once, then ONE MORE retry-dead-letter cron
+// cycle (~4h later, giving a plausible quota-reset window a fair chance)
+// also fails - not the previous 5 same-day cycles.
+export const MAX_RETRIES = 2;
 
 async function getAllChunksByDocumentId(
   ctx: MutationCtx,
@@ -216,6 +227,38 @@ async function diffAndDeleteStaleChunks(
   return { chunksToEmbed, chunksToDelete, unchangedCount };
 }
 
+// August 2026 incident remediation: the producer (crawl/ingest webhooks)
+// must not be able to enqueue embedding work faster than embeddingPool's
+// deliberately-throttled consumer (maxParallelism: 3, tuned for Gemini's
+// free-tier rate) can drain it - an unbounded producer racing ahead of a
+// throttled consumer, with nothing checking backlog depth first, is the
+// actual mechanism that turned one authorized crawl into a ~17,000-row
+// unattended backlog (see docs/rag-store-evaluation/fresh-corpus-crawl-2026-08).
+// A bounded existence check (.take(ceiling+1)) is used rather than a
+// full-table .collect()/count (cost is O(ceiling), not O(table size)) or a
+// separately-maintained counter (which could silently drift out of sync if
+// any pendingChunkText insert/delete site forgot to update it - this table
+// already has several: stagePendingChunkText, GC, stale-generation cleanup).
+export const PENDING_EMBEDDING_BACKLOG_CEILING = 500;
+
+async function assertEmbeddingBacklogHasRoom(ctx: MutationCtx): Promise<void> {
+  await assertBulkOperationsEnabled(ctx);
+  const sample = await ctx.db.query("pendingChunkText").take(PENDING_EMBEDDING_BACKLOG_CEILING + 1);
+  if (sample.length > PENDING_EMBEDDING_BACKLOG_CEILING) {
+    // Controlled failure, not a silent drop: the caller is an httpAction
+    // (crawlWebhook/ingestWebhook) that returns this as a 500, and the
+    // external crawler already retries a failed push on its own
+    // (crawl_config.production.json's pushRetries) - so this is effectively
+    // "pause this producer's push until the backlog drains," using retry
+    // machinery that already exists on the producer side, rather than a new
+    // deferred-queue mechanism on the consumer side.
+    throw new ConvexError(
+      `Embedding backlog at or above the ${PENDING_EMBEDDING_BACKLOG_CEILING}-chunk ceiling; ` +
+        "refusing to enqueue more until embeddingPool drains. This push will be retried.",
+    );
+  }
+}
+
 async function enqueueNewChunks(
   ctx: MutationCtx,
   docId: Id<"documents">,
@@ -225,6 +268,8 @@ async function enqueueNewChunks(
   ingestionGeneration: number,
 ): Promise<void> {
   if (chunksToEmbed.length === 0) return;
+
+  await assertEmbeddingBacklogHasRoom(ctx);
 
   const { namespaceId } = await rag.getOrCreateNamespace(ctx, {
     namespace: "uet-global",
@@ -531,7 +576,23 @@ async function bumpDocumentProgress(
 export const stagePendingChunkText = internalMutation({
   args: { ragVersionKey: v.string(), chunkText: v.string() },
   handler: async (ctx, args) => {
-    await ctx.db.insert("pendingChunkText", args);
+    // Upsert by ragVersionKey instead of always inserting (August 2026
+    // incident remediation - see the schema.ts comment on pendingChunkText
+    // for the full rationale). ragVersionKey is stable across every Workpool
+    // retry and DLQ re-enqueue of the same logical chunk (it is a hash of
+    // baseChunkKey|documentId|ingestionGeneration, see computeRagVersionKey
+    // in chunkKey.ts), so this keeps exactly one row per (chunk, generation)
+    // no matter how many times it is retried, and refreshes updatedAt so GC
+    // can tell "still being retried" apart from "genuinely idle."
+    const existing = await ctx.db
+      .query("pendingChunkText")
+      .withIndex("by_ragVersionKey", (q) => q.eq("ragVersionKey", args.ragVersionKey))
+      .first();
+    if (existing) {
+      await ctx.db.patch(existing._id, { chunkText: args.chunkText, updatedAt: Date.now() });
+    } else {
+      await ctx.db.insert("pendingChunkText", { ...args, updatedAt: Date.now() });
+    }
   },
 });
 
@@ -964,7 +1025,6 @@ async function updateOrCreateDLQEntry(
   chunkKey?: string,
   ingestionGeneration?: number,
 ) {
-  const MAX_RETRIES = 5;
   // One DLQ row per failed chunk (jobId, url, contentHash) so completion accounting
   // can count distinct failed chunks rather than collapsing all chunks of a URL.
   const dlqEntry = await getDLQEntry(ctx, jobId, url, contentHash);
@@ -1171,6 +1231,13 @@ export const resetStuckDLQEntries = internalMutation({
 export const retryDeadLetterQueue = internalMutation({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, { limit }) => {
+    // Cron-driven, not producer-driven: skip quietly rather than throwing
+    // (which would just spam error logs every 4h while intentionally
+    // stopped) - the resource-safety mandate's "before retry/re-enqueue"
+    // kill-switch checkpoint.
+    if (!(await isBulkOperationsEnabled(ctx))) {
+      return { reprocessed: 0, abandoned: 0, remaining: "done", skipped: "bulk_operations_disabled" };
+    }
     const batchSize = limit ?? 20;
 
     // Idempotency is enforced PER ENTRY, not globally: we only ever fetch
@@ -1435,11 +1502,21 @@ export const enqueueDocumentChunks = internalMutation({
     // own field is the authoritative, always-correct source.
     const doc = await ctx.db.get(documentId);
     const ingestionGeneration = doc?.ingestionGeneration ?? 0;
+    // August 2026 incident remediation (resource-safety mandate section 11):
+    // every ingest push previously shared one hardcoded literal jobId
+    // ("ingest-job"), so DLQ/completion records could never distinguish
+    // "which run created/failed this work" - crawlSessionId is already
+    // stored on the document by upsertDocument (from the crawler's own
+    // per-run session id, threaded through /ingest's payload), so reading it
+    // back here gives a real per-run identity with no schema change needed.
+    const jobId = doc?.crawlSessionId ?? "ingest-job-unknown-session";
 
     // WS-1: upsert parents once + resolve parentId for each child.
     const parentIdByHash = await upsertParentsAndResolve(ctx, documentId, parents);
 
     if (children.length > 0) {
+      await assertEmbeddingBacklogHasRoom(ctx);
+
       const { namespaceId } = await rag.getOrCreateNamespace(ctx, {
         namespace: "uet-global",
       });
@@ -1452,7 +1529,7 @@ export const enqueueDocumentChunks = internalMutation({
         contentHash: chunk.contentHash,
         chunkKey: chunk.chunkKey,
         ingestionGeneration,
-        jobId: "ingest-job",
+        jobId,
         parentId: parentIdByHash.get(chunk.parentContentHash),
         headingPath: chunk.headingPath,
         namespaceId: namespaceIdStr,
@@ -1465,7 +1542,7 @@ export const enqueueDocumentChunks = internalMutation({
         {
           onComplete: internal.crawl.mutations.onChunkEmbedded,
           context: {
-            jobId: "ingest-job",
+            jobId,
             documentId: documentId as unknown as string,
             url,
             ingestionGeneration,

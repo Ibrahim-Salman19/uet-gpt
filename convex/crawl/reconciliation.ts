@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import type { MutationCtx } from "../_generated/server";
 import { mutation, query } from "../_generated/server";
 import { requireAdmin } from "../auth";
 import { rag } from "../rag/instance";
@@ -10,6 +11,16 @@ const GC_PAGE_SIZE = 200;
 // hasn't finished settling yet (onComplete scheduling delay, or an admin
 // running GC while a crawl is actively in flight).
 const ORPHAN_GRACE_PERIOD_MS = 15 * 60 * 1000;
+
+// pendingChunkText rows are refreshed (not just re-inserted) on every
+// Workpool retry AND every DLQ cron re-enqueue of the same chunk (see
+// stagePendingChunkText in mutations.ts), so a row only stops being touched
+// once retries genuinely end - success, or DLQ abandonment. The longest
+// legitimate gap between touches while a chunk is still retrying is one
+// retry-dead-letter cron interval (crons.ts), so this grace period must
+// stay comfortably longer than that interval or GC would delete text a
+// still-retrying chunk legitimately needs. Kept well short of "indefinite."
+const PENDING_CHUNK_TEXT_GC_GRACE_PERIOD_MS = 6 * 60 * 60 * 1000; // 6h > 4h cron interval
 
 /**
  * Phase 6.11-6.20 / 6.21A Part 2: bounded, paginated, AUDIT-ONLY
@@ -284,13 +295,61 @@ export const gcOrphanedRagEntries = mutation({
  * chain can produce several successive "ready" entries that each
  * independently need the SAME staged row to run their own commit -
  * deleting it after the first one strands every later chain link. This
- * function is therefore the ONLY thing that ever removes these rows, and it
- * only does so once ORPHAN_GRACE_PERIOD_MS has passed since _creationTime -
- * well beyond any realistic window for a legitimate concurrent attempt
- * (Workpool's own retry backoff for this action tops out at a few minutes
- * total; a same-generation promotion chain settles in seconds, not
- * minutes). dryRun defaults to true, matching gcOrphanedRagEntries above.
+ * function (via sweepPendingChunkTextPage below) is therefore the ONLY
+ * thing that ever removes these rows.
+ *
+ * August 2026 incident remediation: stagePendingChunkText now upserts by
+ * ragVersionKey and refreshes `updatedAt` on every Workpool retry AND every
+ * DLQ cron re-enqueue, so `updatedAt` (not the immutable _creationTime) is
+ * the correct GC clock - it only stops advancing once retries genuinely end
+ * (success, or DLQ abandonment). PENDING_CHUNK_TEXT_GC_GRACE_PERIOD_MS is
+ * sized to stay comfortably longer than one retry-dead-letter cron interval
+ * so an actively-retrying chunk's staged text is never deleted out from
+ * under it. dryRun defaults to true, matching gcOrphanedRagEntries above.
  */
+async function sweepPendingChunkTextPage(
+  ctx: MutationCtx,
+  args: { cursor?: string; limit?: number; dryRun: boolean },
+): Promise<{
+  dryRun: boolean;
+  deletedOrWouldDelete: number;
+  rowsAudited: number;
+  isDone: boolean;
+  continueCursor: string | undefined;
+}> {
+  const { dryRun } = args;
+  const limit = Math.min(args.limit ?? GC_PAGE_SIZE, GC_PAGE_SIZE);
+  const now = Date.now();
+
+  const page = await ctx.db.query("pendingChunkText").paginate({
+    numItems: limit,
+    cursor: args.cursor ?? null,
+  });
+
+  let deletedOrWouldDelete = 0;
+  for (const row of page.page) {
+    // updatedAt is refreshed on every staging attempt (see
+    // stagePendingChunkText); rows written before that field existed fall
+    // back to _creationTime.
+    const lastTouched = row.updatedAt ?? row._creationTime;
+    if (now - lastTouched <= PENDING_CHUNK_TEXT_GC_GRACE_PERIOD_MS) continue;
+    deletedOrWouldDelete++;
+    if (!dryRun) await ctx.db.delete(row._id);
+  }
+
+  return {
+    dryRun,
+    deletedOrWouldDelete,
+    rowsAudited: page.page.length,
+    isDone: page.isDone,
+    continueCursor: page.isDone ? undefined : page.continueCursor,
+  };
+}
+
+// Admin-facing: manual inspection/cleanup, dry-run by default. For the
+// automatic cron-driven sweep (non-dry-run, no admin session available),
+// see sweepPendingChunkTextCron in crawl/jobs.ts, which calls the same
+// sweepPendingChunkTextPage helper above.
 export const gcOrphanedPendingChunkText = mutation({
   args: {
     cursor: v.optional(v.string()),
@@ -306,28 +365,8 @@ export const gcOrphanedPendingChunkText = mutation({
   }),
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
-    const dryRun = args.dryRun ?? true;
-    const limit = Math.min(args.limit ?? GC_PAGE_SIZE, GC_PAGE_SIZE);
-    const now = Date.now();
-
-    const page = await ctx.db.query("pendingChunkText").paginate({
-      numItems: limit,
-      cursor: args.cursor ?? null,
-    });
-
-    let deletedOrWouldDelete = 0;
-    for (const row of page.page) {
-      if (now - row._creationTime <= ORPHAN_GRACE_PERIOD_MS) continue;
-      deletedOrWouldDelete++;
-      if (!dryRun) await ctx.db.delete(row._id);
-    }
-
-    return {
-      dryRun,
-      deletedOrWouldDelete,
-      rowsAudited: page.page.length,
-      isDone: page.isDone,
-      continueCursor: page.isDone ? undefined : page.continueCursor,
-    };
+    return sweepPendingChunkTextPage(ctx, { ...args, dryRun: args.dryRun ?? true });
   },
 });
+
+export { sweepPendingChunkTextPage };

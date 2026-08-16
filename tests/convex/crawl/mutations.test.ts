@@ -36,6 +36,7 @@ vi.mock("../../../convex/crawl/workpools", () => ({
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { computeIndexingFingerprint } from "../../../convex/crawl/chunkKey";
+import { PENDING_EMBEDDING_BACKLOG_CEILING } from "../../../convex/crawl/mutations";
 
 // Phase 6.21A Part 7: the real fast-path fingerprint, computed once for the
 // whole file. It is a pure function of pipeline constants (no Convex/mocking
@@ -1476,6 +1477,44 @@ describe("enqueueDocumentChunks", () => {
     expect(enqueuedArgs[2][0].chunkKey).toBe("key-a");
   });
 
+  // August 2026 incident remediation: every push previously shared one
+  // hardcoded literal jobId ("ingest-job"), so DLQ/completion records could
+  // never answer "which run created/failed this work."
+  it("derives jobId from the document's real crawlSessionId instead of a shared hardcoded literal", async () => {
+    const db = createMockDb({
+      documents: [{ _id: "doc-session", crawlSessionId: "session-abc-123", ingestionGeneration: 2 }],
+    });
+    const ctx = { db, auth: { getUserIdentity: vi.fn() }, runMutation: vi.fn(), runQuery: vi.fn(), runAction: vi.fn() };
+
+    await (handler as any).handler(ctx, {
+      documentId: "doc-session" as any,
+      url: "https://web.uettaxila.edu.pk/page",
+      parents: [{ contentHash: "p", text: "Parent." }],
+      children: [{ text: "C", contentHash: "h", chunkKey: "k", parentContentHash: "p" }],
+    });
+
+    const [, , argsArray, options] = embeddingPoolModule.embeddingPool.enqueueActionBatch.mock.calls[0];
+    expect(argsArray[0].jobId).toBe("session-abc-123");
+    expect(options.context.jobId).toBe("session-abc-123");
+  });
+
+  it("falls back to a labeled placeholder jobId when the document has no crawlSessionId, rather than reusing an ambiguous shared literal silently", async () => {
+    const db = createMockDb({
+      documents: [{ _id: "doc-no-session", ingestionGeneration: 1 }],
+    });
+    const ctx = { db, auth: { getUserIdentity: vi.fn() }, runMutation: vi.fn(), runQuery: vi.fn(), runAction: vi.fn() };
+
+    await (handler as any).handler(ctx, {
+      documentId: "doc-no-session" as any,
+      url: "https://web.uettaxila.edu.pk/page",
+      parents: [{ contentHash: "p", text: "Parent." }],
+      children: [{ text: "C", contentHash: "h", chunkKey: "k", parentContentHash: "p" }],
+    });
+
+    const [, , argsArray] = embeddingPoolModule.embeddingPool.enqueueActionBatch.mock.calls[0];
+    expect(argsArray[0].jobId).toBe("ingest-job-unknown-session");
+  });
+
   it("sets chunkCount on the document", async () => {
     const db = createMockDb();
     const ctx = {
@@ -1533,6 +1572,112 @@ describe("enqueueDocumentChunks", () => {
       }),
     );
     expect(embeddingPoolModule.embeddingPool.enqueueActionBatch).not.toHaveBeenCalled();
+  });
+
+  // August 2026 incident remediation: the producer must not outrun
+  // embeddingPool's throttled consumer. PENDING_EMBEDDING_BACKLOG_CEILING is
+  // enforced via a bounded .take(ceiling+1) check, not a full-table scan.
+  describe("embedding backlog backpressure", () => {
+    function pendingChunkTextRows(count: number) {
+      return Array.from({ length: count }, (_, i) => ({
+        _id: `pending-${i}`,
+        _creationTime: Date.now(),
+        ragVersionKey: `key-${i}`,
+        chunkText: "staged text",
+        updatedAt: Date.now(),
+      }));
+    }
+
+    it("enqueues normally when the backlog is well below the ceiling", async () => {
+      const db = createMockDb({ pendingChunkText: pendingChunkTextRows(5) });
+      const ctx = { db, auth: { getUserIdentity: vi.fn() }, runMutation: vi.fn(), runQuery: vi.fn(), runAction: vi.fn() };
+
+      await (handler as any).handler(ctx, {
+        documentId: "doc-below" as any,
+        url: "https://web.uettaxila.edu.pk/page",
+        parents: [{ contentHash: "p", text: "Parent." }],
+        children: [{ text: "C", contentHash: "h", chunkKey: "k", parentContentHash: "p" }],
+      });
+
+      expect(embeddingPoolModule.embeddingPool.enqueueActionBatch).toHaveBeenCalledTimes(1);
+    });
+
+    it("blocks enqueueing (controlled failure, not a silent drop) once the backlog is AT the ceiling", async () => {
+      const db = createMockDb({
+        pendingChunkText: pendingChunkTextRows(PENDING_EMBEDDING_BACKLOG_CEILING),
+      });
+      const ctx = { db, auth: { getUserIdentity: vi.fn() }, runMutation: vi.fn(), runQuery: vi.fn(), runAction: vi.fn() };
+
+      await expect(
+        (handler as any).handler(ctx, {
+          documentId: "doc-at-ceiling" as any,
+          url: "https://web.uettaxila.edu.pk/page",
+          parents: [{ contentHash: "p", text: "Parent." }],
+          children: [{ text: "C", contentHash: "h", chunkKey: "k", parentContentHash: "p" }],
+        }),
+      ).rejects.toThrow(/backlog/i);
+      expect(embeddingPoolModule.embeddingPool.enqueueActionBatch).not.toHaveBeenCalled();
+    });
+
+    it("blocks enqueueing when the backlog is ABOVE the ceiling", async () => {
+      const db = createMockDb({
+        pendingChunkText: pendingChunkTextRows(PENDING_EMBEDDING_BACKLOG_CEILING + 50),
+      });
+      const ctx = { db, auth: { getUserIdentity: vi.fn() }, runMutation: vi.fn(), runQuery: vi.fn(), runAction: vi.fn() };
+
+      await expect(
+        (handler as any).handler(ctx, {
+          documentId: "doc-above" as any,
+          url: "https://web.uettaxila.edu.pk/page",
+          parents: [{ contentHash: "p", text: "Parent." }],
+          children: [{ text: "C", contentHash: "h", chunkKey: "k", parentContentHash: "p" }],
+        }),
+      ).rejects.toThrow(/backlog/i);
+      expect(embeddingPoolModule.embeddingPool.enqueueActionBatch).not.toHaveBeenCalled();
+    });
+
+    it("checks the backlog with a bounded take(), not an unbounded collect() (cost independent of table size)", async () => {
+      // A huge table would make a real .collect()/count expensive; the take()
+      // call must only ever request ceiling+1 rows regardless of how large
+      // the underlying table actually is.
+      const db = createMockDb({
+        pendingChunkText: pendingChunkTextRows(PENDING_EMBEDDING_BACKLOG_CEILING + 5000),
+      });
+      const ctx = { db, auth: { getUserIdentity: vi.fn() }, runMutation: vi.fn(), runQuery: vi.fn(), runAction: vi.fn() };
+
+      await expect(
+        (handler as any).handler(ctx, {
+          documentId: "doc-huge" as any,
+          url: "https://web.uettaxila.edu.pk/page",
+          parents: [{ contentHash: "p", text: "Parent." }],
+          children: [{ text: "C", contentHash: "h", chunkKey: "k", parentContentHash: "p" }],
+        }),
+      ).rejects.toThrow();
+
+      const pendingChunkTextCallIndex = db.query.mock.calls.findIndex(
+        (call: any[]) => call[0] === "pendingChunkText",
+      );
+      expect(pendingChunkTextCallIndex).toBeGreaterThanOrEqual(0);
+      const chain = db.query.mock.results[pendingChunkTextCallIndex].value;
+      expect(chain.take).toHaveBeenCalledWith(PENDING_EMBEDDING_BACKLOG_CEILING + 1);
+      expect(chain.collect).not.toHaveBeenCalled();
+    });
+
+    it("does not check the backlog (or block) when there are no children to embed", async () => {
+      const db = createMockDb({
+        pendingChunkText: pendingChunkTextRows(PENDING_EMBEDDING_BACKLOG_CEILING + 50),
+      });
+      const ctx = { db, auth: { getUserIdentity: vi.fn() }, runMutation: vi.fn(), runQuery: vi.fn(), runAction: vi.fn() };
+
+      // Must not throw - an empty children array never touches embeddingPool.
+      await (handler as any).handler(ctx, {
+        documentId: "doc-no-children" as any,
+        url: "https://web.uettaxila.edu.pk/page",
+        parents: [],
+        children: [],
+      });
+      expect(embeddingPoolModule.embeddingPool.enqueueActionBatch).not.toHaveBeenCalled();
+    });
   });
 });
 
@@ -1925,6 +2070,93 @@ describe("DLQ operations", () => {
 
       expect(result.resetCount).toBe(0);
     });
+  });
+});
+
+describe("stagePendingChunkText", () => {
+  // August 2026 incident regression suite: stagePendingChunkText used to
+  // unconditionally insert a new row on every call, so every Workpool retry
+  // and DLQ re-enqueue of the same chunk appended a duplicate. It must now
+  // upsert by ragVersionKey - at most one row per (chunk, generation), no
+  // matter how many times it is retried - while still creating genuinely
+  // separate rows for a different chunk/document/generation.
+  let handler: any;
+
+  beforeEach(async () => {
+    const mod = await import("../../../convex/crawl/mutations");
+    handler = mod.stagePendingChunkText;
+  });
+
+  it("inserts a single row on first staging", async () => {
+    const db = createMockDb({ pendingChunkText: null });
+    const ctx = { db, auth: { getUserIdentity: vi.fn() } };
+
+    await (handler as any).handler(ctx, { ragVersionKey: "key-a", chunkText: "text v1" });
+
+    expect(db.insert).toHaveBeenCalledTimes(1);
+    expect(db.insert).toHaveBeenCalledWith(
+      "pendingChunkText",
+      expect.objectContaining({ ragVersionKey: "key-a", chunkText: "text v1" }),
+    );
+  });
+
+  it("BEFORE this fix would insert N rows for N retries of the same chunk; AFTER, exactly one row remains", async () => {
+    const db = createMockDb({ pendingChunkText: null });
+    const ctx = { db, auth: { getUserIdentity: vi.fn() } };
+
+    // Simulate 5 retry attempts of the identical logical chunk (same
+    // ragVersionKey - stable across Workpool retries and DLQ re-enqueues).
+    for (let attempt = 0; attempt < 5; attempt++) {
+      await (handler as any).handler(ctx, {
+        ragVersionKey: "key-retried",
+        chunkText: `text attempt ${attempt}`,
+      });
+    }
+
+    const rows = await db
+      .query("pendingChunkText")
+      .withIndex("by_ragVersionKey", (q: any) => q.eq("ragVersionKey", "key-retried"))
+      .collect();
+    expect(rows).toHaveLength(1);
+    expect(rows[0].chunkText).toBe("text attempt 4"); // reflects the latest attempt
+    expect(db.insert).toHaveBeenCalledTimes(1); // only the FIRST attempt inserted
+    expect(db.patch).toHaveBeenCalledTimes(4); // every subsequent attempt patched
+  });
+
+  it("refreshes updatedAt on every retry so GC can distinguish active retries from idle rows", async () => {
+    const db = createMockDb({ pendingChunkText: null });
+    const ctx = { db, auth: { getUserIdentity: vi.fn() } };
+
+    await (handler as any).handler(ctx, { ragVersionKey: "key-a", chunkText: "v1" });
+    const firstUpdatedAt = (
+      await db.query("pendingChunkText").withIndex("by_ragVersionKey", (q: any) => q.eq("ragVersionKey", "key-a")).first()
+    ).updatedAt;
+
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    await (handler as any).handler(ctx, { ragVersionKey: "key-a", chunkText: "v2" });
+    const secondUpdatedAt = (
+      await db.query("pendingChunkText").withIndex("by_ragVersionKey", (q: any) => q.eq("ragVersionKey", "key-a")).first()
+    ).updatedAt;
+
+    expect(secondUpdatedAt).toBeGreaterThan(firstUpdatedAt);
+  });
+
+  it("does not merge a different chunk/document/generation's staged text into an unrelated row", async () => {
+    const db = createMockDb({ pendingChunkText: null });
+    const ctx = { db, auth: { getUserIdentity: vi.fn() } };
+
+    // Different ragVersionKey values simulate a different baseChunkKey,
+    // documentId, or ingestionGeneration (computeRagVersionKey hashes all
+    // three together in chunkKey.ts), each of which must stay isolated.
+    await (handler as any).handler(ctx, { ragVersionKey: "doc-1-chunk-1-gen-1", chunkText: "A" });
+    await (handler as any).handler(ctx, { ragVersionKey: "doc-1-chunk-2-gen-1", chunkText: "B" }); // different chunk
+    await (handler as any).handler(ctx, { ragVersionKey: "doc-2-chunk-1-gen-1", chunkText: "C" }); // different document
+    await (handler as any).handler(ctx, { ragVersionKey: "doc-1-chunk-1-gen-2", chunkText: "D" }); // different generation
+
+    const all = await db.query("pendingChunkText").collect();
+    expect(all).toHaveLength(4);
+    expect(db.insert).toHaveBeenCalledTimes(4);
+    expect(db.patch).not.toHaveBeenCalled();
   });
 });
 

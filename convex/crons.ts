@@ -33,6 +33,21 @@ crons.interval(
   {},
 );
 
+// August 2026 incident remediation: sweep pendingChunkText rows whose
+// updatedAt has gone stale (see PENDING_CHUNK_TEXT_GC_GRACE_PERIOD_MS in
+// crawl/reconciliation.ts). Previously this only existed as an admin-facing,
+// dry-run-by-default mutation nobody ever ran, which is how ~700 struggling
+// chunks inflated into ~17,000 staged rows with nothing ever cleaning them
+// up. Hourly (not weekly, unlike the other WS-3 sweeps below) because this
+// table is exactly what accumulated runaway volume during a single crawl
+// session, not over weeks.
+crons.interval(
+  "sweep-pending-chunk-text",
+  { hours: 1 },
+  internal.crawl.jobs.sweepPendingChunkTextCron,
+  { limit: 200 },
+);
+
 // Every 2 hours: detect crawl jobs stuck in "running" state for >2 hours (reduced from 30min)
 crons.interval("fail-stuck-crawl-jobs", { hours: 2 }, internal.crawl.workflow.failStuckJobs);
 

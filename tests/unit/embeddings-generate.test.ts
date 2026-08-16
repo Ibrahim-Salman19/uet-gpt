@@ -9,6 +9,7 @@ vi.mock("../../convex/_generated/server", () => ({
   internalMutation: (opts: { handler: Function }) => ({ handler: opts.handler }),
 }));
 
+import { isNonRetryableError } from "@convex-dev/workpool";
 import { generate } from "../../convex/embeddings/generate";
 
 interface MockCtx {
@@ -113,5 +114,62 @@ describe("embeddings:generate", () => {
         }
       ).handler(mockCtx, { text: "test" }),
     ).rejects.toThrow("Bad Request");
+  });
+
+  // August 2026 incident remediation: permanent failures must not receive
+  // the same large Workpool/DLQ retry budget as transient ones. These prove
+  // the actual thrown-error CLASS, not just the message, since that is what
+  // Workpool's isNonRetryableError() checks before deciding whether to retry.
+  describe("non-retryable failure classification", () => {
+    async function captureThrown(): Promise<unknown> {
+      const mockCtx: MockCtx = { runQuery: vi.fn() };
+      try {
+        await (
+          generate as unknown as {
+            handler: (ctx: MockCtx, args: { text: string }) => Promise<number[]>;
+          }
+        ).handler(mockCtx, { text: "test" });
+      } catch (err) {
+        return err;
+      }
+      throw new Error("expected handler to throw");
+    }
+
+    it("marks a missing GEMINI_API_KEY as non-retryable (no retry budget can ever fix a config error)", async () => {
+      vi.stubEnv("GEMINI_API_KEY_1", undefined);
+      vi.stubEnv("GEMINI_API_KEY_2", undefined);
+      vi.stubEnv("GEMINI_API_KEY", undefined);
+      vi.stubEnv("GOOGLE_GENERATIVE_AI_API_KEY", undefined);
+
+      const thrown = await captureThrown();
+      expect(isNonRetryableError(thrown)).toBe(true);
+    });
+
+    it("marks a deterministic 400 Gemini response as non-retryable", async () => {
+      vi.stubEnv("GEMINI_API_KEY_1", "test_gemini_key");
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 400,
+        text: async () => "Bad Request",
+        headers: new Headers({ "content-type": "application/json" }),
+      });
+
+      const thrown = await captureThrown();
+      expect(isNonRetryableError(thrown)).toBe(true);
+    });
+
+    it("does NOT mark a 429 (rate limit) as non-retryable even after every key is exhausted - a later attempt may succeed once quota resets", async () => {
+      vi.stubEnv("GEMINI_API_KEY_1", "key-1");
+      vi.stubEnv("GEMINI_API_KEY_2", "key-2");
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 429,
+        text: async () => "Rate limited",
+        headers: new Headers({ "content-type": "application/json" }),
+      });
+
+      const thrown = await captureThrown();
+      expect(isNonRetryableError(thrown)).toBe(false);
+    });
   });
 });
