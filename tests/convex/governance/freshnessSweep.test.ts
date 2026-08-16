@@ -50,7 +50,7 @@ describe("runFreshnessSweepBatch", () => {
 
     // The .take() call must have been bounded, not passed 100,000 verbatim.
     expect(takeSpy).toHaveBeenCalled();
-    const requested = takeSpy.mock.calls[0][0];
+    const requested = takeSpy.mock.calls[0]![0];
     expect(requested).toBeLessThanOrEqual(500);
   });
 
