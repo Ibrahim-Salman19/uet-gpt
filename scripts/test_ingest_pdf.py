@@ -14,7 +14,10 @@ def make_settings(tmp_path: Path, **overrides):
         project_root=tmp_path,
         gemini_api_key=None,
         vlm_model="gemini-3.6-flash",
-        convex_site_url="https://example.convex.site",
+        # Local by default (see uet_crawler/target_guard.py): validate_for_push
+        # now fails closed on a non-local target, so shared test fixtures must
+        # not implicitly rely on a Convex Cloud-shaped URL passing validation.
+        convex_site_url="http://127.0.0.1:3211",
         convex_auth_token="secret",
         crawl_session_id="pdf-manual",
         ocr_language="eng",
@@ -195,6 +198,45 @@ def test_http_remote_url_is_rejected(tmp_path: Path):
 def test_settings_requires_auth_by_default(tmp_path: Path):
     settings = make_settings(tmp_path, convex_auth_token=None)
     with pytest.raises(mod.ConfigurationError, match="CONVEX_AUTH_TOKEN"):
+        settings.validate_for_push()
+
+
+def test_validate_for_push_accepts_local_target(tmp_path: Path):
+    # Default fixture is now local (http://127.0.0.1:3211) with a token set -
+    # must not raise.
+    make_settings(tmp_path).validate_for_push()
+
+
+def test_validate_for_push_rejects_cloud_target(tmp_path: Path):
+    settings = make_settings(tmp_path, convex_site_url="https://rugged-bird-156.convex.site")
+    with pytest.raises(mod.ConfigurationError):
+        settings.validate_for_push()
+
+
+def test_validate_for_push_rejects_missing_target(tmp_path: Path):
+    settings = make_settings(tmp_path, convex_site_url=None)
+    with pytest.raises(mod.ConfigurationError):
+        settings.validate_for_push()
+
+
+def test_validate_for_push_cloud_target_allowed_with_explicit_authorization(tmp_path: Path):
+    from uet_crawler.target_guard import CLOUD_EXECUTION_AUTHORIZATION_PHRASE
+
+    settings = make_settings(
+        tmp_path,
+        convex_site_url="https://rugged-bird-156.convex.site",
+        cloud_execution_authorization=CLOUD_EXECUTION_AUTHORIZATION_PHRASE,
+    )
+    settings.validate_for_push()  # must not raise
+
+
+def test_validate_for_push_cloud_target_wrong_phrase_still_rejected(tmp_path: Path):
+    settings = make_settings(
+        tmp_path,
+        convex_site_url="https://rugged-bird-156.convex.site",
+        cloud_execution_authorization="not-the-phrase",
+    )
+    with pytest.raises(mod.ConfigurationError):
         settings.validate_for_push()
 
 

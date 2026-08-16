@@ -26,6 +26,7 @@ import contextlib
 import functools
 import gzip
 import hashlib
+import hmac as hmac_lib
 import inspect
 import io
 import ipaddress
@@ -72,6 +73,7 @@ from uet_crawler.gemini_response import (
 from uet_crawler.image_normalization import prepare_image_for_gemini
 from uet_crawler.browser_renderer import BrowserRenderer, RenderLimitReached
 from uet_crawler.crawl_ledger import CrawlLedger
+from uet_crawler.target_guard import UnsafeConvexTargetError, assert_local_convex_target
 
 try:  # PyMuPDF's preferred import name in current releases.
     import pymupdf as fitz
@@ -437,6 +439,15 @@ def configure_logging(project_root: Path, level: str) -> None:
 # ---------------------------------------------------------------------------
 
 
+# A resource-consuming crawl must never default to both an unbounded URL
+# frontier AND an unbounded runtime (see the August 2026 incident: a --limit-0
+# default crawl with no wall-clock ceiling ran unattended for hours and queued
+# ~17,000 pending embedding rows). Both defaults below are conservative and
+# require an explicit, separate opt-in to relax.
+DEFAULT_SAFE_CRAWL_LIMIT = 20
+DEFAULT_MAX_RUNTIME_SECONDS = 3600  # 1 hour
+
+
 @dataclass(frozen=True)
 class CliArgs:
     limit: int
@@ -447,15 +458,53 @@ class CliArgs:
     dry_run: bool
     log_level: str
     require_complete: bool
+    # Defaulted (rather than required) so the many existing direct CliArgs(...)
+    # construction sites in other scripts/tests need not all be updated; only
+    # parse_args()'s CLI surface needs the new safety semantics.
+    max_runtime_seconds: int = DEFAULT_MAX_RUNTIME_SECONDS
+    cloud_execution_authorization: str | None = None
 
 
 def parse_args(argv: Sequence[str] | None = None) -> CliArgs:
     parser = argparse.ArgumentParser(description="UET Taxila production RAG crawler")
-    parser.add_argument(
+    limit_group = parser.add_mutually_exclusive_group()
+    limit_group.add_argument(
         "--limit",
         type=int,
-        default=0,
-        help="Maximum unique URLs scheduled; 0 crawls until the public frontier is exhausted",
+        default=None,
+        help=(
+            "Maximum unique URLs scheduled (must be a positive integer). "
+            f"Defaults to {DEFAULT_SAFE_CRAWL_LIMIT} if neither --limit nor "
+            "--exhaustive is given. Mutually exclusive with --exhaustive."
+        ),
+    )
+    limit_group.add_argument(
+        "--exhaustive",
+        action="store_true",
+        help=(
+            "Crawl until the public frontier is exhausted, with no URL-count "
+            "ceiling. High-risk: explicit opt-in only, not the default. "
+            "--max-runtime-seconds still applies unless separately overridden."
+        ),
+    )
+    parser.add_argument(
+        "--max-runtime-seconds",
+        type=int,
+        default=None,
+        help=(
+            "Wall-clock budget for the whole run; the crawl stops gracefully "
+            "with a resumable checkpoint once reached. 0 disables the budget "
+            f"(unbounded). Defaults to {DEFAULT_MAX_RUNTIME_SECONDS}s."
+        ),
+    )
+    parser.add_argument(
+        "--cloud-execution-authorization",
+        default=None,
+        help=(
+            "Explicit one-shot authorization phrase required to target a "
+            "non-local (Convex Cloud) CONVEX_SITE_URL for this run only. "
+            "Never set this via a persistent environment variable."
+        ),
     )
     parser.add_argument("--clean", action="store_true", help="Reset backend data first")
     parser.add_argument(
@@ -489,10 +538,26 @@ def parse_args(argv: Sequence[str] | None = None) -> CliArgs:
     )
     parser.set_defaults(require_complete=True)
     ns = parser.parse_args(argv)
-    if ns.limit < 0:
-        parser.error("--limit must be zero (exhaustive) or a positive integer")
+    if ns.exhaustive:
+        resolved_limit = 0  # internal unbounded sentinel, unchanged downstream
+    elif ns.limit is None:
+        resolved_limit = DEFAULT_SAFE_CRAWL_LIMIT
+    elif ns.limit <= 0:
+        parser.error(
+            "--limit must be a positive integer; pass --exhaustive to crawl "
+            "until the frontier is exhausted"
+        )
+    else:
+        resolved_limit = ns.limit
+    resolved_max_runtime = (
+        DEFAULT_MAX_RUNTIME_SECONDS
+        if ns.max_runtime_seconds is None
+        else ns.max_runtime_seconds
+    )
+    if resolved_max_runtime < 0:
+        parser.error("--max-runtime-seconds must be zero (unbounded) or positive")
     return CliArgs(
-        limit=ns.limit,
+        limit=resolved_limit,
         clean=ns.clean,
         config=ns.config,
         project_root=ns.project_root,
@@ -500,6 +565,8 @@ def parse_args(argv: Sequence[str] | None = None) -> CliArgs:
         dry_run=ns.dry_run,
         log_level=ns.log_level,
         require_complete=ns.require_complete,
+        max_runtime_seconds=resolved_max_runtime,
+        cloud_execution_authorization=ns.cloud_execution_authorization,
     )
 
 
@@ -596,6 +663,7 @@ class Settings:
     convex_auth_token: str | None
     require_auth_token: bool
     dry_run: bool
+    max_runtime_seconds: int
 
     state_file: Path
     dlq_file: Path
@@ -867,27 +935,21 @@ def load_settings(args: CliArgs, script_path: Path) -> Settings:
         if public_url.endswith(".convex.cloud"):
             convex_site_url = public_url.removesuffix(".convex.cloud") + ".convex.site"
     if not args.dry_run:
-        if not convex_site_url:
-            raise RuntimeError("CONVEX_SITE_URL is not configured in .env.local")
-        if not convex_site_url.startswith("https://"):
-            raise RuntimeError("CONVEX_SITE_URL must use https://")
-    convex_site_url = convex_site_url.rstrip("/")
-    if convex_site_url:
+        # Fail closed: only a positively-verified local (loopback) Convex
+        # target is allowed by default. A cloud target requires the explicit,
+        # one-shot --cloud-execution-authorization phrase for this run only.
+        # See uet_crawler/target_guard.py - this check was entirely absent
+        # during the August 2026 incident, when this script ran against
+        # whatever CONVEX_SITE_URL happened to be in .env.local (Convex Cloud).
         try:
-            convex_parts = urllib.parse.urlsplit(convex_site_url)
-            convex_port = convex_parts.port
-        except (ValueError, UnicodeError) as exc:
-            raise RuntimeError("CONVEX_SITE_URL is malformed") from exc
-        if (
-            convex_parts.scheme != "https"
-            or not convex_parts.hostname
-            or convex_parts.username is not None
-            or convex_parts.password is not None
-            or convex_parts.query
-            or convex_parts.fragment
-            or convex_port not in (None, 443)
-        ):
-            raise RuntimeError("CONVEX_SITE_URL must be a clean HTTPS origin")
+            convex_site_url = assert_local_convex_target(
+                convex_site_url,
+                cloud_execution_authorization_phrase=args.cloud_execution_authorization,
+            )
+        except UnsafeConvexTargetError as exc:
+            raise RuntimeError(str(exc)) from exc
+    else:
+        convex_site_url = convex_site_url.rstrip("/")
     convex_auth_token = os.environ.get("CONVEX_AUTH_TOKEN") or os.environ.get(
         "CRAWL_WEBHOOK_SECRET"
     )
@@ -1084,6 +1146,7 @@ def load_settings(args: CliArgs, script_path: Path) -> Settings:
         convex_auth_token=convex_auth_token,
         require_auth_token=require_auth_token,
         dry_run=args.dry_run,
+        max_runtime_seconds=args.max_runtime_seconds,
         state_file=project_root / "crawler_state.json",
         dlq_file=project_root / "dlq.jsonl",
         dead_dlq_file=project_root / "dlq_dead.jsonl",
@@ -4098,6 +4161,27 @@ class ConvexClient:
             )
         return headers
 
+    def _reset_headers(self, body: str) -> dict[str, str]:
+        """Headers for /api/reset - HMAC+timestamp, not the plain bearer
+        token /ingest uses (August 2026 incident remediation: matches
+        convex/crawl/webhook.ts's resetWebhook, which moved off a static
+        bearer-token compare after that exact token was separately found
+        leaked in plaintext). Mirrors verifySignature in webhook.ts exactly:
+        HMAC-SHA256(secret, f"{timestamp}.{body}"), hex-encoded.
+        """
+        headers = {"Content-Type": "application/json"}
+        token = self.settings.convex_auth_token
+        if token:
+            timestamp = str(int(time.time() * 1000))
+            signature = hmac_lib.new(
+                token.encode("utf-8"),
+                f"{timestamp}.{body}".encode("utf-8"),
+                hashlib.sha256,
+            ).hexdigest()
+            headers["x-crawl-timestamp"] = timestamp
+            headers["x-crawl-signature"] = signature
+        return headers
+
     @classmethod
     async def _read_limited(cls, response: Any) -> bytes:
         declared = str(response.headers.get("content-length", ""))
@@ -4125,9 +4209,12 @@ class ConvexClient:
         for attempt in range(self.settings.push_retries):
             response = None
             try:
+                # Recomputed fresh each attempt (not hoisted above the loop):
+                # the timestamp must stay within the server's 5-minute skew
+                # window even on a retry several minutes into a slow backoff.
                 response = await self.session.post(
                     endpoint,
-                    headers=self.headers,
+                    headers=self._reset_headers(""),
                     timeout=self.settings.push_timeout,
                     allow_redirects=False,
                     discard_cookies=True,
@@ -4346,6 +4433,42 @@ class IoBudgetMonitor:
         return usage
 
 
+class RuntimeBudgetMonitor:
+    """Enforces a wall-clock ceiling on total crawl runtime.
+
+    The August 2026 incident crawl ran unattended for 10h24m with no time
+    limit at all (see
+    docs/rag-store-evaluation/fresh-corpus-crawl-2026-08/pre-crawl-evidence.json).
+    Mirrors IoBudgetMonitor's pattern: once the budget is exceeded, the shared
+    stop event is set so the crawl ends gracefully with a resumable
+    checkpoint (workers finish their current entry) rather than a hard abort.
+    A max_runtime_seconds of 0 means unbounded (explicit opt-in only, see
+    --max-runtime-seconds).
+    """
+
+    def __init__(
+        self, settings: Settings, stop_event: asyncio.Event, start_monotonic: float
+    ) -> None:
+        self._max_runtime_seconds = settings.max_runtime_seconds
+        self._stop_event = stop_event
+        self._start_monotonic = start_monotonic
+        self._stop_requested = False
+
+    def check(self) -> float:
+        elapsed = time.monotonic() - self._start_monotonic
+        if self._max_runtime_seconds > 0 and elapsed >= self._max_runtime_seconds:
+            if not self._stop_requested:
+                self._stop_requested = True
+                log.critical(
+                    "Crawl runtime %.0fs reached the configured wall-clock "
+                    "budget of %.0fs; stopping with a resumable checkpoint",
+                    elapsed,
+                    self._max_runtime_seconds,
+                )
+            self._stop_event.set()
+        return elapsed
+
+
 @dataclass
 class Runtime:
     settings: Settings
@@ -4365,6 +4488,7 @@ class Runtime:
     convex: ConvexClient
     ledger: CrawlLedger
     io_budget: IoBudgetMonitor
+    runtime_budget: RuntimeBudgetMonitor
     session_id: str
     progress: Any
     stop_event: asyncio.Event
@@ -4781,6 +4905,7 @@ async def worker(runtime: Runtime, worker_id: int) -> None:
                                 )
                         log.warning("Could not save crawl state: %s", exc)
                 runtime.io_budget.check()
+                runtime.runtime_budget.check()
 
 
 async def initialise_frontier(
@@ -4940,6 +5065,7 @@ async def crawl(settings: Settings, args: CliArgs) -> CrawlStats:
                 )
             convex = ConvexClient(settings, push_session)
             io_budget = IoBudgetMonitor(settings, stop_event)
+            runtime_budget = RuntimeBudgetMonitor(settings, stop_event, time.monotonic())
             runtime = Runtime(
                 settings=settings,
                 policy=policy,
@@ -4960,6 +5086,7 @@ async def crawl(settings: Settings, args: CliArgs) -> CrawlStats:
                 convex=convex,
                 ledger=ledger,
                 io_budget=io_budget,
+                runtime_budget=runtime_budget,
                 session_id=session_id,
                 progress=progress,
                 stop_event=stop_event,

@@ -48,6 +48,8 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 from urllib.parse import urljoin, urlsplit, urlunsplit
 
+from uet_crawler.target_guard import UnsafeConvexTargetError, assert_local_convex_target
+
 
 # ---------------------------------------------------------------------------
 # Platform setup
@@ -214,6 +216,10 @@ class Settings:
     allow_private_downloads: bool
     allowed_download_hosts: tuple[str, ...]
     require_convex_auth: bool
+    # Defaulted so the existing test-fixture construction site (make_settings
+    # in test_ingest_pdf.py) and any other direct Settings(**values) callers
+    # need not all pass it explicitly.
+    cloud_execution_authorization: str | None = None
 
     @classmethod
     def from_env(cls, project_root: Path) -> "Settings":
@@ -276,18 +282,17 @@ class Settings:
         )
 
     def validate_for_push(self) -> None:
-        if not self.convex_site_url:
-            raise ConfigurationError(
-                "CONVEX_SITE_URL is not configured and could not be derived from "
-                "NEXT_PUBLIC_CONVEX_URL."
+        # Fail closed: only a positively-verified local (loopback) Convex
+        # target is allowed by default. A cloud target requires the explicit,
+        # one-shot cloud_execution_authorization phrase for this run only.
+        # See uet_crawler/target_guard.py.
+        try:
+            assert_local_convex_target(
+                self.convex_site_url,
+                cloud_execution_authorization_phrase=self.cloud_execution_authorization,
             )
-        split = urlsplit(self.convex_site_url)
-        if split.scheme != "https" or not split.hostname:
-            raise ConfigurationError("CONVEX_SITE_URL must be an absolute https:// URL.")
-        if split.username or split.password or split.query or split.fragment:
-            raise ConfigurationError(
-                "CONVEX_SITE_URL must not contain credentials, a query, or a fragment."
-            )
+        except UnsafeConvexTargetError as exc:
+            raise ConfigurationError(str(exc)) from exc
         if self.require_convex_auth and not self.convex_auth_token:
             raise ConfigurationError(
                 "CONVEX_AUTH_TOKEN (or CRAWL_WEBHOOK_SECRET) is required. "
@@ -2056,6 +2061,15 @@ def build_parser() -> argparse.ArgumentParser:
         "--vlm-model",
         help="Override PDF_VLM_MODEL for this invocation.",
     )
+    parser.add_argument(
+        "--cloud-execution-authorization",
+        default=None,
+        help=(
+            "Explicit one-shot authorization phrase required to push to a "
+            "non-local (Convex Cloud) CONVEX_SITE_URL for this run only. "
+            "Never set this via a persistent environment variable."
+        ),
+    )
     parser.add_argument("--verbose", action="store_true", help="Enable debug logging.")
     return parser
 
@@ -2077,6 +2091,10 @@ async def async_main(argv: Sequence[str] | None = None) -> int:
         settings = dataclass_replace(settings, ocr_language=args.ocr_language)
     if args.vlm_model:
         settings = dataclass_replace(settings, vlm_model=args.vlm_model)
+    if args.cloud_execution_authorization:
+        settings = dataclass_replace(
+            settings, cloud_execution_authorization=args.cloud_execution_authorization
+        )
 
     return await ingest(
         source_arg=args.source,
