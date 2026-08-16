@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation } from "../_generated/server";
+import { internalMutation } from "../_generated/server";
 
 export const FRESHNESS_TTLS_DAYS = {
   high: 14,
@@ -7,13 +7,22 @@ export const FRESHNESS_TTLS_DAYS = {
   low: 180,
 } as const;
 
-export const runFreshnessSweepBatch = mutation({
+// August 2026 incident remediation (audit finding): this had no auth check
+// at all - callable by any client holding the public Convex URL, not just
+// authenticated admins - and no upper bound on batchSize. Zero callers exist
+// anywhere in the codebase currently (crawl/staleness.ts's flagExpiredDocuments
+// is the actively cron-wired staleness sweep); this is converted to
+// internalMutation, the narrowest access model, rather than requireAdmin,
+// since no client legitimately needs to call it directly.
+const MAX_FRESHNESS_SWEEP_BATCH_SIZE = 500;
+
+export const runFreshnessSweepBatch = internalMutation({
   args: {
     batchSize: v.optional(v.number()),
     cursor: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const limit = args.batchSize || 100;
+    const limit = Math.min(args.batchSize || 100, MAX_FRESHNESS_SWEEP_BATCH_SIZE);
     const now = Date.now();
     const msPerDay = 24 * 60 * 60 * 1000;
 

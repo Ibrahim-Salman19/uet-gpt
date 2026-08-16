@@ -15,6 +15,9 @@ vi.mock("../../../convex/_generated/api", () => ({
       workflow: {
         completeJobByTaskId: "completeJobByTaskId" as any,
       },
+      actions: {
+        resetPipelineAction: "resetPipelineAction" as any,
+      },
     },
   },
 }));
@@ -476,6 +479,104 @@ describe("crawlWebhook", () => {
       (c: any[]) => c[0] === "queueChunksForEmbedding",
     );
     expect(upsertCalls.length).toBe(0);
+  });
+});
+
+// August 2026 incident remediation: resetWebhook (a full corpus wipe) moved
+// off a static bearer-token compare - the exact token that was separately
+// found leaked in plaintext in CRAWL_RUNBOOK.md - onto the same
+// HMAC+timestamp+replay-window scheme crawlWebhook already used.
+describe("resetWebhook", () => {
+  let resetWebhook: any;
+  let mockCtx: any;
+
+  beforeEach(async () => {
+    process.env.CONVEX_AUTH_TOKEN = "test-reset-secret-67890";
+    const mod = await import("../../../convex/crawl/webhook");
+    resetWebhook = mod.resetWebhook;
+    mockCtx = {
+      runAction: vi.fn().mockResolvedValue(undefined),
+      auth: { getUserIdentity: vi.fn() },
+    };
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+    delete process.env.CONVEX_AUTH_TOKEN;
+  });
+
+  function createSignedResetRequest(
+    body: string,
+    secret: string,
+    options?: { timestamp?: string },
+  ): Request {
+    const ts = options?.timestamp ?? Date.now().toString();
+    const signature = computeSignature(ts, body, secret);
+    return new Request("http://localhost/api/reset", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-crawl-timestamp": ts,
+        "x-crawl-signature": signature,
+        "content-length": body.length.toString(),
+      },
+      body,
+    });
+  }
+
+  it("accepts a correctly-signed request and runs resetPipelineAction", async () => {
+    const req = createSignedResetRequest("", "test-reset-secret-67890");
+    const res = await resetWebhook(mockCtx, req);
+
+    expect(res.status).toBe(200);
+    expect(mockCtx.runAction).toHaveBeenCalledWith("resetPipelineAction");
+  });
+
+  it("rejects a request with no signature headers at all (the old bearer-token scheme no longer works)", async () => {
+    const req = new Request("http://localhost/api/reset", {
+      method: "POST",
+      headers: { "content-type": "application/json", Authorization: "Bearer test-reset-secret-67890" },
+      body: "",
+    });
+    const res = await resetWebhook(mockCtx, req);
+
+    expect(res.status).toBe(400);
+    expect(mockCtx.runAction).not.toHaveBeenCalled();
+  });
+
+  it("rejects an incorrectly-signed request with 401", async () => {
+    const req = createSignedResetRequest("", "wrong-secret");
+    const res = await resetWebhook(mockCtx, req);
+
+    expect(res.status).toBe(401);
+    expect(mockCtx.runAction).not.toHaveBeenCalled();
+  });
+
+  it("rejects an expired timestamp with 400 (replay protection)", async () => {
+    const oldTs = (Date.now() - 10 * 60 * 1000).toString();
+    const req = createSignedResetRequest("", "test-reset-secret-67890", { timestamp: oldTs });
+    const res = await resetWebhook(mockCtx, req);
+
+    expect(res.status).toBe(400);
+    expect(mockCtx.runAction).not.toHaveBeenCalled();
+  });
+
+  it("rejects when CONVEX_AUTH_TOKEN is not configured server-side, rather than silently allowing", async () => {
+    delete process.env.CONVEX_AUTH_TOKEN;
+    const req = createSignedResetRequest("", "any-secret");
+    const res = await resetWebhook(mockCtx, req);
+
+    expect(res.status).toBe(500);
+    expect(mockCtx.runAction).not.toHaveBeenCalled();
+  });
+
+  it("rejects an oversized body with 413", async () => {
+    const largeBody = "x".repeat(10_500_000);
+    const req = createSignedResetRequest(largeBody, "test-reset-secret-67890");
+    const res = await resetWebhook(mockCtx, req);
+
+    expect(res.status).toBe(413);
+    expect(mockCtx.runAction).not.toHaveBeenCalled();
   });
 });
 

@@ -140,15 +140,20 @@ function verifyWebhookHeaders(
   return { timestamp, signature };
 }
 
+// Generic over the configured secret(s) - both crawlWebhook (CRAWL_WEBHOOK_SECRET
+// [+ _NEW for rotation]) and resetWebhook (CONVEX_AUTH_TOKEN, August 2026
+// incident remediation - see resetWebhook below for why it moved off a
+// static bearer-token compare) share this HMAC+timestamp+replay-window
+// verification rather than each having their own copy.
 async function validateWebhookSignature(
   timestamp: string,
   signature: string,
   body: string,
+  configuredSecrets: (string | undefined)[],
 ): Promise<Response | null> {
-  const primarySecret = process.env.CRAWL_WEBHOOK_SECRET;
-  const secondarySecret = process.env.CRAWL_WEBHOOK_SECRET_NEW;
-  if (!primarySecret) {
-    console.error("CRAWL_WEBHOOK_SECRET environment variable is not set");
+  const secrets = configuredSecrets.filter((s): s is string => !!s);
+  if (secrets.length === 0) {
+    console.error("No signing secret configured for this webhook");
     return new Response("Server configuration error", { status: 500 });
   }
 
@@ -159,7 +164,6 @@ async function validateWebhookSignature(
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
-  const secrets = [primarySecret, secondarySecret].filter(Boolean) as string[];
 
   let isValid = false;
   for (const candidate of candidateSignatures) {
@@ -363,7 +367,10 @@ export const crawlWebhook = httpAction(async (ctx, request) => {
     const hmacInfo = verifyWebhookHeaders(request);
     if (hmacInfo instanceof Response) return hmacInfo;
 
-    const sigResp = await validateWebhookSignature(hmacInfo.timestamp, hmacInfo.signature, rawBody);
+    const sigResp = await validateWebhookSignature(hmacInfo.timestamp, hmacInfo.signature, rawBody, [
+      process.env.CRAWL_WEBHOOK_SECRET,
+      process.env.CRAWL_WEBHOOK_SECRET_NEW,
+    ]);
     if (sigResp) return sigResp;
 
     const { taskId: id, status, results, url } = extractWebhookPayload(rawBody);
@@ -429,17 +436,27 @@ export const crawlWebhook = httpAction(async (ctx, request) => {
   }
 });
 
+// August 2026 incident remediation (audit finding): this full-corpus-wipe
+// endpoint was gated only by a static bearer-token compare - the exact token
+// that was separately found leaked in plaintext in CRAWL_RUNBOOK.md. Reuses
+// crawlWebhook's already-stronger HMAC+timestamp+replay-window pattern
+// (5-minute skew window, verifyWebhookHeaders/validateWebhookSignature
+// above) instead of inventing a new scheme, signed with CONVEX_AUTH_TOKEN
+// (the same secret as before - no new env var to configure/rotate).
 export const resetWebhook = httpAction(async (ctx, request) => {
   try {
-    const authHeader = request.headers.get("Authorization");
-    const token = authHeader?.split(" ")[1];
-    const expectedToken = process.env.CONVEX_AUTH_TOKEN;
-    if (!expectedToken) {
-      return new Response("Server configuration error", { status: 500 });
-    }
-    if (!token || !constantTimeCompare(token, expectedToken)) {
-      return new Response("Unauthorized", { status: 401 });
-    }
+    const bodyResult = await readBodyWithSizeCheck(request);
+    if (bodyResult instanceof Response) return bodyResult;
+    const rawBody = bodyResult;
+
+    const hmacInfo = verifyWebhookHeaders(request);
+    if (hmacInfo instanceof Response) return hmacInfo;
+
+    const sigResp = await validateWebhookSignature(hmacInfo.timestamp, hmacInfo.signature, rawBody, [
+      process.env.CONVEX_AUTH_TOKEN,
+    ]);
+    if (sigResp) return sigResp;
+
     await ctx.runAction(internal.crawl.actions.resetPipelineAction);
     return new Response(JSON.stringify({ ok: true }), {
       status: 200,

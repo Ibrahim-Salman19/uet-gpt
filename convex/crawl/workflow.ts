@@ -3,6 +3,7 @@ import { UET_CRAWL_CONFIG } from "../../src/lib/constants.js";
 import { internal } from "../_generated/api";
 import type { Doc } from "../_generated/dataModel";
 import { internalMutation } from "../_generated/server";
+import { isBulkOperationsEnabled } from "./bulkOperationsControl";
 import { crawlPool } from "./workpools";
 
 const SEED_URLS = UET_CRAWL_CONFIG.seedUrls;
@@ -10,6 +11,13 @@ const SEED_URLS = UET_CRAWL_CONFIG.seedUrls;
 export const kickoffDailyCrawl = internalMutation({
   args: {},
   handler: async (ctx) => {
+    // Cron-driven, not producer-driven: skip quietly rather than throwing -
+    // resource-safety mandate section 10, "before crawl scheduling."
+    if (!(await isBulkOperationsEnabled(ctx))) {
+      console.warn("Bulk operations disabled (emergency stop engaged). Skipping daily kick-off.");
+      return null;
+    }
+
     // Idempotency: Prevent running if there's already a pending or running crawl
     const existingJob = await ctx.db
       .query("crawlJobs")

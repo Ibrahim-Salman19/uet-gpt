@@ -80,6 +80,13 @@ const settingsSections: SettingsSection[] = [
         min: 1,
         max: 10000,
         step: 1,
+        // August 2026 incident remediation: this value is persisted but the
+        // actual crawl-start path (crawl/trigger.ts) does not read it - the
+        // real page cap is the hardcoded UET_CRAWL_CONFIG.maxPages in
+        // src/lib/constants.ts. Do not remove this flag by wiring the value
+        // through without also confirming crawl/actions.ts's
+        // buildCrawlPayload reads it.
+        notEnforced: true,
       },
       {
         key: "maxCrawlDepth",
@@ -89,6 +96,10 @@ const settingsSections: SettingsSection[] = [
         min: 1,
         max: 20,
         step: 1,
+        // Same caveat as maxPagesPerCrawl above - also note the default here
+        // (5) does not even match UET_CRAWL_CONFIG.maxDepth (4), which is
+        // the value actually used.
+        notEnforced: true,
       },
       {
         key: "crawlIntervalHours",
@@ -98,8 +109,21 @@ const settingsSections: SettingsSection[] = [
         min: 1,
         max: 8760,
         step: 1,
+        // The daily-crawl cron interval is hardcoded in crons.ts (and that
+        // cron is currently commented out entirely - see its own comment).
+        notEnforced: true,
       },
-      { key: "autoCrawlEnabled", label: "Auto-crawl enabled", type: "boolean", defaultValue: true },
+      {
+        key: "autoCrawlEnabled",
+        label: "Auto-crawl enabled",
+        type: "boolean",
+        defaultValue: true,
+        // Toggling this off does NOT stop crawl/trigger.ts's manually-invoked
+        // trigger() - only the (currently-disabled-in-code) scheduled cron
+        // would be affected if re-enabled. Use the real emergency stop
+        // (convex/crawl/emergencyStop.ts) to actually halt crawling.
+        notEnforced: true,
+      },
     ],
   },
   {
