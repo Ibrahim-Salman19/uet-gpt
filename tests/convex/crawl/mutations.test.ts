@@ -734,6 +734,112 @@ describe("queueChunksForEmbedding", () => {
     expect(result.status).toBe("updated");
     expect(result.chunksQueued).toBe(0);
   });
+
+  // Mirrors the "embedding backlog backpressure" coverage under
+  // enqueueDocumentChunks below, but for queueChunksForEmbedding's OWN direct
+  // call into enqueueNewChunks -> assertEmbeddingBacklogHasRoom (mutations.ts
+  // line ~275). This is the dormant crawlWebhook/ingestWebhook-driven path -
+  // the shared helper's ceiling math is already proven once by the
+  // enqueueDocumentChunks tests, so this only needs to prove THIS call site
+  // actually wires the same check in, not re-derive the ceiling arithmetic.
+  describe("embedding backlog backpressure", () => {
+    function pendingChunkTextRows(count: number) {
+      return Array.from({ length: count }, (_, i) => ({
+        _id: `pending-${i}`,
+        _creationTime: Date.now(),
+        ragVersionKey: `key-${i}`,
+        chunkText: "staged text",
+        updatedAt: Date.now(),
+      }));
+    }
+
+    it("enqueues normally for a new document when the backlog is well below the ceiling", async () => {
+      const db = createMockDb({
+        documents: null,
+        crawledChunks: [],
+        pendingChunkText: pendingChunkTextRows(5),
+      });
+      const ctx = {
+        db,
+        auth: { getUserIdentity: vi.fn() },
+        runMutation: vi.fn(),
+        runQuery: vi.fn(),
+        runAction: vi.fn(),
+      };
+
+      await (handler as any).handler(ctx, {
+        url: "https://web.uettaxila.edu.pk/webhook-page",
+        title: "Test",
+        contentHash: "hash-below",
+        jobId: "job-below",
+        parents: defaultParents,
+        children: defaultChildren,
+      });
+
+      expect(embeddingPoolModule.embeddingPool.enqueueActionBatch).toHaveBeenCalledTimes(1);
+    });
+
+    it("blocks a new document's enqueue (controlled failure) once the backlog is AT the ceiling", async () => {
+      const db = createMockDb({
+        documents: null,
+        crawledChunks: [],
+        pendingChunkText: pendingChunkTextRows(PENDING_EMBEDDING_BACKLOG_CEILING),
+      });
+      const ctx = {
+        db,
+        auth: { getUserIdentity: vi.fn() },
+        runMutation: vi.fn(),
+        runQuery: vi.fn(),
+        runAction: vi.fn(),
+      };
+
+      await expect(
+        (handler as any).handler(ctx, {
+          url: "https://web.uettaxila.edu.pk/webhook-page",
+          title: "Test",
+          contentHash: "hash-at-ceiling",
+          jobId: "job-at-ceiling",
+          parents: defaultParents,
+          children: defaultChildren,
+        }),
+      ).rejects.toThrow(/backlog/i);
+      expect(embeddingPoolModule.embeddingPool.enqueueActionBatch).not.toHaveBeenCalled();
+    });
+
+    it("does not check the backlog (or block) when the diff yields no chunks to embed", async () => {
+      const existingDoc = makeDoc({
+        _id: "doc-existing",
+        contentHash: "same-hash",
+        status: "indexed",
+      });
+      const db = createMockDb({
+        documents: existingDoc,
+        crawledChunks: [],
+        pendingChunkText: pendingChunkTextRows(PENDING_EMBEDDING_BACKLOG_CEILING + 50),
+      });
+      const ctx = {
+        db,
+        auth: { getUserIdentity: vi.fn() },
+        runMutation: vi.fn(),
+        runQuery: vi.fn(),
+        runAction: vi.fn(),
+      };
+
+      // Fast unchanged-path: same contentHash, no fingerprint drift - must
+      // not throw even though the backlog is far over the ceiling, since
+      // nothing new is being queued.
+      await (handler as any).handler(ctx, {
+        url: existingDoc.url,
+        title: "Test",
+        contentHash: "same-hash",
+        jobId: "job-unchanged",
+        parents: defaultParents,
+        children: defaultChildren,
+      });
+
+      expect(embeddingPoolModule.embeddingPool.enqueueActionBatch).not.toHaveBeenCalled();
+    });
+  });
 });
 
 describe("commitCurrentGenerationChunk", () => {
