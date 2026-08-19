@@ -42,11 +42,27 @@ class TitleRankingTests(unittest.TestCase):
     def test_og_title_falls_back_when_no_h1(self):
         result = extract(
             "<html><head>"
-            '<meta property="og:title" content="Fee Schedule - UET Taxila">'
+            '<meta property="og:title" content="Admissions Fee Schedule">'
             "<title>Fallback title</title></head>"
             "<body><p>Body text.</p></body></html>"
         )
-        self.assertEqual(result.title, "Fee Schedule - UET Taxila")
+        self.assertEqual(result.title, "Admissions Fee Schedule")
+
+    def test_known_site_branding_suffix_stripped_from_title(self):
+        # _clean_uet_title intentionally strips a fixed list of redundant
+        # site-branding suffixes (e.g. so a title doesn't repeat "UET
+        # Taxila" when the source/site context already establishes it) -
+        # this is separate, deliberate behavior from ranking which
+        # candidate (h1/og:title/<title>) wins, and deserves its own test:
+        # the pre-existing version of test_og_title_falls_back_when_no_h1
+        # asserted the *un-cleaned* value, which this test's addition
+        # corrects it away from testing by accident.
+        result = extract(
+            "<html><head>"
+            '<meta property="og:title" content="Fee Schedule - UET Taxila">'
+            "</head><body><p>Body text.</p></body></html>"
+        )
+        self.assertEqual(result.title, "Fee Schedule")
 
     def test_generic_title_penalized(self):
         result = extract(
@@ -103,6 +119,107 @@ class LinkConversionTests(unittest.TestCase):
             "</body></html>"
         )
         self.assertIn("https://uet.edu.pk/departments/mechanical", result.crawl_links)
+
+
+class LayoutTableUnwrapTests(unittest.TestCase):
+    """border="0" presentation tables are unwrapped; real data tables survive."""
+
+    def test_nested_presentation_wrapper_unwrapped_preserves_inner_table(self):
+        # Mirrors the real defect: a legacy .asp page wraps genuine course
+        # data (styled <td> "headers", not semantic <th> - typical of
+        # pre-CSS3 markup) in a border="0" positioning table
+        # (width/cellpadding/cellspacing layout attributes), which
+        # markdownify then serializes as one mega-cell of blank-pipe noise
+        # instead of a clean table.
+        result = extract(
+            "<html><head><title>Page</title></head><body>"
+            '<table width="100%" border="0" cellpadding="0" cellspacing="0">'
+            "<tr><td>"
+            "<table border=\"1\">"
+            "<tr><td><b>Course Code</b></td><td><b>Course Title</b></td><td><b>Credit</b></td></tr>"
+            "<tr><td>CE-101</td><td>Engineering Drawing</td><td>3</td></tr>"
+            "</table>"
+            "</td></tr>"
+            "</table>"
+            "</body></html>"
+        )
+        self.assertIn("CE-101", result.markdown)
+        self.assertIn("Engineering Drawing", result.markdown)
+        self.assertGreaterEqual(result.diagnostics.get("layout_tables_unwrapped", 0), 1)
+
+    def test_data_table_with_border_one_not_unwrapped(self):
+        result = extract(
+            "<html><head><title>Page</title></head><body>"
+            '<table border="1">'
+            "<tr><th>Course Code</th><th>Course Title</th></tr>"
+            "<tr><td>CE-101</td><td>Engineering Drawing</td></tr>"
+            "<tr><td>CE-102</td><td>Applied Mechanics</td></tr>"
+            "</table>"
+            "</body></html>"
+        )
+        self.assertIn("CE-101", result.markdown)
+        self.assertIn("CE-102", result.markdown)
+        self.assertEqual(result.diagnostics.get("layout_tables_unwrapped", 0), 0)
+
+    def test_unstyled_data_table_not_unwrapped(self):
+        result = extract(
+            "<html><head><title>Page</title></head><body>"
+            "<table>"
+            "<tr><th>Course Code</th><th>Course Title</th></tr>"
+            "<tr><td>CE-101</td><td>Engineering Drawing</td></tr>"
+            "<tr><td>CE-102</td><td>Applied Mechanics</td></tr>"
+            "</table>"
+            "</body></html>"
+        )
+        self.assertIn("CE-101", result.markdown)
+        self.assertEqual(result.diagnostics.get("layout_tables_unwrapped", 0), 0)
+
+    def test_nested_th_does_not_exempt_outer_wrapper_from_unwrapping(self):
+        # Real defect: a border="0" positioning wrapper with many rows of its
+        # own (spacer/menu cells - no th/caption of its own) contains a nested
+        # real data table with genuine <th> headers. table.find("th") searches
+        # all descendants by default, so the nested child's <th> made the
+        # *outer* wrapper's own data_table check true too, exempting the
+        # wrapper from unwrapping. markdownify then converted the wrapper and
+        # its nested table together in one pass, producing one long garbled
+        # line instead of two independently well-formed conversions (confirmed
+        # against real legacy-asp fixtures: curriculum-e38252 and
+        # betsoftwareengineering-a27271 each had exactly this shape).
+        result = extract(
+            "<html><head><title>Page</title></head><body>"
+            '<table width="100%" border="0" cellpadding="0" cellspacing="0">'
+            "<tr><td>Menu</td></tr>"
+            "<tr><td>"
+            "<table border=\"1\">"
+            "<tr><th>Course Code</th><th>Course Title</th></tr>"
+            "<tr><td>CE-101</td><td>Engineering Drawing</td></tr>"
+            "</table>"
+            "</td></tr>"
+            "<tr><td>Footer</td></tr>"
+            "</table>"
+            "</body></html>"
+        )
+        self.assertIn("CE-101", result.markdown)
+        self.assertIn("Engineering Drawing", result.markdown)
+        self.assertGreaterEqual(result.diagnostics.get("layout_tables_unwrapped", 0), 1)
+
+    def test_table_with_own_direct_th_and_nested_wrapper_not_unwrapped(self):
+        # Guards the fix above from overcorrecting: a table's *own* direct
+        # <th> (not a nested child's) must still count as a real data marker,
+        # even when that same table also contains a further-nested border="0"
+        # wrapper of its own (only the inner trivial wrapper should unwrap).
+        result = extract(
+            "<html><head><title>Page</title></head><body>"
+            '<table border="1">'
+            "<tr><th>Course Code</th><th>Course Title</th></tr>"
+            "<tr><td>CE-101</td><td>"
+            '<table border="0"><tr><td>note</td></tr></table>'
+            "</td></tr>"
+            "</table>"
+            "</body></html>"
+        )
+        self.assertIn("CE-101", result.markdown)
+        self.assertEqual(result.diagnostics.get("layout_tables_unwrapped", 0), 1)
 
 
 class FailureHygieneTests(unittest.TestCase):

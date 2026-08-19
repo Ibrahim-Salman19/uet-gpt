@@ -5098,6 +5098,23 @@ def _replace_disclosure_controls(soup: BeautifulSoup, body: Tag) -> int:
         converted += 1
     return converted
 
+def _table_has_own_data_marker(table: Tag) -> bool:
+    """True when TABLE itself, not a table nested inside it, has a th/caption.
+
+    ``Tag.find`` searches all descendants by default, so a real data table
+    nested inside a ``border="0"`` positioning wrapper made the *wrapper's*
+    own check pass too (its nested child's ``<th>`` counted as if it were the
+    wrapper's own), exempting the wrapper from unwrapping and forcing the
+    nested data table to be converted in the same markdownify pass as the
+    wrapper instead of standing on its own.
+    """
+
+    for marker in table.find_all(["th", "caption"]):
+        if marker.find_parent("table") is table:
+            return True
+    return False
+
+
 def _unwrap_layout_tables(body: Tag) -> int:
     """Flatten only unmistakable one-cell/presentation tables."""
 
@@ -5111,9 +5128,17 @@ def _unwrap_layout_tables(body: Tag) -> int:
         rows = table.find_all("tr", limit=2)
         cells = table.find_all(["td", "th"], limit=2)
         role = str(table.get("role") or "").casefold()
-        data_table = bool(table.find("th") or table.find("caption"))
+        data_table = _table_has_own_data_marker(table)
+        # border="0" is the classic, unambiguous signature of a presentation
+        # table from pre-CSS table-based layouts (real data tables in this
+        # corpus consistently have border unset or ">=1" - never exactly
+        # "0" - verified across every real fixture with tables this session).
+        # Unwrapping (not deleting) is safe even if this signal is ever wrong
+        # on some future page: content survives as plain text, only its
+        # table structure is lost.
+        presentation_border = str(table.get("border") or "") == "0"
         layout = role == "presentation" or (
-            not data_table and len(rows) <= 1 and len(cells) <= 1
+            not data_table and (len(rows) <= 1 and len(cells) <= 1 or presentation_border)
         )
         if not layout:
             continue
@@ -5123,7 +5148,6 @@ def _unwrap_layout_tables(body: Tag) -> int:
         table.unwrap()
         unwrapped += 1
     return unwrapped
-
 
 
 def _remove_uet_legacy_chrome(body: Tag, site_family: int) -> tuple[int, int]:
