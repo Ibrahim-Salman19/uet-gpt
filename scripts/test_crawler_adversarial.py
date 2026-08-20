@@ -291,6 +291,24 @@ class TestConcurrentComponents(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(await frontier.enqueue_retry(url, 0))
         self.assertEqual(frontier.scheduled, 1)
 
+    async def test_frontier_restore_keeps_seen_when_checkpoint_queue_is_empty(self):
+        # Reproduces a real bug found via a Phase 3 local-corpus crawl: once an
+        # exhaustive crawl's live queue legitimately drains to empty (the
+        # normal steady state as it approaches completion, not just a
+        # crash-abandoned run), restore() returned early before assigning
+        # self.seen, discarding the entire historical seen set. The next
+        # resume's seed/sitemap enqueue then had no memory of already-
+        # processed URLs and re-fetched hundreds of them.
+        already_processed = "https://www.uettaxila.edu.pk/already-processed"
+        frontier = c.Frontier(0, 100)
+        restored = await frontier.restore(
+            {"seen": [already_processed], "scheduled": 1, "entries": []},
+            FakePolicy(),
+        )
+        self.assertEqual(restored, 0)
+        self.assertIn(already_processed, frontier.seen)
+        self.assertFalse(await frontier.enqueue(already_processed, 0))
+
     async def test_dlq_snapshot_survives_load_until_success(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

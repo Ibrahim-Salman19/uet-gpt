@@ -3374,15 +3374,20 @@ class Frontier:
             entries.append(FrontierEntry(canonical, depth, url_priority(canonical, depth)))
 
         entries.sort(key=lambda item: item.priority)
-        # A completed crawl can leave a final checkpoint with an empty frontier
-        # if the process exits between checkpoint removal and shutdown. Treat
-        # that as non-resumable; restoring only the historical ``seen`` set
-        # would block every seed from being scheduled on the next run.
+        async with self._lock:
+            self.seen = seen
+        # A checkpoint with an empty frontier queue but a populated ``seen``
+        # set means every previously-discovered URL was already dispatched -
+        # this is the normal steady state as an exhaustive crawl approaches
+        # completion, not just a crash-abandoned run. ``self.seen`` is
+        # restored above regardless, so ``enqueue()`` still correctly skips
+        # those already-processed URLs when seeds/sitemap/DLQ entries are
+        # rescanned on this resume; only the resumable queue itself (below)
+        # has nothing left to restore.
         if not entries:
             return 0
 
         async with self._lock:
-            self.seen = seen
             restored_scheduled = max(
                 safe_int(payload.get("scheduled"), len(seen)), len(seen)
             )
