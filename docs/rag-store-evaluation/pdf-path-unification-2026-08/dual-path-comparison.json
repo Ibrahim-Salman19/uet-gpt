@@ -1,0 +1,38 @@
+{
+  "peeda-2006-2": {
+    "crawler_markdown_sha256": "b082835d82fe021a85b56f1407cf5edbbca4ab1c6a61473dfb4e281281a9bc3d",
+    "crawler_page_count": 16,
+    "crawler_word_count": 8121,
+    "fixture_bytes": 93489,
+    "fixture_path": "scripts/corpus/fixtures/pdf-download/peeda-2006-2-08031c/body.bin",
+    "fixture_sha256": "1efcbc50c39bf2d4778f448c07b180f4211732847d7e36edc146a3ec5c0c4ded",
+    "harness_error_code": null,
+    "harness_markdown_sha256": "b082835d82fe021a85b56f1407cf5edbbca4ab1c6a61473dfb4e281281a9bc3d",
+    "harness_word_count": 8121,
+    "identical": true
+  },
+  "sexualharassment-policy": {
+    "crawler_markdown_sha256": "2b51c307fa1d8f0ea3a7b11ab6909beba9a763b2f6a59c0e0546add8a147a275",
+    "crawler_page_count": 15,
+    "crawler_word_count": 5341,
+    "fixture_bytes": 385972,
+    "fixture_path": "scripts/corpus/fixtures/pdf-download/sexualharassment-policy-4b52e1/body.bin",
+    "fixture_sha256": "1968efa3642da61feb497c05623312eb42b8cd0f5f66ada3b68e5ff5062ee2a4",
+    "harness_error_code": null,
+    "harness_markdown_sha256": "2b51c307fa1d8f0ea3a7b11ab6909beba9a763b2f6a59c0e0546add8a147a275",
+    "harness_word_count": 5341,
+    "identical": true
+  },
+  "uet-prospectus-2024": {
+    "crawler_markdown_sha256": "c2f9639b37d01f8d17dd20a6c94abda5132fabe7bf12371530454d4526d229d8",
+    "crawler_page_count": 166,
+    "crawler_word_count": 44776,
+    "fixture_bytes": 4832630,
+    "fixture_path": "scripts/corpus/fixtures/pdf-download/uet-prospectus-2024-d60577/body.bin",
+    "fixture_sha256": "eac214d8b80033e90162bbe50ae2c819f762080958c4de50b8e2aa4a24661cec",
+    "harness_error_code": null,
+    "harness_markdown_sha256": "c2f9639b37d01f8d17dd20a6c94abda5132fabe7bf12371530454d4526d229d8",
+    "harness_word_count": 44776,
+    "identical": true
+  }
+}

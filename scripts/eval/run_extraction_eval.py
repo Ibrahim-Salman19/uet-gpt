@@ -67,12 +67,24 @@ from html_extractor import (  # noqa: E402
     extract_html_document,
 )
 
-# PDFs go through PyMuPDF4LLM directly, mirroring crawler.extract_pdf_sync's
-# kwargs. The HTML extractor must never see a PDF body (it would emit raw
+# PDFs are routed to crawler.py's real production extractor (extract_pdf_sync)
+# rather than a second, separately-maintained call into PyMuPDF4LLM: two
+# implementations with merely "mirrored" kwargs is exactly how this harness
+# drifted from production before (it measured raw, uncleaned pymupdf4llm
+# output, never exercising crawler.py's _clean_pdf_pages or its quality gate).
+# The HTML extractor must never see a PDF body (it would emit raw
 # ``%PDF``/``obj``/``endobj`` tokens as "markdown"). Routing by content-type
 # is the whole point: the harness exercises the *correct* extractor per family.
 import pymupdf as fitz  # noqa: E402
-import pymupdf4llm  # noqa: E402
+
+import crawler  # noqa: E402
+
+# pymupdf4llm's OCR path prints "=== Document parser messages ===" progress
+# notes via pymupdf.message(), which defaults to stdout. scripts/eval/_fixture_worker.py
+# parses this process's stdout as one JSON object (see its module docstring's
+# "never prints anything else to stdout" contract), so that leak corrupts the
+# worker's output under subprocess isolation - route it to stderr instead.
+fitz.set_messages(stream=sys.stderr)
 
 DEFAULT_CORPUS = SCRIPTS_DIR / "corpus" / "fixtures"
 
@@ -127,8 +139,35 @@ class PdfExtractionOutcome:
     error_message: str | None = None
 
 
+class _ProductionPdfSettings:
+    """Mirrors crawler.py's real default PDF configuration (``load_settings``'s
+    ``pdf.tableStrategy``/``pdf.useOcr``/``pdf.ocrLanguage`` defaults), so this
+    harness exercises the same extraction configuration production uses rather
+    than inventing its own. If those defaults ever change, this must change
+    with them — that drift risk is why ``crawler.extract_pdf_sync`` itself,
+    not just its config, is what this harness now calls (see ``_extract_pdf``).
+    ``describe_pdf_images=False`` skips ``extract_pdf_sync``'s image-candidate
+    extraction, which this markdown-extraction-quality harness does not use.
+    """
+
+    pdf_table_strategy = "lines_strict"
+    pdf_use_ocr = True
+    pdf_ocr_language = "eng"
+    describe_pdf_images = False
+
+
+_PRODUCTION_PDF_SETTINGS = _ProductionPdfSettings()
+
+
 def _extract_pdf(body: bytes, url: str) -> PdfExtractionOutcome:
-    """Run the PDF extractor. Never raises — failures become structured outcomes."""
+    """Run the real production PDF extractor. Never raises — failures become
+    structured outcomes.
+
+    Delegates to crawler.py's extract_pdf_sync — the actual crawler production
+    code path (kwargs, OCR engine selection, and _clean_pdf_pages cleaning) —
+    instead of a separately-maintained approximation of it, so this harness
+    measures what the crawler really produces rather than a fantasy of it.
+    """
     try:
         doc = fitz.open(stream=body, filetype="pdf")
     except fitz.FileDataError as exc:
@@ -139,34 +178,13 @@ def _extract_pdf(body: bytes, url: str) -> PdfExtractionOutcome:
     if doc.page_count == 0:
         doc.close()
         return PdfExtractionOutcome(None, "", error_code="empty_pdf", error_message="zero pages")
+    doc.close()
 
-    title = doc.metadata.get("title") if doc.metadata else None
     try:
-        converted = pymupdf4llm.to_markdown(
-            doc,
-            page_chunks=True,
-            table_strategy="lines_strict",
-            write_images=False,
-            embed_images=False,
-            show_progress=False,
-            header=False,
-            footer=False,
-            page_separators=False,
-            force_text=True,
-        )
+        title, page_texts, _candidates = crawler.extract_pdf_sync(body, url, _PRODUCTION_PDF_SETTINGS)
     except Exception as exc:  # noqa: BLE001
-        doc.close()
         return PdfExtractionOutcome(None, "", error_code="pymupdf4llm_error", error_message=f"{type(exc).__name__}: {exc}")
-    finally:
-        try:
-            doc.close()
-        except Exception:  # noqa: BLE001
-            pass
 
-    if isinstance(converted, list):
-        page_texts = [str(item.get("text") or "") for item in converted]
-    else:
-        page_texts = [str(converted or "")]
     markdown = "\n\n".join(p for p in page_texts if p.strip())
     return PdfExtractionOutcome(title or url, markdown)
 
