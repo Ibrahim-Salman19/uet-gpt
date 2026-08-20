@@ -35,6 +35,10 @@ pnpm-debug.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# local crawl corpus output (raw cache + extracted documents; never committed,
+# see docs/rag-store-evaluation/pdf-path-unification-2026-08/ and scripts/uet_crawler/corpus_sink.py)
+/local_corpus_pilot/
+
 # convex (generated files committed for Vercel builds)
 
 # worktrees

@@ -634,6 +634,50 @@ class CrawlLedger:
 
         await self._call(lambda: operation(self._connection))
 
+    async def mark_result_if_not_terminal(self, url: str, state: str, *, error: str) -> None:
+        """Like mark_result, but a no-op if the URL already reached a
+        terminal state this run.
+
+        A URL can be independently discovered as a link on several different
+        pages after it was already itself successfully processed (e.g. every
+        seed page's nav menu linking back to the same handful of seed URLs,
+        or a deep page linking back to the site root). Both non-scheduling
+        outcomes that call this - "frontier cap reached" and "exceeds
+        maxDepth" - are bulk, best-effort bookkeeping applied to every
+        co-discovered link without checking each one's individual history;
+        an unconditional mark_result there would silently demote an
+        already-ingested/dry-run-ready/skipped URL back to an incomplete
+        state, making the ledger's own state column an unreliable success
+        count for any run that doesn't end via frontier exhaustion.
+        """
+
+        url = str(url).strip()
+        state = str(state).strip()
+        if not url:
+            raise ValueError("url must be non-empty")
+        if not state:
+            raise ValueError("state must be non-empty")
+        error_value = str(error).strip()[:20_000]
+
+        def operation(connection: sqlite3.Connection) -> None:
+            now = time.time()
+
+            def body(conn: sqlite3.Connection) -> None:
+                self._ensure_url_row(conn, url, now, source="implicit-result")
+                placeholders = ",".join("?" * len(TERMINAL_STATES))
+                conn.execute(
+                    f"""
+                    UPDATE crawl_urls
+                    SET state=?, error=?, updated_at=?
+                    WHERE run_id=? AND url=? AND state NOT IN ({placeholders})
+                    """,
+                    (state, error_value, now, self.run_id, url, *TERMINAL_STATES),
+                )
+
+            self._transaction(body)
+
+        await self._call(lambda: operation(self._connection))
+
     # Compatibility with the original stub. New crawler code should use the
     # explicit async methods above.
     def record_visit(self, url: str, status: str) -> None:

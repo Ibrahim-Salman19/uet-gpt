@@ -57,7 +57,13 @@ from curl_cffi.requests.errors import RequestsError
 from dotenv import load_dotenv
 import httpx
 import pymupdf4llm
+from pymupdf4llm.ocr import tesseract_api as pymupdf4llm_tesseract_api
 from tqdm.asyncio import tqdm as atqdm
+
+from pdf_markdown_cleaner import (
+    assess_pdf_markdown_quality,
+    skip_ocr_if_native_text_sufficient,
+)
 
 from uet_crawler.html_extractor import (
     HtmlExtractorOptions,
@@ -74,11 +80,19 @@ from uet_crawler.image_normalization import prepare_image_for_gemini
 from uet_crawler.browser_renderer import BrowserRenderer, RenderLimitReached
 from uet_crawler.crawl_ledger import CrawlLedger
 from uet_crawler.target_guard import UnsafeConvexTargetError, assert_local_convex_target
+from uet_crawler.corpus_sink import FilesystemCorpusSink, document_id_for_url
 
 try:  # PyMuPDF's preferred import name in current releases.
     import pymupdf as fitz
 except ImportError:  # Backward compatibility with older PyMuPDF releases.
     import fitz  # type: ignore[no-redef]
+
+# pymupdf4llm's OCR path prints "=== Document parser messages ===" progress
+# notes via pymupdf.message(), which defaults to stdout. Any code that treats
+# a subprocess's stdout as a structured contract (see scripts/eval/isolation.py's
+# worker, which parses stdout as one JSON object) breaks if that leaks in, so
+# route it to stderr here instead.
+fitz.set_messages(stream=sys.stderr)
 
 
 # ---------------------------------------------------------------------------
@@ -99,7 +113,11 @@ DEFAULT_SEEDS = (
 DEFAULT_BROWSER_UA = "UETTaxilaRAGCrawler/6.0 (+https://www.uettaxila.edu.pk/)"
 DEFAULT_ROBOTS_TOKEN = "UETTaxilaRAGCrawler"
 REDIRECT_STATUSES = {301, 302, 303, 307, 308}
-RETRYABLE_HTTP_STATUSES = {408, 425, 429, 500, 502, 503, 504}
+RETRYABLE_HTTP_STATUSES = {408, 425, 429, 500, 502, 503, 504, 522, 524}
+# 522/524 are Cloudflare-specific (origin connection timeout / a timeout
+# occurred) - they mean the origin was temporarily unreachable through
+# Cloudflare, not that the URL is invalid, so they must not be treated the
+# same as a real 404/410.
 ROBOTS_MAX_BYTES = 512 * 1024
 SITEMAP_MAX_BYTES = 50 * 1024 * 1024
 SITEMAP_MAX_LOCATIONS_PER_FILE = 50_000
@@ -447,6 +465,12 @@ def configure_logging(project_root: Path, level: str) -> None:
 DEFAULT_SAFE_CRAWL_LIMIT = 20
 DEFAULT_MAX_RUNTIME_SECONDS = 3600  # 1 hour
 
+# Bump when extraction behavior meaningfully changes (parser fixes, cleaning
+# changes, kwargs changes), so a local corpus record's provenance is honest
+# about which extractor version produced it. Recorded per-document by
+# FilesystemCorpusSink, not enforced/checked anywhere yet.
+LOCAL_CORPUS_EXTRACTION_VERSION = 1
+
 
 @dataclass(frozen=True)
 class CliArgs:
@@ -463,6 +487,7 @@ class CliArgs:
     # parse_args()'s CLI surface needs the new safety semantics.
     max_runtime_seconds: int = DEFAULT_MAX_RUNTIME_SECONDS
     cloud_execution_authorization: str | None = None
+    local_corpus_dir: str | None = None
 
 
 def parse_args(argv: Sequence[str] | None = None) -> CliArgs:
@@ -529,6 +554,17 @@ def parse_args(argv: Sequence[str] | None = None) -> CliArgs:
         action="store_true",
         help="Fetch and extract without resetting or pushing to Convex",
     )
+    parser.add_argument(
+        "--local-corpus-dir",
+        default=None,
+        help=(
+            "If set, write every successfully fetched raw source and every "
+            "extracted, quality-passed document to this local directory "
+            "(content-addressed raw cache + append-only documents.jsonl), "
+            "independent of --dry-run/Convex push outcome. See "
+            "uet_crawler/corpus_sink.py."
+        ),
+    )
     parser.add_argument("--log-level", default="INFO")
     parser.add_argument(
         "--allow-incomplete",
@@ -567,6 +603,7 @@ def parse_args(argv: Sequence[str] | None = None) -> CliArgs:
         require_complete=ns.require_complete,
         max_runtime_seconds=resolved_max_runtime,
         cloud_execution_authorization=ns.cloud_execution_authorization,
+        local_corpus_dir=ns.local_corpus_dir,
     )
 
 
@@ -676,6 +713,7 @@ class Settings:
     io_budget_soft_bytes: int
     io_budget_stop_bytes: int
     io_budget_max_bytes: int
+    local_corpus_dir: Path | None
 
     @property
     def all_seeds(self) -> tuple[str, ...]:
@@ -1158,6 +1196,11 @@ def load_settings(args: CliArgs, script_path: Path) -> Settings:
         io_budget_soft_bytes=io_budget_soft_bytes,
         io_budget_stop_bytes=io_budget_stop_bytes,
         io_budget_max_bytes=io_budget_max_bytes,
+        local_corpus_dir=(
+            Path(args.local_corpus_dir).expanduser().resolve()
+            if args.local_corpus_dir
+            else None
+        ),
     )
 
 
@@ -1856,6 +1899,7 @@ class FetchAttempt:
     document: ExtractedDocument | None = None
     failure: FetchFailure | None = None
     fetched: bool = False
+    raw_sha256: str | None = None
 
 
 @dataclass
@@ -1968,11 +2012,27 @@ def extract_html_document_sync(
 
 
 def _supported_to_markdown_kwargs(candidate_kwargs: dict[str, Any]) -> dict[str, Any]:
-    """Filter kwargs for compatibility with installed PyMuPDF4LLM versions."""
+    """Filter kwargs for compatibility with installed PyMuPDF4LLM versions.
+
+    In pymupdf4llm >= ~1.26, ``to_markdown`` is a thin ``(*args, **kwargs)``
+    shim that forwards everything to an internal implementation (see
+    ``pymupdf4llm/__init__.py``); ``inspect.signature`` on the shim itself
+    exposes only the ``*args``/``**kwargs`` catch-all parameters, never the
+    real option names. Filtering candidate_kwargs against that would silently
+    drop every kwarg - including ocr_function, page_chunks, and table_strategy
+    - reverting extraction to undocumented defaults (auto-selected OCR
+    backend, single-string non-chunked output) with no error raised. When the
+    signature is just a forwarding catch-all there is nothing meaningful to
+    filter against, so pass candidate_kwargs through unchanged; real filtering
+    still applies for a hypothetical future version with an explicit,
+    non-forwarding signature.
+    """
 
     try:
         parameters = inspect.signature(pymupdf4llm.to_markdown).parameters
     except (TypeError, ValueError):
+        return candidate_kwargs
+    if any(p.kind is inspect.Parameter.VAR_KEYWORD for p in parameters.values()):
         return candidate_kwargs
     return {key: value for key, value in candidate_kwargs.items() if key in parameters}
 
@@ -1992,6 +2052,20 @@ def _clean_pdf_pages(page_texts: list[str]) -> list[str]:
     cleaned_pages: list[list[str]] = []
     edge_counts: Counter[str] = Counter()
     for text in page_texts:
+        # pymupdf4llm wraps OCR output from *inside* an image/picture bounding
+        # box (logos, seals, decorative graphics) in these markers - per its
+        # own source comment it "cannot be sure about the formatting" of that
+        # region. Full-page scanned body text is OCRed through the normal
+        # paragraph path and never wrapped this way. Measured against real
+        # UET PDFs, the wrapped content is OCR misreads of decorative
+        # crests/seals (e.g. "ND)<br>WY =-- W<br>Ne SE<br>"), not legitimate
+        # body text, so it is dropped rather than left to pollute the corpus.
+        text = re.sub(
+            r"<!--\s*Start of picture text\s*-->.*?<!--\s*End of picture text\s*-->\n?",
+            "",
+            text,
+            flags=re.IGNORECASE | re.DOTALL,
+        )
         lines = []
         for line in text.splitlines():
             if "intentionally omitted" in line.lower():
@@ -2045,6 +2119,19 @@ def extract_pdf_sync(
                 "use_ocr": settings.pdf_use_ocr,
                 "ocr_language": settings.pdf_ocr_language,
                 "force_text": True,
+                # Explicit engine, not PyMuPDF4LLM's auto-selected default: the
+                # installed rapidocr_onnxruntime no longer exposes the
+                # `text_detector` attribute PyMuPDF4LLM's rapidocr/rapidtess
+                # backends call (upstream PyMuPDF/RAG#398), which crashes on
+                # every OCR-eligible PDF. tesseract_api uses PyMuPDF's built-in
+                # Tesseract integration and has no RapidOCR dependency.
+                # skip_ocr_if_native_text_sufficient avoids a separate defect:
+                # PyMuPDF4LLM's own OCR-need heuristic misfires on dot-leader
+                # layouts (e.g. tables of contents) with already-complete
+                # native text, appending a redundant/garbled OCR reading.
+                "ocr_function": skip_ocr_if_native_text_sufficient(
+                    pymupdf4llm_tesseract_api.exec_ocr
+                ),
             }
         )
         try:
@@ -2369,6 +2456,10 @@ class GeminiVisionClient:
         return None
 
 
+class PdfExtractionQualityError(RuntimeError):
+    """A fetched PDF produced non-empty but unusably low-quality Markdown."""
+
+
 async def build_pdf_document(
     body: bytes,
     final_url: str,
@@ -2411,6 +2502,22 @@ async def build_pdf_document(
     markdown = normalize_markdown("\n\n".join(sections))
     if not markdown:
         return None
+
+    # A non-empty result can still be unusable (e.g. OCR read a stylized
+    # cover as short, plausible-looking gibberish rather than throwing).
+    # min_word_count formula matches ingest_pdf.py's document_min_words, the
+    # existing, already-considered threshold for the sibling ingestion path,
+    # rather than inventing a new one for this path specifically.
+    document_min_words = min(50, max(8, len(page_texts) * 4))
+    quality = assess_pdf_markdown_quality(
+        markdown, min_word_count=document_min_words, clean_before_assessment=False
+    )
+    if quality.is_garbage:
+        raise PdfExtractionQualityError(
+            f"score={quality.score:.2f} reasons={quality.reasons} "
+            f"word_count={quality.word_count}"
+        )
+
     content_hash = hashlib.sha256(markdown.encode("utf-8")).hexdigest()
     return ExtractedDocument(
         url=final_url,
@@ -2615,6 +2722,7 @@ async def fetch_and_extract_once(
     raw_http: RawHttpClient,
     vision: GeminiVisionClient,
     renderer: BrowserRenderer,
+    corpus_sink: FilesystemCorpusSink | None = None,
 ) -> FetchAttempt:
     probable_pdf = policy.is_probable_pdf_url(url)
     timeout = settings.pdf_timeout if probable_pdf else settings.request_timeout
@@ -2665,6 +2773,24 @@ async def fetch_and_extract_once(
             ),
             fetched=True,
         )
+
+    raw_sha256: str | None = None
+    if corpus_sink is not None:
+        # Preserve raw bytes for every successful fetch, before extraction is
+        # attempted, so a future extractor fix or a failed extraction can be
+        # re-parsed without a second network request ("fetch once, parse many
+        # times" - see corpus_sink.py's module docstring).
+        raw_record = await asyncio.to_thread(
+            corpus_sink.write_raw,
+            result.body,
+            canonical_url=url,
+            final_url=result.final_url,
+            http_status=result.status,
+            content_type=result.content_type,
+            etag=result.headers.get("etag"),
+            last_modified=result.headers.get("last-modified"),
+        )
+        raw_sha256 = raw_record.sha256
 
     try:
         if kind == "pdf":
@@ -2803,7 +2929,7 @@ async def fetch_and_extract_once(
             ),
             fetched=True,
         )
-    return FetchAttempt(document=document, fetched=True)
+    return FetchAttempt(document=document, fetched=True, raw_sha256=raw_sha256)
 
 
 # ---------------------------------------------------------------------------
@@ -3302,6 +3428,7 @@ class CrawlStats:
     dlq: int = 0
     discovered: int = 0
     coverage_complete: bool = False
+    completion_reason: str = "UNKNOWN"
     action_counts: dict[str, int] = field(default_factory=dict)
     started_at_epoch: float = field(default_factory=time.time)
     _lock: asyncio.Lock = field(default_factory=asyncio.Lock, repr=False, compare=False)
@@ -4404,6 +4531,10 @@ class IoBudgetMonitor:
             pass
         return total
 
+    @property
+    def stop_requested(self) -> bool:
+        return self._stop_requested
+
     def check(self) -> int:
         usage = self.usage_bytes()
         if usage >= self._settings.io_budget_max_bytes:
@@ -4454,6 +4585,10 @@ class RuntimeBudgetMonitor:
         self._start_monotonic = start_monotonic
         self._stop_requested = False
 
+    @property
+    def stop_requested(self) -> bool:
+        return self._stop_requested
+
     def check(self) -> float:
         elapsed = time.monotonic() - self._start_monotonic
         if self._max_runtime_seconds > 0 and elapsed >= self._max_runtime_seconds:
@@ -4487,6 +4622,7 @@ class Runtime:
     renderer: BrowserRenderer
     convex: ConvexClient
     ledger: CrawlLedger
+    corpus_sink: FilesystemCorpusSink | None
     io_budget: IoBudgetMonitor
     runtime_budget: RuntimeBudgetMonitor
     session_id: str
@@ -4569,7 +4705,10 @@ async def enqueue_discovered(
 
     if runtime.settings.max_depth >= 0 and depth > runtime.settings.max_depth:
         for url in canonical_links:
-            await runtime.ledger.mark_result(
+            # mark_result_if_not_terminal: this same URL may have already
+            # been successfully processed at an earlier, shallower depth (a
+            # deep page can easily link back to the site root or a seed).
+            await runtime.ledger.mark_result_if_not_terminal(
                 url,
                 "skipped_depth",
                 error=f"discovered at depth {depth}; configured maxDepth={runtime.settings.max_depth}",
@@ -4583,7 +4722,13 @@ async def enqueue_discovered(
         elif runtime.frontier.cap_reached:
             # The URL remains visible in the ledger. This is intentionally an
             # incomplete state so a capped run cannot claim exhaustive coverage.
-            await runtime.ledger.mark_result(
+            # mark_result_if_not_terminal (not mark_result) because the same
+            # URL can be rediscovered as a link on many pages after the cap is
+            # reached - if it was itself already successfully (or terminally)
+            # processed earlier in this run, a plain mark_result would
+            # silently demote it back to "discovered", corrupting the
+            # ledger's own success count for this run.
+            await runtime.ledger.mark_result_if_not_terminal(
                 link,
                 "discovered",
                 error="not scheduled because configured URL limit was reached",
@@ -4631,7 +4776,39 @@ async def _finalize_successful_push(
     reservation: DedupeReservation,
     action: str,
     ledger_common: Mapping[str, Any],
+    document: ExtractedDocument,
+    raw_sha256: str | None,
 ) -> str:
+    if runtime.corpus_sink is not None:
+        # Inside the same cancellation-shielded section as the ledger update
+        # below (see _finish_after_irreversible_side_effect), so a document
+        # can never be written locally without its ledger row also reaching
+        # a terminal state, or vice versa - a budget-limit cancellation that
+        # lands between the two would otherwise leave documents.jsonl ahead
+        # of what the ledger considers done, silently.
+        await asyncio.to_thread(
+            runtime.corpus_sink.write_document,
+            {
+                "documentId": document_id_for_url(document.url),
+                "canonicalUrl": document.url,
+                "sourceUrl": entry.url,
+                "title": document.title,
+                "contentHash": document.content_hash,
+                "rawHash": raw_sha256,
+                "contentType": document.source_type,
+                "extractionMethod": (
+                    "pymupdf4llm+tesseract"
+                    if document.source_type == "pdf"
+                    else "html_extractor"
+                ),
+                "extractionVersion": LOCAL_CORPUS_EXTRACTION_VERSION,
+                "crawlTimestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                "status": "extracted",
+                "wordCount": document.word_count,
+                "markdown": document.markdown,
+            },
+        )
+
     state = "dry_run_ready" if runtime.settings.dry_run else "ingested"
     await runtime.ledger.mark_result(entry.url, state, **ledger_common)
     await runtime.dlq.acknowledge_success(entry.url)
@@ -4674,6 +4851,7 @@ async def process_entry(runtime: Runtime, entry: FrontierEntry) -> None:
             runtime.raw_http,
             runtime.vision,
             runtime.renderer,
+            runtime.corpus_sink,
         )
         if attempt_result.fetched:
             await runtime.stats.increment("fetched")
@@ -4815,6 +4993,8 @@ async def process_entry(runtime: Runtime, entry: FrontierEntry) -> None:
                 reservation,
                 action,
                 ledger_common,
+                document,
+                attempt_result.raw_sha256,
             )
         )
     except BaseException:
@@ -5064,6 +5244,11 @@ async def crawl(settings: Settings, args: CliArgs) -> CrawlStats:
                     "python -m playwright install --with-deps chromium"
                 )
             convex = ConvexClient(settings, push_session)
+            corpus_sink = (
+                FilesystemCorpusSink(settings.local_corpus_dir)
+                if settings.local_corpus_dir is not None
+                else None
+            )
             io_budget = IoBudgetMonitor(settings, stop_event)
             runtime_budget = RuntimeBudgetMonitor(settings, stop_event, time.monotonic())
             runtime = Runtime(
@@ -5085,6 +5270,7 @@ async def crawl(settings: Settings, args: CliArgs) -> CrawlStats:
                 renderer=renderer,
                 convex=convex,
                 ledger=ledger,
+                corpus_sink=corpus_sink,
                 io_budget=io_budget,
                 runtime_budget=runtime_budget,
                 session_id=session_id,
@@ -5238,6 +5424,30 @@ async def crawl(settings: Settings, args: CliArgs) -> CrawlStats:
                     "Could not finalize crawl coverage report: %s", report_error
                 )
 
+            # Budget/cancellation/error reasons take precedence over the
+            # narrower frontier_exhausted signal (which only means "this
+            # run's own scheduler queue drained", not "no eligible URL
+            # remains anywhere" - see CrawlLedger.finish_run's
+            # coverage_complete gating). Only when none of those apply is a
+            # drained queue actually FRONTIER_EXHAUSTED.
+            if crawl_error is not None:
+                stats.completion_reason = "ERROR"
+            elif runtime.io_budget.stop_requested:
+                stats.completion_reason = "BUDGET_IO_LIMIT"
+            elif runtime.runtime_budget.stop_requested:
+                stats.completion_reason = "BUDGET_RUNTIME_LIMIT"
+            elif frontier.cap_reached:
+                stats.completion_reason = "BUDGET_PAGE_LIMIT"
+            elif interrupted:
+                stats.completion_reason = "MANUALLY_CANCELED"
+            elif stats.coverage_complete:
+                stats.completion_reason = "FRONTIER_EXHAUSTED"
+            elif frontier_exhausted:
+                stats.completion_reason = "QUEUE_DRAINED_INCOMPLETE"
+            else:
+                stats.completion_reason = "UNKNOWN"
+            log.info("Run completion reason: %s", stats.completion_reason)
+
             if interrupted or crawl_error is not None or not stats.coverage_complete:
                 try:
                     await state_store.save(frontier, stats, deduper)
@@ -5313,6 +5523,7 @@ async def async_main(argv: Sequence[str] | None = None) -> int:
     if stats.action_counts:
         log.info("Backend actions: %s", stats.action_counts)
     log.info("Coverage complete: %s", stats.coverage_complete)
+    log.info("Completion reason: %s", stats.completion_reason)
     log.info("Coverage JSON: %s", settings.coverage_json_file)
     log.info("Coverage CSV: %s", settings.coverage_csv_file)
     log.info("=" * 72)
