@@ -331,6 +331,30 @@ class TestConcurrentComponents(unittest.IsolatedAsyncioTestCase):
             await reader.acknowledge_success(url)
             self.assertFalse(active.exists())
 
+    async def test_dlq_add_reports_dead_letter_on_final_attempt(self):
+        # Reproduces a real bug found via the same Phase 3 local-corpus crawl:
+        # DeadLetterQueue.add() decides internally when a URL's retry budget
+        # is exhausted and moves it into the dead-letter file, but previously
+        # returned None either way. Every caller wrote "failed_fetch_retryable"
+        # (a non-terminal ledger state) to the ledger regardless of that
+        # outcome, so once a URL was actually dead-lettered its ledger row
+        # stayed parked in a non-terminal state forever - even though
+        # dlq.jsonl no longer had it and nothing would ever retry it again -
+        # permanently blocking the run from being recognized as
+        # coverage-complete. add() must report the dead-letter outcome so
+        # callers can promote the ledger row to a terminal state.
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            active = root / "dlq.jsonl"
+            dead = root / "dead.jsonl"
+            url = "https://www.uettaxila.edu.pk/flaky"
+            dlq = c.DeadLetterQueue(active, dead, 3)
+            self.assertFalse(await dlq.add(url, 0, "HTTP 500"))
+            self.assertFalse(await dlq.add(url, 0, "HTTP 500"))
+            self.assertTrue(await dlq.add(url, 0, "HTTP 500"))
+            self.assertTrue(dead.exists())
+            self.assertFalse(active.exists())
+
     async def test_raw_http_pins_dns_and_bounds_body(self):
         settings = SimpleNamespace(
             max_redirects=5,

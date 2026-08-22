@@ -48,6 +48,12 @@ TERMINAL_STATES = frozenset(
         "skipped_robots",
         "skipped_unsupported",
         "failed_fetch_terminal",
+        # A fetch that succeeded but whose content failed extraction (e.g. a
+        # PdfExtractionQualityError, or a page with no extractable content)
+        # is always recorded with retryable=False, dlq_eligible=False (see
+        # crawler.py's extraction-failure branches) - retrying the fetch
+        # cannot change the outcome, so this is as final as skipped_unsupported.
+        "failed_extract",
     }
 )
 
@@ -72,7 +78,6 @@ KNOWN_STATES = frozenset(
     | set(ACTIVE_STATES)
     | {
         "failed_fetch_retryable",
-        "failed_extract",
         "failed_push",
         "skipped_depth",
     }

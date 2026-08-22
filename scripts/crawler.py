@@ -3731,7 +3731,17 @@ class DeadLetterQueue:
         reason: str,
         status: int = 0,
         previous_attempts: int = 0,
-    ) -> None:
+    ) -> bool:
+        """Record a retryable failure; returns True iff this exhausted the
+        URL's retry budget and moved it to the dead-letter file.
+
+        Callers must reflect a True return in the ledger (as a terminal
+        state) - this class only owns the DLQ's own file bookkeeping and has
+        no reference to the ledger, so without that follow-up the ledger row
+        stays parked in a non-terminal state forever even though the DLQ has
+        permanently given up on the URL, which blocks the run from ever being
+        recognized as coverage-complete.
+        """
         async with self._lock:
             existing = self._pending_by_url.get(url)
             known_attempts = max(
@@ -3747,7 +3757,8 @@ class DeadLetterQueue:
                 attempts=known_attempts + 1,
                 last_failed_at=utc_now_iso(),
             )
-            if entry.attempts >= self.max_attempts:
+            dead_lettered = entry.attempts >= self.max_attempts
+            if dead_lettered:
                 # Write the terminal record before removing the active retry so a
                 # crash cannot lose both copies.
                 await asyncio.to_thread(self._append_sync, self.dead_path, entry)
@@ -3756,6 +3767,7 @@ class DeadLetterQueue:
                 self._pending_by_url[url] = entry
             self._attempts_by_url[url] = entry.attempts
             await self._persist_active_locked()
+            return dead_lettered
 
     def mark_success(self, url: str) -> None:
         """Compatibility helper matching the original in-memory acknowledgement.
@@ -4907,10 +4919,14 @@ async def process_entry(runtime: Runtime, entry: FrontierEntry) -> None:
             error=failure.reason,
         )
         if failure.retryable and failure.dlq_eligible:
-            await runtime.dlq.add(
+            dead_lettered = await runtime.dlq.add(
                 entry.url, entry.depth, failure.reason, status=failure.status
             )
             await runtime.stats.increment("dlq")
+            if dead_lettered:
+                await runtime.ledger.mark_result_if_not_terminal(
+                    entry.url, "failed_fetch_terminal", error=failure.reason
+                )
         if not (failure.retryable and failure.dlq_eligible):
             await runtime.dlq.acknowledge_success(entry.url)
         log.error(
@@ -5045,13 +5061,17 @@ async def worker(runtime: Runtime, worker_id: int) -> None:
             log.exception("Unhandled worker %d error for %s", worker_id, entry.url)
             try:
                 await runtime.stats.increment("failed_fetch")
-                await runtime.dlq.add(entry.url, entry.depth, reason)
+                dead_lettered = await runtime.dlq.add(entry.url, entry.depth, reason)
                 await runtime.stats.increment("dlq")
                 await runtime.ledger.mark_result(
                     entry.url,
                     "failed_fetch_retryable",
                     error=reason,
                 )
+                if dead_lettered:
+                    await runtime.ledger.mark_result_if_not_terminal(
+                        entry.url, "failed_fetch_terminal", error=reason
+                    )
             except Exception as recording_error:
                 log.exception(
                     "Could not persist worker failure for %s: %s",
@@ -5290,7 +5310,15 @@ async def crawl(settings: Settings, args: CliArgs) -> CrawlStats:
                 },
             )
             await ledger.begin_run(
-                exhaustive=settings.max_depth < 0 and settings.max_pages == 0,
+                # max_pages==0 is the --exhaustive sentinel (bare --limit 0 is
+                # rejected by parse_args, so this is an exact proxy for the
+                # flag). max_depth is a separate, normally-finite setting
+                # unrelated to --exhaustive's "no URL-count cap" meaning - a
+                # prior `and settings.max_depth < 0` conjunct here made
+                # `exhaustive` false (and therefore FRONTIER_EXHAUSTED
+                # unreachable) for every depth-bounded exhaustive crawl,
+                # which is the normal case.
+                exhaustive=settings.max_pages == 0,
                 metadata={
                     "config": str(settings.config_path),
                     "dryRun": settings.dry_run,

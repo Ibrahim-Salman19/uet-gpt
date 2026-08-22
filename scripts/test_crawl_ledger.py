@@ -90,6 +90,28 @@ class TestMarkResultIfNotTerminal(unittest.TestCase):
         row = asyncio.run(scenario())
         self.assertEqual(row["state"], "ingested")
 
+    def test_failed_extract_counts_as_terminal_for_coverage(self):
+        # Reproduces a real bug found via a Phase 3 local-corpus crawl:
+        # "failed_extract" (a fetch that succeeded but whose content failed
+        # extraction, e.g. a low-quality PDF) is always recorded with
+        # retryable=False/dlq_eligible=False in crawler.py - retrying the
+        # fetch can never change the outcome - yet it was missing from
+        # TERMINAL_STATES, so a run with any extraction failures could never
+        # be recognized as coverage-complete no matter how many times it
+        # was resumed.
+        url = "https://example.com/bad.pdf"
+
+        async def scenario():
+            await self.ledger.mark_started(url)
+            await self.ledger.mark_result(
+                url, "failed_extract", error="no extractable content"
+            )
+            return await self.ledger.summary()
+
+        summary = asyncio.run(scenario())
+        self.assertTrue(summary.complete_by_state)
+        self.assertEqual(summary.incomplete_urls, 0)
+
 
 if __name__ == "__main__":
     unittest.main()
