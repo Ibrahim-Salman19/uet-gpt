@@ -1,0 +1,71 @@
+{
+  "purpose": "Phase 4 freeze manifest for Corpus V1 - the bounded/resumable full local crawl of uettaxila.edu.pk run entirely locally (--dry-run, zero Convex/Gemini/Pinecone/Neon calls) per the mandate's Phase 3 architecture. This manifest is the reproducibility record for the frozen corpus directory; the corpus payload itself (documents.jsonl, raw/) is not committed to git, matching this repo's existing manifest-not-payload convention.",
+  "frozenAtUtc": "2026-08-22T20:18:49Z",
+  "corpusLocation": "/mnt/d/uetgpt_corpus_v1 (D: drive, chosen for available disk space; all existing files made read-only at freeze time via chmod -R a-w - verified 0 writable files among documents.jsonl, raw-manifest.jsonl, and all 2456 raw/ files. Directory entries themselves remain writable: this is a DrvFs/WSL Windows-mount limitation, not a chmod scope gap - new files could still be added to the tree, though no existing content can be silently overwritten in place.)",
+  "crawlRun": {
+    "runId": "1787260445615-11524",
+    "startedAtUtc": "2026-08-20T21:14:06Z",
+    "finishedAtUtc": "2026-08-22T18:19:06Z",
+    "completionReason": "FRONTIER_EXHAUSTED",
+    "coverageComplete": true,
+    "exhaustive": true,
+    "capReached": false,
+    "note": "Wall-clock span includes an extended web.uettaxila.edu.pk outage (roughly 2026-08-21 06:20 to 2026-08-22 12:35 UTC per session logs) during which the crawl was intentionally backed off rather than hammering a downed origin; active crawl time was substantially less than the wall-clock span."
+  },
+  "crawlerInvocation": {
+    "entryPoint": "scripts/crawler.py (standalone Python CLI, --dry-run)",
+    "config": "scripts/crawl_config_local_corpus.json",
+    "flags": "--exhaustive --max-runtime-seconds 0|1500 (batched then unbounded) --dry-run --local-corpus-dir /mnt/d/uetgpt_corpus_v1 --allow-incomplete --log-level INFO",
+    "maxDepth": 4,
+    "geminiCallsGuarantee": "config-level: pdf.describeImages=false, html.describeImages=false, independent of any GEMINI_API_KEY* present in .env.local",
+    "cloudCallsVerified": "0 Convex/Pinecone/Gemini calls - grepped for convex.cloud/pinecone/generativelanguage.googleapis/gemini across every crawl console log this session; zero matches"
+  },
+  "corpusStats": {
+    "documentsJsonl": {
+      "path": "documents.jsonl",
+      "lineCount": 1891,
+      "uniqueDocumentIds": 1890,
+      "duplicateDocumentIds": 1,
+      "sha256": "97b9b2b9c87178267fc70031e2a1f49cc8aaf08702d70a647bc9ab8f4f3177ad",
+      "sizeBytes": 15761880
+    },
+    "rawManifestJsonl": {
+      "path": "raw-manifest.jsonl",
+      "lineCount": 2527,
+      "sha256": "4493d8e7548190320d9d129a3a75ec5bcccb4483c126b4ef1858a1a7580481a9",
+      "sizeBytes": 1221358
+    },
+    "rawCache": {
+      "path": "raw/",
+      "fileCount": 2456,
+      "sizeBytes": 569018044,
+      "layout": "content-addressed: raw/<sha256[:2]>/<sha256>"
+    },
+    "contentTypeBreakdown": {
+      "html": 1506,
+      "pdf": 385
+    }
+  },
+  "ledgerStateBreakdown": {
+    "totalUrls": 2880,
+    "dry_run_ready": 1891,
+    "skipped_duplicate": 441,
+    "failed_fetch_terminal": 362,
+    "skipped_short": 136,
+    "failed_extract": 32,
+    "skipped_unsupported": 14,
+    "skipped_robots": 4,
+    "incompleteUrls": 0,
+    "completeByState": true
+  },
+  "knownDisclosedGaps": [
+    "1 duplicate documentId (f373f18e2166e26cf1aa9d90420414e94ff2e7628af06f89ec26ae9748dbc960): https://web.uettaxila.edu.pk/ and https://web.uettaxila.edu.pk/UETsub/examination/examViewDtSregS.asp?frm_cate=Date%20Sheet%20BSc both canonicalize to the site root; crawled ~4 hours apart during the outage window, near-identical content (same wordCount, differing contentHash - likely dynamic page content). Not a code defect; two entries sharing a documentId with matching content are trivially collapsible if a downstream consumer needs strict dedup.",
+    "362 failed_fetch_terminal + 32 failed_extract URLs represent real, permanent gaps (mostly the extended site outage's aftermath - persistently-500ing backend endpoints like departmentfaculty?departmentId=N, plus a handful of genuinely low-quality/unextractable PDFs). These will not resolve on further crawling of the same run; a future crawl against a healthier origin may recover some of them."
+  ],
+  "bugsFoundAndFixedThisSession": [
+    "DeadLetterQueue.add() never reported dead-lettering back to callers, so the ledger row for a permanently-failed URL stayed non-terminal forever (scripts/crawler.py)",
+    "failed_extract was missing from TERMINAL_STATES despite being definitionally final (scripts/uet_crawler/crawl_ledger.py)",
+    "begin_run()'s exhaustive computation used max_depth (normally finite, unrelated) instead of max_pages, making FRONTIER_EXHAUSTED unreachable for any depth-bounded exhaustive crawl (scripts/crawler.py)"
+  ],
+  "gitCommit": "e48421d (fix(crawler): make exhaustive-crawl completion detection actually reachable)"
+}
