@@ -296,6 +296,13 @@ def main():
 
     batch, size = [], 0
     stop = False
+    # Threshold, not `written % N == 0`: `written` advances by batch size, so an
+    # equality test skips almost every checkpoint - measured, it would have
+    # fired only 3 times across the whole 44,792-chunk run, leaving a multi-day
+    # unattended job effectively silent.
+    REPORT_EVERY = 2000
+    next_report = REPORT_EVERY
+
     for d in pending:
         text = d.get("text") or d.get("content")
         if batch and size + len(text) > CHAR_BUDGET:
@@ -303,13 +310,16 @@ def main():
                 stop = True
                 break
             batch, size = [], 0
+
+            if written >= next_report:
+                el = time.time() - t0
+                rate = written / el * 60 if el else 0
+                print(f"  {written:,} written this run | {spent:.0f} neurons | "
+                      f"{el/60:.1f} min | {rate:.0f} chunks/min", flush=True)
+                next_report = written + REPORT_EVERY
+
         batch.append(d)
         size += len(text)
-
-        if written and written % 2000 == 0:
-            el = time.time() - t0
-            print(f"  {written} written this run, {spent:.0f} neurons, "
-                  f"{el/60:.1f} min", flush=True)
 
     if not stop:
         flush(batch)
