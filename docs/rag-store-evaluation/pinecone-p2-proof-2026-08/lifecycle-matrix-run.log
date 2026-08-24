@@ -1,0 +1,14 @@
+
+=== Lifecycle Matrix + Concurrent-Generation Torture Test Results ===
+[PASS] 1. initial ingest: 3 chunks upserted+visible  (detail: {'upserted_count': 3, 'lsn_committed': 139, 'reconciled': True, 'attempts': 1, 'max_indexed_lsn': 139})
+[PASS] 2. idempotent retry: re-upsert same generation succeeds, no duplication  (detail: {'upserted_count': 3, 'lsn_committed': 140, 'reconciled': True, 'attempts': 1, 'max_indexed_lsn': 140})
+[PASS] 3a. gen2 upserted alongside gen1 (pre-commit, expected coexistence)  (detail: 6)
+[PASS] post-commit: no stale generation < 2 physically present  (detail: 0)
+[PASS] post-commit: no stale generation < 4 physically present  (detail: 0)
+[PASS] post-commit: no stale generation < 4 physically present  (detail: 0)
+[PASS] 4. late gen-3 write never becomes authoritative after gen-4 commits  (detail: None)
+[PASS] 5. partial-generation upsert is visible as-is (no false completion)  (detail: 1)
+[PASS] 6. document deletion removes all its chunks: no stale generation < 1000000000 physically present  (detail: 0)
+[PASS] 7. re-add after deletion succeeds cleanly  (detail: {'upserted_count': 1, 'lsn_committed': 148, 'reconciled': True, 'attempts': 2, 'max_indexed_lsn': 148})
+
+OVERALL: 7/7 SCENARIOS PASS
