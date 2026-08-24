@@ -119,11 +119,45 @@ The blocker with no technical workaround. Options:
                                  and do not clean or repopulate it. Using it as
                                  production is a deliberate change of role and
                                  needs an explicit decision.
-(c) repair confident-viper-402   the July cutover target; currently errors.
-                                 Was the intended production slot per
-                                 docs/audit/PHASE_3_BACKEND_SMOKE.md. Needs
-                                 diagnosis, likely a deploy.
+(c) deploy to confident-viper-402   RECOMMENDED. See diagnosis below.
 ```
+
+**Diagnosis of confident-viper-402 (this changes the recommendation).**
+Comparing error shapes across deployments is decisive:
+
+```text
+rugged-bird-156      + nonexistent fn -> "Could not find public function
+                                          for 'definitelyNotAReal:function'."
+confident-viper-402  + real fn        -> "Server Error"   (no detail)
+confident-viper-402  + nonexistent fn -> "Server Error"   (identical)
+adamant-stork-623    + real fn        -> "You have exceeded the free plan
+                                          limits..."
+```
+
+confident-viper-402 returns the *same opaque error for real and nonexistent
+functions alike*, and notably does NOT return the quota message that
+adamant-stork-623 returns. So it is not quota-disabled - it simply has no
+functions deployed. It is an empty, uninitialized production slot.
+
+That makes it the best ship target:
+
+```text
++ it is the INTENDED production slot (docs/audit/PHASE_3_BACKEND_SMOKE.md
+  records the July 27-28 cutover targeting prod:confident-viper-402)
++ it is not quota-disabled, so it starts with a clean allowance
++ using it does not conflict with the standing mandate restriction on
+  rugged-bird-156
++ combined with the corpus living in Pinecone rather than Convex (§2), its
+  footprint stays small enough to be sustainable on the free plan
+- NEEDS: a deploy key for it, which is not present in any local env file.
+  Either the user supplies one, or the user runs `npx convex deploy` against
+  that deployment themselves.
+```
+
+Caveat on confidence: "no functions deployed" is the reading most consistent
+with the evidence, but an opaque Server Error could also indicate a broken or
+suspended deployment. The Convex dashboard for that deployment would settle it
+immediately, and a deploy attempt would too.
 
 Whichever is chosen, it only stays healthy if step 5 holds.
 
