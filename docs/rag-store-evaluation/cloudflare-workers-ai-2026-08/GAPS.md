@@ -110,6 +110,17 @@ reranker integration          FINDING: the retrieval architecture is ALREADY
                               so ~7,500 tokens/query = ~2.1 neurons = roughly
                               4,700 reranked queries/day inside the free tier.
                               Comfortably affordable.
+                              STATUS: adapter BUILT and its contract PROVEN
+                              against the live model -
+                              reranker-worker/worker.js plus wrangler.toml,
+                              with reranker-worker/test_contract.py
+                              reproducing the worker's exact mapping and
+                              asserting shape, index/text alignment (a wrong
+                              index would silently return the wrong passage),
+                              descending order, and semantic correctness.
+                              Test passes.
+                              REMAINING: `wrangler deploy` (a cloud action
+                              needing user approval) and setting RERANKER_URL.
                               Must still be benchmarked under the mandate's
                               retrieval-quality gates rather than adopted on
                               reputation.
