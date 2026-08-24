@@ -197,9 +197,10 @@ gate and is not authorized by this evaluation.
 ## 6. Scalability
 
 ```text
-query-time:     ~50 tokens/query => the 10k/day free allocation supports
-                roughly 180,000 queries/day. Not a constraint for a
-                university chatbot.
+query-time:     ~50 tokens/query for the embedding alone => ~180,000
+                queries/day. NOTE: this is embedding-only. Adding the
+                reranker (§6a) drops the practical ceiling to ~3,500
+                queries/day at rerank-depth 20. See §6a for the full table.
 cold start:     3.44 days for the full 44,792-chunk corpus.
 refresh:        incremental. Each chunk record already carries contentHash,
                 so a re-crawl re-embeds only changed chunks - minutes, not
@@ -254,11 +255,42 @@ same Cloudflare account and free tier already in use.** That makes the single
 highest-value retrieval improvement available at $0 with no new vendor,
 no new credentials, and no second embedding space to reconcile.
 
-Not built or benchmarked yet - noted here as the strongest candidate for the
-next quality increment, to be evaluated under the mandate's retrieval-quality
-gates rather than adopted on reputation. Its availability is read from the
-Cloudflare model catalog and has NOT yet been functionally verified, and
-catalog metadata has already proven unreliable once (§3a.4).
+**Functionally verified** (not merely catalog-listed - catalog metadata has
+already proven unreliable once, §3a.4). A real probe with one UET admissions
+question and four candidate passages:
+
+```text
+0.442      "Undergraduate admission is open to students holding an
+            intermediate qualification; merit is computed from
+            matriculation, intermediate and entry test scores."
+0.355      "Candidates ... must have passed FSc pre-engineering with at
+            least 60% marks and appear in the ECAT entrance test."
+0.0000383  "The department of mechanical engineering was established in 1975."
+0.0000373  "The library remains open until 8 PM on weekdays."
+```
+
+Relevant passages score roughly four orders of magnitude above irrelevant ones
+- strong discrimination on our own domain text. API shape is
+`{query, contexts:[{text}]}` returning `{id, score}` sorted by relevance.
+
+**Cost consequence, which constrains the design.** Measured: 224 tokens =
+0.0633 neurons, i.e. ~283 neurons/M tokens. Reranking is applied per query over
+many candidates, so it dominates query-time cost:
+
+```text
+rerank depth   tokens/query   neurons/query   queries/day within 10,000
+top-100          ~50,000          14.1                ~709
+top-50           ~25,000           7.1              ~1,410
+top-20           ~10,000           2.8              ~3,540
+```
+
+This **corrects the scalability figure given in §6**: ~180,000 queries/day is
+the embedding-only number. With reranking enabled the free tier supports
+roughly 3,500 queries/day at top-20, or ~700 at the top-100 depth community
+guidance suggests. Still adequate for a university chatbot, but it must be
+designed for rather than assumed, and the daily allocation is shared with
+corpus (re)embedding. Recommended shape: hybrid retrieve wide, rerank top-20 to
+30, not top-100.
 
 ## 7. Reproduce
 
