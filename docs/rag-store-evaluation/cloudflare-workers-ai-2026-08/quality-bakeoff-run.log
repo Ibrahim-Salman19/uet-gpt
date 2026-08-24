@@ -1,0 +1,14 @@
+sample: 1000 chunks across 1000 documents
+queries: 100 known-item probes
+
+embedding corpus + queries with @cf/baai/bge-m3 ...
+  corpus done. dims=1024  neurons=2027.38
+  Recall@1=0.630  Recall@5=0.750  MRR@10=0.676
+
+embedding corpus + queries with @cf/qwen/qwen3-embedding-0.6b ...
+  corpus done. dims=1024  neurons=421.06
+  Recall@1=0.620  Recall@5=0.730  MRR@10=0.675
+
+=== SUMMARY ===
+@cf/baai/bge-m3                    dim=1024  R@1=0.630 R@5=0.750 MRR@10=0.676 (2027 neurons)
+@cf/qwen/qwen3-embedding-0.6b      dim=1024  R@1=0.620 R@5=0.730 MRR@10=0.675 (421 neurons)
