@@ -198,11 +198,45 @@ Three options, to be decided rather than defaulted into:
                        this work has been trying to eliminate.
 ```
 
-Recommendation: **(b)**. It states the real architecture in the type system
-rather than hiding a second vendor inside an adapter, and it keeps
-`lexicalSearch` genuinely backed by the Convex text index that today's
-`hybridRank` fusion depends on. This should be settled before any adapter code
-is written, since it determines the shape of that code.
+**DECIDED: (b).** Implemented as `convex/knowledgeStore/compositeStore.ts`.
+It states the real architecture in the type system rather than hiding a second
+vendor inside an adapter, and keeps `lexicalSearch` genuinely backed by the
+Convex text index that today's `hybridRank` fusion depends on.
+
+Two ordering rules in that implementation are load-bearing and were not
+arbitrary:
+
+```text
+upsertDocument     lexical (Convex) FIRST - it is the identity authority
+                   (documents.by_url lookup-then-insert assigns documentId).
+                   Its returned id is propagated to the dense side. Reversing
+                   this forces the dense backend to invent an identity Convex
+                   would then contradict.
+
+upsertChunks       dense FIRST - if the vector write fails we abort before the
+                   lexical index advertises text whose vector does not exist,
+                   which would let lexical hits reference chunks dense search
+                   can never return.
+
+commitGeneration   dense FIRST - if the lexical commit then fails, stale TEXT
+                   is briefly served while stale vectors are already gone:
+                   degraded but detectable, and self-healing because
+                   commitGeneration is idempotent (a re-run re-queries
+                   ingestionGeneration < generation). The reverse order leaves
+                   stale VECTORS live after text cutover, which is the harder
+                   failure to notice. The error is re-thrown, never swallowed.
+```
+
+`getChunks` is served from Convex because it holds the canonical text;
+Pinecone would only return whatever was duplicated into vector metadata, which
+is a copy rather than the source of truth, and metadata size limits make
+storing full parent text there unwise. `health` fails if EITHER side fails, and
+`stats`/`verifyIntegrity` report the larger/summed counts so a divergence
+between backends is surfaced rather than averaged away.
+
+Still to build: `pineconeAdapter.ts` as the dense half. That work is now
+unblocked, but it cannot be meaningfully tested until the 1024-dim index exists
+(Step 2).
 
 ### Step 6 - enable reranking  [owner: USER APPROVAL NEEDED]
 
