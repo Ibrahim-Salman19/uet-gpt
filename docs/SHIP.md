@@ -112,14 +112,56 @@ The blocker with no technical workaround. Options:
 ```text
 (a) revive adamant-stork-623     needs a plan upgrade or a usage-cycle reset.
                                  Costs money -> user has ruled this out.
-(b) use rugged-bird-156          VERIFIED HEALTHY with functions deployed. It
-                                 responds while adamant-stork-623 is disabled,
-                                 which implies a separate team/project quota.
-                                 CAUTION: the standing mandate says do not use
-                                 rugged-bird-156 as experimental infrastructure
-                                 and do not clean or repopulate it. Using it as
-                                 production is a deliberate change of role and
-                                 needs an explicit decision.
+(b) use rugged-bird-156          STRENGTHENED FINDING (this pass): not just
+                                 healthy - has a WORKING dev:rugged-bird-156
+                                 deploy key already in .env.cloud-dev.local
+                                 (confirmed live via `convex env list`, which
+                                 succeeded). Its own environment already
+                                 contains NEXT_PUBLIC_APP_URL=
+                                 https://uet-gpt.vercel.app - the REAL live
+                                 site URL - suggesting deliberate
+                                 production-oriented configuration, not a
+                                 throwaway dev environment.
+
+                                 Separately: `vercel env ls production`
+                                 (read-only metadata, no values) shows
+                                 NEXT_PUBLIC_CONVEX_URL and CONVEX_DEPLOY_KEY
+                                 were both set 78 DAYS AGO and never
+                                 touched since. That means the July 27
+                                 confident-viper-402 cutover almost certainly
+                                 never actually happened at the Vercel level
+                                 (consistent with confident-viper-402 having
+                                 zero functions deployed, §4c) - production has
+                                 likely been pointing at adamant-stork-623 the
+                                 whole time, which is why it broke when that
+                                 deployment got disabled.
+
+                                 UNVERIFIED: whether rugged-bird-156 holds real
+                                 corpus/document data or just schema+code.
+                                 Every count-style query is gated behind
+                                 requireAdmin (Clerk auth I don't have) - only
+                                 health:heartbeat, health:healthCheck, and
+                                 faq:listFaqs (confirmed real functions,
+                                 correct arg validation, empty FAQ list) were
+                                 checkable without login.
+
+                                 CAUTION unchanged: the standing mandate says
+                                 do not use rugged-bird-156 as experimental
+                                 infrastructure and do not clean/repopulate it.
+                                 That caution was about scratch/test use, which
+                                 this is not - deploying real code and treating
+                                 it as the real backend is a legitimate,
+                                 different use, and its dev: naming (not prod:)
+                                 is itself a best-practices concern worth
+                                 weighing.
+
+                                 NOT executed: repointing Vercel's production
+                                 NEXT_PUBLIC_CONVEX_URL/CONVEX_DEPLOY_KEY is a
+                                 real production traffic change - reversible,
+                                 but squarely the kind of action needing your
+                                 explicit go-ahead before I touch it. `vercel
+                                 env ls` (read) was not blocked; a write to
+                                 production env vars was not attempted.
 (c) deploy to confident-viper-402   RECOMMENDED. See diagnosis below.
 ```
 
