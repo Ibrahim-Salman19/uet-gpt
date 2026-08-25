@@ -219,9 +219,14 @@ function cosine(a: Float32Array, b: Float32Array): number {
   let nb = 0;
   const len = Math.min(a.length, b.length);
   for (let i = 0; i < len; i++) {
-    dot += a[i] * b[i];
-    na += a[i] * a[i];
-    nb += b[i] * b[i];
+    // noUncheckedIndexedAccess types a[i] as number|undefined even though
+    // i < len makes it always in bounds here - ?? 0 satisfies the checker
+    // without masking a real out-of-bounds case (there isn't one).
+    const ai = a[i] ?? 0;
+    const bi = b[i] ?? 0;
+    dot += ai * bi;
+    na += ai * ai;
+    nb += bi * bi;
   }
   if (na === 0 || nb === 0) return 0;
   return dot / (Math.sqrt(na) * Math.sqrt(nb));

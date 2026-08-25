@@ -18,6 +18,12 @@ import type {
 import { InMemoryKnowledgeStore } from "./inMemoryKnowledgeStore";
 import { runKnowledgeStoreContractTests } from "./knowledgeStoreContract";
 
+// None of RecordingStore/stubStore/InMemoryKnowledgeStore use ctx (matching
+// the contract file's own "ctx as never" convention for backends where it's
+// unused) - one typed constant instead of a bare `undefined` at every call
+// site, which `tsc` accepts as ActionCtx but a literal undefined does not.
+const ctx = undefined as unknown as import("../../convex/_generated/server").ActionCtx;
+
 // 1) The shared, backend-agnostic contract suite (already exercises Turso and
 // Zilliz adapters elsewhere) run against a CompositeKnowledgeStore built from
 // two INDEPENDENT in-memory stores - genuinely separate dense/lexical
@@ -171,7 +177,7 @@ describe("CompositeKnowledgeStore: ordering and failure propagation", () => {
     const lexical = new RecordingStore("lexical", log);
     const store = new CompositeKnowledgeStore(dense, lexical);
 
-    const result = await store.upsertDocument(undefined, anyDoc);
+    const result = await store.upsertDocument(ctx, anyDoc);
 
     expect(log).toEqual(["lexical.upsertDocument", "dense.upsertDocument"]);
     expect(result.documentId).toBe("lexical-doc"); // the returned identity IS Convex's
@@ -184,7 +190,7 @@ describe("CompositeKnowledgeStore: ordering and failure propagation", () => {
     lexical.failOnce("upsertDocument");
     const store = new CompositeKnowledgeStore(dense, lexical);
 
-    await expect(store.upsertDocument(undefined, anyDoc)).rejects.toThrow(
+    await expect(store.upsertDocument(ctx, anyDoc)).rejects.toThrow(
       "lexical.upsertDocument deliberately failed",
     );
     expect(log).toEqual(["lexical.upsertDocument"]); // never invented an identity Convex hadn't assigned
@@ -196,7 +202,7 @@ describe("CompositeKnowledgeStore: ordering and failure propagation", () => {
     const lexical = new RecordingStore("lexical", log);
     const store = new CompositeKnowledgeStore(dense, lexical);
 
-    await store.upsertChunks(undefined, "doc-1", 1, "crawled", anyChunks);
+    await store.upsertChunks(ctx, "doc-1", 1, "crawled", anyChunks);
 
     expect(log).toEqual(["dense.upsertChunks", "lexical.upsertChunks"]);
   });
@@ -208,7 +214,7 @@ describe("CompositeKnowledgeStore: ordering and failure propagation", () => {
     dense.failOnce("upsertChunks");
     const store = new CompositeKnowledgeStore(dense, lexical);
 
-    await expect(store.upsertChunks(undefined, "doc-1", 1, "crawled", anyChunks)).rejects.toThrow(
+    await expect(store.upsertChunks(ctx, "doc-1", 1, "crawled", anyChunks)).rejects.toThrow(
       "dense.upsertChunks deliberately failed",
     );
     expect(log).toEqual(["dense.upsertChunks"]); // no orphaned lexical entry pointing at a missing vector
@@ -221,7 +227,7 @@ describe("CompositeKnowledgeStore: ordering and failure propagation", () => {
     lexical.failOnce("commitGeneration");
     const store = new CompositeKnowledgeStore(dense, lexical);
 
-    await expect(store.commitGeneration(undefined, "doc-1", 2)).rejects.toThrow(
+    await expect(store.commitGeneration(ctx, "doc-1", 2)).rejects.toThrow(
       "lexical.commitGeneration deliberately failed",
     );
     // Dense DID commit (stale vectors are already gone - the documented,
@@ -235,7 +241,7 @@ describe("CompositeKnowledgeStore: ordering and failure propagation", () => {
     const lexical = stubStore({ commitGeneration: async () => ({ deletedStaleChunks: 7 }) });
     const store = new CompositeKnowledgeStore(dense, lexical);
 
-    const result = await store.commitGeneration(undefined, "doc-1", 2);
+    const result = await store.commitGeneration(ctx, "doc-1", 2);
     expect(result.deletedStaleChunks).toBe(7);
   });
 
@@ -246,7 +252,7 @@ describe("CompositeKnowledgeStore: ordering and failure propagation", () => {
     });
     const store = new CompositeKnowledgeStore(dense, lexical);
 
-    const result = await store.health(undefined);
+    const result = await store.health(ctx);
     expect(result.ok).toBe(false);
     expect(result.detail).toContain("FAIL");
   });
@@ -257,10 +263,10 @@ describe("CompositeKnowledgeStore: ordering and failure propagation", () => {
     const lexical = new RecordingStore("lexical", log);
     const store = new CompositeKnowledgeStore(dense, lexical);
 
-    await store.denseSearch(undefined, new Float32Array(4), { topK: 5 });
+    await store.denseSearch(ctx, new Float32Array(4), { topK: 5 });
     expect(log).toEqual(["dense.denseSearch"]);
 
-    await store.lexicalSearch(undefined, "query", { topK: 5 });
+    await store.lexicalSearch(ctx, "query", { topK: 5 });
     expect(log).toEqual(["dense.denseSearch", "lexical.lexicalSearch"]);
   });
 
@@ -270,7 +276,7 @@ describe("CompositeKnowledgeStore: ordering and failure propagation", () => {
     const lexical = new RecordingStore("lexical", log);
     const store = new CompositeKnowledgeStore(dense, lexical);
 
-    await store.getChunks(undefined, [{ documentId: "d", chunkKey: "k" }]);
+    await store.getChunks(ctx, [{ documentId: "d", chunkKey: "k" }]);
     expect(log).toEqual(["lexical.getChunks"]);
   });
 
@@ -291,7 +297,7 @@ describe("CompositeKnowledgeStore: ordering and failure propagation", () => {
     });
     const store = new CompositeKnowledgeStore(dense, lexical);
 
-    const report = await store.verifyIntegrity(undefined);
+    const report = await store.verifyIntegrity(ctx);
     expect(report).toEqual({
       duplicateChunkKeys: 1,
       crossDocumentChunkKeyCollisions: 1,
