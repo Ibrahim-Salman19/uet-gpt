@@ -120,9 +120,30 @@ def save_state(state):
     os.replace(tmp, STATE)      # atomic; a crash mid-write can't corrupt it
 
 
+class DailyQuotaExhausted(Exception):
+    """Cloudflare's daily free neuron allocation is spent.
+
+    Critically distinct from a rate-limit 429 even though it arrives with the
+    SAME status code. The body carries code 4006 / "you have used up your daily
+    free allocation". Retrying it is pointless: no amount of backoff produces
+    allowance, so the correct response is to stop the run immediately and
+    resume when the allocation resets.
+
+    Treating it as transient (which this script originally did) burns ~126s of
+    backoff per batch and then falsely records perfectly good chunks as
+    'failed'. The Gemini pipeline already distinguished per-day quota from
+    transient 429s; this is the same lesson applied to a second provider.
+    """
+
+
+def _is_quota_exhausted(body_text):
+    return "4006" in body_text or "daily free allocation" in body_text.lower()
+
+
 def post(account, token, model, texts, max_retries=7):
     """Returns (vectors, neurons). Raises HTTPError(400) for the caller to
-    split; retries transient failures with exponential backoff."""
+    split, DailyQuotaExhausted when the allocation is spent, and retries
+    genuinely transient failures with exponential backoff."""
     url = f"https://api.cloudflare.com/client/v4/accounts/{account}/ai/run/{model}"
     delay = 2.0
     for attempt in range(max_retries):
@@ -142,6 +163,15 @@ def post(account, token, model, texts, max_retries=7):
         except urllib.error.HTTPError as e:
             if e.code == 400:
                 raise
+            # Read the body ONCE - it is a stream and cannot be re-read, and it
+            # is the only thing distinguishing "out of allowance" from "slow
+            # down" since both arrive as 429.
+            try:
+                body_text = e.read().decode(errors="replace")
+            except Exception:
+                body_text = ""
+            if e.code == 429 and _is_quota_exhausted(body_text):
+                raise DailyQuotaExhausted(body_text[:200])
             if attempt == max_retries - 1:
                 raise
             ra = e.headers.get("retry-after")
@@ -192,6 +222,21 @@ def main():
     env = read_env()
     account, token = env["account"], env["token"]
 
+    # Pre-flight: one tiny call before touching the big files. Loading
+    # all_chunks.jsonl + the output file costs ~4 minutes of I/O on /mnt/d, and
+    # doing that only to discover the allocation is spent wastes the whole
+    # window. Cheap (a fraction of a neuron) and fails fast.
+    try:
+        post(account, token, MODEL, ["preflight"])
+    except DailyQuotaExhausted as e:
+        print("Cloudflare daily allocation is already exhausted - nothing to do.")
+        print(f"  {e}")
+        print("  Re-run once the allocation resets.")
+        return 0
+    except Exception as e:
+        print(f"pre-flight call failed ({type(e).__name__}: {e}); "
+              f"continuing anyway so a transient blip does not skip a whole day.")
+
     done = load_done()
     state = load_state()
     remaining_budget = DAILY_NEURON_BUDGET - state["neurons"]
@@ -237,6 +282,16 @@ def main():
         try:
             vecs, neurons = post(account, token, MODEL,
                                  [b.get("text") or b.get("content") for b in batch])
+        except DailyQuotaExhausted as e:
+            # Not a failure of these chunks - they simply have not been done
+            # yet. Deliberately do NOT write them to the failures file: they
+            # stay absent from the output, so the next run picks them up as
+            # pending exactly like any other unembedded chunk.
+            print(f"\nCloudflare daily allocation exhausted; stopping cleanly.\n"
+                  f"  {e}\n"
+                  f"  These chunks remain pending and resume on the next run.",
+                  flush=True)
+            return False
         except urllib.error.HTTPError as e:
             if e.code == 400 and len(batch) > 1:
                 mid = len(batch) // 2
