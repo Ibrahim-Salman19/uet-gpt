@@ -281,9 +281,31 @@ with `generation < target`, including ones simply never re-submitted, not only
 the one that changed. The first test run caught this by failing; fixing the
 test (not the adapter) made the semantics explicit rather than assumed.
 
-### Step 6 - enable reranking  [owner: USER ACTION NEEDED - specific permission]
+### Step 6 - enable reranking  [DONE - no permission gap remains]
 
 ```text
+SUPERSEDED the Worker-deployment path below: convex/reranking/cloudflareRerank.ts
+calls @cf/baai/bge-reranker-base directly from Convex action context via
+Cloudflare's REST API, using only the Workers AI scope the token already has.
+No wrangler, no Worker deployment, no "Workers Scripts: Edit" permission
+needed at all. Verified against the live API by invoking the real exported
+internalAction directly (20/20-equivalent checks, see the file's own test).
+
+Follows groqRerank.ts's established convention: a real, tested action,
+deliberately left UNWIRED from cascade.ts's live tiers. The remaining step is
+a production-code activation decision (add a Cloudflare tier to cascade.ts,
+or set it as an env-gated alternative), which sits behind the mandate's
+independent-review gate - it is not a credentials/permission blocker anymore.
+
+REAL FINDING from testing this live: reranking and corpus embedding share ONE
+Cloudflare account's daily neuron budget. Hit the actual allocation limit
+while testing (confirmed via direct API probe, code 4006). If both are ever
+live simultaneously in production, reranking can silently degrade to its
+safe fallback during heavy embedding windows. Not yet mitigated - worth a
+decision (separate Cloudflare account for reranking? a reserved sub-budget?)
+before wiring this into production, not before using it for evaluation.
+
+--- superseded path, kept for reference ---
 action:  wrangler deploy the adapter in
          docs/rag-store-evaluation/cloudflare-workers-ai-2026-08/
          reranker-worker/, then set RERANKER_URL

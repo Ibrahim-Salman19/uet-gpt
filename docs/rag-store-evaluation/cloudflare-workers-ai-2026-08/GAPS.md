@@ -252,6 +252,29 @@ Recommendation: (b) for the current corpus since it needs no re-crawl and no
 re-embed, plus (c) whenever Corpus V2 is built. Must be measured under the
 retrieval-quality gates rather than assumed.
 
+## I. Shared Cloudflare budget: reranking and embedding compete for one allocation
+
+Discovered while live-testing `convex/reranking/cloudflareRerank.ts`: it hit
+the actual daily neuron allocation (confirmed via direct API probe, code
+4006 "you have used up your daily free allocation") because the corpus
+embedding run was already using the SAME account's budget that day.
+
+This is a real production concern, not just a testing inconvenience: if
+reranking is ever wired into the live cascade while a corpus (re)embed is
+running, query-time reranking can silently degrade to its position-decay
+fallback for the duration - degraded quality with no error, no alert, in
+production traffic. `cloudflareRerank.ts`'s fallback is safe (never throws,
+never hangs) but the QUALITY regression itself is invisible unless someone is
+watching for the fallback's exact score signature.
+
+Not yet mitigated. Options: a second Cloudflare account/token dedicated to
+reranking (clean separation, more to manage); a reserved sub-budget enforced
+in application code (one shared account, artificial split); or accept the
+risk and monitor for the fallback signature in production logs. Needs a
+decision before this is wired into cascade.ts, not before it's used for
+evaluation work (where an occasional degraded run is a nuisance, not a
+production quality regression affecting real users).
+
 ## G. Known-unreliable inputs (standing cautions)
 
 ```text
