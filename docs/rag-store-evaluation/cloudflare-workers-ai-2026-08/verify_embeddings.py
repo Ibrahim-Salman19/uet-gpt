@@ -20,6 +20,8 @@ Exit code 0 = safe to proceed, 1 = do not upsert.
 import json
 import math
 import sys
+
+import numpy as np
 from collections import Counter
 
 BASE = "/mnt/d/uetgpt_corpus_v1/embeddings"
@@ -67,16 +69,20 @@ def main():
                 problems.append(f"line {lineno}: embedding is not a list")
                 continue
             dims[len(v)] += 1
-            if not all(isinstance(x, (int, float)) and math.isfinite(x) for x in v):
+            # numpy, not a Python loop: at 44,792 x 1024 a pure-Python norm is
+            # slow enough that the gate stops being runnable, and a
+            # verification step nobody runs is not a gate.
+            arr = np.asarray(v, dtype=np.float64)
+            if not np.all(np.isfinite(arr)):
                 non_finite += 1
                 continue
-            norm = math.sqrt(sum(x * x for x in v))
+            norm = float(np.sqrt(arr.dot(arr)))
             if norm == 0.0:
                 all_zero += 1
             elif abs(norm - 1.0) > NORM_TOL:
                 bad_norm += 1
             # cheap collision fingerprint: catches a file of identical vectors
-            fingerprints[tuple(round(x, 5) for x in v[:8])] += 1
+            fingerprints[tuple(np.round(arr[:8], 5))] += 1
 
     print(f"embedding records:    {n:,}")
     print(f"unique identities:    {len(seen):,}")

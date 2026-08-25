@@ -169,6 +169,50 @@ incremental freshness/re-crawl  Corpus V1 is a frozen snapshot; the mandate
                                 straightforward once a refresh path is built.
 ```
 
+## H. Corpus-quality finding: 17.1% duplicate chunk text
+
+Surfaced while investigating repeated embedding fingerprints during
+verification (6,710 distinct fingerprints across 7,324 records). The repeated
+vectors are NOT degenerate embeddings - they are the correct output for
+genuinely identical input text:
+
+```text
+embedded chunks sampled:  7,324
+distinct texts:           6,656
+rows with duplicate text: 1,252  (17.1%)
+
+  x11  "Document Title: SocietyDetails | ## Official resources
+        - [HEC Pakistan Higher Educ..."
+  x4   "Document Title: Department of Software Engineering, UET Taxila..."
+  x4   "Document Title: Building and Works Department, UET Taxila..."
+```
+
+So the embedding model is behaving correctly and this is not an integrity
+failure. It IS a retrieval-quality issue: site-wide boilerplate (shared
+"Official resources" blocks, repeated departmental preambles) is chunked once
+per page, so a single query can retrieve the same text several times and crowd
+genuinely diverse passages out of top-k. That directly reduces the useful
+context reaching the LLM.
+
+Not yet addressed. Options, cheapest first:
+
+```text
+(a) dedupe at upsert     collapse byte-identical chunk text to one vector,
+                         keeping the documentId list as metadata. Cheapest,
+                         and shrinks the index. Loses per-page attribution
+                         unless the metadata is carried carefully.
+(b) MMR / diversity      apply Maximal Marginal Relevance or a near-duplicate
+    at retrieval         filter after fusion. Keeps attribution intact and is
+                         the standard 2026 answer to redundant top-k.
+(c) boilerplate strip    improve extraction so shared nav/footer blocks never
+    at chunking          become chunks. Best long-term fix, but Corpus V1 is
+                         frozen - this belongs to a future Corpus V2.
+```
+
+Recommendation: (b) for the current corpus since it needs no re-crawl and no
+re-embed, plus (c) whenever Corpus V2 is built. Must be measured under the
+retrieval-quality gates rather than assumed.
+
 ## G. Known-unreliable inputs (standing cautions)
 
 ```text
