@@ -194,6 +194,45 @@ per page, so a single query can retrieve the same text several times and crowd
 genuinely diverse passages out of top-k. That directly reduces the useful
 context reaching the LLM.
 
+### Measured impact (measure_duplicate_impact.py, zero API cost)
+
+Rather than assume the community's generic 20-30% rerank figure applies,
+measured directly: 300 already-embedded chunks used as probes against the
+already-embedded set, counting how many of each top-10 carried text
+byte-identical to another result already in that same window.
+
+```text
+mean redundant slots:  0.93 / 10   (9.3% of the window)
+median:                0
+queries with >=1 dup:  94 / 300    (31.3%)
+worst case:            9 of 10 slots redundant
+
+distribution (redundant slots -> query count):
+   0: ############################################ 206
+   1: ###### 18
+   2: ##### 16
+   3: ########## 33
+   4: ##### 16
+   5: # 4
+   6: ## 5
+   7: 1
+   9: 1
+```
+
+**The mean is misleading and the distribution is the finding.** 68.7% of
+queries are entirely unaffected, which is why an average of "9%" understates
+the harm badly. Among the 31.3% that ARE affected, the mean is ~3 redundant
+slots - roughly **30% of the context window carrying no new information** - and
+the tail reaches 9 of 10 slots wasted on a single repeated boilerplate block.
+
+So this is not a uniform 9% tax; it is a small set of queries being severely
+degraded while most are fine. That shape matters for the fix: a near-duplicate
+filter is cheap insurance that does nothing for two-thirds of traffic and
+rescues the third that is currently badly served. It also means any evaluation
+averaging over a random query set will barely register the problem - the
+regression must be measured on affected queries specifically, or it will look
+like noise.
+
 Not yet addressed. Options, cheapest first:
 
 ```text
