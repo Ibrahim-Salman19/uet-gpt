@@ -4,7 +4,47 @@ Sequenced path from "live site is up but every backend call fails" to a
 working, sustainable deployment. Each step names its owner, its verification,
 and its rollback.
 
-## 1. What is actually broken
+## 0. Interim fix applied 2026-08-26 - outage resolved, temporarily
+
+Per explicit user authorization ("do it for now but keep in mind it is
+temporarily we are making production database locally and will deploy it"):
+Vercel production's `NEXT_PUBLIC_CONVEX_URL` and `CONVEX_DEPLOY_KEY` were
+repointed from the disabled `adamant-stork-623` to `rugged-bird-156`, and a
+previous production build was redeployed (`vercel redeploy`, same source,
+new env vars) so the change actually took effect - `NEXT_PUBLIC_*` vars are
+baked in at Next.js build time, so changing the env var alone would not have
+been enough.
+
+**Verified on the real live domain, not just via the API directly:**
+```text
+https://uet-gpt.vercel.app             -> HTTP 200, renders correctly
+served JS bundle                       -> references rugged-bird-156.convex.cloud
+users:getByClerkId (the exact call     -> {"status":"success","value":null}
+  that threw "exceeded free plan            (was: "You have exceeded the
+  limits" at the start of this            free plan limits, so your
+  session)                                deployments have been disabled")
+```
+
+**This is explicitly interim, not the target architecture.** Per the user's
+own framing, the real production system is still the local-crawl -> frozen
+corpus -> Pinecone dense + Convex lexical composite store being built in this
+same session (§4-6 below, and the whole Cloudflare embedding evaluation).
+rugged-bird-156 restores live service now; it does not replace that plan.
+
+**Still unverified, now with real stakes**: whether rugged-bird-156 holds
+real corpus/document data or just schema+code - every count-style query is
+gated behind Clerk admin auth not available here. If it turns out to be thin
+or stale, the interim fix trades a visible outage for a chatbot that may
+answer confidently with incomplete information. Worth checking the admin
+dashboard directly, now that real traffic may be hitting it.
+
+**Rollback**, if needed: `vercel env rm NEXT_PUBLIC_CONVEX_URL production`
+and `vercel env rm CONVEX_DEPLOY_KEY production`, re-add the prior values (not
+captured here - `vercel env pull` was blocked from extracting them, and
+Vercel's own env var history in the dashboard is the fallback), then
+`vercel redeploy` again.
+
+## 1. What was broken (historical - see §0 for current state)
 
 The frontend is fine. `https://uet-gpt.vercel.app` returns HTTP 200 and renders
 correctly - verified directly. The failure is entirely backend:
