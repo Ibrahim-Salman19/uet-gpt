@@ -21,6 +21,7 @@ docs/rag-store-evaluation/cloudflare-workers-ai-2026-08/report.md:
 Lives on /mnt/d (durable) rather than the session scratchpad, which has been
 observed to be wiped across session boundaries.
 """
+import http.client
 import json
 import math
 import os
@@ -180,7 +181,17 @@ def post(account, token, model, texts, max_retries=7):
                   f"({attempt + 1}/{max_retries})", flush=True)
             time.sleep(wait)
             delay = min(delay * 2, 120)
-        except (urllib.error.URLError, TimeoutError, OSError) as e:
+        except (urllib.error.URLError, TimeoutError, OSError,
+                http.client.HTTPException) as e:
+            # http.client.HTTPException (IncompleteRead, BadStatusLine,
+            # RemoteDisconnected, ...) is NOT a subclass of OSError or
+            # URLError - confirmed by inspecting its MRO after a live run
+            # crashed uncaught on IncompleteRead (a truncated response body,
+            # 65536 of ~694k bytes) and killed the whole script rather than
+            # retrying one batch. fsync-per-batch meant no data was lost, but
+            # nothing should end an unattended multi-day run over one
+            # truncated read when the fix is a retry like any other
+            # transient network failure.
             if attempt == max_retries - 1:
                 raise
             print(f"    network error ({e}); backoff {delay:.0f}s", flush=True)
@@ -304,6 +315,25 @@ def main():
                     "reason": f"HTTP {e.code}", "chars": len(b.get("text") or "")}) + "\n")
             fail_f.flush()
             print(f"    !! HTTP {e.code} on {len(batch)} chunk(s); recorded, skipping")
+            return True
+        except Exception as e:
+            # post() retries transient failures itself; this only fires if a
+            # batch survives all 7 attempts still failing (e.g. sustained
+            # network trouble) or a not-yet-anticipated exception type slips
+            # through, the way http.client.IncompleteRead did in a real run
+            # before the fix above. Deliberately broad, and deliberately safe
+            # to be broad here: this wraps exactly one network call whose
+            # only job is "get vectors for these texts," with an established
+            # fallback (record, skip, the next run picks it up as pending) -
+            # unlike a bare except elsewhere in a larger function, this can't
+            # silently swallow a bug in unrelated code. An unattended
+            # multi-day job should not die over one bad batch of any kind.
+            for b in batch:
+                fail_f.write(json.dumps({
+                    "documentId": b["documentId"], "chunkKey": b["chunkKey"],
+                    "reason": f"{type(e).__name__}: {e}"}) + "\n")
+            fail_f.flush()
+            print(f"    !! {type(e).__name__} on {len(batch)} chunk(s); recorded, skipping")
             return True
 
         spent += neurons
