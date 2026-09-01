@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { CookieConsent } from "@/components/cookie-consent";
 import { Providers } from "@/components/providers";
 import { APP_DESCRIPTION, APP_KEYWORDS, APP_NAME, APP_TAGLINE } from "@/lib/constants";
 import { JsonLd } from "@/lib/json-ld";
@@ -16,7 +17,6 @@ const geistMono = Geist_Mono({
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
-
 const title = `${APP_NAME} - ${APP_TAGLINE}`;
 
 export const metadata: Metadata = {
@@ -26,9 +26,15 @@ export const metadata: Metadata = {
     template: `%s | ${APP_NAME}`,
   },
   description: APP_DESCRIPTION,
+  keywords: [...APP_KEYWORDS],
   authors: [{ name: "UET GPT Team" }],
   creator: "UET GPT",
   publisher: "UET GPT",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "UET GPT",
+  },
   robots: {
     index: true,
     follow: true,
@@ -58,6 +64,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
+    site: "@uet_gpt",
+    creator: "@uet_gpt",
     title,
     description: APP_DESCRIPTION,
     images: [`${siteUrl}/opengraph-image`],
@@ -67,6 +75,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   colorScheme: "dark",
   themeColor: "#070708",
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -75,14 +84,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <JsonLd />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-[#070708]`}
+      >
         <a
           href="#main-content"
           className="fixed -left-full top-2 z-[var(--z-tooltip)] rounded-[var(--radius-sm)] bg-[var(--primary)] px-4 py-2 text-sm text-[var(--primary-fg)] shadow-[var(--shadow-lg)] transition-[left] focus:left-2"
         >
           Skip to main content
         </a>
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <CookieConsent />
+        </Providers>
       </body>
     </html>
   );
