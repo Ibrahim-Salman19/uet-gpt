@@ -1,22 +1,38 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SCHEMA_DATE_MODIFIED } from "@/lib/dates";
 import { BreadcrumbJsonLd } from "@/lib/json-ld";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
 export const metadata: Metadata = {
-  title: "UET Taxila Fee Structure - Undergraduate Tuition, Hostel & Other Charges",
+  title: "UET Taxila Fee Structure: Tuition & Hostel Fees",
   description:
     "UET Taxila fee structure explained: subsidized and partial-subsidized (S and X) undergraduate tuition, hostel and other charges, payment schedules, and the admission fee refund policy - with how UET GPT provides current figures.",
   alternates: {
     canonical: `${siteUrl}/uet-taxila/fee-structure`,
   },
   openGraph: {
-    title: "UET Taxila Fee Structure - Undergraduate Tuition, Hostel & Other Charges",
+    title: "UET Taxila Fee Structure: Tuition & Hostel Fees",
     description:
       "Undergraduate tuition, hostel and other charges at UET Taxila, the payment schedule, and the fee refund policy - grounded in the official UET Taxila prospectus.",
     url: `${siteUrl}/uet-taxila/fee-structure`,
     type: "website",
+    images: [
+      {
+        url: `${siteUrl}/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: "UET Taxila Fee Structure",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "UET Taxila Fee Structure: Tuition & Hostel Fees",
+    description:
+      "Undergraduate tuition, hostel charges, payment schedules, and refund policy at UET Taxila.",
+    images: [`${siteUrl}/opengraph-image`],
   },
 };
 
@@ -54,7 +70,7 @@ const FAQ_ITEMS = [
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
-  dateModified: "2026-07-16",
+  dateModified: SCHEMA_DATE_MODIFIED,
   mainEntity: FAQ_ITEMS.map((item) => ({
     "@type": "Question",
     name: item.q,
@@ -115,15 +131,16 @@ export default function UetTaxilaFeeStructurePage() {
       />
       <script
         type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: static schema
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <div className="flex min-h-screen flex-col bg-[#070708] text-[#e1e1e2]">
         <header className="flex items-center justify-between px-6 py-4 border-b border-[#1a1a1e]">
           <div className="flex items-center gap-3">
-            <div className="size-8 rounded-lg bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white font-bold text-sm">
+            <div className="size-8 rounded-lg bg-[#d9b451] flex items-center justify-center text-[#07080a] font-bold text-sm">
               U
             </div>
-            <span className="font-semibold text-base">UET GPT</span>
+            <span className="font-semibold text-base font-mono">UET GPT</span>
           </div>
           <nav className="flex items-center gap-4">
             <Link
@@ -136,13 +153,13 @@ export default function UetTaxilaFeeStructurePage() {
               href="/uet-taxila"
               className="text-sm text-[#a1a1aa] hover:text-[#e1e1e2] transition-colors"
             >
-              UET Taxila
+              UET Taxila Hub
             </Link>
             <Link
-              href="/sign-up"
-              className="text-sm px-4 py-2 rounded-lg bg-[#6366f1] text-white hover:bg-[#5558e6] transition-colors"
+              href="/chat"
+              className="text-sm px-4 py-2 rounded-lg bg-[#d9b451] text-[#07080a] font-semibold hover:bg-[#f0d178] transition-colors"
             >
-              Get Started
+              Start Chat
             </Link>
           </nav>
         </header>
@@ -151,7 +168,7 @@ export default function UetTaxilaFeeStructurePage() {
           <section className="px-6 pt-24 pb-16 max-w-3xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
               UET Taxila Fee Structure
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#6366f1] to-[#a78bfa]">
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#d9b451] to-[#f0d178] mt-2">
                 Tuition, Hostel &amp; Other Charges
               </span>
             </h1>
@@ -162,8 +179,8 @@ export default function UetTaxilaFeeStructurePage() {
             </p>
             <div className="flex items-center justify-center gap-4">
               <Link
-                href="/"
-                className="px-6 py-3 rounded-xl bg-[#6366f1] text-white font-medium hover:bg-[#5558e6] transition-colors text-base"
+                href="/chat"
+                className="px-6 py-3 rounded-xl bg-[#d9b451] text-[#07080a] font-semibold hover:bg-[#f0d178] transition-colors text-base"
               >
                 Ask UET GPT
               </Link>
@@ -314,127 +331,53 @@ export default function UetTaxilaFeeStructurePage() {
             </div>
           </section>
 
-          <section className="px-6 py-16 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-semibold text-center mb-4">
-              Differences Across Programs &amp; Categories
-            </h2>
-            <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto">
-              What changes between subsidized and partial-subsidized students
-            </p>
-            <div className="space-y-4">
-              <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
-                  Subsidized vs partial-subsidized (S and X)
-                </h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  Most UET Taxila seats are subsidized. Category S (All Pakistan) and Category X
-                  (children of overseas Pakistanis) are partial-subsidized. Fees are subsidized for
-                  all categories except S and X, and there is no relaxation, concession, or waiver
-                  in fee for the S and X categories. The difference shows up in admission charges
-                  (Rs. 7,000 vs Rs. 300,000) and per-semester tuition (Rs. 38,000 vs Rs. 130,000).
-                </p>
-              </div>
-              <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">Program-specific charges</h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  Civil Engineering students pay survey camp charges (Rs. 10,000 per semester) with
-                  the fee of the 2nd, 3rd, and 4th semesters. Students using university transport
-                  pay bus fares that differ for residents and non-residents, and these - along with
-                  electricity and gas charges - depend on prevailing government-fixed rates and are
-                  set each semester by the Vice Chancellor on the Treasurer&apos;s and PD&apos;s
-                  recommendations.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <section className="px-6 py-16 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-semibold text-center mb-4">
-              Payment, Deadlines &amp; Refunds
-            </h2>
-            <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto">
-              When fees are due, what happens on late payment, and how refunds work
-            </p>
-            <div className="space-y-4">
-              <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">When fees are due</h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  Regular semester fees are payable before the start of every semester. The
-                  Treasurer notifies the schedule about one month ahead, and registration plus fee
-                  submission must be completed ten days before the semester begins. The last date
-                  for semester registration is the last date for fee submission.
-                </p>
-              </div>
-              <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">Late payment and extensions</h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  A late registration fine of Rs. 100 per day applies up to one month after classes
-                  commence. A department chairman may grant a need-based extension (up to 30 days)
-                  or allow payment in two installments; the late fee fine itself generally cannot be
-                  waived. Persistent non-payment can lead to suspension or cancellation of
-                  admission.
-                </p>
-              </div>
-              <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">Fee refund policy</h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  On admission withdrawal, UET Taxila applies the National Level Fee-Refund Policy:
-                  100% of applicable fee refunded up to the 7th day of commencement of classes, 50%
-                  from the 8th to the 15th day, and 0% from the 16th day onward. The percentage
-                  applies to all components except security and admission charges, and the timeline
-                  runs continuously across weekdays and weekends.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <section className="px-6 py-16 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-semibold text-center mb-4">
-              How UET GPT Explains Current UET Taxila Fees
-            </h2>
-            <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto">
-              Accurate, sourced, and always current - that is how UET GPT answers fee questions
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[
-                {
-                  title: "Grounded in official data",
-                  desc: "UET GPT answers fee questions using Retrieval-Augmented Generation over official UET Taxila documents, including the undergraduate prospectus and the university website.",
-                },
-                {
-                  title: "Current figures, not guesses",
-                  desc: "Because bus fares, electricity, and gas charges change each semester, UET GPT provides the current figures and cites the official source rather than presenting outdated numbers.",
-                },
-                {
-                  title: "Any fee component",
-                  desc: "Ask about tuition, admission charges, hostel dues, refunds, category differences, or payment deadlines - UET GPT breaks it down clearly.",
-                },
-                {
-                  title: "Category clarity",
-                  desc: "UET GPT distinguishes subsidized from partial-subsidized (S and X) fees so applicants understand exactly what they owe.",
-                },
-                {
-                  title: "Refund scenarios",
-                  desc: "Get an up-to-date read on the fee refund policy and how much is recoverable at each stage of admission withdrawal.",
-                },
-                {
-                  title: "Free for everyone",
-                  desc: "UET GPT is free for all UET Taxila students, faculty, and prospective applicants. Start on the UET GPT home page.",
-                },
-              ].map((f) => (
-                <div key={f.title} className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                  <h3 className="font-semibold text-base mb-2">{f.title}</h3>
-                  <p className="text-sm text-[#a1a1aa]">{f.desc}</p>
-                </div>
-              ))}
-            </div>
-            <div className="text-center mt-12">
+          {/* Sibling Cross-Links & Navigation */}
+          <section className="px-6 py-12 max-w-4xl mx-auto border-t border-white/10">
+            <h2 className="text-xl font-semibold mb-6 text-white">Related UET Taxila Hub Guides</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <Link
-                href="/"
-                className="px-6 py-3 rounded-xl bg-[#6366f1] text-white font-medium hover:bg-[#5558e6] transition-colors text-base"
+                href="/uet-taxila/admissions"
+                className="p-4 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f] hover:border-[#d9b451]/50 transition-colors"
               >
-                Go to UET GPT
+                <div className="text-xs text-[#d9b451] font-mono mb-1">ADMISSIONS</div>
+                <h3 className="font-medium text-sm text-white">ECAT &amp; Merit 2026</h3>
+                <p className="text-xs text-[#a1a1aa] mt-1">
+                  Eligibility, aggregate, and application.
+                </p>
               </Link>
+              <Link
+                href="/uet-taxila/programs"
+                className="p-4 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f] hover:border-[#d9b451]/50 transition-colors"
+              >
+                <div className="text-xs text-[#d9b451] font-mono mb-1">ACADEMICS</div>
+                <h3 className="font-medium text-sm text-white">Programs &amp; Departments</h3>
+                <p className="text-xs text-[#a1a1aa] mt-1">14 departments across 6 faculties.</p>
+              </Link>
+              <Link
+                href="/learn/fee-structure"
+                className="p-4 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f] hover:border-[#d9b451]/50 transition-colors"
+              >
+                <div className="text-xs text-[#d9b451] font-mono mb-1">GLOSSARY</div>
+                <h3 className="font-medium text-sm text-white">Fee Structure Explained</h3>
+                <p className="text-xs text-[#a1a1aa] mt-1">
+                  Subsidized seats vs Category S &amp; X.
+                </p>
+              </Link>
+            </div>
+
+            {/* Editorial byline and official portal link */}
+            <div className="text-xs text-[#a1a1aa] border-t border-white/10 pt-4 mt-8 flex flex-col sm:flex-row justify-between items-center gap-2 font-mono">
+              <span>
+                Published by UET GPT Editorial Team • Verified against official Prospectus
+              </span>
+              <a
+                href="https://web.uettaxila.edu.pk"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#d9b451] hover:underline"
+              >
+                Official UET Taxila Portal &rarr;
+              </a>
             </div>
           </section>
 
@@ -453,34 +396,29 @@ export default function UetTaxilaFeeStructurePage() {
                 </details>
               ))}
             </div>
-            <div className="text-center mt-12">
-              <Link
-                href="/uet-taxila"
-                className="px-6 py-3 rounded-xl border border-[#27272a] text-[#a1a1aa] hover:text-[#e1e1e2] hover:border-[#3f3f46] transition-colors text-base"
-              >
-                Back to UET Taxila Hub
-              </Link>
-            </div>
           </section>
         </main>
 
         <footer className="border-t border-[#1a1a1e] px-6 py-8">
           <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-[#a1a1aa]">
-              &copy; {new Date().getFullYear()} UET GPT Team. All rights reserved.
+              &copy; {new Date().getFullYear()} UET GPT Community. All rights reserved.
             </p>
-            <div className="flex items-center gap-6 text-sm text-[#a1a1aa]">
+            <div className="flex flex-wrap items-center gap-6 text-sm text-[#a1a1aa]">
               <Link href="/" className="hover:text-[#e1e1e2] transition-colors">
-                UET GPT Home
+                Home
               </Link>
               <Link href="/uet-taxila" className="hover:text-[#e1e1e2] transition-colors">
-                UET Taxila
+                UET Taxila Hub
               </Link>
-              <Link href="/chat" className="hover:text-[#e1e1e2] transition-colors">
-                Chat
+              <Link href="/learn" className="hover:text-[#e1e1e2] transition-colors">
+                Glossary
               </Link>
-              <Link href="/explore" className="hover:text-[#e1e1e2] transition-colors">
-                Explore
+              <Link href="/about" className="hover:text-[#e1e1e2] transition-colors">
+                About
+              </Link>
+              <Link href="/privacy" className="hover:text-[#e1e1e2] transition-colors">
+                Privacy
               </Link>
             </div>
           </div>

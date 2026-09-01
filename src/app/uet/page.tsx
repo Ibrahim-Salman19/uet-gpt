@@ -5,16 +5,16 @@ import { BreadcrumbJsonLd } from "@/lib/json-ld";
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
 export const metadata: Metadata = {
-  title: "UET Taxila Guide: Admissions, Fees & Departments",
+  title: "UET: University of Engineering & Technology Guide",
   description:
-    "Complete guide to UET Taxila — admissions, ECAT entry test, merit formula, fee structures, departments, and campus life. Ask UET GPT for instant answers.",
+    "Comprehensive guide to the UET (University of Engineering & Technology) network in Pakistan with focused guides for the UET Taxila campus powered by UET GPT.",
   alternates: {
     canonical: `${siteUrl}/uet`,
   },
   openGraph: {
-    title: "UET Taxila Guide: Admissions, Fees & Departments | UET GPT",
+    title: "UET: University of Engineering & Technology Guide",
     description:
-      "Complete guide to UET Taxila — admissions, ECAT entry test, merit formula, fee structures, departments, and campus life.",
+      "Comprehensive guide to the UET (University of Engineering & Technology) network in Pakistan with focused guides for the UET Taxila campus powered by UET GPT.",
     url: `${siteUrl}/uet`,
     type: "website",
     images: [
@@ -22,14 +22,14 @@ export const metadata: Metadata = {
         url: `${siteUrl}/opengraph-image`,
         width: 1200,
         height: 630,
-        alt: "UET GPT — AI Assistant for UET Taxila",
+        alt: "UET: University of Engineering & Technology Guide",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "UET Taxila Guide: Admissions, Fees & Departments | UET GPT",
-    description: "Complete guide to UET Taxila — admissions, ECAT, merit, fees, and departments.",
+    title: "UET: University of Engineering & Technology Guide",
+    description: "Comprehensive guide to UET engineering universities in Pakistan and UET Taxila.",
     images: [`${siteUrl}/opengraph-image`],
   },
 };
@@ -73,6 +73,7 @@ export default function UetPage() {
       />
       <script
         type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: static schema
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
@@ -86,11 +87,11 @@ export default function UetPage() {
         </nav>
 
         <header className="mb-12 border-b border-[#27272a] pb-8">
-          <span className="inline-block rounded-full bg-[#18181b] px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#38bdf8] border border-[#27272a] mb-4">
+          <span className="inline-block rounded-full bg-[#18181b] px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#d9b451] border border-[#27272a] mb-4">
             Official Keyword Hub
           </span>
           <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl mb-4">
-            UET (University of Engineering & Technology)
+            UET (University of Engineering &amp; Technology)
           </h1>
           <p className="text-lg text-[#a1a1aa] leading-relaxed">
             Welcome to the complete guide for <strong className="text-white">UET</strong>{" "}
@@ -102,10 +103,10 @@ export default function UetPage() {
         <section className="mb-12 grid grid-cols-1 md:grid-cols-3 gap-6">
           <Link
             href="/uet-taxila"
-            className="group block rounded-xl border border-[#27272a] bg-[#09090b] p-6 transition-all hover:border-[#38bdf8]/50 hover:bg-[#18181b]"
+            className="group block rounded-xl border border-[#27272a] bg-[#09090b] p-6 transition-all hover:border-[#d9b451]/50 hover:bg-[#18181b]"
           >
-            <h2 className="text-xl font-semibold text-white group-hover:text-[#38bdf8] mb-2">
-              UET Taxila Guide →
+            <h2 className="text-xl font-semibold text-white group-hover:text-[#d9b451] mb-2">
+              UET Taxila Guide &rarr;
             </h2>
             <p className="text-sm text-[#a1a1aa]">
               Comprehensive overview of UET Taxila history, campuses, 14 departments, and faculties.
@@ -114,10 +115,10 @@ export default function UetPage() {
 
           <Link
             href="/uet-gpt"
-            className="group block rounded-xl border border-[#27272a] bg-[#09090b] p-6 transition-all hover:border-[#38bdf8]/50 hover:bg-[#18181b]"
+            className="group block rounded-xl border border-[#27272a] bg-[#09090b] p-6 transition-all hover:border-[#d9b451]/50 hover:bg-[#18181b]"
           >
-            <h2 className="text-xl font-semibold text-white group-hover:text-[#38bdf8] mb-2">
-              About UET GPT →
+            <h2 className="text-xl font-semibold text-white group-hover:text-[#d9b451] mb-2">
+              About UET GPT &rarr;
             </h2>
             <p className="text-sm text-[#a1a1aa]">
               Learn how the RAG-powered AI chatbot helps students find instant answers with
@@ -127,10 +128,10 @@ export default function UetPage() {
 
           <Link
             href="/uet-taxila/admissions"
-            className="group block rounded-xl border border-[#27272a] bg-[#09090b] p-6 transition-all hover:border-[#38bdf8]/50 hover:bg-[#18181b]"
+            className="group block rounded-xl border border-[#27272a] bg-[#09090b] p-6 transition-all hover:border-[#d9b451]/50 hover:bg-[#18181b]"
           >
-            <h2 className="text-xl font-semibold text-white group-hover:text-[#38bdf8] mb-2">
-              Admissions & ECAT →
+            <h2 className="text-xl font-semibold text-white group-hover:text-[#d9b451] mb-2">
+              Admissions &amp; ECAT &rarr;
             </h2>
             <p className="text-sm text-[#a1a1aa]">
               Eligibility, ECAT entry test formula, aggregate calculation, and key application
@@ -148,7 +149,7 @@ export default function UetPage() {
             </p>
             <Link
               href="/chat"
-              className="inline-flex items-center justify-center rounded-lg bg-[#38bdf8] px-6 py-3 text-sm font-semibold text-black hover:bg-[#0284c7] transition-colors"
+              className="inline-flex items-center justify-center rounded-lg bg-[#d9b451] px-6 py-3 text-sm font-semibold text-[#07080a] hover:bg-[#f0d178] transition-colors"
             >
               Start Free Chat with UET GPT
             </Link>

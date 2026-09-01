@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SCHEMA_DATE_MODIFIED } from "@/lib/dates";
 import { BreadcrumbJsonLd } from "@/lib/json-ld";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
@@ -7,14 +8,14 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app"
 export const metadata: Metadata = {
   title: "UET GPT: Free AI Assistant for UET Taxila Students",
   description:
-    "UET GPT is the free AI chatbot for UET Taxila. Ask about admissions, ECAT, merit, fees, departments — answers grounded in official data.",
+    "UET GPT is the free open-source AI assistant for UET Taxila. Ask questions about admissions, ECAT, merit formula, fee structures, and campus life.",
   alternates: {
     canonical: `${siteUrl}/uet-gpt`,
   },
   openGraph: {
     title: "UET GPT: Free AI Assistant for UET Taxila Students",
     description:
-      "UET GPT is the free AI chatbot for UET Taxila students. Ask about admissions, ECAT, merit, fees, and campus life.",
+      "UET GPT is the free open-source AI assistant for UET Taxila students. Ask about admissions, ECAT, merit, fees, and campus life.",
     url: `${siteUrl}/uet-gpt`,
     type: "website",
     images: [
@@ -64,7 +65,7 @@ const FAQ_ITEMS = [
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
-  dateModified: "2026-07-16",
+  dateModified: SCHEMA_DATE_MODIFIED,
   mainEntity: FAQ_ITEMS.map((item) => ({
     "@type": "Question",
     name: item.q,
@@ -106,10 +107,16 @@ export default function UetGptPage() {
               UET GPT Home
             </Link>
             <Link
-              href="/sign-up"
+              href="/uet-taxila"
+              className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors font-mono font-medium"
+            >
+              UET Taxila Hub
+            </Link>
+            <Link
+              href="/chat"
               className="text-xs px-4 py-2 rounded-md bg-[var(--accent)] text-[var(--accent-fg)] hover:bg-[var(--accent-hover)] transition-all font-mono font-semibold tracking-wider uppercase active:scale-[0.97] shadow-[0_2px_10px_rgba(202,138,4,0.15)]"
             >
-              Get Started
+              Start Chat
             </Link>
           </nav>
         </header>
@@ -130,7 +137,7 @@ export default function UetGptPage() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
-                href="/"
+                href="/chat"
                 className="w-full sm:w-auto px-6 py-3.5 rounded-md bg-[var(--accent)] text-[var(--accent-fg)] font-semibold hover:bg-[var(--accent-hover)] active:scale-[0.98] transition-all text-xs font-mono tracking-wider uppercase shadow-[0_4px_12px_rgba(202,138,4,0.2)]"
               >
                 Ask UET GPT
@@ -289,100 +296,6 @@ export default function UetGptPage() {
             </div>
           </section>
 
-          {/* Open Source & Community Section */}
-          <section className="px-6 py-16 max-w-4xl mx-auto">
-            <h2 className="text-xl md:text-2xl font-semibold text-center mb-2 tracking-tight text-[var(--text-primary)]">
-              Open Source & Community
-            </h2>
-            <p className="text-[var(--text-secondary)] text-sm text-center mb-8 font-sans">
-              UET GPT is free, transparent, and built in the open
-            </p>
-            <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/40 backdrop-blur-sm">
-              <p className="text-sm text-[var(--text-secondary)] leading-relaxed font-sans">
-                UET GPT is released as open-source software and runs free for everyone at{" "}
-                <Link
-                  href="/"
-                  className="text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors underline font-medium"
-                >
-                  uet-gpt.vercel.app
-                </Link>
-                . Because the project is student-built and community-maintained, anyone can suggest
-                improvements, report inaccuracies, or help expand coverage of UET Taxila topics.
-              </p>
-            </div>
-          </section>
-
-          {/* Disclaimer Section */}
-          <section className="px-6 py-16 max-w-4xl mx-auto">
-            <h2 className="text-xl md:text-2xl font-semibold text-center mb-2 tracking-tight text-[var(--text-primary)]">
-              Not Affiliated With the Official UET
-            </h2>
-            <p className="text-[var(--text-secondary)] text-sm text-center mb-8 font-sans">
-              An important distinction for anyone searching for &quot;UET GPT&quot;
-            </p>
-            <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/40 backdrop-blur-sm">
-              <p className="text-sm text-[var(--text-secondary)] leading-relaxed font-sans">
-                UET GPT is an independent project and is{" "}
-                <span className="text-[var(--text-primary)] font-medium">
-                  not affiliated with, endorsed by, or operated by
-                </span>{" "}
-                the University of Engineering and Technology, Taxila, or any campus of the
-                University of Engineering and Technology. The name &quot;UET GPT&quot; refers
-                specifically to this open-source guide. It is not an official university portal, and
-                for binding, authoritative decisions - admissions results, fee deadlines, and
-                official notices - you should always consult the official UET Taxila channels. UET
-                GPT is a helpful companion that points you to the right official sources.
-              </p>
-            </div>
-          </section>
-
-          {/* Links Row */}
-          <section className="px-6 py-16 max-w-5xl mx-auto">
-            <h2 className="text-xl md:text-2xl font-semibold text-center mb-2 tracking-tight text-[var(--text-primary)]">
-              Explore UET Taxila with UET GPT
-            </h2>
-            <p className="text-[var(--text-secondary)] text-sm text-center mb-8 font-sans">
-              Start asking, or read the broader guide to the university
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Link
-                href="/"
-                className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/20 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-card)]/30 transition-all"
-              >
-                <h3 className="font-semibold text-base mb-2 text-[var(--text-primary)]">
-                  UET GPT Home
-                </h3>
-                <p className="text-sm text-[var(--text-secondary)] font-sans">
-                  Open the chatbot and start asking questions about UET Taxila admissions, fees,
-                  departments, and campus life.
-                </p>
-              </Link>
-              <Link
-                href="/uet-taxila"
-                className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/20 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-card)]/30 transition-all"
-              >
-                <h3 className="font-semibold text-base mb-2 text-[var(--text-primary)]">
-                  Guide to UET Taxila
-                </h3>
-                <p className="text-sm text-[var(--text-secondary)] font-sans">
-                  Read the authoritative, AI-grounded guide to UET Taxila - its history, campuses,
-                  faculties, departments, and admissions.
-                </p>
-              </Link>
-              <Link
-                href="/uet"
-                className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/20 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-card)]/30 transition-all"
-              >
-                <h3 className="font-semibold text-base mb-2 text-[var(--text-primary)]">
-                  UET Keyword Hub
-                </h3>
-                <p className="text-sm text-[var(--text-secondary)] font-sans">
-                  Quick overview of UET, UET Taxila, and UET GPT with links to all guides.
-                </p>
-              </Link>
-            </div>
-          </section>
-
           {/* FAQ Accordion Section */}
           <section className="px-6 py-16 max-w-3xl mx-auto">
             <h2 className="text-xl md:text-2xl font-semibold text-center mb-8 tracking-tight text-[var(--text-primary)]">
@@ -412,10 +325,10 @@ export default function UetGptPage() {
         {/* Footer */}
         <footer className="border-t border-[var(--border)] px-6 py-8 bg-[var(--surface-base)] text-[var(--text-secondary)] font-mono text-xs">
           <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            <p>&copy; {new Date().getFullYear()} UET GPT Team. All rights reserved.</p>
-            <div className="flex items-center gap-6">
+            <p>&copy; {new Date().getFullYear()} UET GPT Community. All rights reserved.</p>
+            <div className="flex flex-wrap items-center gap-6">
               <Link href="/" className="hover:text-[var(--text-primary)] transition-colors">
-                UET GPT Home
+                Home
               </Link>
               <Link
                 href="/uet-taxila"
@@ -423,8 +336,14 @@ export default function UetGptPage() {
               >
                 UET Taxila
               </Link>
-              <Link href="/uet" className="hover:text-[var(--text-primary)] transition-colors">
-                UET
+              <Link href="/learn" className="hover:text-[var(--text-primary)] transition-colors">
+                Glossary
+              </Link>
+              <Link href="/about" className="hover:text-[var(--text-primary)] transition-colors">
+                About
+              </Link>
+              <Link href="/privacy" className="hover:text-[var(--text-primary)] transition-colors">
+                Privacy
               </Link>
             </div>
           </div>

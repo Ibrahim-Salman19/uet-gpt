@@ -1,22 +1,38 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SCHEMA_DATE_MODIFIED } from "@/lib/dates";
 import { BreadcrumbJsonLd } from "@/lib/json-ld";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
 export const metadata: Metadata = {
-  title: "UET Taxila Programs & Departments - Undergraduate, Graduate, PhD",
+  title: "UET Taxila Programs & Departments: BS, MS, PhD",
   description:
     "Explore UET Taxila programs and UET Taxila departments: 14 departments across 6 faculties offering undergraduate, graduate (MS/MPhil), and PhD degrees - and how UET GPT helps you choose.",
   alternates: {
     canonical: `${siteUrl}/uet-taxila/programs`,
   },
   openGraph: {
-    title: "UET Taxila Programs & Departments - Undergraduate, Graduate, PhD",
+    title: "UET Taxila Programs & Departments: BS, MS, PhD",
     description:
       "The 14 departments and 6 faculties of UET Taxila, plus its undergraduate, graduate, and PhD programs - and how UET GPT helps students choose the right path.",
     url: `${siteUrl}/uet-taxila/programs`,
     type: "website",
+    images: [
+      {
+        url: `${siteUrl}/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: "UET Taxila Programs & Departments",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "UET Taxila Programs & Departments: BS, MS, PhD",
+    description:
+      "Explore 14 departments and 6 faculties at UET Taxila offering BS, MS, and PhD degrees.",
+    images: [`${siteUrl}/opengraph-image`],
   },
 };
 
@@ -50,7 +66,7 @@ const FAQ_ITEMS = [
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
-  dateModified: "2026-07-16",
+  dateModified: SCHEMA_DATE_MODIFIED,
   mainEntity: FAQ_ITEMS.map((item) => ({
     "@type": "Question",
     name: item.q,
@@ -115,15 +131,16 @@ export default function UetTaxilaProgramsPage() {
       />
       <script
         type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: static schema
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <div className="flex min-h-screen flex-col bg-[#070708] text-[#e1e1e2]">
         <header className="flex items-center justify-between px-6 py-4 border-b border-[#1a1a1e]">
           <div className="flex items-center gap-3">
-            <div className="size-8 rounded-lg bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white font-bold text-sm">
+            <div className="size-8 rounded-lg bg-[#d9b451] flex items-center justify-center text-[#07080a] font-bold text-sm">
               U
             </div>
-            <span className="font-semibold text-base">UET GPT</span>
+            <span className="font-semibold text-base font-mono">UET GPT</span>
           </div>
           <nav className="flex items-center gap-4">
             <Link
@@ -139,10 +156,10 @@ export default function UetTaxilaProgramsPage() {
               UET Taxila Hub
             </Link>
             <Link
-              href="/sign-up"
-              className="text-sm px-4 py-2 rounded-lg bg-[#6366f1] text-white hover:bg-[#5558e6] transition-colors"
+              href="/chat"
+              className="text-sm px-4 py-2 rounded-lg bg-[#d9b451] text-[#07080a] font-semibold hover:bg-[#f0d178] transition-colors"
             >
-              Get Started
+              Start Chat
             </Link>
           </nav>
         </header>
@@ -151,7 +168,7 @@ export default function UetTaxilaProgramsPage() {
           <section className="px-6 pt-24 pb-16 max-w-3xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
               UET Taxila Programs
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#6366f1] to-[#a78bfa]">
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#d9b451] to-[#f0d178] mt-2">
                 and Departments
               </span>
             </h1>
@@ -162,8 +179,8 @@ export default function UetTaxilaProgramsPage() {
             </p>
             <div className="flex items-center justify-center gap-4">
               <Link
-                href="/"
-                className="px-6 py-3 rounded-xl bg-[#6366f1] text-white font-medium hover:bg-[#5558e6] transition-colors text-base"
+                href="/chat"
+                className="px-6 py-3 rounded-xl bg-[#d9b451] text-[#07080a] font-semibold hover:bg-[#f0d178] transition-colors text-base"
               >
                 Ask UET GPT
               </Link>
@@ -186,7 +203,7 @@ export default function UetTaxilaProgramsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {FACULTIES.map((f) => (
                 <div key={f.title} className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                  <h3 className="font-semibold text-base mb-3">{f.title}</h3>
+                  <h3 className="font-semibold text-base mb-3 text-white">{f.title}</h3>
                   <ul className="mb-3 space-y-1">
                     {f.departments.map((d) => (
                       <li key={d} className="text-sm text-[#a1a1aa]">
@@ -248,54 +265,51 @@ export default function UetTaxilaProgramsPage() {
             </div>
           </section>
 
-          <section className="px-6 py-16 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-semibold text-center mb-4">
-              How UET GPT Helps You Choose a Program
-            </h2>
-            <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto">
-              Choosing the right department is the first real decision of your UET Taxila journey -
-              UET GPT makes it easier
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[
-                {
-                  title: "Compare Departments",
-                  desc: "Understand what each of the 14 departments actually teaches, and how their programs differ, before you pick.",
-                },
-                {
-                  title: "Match Your Interests",
-                  desc: "Tell UET GPT your strengths and goals; it maps them to the right faculty and program at UET Taxila.",
-                },
-                {
-                  title: "Understand Admission",
-                  desc: "Get clear, current answers on ECAT, merit, eligibility, and seat allocation for each program.",
-                },
-                {
-                  title: "Plan Your Path",
-                  desc: "See how undergraduate, MS/MPhil, and PhD study connect, and what each level prepares you for.",
-                },
-                {
-                  title: "Research & Careers",
-                  desc: "Learn about each department's labs, research areas, and career outlook grounded in official data.",
-                },
-                {
-                  title: "Always Grounded",
-                  desc: "UET GPT uses Retrieval-Augmented Generation over official UET Taxila documents, so guidance stays accurate.",
-                },
-              ].map((f) => (
-                <div key={f.title} className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                  <h3 className="font-semibold text-base mb-2">{f.title}</h3>
-                  <p className="text-sm text-[#a1a1aa]">{f.desc}</p>
-                </div>
-              ))}
-            </div>
-            <div className="text-center mt-12">
+          {/* Sibling Cross-Links & Navigation */}
+          <section className="px-6 py-12 max-w-4xl mx-auto border-t border-white/10">
+            <h2 className="text-xl font-semibold mb-6 text-white">Related UET Taxila Hub Guides</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <Link
-                href="/"
-                className="px-6 py-3 rounded-xl bg-[#6366f1] text-white font-medium hover:bg-[#5558e6] transition-colors text-base"
+                href="/uet-taxila/admissions"
+                className="p-4 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f] hover:border-[#d9b451]/50 transition-colors"
               >
-                Go to UET GPT
+                <div className="text-xs text-[#d9b451] font-mono mb-1">ADMISSIONS</div>
+                <h3 className="font-medium text-sm text-white">ECAT &amp; Merit 2026</h3>
+                <p className="text-xs text-[#a1a1aa] mt-1">Requirements and entry test criteria.</p>
               </Link>
+              <Link
+                href="/uet-taxila/fee-structure"
+                className="p-4 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f] hover:border-[#d9b451]/50 transition-colors"
+              >
+                <div className="text-xs text-[#d9b451] font-mono mb-1">FINANCES</div>
+                <h3 className="font-medium text-sm text-white">Fee Structure 2026</h3>
+                <p className="text-xs text-[#a1a1aa] mt-1">
+                  Tuition, hostel, and semester charges.
+                </p>
+              </Link>
+              <Link
+                href="/learn/eligibility-criteria"
+                className="p-4 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f] hover:border-[#d9b451]/50 transition-colors"
+              >
+                <div className="text-xs text-[#d9b451] font-mono mb-1">GLOSSARY</div>
+                <h3 className="font-medium text-sm text-white">Eligibility Criteria</h3>
+                <p className="text-xs text-[#a1a1aa] mt-1">60% vs 50% threshold rules.</p>
+              </Link>
+            </div>
+
+            {/* Editorial byline and official portal link */}
+            <div className="text-xs text-[#a1a1aa] border-t border-white/10 pt-4 mt-8 flex flex-col sm:flex-row justify-between items-center gap-2 font-mono">
+              <span>
+                Published by UET GPT Editorial Team • Verified against official Prospectus
+              </span>
+              <a
+                href="https://web.uettaxila.edu.pk"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#d9b451] hover:underline"
+              >
+                Official UET Taxila Portal &rarr;
+              </a>
             </div>
           </section>
 
@@ -314,31 +328,29 @@ export default function UetTaxilaProgramsPage() {
                 </details>
               ))}
             </div>
-            <div className="text-center mt-10">
-              <Link
-                href="/uet-taxila"
-                className="text-sm text-[#a1a1aa] hover:text-[#e1e1e2] transition-colors"
-              >
-                Explore the UET Taxila Hub &rarr;
-              </Link>
-            </div>
           </section>
         </main>
 
         <footer className="border-t border-[#1a1a1e] px-6 py-8">
           <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-[#a1a1aa]">
-              &copy; {new Date().getFullYear()} UET GPT Team. All rights reserved.
+              &copy; {new Date().getFullYear()} UET GPT Community. All rights reserved.
             </p>
-            <div className="flex items-center gap-6 text-sm text-[#a1a1aa]">
+            <div className="flex flex-wrap items-center gap-6 text-sm text-[#a1a1aa]">
               <Link href="/" className="hover:text-[#e1e1e2] transition-colors">
-                UET GPT Home
+                Home
               </Link>
               <Link href="/uet-taxila" className="hover:text-[#e1e1e2] transition-colors">
                 UET Taxila Hub
               </Link>
-              <Link href="/chat" className="hover:text-[#e1e1e2] transition-colors">
-                Chat
+              <Link href="/learn" className="hover:text-[#e1e1e2] transition-colors">
+                Glossary
+              </Link>
+              <Link href="/about" className="hover:text-[#e1e1e2] transition-colors">
+                About
+              </Link>
+              <Link href="/privacy" className="hover:text-[#e1e1e2] transition-colors">
+                Privacy
               </Link>
             </div>
           </div>

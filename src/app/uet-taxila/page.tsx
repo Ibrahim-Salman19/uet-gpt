@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SCHEMA_DATE_MODIFIED } from "@/lib/dates";
 import { BreadcrumbJsonLd } from "@/lib/json-ld";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
@@ -64,7 +65,7 @@ const FAQ_ITEMS = [
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
-  dateModified: "2026-07-16",
+  dateModified: SCHEMA_DATE_MODIFIED,
   mainEntity: FAQ_ITEMS.map((item) => ({
     "@type": "Question",
     name: item.q,
@@ -86,6 +87,7 @@ export default function UetTaxilaPage() {
       />
       <script
         type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: static schema
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <div className="flex min-h-screen flex-col bg-[var(--surface-base)] text-[var(--text-primary)] selection:bg-[var(--accent)] selection:text-[var(--accent-fg)]">
@@ -105,10 +107,16 @@ export default function UetTaxilaPage() {
               UET GPT Home
             </Link>
             <Link
-              href="/sign-up"
+              href="/learn"
+              className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors font-mono font-medium"
+            >
+              Glossary
+            </Link>
+            <Link
+              href="/chat"
               className="text-xs px-4 py-2 rounded-md bg-[var(--accent)] text-[var(--accent-fg)] hover:bg-[var(--accent-hover)] transition-all font-mono font-semibold tracking-wider uppercase active:scale-[0.97] shadow-[0_2px_10px_rgba(202,138,4,0.15)]"
             >
-              Get Started
+              Start Chat
             </Link>
           </nav>
         </header>
@@ -129,16 +137,16 @@ export default function UetTaxilaPage() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
-                href="/"
+                href="/chat"
                 className="w-full sm:w-auto px-6 py-3.5 rounded-md bg-[var(--accent)] text-[var(--accent-fg)] font-semibold hover:bg-[var(--accent-hover)] active:scale-[0.98] transition-all text-xs font-mono tracking-wider uppercase shadow-[0_4px_12px_rgba(202,138,4,0.2)]"
               >
                 Ask UET GPT
               </Link>
               <Link
-                href="/sign-up"
+                href="/uet-taxila/admissions"
                 className="w-full sm:w-auto px-6 py-3.5 rounded-md border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent)]/30 active:scale-[0.98] transition-all text-xs font-mono tracking-wider uppercase"
               >
-                Sign In
+                Admissions 2026
               </Link>
             </div>
           </section>
@@ -344,15 +352,15 @@ export default function UetTaxilaPage() {
             </div>
             <div className="text-center mt-12">
               <Link
-                href="/"
+                href="/chat"
                 className="px-6 py-3.5 rounded-md bg-[var(--accent)] text-[var(--accent-fg)] font-semibold hover:bg-[var(--accent-hover)] active:scale-[0.98] transition-all text-xs font-mono tracking-wider uppercase shadow-[0_4px_12px_rgba(202,138,4,0.2)]"
               >
-                Go to UET GPT
+                Start Chat with UET GPT
               </Link>
             </div>
           </section>
 
-          {/* Sub Guides Section */}
+          {/* Sub Guides Section - Fixed direct routing URLs */}
           <section className="px-6 py-16 max-w-4xl mx-auto">
             <h2 className="text-xl md:text-2xl font-semibold text-center mb-2 tracking-tight text-[var(--text-primary)]">
               Explore UET Taxila Guides
@@ -362,7 +370,7 @@ export default function UetTaxilaPage() {
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Link
-                href="#admissions"
+                href="/uet-taxila/admissions"
                 className="p-5 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/20 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-card)]/30 transition-all"
               >
                 <h3 className="font-semibold text-base mb-1 text-[var(--text-primary)]">
@@ -373,7 +381,7 @@ export default function UetTaxilaPage() {
                 </p>
               </Link>
               <Link
-                href="#faculties"
+                href="/uet-taxila/programs"
                 className="p-5 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/20 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-card)]/30 transition-all"
               >
                 <h3 className="font-semibold text-base mb-1 text-[var(--text-primary)]">
@@ -384,7 +392,7 @@ export default function UetTaxilaPage() {
                 </p>
               </Link>
               <Link
-                href="#admissions"
+                href="/uet-taxila/fee-structure"
                 className="p-5 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/20 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-card)]/30 transition-all"
               >
                 <h3 className="font-semibold text-base mb-1 text-[var(--text-primary)]">
@@ -405,6 +413,21 @@ export default function UetTaxilaPage() {
                   Quick overview of all UET pages.
                 </p>
               </Link>
+            </div>
+
+            {/* Editorial byline and official portal link */}
+            <div className="text-xs text-[var(--text-secondary)] border-t border-[var(--border)] pt-4 mt-8 flex flex-col sm:flex-row justify-between items-center gap-2 font-mono">
+              <span>
+                Published by UET GPT Editorial Team • Verified against official Prospectus
+              </span>
+              <a
+                href="https://web.uettaxila.edu.pk"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--accent)] hover:underline"
+              >
+                Official UET Taxila Portal &rarr;
+              </a>
             </div>
           </section>
 
@@ -437,22 +460,25 @@ export default function UetTaxilaPage() {
         {/* Footer */}
         <footer className="border-t border-[var(--border)] px-6 py-8 bg-[var(--surface-base)] text-[var(--text-secondary)] font-mono text-xs">
           <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            <p>&copy; {new Date().getFullYear()} UET GPT Team. All rights reserved.</p>
-            <div className="flex items-center gap-6">
+            <p>&copy; {new Date().getFullYear()} UET GPT Community. All rights reserved.</p>
+            <div className="flex flex-wrap items-center gap-6">
               <Link href="/" className="hover:text-[var(--text-primary)] transition-colors">
-                UET GPT Home
+                Home
               </Link>
               <Link href="/learn" className="hover:text-[var(--text-primary)] transition-colors">
                 Glossary
               </Link>
-              <Link href="/chat" className="hover:text-[var(--text-primary)] transition-colors">
-                Chat
+              <Link href="/about" className="hover:text-[var(--text-primary)] transition-colors">
+                About
               </Link>
-              <Link href="/explore" className="hover:text-[var(--text-primary)] transition-colors">
-                Explore
+              <Link href="/privacy" className="hover:text-[var(--text-primary)] transition-colors">
+                Privacy
               </Link>
-              <Link href="/uet" className="hover:text-[var(--text-primary)] transition-colors">
-                UET Hub
+              <Link href="/terms" className="hover:text-[var(--text-primary)] transition-colors">
+                Terms
+              </Link>
+              <Link href="/contact" className="hover:text-[var(--text-primary)] transition-colors">
+                Contact
               </Link>
             </div>
           </div>

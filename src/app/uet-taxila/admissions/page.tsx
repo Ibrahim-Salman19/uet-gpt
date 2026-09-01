@@ -1,22 +1,38 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SCHEMA_DATE_MODIFIED } from "@/lib/dates";
 import { BreadcrumbJsonLd } from "@/lib/json-ld";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
 export const metadata: Metadata = {
-  title: "UET Taxila Admissions 2025 - ECAT, Eligibility & Merit",
+  title: "UET Taxila Admissions 2026: ECAT, Merit & Guide",
   description:
     "UET Taxila admissions guide: UET Taxila ECAT entry test, 60%/50% eligibility, how merit is calculated (ECAT 33%, HSSC 50%, SSC 17%), merit lists, required documents, and how UET GPT helps applicants.",
   alternates: {
     canonical: `${siteUrl}/uet-taxila/admissions`,
   },
   openGraph: {
-    title: "UET Taxila Admissions 2025 - ECAT, Eligibility & Merit",
+    title: "UET Taxila Admissions 2026: ECAT, Merit & Guide",
     description:
       "How UET Taxila admissions work: the UET Taxila ECAT entry test, eligibility marks, the merit formula, merit lists, and required documents - explained with UET GPT.",
     url: `${siteUrl}/uet-taxila/admissions`,
     type: "website",
+    images: [
+      {
+        url: `${siteUrl}/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: "UET Taxila Admissions 2026",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "UET Taxila Admissions 2026: ECAT, Merit & Guide",
+    description:
+      "UET Taxila admissions guide: ECAT entry test, eligibility, merit calculation, and key dates.",
+    images: [`${siteUrl}/opengraph-image`],
   },
 };
 
@@ -50,7 +66,7 @@ const FAQ_ITEMS = [
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
-  dateModified: "2026-07-16",
+  dateModified: SCHEMA_DATE_MODIFIED,
   mainEntity: FAQ_ITEMS.map((item) => ({
     "@type": "Question",
     name: item.q,
@@ -76,13 +92,13 @@ export default function UetTaxilaAdmissionsPage() {
         // biome-ignore lint/security/noDangerouslySetInnerHtml: Needed for JSON-LD schema
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <div className="flex min-h-screen flex-col bg-[var(--surface-base)] text-zinc-100">
-        <header className="flex items-center justify-between px-6 py-4 border-b border-[var(--surface-divider)]">
+      <div className="flex min-h-screen flex-col bg-[#070708] text-zinc-100">
+        <header className="flex items-center justify-between px-6 py-4 border-b border-[#1a1a1e]">
           <div className="flex items-center gap-3">
-            <div className="size-8 rounded-lg bg-[var(--accent)] flex items-center justify-center text-white font-bold text-sm">
+            <div className="size-8 rounded-lg bg-[#d9b451] flex items-center justify-center text-[#07080a] font-bold text-sm">
               U
             </div>
-            <span className="font-semibold text-base">UET GPT</span>
+            <span className="font-semibold text-base font-mono">UET GPT</span>
           </div>
           <nav className="flex items-center gap-4">
             <Link href="/" className="text-sm text-zinc-400 hover:text-zinc-200 transition-colors">
@@ -95,10 +111,10 @@ export default function UetTaxilaAdmissionsPage() {
               UET Taxila Hub
             </Link>
             <Link
-              href="/sign-up"
-              className="text-sm px-4 py-2 rounded-lg bg-[#6366f1] text-white hover:bg-[#5558e6] transition-colors"
+              href="/chat"
+              className="text-sm px-4 py-2 rounded-lg bg-[#d9b451] text-[#07080a] font-semibold hover:bg-[#f0d178] transition-colors"
             >
-              Get Started
+              Start Chat
             </Link>
           </nav>
         </header>
@@ -106,8 +122,8 @@ export default function UetTaxilaAdmissionsPage() {
         <main id="main-content" className="flex-1">
           <section className="px-6 pt-24 pb-16 max-w-3xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
-              UET Taxila Admissions
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#6366f1] to-[#a78bfa]">
+              UET Taxila Admissions 2026
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#d9b451] to-[#f0d178] mt-2">
                 ECAT, Eligibility &amp; Merit
               </span>
             </h1>
@@ -118,8 +134,8 @@ export default function UetTaxilaAdmissionsPage() {
             </p>
             <div className="flex items-center justify-center gap-4">
               <Link
-                href="/"
-                className="px-6 py-3 rounded-xl bg-[#6366f1] text-white font-medium hover:bg-[#5558e6] transition-colors text-base"
+                href="/chat"
+                className="px-6 py-3 rounded-xl bg-[#d9b451] text-[#07080a] font-semibold hover:bg-[#f0d178] transition-colors text-base"
               >
                 Ask UET GPT
               </Link>
@@ -307,130 +323,51 @@ export default function UetTaxilaAdmissionsPage() {
             </div>
           </section>
 
-          <section className="px-6 py-16 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-semibold text-center mb-4">
-              Merit Lists, Seats &amp; Categories
-            </h2>
-            <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto">
-              How seats are allocated and where you stand once lists are out
-            </p>
-            <div className="space-y-4">
-              <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">Category-wise merit</h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  Seats are distributed across categories such as Open Merit (A), reserved district
-                  and minority categories, children of university alumni and graduates, disabled
-                  persons, tribal areas, and overseas Pakistanis. Eligible applicants in each
-                  category compete among themselves for the seats allocated to that category.
-                </p>
-              </div>
-              <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">Tie-breaking and list publication</h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  If two or more applicants have equal admission marks up to three decimal places,
-                  they are treated at par and all may be admitted to the last seat. Merit lists are
-                  displayed on the notified date and time showing the percentage of applicants
-                  admitted per discipline and category.
-                </p>
-              </div>
-              <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">Movement of unfilled seats</h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  Unfilled seats in reserved categories are moved to open-merit seats over the
-                  admission cycle. Applicants may be transferred upward to a vacant higher
-                  preference, or request a one-time downgrade, depending on merit and seat
-                  availability - or freeze their selected discipline and category in writing.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <section className="px-6 py-16 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-semibold text-center mb-4">
-              Documents Required for Admission
-            </h2>
-            <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto">
-              What to keep attested and ready before you apply
-            </p>
-            <div className="space-y-4">
-              <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">Domicile certificate (mandatory)</h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  All applicants must submit an attested photocopy of their domicile certificate;
-                  without it the application is not considered. For certain categories, a
-                  parent&apos;s domicile certificate and proof of inclusion in the electoral rolls
-                  are also required.
-                </p>
-              </div>
-              <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
-                  Attestation of application documents
-                </h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  All documents attached with the Application Form (F-I) must be attested by a
-                  Class-I gazetted officer of the Government or a Class-A officer of the University
-                  at the time of joining.
-                </p>
-              </div>
-              <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">Equivalence and category proofs</h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  A-Level and other foreign-qualification applicants attach an IBCC equivalence
-                  certificate (Pre-Engineering) with their application. Children of government
-                  servants posted outside Punjab and other specified categories submit additional
-                  forms (F-II / F-III) downloaded from the admissions portal.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <section className="px-6 py-16 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-semibold text-center mb-4">
-              How UET GPT Helps with UET Taxila Admissions
-            </h2>
-            <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto">
-              Accurate, prospectus-grounded answers for every step of your application
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[
-                {
-                  title: "ECAT & Eligibility",
-                  desc: "Clarify which entry test applies, the 60%/50% eligibility thresholds, and the subject combinations needed for each program.",
-                },
-                {
-                  title: "Merit Formula",
-                  desc: "See exactly how ECAT (33%), HSSC (50%), and SSC (17%) combine, with worked examples you can adapt to your own marks.",
-                },
-                {
-                  title: "Merit Lists & Seats",
-                  desc: "Understand category-wise seat allocation, how lists are published, and how transfers, downgrades, and freezing work.",
-                },
-                {
-                  title: "Documents Checklist",
-                  desc: "Know the mandatory domicile certificate, attestation rules, and the extra proofs your category requires before you apply.",
-                },
-                {
-                  title: "Always Grounded",
-                  desc: "UET GPT answers from the official UET Taxila undergraduate prospectus, so admissions guidance stays accurate and current.",
-                },
-                {
-                  title: "Free for Applicants",
-                  desc: "UET GPT is free for prospective applicants, students, and faculty. Ask your admissions question on the UET GPT home page.",
-                },
-              ].map((f) => (
-                <div key={f.title} className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                  <h3 className="font-semibold text-base mb-2">{f.title}</h3>
-                  <p className="text-sm text-[#a1a1aa]">{f.desc}</p>
-                </div>
-              ))}
-            </div>
-            <div className="text-center mt-12">
+          {/* Sibling Cross-Links & Navigation */}
+          <section className="px-6 py-12 max-w-4xl mx-auto border-t border-white/10">
+            <h2 className="text-xl font-semibold mb-6 text-white">Related UET Taxila Hub Guides</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <Link
-                href="/"
-                className="px-6 py-3 rounded-xl bg-[#6366f1] text-white font-medium hover:bg-[#5558e6] transition-colors text-base"
+                href="/uet-taxila/fee-structure"
+                className="p-4 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f] hover:border-[#d9b451]/50 transition-colors"
               >
-                Ask UET GPT
+                <div className="text-xs text-[#d9b451] font-mono mb-1">FINANCES</div>
+                <h3 className="font-medium text-sm text-white">Fee Structure 2026</h3>
+                <p className="text-xs text-[#a1a1aa] mt-1">Tuition, hostel, and fee schedules.</p>
               </Link>
+              <Link
+                href="/uet-taxila/programs"
+                className="p-4 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f] hover:border-[#d9b451]/50 transition-colors"
+              >
+                <div className="text-xs text-[#d9b451] font-mono mb-1">ACADEMICS</div>
+                <h3 className="font-medium text-sm text-white">Programs &amp; Departments</h3>
+                <p className="text-xs text-[#a1a1aa] mt-1">14 departments across 6 faculties.</p>
+              </Link>
+              <Link
+                href="/learn/ecat"
+                className="p-4 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f] hover:border-[#d9b451]/50 transition-colors"
+              >
+                <div className="text-xs text-[#d9b451] font-mono mb-1">GLOSSARY</div>
+                <h3 className="font-medium text-sm text-white">ECAT Entry Test Guide</h3>
+                <p className="text-xs text-[#a1a1aa] mt-1">
+                  Format, scoring, and syllabus details.
+                </p>
+              </Link>
+            </div>
+
+            {/* Editorial byline and official portal link */}
+            <div className="text-xs text-[#a1a1aa] border-t border-white/10 pt-4 mt-8 flex flex-col sm:flex-row justify-between items-center gap-2 font-mono">
+              <span>
+                Published by UET GPT Editorial Team • Verified against official Prospectus
+              </span>
+              <a
+                href="https://web.uettaxila.edu.pk"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#d9b451] hover:underline"
+              >
+                Official UET Taxila Portal &rarr;
+              </a>
             </div>
           </section>
 
@@ -449,45 +386,17 @@ export default function UetTaxilaAdmissionsPage() {
                 </details>
               ))}
             </div>
-            <p className="text-sm text-[#a1a1aa] text-center mt-8">
-              Explore more on the{" "}
-              <Link
-                href="/uet-taxila"
-                className="text-[#6366f1] hover:text-[#8b5cf6] transition-colors"
-              >
-                UET Taxila hub
-              </Link>{" "}
-              or go to the{" "}
-              <Link href="/" className="text-[#6366f1] hover:text-[#8b5cf6] transition-colors">
-                UET GPT home page
-              </Link>
-              . For detailed term explanations, see{" "}
-              <Link
-                href="/learn/ecat"
-                className="text-[#6366f1] hover:text-[#8b5cf6] transition-colors"
-              >
-                ECAT explained
-              </Link>{" "}
-              and{" "}
-              <Link
-                href="/learn/merit-formula"
-                className="text-[#6366f1] hover:text-[#8b5cf6] transition-colors"
-              >
-                merit formula
-              </Link>
-              .
-            </p>
           </section>
         </main>
 
         <footer className="border-t border-[#1a1a1e] px-6 py-8">
           <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-[#a1a1aa]">
-              &copy; {new Date().getFullYear()} UET GPT Team. All rights reserved.
+              &copy; {new Date().getFullYear()} UET GPT Community. All rights reserved.
             </p>
-            <div className="flex items-center gap-6 text-sm text-[#a1a1aa]">
+            <div className="flex flex-wrap items-center gap-6 text-sm text-[#a1a1aa]">
               <Link href="/" className="hover:text-[#e1e1e2] transition-colors">
-                UET GPT Home
+                Home
               </Link>
               <Link href="/uet-taxila" className="hover:text-[#e1e1e2] transition-colors">
                 UET Taxila Hub
@@ -495,8 +404,11 @@ export default function UetTaxilaAdmissionsPage() {
               <Link href="/learn" className="hover:text-[#e1e1e2] transition-colors">
                 Glossary
               </Link>
-              <Link href="/chat" className="hover:text-[#e1e1e2] transition-colors">
-                Chat
+              <Link href="/about" className="hover:text-[#e1e1e2] transition-colors">
+                About
+              </Link>
+              <Link href="/privacy" className="hover:text-[#e1e1e2] transition-colors">
+                Privacy
               </Link>
             </div>
           </div>
