@@ -435,28 +435,52 @@ below) and (b) actually states the same fact, not merely a related one.
 
 **Results — 10 upgraded, 6 searched-and-not-found:**
 
-Upgraded to `AUTHORITATIVE_SOURCE_MATCH` (independent second/third source
-confirmed, reasoning recorded in each query's `provenance` field in
-`golden_set_verified.jsonl`):
+Upgraded to `AUTHORITATIVE_SOURCE_MATCH`, but not all at the same
+evidentiary strength — two distinct tiers, both legitimate but worth
+telling apart rather than presenting as one undifferentiated list:
 
-- Q6 (pay semester fee) — Dues Notice PDF + 2024 Prospectus
-- Q7 (late fee fine) — same §30.4 text in two independent Prospectus
+**Same-fact confirmation** (two+ independent sources state the identical
+fact — the stronger tier):
+
+- Q7 (late fee fine) — identical §30.4 text in two independent Prospectus
   editions (2024 and 2025)
-- Q8 (BS CS eligibility 50%) — corroborated by 2 further independent
-  documents beyond the original FAQ: `Admission_Eligibility.php`'s table
-  and `Admission_Guidelines_2023.pdf`'s explicit text, both stating 50%
+- Q8 (BS CS eligibility 50%) — `Admission_Eligibility.php`'s table and
+  `Admission_Guidelines_2023.pdf`'s explicit text both state 50% for CS
+  specifically. The same search also surfaced the 2024/2025 Prospectus
+  stating a general 60% threshold — not a conflict: the Guidelines PDF
+  explicitly frames 50% as a CS-specific carve-out from the 60% general
+  rule ("...will **also** be eligible"), so all four sources are
+  consistent, not contradictory. Recorded explicitly in the provenance
+  field so an auditor re-running this search doesn't have to reconstruct
+  that reasoning themselves.
 - Q11 (DAE lateral entry) — Eligibility page + Prospectus merit table
-- Q25 (CS dept head contact) — already-documented 5-page corroboration
+  both confirm DAE is a real, defined eligible pathway
+- Q25 (CS dept head contact) — already-documented 5-page corroboration,
+  identical email/phone
 - Q26 (Vice Chancellor name) — VC Office page corroborated by 2 further
-  independent pages found this pass: VC Message and Leadership
+  independent pages found this pass (VC Message, Leadership), same name
 - Q28 (main campus phone number) — already-documented 5-page
-  corroboration
-- Q31 (fee waiver program) — 2023 flood-waiver notice + 2014-15 progress
-  report's general need-based concession scheme
+  corroboration, same number range
 - Q39 (semester freeze procedure) — verified this pass that its 3
   relevant chunks are genuinely 3 separate documents (Examination FAQ,
-  FORM UG-V PDF, Freezing-Semester-Form-FS1.pdf), not chunks of one page
-- Q50 (fee structure) — Rule Book refund-policy section + FAQ figures
+  FORM UG-V PDF, Freezing-Semester-Form-FS1.pdf) describing the same
+  policy consistently, not chunks of one page
+
+**Topical consistency** (two independent sources each contribute a
+*different* fact within the same topic, neither contradicting the
+other — corroborates the broader claim, not one identical statement;
+weaker but still meaningfully better than a single uncorroborated read,
+and consistent with how this project already treated the fee-query
+Prospectus cross-checks):
+
+- Q6 (pay semester fee) — Dues Notice PDF (bank/ERP channel) + 2024
+  Prospectus (installment plan) — different payment-process details,
+  same real institutional fee-payment system
+- Q31 (fee waiver program) — 2023 flood-waiver notice + 2014-15 progress
+  report's general need-based concession scheme — different specific
+  programs, both confirm real waiver/concession mechanisms exist
+- Q50 (fee structure) — Rule Book refund-policy section + FAQ figures —
+  different aspects of fee structure, neither conflicting
 
 Searched but no independent corroboration found (provenance stays
 `LLM_JUDGED`, search documented in `golden_set_verified.jsonl` rather
@@ -504,10 +528,12 @@ Queries examined:         16 (every query with >=1 relevant chunk still
 Upgraded:                 10 (see list above)
 Searched, not found:      6 (see list above, including 1 correction to
                           a prior independence assumption)
-golden_set_verified.jsonl SHA-256 (post-pass, MEASURED):
-                          594ceb4dfba33405e430bca62ef8943485f2337ae420e8eb95a6b3840906379d
+golden_set_verified.jsonl SHA-256 (post-pass, MEASURED, includes the
+  Q8 60%/50% clarification added on review):
+                          66cfd3286b29418e6663d293e0d0f80e0cab40f7bc20529fd482eefa082ed1d7
 Idempotency:              verified - re-running the patch script against
-                          its own output reports 0 upgraded / 0 annotated
+                          its own output (pre-Q8-clarification version)
+                          reports 0 upgraded / 0 annotated
 Claims classified MEASURED: the upgrade/not-found counts, the Q34
   independence correction, the final hash. Classified INFERENCE: whether
   each corroborating source is "independent enough" to count - a
