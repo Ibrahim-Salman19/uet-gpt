@@ -1,3 +1,5 @@
+"use node";
+
 import { Pinecone, type PineconeRecord, type RecordMetadata } from "@pinecone-database/pinecone";
 import { computeRagVersionKey } from "../crawl/chunkKey";
 import type { ActionCtx } from "../_generated/server";
