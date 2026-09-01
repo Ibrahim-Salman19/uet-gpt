@@ -3,7 +3,7 @@ import { internal } from "../_generated/api";
 import { type ActionCtx, internalAction } from "../_generated/server";
 import { recordTiming } from "../observability/metrics";
 import { rag } from "../rag/instance";
-import { type AdaptiveWeights, estimateIdf } from "./idf";
+import { estimateIdf } from "./idf";
 
 // FAQ results are fused on the same reciprocal-rank scale as document results
 // (1/(RRF_K + rank)) rather than by multiplying a raw, unbounded BM25 _score by
@@ -20,6 +20,11 @@ import {
   isRetrievalEligibleStatus,
   shouldAbstainOnStaleOnly,
 } from "../shared/freshnessPolicy";
+import { hybridRank } from "./hybridRank";
+
+// Re-exported for existing external references; the implementation now
+// lives in ./hybridRank.ts (see that file's header comment for why).
+export { hybridRank };
 
 type VectorSearchResult = { entryId: string; score?: number; content?: { text: string }[] };
 type TextSearchResult = { ragId: string; text: string; score: number };
@@ -57,46 +62,6 @@ type DocMeta = {
   headingPath?: string[];
   contextualizedText?: string;
 };
-
-export function hybridRank(
-  vectorResults: Array<{ id: string; score: number }>,
-  textResults: Array<{ id: string; score: number }>,
-  k = 60,
-  weights: AdaptiveWeights = { vector: 1.0, text: 1.0 },
-  decayStrategy: "linear" | "reciprocal" = "reciprocal",
-  extraResults?: Array<{
-    results: Array<{ id: string; score: number }>;
-    weight: number;
-  }>,
-): Array<{ id: string; score: number }> {
-  const scores = new Map<string, number>();
-
-  const decay = (rank: number, total: number): number => {
-    if (decayStrategy === "linear") {
-      return Math.max(0.001, total > 0 ? (total - rank) / total : 0);
-    }
-    return 1 / (k + rank);
-  };
-
-  const addSet = (results: Array<{ id: string; score: number }>, weight: number): void => {
-    results.forEach((res, rank) => {
-      scores.set(res.id, (scores.get(res.id) ?? 0) + weight * decay(rank, results.length));
-    });
-  };
-
-  addSet(vectorResults, weights.vector);
-  addSet(textResults, weights.text);
-
-  if (extraResults) {
-    for (const extra of extraResults) {
-      addSet(extra.results, extra.weight);
-    }
-  }
-
-  return Array.from(scores.entries())
-    .map(([id, score]) => ({ id, score }))
-    .sort((a, b) => b.score - a.score);
-}
 
 async function batchFetchDocMeta(
   ctx: ActionCtx,

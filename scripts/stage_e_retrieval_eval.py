@@ -112,7 +112,10 @@ DEFAULT_RESPONSE_BYTES = 16 * 1024 * 1024
 DEFAULT_CUTOFFS = (1, 3, 5, 10)
 DEFAULT_BOOTSTRAP_SAMPLES = 5000
 DEFAULT_RANDOM_SEED = 20260802
-DEFAULT_RRF_K = 60
+# DEFAULT_RRF_K was removed in the 2026-08 remediation along with the local
+# reciprocal_rank_fusion() reimplementation - production's real RRF_K=60
+# (convex/embeddings/search.ts) is used automatically by run_production_baseline(),
+# which calls the real endpoint rather than needing its own copy of this constant.
 MAX_QUERY_COUNT = 10_000
 MAX_CORPUS_CHUNKS = 1_000_000
 MAX_TEXT_CHARS = 100_000
@@ -143,11 +146,19 @@ PUSHED_URLS = (
 
 # These preserve the original manual judgments, but use exact URLs rather than
 # unsafe substring fragments. Review these labels with a domain expert before
-# treating the scores as an acceptance benchmark.
+# treating the scores as an acceptance benchmark. Provenance is EXISTING_TEST,
+# not HUMAN_VERIFIED: these are carried-over manual judgments from an earlier
+# session with no record found (as of the 2026-08 retrieval-baseline control
+# verification) confirming the domain-expert review this comment itself asks
+# for has actually happened. Do not silently promote this to HUMAN_VERIFIED
+# without that evidence. Six queries is also a small set for a project-wide
+# baseline - report this explicitly (see async_main's warnings) rather than
+# manufacturing additional "gold" labels to pad the count.
 DEFAULT_QUERY_ROWS: tuple[dict[str, Any], ...] = (
     {
         "id": "q1",
         "question": "How can I apply for admission at UET Taxila?",
+        "provenance": "EXISTING_TEST",
         "relevance": {
             "https://admission.uettaxila.edu.pk/application/index.php": 1.0,
             "https://admissions.uettaxila.edu.pk/": 1.0,
@@ -156,6 +167,7 @@ DEFAULT_QUERY_ROWS: tuple[dict[str, Any], ...] = (
     {
         "id": "q2",
         "question": "What is the contact address of the Mechanical Engineering department?",
+        "provenance": "EXISTING_TEST",
         "relevance": {
             "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=1": 1.0,
             "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=2": 1.0,
@@ -164,6 +176,7 @@ DEFAULT_QUERY_ROWS: tuple[dict[str, Any], ...] = (
     {
         "id": "q3",
         "question": "Which departments does the Civil Engineering department contain?",
+        "provenance": "EXISTING_TEST",
         "relevance": {
             "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=2": 1.0,
             "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=4": 1.0,
@@ -173,6 +186,7 @@ DEFAULT_QUERY_ROWS: tuple[dict[str, Any], ...] = (
     {
         "id": "q4",
         "question": "Who is the head of the Electrical Engineering department?",
+        "provenance": "EXISTING_TEST",
         "relevance": {
             "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=4": 1.0,
             "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=9": 1.0,
@@ -182,6 +196,7 @@ DEFAULT_QUERY_ROWS: tuple[dict[str, Any], ...] = (
     {
         "id": "q5",
         "question": "What is the main university website about?",
+        "provenance": "EXISTING_TEST",
         "relevance": {
             "https://web.uettaxila.edu.pk/": 1.0,
             "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=1": 1.0,
@@ -190,6 +205,7 @@ DEFAULT_QUERY_ROWS: tuple[dict[str, Any], ...] = (
     {
         "id": "q6",
         "question": "How many faculty members work in the Computer Engineering department?",
+        "provenance": "EXISTING_TEST",
         "relevance": {
             "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=6": 1.0,
             "https://web.uettaxila.edu.pk/departmentfaculty?departmentId=7": 1.0,
@@ -198,11 +214,38 @@ DEFAULT_QUERY_ROWS: tuple[dict[str, Any], ...] = (
 )
 
 
+# Query-label provenance taxonomy (retrieval-baseline remediation, 2026-08).
+# Every query's relevance judgment must carry exactly one of these - no
+# heuristic or test label may be silently promoted to human ground truth.
+QUERY_LABEL_PROVENANCE_VALUES = frozenset(
+    {
+        "HUMAN_VERIFIED",
+        "EXISTING_TEST",
+        "AUTHORITATIVE_PAGE_MATCH",
+        "HEURISTIC",
+        "LLM_JUDGED",
+    }
+)
+
+# Per-strategy evidence classification (retrieval-baseline remediation,
+# 2026-08) - preserved as two distinct concepts per instruction: exact/
+# full-corpus retrieval as ground truth/reference, and production bounded
+# retrieval as actual system behavior. Never conflated into one metric.
+STRATEGY_CLASSIFICATIONS: dict[str, str] = {
+    "dense": "EXACT_GROUND_TRUTH_REFERENCE",
+    "bm25": "NON_PRODUCTION_REFERENCE",
+    "production_baseline_a": "PRODUCTION_PRE_RERANK",
+    "production_baseline_b": "PRODUCTION_POST_RERANK",
+    "backend": "EXTERNAL_BACKEND_REFERENCE",
+}
+
+
 @dataclass(frozen=True)
 class QuerySpec:
     query_id: str
     question: str
     relevance: Mapping[str, float]
+    provenance: str
 
 
 @dataclass(frozen=True)
@@ -213,6 +256,15 @@ class DocumentRecord:
     word_count: int
     source_url: str | None = None
     aliases: tuple[str, ...] = ()
+    # Eligibility/freshness fields (retrieval-baseline remediation, 2026-08) -
+    # the exact fields convex/shared/freshnessPolicy.ts's real classification
+    # functions read (see scripts/apply_freshness_filter.ts). None when the
+    # corpus source doesn't provide them (e.g. live-refetch proxy mode, which
+    # has no Convex document row to read these from at all).
+    status: str | None = None
+    is_stale: bool | None = None
+    freshness_tier: str | None = None
+    crawled_at: float | None = None
 
 
 @dataclass(frozen=True)
@@ -225,6 +277,12 @@ class ChunkRecord:
     source_url: str | None = None
     aliases: tuple[str, ...] = ()
     content_hash: str = ""
+    # Carried from the owning DocumentRecord at chunk-construction time - see
+    # DocumentRecord's fields above for what these mean and why they may be None.
+    status: str | None = None
+    is_stale: bool | None = None
+    freshness_tier: str | None = None
+    crawled_at: float | None = None
 
 
 @dataclass(frozen=True)
@@ -250,6 +308,7 @@ class StrategyResult:
     question: str
     strategy: str
     relevance: dict[str, float]
+    relevance_provenance: str
     missing_relevant: list[str]
     ranked_documents: list[dict[str, Any]]
     ranked_chunks: list[dict[str, Any]]
@@ -467,15 +526,48 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--offline",
         action="store_true",
-        help="Use cached embeddings only and make no Gemini embedding requests",
+        help=(
+            "Use cached embeddings only, make no Gemini embedding requests, "
+            "and skip the production baseline (no Convex calls either)"
+        ),
+    )
+    parser.add_argument(
+        "--skip-production-baseline",
+        action="store_true",
+        help=(
+            "Compute only the exact/BM25 reference strategies; do not call "
+            "the real Convex retrieval pipeline via `npx convex run`"
+        ),
+    )
+    parser.add_argument(
+        "--production-limit",
+        type=int,
+        default=8,
+        help="Candidate count requested from the real production endpoint (matches retrieval.ts's real call site default)",
+    )
+    parser.add_argument(
+        "--production-rerank-top-k",
+        type=int,
+        default=4,
+        help="Cascade rerank topK requested from the real production endpoint (matches retrieval.ts's real call site default)",
+    )
+    parser.add_argument(
+        "--now-epoch-ms",
+        type=int,
+        default=None,
+        help=(
+            "Fixed 'now' (epoch ms) for freshness/eligibility classification. "
+            "Defaults to the current time if omitted, which makes eligibility "
+            "near a TTL boundary time-dependent - pass a fixed value for a "
+            "reproducible rerun."
+        ),
     )
     parser.add_argument("--model", default=DEFAULT_MODEL)
-    parser.add_argument(
-        "--retrieval-task",
-        choices=("question-answering", "search-result", "fact-checking"),
-        default="question-answering",
-        help="Gemini Embedding 2 asymmetric retrieval instruction",
-    )
+    # --retrieval-task (a Gemini Embedding 2 asymmetric retrieval task-type
+    # prefix) was removed in the 2026-08 retrieval-baseline remediation:
+    # production sends raw, unprefixed text to the embedding API (see
+    # prepare_embedding_input's docstring) - this argument no longer does
+    # anything and offering it would misleadingly suggest it still does.
     parser.add_argument("--dimensions", type=int, default=DEFAULT_DIMENSIONS)
     parser.add_argument("--batch-size", type=int, default=DEFAULT_BATCH_SIZE)
     parser.add_argument("--batch-bytes", type=int, default=DEFAULT_BATCH_BYTES)
@@ -484,14 +576,13 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--max-chunk", type=int, default=DEFAULT_MAX_CHUNK)
     parser.add_argument("--overlap", type=int, default=DEFAULT_OVERLAP)
     parser.add_argument("--cutoffs", type=parse_cutoffs, default=DEFAULT_CUTOFFS)
-    parser.add_argument("--rrf-k", type=int, default=DEFAULT_RRF_K)
     parser.add_argument(
         "--bootstrap-samples", type=int, default=DEFAULT_BOOTSTRAP_SAMPLES
     )
     parser.add_argument("--seed", type=int, default=DEFAULT_RANDOM_SEED)
     parser.add_argument(
         "--gate-strategy",
-        choices=("dense", "bm25", "hybrid", "backend"),
+        choices=("dense", "bm25", "production_baseline_a", "production_baseline_b", "backend"),
         default="dense",
     )
     parser.add_argument("--min-recall-at-5", type=float, default=None)
@@ -530,8 +621,6 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         parser.error("--max-chunk must be between 256 and 100,000")
     if not 0 <= args.overlap < args.max_chunk:
         parser.error("--overlap must be non-negative and smaller than --max-chunk")
-    if not 1 <= args.rrf_k <= 100_000:
-        parser.error("--rrf-k must be between 1 and 100,000")
     if not 0 <= args.bootstrap_samples <= 100_000:
         parser.error("--bootstrap-samples must be between 0 and 100,000")
     if not 1 <= args.top_results <= 1000:
@@ -550,21 +639,43 @@ def normalize_title(value: str | None) -> str:
 
 
 def prepare_embedding_input(item: EmbedInput) -> str:
-    text = unicodedata.normalize("NFKC", item.text).strip()
+    """Return the exact text sent to Gemini - raw, unprefixed, matching
+    production byte-for-byte (convex/embeddings/generate.ts's
+    embedNativeGemini / buildGeminiEmbedContentRequestBody send only
+    {content: {parts: [{text}]}, outputDimensionality} - no task-type prefix,
+    no title wrapping).
+
+    Retrieval-baseline remediation (2026-08,
+    docs/rag-store-evaluation/retrieval-baseline-2026-08/control-verification-findings.json):
+    this function previously prepended a Gemini-recommended retrieval-task
+    prefix ("task: X | query: Y") for queries and a title wrapper
+    ("title: X | text: Y") for documents. Production's own code comment
+    (convex/embeddings/generate.ts) explains why it never adopted that:
+    "taskType parameter has no effect on gemini-embedding-2 (confirmed bug)".
+    Keeping the prefix here made this evaluator measure embeddings in a
+    different region of the model's latent space than production actually
+    uses - see scripts/test_embedding_request_parity.py for the regression
+    test proving byte-for-byte request-construction parity against the real
+    TypeScript code (convex/embeddings/generate.ts's
+    buildGeminiEmbedContentRequestBody, via scripts/print_embedding_request.ts).
+    """
+
+    # No NFKC (or any other Unicode) normalization here - production's real
+    # embedding path (generateEmbeddingsInternal, convex/embeddings/generate.ts)
+    # applies none either, only a MAX_EMBED_CHARS truncation. .strip() is kept
+    # only because it is idempotent on the text this function actually
+    # receives (already trimmed upstream by scanForInjection() for queries),
+    # not because it changes production behavior.
+    text = item.text.strip()
     if not text:
         raise EvaluationError("cannot embed empty text")
     if len(text) > MAX_TEXT_CHARS:
         raise EvaluationError(
             f"embedding input exceeds {MAX_TEXT_CHARS:,} characters"
         )
-    if item.kind == "query":
-        task = item.task.strip().replace("-", " ")
-        if task not in {"question answering", "search result", "fact checking"}:
-            raise EvaluationError(f"unsupported Gemini retrieval task: {item.task}")
-        return f"task: {task} | query: {text}"
-    if item.kind == "document":
-        return f"title: {normalize_title(item.title)} | text: {text}"
-    raise EvaluationError(f"unsupported embedding kind: {item.kind}")
+    if item.kind not in ("query", "document"):
+        raise EvaluationError(f"unsupported embedding kind: {item.kind}")
+    return text
 
 
 def l2_normalize(vector: Sequence[float], expected_dimensions: int) -> list[float]:
@@ -773,13 +884,19 @@ class GeminiEmbeddingClient:
         )
 
     def _request_for(self, prepared_text: str) -> dict[str, Any]:
+        # Must match convex/embeddings/generate.ts's
+        # buildGeminiBatchEmbedContentsRequestItem exactly (verified via
+        # scripts/test_embedding_request_parity.py) - a flat top-level
+        # outputDimensionality, not nested under an embedContentConfig
+        # object, and no autoTruncate field (production relies on its own
+        # MAX_EMBED_CHARS client-side cap instead). Both shapes were
+        # empirically confirmed to work against the live API, but the
+        # mandate requires exact request-construction fidelity, not just
+        # functional equivalence.
         return {
             "model": f"models/{self.model}",
             "content": {"parts": [{"text": prepared_text}]},
-            "embedContentConfig": {
-                "outputDimensionality": self.dimensions,
-                "autoTruncate": False,
-            },
+            "outputDimensionality": self.dimensions,
         }
 
     def _build_batches(
@@ -1070,6 +1187,10 @@ def make_chunk(
     source_url: str | None,
     aliases: Sequence[str],
     chunk_id: str | None = None,
+    status: str | None = None,
+    is_stale: bool | None = None,
+    freshness_tier: str | None = None,
+    crawled_at: float | None = None,
 ) -> ChunkRecord:
     clean = clean_text(text, maximum=MAX_TEXT_CHARS, field_name="chunk text")
     canonical = comparison_url(url)
@@ -1098,6 +1219,10 @@ def make_chunk(
         source_url=comparison_url(source_url) if source_url else None,
         aliases=normalized_aliases,
         content_hash=digest,
+        status=status,
+        is_stale=is_stale,
+        freshness_tier=freshness_tier,
+        crawled_at=crawled_at,
     )
 
 
@@ -1123,6 +1248,10 @@ def chunks_from_documents(
                     index=index,
                     source_url=document.source_url,
                     aliases=document.aliases,
+                    status=document.status,
+                    is_stale=document.is_stale,
+                    freshness_tier=document.freshness_tier,
+                    crawled_at=document.crawled_at,
                 )
             )
     return tuple(chunks)
@@ -1153,6 +1282,16 @@ def _document_from_mapping(raw: Mapping[str, Any]) -> DocumentRecord:
     if not isinstance(aliases_raw, list):
         raise EvaluationError(f"aliases must be an array for {url}")
     aliases = tuple(value for value in (comparison_url(x) for x in aliases_raw) if value)
+    status_raw = raw.get("status")
+    status = status_raw if isinstance(status_raw, str) and status_raw else None
+    is_stale_raw = raw.get("is_stale")
+    is_stale = bool(is_stale_raw) if isinstance(is_stale_raw, bool) else None
+    freshness_tier_raw = raw.get("freshness_tier")
+    freshness_tier = (
+        freshness_tier_raw if isinstance(freshness_tier_raw, str) and freshness_tier_raw else None
+    )
+    crawled_at_raw = raw.get("crawled_at")
+    crawled_at = float(crawled_at_raw) if isinstance(crawled_at_raw, (int, float)) else None
     return DocumentRecord(
         url=url,
         title=title,
@@ -1160,6 +1299,10 @@ def _document_from_mapping(raw: Mapping[str, Any]) -> DocumentRecord:
         word_count=word_count,
         source_url=source_url or None,
         aliases=aliases,
+        status=status,
+        is_stale=is_stale,
+        freshness_tier=freshness_tier,
+        crawled_at=crawled_at,
     )
 
 
@@ -1238,6 +1381,20 @@ def load_corpus_json(
                 aliases_raw = raw.get("aliases") or []
                 if isinstance(aliases_raw, str):
                     aliases_raw = [aliases_raw]
+                # Eligibility/freshness fields live on the DOCUMENT object in
+                # the real exportCorpus.ts shape (convex/crawl/exportCorpus.ts),
+                # one set inherited by every chunk under it - matching how
+                # production reads them (per-document, not per-chunk).
+                doc_status_raw = raw.get("status")
+                doc_status = doc_status_raw if isinstance(doc_status_raw, str) and doc_status_raw else None
+                doc_is_stale_raw = raw.get("is_stale")
+                doc_is_stale = bool(doc_is_stale_raw) if isinstance(doc_is_stale_raw, bool) else None
+                doc_tier_raw = raw.get("freshness_tier")
+                doc_tier = doc_tier_raw if isinstance(doc_tier_raw, str) and doc_tier_raw else None
+                doc_crawled_raw = raw.get("crawled_at")
+                doc_crawled_at = (
+                    float(doc_crawled_raw) if isinstance(doc_crawled_raw, (int, float)) else None
+                )
                 for index, nested in enumerate(nested_chunks):
                     if not isinstance(nested, Mapping):
                         raise EvaluationError("nested chunk must be an object")
@@ -1253,6 +1410,10 @@ def load_corpus_json(
                                 nested.get("chunk_id") or nested.get("id") or ""
                             )
                             or None,
+                            status=doc_status,
+                            is_stale=doc_is_stale,
+                            freshness_tier=doc_tier,
+                            crawled_at=doc_crawled_at,
                         )
                     )
             elif raw.get("markdown") is not None or raw.get("text") is not None:
@@ -1361,7 +1522,14 @@ def load_queries(path: Path | None) -> tuple[QuerySpec, ...]:
             )
         if not relevance:
             raise EvaluationError(f"query {query_id} has no relevant documents")
-        queries.append(QuerySpec(query_id, question, relevance))
+        provenance = raw.get("provenance")
+        if not isinstance(provenance, str) or provenance not in QUERY_LABEL_PROVENANCE_VALUES:
+            raise EvaluationError(
+                f"query {query_id} must declare a 'provenance' field, one of: "
+                + ", ".join(sorted(QUERY_LABEL_PROVENANCE_VALUES))
+                + " - do not silently promote a heuristic or test label to human ground truth"
+            )
+        queries.append(QuerySpec(query_id, question, relevance, provenance))
     return tuple(queries)
 
 
@@ -1471,6 +1639,7 @@ def load_backend_rankings(
 def add_backend_strategy(
     evaluation: EvaluationResult,
     *,
+    strategy_name: str = "backend",
     rankings: Mapping[str, Sequence[tuple[float, str]]],
     queries: Sequence[QuerySpec],
     chunks: Sequence[ChunkRecord],
@@ -1525,15 +1694,16 @@ def add_backend_strategy(
             StrategyResult(
                 query_id=query.query_id,
                 question=query.question,
-                strategy="backend",
+                strategy=strategy_name,
                 relevance=dict(relevance),
+                relevance_provenance=query.provenance,
                 missing_relevant=missing_relevant,
                 ranked_documents=documents,
                 ranked_chunks=[],
                 metrics=metric_values(ranked_urls, relevance, cutoffs),
             )
         )
-    evaluation.strategies["backend"] = rows
+    evaluation.strategies[strategy_name] = rows
 
 
 async def fetch_live_documents(
@@ -1784,6 +1954,185 @@ async def obtain_corpus(args: argparse.Namespace) -> CorpusLoadResult:
     )
 
 
+def run_freshness_filter(
+    chunks: Sequence[ChunkRecord],
+    *,
+    now_epoch_ms: int,
+) -> dict[str, dict[str, Any]]:
+    """Applies the REAL production eligibility/freshness classification
+    (convex/shared/freshnessPolicy.ts, via scripts/apply_freshness_filter.ts -
+    a thin wrapper that imports and calls the actual TypeScript functions,
+    not a Python reimplementation) to a batch of chunks. Returns
+    {chunk_id: {eligible, state, applicability, penalized, reason,
+    scoreMultiplier}}. Raises EvaluationError on any subprocess/parsing
+    failure - a broken freshness classification must not silently pass
+    through as "everything eligible".
+    """
+    if not chunks:
+        return {}
+    payload = [
+        {
+            "id": chunk.chunk_id,
+            "status": chunk.status,
+            "isStale": chunk.is_stale,
+            "crawledAt": chunk.crawled_at,
+            "freshnessTier": chunk.freshness_tier,
+        }
+        for chunk in chunks
+    ]
+    script = SCRIPTS_DIR / "apply_freshness_filter.ts"
+    try:
+        completed = subprocess.run(
+            ["npx", "tsx", str(script), str(now_epoch_ms)],
+            input=canonical_json_bytes(payload),
+            capture_output=True,
+            cwd=PROJECT_ROOT,
+            timeout=120,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise EvaluationError(
+            f"failed to invoke {script} for freshness classification: {exc}"
+        ) from exc
+    if completed.returncode != 0:
+        raise EvaluationError(
+            f"{script} exited {completed.returncode}: "
+            f"{completed.stderr.decode('utf-8', 'replace')[:2000]}"
+        )
+    try:
+        results = json.loads(completed.stdout)
+    except json.JSONDecodeError as exc:
+        raise EvaluationError(f"{script} produced invalid JSON: {exc}") from exc
+    if not isinstance(results, list):
+        raise EvaluationError(f"{script} must produce a JSON array")
+    by_id: dict[str, dict[str, Any]] = {}
+    for row in results:
+        if not isinstance(row, Mapping) or "id" not in row:
+            raise EvaluationError(f"{script} produced a malformed row: {row!r}")
+        by_id[str(row["id"])] = dict(row)
+    missing = [chunk.chunk_id for chunk in chunks if chunk.chunk_id not in by_id]
+    if missing:
+        raise EvaluationError(
+            f"{script} did not classify {len(missing)} chunk(s), e.g. {missing[:5]}"
+        )
+    return by_id
+
+
+def filter_eligible_chunks(
+    chunks: Sequence[ChunkRecord],
+    *,
+    now_epoch_ms: int,
+) -> tuple[tuple[ChunkRecord, ...], int]:
+    """Returns (eligible_chunks, excluded_count) using the REAL production
+    eligibility classification, so the "dense"/"bm25" exact/reference
+    strategies represent ground truth over the set of chunks production could
+    ever actually surface - not the raw full corpus including stale/failed
+    documents. Chunks with no eligibility data at all (status is None - e.g.
+    live-refetch proxy mode, which has no Convex document row to read status
+    from) are passed through unfiltered with the caller expected to warn
+    loudly, since there is nothing to classify - NOT silently treated as
+    eligible by construction.
+    """
+    if not chunks:
+        return (), 0
+    if all(chunk.status is None for chunk in chunks):
+        return tuple(chunks), 0
+    classifications = run_freshness_filter(chunks, now_epoch_ms=now_epoch_ms)
+    eligible = tuple(chunk for chunk in chunks if classifications[chunk.chunk_id]["eligible"])
+    excluded = len(chunks) - len(eligible)
+    return eligible, excluded
+
+
+async def run_production_baseline(
+    queries: Sequence[QuerySpec],
+    *,
+    limit: int,
+    rerank_top_k: int,
+    verbose: bool,
+) -> tuple[dict[str, list[tuple[float, str]]], dict[str, list[tuple[float, str]]]]:
+    """Calls the REAL production retrieval pipeline
+    (convex/rag/evalRetrieval.ts's evalRetrieveDocuments, via `npx convex
+    run`) once per query, capturing both Baseline A (pre-rerank) and
+    Baseline B (post-rerank) candidate lists - the actual production
+    hybridRank()/Cascade output, not a Python reimplementation of either.
+
+    Requires CONVEX_DEPLOY_KEY to be set as a real shell-exported environment
+    variable - the Convex CLI does NOT auto-load .env.local (confirmed during
+    this remediation: `npx convex run` silently used a different, empty
+    deployment until CONVEX_DEPLOY_KEY was explicitly exported). Raises
+    EvaluationError on any failure for any query - a partial production
+    baseline (some queries captured, others silently skipped) would be worse
+    than a clean, loud failure demanding investigation.
+    """
+    if not os.environ.get("CONVEX_DEPLOY_KEY"):
+        raise EvaluationError(
+            "CONVEX_DEPLOY_KEY is not set in the environment - export it "
+            "explicitly (it is not auto-loaded from .env.local by the Convex "
+            "CLI) before requesting a production baseline"
+        )
+
+    baseline_a: dict[str, list[tuple[float, str]]] = {}
+    baseline_b: dict[str, list[tuple[float, str]]] = {}
+    for query in queries:
+        args_json = json.dumps(
+            {"queryText": query.question, "limit": limit, "rerankTopK": rerank_top_k}
+        )
+        if verbose:
+            print(f"production baseline: querying Convex for {query.query_id}")
+        try:
+            completed = await asyncio.to_thread(
+                subprocess.run,
+                [
+                    "npx",
+                    "convex",
+                    "run",
+                    "rag/evalRetrieval:evalRetrieveDocuments",
+                    args_json,
+                ],
+                capture_output=True,
+                cwd=PROJECT_ROOT,
+                timeout=120,
+                check=False,
+            )
+        except (OSError, subprocess.SubprocessError) as exc:
+            raise EvaluationError(
+                f"failed to invoke the Convex eval endpoint for query {query.query_id}: {exc}"
+            ) from exc
+        if completed.returncode != 0:
+            raise EvaluationError(
+                "npx convex run rag/evalRetrieval:evalRetrieveDocuments failed "
+                f"for query {query.query_id} (exit {completed.returncode}): "
+                f"{completed.stderr.decode('utf-8', 'replace')[:2000]}"
+            )
+        try:
+            response = json.loads(completed.stdout)
+        except json.JSONDecodeError as exc:
+            raise EvaluationError(
+                f"Convex eval endpoint produced invalid JSON for query {query.query_id}: "
+                f"{exc}. Raw stdout: {completed.stdout.decode('utf-8', 'replace')[:2000]}"
+            ) from exc
+        if not isinstance(response, Mapping):
+            raise EvaluationError(
+                f"Convex eval endpoint response for query {query.query_id} is not an object"
+            )
+        for key, target in (
+            ("baselineAPreRerank", baseline_a),
+            ("baselineBPostRerank", baseline_b),
+        ):
+            rows = response.get(key)
+            if not isinstance(rows, list):
+                raise EvaluationError(
+                    f"Convex eval endpoint response for query {query.query_id} "
+                    f"is missing '{key}'"
+                )
+            target[query.query_id] = [
+                (float(row["relevanceScore"]), str(row["url"]))
+                for row in rows
+                if isinstance(row, Mapping) and "url" in row and "relevanceScore" in row
+            ]
+    return baseline_a, baseline_b
+
+
 def build_alias_map(chunks: Sequence[ChunkRecord]) -> dict[str, str]:
     alias_to_document: dict[str, str] = {}
     for chunk in chunks:
@@ -1904,25 +2253,17 @@ def collapse_documents(
     )
 
 
-def reciprocal_rank_fusion(
-    dense_documents: Sequence[tuple[float, str, int]],
-    bm25_documents: Sequence[tuple[float, str, int]],
-    *,
-    rrf_k: int,
-) -> list[tuple[float, str, int]]:
-    scores: defaultdict[str, float] = defaultdict(float)
-    representative: dict[str, int] = {}
-    for ranking in (dense_documents, bm25_documents):
-        for rank, (_score, url, index) in enumerate(ranking, start=1):
-            scores[url] += 1.0 / (rrf_k + rank)
-            representative.setdefault(url, index)
-    return sorted(
-        (
-            (score, url, representative[url])
-            for url, score in scores.items()
-        ),
-        key=lambda item: (-item[0], item[1]),
-    )
+
+# reciprocal_rank_fusion() (a fixed-weight, 2-channel dense+BM25 RRF) was
+# removed in the 2026-08 retrieval-baseline remediation. It reimplemented a
+# materially different algorithm from production's real hybridRank()
+# (3-channel, query-dependent adaptive weights - see
+# convex/embeddings/search.ts and source-of-truth-specification.json) and its
+# only use was computing the (now-removed) "hybrid" strategy. The
+# authoritative hybrid/RRF result now comes from run_production_baseline(),
+# which calls the real production endpoint directly rather than
+# reimplementing its fusion math in Python. See
+# control-verification-findings.json for the original defect this fixes.
 
 
 def metric_values(
@@ -2132,10 +2473,10 @@ def finalize_aggregates(
 
     comparisons = (
         ("dense", "bm25"),
-        ("dense", "hybrid"),
-        ("bm25", "hybrid"),
+        ("dense", "production_baseline_a"),
+        ("production_baseline_a", "production_baseline_b"),
+        ("bm25", "production_baseline_a"),
         ("dense", "backend"),
-        ("hybrid", "backend"),
     )
     key_metrics = ("recall@5", "mrr@5", "ndcg@5", "map@5")
     for left_name, right_name in comparisons:
@@ -2174,12 +2515,31 @@ async def evaluate(
     queries: Sequence[QuerySpec],
     embedding_client: GeminiEmbeddingClient,
     cutoffs: Sequence[int],
-    rrf_k: int,
     bootstrap_samples: int,
     seed: int,
     top_results: int,
-    retrieval_task: str,
 ) -> EvaluationResult:
+    """Computes two REFERENCE/DIAGNOSTIC strategies only - NOT the
+    authoritative production baseline (that's run_production_baseline(),
+    which calls the real Convex retrieval pipeline directly):
+
+    - "dense": exact, full-corpus cosine similarity - the ANN-recall-style
+      exact ground truth (same role as the Turso benchmark's bench_exact),
+      computed over `chunks` as given by the caller (the caller is
+      responsible for pre-filtering to eligible chunks if that distinction
+      matters for the comparison being made - see filter_eligible_chunks()).
+    - "bm25": a local, textbook Okapi BM25 (k1=1.5, b=0.75) reference
+      implementation - NOT proven equivalent to Convex's proprietary native
+      full-text search (see NON_PRODUCTION_REFERENCE classification in
+      STRATEGY_CLASSIFICATIONS). Diagnostic only.
+
+    The "hybrid" strategy previously computed here (a fixed-weight 2-channel
+    RRF of the above two) was removed in the 2026-08 remediation - it was a
+    materially different algorithm from production's real 3-channel,
+    adaptive-weighted hybridRank() and was never an acceptable stand-in for
+    the authoritative baseline. See control-verification-findings.json.
+    """
+
     alias_map = build_alias_map(chunks)
     document_inputs = [
         EmbedInput("document", chunk.text, chunk.title)
@@ -2187,18 +2547,11 @@ async def evaluate(
     ]
     chunk_vectors = await embedding_client.embed(document_inputs)
     query_vectors = await embedding_client.embed(
-        [
-            EmbedInput(
-                "query",
-                query.question,
-                task=retrieval_task.replace("-", " "),
-            )
-            for query in queries
-        ]
+        [EmbedInput("query", query.question) for query in queries]
     )
     bm25 = BM25Index(chunks)
     result = EvaluationResult(
-        strategies={"dense": [], "bm25": [], "hybrid": []}
+        strategies={"dense": [], "bm25": []}
     )
 
     for query, query_vector in zip(queries, query_vectors):
@@ -2212,34 +2565,9 @@ async def evaluate(
         bm25_chunk_ranking = rank_chunks(chunks, bm25_scores)
         bm25_document_ranking = collapse_documents(chunks, bm25_chunk_ranking)
 
-        hybrid_document_ranking = reciprocal_rank_fusion(
-            dense_document_ranking,
-            bm25_document_ranking,
-            rrf_k=rrf_k,
-        )
-        dense_by_url = {
-            url: (score, index)
-            for score, url, index in dense_document_ranking
-        }
-        hybrid_chunk_ranking = sorted(
-            (
-                (
-                    next(
-                        score
-                        for score, candidate_url, _ in hybrid_document_ranking
-                        if candidate_url == url
-                    ),
-                    index,
-                )
-                for url, (_dense_score, index) in dense_by_url.items()
-            ),
-            key=lambda item: (-item[0], chunks[item[1]].url),
-        )
-
         rankings = {
             "dense": (dense_document_ranking, dense_chunk_ranking),
             "bm25": (bm25_document_ranking, bm25_chunk_ranking),
-            "hybrid": (hybrid_document_ranking, hybrid_chunk_ranking),
         }
         for strategy, (document_ranking, chunk_ranking) in rankings.items():
             ranked_urls = [url for _score, url, _index in document_ranking]
@@ -2250,6 +2578,7 @@ async def evaluate(
                     question=query.question,
                     strategy=strategy,
                     relevance=dict(relevance),
+                    relevance_provenance=query.provenance,
                     missing_relevant=missing,
                     ranked_documents=serialize_document_ranking(
                         document_ranking,
@@ -2338,6 +2667,7 @@ def query_hash(queries: Sequence[QuerySpec]) -> str:
             "id": query.query_id,
             "question": query.question,
             "relevance": dict(sorted(query.relevance.items())),
+            "provenance": query.provenance,
         }
         for query in queries
     ]
@@ -2351,6 +2681,7 @@ def strategy_to_json(rows: Sequence[StrategyResult]) -> list[dict[str, Any]]:
             "question": row.question,
             "strategy": row.strategy,
             "relevance": row.relevance,
+            "relevance_provenance": row.relevance_provenance,
             "missing_relevant": row.missing_relevant,
             "metrics": row.metrics,
             "top_documents": row.ranked_documents,
@@ -2389,6 +2720,7 @@ def write_csv_artifacts(
                 "strategy",
                 "query_id",
                 "question",
+                "relevance_provenance",
                 "missing_relevant",
                 *metric_names,
             ),
@@ -2401,6 +2733,7 @@ def write_csv_artifacts(
                         "strategy": strategy,
                         "query_id": row.query_id,
                         "question": row.question,
+                        "relevance_provenance": row.relevance_provenance,
                         "missing_relevant": " | ".join(row.missing_relevant),
                         **row.metrics,
                     }
@@ -2479,6 +2812,15 @@ def markdown_report(
         f"- Dimensions: `{metadata['embedding']['dimensions']}`",
         f"- Corpus hash: `{metadata['corpus_hash']}`",
         f"- Query-label hash: `{metadata['query_hash']}`",
+        f"- Production baseline captured: `{metadata['production_baseline']['captured']}`"
+        + (
+            f" (skipped: {metadata['production_baseline']['skipped_reason']})"
+            if not metadata["production_baseline"]["captured"]
+            else ""
+        ),
+        f"- Eligible/total corpus chunks: "
+        f"`{metadata['eligibility_filtering']['eligible_chunks_used_for_ground_truth']}"
+        f"/{metadata['eligibility_filtering']['total_corpus_chunks']}`",
         "",
     ]
     if warnings:
@@ -2490,21 +2832,23 @@ def markdown_report(
         [
             "## Aggregate metrics",
             "",
-            "| Strategy | Recall@5 | Precision@5 | MRR@5 | MAP@5 | nDCG@5 | Hit@5 |",
-            "|---|---:|---:|---:|---:|---:|---:|",
+            "| Strategy | Classification | Recall@5 | Precision@5 | MRR@5 | MAP@5 | nDCG@5 | Hit@5 |",
+            "|---|---|---:|---:|---:|---:|---:|---:|",
         ]
     )
     strategy_order = [
         strategy
-        for strategy in ("dense", "bm25", "hybrid", "backend")
+        for strategy in ("dense", "bm25", "production_baseline_a", "production_baseline_b", "backend")
         if strategy in evaluation.aggregate
     ]
     for strategy in strategy_order:
         metrics = evaluation.aggregate[strategy]
+        classification = STRATEGY_CLASSIFICATIONS.get(strategy, "UNCLASSIFIED")
         lines.append(
-            "| {strategy} | {recall:.3f} | {precision:.3f} | {mrr:.3f} | "
+            "| {strategy} | {classification} | {recall:.3f} | {precision:.3f} | {mrr:.3f} | "
             "{map_value:.3f} | {ndcg:.3f} | {hit:.3f} |".format(
                 strategy=strategy,
+                classification=classification,
                 recall=metrics.get("recall@5", 0.0),
                 precision=metrics.get("precision@5", 0.0),
                 mrr=metrics.get("mrr@5", 0.0),
@@ -2531,7 +2875,8 @@ def markdown_report(
             lines.append("")
 
     for strategy in strategy_order:
-        lines.extend([f"## {strategy.title()} query results", ""])
+        display_name = strategy.replace("_", " ").title()
+        lines.extend([f"## {display_name} query results", ""])
         for row in evaluation.strategies[strategy]:
             metrics = row.metrics
             lines.append(
@@ -2598,6 +2943,7 @@ async def async_main(args: argparse.Namespace) -> int:
         load_dotenv(PROJECT_ROOT / ".env.local", override=False)
 
     started = time.monotonic()
+    now_epoch_ms = args.now_epoch_ms if args.now_epoch_ms is not None else int(time.time() * 1000)
     corpus = await obtain_corpus(args)
     queries = load_queries(args.queries_json)
 
@@ -2621,6 +2967,22 @@ async def async_main(args: argparse.Namespace) -> int:
             + ", ".join(missing_expected[:10])
         )
 
+    # Preserve two distinct concepts rather than conflating them (per the
+    # retrieval-baseline remediation instructions): the "dense"/"bm25"
+    # strategies below are EXACT/FULL-CORPUS ground truth, computed only over
+    # chunks the real production eligibility/freshness rules would ever
+    # actually surface - using the REAL classification logic
+    # (convex/shared/freshnessPolicy.ts, via filter_eligible_chunks), not a
+    # Python reimplementation of it.
+    eligible_chunks, excluded_ineligible_count = filter_eligible_chunks(
+        corpus.chunks, now_epoch_ms=now_epoch_ms
+    )
+    if not eligible_chunks:
+        raise EvaluationError(
+            "every corpus chunk was excluded by the real production eligibility "
+            "classification - the exact/reference strategies would have nothing to rank"
+        )
+
     cache = EmbeddingCache(
         args.cache,
         enabled=not args.no_cache,
@@ -2640,15 +3002,13 @@ async def async_main(args: argparse.Namespace) -> int:
             verbose=args.verbose,
         ) as embedding_client:
             evaluation = await evaluate(
-                chunks=corpus.chunks,
+                chunks=eligible_chunks,
                 queries=queries,
                 embedding_client=embedding_client,
                 cutoffs=args.cutoffs,
-                rrf_k=args.rrf_k,
                 bootstrap_samples=args.bootstrap_samples,
                 seed=args.seed,
                 top_results=args.top_results,
-                retrieval_task=args.retrieval_task,
             )
             if args.backend_rankings_json is not None:
                 backend_rankings = load_backend_rankings(
@@ -2657,19 +3017,61 @@ async def async_main(args: argparse.Namespace) -> int:
                 )
                 add_backend_strategy(
                     evaluation,
+                    strategy_name="backend",
                     rankings=backend_rankings,
                     queries=queries,
                     chunks=corpus.chunks,
                     cutoffs=args.cutoffs,
                     top_results=args.top_results,
                 )
-                finalize_aggregates(
-                    evaluation,
-                    bootstrap_samples=args.bootstrap_samples,
-                    seed=args.seed,
-                )
     finally:
         cache.close()
+
+    # BASELINE_A/BASELINE_B: the actual production hybridRank()/Cascade
+    # output, via the real Convex endpoint - not a Python reimplementation.
+    # Preserved as separate strategies from "dense"/"bm25" above (pre-rerank
+    # vs. post-rerank answer different questions, per instruction - never
+    # collapsed into one metric).
+    production_baseline_skipped_reason: str | None = None
+    if args.offline:
+        production_baseline_skipped_reason = "--offline was set"
+    elif args.skip_production_baseline:
+        production_baseline_skipped_reason = "--skip-production-baseline was set"
+    elif not os.environ.get("CONVEX_DEPLOY_KEY"):
+        production_baseline_skipped_reason = (
+            "CONVEX_DEPLOY_KEY is not set in the environment"
+        )
+    else:
+        baseline_a_rankings, baseline_b_rankings = await run_production_baseline(
+            queries,
+            limit=args.production_limit,
+            rerank_top_k=args.production_rerank_top_k,
+            verbose=args.verbose,
+        )
+        add_backend_strategy(
+            evaluation,
+            strategy_name="production_baseline_a",
+            rankings=baseline_a_rankings,
+            queries=queries,
+            chunks=corpus.chunks,
+            cutoffs=args.cutoffs,
+            top_results=args.top_results,
+        )
+        add_backend_strategy(
+            evaluation,
+            strategy_name="production_baseline_b",
+            rankings=baseline_b_rankings,
+            queries=queries,
+            chunks=corpus.chunks,
+            cutoffs=args.cutoffs,
+            top_results=args.top_results,
+        )
+
+    finalize_aggregates(
+        evaluation,
+        bootstrap_samples=args.bootstrap_samples,
+        seed=args.seed,
+    )
 
     all_missing_gold = sorted(
         {
@@ -2682,16 +3084,38 @@ async def async_main(args: argparse.Namespace) -> int:
     warnings = list(corpus.warnings)
     warnings.append(
         "The six built-in relevance sets preserve the supplied labels but require "
-        "domain-expert review before they are used as production acceptance criteria."
+        "domain-expert review before they are used as production acceptance criteria "
+        "(provenance is EXISTING_TEST, not HUMAN_VERIFIED)."
     )
     warnings.append(
         "Six queries provide weak statistical power; paired bootstrap intervals "
-        "are reported, but the query set should be expanded before release gating."
+        "are reported, but the query set should be expanded before release gating. "
+        "This is reported explicitly rather than manufacturing additional 'gold' labels."
     )
     warnings.append(
-        "This script simulates retrieval locally. To validate the deployed Convex "
-        "index and search function, also evaluate rankings returned by the live backend."
+        "'dense' and 'bm25' are EXACT_GROUND_TRUTH_REFERENCE / NON_PRODUCTION_REFERENCE "
+        "only (local computation) - they are not proof of what the deployed Convex "
+        "index and search function actually return. See 'production_baseline_a' and "
+        "'production_baseline_b' for the real production pipeline's output."
     )
+    warnings.append(
+        "production_baseline_a/b measure the PRE-rerank candidate pool and the "
+        "deterministic-Cascade-rerank output respectively - NOT final user-facing "
+        "answers. Query rewriting, HyDE, the semantic cache, and CRAG's LLM relevance "
+        "judge are intentionally excluded (non-deterministic/LLM-based) - see "
+        "docs/rag-store-evaluation/retrieval-baseline-2026-08/source-of-truth-specification.json."
+    )
+    if production_baseline_skipped_reason is not None:
+        warnings.append(
+            f"Production baseline was NOT captured: {production_baseline_skipped_reason}. "
+            "'dense'/'bm25' reference strategies only - see control-verification-findings.json."
+        )
+    if excluded_ineligible_count:
+        warnings.append(
+            f"{excluded_ineligible_count} of {len(corpus.chunks)} corpus chunk(s) were "
+            "excluded from the exact/reference ground truth by the real production "
+            "eligibility classification (hard-excluded status, e.g. stale/failed/pending)."
+        )
     if missing_expected:
         warnings.append(
             f"{len(missing_expected)} expected Stage D document(s) are missing."
@@ -2706,25 +3130,18 @@ async def async_main(args: argparse.Namespace) -> int:
         )
 
     metadata = {
-        "schema_version": 2,
+        "schema_version": 3,
         "generated_at": utc_now_iso(),
         "duration_seconds": round(time.monotonic() - started, 3),
         "project_root": str(PROJECT_ROOT),
         "python": sys.version,
         "git": git_metadata(),
         "packages": package_versions(),
+        "now_epoch_ms": now_epoch_ms,
         "embedding": {
             "model": args.model,
             "dimensions": args.dimensions,
-            "input_format": {
-                "retrieval_task": args.retrieval_task,
-                "query": (
-                    "task: "
-                    + args.retrieval_task.replace("-", " ")
-                    + " | query: {content}"
-                ),
-                "document": "title: {title} | text: {content}",
-            },
+            "input_format": "raw text, no prefix - matches production exactly (see prepare_embedding_input)",
             "auto_truncate": False,
             "similarity": "explicit L2-normalized cosine",
         },
@@ -2734,13 +3151,25 @@ async def async_main(args: argparse.Namespace) -> int:
             "fallback_overlap_chars": args.overlap,
         },
         "cutoffs": list(args.cutoffs),
-        "rrf_k": args.rrf_k,
         "bootstrap_samples": args.bootstrap_samples,
         "backend_rankings_json": (
             str(args.backend_rankings_json)
             if args.backend_rankings_json is not None
             else None
         ),
+        "production_baseline": {
+            "captured": production_baseline_skipped_reason is None,
+            "skipped_reason": production_baseline_skipped_reason,
+            "limit": args.production_limit,
+            "rerank_top_k": args.production_rerank_top_k,
+            "convex_function": "rag/evalRetrieval:evalRetrieveDocuments",
+        },
+        "eligibility_filtering": {
+            "total_corpus_chunks": len(corpus.chunks),
+            "eligible_chunks_used_for_ground_truth": len(eligible_chunks),
+            "excluded_ineligible_chunks": excluded_ineligible_count,
+        },
+        "strategy_classifications": dict(STRATEGY_CLASSIFICATIONS),
         "random_seed": args.seed,
         "corpus_hash": corpus_hash(corpus.chunks),
         "query_hash": query_hash(queries),
@@ -2793,7 +3222,7 @@ async def async_main(args: argparse.Namespace) -> int:
 
     for strategy in (
         strategy
-        for strategy in ("dense", "bm25", "hybrid", "backend")
+        for strategy in ("dense", "bm25", "production_baseline_a", "production_baseline_b", "backend")
         if strategy in evaluation.aggregate
     ):
         aggregate = evaluation.aggregate[strategy]
