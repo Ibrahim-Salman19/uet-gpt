@@ -6,8 +6,17 @@ lxml>=5.4,<7
 markdownify>=1.2,<2
 Pillow>=11,<13
 protego==0.6.2
-pymupdf==1.28.0
-pymupdf4llm==1.28.0
+# PDF OCR (scripts/crawler.py, scripts/ingest_pdf.py, scripts/eval/run_extraction_eval.py)
+# explicitly selects pymupdf4llm.ocr.tesseract_api rather than letting
+# PyMuPDF4LLM auto-select a RapidOCR/RapidTess backend - the installed
+# rapidocr_onnxruntime is API-incompatible with PyMuPDF4LLM's RapidOCR
+# wrapper (missing `text_detector`, upstream PyMuPDF/RAG#398), and pinning
+# to a deprecated RapidOCR package to work around that would just defer the
+# same problem. tesseract_api has no rapidocr dependency, but it does need
+# the system `tesseract` binary + tessdata installed and on PATH - that is
+# NOT a pip package and will not be installed by this file.
+pymupdf==1.28.2
+pymupdf4llm==1.28.2
 python-dotenv>=1.1,<2
 tqdm>=4.67,<5
 trafilatura>=2.1,<3

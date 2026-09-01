@@ -160,6 +160,7 @@ export const _searchChunks = internalQuery({
     return results.map((r) => ({
       documentId: r.documentId,
       contentHash: r.contentHash,
+      chunkKey: r.chunkKey,
       textPreview: r.text.slice(0, 200),
       headingPath: r.headingPath,
     }));

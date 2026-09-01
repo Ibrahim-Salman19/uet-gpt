@@ -17,7 +17,11 @@ DETERMINISM:                      genuine two-pass, 100% across all 43 fixtures
 INGEST_PDF.PY:                    explicitly NOT unified this phase — disclosed,
                                    not silently left inconsistent (see §5)
 CLOUD ACTIVITY:                   0 (Convex/Gemini/Pinecone/Neon/Zilliz)
-COMMIT:                           NOT YET MADE — awaiting explicit authorization
+COMMIT:                           a6ee46b (2026-08-20) — this line was stale
+                                   (still said "NOT YET MADE" after the
+                                   commit happened); corrected 2026-08-29
+                                   after independently confirming the commit
+                                   via `git log --oneline --all`
 ```
 
 ## 0. Scope

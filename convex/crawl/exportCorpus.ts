@@ -31,6 +31,20 @@ export const corpusPage = internalQuery({
         title: document.title ?? "",
         source_url: document.url,
         word_count: document.metadata?.wordCount,
+        // Eligibility/freshness fields (retrieval-baseline remediation,
+        // docs/rag-store-evaluation/retrieval-baseline-2026-08/): the exact
+        // fields convex/shared/freshnessPolicy.ts's isRetrievalEligibleStatus
+        // and classifyFreshness read at real retrieval time
+        // (convex/embeddings/search.ts:301-325). Exported as-is so the
+        // evaluator can reuse the real production classification (via
+        // scripts/apply_freshness_filter.ts) instead of reimplementing an
+        // approximation - status/isStale/freshnessTier/crawledAt are the
+        // complete set of fields that function touches; no others were found
+        // to affect eligibility or scoring during the source-of-truth trace.
+        status: document.status,
+        is_stale: document.isStale,
+        freshness_tier: document.freshnessTier,
+        crawled_at: document.crawledAt,
         chunks: chunks.map((chunk, index) => ({
           text: chunk.text,
           chunk_id: chunk._id,

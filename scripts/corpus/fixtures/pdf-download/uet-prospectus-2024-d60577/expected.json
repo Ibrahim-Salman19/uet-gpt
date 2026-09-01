@@ -1,13 +1,13 @@
 {
   "_curated": true,
   "_labelled_by": "scripts/eval/_label_vacuous.py (Deliverable 2 grounded labels)",
-  "_note": "max_duration_ms=300000 accommodates the isolated worker's TWO-pass extraction (determinism fingerprint): single pass measures ~124s on this 4.8MB PDF, so two passes + spawn overhead need ~282s. The earlier 180000ms budget fit one pass but timed out on two. CI runners are typically faster; if a slower machine times out, raise this rather than disabling determinism.",
+  "_note": "max_duration_ms updated 2026-08-19 after fixing the OCR crash (scripts/crawler.py's extract_pdf_sync now passes ocr_function=pymupdf4llm.ocr.tesseract_api.exec_ocr instead of letting PyMuPDF4LLM auto-select a RapidOCR backend incompatible with the installed rapidocr_onnxruntime - see requirements.txt). Before the fix this fixture crashed near-instantly (0 words), so the old 300000ms budget was measured against a native-text-only assumption that never actually exercised real OCR. Measured single-pass extraction with real Tesseract OCR on 64 of this document's 166 pages: 1880.8s (~31.3 min) via `python3 -c \"...pymupdf4llm.to_markdown(doc, ocr_function=tesseract_api.exec_ocr, ...)\"` on the cached body.bin, pymupdf==1.28.2 pymupdf4llm==1.28.2 tesseract 4.1.1. Two-pass determinism checking would take roughly double that plus spawn overhead. Set with wide margin for slower machines; if CI cannot absorb a ~90min-budget PDF fixture, consider excluding this one from default determinism checking rather than lowering the budget below real measured cost.",
   "expected": {
     "canonical_host": "admissions.uettaxila.edu.pk",
     "criticality": "critical",
     "forbidden_links_contain": [],
     "forbidden_text_blocks": [],
-    "max_duration_ms": 300000,
+    "max_duration_ms": 5400000,
     "required_links_contain": [],
     "required_text_blocks": [
       {

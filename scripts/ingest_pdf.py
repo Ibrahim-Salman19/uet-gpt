@@ -82,6 +82,7 @@ try:
         PdfMarkdownQuality,
         assess_pdf_markdown_quality,
         clean_pdf_markdown,
+        skip_ocr_if_native_text_sufficient,
     )
 except ImportError:
     PdfMarkdownQuality = Any  # type: ignore[misc,assignment]
@@ -157,6 +158,16 @@ except ImportError:
             ),
             suspicious_character_ratio=(suspicious / len(visible)) if visible else 0.0,
         )
+
+    def skip_ocr_if_native_text_sufficient(ocr_function, min_word_count: int = 20):
+        def wrapped(page, dpi=150, pixmap=None, language="eng", keep_ocr_text=False):
+            if len(page.get_text().split()) >= min_word_count:
+                return
+            return ocr_function(
+                page, dpi=dpi, pixmap=pixmap, language=language, keep_ocr_text=keep_ocr_text
+            )
+
+        return wrapped
 
 
 # ---------------------------------------------------------------------------
@@ -859,9 +870,21 @@ def extract_fast_page_chunks(path: Path, settings: Settings) -> list[dict[str, A
         return extract_pypdf_page_chunks(path)
 
     LOGGER.info(
-        "Extracting with PyMuPDF4LLM (page chunks, hybrid OCR, table strategy=%s)",
+        "Extracting with PyMuPDF4LLM (page chunks, Tesseract OCR, table strategy=%s)",
         settings.table_strategy,
     )
+    try:
+        from pymupdf4llm.ocr import tesseract_api
+    except ImportError:
+        tesseract_api = None
+
+    # pymupdf4llm's OCR path prints "=== Document parser messages ===" progress
+    # notes via pymupdf.message(), which defaults to stdout; route it to stderr
+    # so nothing downstream that reads this process's stdout gets it mixed in.
+    import pymupdf
+
+    pymupdf.set_messages(stream=sys.stderr)
+
     kwargs: dict[str, Any] = {
         "page_chunks": True,
         "page_separators": False,
@@ -874,6 +897,19 @@ def extract_fast_page_chunks(path: Path, settings: Settings) -> list[dict[str, A
         "header": True,
         "footer": True,
         "show_progress": True,
+        # See scripts/crawler.py's extract_pdf_sync for why this is explicit:
+        # PyMuPDF4LLM's auto-selected RapidOCR/RapidTess backends crash against
+        # the installed rapidocr_onnxruntime (missing text_detector attribute,
+        # upstream PyMuPDF/RAG#398). tesseract_api has no RapidOCR dependency.
+        # skip_ocr_if_native_text_sufficient avoids a separate defect:
+        # PyMuPDF4LLM's own OCR-need heuristic misfires on dot-leader layouts
+        # (e.g. tables of contents) with already-complete native text,
+        # appending a redundant/garbled OCR reading alongside it.
+        "ocr_function": (
+            skip_ocr_if_native_text_sufficient(tesseract_api.exec_ocr)
+            if tesseract_api
+            else None
+        ),
     }
 
     try:

@@ -1,7 +1,7 @@
 import { ConvexError, v } from "convex/values";
 import { internal } from "../_generated/api";
 import type { Doc } from "../_generated/dataModel";
-import { internalMutation, mutation, query } from "../_generated/server";
+import { internalMutation, type MutationCtx, mutation, query } from "../_generated/server";
 import { requireAdmin } from "../auth";
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -242,121 +242,253 @@ export const getOverviewData = query({
   },
 });
 
+const DASHBOARD_STATS_PAGE_SIZE = 1000;
+// Must exceed the 1-hour cron interval (crons.ts: "compute-dashboard-stats")
+// comfortably, mirroring workflow.ts's failStuckJobs 3h-timeout-vs-2h-cron
+// pattern, so a genuinely stuck build self-heals rather than blocking every
+// future rebuild forever.
+const STUCK_BUILD_TIMEOUT_MS = 2 * 60 * 60 * 1000;
+
+const DASHBOARD_STATS_PHASES = [
+  "documents",
+  "users",
+  "feedback",
+  "crawlJobs",
+  "semanticCache",
+] as const;
+type DashboardStatsPhase = (typeof DASHBOARD_STATS_PHASES)[number];
+
+type DashboardStatsAccumulator = {
+  docTotal: number;
+  docIndexed: number;
+  docPending: number;
+  docFailed: number;
+  userTotal: number;
+  userActive: number;
+  feedbackTotal: number;
+  crawlTotal: number;
+  cacheTotal: number;
+};
+
+const ZERO_ACCUMULATOR: DashboardStatsAccumulator = {
+  docTotal: 0,
+  docIndexed: 0,
+  docPending: 0,
+  docFailed: 0,
+  userTotal: 0,
+  userActive: 0,
+  feedbackTotal: 0,
+  crawlTotal: 0,
+  cacheTotal: 0,
+};
+
+const accumulatorValidator = v.object({
+  docTotal: v.number(),
+  docIndexed: v.number(),
+  docPending: v.number(),
+  docFailed: v.number(),
+  userTotal: v.number(),
+  userActive: v.number(),
+  feedbackTotal: v.number(),
+  crawlTotal: v.number(),
+  cacheTotal: v.number(),
+});
+
 /**
- * Background mutation run by cron to compute and store dashboard statistics.
+ * Background mutation run by cron to (re)start a dashboard-stats rebuild.
+ *
+ * Phase 6.21A Part 9: previously ran FIVE separate multi-page `.paginate()`
+ * loops - one per source table - inside a single internalMutation, violating
+ * this file's own "one paginated query per function" rule five times over
+ * and risking the mutation's total transaction budget as any of those tables
+ * grows. Now mirrors the cursor + ctx.scheduler.runAfter continuation
+ * pattern already established by crawl/staleness.ts's flagExpiredDocuments:
+ * this entry point only starts the build (idempotent, coalesced - see the
+ * buildInProgress guard below); computeDashboardStatsStep does the actual
+ * one-page-per-invocation work and performs the final atomic promotion.
  */
 export const computeDashboardStats = internalMutation({
   args: {},
   handler: async (ctx) => {
-    // 1. Compute documentStats
-    let docTotal = 0;
-    let docIndexed = 0;
-    let docPending = 0;
-    let docFailed = 0;
-    let docCursor: string | null = null;
-    while (true) {
-      const page = await ctx.db.query("documents").paginate({ numItems: 1000, cursor: docCursor });
-      for (const doc of page.page) {
-        docTotal++;
-        if (doc.status === "indexed") docIndexed++;
-        else if (doc.status === "pending") docPending++;
-        else if (doc.status === "failed") docFailed++;
-      }
-      if (page.isDone) break;
-      docCursor = page.continueCursor;
-    }
-
-    // 2. Compute userStats
-    const now = Date.now();
-    const userCutoff = now - 24 * 60 * 60 * 1000;
-    let userTotal = 0;
-    let userActive = 0;
-    let userCursor: string | null = null;
-    while (true) {
-      const page = await ctx.db.query("users").paginate({ numItems: 1000, cursor: userCursor });
-      for (const u of page.page) {
-        userTotal++;
-        if (u.lastLoginAt && u.lastLoginAt >= userCutoff) userActive++;
-      }
-      if (page.isDone) break;
-      userCursor = page.continueCursor;
-    }
-
-    // 3. Compute feedbackCount
-    let feedbackTotal = 0;
-    let feedbackCursor: string | null = null;
-    while (true) {
-      const page = await ctx.db
-        .query("feedback")
-        .paginate({ numItems: 1000, cursor: feedbackCursor });
-      feedbackTotal += page.page.length;
-      if (page.isDone) break;
-      feedbackCursor = page.continueCursor;
-    }
-
-    // 4. Compute crawlCount
-    let crawlTotal = 0;
-    let crawlCursor: string | null = null;
-    while (true) {
-      const page = await ctx.db
-        .query("crawlJobs")
-        .paginate({ numItems: 1000, cursor: crawlCursor });
-      crawlTotal += page.page.length;
-      if (page.isDone) break;
-      crawlCursor = page.continueCursor;
-    }
-
-    // 5. Compute cacheStats - semanticCache rows are large (each carries a 768-float
-    // queryEmbedding + optional alternateEmbeddings + full response), so scanning the
-    // whole table is the dominant DB-bandwidth cost and grows O(cacheRows). Re-count it
-    // at most ~4×/day (every 6th UTC hour) and reuse the last known count otherwise; the
-    // lighter tables above are still counted every run.
     const existing = await ctx.db
       .query("dashboardStats")
       .withIndex("by_statsId", (q) => q.eq("statsId", "global"))
       .unique();
-    let cacheTotal = existing?.cacheStats?.total ?? 0;
-    // Re-count ~4×/day (UTC hours 0/6/12/18), and always on the first run (no prior stats).
-    if (!existing || new Date(now).getUTCHours() % 6 === 0) {
-      cacheTotal = 0;
-      let cacheCursor: string | null = null;
-      while (true) {
-        const page = await ctx.db
-          .query("semanticCache")
-          .paginate({ numItems: 1000, cursor: cacheCursor });
-        cacheTotal += page.page.length;
-        if (page.isDone) break;
-        cacheCursor = page.continueCursor;
-      }
+
+    const now = Date.now();
+    if (
+      existing?.buildInProgress === true &&
+      existing.buildStartedAt !== undefined &&
+      now - existing.buildStartedAt < STUCK_BUILD_TIMEOUT_MS
+    ) {
+      // Coalesce: a build is already in flight and not yet stuck - skip this
+      // cron tick rather than starting an overlapping second rebuild.
+      console.log("computeDashboardStats: build already in progress, skipping this tick.");
+      return;
     }
 
-    const statsData = {
-      statsId: "global",
-      documentStats: {
-        total: docTotal,
-        indexed: docIndexed,
-        pending: docPending,
-        failed: docFailed,
-      },
-      userStats: {
-        total: userTotal,
-        activeLast24h: userActive,
-      },
-      feedbackCount: feedbackTotal,
-      crawlCount: crawlTotal,
-      cacheStats: {
-        total: cacheTotal,
-      },
-      lastUpdatedAt: now,
-    };
+    // Cache recount cadence (~4x/day, UTC hours 0/6/12/18) is decided ONCE
+    // for the whole build, not re-evaluated when the semanticCache phase is
+    // reached, so it reflects a single consistent "now" for this build.
+    const skipCacheRecount = existing !== null && new Date(now).getUTCHours() % 6 !== 0;
 
     if (existing) {
-      await ctx.db.patch(existing._id, statsData);
+      await ctx.db.patch(existing._id, { buildInProgress: true, buildStartedAt: now });
     } else {
-      await ctx.db.insert("dashboardStats", statsData);
+      // First-ever run: insert a placeholder singleton with zeroed public
+      // fields so documentStats/etc. readers have a row while the first
+      // build runs; the final step below overwrites these with real values.
+      await ctx.db.insert("dashboardStats", {
+        statsId: "global",
+        documentStats: { total: 0, indexed: 0, pending: 0, failed: 0 },
+        userStats: { total: 0, activeLast24h: 0 },
+        feedbackCount: 0,
+        crawlCount: 0,
+        cacheStats: { total: 0 },
+        lastUpdatedAt: now,
+        buildInProgress: true,
+        buildStartedAt: now,
+      });
     }
+
+    await ctx.scheduler.runAfter(0, internal.admin.stats.computeDashboardStatsStep, {
+      phase: "documents",
+      cursor: null,
+      now,
+      skipCacheRecount,
+      accumulated: ZERO_ACCUMULATOR,
+    });
   },
 });
+
+export const computeDashboardStatsStep = internalMutation({
+  args: {
+    phase: v.union(
+      v.literal("documents"),
+      v.literal("users"),
+      v.literal("feedback"),
+      v.literal("crawlJobs"),
+      v.literal("semanticCache"),
+    ),
+    cursor: v.union(v.string(), v.null()),
+    now: v.number(),
+    skipCacheRecount: v.boolean(),
+    accumulated: accumulatorValidator,
+  },
+  handler: async (ctx, args) => {
+    const acc: DashboardStatsAccumulator = { ...args.accumulated };
+
+    // semanticCache re-count is skipped on most hourly ticks (see the
+    // cadence comment above) - carry the last known total through unchanged
+    // rather than reading the table at all.
+    if (args.phase === "semanticCache" && args.skipCacheRecount) {
+      const existing = await ctx.db
+        .query("dashboardStats")
+        .withIndex("by_statsId", (q) => q.eq("statsId", "global"))
+        .unique();
+      acc.cacheTotal = existing?.cacheStats?.total ?? 0;
+      await finalizeDashboardStatsBuild(ctx, acc, args.now);
+      return;
+    }
+
+    const page = await ctx.db
+      .query(args.phase)
+      .paginate({ numItems: DASHBOARD_STATS_PAGE_SIZE, cursor: args.cursor });
+
+    if (args.phase === "documents") {
+      for (const doc of page.page as Doc<"documents">[]) {
+        acc.docTotal++;
+        if (doc.status === "indexed") acc.docIndexed++;
+        else if (doc.status === "pending") acc.docPending++;
+        else if (doc.status === "failed") acc.docFailed++;
+      }
+    } else if (args.phase === "users") {
+      const userCutoff = args.now - 24 * 60 * 60 * 1000;
+      for (const u of page.page as Doc<"users">[]) {
+        acc.userTotal++;
+        if (u.lastLoginAt && u.lastLoginAt >= userCutoff) acc.userActive++;
+      }
+    } else if (args.phase === "feedback") {
+      acc.feedbackTotal += page.page.length;
+    } else if (args.phase === "crawlJobs") {
+      acc.crawlTotal += page.page.length;
+    } else {
+      acc.cacheTotal += page.page.length;
+    }
+
+    if (!page.isDone) {
+      await ctx.scheduler.runAfter(0, internal.admin.stats.computeDashboardStatsStep, {
+        phase: args.phase,
+        cursor: page.continueCursor,
+        now: args.now,
+        skipCacheRecount: args.skipCacheRecount,
+        accumulated: acc,
+      });
+      return;
+    }
+
+    const nextPhase: DashboardStatsPhase | undefined =
+      DASHBOARD_STATS_PHASES[DASHBOARD_STATS_PHASES.indexOf(args.phase) + 1];
+    if (nextPhase) {
+      await ctx.scheduler.runAfter(0, internal.admin.stats.computeDashboardStatsStep, {
+        phase: nextPhase,
+        cursor: null,
+        now: args.now,
+        skipCacheRecount: args.skipCacheRecount,
+        accumulated: acc,
+      });
+      return;
+    }
+
+    await finalizeDashboardStatsBuild(ctx, acc, args.now);
+  },
+});
+
+/**
+ * Final promotion step: the ONLY place the public-facing documentStats/
+ * userStats/feedbackCount/crawlCount/cacheStats fields are written. A
+ * partial or crashed build therefore never overwrites the last good
+ * snapshot - readers keep seeing the previous complete build's numbers
+ * until this runs. Also clears buildInProgress so the next cron tick (or a
+ * stuck-build timeout) can start a fresh rebuild.
+ */
+async function finalizeDashboardStatsBuild(
+  ctx: MutationCtx,
+  acc: DashboardStatsAccumulator,
+  now: number,
+): Promise<void> {
+  const existing = await ctx.db
+    .query("dashboardStats")
+    .withIndex("by_statsId", (q) => q.eq("statsId", "global"))
+    .unique();
+
+  const statsData = {
+    statsId: "global",
+    documentStats: {
+      total: acc.docTotal,
+      indexed: acc.docIndexed,
+      pending: acc.docPending,
+      failed: acc.docFailed,
+    },
+    userStats: {
+      total: acc.userTotal,
+      activeLast24h: acc.userActive,
+    },
+    feedbackCount: acc.feedbackTotal,
+    crawlCount: acc.crawlTotal,
+    cacheStats: {
+      total: acc.cacheTotal,
+    },
+    lastUpdatedAt: now,
+    buildInProgress: false,
+  };
+
+  if (existing) {
+    await ctx.db.patch(existing._id, statsData);
+  } else {
+    await ctx.db.insert("dashboardStats", statsData);
+  }
+}
 
 // ────────────────────────────────────────────────────────────────────────────
 // Mutations

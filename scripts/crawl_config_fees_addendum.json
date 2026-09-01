@@ -1,0 +1,44 @@
+{
+  "_comment": "2026-08-30 targeted addendum: fetches exactly 2 pages (Fees.php was an explicit seed in crawl_config_local_corpus.json's original seedUrls list yet has zero record in raw-manifest.jsonl - never actually fetched, root cause not determined; FeesForTechnologyPrograms.php is its sibling nav-menu link, also never crawled). Identical settings to crawl_config_local_corpus.json (same politeness/extraction/zero-Gemini-calls config) except seedUrls, so this addendum is produced under the same conditions as the rest of Corpus V1. Run with: python3 scripts/crawler.py --config scripts/crawl_config_fees_addendum.json --limit 2 --dry-run --local-corpus-dir <SEPARATE addendum dir, never the frozen Corpus V1 path> --no-resume",
+  "seedUrls": [
+    "https://admissions.uettaxila.edu.pk/Fees.php",
+    "https://admissions.uettaxila.edu.pk/FeesForTechnologyPrograms.php"
+  ],
+  "departmentFacultyRange": { "start": 1, "end": 1 },
+  "maxDepth": 0,
+  "concurrency": 2,
+  "requestTimeout": 20,
+  "maxRetries": 3,
+  "pushRetries": 3,
+  "minWordCount": 80,
+  "queueMaxSize": 50,
+  "excludePatterns": [
+    "/search*", "/print/**", "/feed/**", "/gallery/**",
+    "*.doc", "*.docx", "*.ppt", "*.pptx",
+    "*.xls", "*.xlsx", "*.zip", "*.rar", "*.exe",
+    "*.jpg", "*.jpeg", "*.png", "*.gif"
+  ],
+  "includePatterns": [
+    "https://web.uettaxila.edu.pk/**",
+    "https://uettaxila.edu.pk/**",
+    "https://admissions.uettaxila.edu.pk/**"
+  ],
+  "rateLimiter": {
+    "minDelay": 0.05,
+    "maxDelay": 5.0,
+    "initialDelay": 0.4,
+    "aiStep": 0.01,
+    "mdFactor": 2.0,
+    "successThreshold": 10
+  },
+  "tokenBucket": {
+    "rate": 8.0,
+    "capacity": 15.0
+  },
+  "pdf": {
+    "describeImages": false
+  },
+  "html": {
+    "describeImages": false
+  }
+}

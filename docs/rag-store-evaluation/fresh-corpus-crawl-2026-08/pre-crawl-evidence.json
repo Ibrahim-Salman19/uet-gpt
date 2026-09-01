@@ -1,0 +1,98 @@
+{
+  "purpose": "Pre-crawl evidence snapshot captured before starting one controlled, production-equivalent, from-scratch crawl into the newly-created (currently empty) rugged-bird-156 Convex deployment. Authorized by the user 2026-08-15 to establish a fresh authoritative corpus for the retrieval-baseline-remediation work in ../retrieval-baseline-2026-08/.",
+  "capturedAtUtc": "2026-08-15T15:37:00Z",
+  "git": {
+    "head": "587363db82285781ecd6e4f4a57c0f57b752195b",
+    "lastCommits": [
+      "587363d docs(rag-store-evaluation): retrieval baseline control verification - defects found, not executed",
+      "5ae2c91 docs(rag-store-evaluation): market-wide RAG storage architecture screen",
+      "eacede1 docs(rag-store-evaluation): include log evidence artifacts (gitignore override)"
+    ],
+    "dirtyTreeNote": "Working tree has pre-existing unrelated modified/untracked files from earlier sessions (.agents/skills/*, .claude/skills/*, convex/admin/stats.ts, package.json, pnpm-lock.yaml, pnpm-workspace.yaml, skills-lock.json, convex/_generated/ai/ai-files.state.json, AGENTS.md, an .env.local backup) plus this session's own retrieval-baseline-remediation changes (convex/crawl/exportCorpus.ts, convex/embeddings/generate.ts, scripts/stage_e_retrieval_eval.py, convex/rag/evalRetrieval.ts, scripts/apply_freshness_filter.ts, scripts/print_embedding_request.ts, scripts/test_*.py, docs/rag-store-evaluation/retrieval-baseline-2026-08/source-of-truth-specification.json). None of these are touched by or relevant to the crawl itself; the crawl runs entirely through scripts/crawler.py (a standalone Python CLI process, not a Convex deploy), so no push/deploy of this dirty tree occurs as part of running it."
+  },
+  "targetDeployment": {
+    "claimedInEnvLocal": "rugged-bird-156",
+    "nextPublicConvexUrl": "https://rugged-bird-156.convex.cloud",
+    "deployKeyPrefix": "dev:rugged-bird-156",
+    "identityProofMethod": "Three independent signals agree: (1) NEXT_PUBLIC_CONVEX_URL host, (2) CONVEX_DEPLOY_KEY's own non-secret prefix (text before the '|' separator, which Convex deploy keys self-declare as '<env>:<deployment-name>'), (3) a live authenticated query using this exact key succeeded (Convex deploy keys are cryptographically bound to one specific deployment, so a mismatched key would fail auth outright rather than silently reading a different deployment).",
+    "confirmedEmptyAtUtc": "2026-08-15T15:52:26Z (re-confirmed twice this session; second check used --inline-query with .collect() for exact counts rather than .take(5) presence checks)",
+    "preCrawlCounts": {
+      "documents": 0,
+      "crawledChunks": 0,
+      "crawlJobs": 0,
+      "crawlDeadLetter": 0
+    }
+  },
+  "crawlEntryPoint": {
+    "livePath": "scripts/crawler.py (standalone Python CLI, Path A per the pre-flight investigation) - pushes to convex/crawl/webhook.ts's ingestWebhook httpAction via CONVEX_AUTH_TOKEN bearer auth",
+    "disabledPath": "convex/crawl/trigger.ts's trigger mutation / convex/crawl/workflow.ts's kickoffDailyCrawl cron (Path B) is explicitly disabled in convex/crons.ts because its Crawl4AI Docker dependency is not deployed - not used",
+    "commandUsed": "python3 scripts/crawler.py --config scripts/crawl_config.production.json --no-resume",
+    "whyNoResume": "This checkout retained crash-recovery state (crawler_state.json, crawl_ledger.sqlite3, dlq.jsonl) from the ORIGINAL interrupted 2026-08-02 run that built the historical ~992-document corpus on a DIFFERENT (now-superseded) Convex deployment, before the user created this new rugged-bird-156 deployment on another Google account. Default --resume behavior would silently treat this as continuing that old, different-deployment run (crawling only its ~931 leftover queued URLs) rather than a genuine from-scratch crawl of the live site into the new empty database. --no-resume generates a fresh runId, verified via source inspection (scripts/crawler.py:4893-4898) to leave the old state file's content backed up (see stateFilesBackup below) before it gets overwritten by this run's own periodic saves, and the SQLite ledger (scripts/uet_crawler/crawl_ledger.py:182-201) is properly scoped by a (run_id, url) composite primary key so old rows cannot silently bias or skip URLs for the new run_id.",
+    "stateFilesBackup": "Pre-existing crawler_state.json, crawl_ledger.sqlite3, dlq.jsonl, crawl_coverage.json, crawl_coverage.csv copied (not moved) to the session scratchpad before this run started, so the historical 2026-08-02 run's evidence is preserved regardless of what this new run does to the same-named files in the project root."
+  },
+  "crawlerConfiguration": {
+    "configFile": "scripts/crawl_config.production.json",
+    "seedUrls": [
+      "https://admissions.uettaxila.edu.pk/",
+      "https://admission.uettaxila.edu.pk/",
+      "https://web.uettaxila.edu.pk/",
+      "https://www.uettaxila.edu.pk/",
+      "https://uettaxila.edu.pk/",
+      "https://entrytest.uettaxila.edu.pk/"
+    ],
+    "maxDepth": 4,
+    "concurrency": 5,
+    "queueMaxSize": 2000,
+    "requestTimeoutSeconds": 20,
+    "pdfTimeoutSeconds": 120,
+    "connectTimeoutSeconds": 10,
+    "maxRetries": 4,
+    "pushRetries": 4,
+    "pushTimeoutSeconds": 30,
+    "minWordCount": 40,
+    "maxResponseBytes": 26214400,
+    "maxPdfResponseBytes": 52428800,
+    "maxIngestBytes": 4194304,
+    "maxRedirects": 5,
+    "requireAuthToken": true,
+    "stateSaveInterval": 25,
+    "dlqMaxAttempts": 10,
+    "ioBudget": { "softBytes": 471859200, "stopBytes": 503316480, "maxBytes": 524288000 },
+    "robots": { "enabled": true, "cacheSeconds": 86400, "staleSeconds": 2592000 },
+    "sitemap": { "enabled": true, "maxFiles": 25, "maxUrls": 8000 },
+    "tokenBucket": { "rate": 8.0, "capacity": 15.0 },
+    "allowedHostSuffixes": ["uettaxila.edu.pk"],
+    "pageLimit": "0 (exhaustive / unbounded - the --limit default, matching the historical production run and this task's explicit 'production-equivalent crawl' requirement rather than an artificially capped test)",
+    "wallClockCap": "none - no wall-clock timeout exists anywhere in scripts/crawler.py per source inspection; the historical 2026-08-02 run took 10h24m and was manually interrupted rather than auto-completing, so this run may take a comparably long or longer time"
+  },
+  "indexingFingerprint": {
+    "value": "3ab1610d2be11e1de42a5e8e58a69b70544fe786a698067d70ea1714a3f1fcf7",
+    "computedBy": "convex/crawl/chunkKey.ts's computeIndexingFingerprint(), executed live against this HEAD via npx tsx",
+    "inputs": {
+      "chunkingVersion": 1,
+      "parentChunkSize": 3000,
+      "parentChunkOverlap": 300,
+      "childChunkSize": 800,
+      "childChunkOverlap": 100,
+      "contextPrefixVersion": 1,
+      "embeddingModel": "gemini-embedding-2",
+      "embeddingDimension": 768
+    }
+  },
+  "embeddingConfiguration": {
+    "model": "gemini-embedding-2",
+    "dimensions": 768,
+    "requestShape": "flat top-level outputDimensionality (see convex/embeddings/generate.ts's buildGeminiEmbedContentRequestBody / buildGeminiBatchEmbedContentsRequestItem, both empirically confirmed against the live API this session)"
+  },
+  "requiredEnvVarsPresentAtLaunch": {
+    "CONVEX_SITE_URL": true,
+    "CONVEX_AUTH_TOKEN": true,
+    "GEMINI_API_KEY": true,
+    "GEMINI_API_KEY_1": true,
+    "GEMINI_API_KEY_2": true,
+    "CONVEX_DEPLOY_KEY": true,
+    "NEXT_PUBLIC_CONVEX_URL": true,
+    "note": "Presence/length only - no secret values printed or recorded anywhere, per this session's standing constraint after an earlier accidental `npx convex env list` exposure."
+  },
+  "explicitNonRequirement": "Per the user's explicit instruction: historical corpus-size figures (~992 documents, ~20,652 chunks) from the original run are NOT used as acceptance requirements for this crawl - they are recorded here only as historical reference, since the live uettaxila.edu.pk site may have changed since 2026-08-02."
+}

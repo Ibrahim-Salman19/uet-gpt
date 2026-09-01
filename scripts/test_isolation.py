@@ -96,12 +96,18 @@ class TestIsolation(unittest.TestCase):
     def test_prospectus_extracts_under_isolation(self):
         # The slowest fixture (4.6 MB / 166 pages). Confirms the isolation layer
         # handles the real worst case without timeout when given a realistic budget.
+        # timeout_ms was 300000 (5 min) when this fixture crashed near-instantly
+        # under the broken RapidOCR backend (see scripts/crawler.py's OCR fix). Real
+        # Tesseract OCR of 64/166 pages measures ~1880.8s single-pass (see this
+        # fixture's expected.json _note); run_isolated derives an RLIMIT_CPU budget
+        # from timeout_ms, so a stale 300000 now kills the worker with SIGXCPU
+        # before it can finish, not a real defect in the extraction itself.
         out = run_isolated(WorkerRequest(
             fixture_id="pdf-download/uet-prospectus-2024-d60577",
             extractor_kind="pdf", body_path=str(PROSPECTUS),
             content_type="application/pdf",
             final_url="https://uettaxila.edu.pk/prospectus.pdf",
-            timeout_ms=300000,
+            timeout_ms=5400000,
         ))
         self.assertEqual(out.status, "success")
         self.assertIsNotNone(out.result)

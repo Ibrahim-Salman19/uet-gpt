@@ -93,6 +93,7 @@ class CleaningReport:
     boilerplate_removed: int
     page_artifacts_removed: int
     control_characters_removed: int
+    picture_text_blocks_removed: int
     pages_detected: int
     used_page_aware_detection: bool
 
@@ -139,6 +140,21 @@ _EXPLICIT_PAGE_SEPARATOR_RE: Final = re.compile(
     r"|\f"
     r")\s*$",
     re.IGNORECASE,
+)
+
+# pymupdf4llm wraps OCR output from *inside* an image/picture bounding box
+# (logos, seals, decorative graphics) in these markers - per its own source
+# comment (picture_text_to_md/fallback_text_to_md in helpers/document_layout.py)
+# it "cannot be sure about the formatting" of that region. Full-page scanned
+# body text is OCRed through the normal heading/paragraph path and never
+# wrapped this way, so this pattern only ever matches non-prose graphic
+# regions. Measured against real UET PDFs, the wrapped content is OCR
+# misreads of decorative crests/seals (e.g. "ND)<br>WY =-- W<br>Ne SE<br>"),
+# not legitimate body text, so it is dropped rather than left to pollute
+# retrieval with noise tokens.
+_PICTURE_TEXT_BLOCK_RE: Final = re.compile(
+    r"<!--\s*Start of picture text\s*-->.*?<!--\s*End of picture text\s*-->\n?",
+    re.IGNORECASE | re.DOTALL,
 )
 
 # Placeholder generated when picture/image regions are omitted from text.
@@ -274,6 +290,7 @@ def clean_pdf_markdown_with_report(
     if not isinstance(config, CleaningConfig):
         raise TypeError("config must be a CleaningConfig instance")
 
+    markdown, picture_text_blocks_removed = _PICTURE_TEXT_BLOCK_RE.subn("", markdown)
     normalized, controls_removed = _normalize_input(markdown)
     records = _build_line_records(normalized)
     original_line_count = len(records)
@@ -335,6 +352,7 @@ def clean_pdf_markdown_with_report(
         boilerplate_removed=boilerplate_removed,
         page_artifacts_removed=page_artifacts_removed,
         control_characters_removed=controls_removed,
+        picture_text_blocks_removed=picture_text_blocks_removed,
         pages_detected=page_count,
         used_page_aware_detection=page_aware,
     )
@@ -477,6 +495,40 @@ def is_pdf_output_garbage(markdown: str, min_word_count: int = 50) -> bool:
         markdown,
         min_word_count=min_word_count,
     ).is_garbage
+
+
+def skip_ocr_if_native_text_sufficient(ocr_function, min_word_count: int = 20):
+    """Wrap a pymupdf4llm OCR callback to skip OCR when native text already suffices.
+
+    pymupdf4llm's own need-OCR heuristic (the ``chars_bad``/``bad_areas``
+    ratio checks in ``pymupdf4llm/ocr/analyze_page.py``) can misfire on
+    dot-leader-heavy layouts (e.g. a table of contents), triggering OCR on a
+    page whose native text extraction is already complete and correct.
+    pymupdf4llm excludes already-"legible" text spans from the OCR pixmap,
+    but dot-leader glyphs are not always classified as legible, so the OCR
+    pass appends a redundant, sometimes garbled reading of the same content
+    rather than filling in anything missing.
+
+    The callback receives the live page object before OCR runs, so checking
+    its already-available native text word count against a low floor lets
+    callers skip OCR precisely when it would only add noise, without
+    touching pymupdf4llm's own per-page OCR-need decision (a page with too
+    little native text, e.g. a scanned cover with 0 words, still gets OCRed
+    normally). Deliberately a raw word count rather than
+    :func:`assess_pdf_markdown_quality`: that function's
+    suspicious-character/alphanumeric-ratio checks are tuned to flag
+    dot-leader-heavy text as a quality problem, which is the exact case
+    this exists to protect - reusing it here would defeat the purpose.
+    """
+
+    def wrapped(page, dpi=150, pixmap=None, language="eng", keep_ocr_text=False):
+        if len(page.get_text().split()) >= min_word_count:
+            return
+        return ocr_function(
+            page, dpi=dpi, pixmap=pixmap, language=language, keep_ocr_text=keep_ocr_text
+        )
+
+    return wrapped
 
 
 # ---------------------------------------------------------------------------
@@ -1049,4 +1101,5 @@ __all__ = [
     "clean_pdf_markdown",
     "clean_pdf_markdown_with_report",
     "is_pdf_output_garbage",
+    "skip_ocr_if_native_text_sufficient",
 ]

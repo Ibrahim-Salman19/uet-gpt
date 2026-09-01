@@ -3,7 +3,16 @@ from pdf_markdown_cleaner import (
     clean_pdf_markdown,
     clean_pdf_markdown_with_report,
     is_pdf_output_garbage,
+    skip_ocr_if_native_text_sufficient,
 )
+
+
+class _FakePage:
+    def __init__(self, native_text: str):
+        self._native_text = native_text
+
+    def get_text(self) -> str:
+        return self._native_text
 
 
 def test_removes_placeholders_but_preserves_inline_dimensions():
@@ -179,3 +188,97 @@ def test_cleaning_is_idempotent():
     once = clean_pdf_markdown(source)
     twice = clean_pdf_markdown(once)
     assert once == twice
+
+
+def test_removes_ocr_picture_text_gibberish_preserves_real_heading():
+    # Real output captured from pymupdf4llm's tesseract_api OCR path against
+    # a UET PDF's cover crest: garbled OCR of a decorative logo, wrapped in
+    # pymupdf4llm's own "picture text" markers (see picture_text_to_md in
+    # pymupdf4llm/helpers/document_layout.py), immediately followed by the
+    # real, correctly-recognized page title.
+    source = (
+        "\n\n<!-- Start of picture text -->\n"
+        "el eA<br>E= Ne,<br>va =e ee Coe ia<br>— | henmrih Ia & 2°<br>gies is iLaa<br>"
+        "<!-- End of picture text -->\n\n"
+        "UNDERGRADUATE PROSPECTUS 2024 \n\n"
+        "UNIVERSITY OF ENGINEERING AND TECHNOLOGY, TAXILA \n\n"
+    )
+    cleaned, report = clean_pdf_markdown_with_report(source)
+    assert "henmrih" not in cleaned
+    assert "picture text" not in cleaned
+    assert "UNDERGRADUATE PROSPECTUS 2024" in cleaned
+    assert "UNIVERSITY OF ENGINEERING AND TECHNOLOGY, TAXILA" in cleaned
+    assert report.picture_text_blocks_removed == 1
+
+
+def test_removes_multiple_picture_text_blocks_across_page():
+    source = (
+        "<!-- Start of picture text -->\nEQ<br><!-- End of picture text -->\n\n"
+        "Real Heading\n\n"
+        "<!-- Start of picture text -->\n@(So<br><!-- End of picture text -->\n\n"
+        "More real body text.\n"
+    )
+    cleaned, report = clean_pdf_markdown_with_report(source)
+    assert "EQ" not in cleaned
+    assert "@(So" not in cleaned
+    assert "Real Heading" in cleaned
+    assert "More real body text." in cleaned
+    assert report.picture_text_blocks_removed == 2
+
+
+def test_preserves_table_shaped_picture_text_fallback_markers_removed():
+    # fallback_text_to_md (used when picture spans have varying counts) wraps
+    # its markdown-table rendering in the same start/end markers as the plain
+    # line-by-line form; both must be stripped by the same pattern.
+    source = (
+        "<!-- Start of picture text -->\n"
+        "||\n|---|\n|garbled|\n"
+        "\n<!-- End of picture text -->\n\n"
+        "Body text after the fallback table.\n"
+    )
+    cleaned = clean_pdf_markdown(source)
+    assert "garbled" not in cleaned
+    assert "picture text" not in cleaned
+    assert "Body text after the fallback table." in cleaned
+
+
+def test_skip_ocr_wrapper_skips_when_native_text_already_sufficient():
+    # Real defect this exists for: a table-of-contents page's dot-leader
+    # layout has plenty of correct native text, but pymupdf4llm's own
+    # OCR-need heuristic still fires on it, appending a redundant/garbled
+    # OCR reading. 20+ real native words should suppress the OCR call.
+    calls = []
+    ocr_function = lambda page, **kw: calls.append(page)
+    wrapped = skip_ocr_if_native_text_sufficient(ocr_function, min_word_count=20)
+    page = _FakePage(" ".join(f"word{i}" for i in range(30)))
+    result = wrapped(page, dpi=150, pixmap=None, language="eng", keep_ocr_text=False)
+    assert result is None
+    assert calls == []
+
+
+def test_skip_ocr_wrapper_still_runs_ocr_when_native_text_insufficient():
+    # Real case this must not break: a scanned cover page with 0 native
+    # text still needs OCR to recover its title.
+    calls = []
+
+    def ocr_function(page, dpi, pixmap, language, keep_ocr_text):
+        calls.append((page, dpi, language))
+        return "ocr result"
+
+    wrapped = skip_ocr_if_native_text_sufficient(ocr_function, min_word_count=20)
+    page = _FakePage("")
+    result = wrapped(page, dpi=150, pixmap="pix", language="eng", keep_ocr_text=True)
+    assert result == "ocr result"
+    assert calls == [(page, 150, "eng")]
+
+
+def test_skip_ocr_wrapper_boundary_at_exact_threshold():
+    calls = []
+    ocr_function = lambda page, **kw: calls.append(page)
+    wrapped = skip_ocr_if_native_text_sufficient(ocr_function, min_word_count=20)
+    exactly_at_floor = _FakePage(" ".join(f"w{i}" for i in range(20)))
+    wrapped(exactly_at_floor, dpi=150, pixmap=None, language="eng", keep_ocr_text=False)
+    assert calls == []  # >= floor means sufficient, OCR skipped
+    one_below_floor = _FakePage(" ".join(f"w{i}" for i in range(19)))
+    wrapped(one_below_floor, dpi=150, pixmap=None, language="eng", keep_ocr_text=False)
+    assert calls == [one_below_floor]
