@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SCHEMA_DATE_MODIFIED } from "@/lib/dates";
 import { BreadcrumbJsonLd } from "@/lib/json-ld";
 import { LEARN_TERMS } from "@/lib/learn-terms";
 
@@ -18,6 +19,21 @@ export const metadata: Metadata = {
       "Understand UET Taxila admissions jargon: ECAT, merit formula, eligibility, hostel allotment, scholarships, and fees - all explained and source-cited by UET GPT.",
     url: `${siteUrl}/learn`,
     type: "website",
+    images: [
+      {
+        url: `${siteUrl}/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: "UET Taxila Glossary — UET GPT",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "UET Taxila Glossary - Learn Key Terms - UET GPT",
+    description:
+      "Understand UET Taxila admissions jargon: ECAT, merit formula, eligibility, hostel allotment, scholarships, and fees.",
+    images: [`${siteUrl}/opengraph-image`],
   },
 };
 
@@ -28,11 +44,20 @@ const collectionSchema = {
   description:
     "Key UET Taxila terms explained: ECAT, merit formula, eligibility criteria, hostel allotment, scholarships, and fee structure.",
   url: `${siteUrl}/learn`,
-  dateModified: "2026-07-16",
+  dateModified: SCHEMA_DATE_MODIFIED,
   publisher: {
     "@type": "Organization",
     "@id": `${siteUrl}/#organization`,
-    name: "UET GPT Team",
+    name: "UET GPT",
+  },
+  mainEntity: {
+    "@type": "ItemList",
+    itemListElement: LEARN_TERMS.map((t, idx) => ({
+      "@type": "ListItem",
+      position: idx + 1,
+      name: t.title,
+      url: `${siteUrl}/learn/${t.slug}`,
+    })),
   },
 };
 
@@ -74,10 +99,10 @@ export default function LearnIndexPage() {
               UET Taxila Hub
             </Link>
             <Link
-              href="/sign-up"
-              className="text-sm px-4 py-2 rounded-lg bg-[#6366f1] text-white hover:bg-[#5558e6] transition-colors"
+              href="/chat"
+              className="text-sm px-4 py-2 rounded-lg bg-[#d9b451] text-[#07080a] font-semibold hover:bg-[#f0d178] transition-colors"
             >
-              Get Started
+              Start Chat
             </Link>
           </nav>
         </header>
@@ -96,8 +121,8 @@ export default function LearnIndexPage() {
               sourced from the official 2025 undergraduate prospectus.
             </p>
             <Link
-              href="/"
-              className="px-6 py-3 rounded-xl bg-[#6366f1] text-white font-medium hover:bg-[#5558e6] transition-colors text-base"
+              href="/chat"
+              className="px-6 py-3 rounded-xl bg-[#d9b451] text-[#07080a] font-semibold hover:bg-[#f0d178] transition-colors text-base"
             >
               Ask UET GPT Anything
             </Link>
@@ -135,8 +160,8 @@ export default function LearnIndexPage() {
               applicant.
             </p>
             <Link
-              href="/"
-              className="px-6 py-3 rounded-xl bg-[#6366f1] text-white font-medium hover:bg-[#5558e6] transition-colors text-base"
+              href="/chat"
+              className="px-6 py-3 rounded-xl bg-[#d9b451] text-[#07080a] font-semibold hover:bg-[#f0d178] transition-colors text-base"
             >
               Ask UET GPT
             </Link>
@@ -147,7 +172,7 @@ export default function LearnIndexPage() {
         <footer className="border-t border-[#1a1a1e] px-6 py-8">
           <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-[#a1a1aa]">
-              &copy; {new Date().getFullYear()} UET GPT Team. All rights reserved.
+              &copy; {new Date().getFullYear()} UET GPT Community. All rights reserved.
             </p>
             <div className="flex items-center gap-6 text-sm text-[#a1a1aa]">
               <Link href="/" className="hover:text-[#e1e1e2] transition-colors">
@@ -161,6 +186,12 @@ export default function LearnIndexPage() {
                 className="hover:text-[#e1e1e2] transition-colors"
               >
                 Admissions
+              </Link>
+              <Link href="/about" className="hover:text-[#e1e1e2] transition-colors">
+                About
+              </Link>
+              <Link href="/privacy" className="hover:text-[#e1e1e2] transition-colors">
+                Privacy
               </Link>
             </div>
           </div>

@@ -34,6 +34,20 @@ export async function generateMetadata({
       description: term.metaDescription,
       url: `${siteUrl}/learn/${term.slug}`,
       type: "article",
+      images: [
+        {
+          url: `${siteUrl}/opengraph-image`,
+          width: 1200,
+          height: 630,
+          alt: term.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: term.pageTitle,
+      description: term.metaDescription,
+      images: [`${siteUrl}/opengraph-image`],
     },
   };
 }
@@ -52,24 +66,28 @@ export default async function LearnTermPage({ params }: { params: Promise<{ slug
     headline: term.title,
     description: term.lead,
     url: `${siteUrl}/learn/${term.slug}`,
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${siteUrl}/learn/${term.slug}`,
+    },
+    image: [`${siteUrl}/opengraph-image`],
     datePublished: term.datePublished,
     dateModified: term.dateModified,
     author: {
       "@type": "Organization",
       "@id": `${siteUrl}/#organization`,
-      name: "UET GPT Team",
+      name: "UET GPT",
     },
     publisher: {
       "@type": "Organization",
       "@id": `${siteUrl}/#organization`,
-      name: "UET GPT Team",
+      name: "UET GPT",
     },
     about: {
       "@type": "CollegeOrUniversity",
       "@id": "https://web.uettaxila.edu.pk/#university",
       name: "University of Engineering and Technology, Taxila",
       url: "https://web.uettaxila.edu.pk",
-      dateModified: "2026-07-16",
     },
   };
 
@@ -133,10 +151,10 @@ export default async function LearnTermPage({ params }: { params: Promise<{ slug
               UET Taxila Hub
             </Link>
             <Link
-              href="/sign-up"
-              className="text-sm px-4 py-2 rounded-lg bg-[#6366f1] text-white hover:bg-[#5558e6] transition-colors"
+              href="/chat"
+              className="text-sm px-4 py-2 rounded-lg bg-[#d9b451] text-[#07080a] font-semibold hover:bg-[#f0d178] transition-colors"
             >
-              Get Started
+              Start Chat
             </Link>
           </nav>
         </header>
@@ -238,8 +256,8 @@ export default async function LearnTermPage({ params }: { params: Promise<{ slug
               campus life, and more — grounded in official sources, free for every student.
             </p>
             <Link
-              href="/"
-              className="px-6 py-3 rounded-xl bg-[#6366f1] text-white font-medium hover:bg-[#5558e6] transition-colors text-base"
+              href="/chat"
+              className="px-6 py-3 rounded-xl bg-[#d9b451] text-[#07080a] font-semibold hover:bg-[#f0d178] transition-colors text-base"
             >
               Ask UET GPT
             </Link>
@@ -250,7 +268,7 @@ export default async function LearnTermPage({ params }: { params: Promise<{ slug
         <footer className="border-t border-[#1a1a1e] px-6 py-8">
           <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-[#a1a1aa]">
-              &copy; {new Date().getFullYear()} UET GPT Team. All rights reserved.
+              &copy; {new Date().getFullYear()} UET GPT Community. All rights reserved.
             </p>
             <div className="flex items-center gap-6 text-sm text-[#a1a1aa]">
               <Link href="/" className="hover:text-[#e1e1e2] transition-colors">
@@ -261,6 +279,12 @@ export default async function LearnTermPage({ params }: { params: Promise<{ slug
               </Link>
               <Link href="/learn" className="hover:text-[#e1e1e2] transition-colors">
                 Learn
+              </Link>
+              <Link href="/about" className="hover:text-[#e1e1e2] transition-colors">
+                About
+              </Link>
+              <Link href="/privacy" className="hover:text-[#e1e1e2] transition-colors">
+                Privacy
               </Link>
             </div>
           </div>

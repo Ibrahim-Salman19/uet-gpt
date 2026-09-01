@@ -7,6 +7,8 @@
  * segment used at /learn/[slug]. Keep it lowercase with hyphens.
  */
 
+import { LEARN_TERMS_DATE_MODIFIED } from "@/lib/dates";
+
 export interface TermFaq {
   q: string;
   a: string;
@@ -37,7 +39,7 @@ export const LEARN_TERMS: LearnTerm[] = [
   {
     slug: "ecat",
     title: "ECAT (Engineering College Admission Test)",
-    pageTitle: "What is ECAT for UET Taxila? - UET GPT",
+    pageTitle: "What is ECAT? UET Entry Test Explained | UET GPT",
     metaDescription:
       "ECAT is the Engineering College Admission Test required for UET Taxila admissions. Learn what ECAT is, how it is scored, and how it counts in the UET Taxila merit formula.",
     lead: "ECAT — Engineering College Admission Test — is the standardized entry test that applicants to undergraduate engineering and computing programs at UET Taxila must sit before their admission merit can be calculated. Conducted annually by UET Lahore for Punjab-domicile students, ECAT is mandatory for engineering programs and BS Computer Science.",
@@ -96,12 +98,12 @@ export const LEARN_TERMS: LearnTerm[] = [
       { label: "Ask UET GPT", href: siteUrl },
     ],
     datePublished: "2026-07-16",
-    dateModified: "2026-07-16",
+    dateModified: LEARN_TERMS_DATE_MODIFIED,
   },
   {
     slug: "merit-formula",
     title: "UET Taxila Merit Formula (Aggregate Marks)",
-    pageTitle: "UET Taxila Merit Formula Explained - UET GPT",
+    pageTitle: "UET Taxila Merit Formula: Calculation Guide | UET GPT",
     metaDescription:
       "The UET Taxila merit formula combines ECAT 33%, HSSC 50%, and SSC 17%. Learn how aggregate admission marks are calculated with a worked example from the official prospectus.",
     lead: "The UET Taxila merit formula — officially called the admission marks formula — calculates a weighted percentage from three components: the ECAT entry test (33%), the HSSC or equivalent higher qualification (50%), and the SSC or equivalent (17%). This aggregate determines where an applicant stands on the merit list for their chosen discipline and category.",
@@ -162,12 +164,12 @@ export const LEARN_TERMS: LearnTerm[] = [
       { label: "Ask UET GPT", href: siteUrl },
     ],
     datePublished: "2026-07-16",
-    dateModified: "2026-07-16",
+    dateModified: LEARN_TERMS_DATE_MODIFIED,
   },
   {
     slug: "eligibility-criteria",
     title: "UET Taxila Eligibility Criteria",
-    pageTitle: "UET Taxila Eligibility Criteria Explained - UET GPT",
+    pageTitle: "UET Taxila Eligibility Criteria Explained | UET GPT",
     metaDescription:
       "UET Taxila eligibility criteria: 60% marks for engineering, 50% for CS/Math/Physics. Learn HSSC, ECAT, residency, and medical requirements from the official prospectus.",
     lead: "To be eligible for undergraduate admission at UET Taxila, an applicant must meet three requirements: a valid ECAT entry-test score, a minimum of 60% unadjusted marks in HSSC or equivalent (50% for BS Computer Science, BS Mathematics, and BS Physics), and domicile in the area from which they seek admission. Medical standards (physique and eyesight) must also be met.",
@@ -226,12 +228,12 @@ export const LEARN_TERMS: LearnTerm[] = [
       { label: "Ask UET GPT", href: siteUrl },
     ],
     datePublished: "2026-07-16",
-    dateModified: "2026-07-16",
+    dateModified: LEARN_TERMS_DATE_MODIFIED,
   },
   {
     slug: "hostel-allotment",
     title: "UET Taxila Hostel Allotment",
-    pageTitle: "UET Taxila Hostel Allotment - Rules & Charges - UET GPT",
+    pageTitle: "UET Taxila Hostel Allotment: Rules & Charges | UET GPT",
     metaDescription:
       "UET Taxila hostel allotment: how hostel rooms are allocated, hostel charges, security deposits, and refund rules from the official UET Taxila prospectus.",
     lead: "UET Taxila provides on-campus hostel accommodation for students. Hostel allotment is managed by the university on the basis of merit and availability. Students pay hostel charges in addition to their regular tuition and other fees; refundable security deposits are collected at admission and returned when a student leaves.",
@@ -283,12 +285,12 @@ export const LEARN_TERMS: LearnTerm[] = [
       { label: "Ask UET GPT", href: siteUrl },
     ],
     datePublished: "2026-07-16",
-    dateModified: "2026-07-16",
+    dateModified: LEARN_TERMS_DATE_MODIFIED,
   },
   {
     slug: "scholarships",
     title: "UET Taxila Scholarships",
-    pageTitle: "UET Taxila Scholarships - Types & How to Apply - UET GPT",
+    pageTitle: "UET Taxila Scholarships: Types & Application | UET GPT",
     metaDescription:
       "UET Taxila scholarships include need-based, merit-based, HEC, and government schemes. Learn what scholarships are available for UET Taxila students and how UET GPT helps.",
     lead: "UET Taxila students have access to multiple scholarship and financial-assistance schemes. These include need-based and merit-based awards administered by the university, scholarships from the Higher Education Commission (HEC), provincial government schemes, and external awards. Students with financial need may also request a fee-payment extension or installment plan.",
@@ -346,12 +348,12 @@ export const LEARN_TERMS: LearnTerm[] = [
       { label: "Ask UET GPT", href: siteUrl },
     ],
     datePublished: "2026-07-16",
-    dateModified: "2026-07-16",
+    dateModified: LEARN_TERMS_DATE_MODIFIED,
   },
   {
     slug: "fee-structure",
     title: "UET Taxila Fee Structure",
-    pageTitle: "UET Taxila Fee Structure Explained - UET GPT",
+    pageTitle: "What is UET Taxila Fee Structure? - Glossary | UET GPT",
     metaDescription:
       "UET Taxila fee structure: subsidized tuition Rs. 38,000/semester, partial-subsidized Rs. 130,000, hostel charges, and refund policy. Grounded in the 2025 prospectus.",
     lead: "The UET Taxila fee structure for undergraduate students consists of non-recurring charges (paid once at admission) and recurring per-semester charges. Most students pay subsidized tuition of Rs. 38,000 per semester; students in the partial-subsidized Category S or Category X pay Rs. 130,000 per semester. Hostel, mess, and utility charges are additional for residents.",
@@ -418,7 +420,7 @@ export const LEARN_TERMS: LearnTerm[] = [
       { label: "Ask UET GPT", href: siteUrl },
     ],
     datePublished: "2026-07-16",
-    dateModified: "2026-07-16",
+    dateModified: LEARN_TERMS_DATE_MODIFIED,
   },
 ];
 
