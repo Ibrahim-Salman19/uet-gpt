@@ -1,0 +1,175 @@
+{
+  "purpose": "Complete, file/function/line-cited trace of the real production retrieval path, query input through final hydrated chunks/citations, built from direct code inspection (not memory, not the prior evaluator's assumptions). This is the control specification every evaluator fix in this remediation pass is checked against.",
+  "generated": "2026-08-15",
+  "pipeline_stages": [
+    {
+      "step": 1,
+      "name": "query_normalization",
+      "owner": "scanForInjection()",
+      "location": "convex/rag/retrieval.ts:7-23",
+      "behavior": "Rejects non-string/empty input. Enforces MAX_QUERY_LEN=2000 chars (convex/rag/constants.ts:21). Tests against INJECTION_RE, a prompt-injection pattern regex (constants.ts:3-19) - throws ConvexError and logs a security warning on match. Returns query.trim() (leading/trailing whitespace stripped only - no other normalization: no case-folding, no Unicode normalization, no internal whitespace collapsing).",
+      "in_scope_for_frozen_baseline": true
+    },
+    {
+      "step": 2,
+      "name": "intent_classification",
+      "owner": "classifyUserIntent() -> internal.rag.routing.classifyQueryAction",
+      "location": "convex/rag/retrieval.ts:93-105",
+      "behavior": "LLM-based classification into an intent category, defaults to 'general' on any failure. Passed through to searchVectorDB as a parameter, but in the code read for this remediation, its only confirmed use inside the retrieval path is diagnostic (included in an error-log message on search failure) - not confirmed to alter ranking, candidate limits, or filters. routing.ts's internals were not fully read; this claim is scoped to what was directly observed.",
+      "in_scope_for_frozen_baseline": false,
+      "exclusion_reason": "LLM-based, non-deterministic, and not confirmed to affect retrieval ranking in the code paths read. Excluding it keeps the frozen baseline deterministic without dropping anything shown to matter for retrieval quality."
+    },
+    {
+      "step": 3,
+      "name": "query_enrichment_rewrite_and_hyde",
+      "owner": "enrichQuery() -> internal.rag.routing.rewriteQueryAction / internal.rag.routing.hydeQueryAction",
+      "location": "convex/rag/retrieval.ts:107-121",
+      "behavior": "Two LLM calls issued in parallel via Promise.allSettled: query rewriting (rewrittenQuery) and HyDE - Hypothetical Document Embeddings, where an LLM generates a plausible answer to the query, and that generated text is what actually gets embedded for dense search rather than the literal question (hydeQuery). Each independently falls back to the normalized question (safeQuestion) if its own LLM call fails. THIS IS A PREVIOUSLY UNDOCUMENTED, MATERIAL FINDING relative to both the original evaluator and the user's own enumerated pipeline list (which named 'query normalization -> embedding' with no rewrite/HyDE stage in between).",
+      "in_scope_for_frozen_baseline": false,
+      "exclusion_reason": "Two additional non-deterministic LLM calls (separate from and upstream of the Gemini embedding call), whose output text directly determines what gets embedded. Including them would make the 'same inputs, same outputs' determinism check fail through no fault of the retrieval layer itself, and query understanding is orthogonal to comparing vector-store backends (every backend would receive the same rewritten/HyDE text regardless of which one is under test). Documented here, not silently dropped - see 'frozen_baseline_scope' below for the exact text the frozen baseline embeds instead."
+    },
+    {
+      "step": 4,
+      "name": "query_embedding",
+      "owner": "generateQueryEmbedding() -> actions.embeddings.generate.generate -> generateEmbeddingsInternal() -> embedNativeGemini()",
+      "location": "convex/rag/retrieval.ts:123-142 (call site); convex/embeddings/generate.ts:200-285 (generate action); convex/embeddings/generate.ts:100-167 (embedNativeGemini, the actual HTTP request)",
+      "behavior": "Embeds text: hydeQuery || rewrittenQuery || safeQuestion (retrieval.ts:132) - i.e. the HyDE-generated text if available, else the rewritten query, else the raw normalized question. Model: gemini-embedding-2 (generate.ts:104,132,141). Dimensions: EMBEDDING_DIMENSION=768 (embeddings/dimension.ts:20), sent as outputDimensionality in the request body. Request body is RAW TEXT ONLY - {content: {parts: [{text: <text>}]}, outputDimensionality: 768} - no task-type prefix, no title wrapping (generate.ts:100-167). Multi-key rotation across up to 4 GEMINI_API_KEY* env vars on auth/quota errors only (generate.ts:209-247); deterministic (non-retryable) errors fail fast without rotation. FAKE_EMBEDDINGS_FOR_LOCAL_TEST env var bypass exists for local storage/lifecycle tests only (generate.ts:179-198,203-205) - must be unset/not '1' for any real baseline run.",
+      "in_scope_for_frozen_baseline": true,
+      "frozen_baseline_input_text": "safeQuestion only (the normalized raw query) - see exclusion_reason on step 3."
+    },
+    {
+      "step": 5,
+      "name": "semantic_cache_check",
+      "owner": "checkSemanticCache() -> actions.cache.get.get",
+      "location": "convex/rag/retrieval.ts:144-174",
+      "behavior": "Keyed on queryText + queryEmbedding. On a hit, returns a cached {response, sources, model} directly and the ENTIRE remaining pipeline (eligibility filtering, dense/lexical/RRF, Cascade, CRAG) is skipped for that request. THIS IS ALSO A PREVIOUSLY UNDOCUMENTED STAGE relative to the original evaluator.",
+      "in_scope_for_frozen_baseline": false,
+      "exclusion_reason": "The cache is a performance/cost optimization layer, not a source of retrieval-quality difference - a cache hit returns a previously-computed real result, it doesn't compute a different one. The frozen baseline measures retrieval as if every query is a cache miss (calls the real retrieval action path directly), which is the correct and simpler thing to freeze."
+    },
+    {
+      "step": 6,
+      "name": "eligibility_and_freshness_filtering",
+      "owner": "isRetrievalEligibleStatus() / classifyFreshness() -> applied inline in searchDocumentsAction",
+      "location": "convex/shared/freshnessPolicy.ts:107-135 (status literals), 192-256 (classifyFreshness); applied at convex/embeddings/search.ts:301-325",
+      "behavior": "Per candidate: hard-exclude if status is stale/failed/pending/processing/pending_embed (RETRIEVAL_EXCLUDED_STATUSES). If eligible (active/indexed, or missing status): classify freshness by tier-specific TTL (high=14d/medium=60d/low=180d, freshnessPolicy.ts:41-45) vs crawledAt, with a 1-day future-clock-skew tolerance; isStale===true or age>TTL => 'aged' + penalized=true => finalScore = item.score * DEFAULT_STALE_SCORE_MULTIPLIER (0.3, freshnessPolicy.ts:61); missing crawledAt => 'unknown', never treated as fresh, not penalized; otherwise 'fresh', not penalized.",
+      "in_scope_for_frozen_baseline": true,
+      "requires": "The corpus export must carry status, isStale, freshnessTier, and crawledAt per document - not present in exportCorpus.ts prior to this remediation."
+    },
+    {
+      "step": 7,
+      "name": "candidate_overfetch",
+      "owner": "candidateLimit()",
+      "location": "convex/shared/freshnessPolicy.ts:84-101",
+      "behavior": "candidateLimit(k) = min(256, max(k*3, 30)). Each retrieval channel below is asked for this many candidates (not the final requested k), so post-filter/post-freshness truncation doesn't starve the final top-k. For the default caller (searchVectorDB, limit=8), this yields 30 per channel.",
+      "in_scope_for_frozen_baseline": true,
+      "note": "Baseline B (bounded, production-shaped) uses this real bound. A separately-labeled exhaustive/exact ground-truth mode (see 'exhaustive_vs_bounded' below) intentionally does not."
+    },
+    {
+      "step": 8,
+      "name": "dense_retrieval",
+      "owner": "rag.search() (the @convex-dev/rag component, configured in convex/rag/instance.ts)",
+      "location": "convex/embeddings/search.ts:264-274 (call site); convex/rag/instance.ts:1-23 (component config)",
+      "behavior": "namespace 'uet-global', query is either a precomputed embedding array or raw text (component embeds internally if given text - not exercised on the production call path, which always supplies a precomputed queryEmbedding from step 4), limit=candidateLimit(requestedLimit), chunkContext {before:0, after:0} (no surrounding-chunk context window pulled in at this stage), optional category filter. Returns entryId+score+content per result; results.map to {id, score} pairs (vectorRanked).",
+      "in_scope_for_frozen_baseline": true
+    },
+    {
+      "step": 9,
+      "name": "lexical_retrieval_document_level",
+      "owner": "internal.crawl.queries.fullTextSearch",
+      "location": "convex/crawl/queries.ts:8-36",
+      "behavior": "Convex's native, proprietary .withSearchIndex('search_text', q => q.search('text', query)).take(limit) over the crawledChunks table, resolved back to owning documents. Every returned row is assigned a FLAT score of 1.0 (queries.ts:30) - the numeric score is not meaningful; only the RETURNED ORDER (Convex's internal ranking) matters, since RRF fusion downstream is rank-based, not score-based.",
+      "in_scope_for_frozen_baseline": true,
+      "fidelity_caveat": "Convex's ranking algorithm is proprietary/undocumented in detail (informally described by Convex as BM25-like). No published k1/b or tokenization spec exists to verify a reimplementation against."
+    },
+    {
+      "step": 10,
+      "name": "lexical_retrieval_chunk_level_third_channel",
+      "owner": "internal.embeddings.chunkTextSearch.run",
+      "location": "convex/embeddings/search.ts:281-284 (call site, not yet read in full - referenced by name and call site only)",
+      "behavior": "A SEPARATE, chunk-granularity text-search channel from step 9's document-level search, called with limit=min(20, candidateLimit). This is the third fusion channel (chunkRanked) weighted at adaptiveWeights.text * 0.5 in the RRF call (search.ts:294-296).",
+      "in_scope_for_frozen_baseline": true,
+      "note": "The internals of chunkTextSearch.ts were not read line-by-line during this remediation pass; its call site, limit, and fusion weight are confirmed from search.ts directly."
+    },
+    {
+      "step": 11,
+      "name": "adaptive_weighting",
+      "owner": "estimateIdf()",
+      "location": "convex/embeddings/idf.ts:116-152",
+      "behavior": "Deterministic, pure function of the raw query text (search.ts:244 calls estimateIdf(args.queryText).weights - queryText here is rewrittenQuery||safeQuestion, NOT hydeQuery). Tokenizes (lowercase, strip non-alphanumeric, whitespace-split), computes a stopword-filtered unique-word ratio and average word length to derive a 'rareTermRatio' in [0,1], then picks {vector, text} weights by word count band: <5 words -> {1.5,0.5} (or {1.2,0.8} if rareTermRatio>0.7); 5-15 words -> a linear blend between those extremes based on rareTermRatio; >15 words -> {0.5,1.5} (or {1.0,1.0} if rareTermRatio<0.3). This is a pure, deterministic function - safe to include in the frozen baseline as-is.",
+      "in_scope_for_frozen_baseline": true
+    },
+    {
+      "step": 12,
+      "name": "rrf_hybrid_fusion",
+      "owner": "hybridRank()",
+      "location": "convex/embeddings/search.ts:61-99 (function); 294-296 (call site)",
+      "behavior": "3-channel Reciprocal Rank Fusion: vectorResults (weight=adaptiveWeights.vector), textResults/document-level fullTextSearch (weight=adaptiveWeights.text), plus an extraResults channel = chunkTextSearch results (weight=adaptiveWeights.text*0.5). Per channel, decay(rank,total) = 1/(RRF_K+rank) with RRF_K=60 (search.ts:13) under the default 'reciprocal' strategy (a 'linear' decay strategy also exists in the function but is not used on this call path). Scores accumulate additively per candidate id across all three channels, then sorted descending.",
+      "in_scope_for_frozen_baseline": true
+    },
+    {
+      "step": 13,
+      "name": "post_fusion_eligibility_and_freshness_application",
+      "owner": "inline in searchDocumentsAction",
+      "location": "convex/embeddings/search.ts:298-347",
+      "behavior": "For each fused candidate: batch-fetch document metadata (batchFetchDocMeta, search.ts:101-128), hard-exclude ineligible statuses, classify freshness and apply the 0.3x penalty per step 6, resolve display content via pickBestContent (parentText > vector-result content > document-level text-search content > chunk-level text-search content, with an optional contextualizedText summary prepended - search.ts:130-164), re-sort by final (possibly penalized) score.",
+      "in_scope_for_frozen_baseline": true
+    },
+    {
+      "step": 14,
+      "name": "faq_injection",
+      "owner": "fetchActiveFaqs()",
+      "location": "convex/embeddings/search.ts:166-198 (function); 369-372 (merge site)",
+      "behavior": "Up to 2 active (non-expired) FAQ entries scored via FAQ_WEIGHT(1.0) * 1/(RRF_K+rank) (search.ts:12-13,190), concatenated with the freshness-scored document results and re-sorted by score together - NOT fused through the RRF mechanism itself, a separate scoring formula merged by plain numeric sort.",
+      "in_scope_for_frozen_baseline": true,
+      "note": "FAQs are not backend-specific corpus content (they live in a separate 'faqs' table, not crawledChunks), so this channel is identical regardless of which KnowledgeStore backend supplies the crawled-chunk candidates. Included in the frozen baseline for full production fidelity, but callers comparing backends should be aware this component of the final ranking does not vary by backend."
+    },
+    {
+      "step": 15,
+      "name": "pre_rerank_candidate_list",
+      "owner": "searchDocumentsAction return value, truncated to the caller's requested limit",
+      "location": "convex/embeddings/search.ts:374-406; called with limit=8 from convex/rag/retrieval.ts:197-202",
+      "behavior": "Final slice to the requested limit (8 in the real production call site) after all of the above. THIS IS BASELINE A.",
+      "in_scope_for_frozen_baseline": true,
+      "baseline_designation": "BASELINE_A_PRE_RERANK"
+    },
+    {
+      "step": 16,
+      "name": "cascade_rerank",
+      "owner": "cascadeRerank()",
+      "location": "convex/reranking/cascade.ts:51-182; called from convex/rag/retrieval.ts:219-226 with topK=4",
+      "behavior": "Tier 1 (always runs, pure/deterministic): word-overlap (computeWordOverlap, cascade.ts:25-49) + position-decay score, combined = overlapWeight(0.6)*overlap + positionWeight(0.4)*positionScore (CASCADE_CONFIG, convex/rag/constants.ts:37-44). Filters below minWordOverlap=0.1; if that empties the set, falls back to raw Tier-1-scored top-K. Otherwise sorts by Tier-1 score, takes top tier2CandidateCount=15 candidates forward. Tier 2 (conditional): external RERANKER_URL cross-encoder if the env var is set (5s timeout) - ABSENT in this deployment's .env.local as checked during this remediation. Tier 3 (conditional): Cohere rerank-v3.5 if COHERE_API_KEY is set - ALSO ABSENT in this deployment. Final fallback (what actually executes in THIS environment, given both Tier 2 and Tier 3 are unconfigured): Tier-1 combined scores, sliced to topK.",
+      "in_scope_for_frozen_baseline": true,
+      "baseline_designation": "BASELINE_B_POST_RERANK",
+      "determinism_note": "In this specific deployment (neither RERANKER_URL nor COHERE_API_KEY configured), Cascade is FULLY DETERMINISTIC - it falls through entirely to the pure Tier-1 word-overlap/position scoring, with no external network call in the loop. This must be re-verified if either env var is ever set in this deployment."
+    },
+    {
+      "step": 17,
+      "name": "crag_llm_relevance_judge",
+      "owner": "evaluateWithCrag() -> internal.rag.crag.evaluateChunks (Groq LLM)",
+      "location": "convex/rag/retrieval.ts:254-334",
+      "behavior": "LLM-judges each of Cascade's (up to 4) candidates for relevance+confidence. If ALL judged irrelevant at high confidence (CRAG_CONFIG.highConfidenceThreshold=0.7) -> empty result, tier='refuse'. If SOME irrelevant -> filters them out (tier='hedge' if <=2 remain, else null). If NONE irrelevant -> unchanged, tier=null. Gated overall by CRAG_CONFIG.skipThreshold=0.6 at the call site logic referenced in constants.ts (the exact skip-decision code path was not read line-by-line in this pass - the CONFIG values and evaluateWithCrag's internal filtering logic were directly confirmed; whether/when the call to evaluateWithCrag is skipped entirely for high-confidence rerank scores was not traced to its exact call site).",
+      "in_scope_for_frozen_baseline": false,
+      "exclusion_reason": "A live Groq LLM call, non-deterministic-adjacent (model sampling, provider-side changes) and conditionally skipped depending on rerank-score confidence - directly conflicts with the 'rerun twice, expect same results' determinism requirement for a frozen baseline. Documented as a real, in-scope-for-production stage that end users do experience, but explicitly out of scope for the frozen retrieval-quality control this remediation produces."
+    },
+    {
+      "step": 18,
+      "name": "final_hydrated_chunks_and_citations",
+      "owner": "buildSourcesFromResults() / buildResponseContext()",
+      "location": "convex/rag/retrieval.ts:243-252,362 onward (context-building continues past the read window of this remediation pass)",
+      "behavior": "Converts final result set to source/citation entries (entryId, url, title, relevanceScore, excerpt, headingPath) and builds the LLM answer-generation context. This stage (and anything past it - prompt construction, answer generation) is answer-generation, not retrieval, and out of scope for a retrieval-quality baseline entirely (not merely excluded for determinism, but categorically a different concern).",
+      "in_scope_for_frozen_baseline": false,
+      "exclusion_reason": "Not retrieval - this is answer generation and citation formatting, categorically outside 'retrieval-quality baseline' scope regardless of determinism."
+    }
+  ],
+  "frozen_baseline_scope": {
+    "baseline_a_pre_rerank": "Steps 1, 4 (embedding safeQuestion), 6, 7, 8, 9, 10, 11, 12, 13, 14, 15.",
+    "baseline_b_post_rerank": "Baseline A's steps, plus step 16 (Cascade rerank, deterministic in this deployment's current configuration).",
+    "explicitly_excluded_from_both_with_reasons": ["step 2 (intent classification)", "step 3 (query rewrite/HyDE)", "step 5 (semantic cache)", "step 17 (CRAG)", "step 18 (answer generation)"],
+    "both_must_be_captured_separately": "Per instruction: do not collapse Baseline A and B into one metric - they answer different questions (candidate-pool quality vs. what a user's citations would actually look like after the deterministic portion of reranking)."
+  },
+  "unresolved_from_this_pass": [
+    "convex/embeddings/chunkTextSearch.ts internals were not read line-by-line (only call site, limit, and fusion weight confirmed from search.ts).",
+    "convex/rag/routing.ts internals (classifyQueryAction, rewriteQueryAction, hydeQueryAction) were not read line-by-line - excluded from the frozen baseline regardless, so not required for this remediation, but flagged for completeness.",
+    "The exact call-site logic that decides whether evaluateWithCrag is invoked at all for a given rerank-score confidence (referencing CRAG_CONFIG.skipThreshold) was not traced past retrieval.ts:334 - not required since CRAG is excluded from the frozen baseline regardless."
+  ]
+}

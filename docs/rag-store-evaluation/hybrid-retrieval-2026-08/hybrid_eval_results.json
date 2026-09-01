@@ -1,0 +1,1472 @@
+{
+  "results": [
+    {
+      "queryId": "8fe9e8f2dfe15d2e",
+      "query": "What is the fee structure for BS Software Engineering at UET Taxila?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "73013e45ac0a8d6d271f6d29a459152945d83a69536abe113ef847b35135d5c5",
+        "08e11f9fada79dceb862bb6253e69dc60c96854b0bb9ac0f300e6fb78afbe0b3",
+        "c2da4330d73b7080e7efd4380521b422aa9f5678dcffc6eb7ef6d0c426fdcebd",
+        "538f04e55d143eab5ca5ca549d9a686fe1feb6c24e847be75b43b9f99779aacc",
+        "368e6cf3d46a2c7b4269bc9941b87555a1739e267634d2a487705bcb1f825da9"
+      ],
+      "lexicalTop5": [
+        "0d1734dac162a74e4d566720f6639a2abd3ca0fed083eb3e6f78d6c138fce9dd",
+        "047ea82187b988440580aa7760da5ee71889c0eb0a0896d05b5c12b45a2b6183",
+        "73013e45ac0a8d6d271f6d29a459152945d83a69536abe113ef847b35135d5c5",
+        "afa29583b507bb36d2ed54298d4edf1ae9b4090d5a9f9f8b3223b854f34d6ebd",
+        "d35634ccf15fdfc9e9775827541b6019292c256c5a306c8fefa3de5c5e746726"
+      ],
+      "fusedTop5": [
+        "73013e45ac0a8d6d271f6d29a459152945d83a69536abe113ef847b35135d5c5",
+        "0d1734dac162a74e4d566720f6639a2abd3ca0fed083eb3e6f78d6c138fce9dd",
+        "08e11f9fada79dceb862bb6253e69dc60c96854b0bb9ac0f300e6fb78afbe0b3",
+        "047ea82187b988440580aa7760da5ee71889c0eb0a0896d05b5c12b45a2b6183",
+        "c2da4330d73b7080e7efd4380521b422aa9f5678dcffc6eb7ef6d0c426fdcebd"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "74c9b0d4368cc597",
+      "query": "How much does a student pay per semester in BS Computer Science?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "a482af051ae78e23b79ab75d79e663a46f56575855be4cf5f4fb1ef0343d3c1e",
+        "594948699286e930bfef8b9b8ae5bd6ffdd98e13c8ee997821c5bd665e88824f",
+        "c34064eaf9ed88a349b2021f2e3cb2e3116936715fc0dc6a22eb423164565bc1",
+        "949279a6fb6616a837cfd94f54e76cdc3239a1ee9958275d6e2db44dbf64988e",
+        "d370f50c85e6d3ff17a335282486c2d2a65f36859567a877d05eb0a06f3f84a3"
+      ],
+      "lexicalTop5": [
+        "b7997624fbc0f7d118e045a843264c8e3e55864f573110e7f1023cb1b22887af",
+        "dffb35cff2a1ef9647a66ac914ee6a7eb47790869b434021e8d61cc465adb940",
+        "b2ce4bbe52cc1b8216e30d720f3ba535b0a6f99dbac03b2bb9d64967e4f01672",
+        "12b8c5d82a0aaebe77680c1e1e55d0254154e17260499dc2d61cb7f17e59f810",
+        "e453fcf3dac462866ea8071db9371721f1be1c9ca3e906445f601c4c636a75e3"
+      ],
+      "fusedTop5": [
+        "a482af051ae78e23b79ab75d79e663a46f56575855be4cf5f4fb1ef0343d3c1e",
+        "b7997624fbc0f7d118e045a843264c8e3e55864f573110e7f1023cb1b22887af",
+        "594948699286e930bfef8b9b8ae5bd6ffdd98e13c8ee997821c5bd665e88824f",
+        "dffb35cff2a1ef9647a66ac914ee6a7eb47790869b434021e8d61cc465adb940",
+        "c34064eaf9ed88a349b2021f2e3cb2e3116936715fc0dc6a22eb423164565bc1"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "fc1c0652eda046e9",
+      "query": "What is the total tuition cost for a 4-year BS program at UET Taxila?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "8a6badf336c6f4718678dd324f003349789299bd686a7bd425c393b462658141",
+        "7a3156675bf22e1742af21f2f38ad80ac867d7794a3b549e92a188f95e00433f",
+        "ca96eb44be062baa26fe7390c779d7492579fea25fd10dcd92e7a210a28b0935",
+        "b7ca5395d472fffbce9a5b7f2877b08c86814a80337f49ce9080cbe5fcb610c5",
+        "9ccf8e2fa1c1bfb2e1f7d60fcf5ad599f738fb89d7171e9021cf32c4b3f2dd8a"
+      ],
+      "lexicalTop5": [
+        "e8b09c9efacc34306f2ab05ba6780e5be0b57ce0eedb36687652694991b936b9",
+        "29cfbd27b1249d1a4ef98fc52502e810bc245f241901f61a715f636cc9470401",
+        "b2ce4bbe52cc1b8216e30d720f3ba535b0a6f99dbac03b2bb9d64967e4f01672",
+        "afa29583b507bb36d2ed54298d4edf1ae9b4090d5a9f9f8b3223b854f34d6ebd",
+        "f62a353050eab6f859af3966b8f4202758436a5cda9affbcfd7ffdded029a82c"
+      ],
+      "fusedTop5": [
+        "9e00aa8341e63ae5e5daa87db6b19070970b5767c297beb9219378e57a2fc5b8",
+        "8a6badf336c6f4718678dd324f003349789299bd686a7bd425c393b462658141",
+        "e8b09c9efacc34306f2ab05ba6780e5be0b57ce0eedb36687652694991b936b9",
+        "7a3156675bf22e1742af21f2f38ad80ac867d7794a3b549e92a188f95e00433f",
+        "29cfbd27b1249d1a4ef98fc52502e810bc245f241901f61a715f636cc9470401"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "d9ad8a444d6c7741",
+      "query": "Are there any additional charges apart from tuition in UET Taxila fee structure?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "73ce047edb4008ce197d3c5cf14012f5daf0e7dd4ca38d60a9efe47f2ce2aa39",
+        "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
+        "d335472b52f99caf8d8d7a0d35c8906939b9b18c7c7d981626c096782530dc38",
+        "6cac46287dd7852d3bda0f66a760a2d7e606807ce57fee80d9286b4d08541b94",
+        "8e1fc606c5ec5ff5d1d6c9d89ff8bac34b7cfaa7c7544f1309505d6527621116"
+      ],
+      "lexicalTop5": [
+        "6dffa71b3dc95ec8d513db321fef381e91a9a88529dee29d66eb604a4327f484",
+        "dc1a97efd60d1452aa96410cf7b2714da2ecbbf330c52ebca864e37fc9dc5276",
+        "e8c1aee125b92facb5142ea65a3c34b0b06d81818d6c59dd1222422936cdeb91",
+        "e6e3aac609d049f97b5954311762d5e165acb7ee1a3e6e64810cdf3e584612b2",
+        "79d4936e82a4b3077abfaa37996f7870a5d121bb902a59a05a7362214d57e27f"
+      ],
+      "fusedTop5": [
+        "73ce047edb4008ce197d3c5cf14012f5daf0e7dd4ca38d60a9efe47f2ce2aa39",
+        "6dffa71b3dc95ec8d513db321fef381e91a9a88529dee29d66eb604a4327f484",
+        "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
+        "dc1a97efd60d1452aa96410cf7b2714da2ecbbf330c52ebca864e37fc9dc5276",
+        "d335472b52f99caf8d8d7a0d35c8906939b9b18c7c7d981626c096782530dc38"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "e1f643e47aede4e3",
+      "query": "What is the fee difference between engineering and computer science programs?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "2886ef826a6586ce1557d404ddd43f22a3ae1ae1277d35b3d96551cb8cfd7a4d",
+        "02a83a101cbda158371defb21a7584acacc4b239154bd2ea1c86a6995164fb22",
+        "951802928a97f125d12e4dc981296336af34a3de2c56ca1a102977694c5e96ec",
+        "f688c1d459c2b1c3e1729729b71ad35db9ef2073f8396b029ff7aec58223d397",
+        "cb6a315433b42b34711471fac967067a62c08a0e5bb2e7dc917664cb9a6c7276"
+      ],
+      "lexicalTop5": [
+        "49ba3a767c08218c224360e50e002c21a8732932ebd002e29da4efe34fb033e2",
+        "da2ef01e083ccaf626903aeb1e54869c4ec32611820ae513c55ea992e46f0b9d",
+        "8a5e10e5bfaaa50545005b0d7b44b3c5266c6b2fd275c49ed652d3f26b02fded",
+        "11b54e9de5aedf2c712ec60e28abba8a1483e848adf16c79cf607b17816f4ecd",
+        "d35634ccf15fdfc9e9775827541b6019292c256c5a306c8fefa3de5c5e746726"
+      ],
+      "fusedTop5": [
+        "da2ef01e083ccaf626903aeb1e54869c4ec32611820ae513c55ea992e46f0b9d",
+        "2886ef826a6586ce1557d404ddd43f22a3ae1ae1277d35b3d96551cb8cfd7a4d",
+        "49ba3a767c08218c224360e50e002c21a8732932ebd002e29da4efe34fb033e2",
+        "02a83a101cbda158371defb21a7584acacc4b239154bd2ea1c86a6995164fb22",
+        "951802928a97f125d12e4dc981296336af34a3de2c56ca1a102977694c5e96ec"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "6f79337e4985ea52",
+      "query": "How can I pay my semester fee at UET Taxila?",
+      "relevantChunkKeys": [
+        "019e75af934e50252dcf8498a967749e5bed789308421c6372ba6bd9026df7d2"
+      ],
+      "denseTop5": [
+        "019e75af934e50252dcf8498a967749e5bed789308421c6372ba6bd9026df7d2",
+        "28596a605f45070c7b9541ffdbf656b726ce18fbbf1ed66ae44af4cacbe830b0",
+        "ac2f10660ca28a0e47ad7e26b9e88ec591faaf063e2a86baa846feec024be561",
+        "018ff629cf095f6f32bbb18f70fd9877b8b56215be63547cd4424064228e7be4",
+        "549036e9c37315e68fec9ae6c06d62c1a0a05d7e9fb50f4aaa9b25a5c14995f1"
+      ],
+      "lexicalTop5": [
+        "1853094b29f420c4977cca082f10ebf889a9323e25f0c3b8861d67e7fd0bdee2",
+        "a3176eaceb0c9e8b45b05085fa5d5057dd01fa3506d41c541aaae1c9737feba5",
+        "64537e12778f1b5f3a8c0baad704c203451cf3f0f993f7380970efb49484c6ca",
+        "4243962217b961221d046871cf046ab24afadfdb09dbcf3023f21ae7fa4c43b3",
+        "193edb426f50f4a0a86c16c0f06da03966ce0e7718cf6886bedbecf3f52efcc6"
+      ],
+      "fusedTop5": [
+        "549036e9c37315e68fec9ae6c06d62c1a0a05d7e9fb50f4aaa9b25a5c14995f1",
+        "019e75af934e50252dcf8498a967749e5bed789308421c6372ba6bd9026df7d2",
+        "1853094b29f420c4977cca082f10ebf889a9323e25f0c3b8861d67e7fd0bdee2",
+        "28596a605f45070c7b9541ffdbf656b726ce18fbbf1ed66ae44af4cacbe830b0",
+        "a3176eaceb0c9e8b45b05085fa5d5057dd01fa3506d41c541aaae1c9737feba5"
+      ],
+      "hitAt5": 1,
+      "mrr": 0.5
+    },
+    {
+      "queryId": "a4d3227f8a1b046e",
+      "query": "Is there a fine for late fee submission at UET Taxila?",
+      "relevantChunkKeys": [
+        "fc11e6092df4b89ebbfee2575a4a56dcb7e5c096a5b09cc4441a847d56f48d5c"
+      ],
+      "denseTop5": [
+        "019e75af934e50252dcf8498a967749e5bed789308421c6372ba6bd9026df7d2",
+        "ac2f10660ca28a0e47ad7e26b9e88ec591faaf063e2a86baa846feec024be561",
+        "5dc5996c2be8011b3546106233b998c3fc3f412f3c0f20defe046a3c5c1c2407",
+        "c45444bc7b602c7c32149b74f1ad1e207869a7fa2d971ce89fb92e633490ebda",
+        "fc11e6092df4b89ebbfee2575a4a56dcb7e5c096a5b09cc4441a847d56f48d5c"
+      ],
+      "lexicalTop5": [
+        "fc11e6092df4b89ebbfee2575a4a56dcb7e5c096a5b09cc4441a847d56f48d5c",
+        "d19c79ab521e71936d73049c8de2d335d2138884bb3de213e58ef3c2e96667ff",
+        "893cf7fe947d8222041db638b248e1ffa0a03b5b1365794ca10b0a4be0e426a2",
+        "08f2c4d437f4c134e5a1d7e7e281a01541a1990b206acfa30c4cd0119daa958c",
+        "38192ba75e13e04113c60b92ee4a058a672ca3fed9669efc92afe09825e33991"
+      ],
+      "fusedTop5": [
+        "fc11e6092df4b89ebbfee2575a4a56dcb7e5c096a5b09cc4441a847d56f48d5c",
+        "d19c79ab521e71936d73049c8de2d335d2138884bb3de213e58ef3c2e96667ff",
+        "019e75af934e50252dcf8498a967749e5bed789308421c6372ba6bd9026df7d2",
+        "ac2f10660ca28a0e47ad7e26b9e88ec591faaf063e2a86baa846feec024be561",
+        "5dc5996c2be8011b3546106233b998c3fc3f412f3c0f20defe046a3c5c1c2407"
+      ],
+      "hitAt5": 1,
+      "mrr": 1
+    },
+    {
+      "queryId": "379d79b1e7ee91b2",
+      "query": "What are the eligibility criteria for admission to BS Computer Science at UET Taxila?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "cf3fc98f2f04452f2395a23e123b64c55b7b7f5167ccb49b00cb3baf2af3ba2c",
+        "6326985b139fce911b7846fa022b5d5230f29144e3366871c3a16d4979769b25",
+        "024526b3e1752da66899b578ee7f0639326761826489756a2d552eb0da57e076",
+        "e1a69ffd3cb7ce4d542126dc92ce497d3896829d21ccdea0dbeefc90b1da6e9a",
+        "1ecef200c005d0eb891cc53c082a7bef33e93a762a719e2c048c3d9e8758c38c"
+      ],
+      "lexicalTop5": [
+        "49ba3a767c08218c224360e50e002c21a8732932ebd002e29da4efe34fb033e2",
+        "c9119673b0afb01ba3559055d77f9e58354bbf961251df532517d7fa4d35ebff",
+        "bc557f2f2a6ccf7a5889a166676312580f52ed91934226592a31b5ebb1a5a61e",
+        "2bc0eb6d1fd60b8fd787663a7b58f0babfbca170f6c9b3fd3c440c41b3194368",
+        "83bb7fa39863ba727755d3753134d2b0542aa8dc2fb1d87a9ea6f4cdaeef5409"
+      ],
+      "fusedTop5": [
+        "2bc0eb6d1fd60b8fd787663a7b58f0babfbca170f6c9b3fd3c440c41b3194368",
+        "bc557f2f2a6ccf7a5889a166676312580f52ed91934226592a31b5ebb1a5a61e",
+        "cf3fc98f2f04452f2395a23e123b64c55b7b7f5167ccb49b00cb3baf2af3ba2c",
+        "49ba3a767c08218c224360e50e002c21a8732932ebd002e29da4efe34fb033e2",
+        "6326985b139fce911b7846fa022b5d5230f29144e3366871c3a16d4979769b25"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "9e51f9dc27154685",
+      "query": "What is the minimum percentage required in FSc for admission to UET Taxila?",
+      "relevantChunkKeys": [
+        "5d4dc9002869fa5e66bf13f54354e02d95a4a8bb6a45055dae14e75d030eca9c"
+      ],
+      "denseTop5": [
+        "5d4dc9002869fa5e66bf13f54354e02d95a4a8bb6a45055dae14e75d030eca9c",
+        "7a3156675bf22e1742af21f2f38ad80ac867d7794a3b549e92a188f95e00433f",
+        "8a6badf336c6f4718678dd324f003349789299bd686a7bd425c393b462658141",
+        "3872fe48e0c7cf4b2d209e1aa17e743d44f1392b4edddce31e14e6f2686b313f",
+        "abf448db72516de55d5d0fa51a82ab400daff990e839a74db94c67d91dba596c"
+      ],
+      "lexicalTop5": [
+        "d35634ccf15fdfc9e9775827541b6019292c256c5a306c8fefa3de5c5e746726",
+        "3e8c4b6a4dcaa341eaa9abb52a3c2d639926efb489c3e58af254d7301b354701",
+        "ecc3275bd0ae2d1755e46c56b1b2f08b94059f7213407b0e2daff910e33f7511",
+        "c8f096fb6be6280415d3bafb1da18e725ff56f431d63ac84e42bcedaff92084e",
+        "589f2a71a19f245e897d15a6b2339ce8eadc55db2640fa41b7cac78593cb849f"
+      ],
+      "fusedTop5": [
+        "5d4dc9002869fa5e66bf13f54354e02d95a4a8bb6a45055dae14e75d030eca9c",
+        "d35634ccf15fdfc9e9775827541b6019292c256c5a306c8fefa3de5c5e746726",
+        "7a3156675bf22e1742af21f2f38ad80ac867d7794a3b549e92a188f95e00433f",
+        "3e8c4b6a4dcaa341eaa9abb52a3c2d639926efb489c3e58af254d7301b354701",
+        "8a6badf336c6f4718678dd324f003349789299bd686a7bd425c393b462658141"
+      ],
+      "hitAt5": 1,
+      "mrr": 1
+    },
+    {
+      "queryId": "c5ee1c9ad958ad05",
+      "query": "What is the last date to apply for UET Taxila undergraduate admissions?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
+        "d061d7a5b2d027bd5a061f726ffcc6334195e235956d24d6720422e10bce9846",
+        "ad5b591a08fd654d8d0848113523bffbf10fe8f395daf511e1bf3d635ad7497b",
+        "70491f1163e21db561b5d5a715c8b2a23d11d96d155369b603362640ba00441e",
+        "8a6badf336c6f4718678dd324f003349789299bd686a7bd425c393b462658141"
+      ],
+      "lexicalTop5": [
+        "41b163937386bf57e54dd669cebb235bdd4b4f0b18ffbd687464472bb48ad12e",
+        "a7c0e00c9a2dd77ccf229092702195cba3e1a3de32c9dbbd54e4e51c870ee3b6",
+        "650c0ec324ca8ae8bd8ce75b904d51f7bcd0d5573c2e004da40abb67161d7a4f",
+        "3c358ae6a97dfbac4f73f80b5caae19c105b626217a7cbdf3e7d74fb4307d815",
+        "08246b00a240e56e626d79acb30fb7c159d6afff4285399ae4d1f57485265440"
+      ],
+      "fusedTop5": [
+        "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
+        "41b163937386bf57e54dd669cebb235bdd4b4f0b18ffbd687464472bb48ad12e",
+        "d061d7a5b2d027bd5a061f726ffcc6334195e235956d24d6720422e10bce9846",
+        "a7c0e00c9a2dd77ccf229092702195cba3e1a3de32c9dbbd54e4e51c870ee3b6",
+        "ad5b591a08fd654d8d0848113523bffbf10fe8f395daf511e1bf3d635ad7497b"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "928451f564ccf0a4",
+      "query": "Does UET Taxila accept DAE students for lateral entry?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
+        "2c8a045e6ae52c325883ea73ea10be83e111a176bfc504fc2092a46c41d7adf8",
+        "c4a06785c311d32cdf5f3a8609813e9fbf77ffb46a6b24e30f929f454aa08cfd",
+        "8a5f1523621f157e26d7aed08a88f9fe485eb074f5d329acc96ae0bcf73af90d",
+        "19be0e76c6f156ada11aa46f96cf7915d0cce6873f716d275f13e9a8ced4b3a7"
+      ],
+      "lexicalTop5": [
+        "5d4dc9002869fa5e66bf13f54354e02d95a4a8bb6a45055dae14e75d030eca9c",
+        "729ae8a0e4767919576f46f3ffbb285e8d4ac3ba4ae7bc6080e87ceaaab50b43",
+        "7d721d2410fb8295634a91909ef335cbe590c9bad34a3843f39065c46e247963",
+        "0e1452eac70bf4018dd78ba49f73ec202b8d44850a70bf8cff6388ddbb43cc76",
+        "e685e0c1dc4d0582d8f0ffed9fba309ae82f0c46d1a93f84292cfa1005903eef"
+      ],
+      "fusedTop5": [
+        "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
+        "5d4dc9002869fa5e66bf13f54354e02d95a4a8bb6a45055dae14e75d030eca9c",
+        "2c8a045e6ae52c325883ea73ea10be83e111a176bfc504fc2092a46c41d7adf8",
+        "729ae8a0e4767919576f46f3ffbb285e8d4ac3ba4ae7bc6080e87ceaaab50b43",
+        "c4a06785c311d32cdf5f3a8609813e9fbf77ffb46a6b24e30f929f454aa08cfd"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "f36e58e0f4ae2b8c",
+      "query": "How many seats are available for BS Electrical Engineering at UET Taxila?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "710589581d3ee752264e3491f7a2fdae2431b19fdd2c9e33f1dbe5e933f0405d",
+        "577f26d758be5b04a4686ca6ab2a82c9aed1639a83a2a79a0b1928f1c9945305",
+        "0ef4202b67630015fde6bd94df556225ce1dc636ba8fbaf347e0af4420e99169",
+        "b41ec1462a25be808621378807e29439b08b502b57c4bdc6ebb8283dd83e0904",
+        "a0d513a9b801349b7596d0b9d7329d7b21ae74b6d3e349151a17d4ad3ee51d8f"
+      ],
+      "lexicalTop5": [
+        "b122e45dfa9111e5a5cc30a8f618b70330957d7a2a6f6c36675eb70aeed2865a",
+        "2595a9e6b98b0631e0f67fab26d33b8383a1e80ebffdef63a221249bd8c2094f",
+        "2155c7093d1e74ed2d43246d6398e854574e36eedfac22afe80d1fa28dfe8d98",
+        "63ba5c1c2eb3db29b3894084cd9a64a114e0386e20483e1715f0eae264182beb",
+        "21c65da49e7a5ed887e9a27071578dab3b4fe86f73e9d543c3254879789c17d3"
+      ],
+      "fusedTop5": [
+        "710589581d3ee752264e3491f7a2fdae2431b19fdd2c9e33f1dbe5e933f0405d",
+        "b122e45dfa9111e5a5cc30a8f618b70330957d7a2a6f6c36675eb70aeed2865a",
+        "577f26d758be5b04a4686ca6ab2a82c9aed1639a83a2a79a0b1928f1c9945305",
+        "2595a9e6b98b0631e0f67fab26d33b8383a1e80ebffdef63a221249bd8c2094f",
+        "0ef4202b67630015fde6bd94df556225ce1dc636ba8fbaf347e0af4420e99169"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "fa7779e221583d3d",
+      "query": "What is the merit list procedure for UET Taxila admissions?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "7a3156675bf22e1742af21f2f38ad80ac867d7794a3b549e92a188f95e00433f",
+        "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
+        "8a5f1523621f157e26d7aed08a88f9fe485eb074f5d329acc96ae0bcf73af90d",
+        "2c8a045e6ae52c325883ea73ea10be83e111a176bfc504fc2092a46c41d7adf8",
+        "c4a06785c311d32cdf5f3a8609813e9fbf77ffb46a6b24e30f929f454aa08cfd"
+      ],
+      "lexicalTop5": [
+        "dfcd25d71e12a936845599b6f5925e73030c33a8892dc97e815fae504374fbd3",
+        "18a60f68944fbff3d204ca9790356b91b08baec53f14315a8b177b4d280e5886",
+        "6074be175431057c92bde34206c32b49be9817317043391a4364c596b7c7a693",
+        "8389703f0672a49818b4bdf0937799955e75370f9420e0329123f385eb680ee6",
+        "2449fc7207c12d4667bafd09e463ec3e720ef04eba8d00c68b9f3ca335d914cd"
+      ],
+      "fusedTop5": [
+        "6074be175431057c92bde34206c32b49be9817317043391a4364c596b7c7a693",
+        "2449fc7207c12d4667bafd09e463ec3e720ef04eba8d00c68b9f3ca335d914cd",
+        "7a3156675bf22e1742af21f2f38ad80ac867d7794a3b549e92a188f95e00433f",
+        "dfcd25d71e12a936845599b6f5925e73030c33a8892dc97e815fae504374fbd3",
+        "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "cb7a97774e15f4e9",
+      "query": "When are the midterm exams held at UET Taxila?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "e732a12e5e3d98b57b66144df505e94284caf4f229db44e1cf9a09ecd6f013cb",
+        "c4a06785c311d32cdf5f3a8609813e9fbf77ffb46a6b24e30f929f454aa08cfd",
+        "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
+        "8a6badf336c6f4718678dd324f003349789299bd686a7bd425c393b462658141",
+        "b1f66bcd4cef6138b5cdcac02649a193e4c0e18bfa6c507493bc48ba3e10856b"
+      ],
+      "lexicalTop5": [
+        "f19ca0b777765efb13d18a675e8bd437dd4f091b424f43ee4e9e86b13b2d16dc",
+        "fc6095544026a5f41138acf894be92956d1b6f8418e655ef0558e6e0ee4134d2",
+        "fc5261c73538c67f7481d1949af980e601e954e40b9e6be3b51df65458f5a21e",
+        "65a59a1987074fd36d3e49e5d0bee1c87aa762eeaf048218e7f077bdfc027e7b",
+        "c8fb1c97c55f46b4eedf4a1fbb53277b133e2f87e40baa6e88fb21a0e7fc3281"
+      ],
+      "fusedTop5": [
+        "e732a12e5e3d98b57b66144df505e94284caf4f229db44e1cf9a09ecd6f013cb",
+        "f19ca0b777765efb13d18a675e8bd437dd4f091b424f43ee4e9e86b13b2d16dc",
+        "c4a06785c311d32cdf5f3a8609813e9fbf77ffb46a6b24e30f929f454aa08cfd",
+        "fc6095544026a5f41138acf894be92956d1b6f8418e655ef0558e6e0ee4134d2",
+        "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "0516bcbb0e07b76d",
+      "query": "What is the schedule for final exams in spring semester 2025 at UET Taxila?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "617275529fb23360479ef650cf4bb7765a9bf3b38d0d8009aa2af41139665968",
+        "765c1849d2d385542b47eb2c0ebae3fd8eedcb00c200e8830e1487759c54e92c",
+        "b5bb836b20b655ec592639db601c090fc0d896de48ab0a4e34f6b7eee7b6f246",
+        "0fff3651ff9810bec8fc5ab1a89b4aa963dace600116a47902e9043c7c7ff21b",
+        "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e"
+      ],
+      "lexicalTop5": [
+        "338120a50977f439484bdd7a0ae3635a671081e8da27741b07cca84cd8c5de73",
+        "ab2ea20165b8f2eca74ebd72353f72421fd6c5f7c6e25629fdb9487b2bea996b",
+        "14f16e454c9752ea53cdbb67433d098a6d57789411e762db464c40f6d4c55861",
+        "91488539d1fadcf3072e2b8a9050b85b4f72a9750de8fbddaced5a20efa83dda",
+        "ce71de666af8123ca61028e53ac4102f566e6f1897e791620bc1940b3fc80a94"
+      ],
+      "fusedTop5": [
+        "617275529fb23360479ef650cf4bb7765a9bf3b38d0d8009aa2af41139665968",
+        "338120a50977f439484bdd7a0ae3635a671081e8da27741b07cca84cd8c5de73",
+        "765c1849d2d385542b47eb2c0ebae3fd8eedcb00c200e8830e1487759c54e92c",
+        "ab2ea20165b8f2eca74ebd72353f72421fd6c5f7c6e25629fdb9487b2bea996b",
+        "b5bb836b20b655ec592639db601c090fc0d896de48ab0a4e34f6b7eee7b6f246"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "d05381af7512b11d",
+      "query": "When does the spring semester 2025 start at UET Taxila?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "ad5b591a08fd654d8d0848113523bffbf10fe8f395daf511e1bf3d635ad7497b",
+        "d061d7a5b2d027bd5a061f726ffcc6334195e235956d24d6720422e10bce9846",
+        "70491f1163e21db561b5d5a715c8b2a23d11d96d155369b603362640ba00441e",
+        "0fff3651ff9810bec8fc5ab1a89b4aa963dace600116a47902e9043c7c7ff21b",
+        "617275529fb23360479ef650cf4bb7765a9bf3b38d0d8009aa2af41139665968"
+      ],
+      "lexicalTop5": [
+        "e4f7886b70676f65ffbac281a976e9c71a24dac9de6092a65a0691b907fbd606",
+        "14f16e454c9752ea53cdbb67433d098a6d57789411e762db464c40f6d4c55861",
+        "08f2c4d437f4c134e5a1d7e7e281a01541a1990b206acfa30c4cd0119daa958c",
+        "9ba9df538d8d625fed2766fb4ec8632d3efcd1cea6f186736bb756486f8c6d8c",
+        "b7997624fbc0f7d118e045a843264c8e3e55864f573110e7f1023cb1b22887af"
+      ],
+      "fusedTop5": [
+        "2e1b7b0dcb507ccf03759bcb2d95a333ea12ac5b03c1a0353fbd4f637feb28df",
+        "ad5b591a08fd654d8d0848113523bffbf10fe8f395daf511e1bf3d635ad7497b",
+        "e4f7886b70676f65ffbac281a976e9c71a24dac9de6092a65a0691b907fbd606",
+        "d061d7a5b2d027bd5a061f726ffcc6334195e235956d24d6720422e10bce9846",
+        "14f16e454c9752ea53cdbb67433d098a6d57789411e762db464c40f6d4c55861"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "93971e85e247fde9",
+      "query": "What are the important dates in the UET Taxila academic calendar?",
+      "relevantChunkKeys": [
+        "b5bb836b20b655ec592639db601c090fc0d896de48ab0a4e34f6b7eee7b6f246"
+      ],
+      "denseTop5": [
+        "b5bb836b20b655ec592639db601c090fc0d896de48ab0a4e34f6b7eee7b6f246",
+        "3d8bdb58e0a89b17ea9266de4d07c045c9188ce22e67a987814842dcad227234",
+        "a9bf73c6816855aa2d6f5b695b8cc64733b614cfb7ac15ad3a4e8b6cb8fba955",
+        "948c11e8a9508af7a9fec13ae72dece5f30f3b2e44d0379c14ba4402163cdec9",
+        "6fa4f408d2be30043d3d8a4b011002ffba9ee0f13cd33f2eb94a13541675a44e"
+      ],
+      "lexicalTop5": [
+        "6893701df7cf5a975de46788caf2874ae8ac5f6811b210572f39dd7340883837",
+        "51d03678b58edabf5f71a168e73456848709158bf9c3778b796b8252d9c719aa",
+        "6a3232b98c785fddc01857b2b9787cbf3fd7430a28381d6a6b0ec4fe6c630ac3",
+        "24ee2e8b5beedc9221f2641c769660b6d6130badb06b7d528d7fa282718cb4a3",
+        "acbc44fec64636705646f9e41e33ea1298f9cf6e94d1fe1b3c548312c1e37951"
+      ],
+      "fusedTop5": [
+        "b5bb836b20b655ec592639db601c090fc0d896de48ab0a4e34f6b7eee7b6f246",
+        "6893701df7cf5a975de46788caf2874ae8ac5f6811b210572f39dd7340883837",
+        "3d8bdb58e0a89b17ea9266de4d07c045c9188ce22e67a987814842dcad227234",
+        "51d03678b58edabf5f71a168e73456848709158bf9c3778b796b8252d9c719aa",
+        "a9bf73c6816855aa2d6f5b695b8cc64733b614cfb7ac15ad3a4e8b6cb8fba955"
+      ],
+      "hitAt5": 1,
+      "mrr": 1
+    },
+    {
+      "queryId": "2ea89221212da31c",
+      "query": "When is the summer break at UET Taxila university?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "d061d7a5b2d027bd5a061f726ffcc6334195e235956d24d6720422e10bce9846",
+        "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
+        "9dab977457b9e7d209975d1b699efc862a3da0c33dd63f88e24ae4ea0e5a733b",
+        "ad5b591a08fd654d8d0848113523bffbf10fe8f395daf511e1bf3d635ad7497b",
+        "8a6badf336c6f4718678dd324f003349789299bd686a7bd425c393b462658141"
+      ],
+      "lexicalTop5": [
+        "29cfbd27b1249d1a4ef98fc52502e810bc245f241901f61a715f636cc9470401",
+        "b2ce4bbe52cc1b8216e30d720f3ba535b0a6f99dbac03b2bb9d64967e4f01672",
+        "eb0b6db889fe65b73edd2240f67797441d90795f021ff2b63ee8eeb8659dd937",
+        "870f59ced294c5691750aab1a97cb90acaf2b60663f9bd5679666d497a056902",
+        "747b5a382bd6fdf7afc68e714ec776191e0388916f64a056528b130a4f85adec"
+      ],
+      "fusedTop5": [
+        "d061d7a5b2d027bd5a061f726ffcc6334195e235956d24d6720422e10bce9846",
+        "29cfbd27b1249d1a4ef98fc52502e810bc245f241901f61a715f636cc9470401",
+        "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
+        "b2ce4bbe52cc1b8216e30d720f3ba535b0a6f99dbac03b2bb9d64967e4f01672",
+        "9dab977457b9e7d209975d1b699efc862a3da0c33dd63f88e24ae4ea0e5a733b"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "7b5d19924011310c",
+      "query": "What are the prerequisites for the Data Structures course at UET Taxila?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "eed14e184563be44581747a3e524e09ee0eb4a323479a423db43d177967acfb7",
+        "eb13f7856abb78eef69d637b8c3af6f8973401679dfa0769c083d801c0869cf2",
+        "07739da427051d379d0df9c502326240f3960e9174343fe0a8742152a86beff3",
+        "0f2c7544eac5866250d873674047d2bb9169ace30cdf856c5d66f0d78fe8bba0",
+        "5e1206eb07d99d5e1876888f3298a77860ee61ec128d0bd4a408ecfa332828bc"
+      ],
+      "lexicalTop5": [
+        "796ec7e820929ef9216bb370273ad5c898b2f0f2234c692745a3cdb2b86104d5",
+        "c0ff3c7a56f9be264faf3b8e6da422b2dd533bc25bd8fd2c07d283e24e96dd6c",
+        "86706479c23ade80e3ed60964dd80e4ae6a0c6bc1f5c7f410f8f36cdf3fb9fab",
+        "fa2e516bb0600a1decb3447e0966e114c9f0dde1e0362dfba0f8fce806bdb420",
+        "7574d847164155a4891acfe8a981d593636b75e1ec5a80fb8fb2f9e7bfb98720"
+      ],
+      "fusedTop5": [
+        "eed14e184563be44581747a3e524e09ee0eb4a323479a423db43d177967acfb7",
+        "796ec7e820929ef9216bb370273ad5c898b2f0f2234c692745a3cdb2b86104d5",
+        "eb13f7856abb78eef69d637b8c3af6f8973401679dfa0769c083d801c0869cf2",
+        "c0ff3c7a56f9be264faf3b8e6da422b2dd533bc25bd8fd2c07d283e24e96dd6c",
+        "07739da427051d379d0df9c502326240f3960e9174343fe0a8742152a86beff3"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "28c28a292f783f28",
+      "query": "How many credit hours is the Programming Fundamentals course at UET Taxila?",
+      "relevantChunkKeys": [
+        "8aee572b1c180b8dedf84fbf270625f30f5733972c4d6917b2f8c3070c6ea499",
+        "d4ae0318d1e26573e9ce22e8fe62d04faf7a092d21b1beec84dcc85e11037b4e",
+        "d3b2910fc4aa9b58c44ae8e608b6c37841be7950ccc0220971fd7a5ad0739b6a"
+      ],
+      "denseTop5": [
+        "8aee572b1c180b8dedf84fbf270625f30f5733972c4d6917b2f8c3070c6ea499",
+        "9b2669acf19154abfe3d441d4b939e378f731b05792bc588faa394348946b3bf",
+        "d4ae0318d1e26573e9ce22e8fe62d04faf7a092d21b1beec84dcc85e11037b4e",
+        "d3b2910fc4aa9b58c44ae8e608b6c37841be7950ccc0220971fd7a5ad0739b6a",
+        "a7926abdeca8986d513af1d32fef27994899b477c6c0d398b92043b7aaa63aea"
+      ],
+      "lexicalTop5": [
+        "578b13e13b5ae05fbe9c165ccb472cd4eba32c183227a49907b00f89a5091506",
+        "796ec7e820929ef9216bb370273ad5c898b2f0f2234c692745a3cdb2b86104d5",
+        "c0ff3c7a56f9be264faf3b8e6da422b2dd533bc25bd8fd2c07d283e24e96dd6c",
+        "b118df79e5bb2413f23f340b12eb5db33d3eb12e0f0d166cc3ae7e015fee4f55",
+        "fbb38e41732a2a2c0d66cecc9ea22fbf2116768128640d7f5e928d3b252fa530"
+      ],
+      "fusedTop5": [
+        "578b13e13b5ae05fbe9c165ccb472cd4eba32c183227a49907b00f89a5091506",
+        "8aee572b1c180b8dedf84fbf270625f30f5733972c4d6917b2f8c3070c6ea499",
+        "9b2669acf19154abfe3d441d4b939e378f731b05792bc588faa394348946b3bf",
+        "796ec7e820929ef9216bb370273ad5c898b2f0f2234c692745a3cdb2b86104d5",
+        "d4ae0318d1e26573e9ce22e8fe62d04faf7a092d21b1beec84dcc85e11037b4e"
+      ],
+      "hitAt5": 1,
+      "mrr": 0.5
+    },
+    {
+      "queryId": "d401ee13982062e9",
+      "query": "What courses are offered in the 3rd semester of BS Computer Science?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "a482af051ae78e23b79ab75d79e663a46f56575855be4cf5f4fb1ef0343d3c1e",
+        "594948699286e930bfef8b9b8ae5bd6ffdd98e13c8ee997821c5bd665e88824f",
+        "c34064eaf9ed88a349b2021f2e3cb2e3116936715fc0dc6a22eb423164565bc1",
+        "949279a6fb6616a837cfd94f54e76cdc3239a1ee9958275d6e2db44dbf64988e",
+        "1058fb810aaaa2c4fab3a0c09d590a76243f03edbf69ef270e85ca8cdb01f14e"
+      ],
+      "lexicalTop5": [
+        "da2ef01e083ccaf626903aeb1e54869c4ec32611820ae513c55ea992e46f0b9d",
+        "eb0b6db889fe65b73edd2240f67797441d90795f021ff2b63ee8eeb8659dd937",
+        "b2ce4bbe52cc1b8216e30d720f3ba535b0a6f99dbac03b2bb9d64967e4f01672",
+        "d370f50c85e6d3ff17a335282486c2d2a65f36859567a877d05eb0a06f3f84a3",
+        "e032cd102cd0b6cb2274375d7e4cd3488e4ed0f524d8dad07476abdfe503845f"
+      ],
+      "fusedTop5": [
+        "a482af051ae78e23b79ab75d79e663a46f56575855be4cf5f4fb1ef0343d3c1e",
+        "da2ef01e083ccaf626903aeb1e54869c4ec32611820ae513c55ea992e46f0b9d",
+        "594948699286e930bfef8b9b8ae5bd6ffdd98e13c8ee997821c5bd665e88824f",
+        "eb0b6db889fe65b73edd2240f67797441d90795f021ff2b63ee8eeb8659dd937",
+        "c34064eaf9ed88a349b2021f2e3cb2e3116936715fc0dc6a22eb423164565bc1"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "32bd7727e786b6c1",
+      "query": "Is there a lab component for Operating Systems at UET Taxila?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "c384d5aef64d7bf75753e0c1d97a80846e55d79bd6558f95a3a64c9306e25741",
+        "91854c6927fe41f96894c56159a350c3174ba234eb16e25a7c1567a6c766ae0c",
+        "cc6379e6eae7df51f5c553852f5cb7b87065da0ac92d8d4f4608ff3dc6b7c174",
+        "525bb7339c45c0d85d3edeaf85482d46f6fa05a90f615c5b03c1a3a0ac040051",
+        "a96cb0885502224d7b3ef3548ec8ee5d6b68691245d46ef7854cf2260093a19c"
+      ],
+      "lexicalTop5": [
+        "44b54bca0f022224ea01807d64dcf55d3fd08ceebe69b9c335ec73ce384d9974",
+        "ba116d9711875f63818f8358a5725f69856fed8b919322ab9f2d2c0d926db624",
+        "863b6210184cc3c4427c3262f15a0593c0873ddef60acdfd173e72584fbb0b59",
+        "c7b4b3bb28ad4e0a69df780bb851ef02ca80151518ae126e8877ae7097b72dcd",
+        "c48a55eea15c8a7e2f9573a944afd02ed6637949288b91979627cb011ca01aea"
+      ],
+      "fusedTop5": [
+        "c384d5aef64d7bf75753e0c1d97a80846e55d79bd6558f95a3a64c9306e25741",
+        "44b54bca0f022224ea01807d64dcf55d3fd08ceebe69b9c335ec73ce384d9974",
+        "91854c6927fe41f96894c56159a350c3174ba234eb16e25a7c1567a6c766ae0c",
+        "ba116d9711875f63818f8358a5725f69856fed8b919322ab9f2d2c0d926db624",
+        "cc6379e6eae7df51f5c553852f5cb7b87065da0ac92d8d4f4608ff3dc6b7c174"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "0a6d92d625563c42",
+      "query": "What is the course outline for Database Systems at UET Taxila?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "44e8c771bed986eda978af142abf1c245b81b1456dc890d7217130c9b3568ffd",
+        "996adc4698031cce609f542d946190b5cddb96e70cdd5e6a5a6d4b0a9155c9a2",
+        "2d14c52d812f952df62092e58d1d4ffb523b2c8ced2d38511130cc8ac34e7795",
+        "a4f84c633ef42c65cacd7beaf6c11562c042772bfc556cb0f9781b02fae3c0f7",
+        "d2cbff227c8b159c159fa344098f6c86bd0d5982dca5a3b27148857b5518f4b4"
+      ],
+      "lexicalTop5": [
+        "7200c8c09cced315c9efc4066d6143befa306501b84eb4c5b511e0dcb34c58a7",
+        "796ec7e820929ef9216bb370273ad5c898b2f0f2234c692745a3cdb2b86104d5",
+        "c0ff3c7a56f9be264faf3b8e6da422b2dd533bc25bd8fd2c07d283e24e96dd6c",
+        "3f941424126d5d26b47f56273be736f956ccf0a47895eae5398b3ce578e57e1c",
+        "86e24c2432d32c321d168722aca493d20a2d555a0475fbd17e070f82d60f3ed4"
+      ],
+      "fusedTop5": [
+        "44e8c771bed986eda978af142abf1c245b81b1456dc890d7217130c9b3568ffd",
+        "7200c8c09cced315c9efc4066d6143befa306501b84eb4c5b511e0dcb34c58a7",
+        "996adc4698031cce609f542d946190b5cddb96e70cdd5e6a5a6d4b0a9155c9a2",
+        "796ec7e820929ef9216bb370273ad5c898b2f0f2234c692745a3cdb2b86104d5",
+        "2d14c52d812f952df62092e58d1d4ffb523b2c8ced2d38511130cc8ac34e7795"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "07002b9f761478bc",
+      "query": "How do I contact the Dean of the Faculty of Engineering at UET Taxila?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "588534697690840a24d8ee703c4c4227123fe383b2365488570873796ff82310",
+        "b32bfe9efac3b71971cab8b36f666022f33df2fce0e0d128713f3bf9bb870fbe",
+        "33a09249f4a587412bbc9355c75c98f8fc46a7cd0eecd435caf44317d9b04707",
+        "80c5e48964adb28b1253d0949dc388fe8440592f0215181841f1a36c2a12d1c8",
+        "77028e777a28646f13aee2cc26bb51b0b1d9004ad05fbe9665e5a26eff5c9ac7"
+      ],
+      "lexicalTop5": [
+        "f365b2f41b6c8686dae1189048ad023163e77546bf053802dde49840e7a2d06b",
+        "9d19d311b2784e0c5f3fd965c4e069be107fb880a635f1a7db42ee3ca2786450",
+        "e04e2d338b1456fc2cee4288972a710f0c89235d6ae2252fb5ed13519e7a3cdb",
+        "a174e0b4ceef7a28ffdfe4beba35e613502b4b8fb80f7d62c65a1404cbe65ec9",
+        "a26559419dbcd4b39246be1615eb5e3aa66dc0801318f53d63456a7d4c29437e"
+      ],
+      "fusedTop5": [
+        "588534697690840a24d8ee703c4c4227123fe383b2365488570873796ff82310",
+        "f365b2f41b6c8686dae1189048ad023163e77546bf053802dde49840e7a2d06b",
+        "b32bfe9efac3b71971cab8b36f666022f33df2fce0e0d128713f3bf9bb870fbe",
+        "9d19d311b2784e0c5f3fd965c4e069be107fb880a635f1a7db42ee3ca2786450",
+        "33a09249f4a587412bbc9355c75c98f8fc46a7cd0eecd435caf44317d9b04707"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "809427d946da55fe",
+      "query": "What is the email address of the CS department head at UET Taxila?",
+      "relevantChunkKeys": [
+        "491f704ab01374604892239079710fc86fa76abecf9733eb382e5b93fa2c2e77",
+        "b5f7330baeafd71f6b577fcd878ba4a66aaf1790b5cc4e40e44c8f03a8614cd6",
+        "4aa06117613a1655c388c91d83e14270da1473e9feb433963a40735e0771fe56",
+        "0e363892f9fb7860989c238d4d217efc3cdbd9d6ae340315d74e97d316bdd3e2",
+        "7a01b32a0d203f122fee8037219953fa39dd800b85079de8a043d9a4c838bbf1"
+      ],
+      "denseTop5": [
+        "491f704ab01374604892239079710fc86fa76abecf9733eb382e5b93fa2c2e77",
+        "b5f7330baeafd71f6b577fcd878ba4a66aaf1790b5cc4e40e44c8f03a8614cd6",
+        "4aa06117613a1655c388c91d83e14270da1473e9feb433963a40735e0771fe56",
+        "0e363892f9fb7860989c238d4d217efc3cdbd9d6ae340315d74e97d316bdd3e2",
+        "7a01b32a0d203f122fee8037219953fa39dd800b85079de8a043d9a4c838bbf1"
+      ],
+      "lexicalTop5": [
+        "e66b2ca560e34fdb217184043b98fbd32eb7cfd74befe6a74de8bbb671e704dc",
+        "c8a583f5a6d6b9f25a86788ba39ee24744e9c1cfe04b317df82feda38a80484a",
+        "75cb69964786deac40820f8a07d389bc9218ff41ab1ee20de4e0fe4cb8ec36d6",
+        "d35634ccf15fdfc9e9775827541b6019292c256c5a306c8fefa3de5c5e746726",
+        "3e8c4b6a4dcaa341eaa9abb52a3c2d639926efb489c3e58af254d7301b354701"
+      ],
+      "fusedTop5": [
+        "491f704ab01374604892239079710fc86fa76abecf9733eb382e5b93fa2c2e77",
+        "e66b2ca560e34fdb217184043b98fbd32eb7cfd74befe6a74de8bbb671e704dc",
+        "b5f7330baeafd71f6b577fcd878ba4a66aaf1790b5cc4e40e44c8f03a8614cd6",
+        "c8a583f5a6d6b9f25a86788ba39ee24744e9c1cfe04b317df82feda38a80484a",
+        "4aa06117613a1655c388c91d83e14270da1473e9feb433963a40735e0771fe56"
+      ],
+      "hitAt5": 1,
+      "mrr": 1
+    },
+    {
+      "queryId": "0a5abd0e1ccc4e3a",
+      "query": "Who is the Vice Chancellor of UET Taxila?",
+      "relevantChunkKeys": [
+        "b6e2619e6c2d615ad3a14f1240af0141f169274b77f093ed4b760cbcf1a6e136"
+      ],
+      "denseTop5": [
+        "b6e2619e6c2d615ad3a14f1240af0141f169274b77f093ed4b760cbcf1a6e136",
+        "c78c4846fd4f669b198e160246b71bc43c19e46cda1ec74c08ffd8b9f30a63d7",
+        "ecdabef613f5cd5d2d5fa1f2ddad45ef598d399190c849c82f59540f4b39dd3f",
+        "ffa96c516dc58306d28ece9733e1562a3f698bb4be220094f6c729b9e266cbd2",
+        "366a04b4a44519c2a78810de048fe934bdec6db0dd1d6d76a904d2f129a3a4e3"
+      ],
+      "lexicalTop5": [
+        "b7bf7a051de5a04db0743bc72341f8a4c59f1a3deb3c608c6f5af64d9a27b8dd",
+        "0d74f2aecbe2fca49a167b4537383c0f084b72fc67652990aa77ae50dc330953",
+        "69d2d6372846cf39a1a78bd9ee6e3250bc3cb132a647685e3f36a76aa747516e",
+        "7057aa5fd03454b85f25064a24432a4e8ee9de2908cd8c5712fbeb19c4c64462",
+        "9350b018c1025d7219fcf0d952f2e4dcc0ebf7d6d018280e3eb45c7dcd745edb"
+      ],
+      "fusedTop5": [
+        "b6e2619e6c2d615ad3a14f1240af0141f169274b77f093ed4b760cbcf1a6e136",
+        "b7bf7a051de5a04db0743bc72341f8a4c59f1a3deb3c608c6f5af64d9a27b8dd",
+        "c78c4846fd4f669b198e160246b71bc43c19e46cda1ec74c08ffd8b9f30a63d7",
+        "0d74f2aecbe2fca49a167b4537383c0f084b72fc67652990aa77ae50dc330953",
+        "ecdabef613f5cd5d2d5fa1f2ddad45ef598d399190c849c82f59540f4b39dd3f"
+      ],
+      "hitAt5": 1,
+      "mrr": 1
+    },
+    {
+      "queryId": "067a5f0f244a6e34",
+      "query": "How can I contact the registrar office at UET Taxila?",
+      "relevantChunkKeys": [
+        "a7e5a404a4626b95fd9b5a7ab0772cffd03fad7765d1a965fac01d8fe35a2212",
+        "beeeaca047e6dd4b662a414b0ae5369d9633da1a6ea984c9bbb61c4d278ecdc5",
+        "73e71c7d7418ac1d6d5560e1840c1c31e9072a4237bd0fb6fd005186ca993390"
+      ],
+      "denseTop5": [
+        "a7e5a404a4626b95fd9b5a7ab0772cffd03fad7765d1a965fac01d8fe35a2212",
+        "beeeaca047e6dd4b662a414b0ae5369d9633da1a6ea984c9bbb61c4d278ecdc5",
+        "73e71c7d7418ac1d6d5560e1840c1c31e9072a4237bd0fb6fd005186ca993390",
+        "b4222c5451c5548d9374f082fed820cbf141f95c0f458960bddefca535b8743d",
+        "60cfadcc37bdc013aab7547d2bb8c43d73a1e195c5883aa9289e3e32d7c37037"
+      ],
+      "lexicalTop5": [
+        "7f0662ebf824910b55a9cee95b9e6637db02c80d9defbc0fefa2f17b944096f1",
+        "c403164d2c6f07d789bc6ea898d263bdd3cfd0b9b1638264eddcba0e965db9a0",
+        "7c4504156961eab8da2431de972448bfb5482c9696afd42daf378b1d473717e2",
+        "07fd16e0b2a8645b0f4efabfecd3ccebc99c61e3867cdba5a899640e241d7a07",
+        "f365b2f41b6c8686dae1189048ad023163e77546bf053802dde49840e7a2d06b"
+      ],
+      "fusedTop5": [
+        "7f0662ebf824910b55a9cee95b9e6637db02c80d9defbc0fefa2f17b944096f1",
+        "a7e5a404a4626b95fd9b5a7ab0772cffd03fad7765d1a965fac01d8fe35a2212",
+        "beeeaca047e6dd4b662a414b0ae5369d9633da1a6ea984c9bbb61c4d278ecdc5",
+        "c403164d2c6f07d789bc6ea898d263bdd3cfd0b9b1638264eddcba0e965db9a0",
+        "73e71c7d7418ac1d6d5560e1840c1c31e9072a4237bd0fb6fd005186ca993390"
+      ],
+      "hitAt5": 1,
+      "mrr": 0.5
+    },
+    {
+      "queryId": "1e3f0c84cff8af35",
+      "query": "What is the phone number of UET Taxila main campus?",
+      "relevantChunkKeys": [
+        "60cfadcc37bdc013aab7547d2bb8c43d73a1e195c5883aa9289e3e32d7c37037",
+        "b4222c5451c5548d9374f082fed820cbf141f95c0f458960bddefca535b8743d",
+        "4738f2e1a87b10b3da3ffc8ad21214fb3f322c788b6c87b1d5b6527f3013cd2b",
+        "418d2e122542a48d18531232b69153673a9f6724bb6640ed6e4c00fb5eb1819d",
+        "04919b8122bc402334fb9351d73e12430f60bbf5ee2ecbde4bedb8f29bab4b95"
+      ],
+      "denseTop5": [
+        "60cfadcc37bdc013aab7547d2bb8c43d73a1e195c5883aa9289e3e32d7c37037",
+        "b4222c5451c5548d9374f082fed820cbf141f95c0f458960bddefca535b8743d",
+        "4738f2e1a87b10b3da3ffc8ad21214fb3f322c788b6c87b1d5b6527f3013cd2b",
+        "418d2e122542a48d18531232b69153673a9f6724bb6640ed6e4c00fb5eb1819d",
+        "04919b8122bc402334fb9351d73e12430f60bbf5ee2ecbde4bedb8f29bab4b95"
+      ],
+      "lexicalTop5": [
+        "7e44552a2f9c3cf75eeaa138f72fdab78d87b76e13c066d11d386ee10ba1d929",
+        "317209eb7b1570f5d5e2f498723611645a6bf43967526c3595b815c3759f964f",
+        "6c51931edcace62831fc31c7e91ae44e5ea67635dd59e8eeb827ae580d9ee8fe",
+        "f06191415eb603dd2fe70dd572093ea90f18f29d13b6c659cf6713d20df09998",
+        "981573423e72d2aeffa1425b345bb294051d0c751ac1bb9d87ee05d1187636ac"
+      ],
+      "fusedTop5": [
+        "60cfadcc37bdc013aab7547d2bb8c43d73a1e195c5883aa9289e3e32d7c37037",
+        "7e44552a2f9c3cf75eeaa138f72fdab78d87b76e13c066d11d386ee10ba1d929",
+        "b4222c5451c5548d9374f082fed820cbf141f95c0f458960bddefca535b8743d",
+        "317209eb7b1570f5d5e2f498723611645a6bf43967526c3595b815c3759f964f",
+        "4738f2e1a87b10b3da3ffc8ad21214fb3f322c788b6c87b1d5b6527f3013cd2b"
+      ],
+      "hitAt5": 1,
+      "mrr": 1
+    },
+    {
+      "queryId": "0826c56fb3e9e670",
+      "query": "How do I apply for the HEC need-based scholarship at UET Taxila?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "f120e2b0134997c65d4ec381b7e3398e0da42861cff2454a70cb1aae5ec293ca",
+        "4784abffdbb2aa0013cbc77f8c7422bf36ac10f5676e1422537782021b5b2062",
+        "7a7bcbb014628245b76babc9e0c6038d39718551fc37df1fa85f0549f6e80565",
+        "ebe092c436eb0ea3a1048e9c1b77d10822bc6c432f6352a6fb3801e16999b33f",
+        "85f018173dfc3a5429a83b35978c896f0bd5cdc35bd7240c7eb671bcdd48e8fb"
+      ],
+      "lexicalTop5": [
+        "6782cb5608f0be8f6a9794c4c50b09bb222d563988ea2da9ae02ed1e0a363427",
+        "3fcbf5a940f3273f7ad29e98af44762eab10806ef41ff39a5d93f446c059c34b",
+        "8c10cd8397b2e4199e0e2cd35866f7639ee85ac4f6dfd10e8f91964a34a5c638",
+        "54d626b48cada687e1120a927ef6ed04d4147270445a503115658569f12ff939",
+        "59dd1f04271dec43bdfb43805531da44294fd1372ef5181e494d311fc742070f"
+      ],
+      "fusedTop5": [
+        "f120e2b0134997c65d4ec381b7e3398e0da42861cff2454a70cb1aae5ec293ca",
+        "6782cb5608f0be8f6a9794c4c50b09bb222d563988ea2da9ae02ed1e0a363427",
+        "4784abffdbb2aa0013cbc77f8c7422bf36ac10f5676e1422537782021b5b2062",
+        "3fcbf5a940f3273f7ad29e98af44762eab10806ef41ff39a5d93f446c059c34b",
+        "7a7bcbb014628245b76babc9e0c6038d39718551fc37df1fa85f0549f6e80565"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "ed64320d24518201",
+      "query": "What merit scholarships are available for top students at UET Taxila?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "8a5297c4ba7b5ae51968230851b72f698fed7ed162f3015f5ce3fe752fa17eee",
+        "5c5de983dab13e98508832098b9ee7aa1fcb40ad4fe7c85c5ef5e64d5ee6c549",
+        "85f018173dfc3a5429a83b35978c896f0bd5cdc35bd7240c7eb671bcdd48e8fb",
+        "2803d6854ca2291f76374bab92d04edfc70673f93b14c8f0210b56fed4517b79",
+        "ebe092c436eb0ea3a1048e9c1b77d10822bc6c432f6352a6fb3801e16999b33f"
+      ],
+      "lexicalTop5": [
+        "9a84f832d30b1c83f103eff219ac53d684e1edd19cf5d4e23747159e618b338b",
+        "e37fa5390558479b461e45817852fe83c5178ed1aaf240d3db72f8908cdb05e0",
+        "d58a2347e262afd46a726990d5ad42559b35e2f41c6827ebb1866136a0d34845",
+        "fe01005fce446eccec63d4ec90da3dfd92da23fa7b36f7a8121e3e533694d646",
+        "0b0532e3b4620188eac416defd6efd09c92b3c82c422430dd1a69cd483593d0e"
+      ],
+      "fusedTop5": [
+        "8a5297c4ba7b5ae51968230851b72f698fed7ed162f3015f5ce3fe752fa17eee",
+        "9a84f832d30b1c83f103eff219ac53d684e1edd19cf5d4e23747159e618b338b",
+        "5c5de983dab13e98508832098b9ee7aa1fcb40ad4fe7c85c5ef5e64d5ee6c549",
+        "e37fa5390558479b461e45817852fe83c5178ed1aaf240d3db72f8908cdb05e0",
+        "85f018173dfc3a5429a83b35978c896f0bd5cdc35bd7240c7eb671bcdd48e8fb"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "4b515ce39511ff1b",
+      "query": "Is there a fee waiver program for financially needy students at UET Taxila?",
+      "relevantChunkKeys": [
+        "9e8723a93be0ccacc05877d21901d82e6d7b0b48f01131590d3337cf1afb8e05"
+      ],
+      "denseTop5": [
+        "51bdbc92a4674d7c23a251cdf084f6c0d78dea87f675677a925191fe2ba7b7dc",
+        "9e8723a93be0ccacc05877d21901d82e6d7b0b48f01131590d3337cf1afb8e05",
+        "abf448db72516de55d5d0fa51a82ab400daff990e839a74db94c67d91dba596c",
+        "b73269d761d764eb0ea619d0297d51e54dc16671ef743731824393737c9c08bb",
+        "d335472b52f99caf8d8d7a0d35c8906939b9b18c7c7d981626c096782530dc38"
+      ],
+      "lexicalTop5": [
+        "73c5f654fd6fd7482328b06e7a819dbddae7cf3791f2e760a0cd4585c3db601d",
+        "3d5128c75c3faf9fe0fca44e704b7a4dac1fd6998d6e61cecd13af8a2f818083",
+        "fc11e6092df4b89ebbfee2575a4a56dcb7e5c096a5b09cc4441a847d56f48d5c",
+        "d19c79ab521e71936d73049c8de2d335d2138884bb3de213e58ef3c2e96667ff",
+        "96969304e592f46bdb3003da7f2207f2321cfe76f4a2dce4709fdc74ab5c3a7d"
+      ],
+      "fusedTop5": [
+        "51bdbc92a4674d7c23a251cdf084f6c0d78dea87f675677a925191fe2ba7b7dc",
+        "73c5f654fd6fd7482328b06e7a819dbddae7cf3791f2e760a0cd4585c3db601d",
+        "9e8723a93be0ccacc05877d21901d82e6d7b0b48f01131590d3337cf1afb8e05",
+        "3d5128c75c3faf9fe0fca44e704b7a4dac1fd6998d6e61cecd13af8a2f818083",
+        "abf448db72516de55d5d0fa51a82ab400daff990e839a74db94c67d91dba596c"
+      ],
+      "hitAt5": 1,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "queryId": "92caae0e08262a70",
+      "query": "Where is the UET Taxila main campus located?",
+      "relevantChunkKeys": [
+        "fb432fb00678ad965cf9952186b747a88f68722d3867aca276df63794348d909",
+        "da2a62794a68ea8a34da9db9169c3a06d43136da0cd644a65fabd4549e2ed820",
+        "28656442d346a1b2858b9abb79ce05f3d28335b4b6b7748298dea5dc181f926a",
+        "f6007caa25253ff95e277886d05326ce68225991347d4ffc0dd17a425e18118f"
+      ],
+      "denseTop5": [
+        "fb432fb00678ad965cf9952186b747a88f68722d3867aca276df63794348d909",
+        "da2a62794a68ea8a34da9db9169c3a06d43136da0cd644a65fabd4549e2ed820",
+        "366a04b4a44519c2a78810de048fe934bdec6db0dd1d6d76a904d2f129a3a4e3",
+        "28656442d346a1b2858b9abb79ce05f3d28335b4b6b7748298dea5dc181f926a",
+        "f6007caa25253ff95e277886d05326ce68225991347d4ffc0dd17a425e18118f"
+      ],
+      "lexicalTop5": [
+        "981573423e72d2aeffa1425b345bb294051d0c751ac1bb9d87ee05d1187636ac",
+        "0293fdd0528d9e4a0fa77e0bdc1872813aea5ea8b029e355cacec37cfa9e29d9",
+        "f5a41c9e3a7128720865ad30feae6ab2c48c159bf6f307737e049a6d26ab7dc0",
+        "f6007caa25253ff95e277886d05326ce68225991347d4ffc0dd17a425e18118f",
+        "da2a62794a68ea8a34da9db9169c3a06d43136da0cd644a65fabd4549e2ed820"
+      ],
+      "fusedTop5": [
+        "fb432fb00678ad965cf9952186b747a88f68722d3867aca276df63794348d909",
+        "da2a62794a68ea8a34da9db9169c3a06d43136da0cd644a65fabd4549e2ed820",
+        "f6007caa25253ff95e277886d05326ce68225991347d4ffc0dd17a425e18118f",
+        "28656442d346a1b2858b9abb79ce05f3d28335b4b6b7748298dea5dc181f926a",
+        "981573423e72d2aeffa1425b345bb294051d0c751ac1bb9d87ee05d1187636ac"
+      ],
+      "hitAt5": 1,
+      "mrr": 1
+    },
+    {
+      "queryId": "e1d169833b2c6fe2",
+      "query": "Does UET Taxila have a student hostel on campus?",
+      "relevantChunkKeys": [
+        "ecb02a527482f3183fac55c355b7e6843c1841514a0b7b7c1df24e10e1a890a2",
+        "5a235ddd3d18ae323581977fa2de347228b4789f62efccf08416aa751aae8b05",
+        "1471c51933271a97c105c46f55583809d72b89a12fdcca157bf9533659920e6c",
+        "f535f741a88abc79e86cfc4e700f0424ff021c28c7a046451d435d5ad55af39b",
+        "e5a1a739dcb84b4ce5bdaca8d29bed6bda97165754deddba58c41b50d1f07ac8"
+      ],
+      "denseTop5": [
+        "ecb02a527482f3183fac55c355b7e6843c1841514a0b7b7c1df24e10e1a890a2",
+        "5a235ddd3d18ae323581977fa2de347228b4789f62efccf08416aa751aae8b05",
+        "1471c51933271a97c105c46f55583809d72b89a12fdcca157bf9533659920e6c",
+        "f535f741a88abc79e86cfc4e700f0424ff021c28c7a046451d435d5ad55af39b",
+        "e5a1a739dcb84b4ce5bdaca8d29bed6bda97165754deddba58c41b50d1f07ac8"
+      ],
+      "lexicalTop5": [
+        "12649df966b6d49c0cab78818792affc237db9ae391381f0992a322e20bb1c1a",
+        "7e44552a2f9c3cf75eeaa138f72fdab78d87b76e13c066d11d386ee10ba1d929",
+        "249088e5f563a42f5deda52f4ead7498fcf32da8143e070c7cef968efc71c461",
+        "da467d2344cfb0aaf201ea81179edd019f16fad1f2c8a27ea6fd1c6cd1af9ec5",
+        "1ed571cf6ba75c1c398372e8f04462cb832a296a5ee01f8c5560901b88a07f33"
+      ],
+      "fusedTop5": [
+        "ecb02a527482f3183fac55c355b7e6843c1841514a0b7b7c1df24e10e1a890a2",
+        "12649df966b6d49c0cab78818792affc237db9ae391381f0992a322e20bb1c1a",
+        "5a235ddd3d18ae323581977fa2de347228b4789f62efccf08416aa751aae8b05",
+        "7e44552a2f9c3cf75eeaa138f72fdab78d87b76e13c066d11d386ee10ba1d929",
+        "1471c51933271a97c105c46f55583809d72b89a12fdcca157bf9533659920e6c"
+      ],
+      "hitAt5": 1,
+      "mrr": 1
+    },
+    {
+      "queryId": "bb92759aba56e8f6",
+      "query": "What transport facilities does UET Taxila provide for students?",
+      "relevantChunkKeys": [
+        "d2fcfbfa12f8f0c3effd969ec4b7f9de01269fbaa05010a801c5615eeb3f3cfd",
+        "02fd6588dc612d043caf6ba9f51ce49b1bbf2fdfd45ac68a1ff62bed30297a65"
+      ],
+      "denseTop5": [
+        "02fd6588dc612d043caf6ba9f51ce49b1bbf2fdfd45ac68a1ff62bed30297a65",
+        "d2fcfbfa12f8f0c3effd969ec4b7f9de01269fbaa05010a801c5615eeb3f3cfd",
+        "1471c51933271a97c105c46f55583809d72b89a12fdcca157bf9533659920e6c",
+        "937ad17feac70bec38a2b707e2606a1e76bdafd88390df95c5009a932f8f4764",
+        "5a235ddd3d18ae323581977fa2de347228b4789f62efccf08416aa751aae8b05"
+      ],
+      "lexicalTop5": [
+        "5f17ce948b89dcdb2e49f7f8f95d99feab050f70a1b2a551d029dacf7c0d67bf",
+        "a865a1229fd572763d7ecf401247258c9d338894a90059a29a6f8a1cb15597a4",
+        "e04e2d338b1456fc2cee4288972a710f0c89235d6ae2252fb5ed13519e7a3cdb",
+        "f365b2f41b6c8686dae1189048ad023163e77546bf053802dde49840e7a2d06b",
+        "150f9c6c30bff62bcd68449e5e98dec0d32bf7bb6cb85424f9950d2db9bc8223"
+      ],
+      "fusedTop5": [
+        "02fd6588dc612d043caf6ba9f51ce49b1bbf2fdfd45ac68a1ff62bed30297a65",
+        "5f17ce948b89dcdb2e49f7f8f95d99feab050f70a1b2a551d029dacf7c0d67bf",
+        "d2fcfbfa12f8f0c3effd969ec4b7f9de01269fbaa05010a801c5615eeb3f3cfd",
+        "a865a1229fd572763d7ecf401247258c9d338894a90059a29a6f8a1cb15597a4",
+        "1471c51933271a97c105c46f55583809d72b89a12fdcca157bf9533659920e6c"
+      ],
+      "hitAt5": 1,
+      "mrr": 1
+    },
+    {
+      "queryId": "f86cfd8aa6d35c49",
+      "query": "What is the library timing at UET Taxila?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "dd23ce96a8aa1d8ab769eeade44c4eb6018a603730c4dce12f9f26b89f6cfd0c",
+        "f046789127bd9414ae00f7676a0ebb4135617b5fb96b2dba1484b4c0ce2e0289",
+        "a428769fbf99509e45a47972b0ada96d693df2fd66cacdce5edd104acf678a45",
+        "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
+        "ec69b56ed39f02239ee746dc38896baea2453b82fc8020a471a0adbb51b628e8"
+      ],
+      "lexicalTop5": [
+        "7b56e94dae60576c388bc8f74c77f5739e9a64b6bb7d1dbaa6c4133575d519b2",
+        "a15694659884f9b2aefc0c9a1779026e8e3f7355fc5010d02f5ce5aaa110353b",
+        "5f17ce948b89dcdb2e49f7f8f95d99feab050f70a1b2a551d029dacf7c0d67bf",
+        "0d1734dac162a74e4d566720f6639a2abd3ca0fed083eb3e6f78d6c138fce9dd",
+        "13b3d504c1629ab79909149c73463aeae9af438fde25cc7f2ce45a82b5590625"
+      ],
+      "fusedTop5": [
+        "dd23ce96a8aa1d8ab769eeade44c4eb6018a603730c4dce12f9f26b89f6cfd0c",
+        "7b56e94dae60576c388bc8f74c77f5739e9a64b6bb7d1dbaa6c4133575d519b2",
+        "f046789127bd9414ae00f7676a0ebb4135617b5fb96b2dba1484b4c0ce2e0289",
+        "a15694659884f9b2aefc0c9a1779026e8e3f7355fc5010d02f5ce5aaa110353b",
+        "a428769fbf99509e45a47972b0ada96d693df2fd66cacdce5edd104acf678a45"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "136c2516eded904b",
+      "query": "Where do I submit form 17-B for clearance at UET Taxila?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "a79924742cd764cb0a73daa2a6957e57ad7e463c4fb5cc09373b93e716618f76",
+        "026accb5be0716971521c037d9821484c57fdce03b3ff4a8a8e85a6f5632855a",
+        "14e94df4164e484950e4dbce3f5654e8b27e2e2358cd63819d0fbba6cff3548f",
+        "5dc5996c2be8011b3546106233b998c3fc3f412f3c0f20defe046a3c5c1c2407",
+        "ef00f8eee0c19ad46896456d290d97e89976d3bbc3db9735a6430742f8e344ac"
+      ],
+      "lexicalTop5": [
+        "1e5e1ef3488fd2bd561db76f2ddfeff9ff9d33d00c049eab6014fd81e3b51da1",
+        "675a37c274a3a4b4510d2e311ae6284455f90bc2403360edff1519667ed507b0",
+        "585747f3422277744bb2af2a2d6e4734ce44950e9cfc49a1ccb3b4b0da9be5c0",
+        "8be4bc42bbf1eb616207ccf1b3a49d1f65386a65815f5118c8c62ef0ea798e13",
+        "c0d85fb09cbaa8989c7398907755b110d6d2edcc72aa552d81f5231e2eafb8c2"
+      ],
+      "fusedTop5": [
+        "a79924742cd764cb0a73daa2a6957e57ad7e463c4fb5cc09373b93e716618f76",
+        "1e5e1ef3488fd2bd561db76f2ddfeff9ff9d33d00c049eab6014fd81e3b51da1",
+        "026accb5be0716971521c037d9821484c57fdce03b3ff4a8a8e85a6f5632855a",
+        "675a37c274a3a4b4510d2e311ae6284455f90bc2403360edff1519667ed507b0",
+        "14e94df4164e484950e4dbce3f5654e8b27e2e2358cd63819d0fbba6cff3548f"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "c6d36166ce93efaf",
+      "query": "Is CS-301 equivalent to SE-301 at UET Taxila?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "746919df0544c48487bd1e89f8fd05aebff1ea7a02be638e00d488c824b93dce",
+        "87af7841a9e856c9d2163452063374701f00ea02cc495ad1ff31075e4ebed971",
+        "d8f448402ae71fa80b1e69ef8cd605bc4883af8c02a57493a5e8c267a292b77a",
+        "ccc9fe69fabdd7deda55f1a1cfc7f30fd478d24f6c908e6e9a548081093bbf97",
+        "8a6badf336c6f4718678dd324f003349789299bd686a7bd425c393b462658141"
+      ],
+      "lexicalTop5": [
+        "4fe51670bece41e5b3e602c2a1a65f931d68e8fa8fdf64d6f1d5d5fc8c74d19a",
+        "3e6fcac011b60dc7979e094d8257081db0295a4aeee40816d3480f86066fbd53",
+        "103a800584ca740e57d0631f90b81282bfecd6eaec26055d20e0919d3860dc16",
+        "fab501d6ee5eadfca62825fb8abc5d5effc03da435202c8224624c0be6d8ec19",
+        "dd6a6e11ada5cd1aaabbe2c07386cf8fee960af697ae042034dd2dc1faf169b6"
+      ],
+      "fusedTop5": [
+        "746919df0544c48487bd1e89f8fd05aebff1ea7a02be638e00d488c824b93dce",
+        "4fe51670bece41e5b3e602c2a1a65f931d68e8fa8fdf64d6f1d5d5fc8c74d19a",
+        "87af7841a9e856c9d2163452063374701f00ea02cc495ad1ff31075e4ebed971",
+        "3e6fcac011b60dc7979e094d8257081db0295a4aeee40816d3480f86066fbd53",
+        "d8f448402ae71fa80b1e69ef8cd605bc4883af8c02a57493a5e8c267a292b77a"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "21ce9642f1250090",
+      "query": "What is the procedure to apply for a degree certificate at UET Taxila?",
+      "relevantChunkKeys": [
+        "a79924742cd764cb0a73daa2a6957e57ad7e463c4fb5cc09373b93e716618f76"
+      ],
+      "denseTop5": [
+        "7a3156675bf22e1742af21f2f38ad80ac867d7794a3b549e92a188f95e00433f",
+        "a79924742cd764cb0a73daa2a6957e57ad7e463c4fb5cc09373b93e716618f76",
+        "549036e9c37315e68fec9ae6c06d62c1a0a05d7e9fb50f4aaa9b25a5c14995f1",
+        "6cac46287dd7852d3bda0f66a760a2d7e606807ce57fee80d9286b4d08541b94",
+        "3f76c3ea700d3862d2411e5d8b2e19423d9d1785c0c2ef0ea1a4c120a9102bf6"
+      ],
+      "lexicalTop5": [
+        "608165094f6c8b23bab789c81b280cb897327318fb66cf10476a953badea8176",
+        "916b1b237f7cb8369eceeffdc956ec1dcc1d1b2c5579a7cbfe38c24e80026f34",
+        "0cb6397f908e6fe541539c632dfb79754513259d7fa1bbaec180b40b72b406a5",
+        "25c2fc97f63450c0459043e187e25595b04111c814af22388f81d80607869024",
+        "e5d332248282220d88d494f9bb272a0c4c51d0162cd38cb01f2d47b68acf37c9"
+      ],
+      "fusedTop5": [
+        "7a3156675bf22e1742af21f2f38ad80ac867d7794a3b549e92a188f95e00433f",
+        "608165094f6c8b23bab789c81b280cb897327318fb66cf10476a953badea8176",
+        "a79924742cd764cb0a73daa2a6957e57ad7e463c4fb5cc09373b93e716618f76",
+        "916b1b237f7cb8369eceeffdc956ec1dcc1d1b2c5579a7cbfe38c24e80026f34",
+        "549036e9c37315e68fec9ae6c06d62c1a0a05d7e9fb50f4aaa9b25a5c14995f1"
+      ],
+      "hitAt5": 1,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "queryId": "9a07498d5501476c",
+      "query": "Can I freeze my semester at UET Taxila and what is the procedure?",
+      "relevantChunkKeys": [
+        "132cc45bfc91bd0fee26227bd1790990dba64825b93d0de035fe3e077713ed98",
+        "1bfe40dd95c20fd48bade917418dbb39ec24eacb80fb23200b3204fb709bd542",
+        "f5ec67ad032d40a574afd5710573f5e66455941833bc41cdc6cd8534a1879ade"
+      ],
+      "denseTop5": [
+        "f68a8c83695e81f4f16d850438d104a99aa0730f194667eaca73e7918c643067",
+        "132cc45bfc91bd0fee26227bd1790990dba64825b93d0de035fe3e077713ed98",
+        "1bfe40dd95c20fd48bade917418dbb39ec24eacb80fb23200b3204fb709bd542",
+        "f5ec67ad032d40a574afd5710573f5e66455941833bc41cdc6cd8534a1879ade",
+        "e732a12e5e3d98b57b66144df505e94284caf4f229db44e1cf9a09ecd6f013cb"
+      ],
+      "lexicalTop5": [
+        "5f17ce948b89dcdb2e49f7f8f95d99feab050f70a1b2a551d029dacf7c0d67bf",
+        "f365b2f41b6c8686dae1189048ad023163e77546bf053802dde49840e7a2d06b",
+        "e04e2d338b1456fc2cee4288972a710f0c89235d6ae2252fb5ed13519e7a3cdb",
+        "9d19d311b2784e0c5f3fd965c4e069be107fb880a635f1a7db42ee3ca2786450",
+        "99e8b67311e9c2ce8d10f734822c287393189307545e6da3f7df914c0f763300"
+      ],
+      "fusedTop5": [
+        "f68a8c83695e81f4f16d850438d104a99aa0730f194667eaca73e7918c643067",
+        "5f17ce948b89dcdb2e49f7f8f95d99feab050f70a1b2a551d029dacf7c0d67bf",
+        "132cc45bfc91bd0fee26227bd1790990dba64825b93d0de035fe3e077713ed98",
+        "f365b2f41b6c8686dae1189048ad023163e77546bf053802dde49840e7a2d06b",
+        "1bfe40dd95c20fd48bade917418dbb39ec24eacb80fb23200b3204fb709bd542"
+      ],
+      "hitAt5": 1,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "queryId": "6988aa3c5815e338",
+      "query": "What is the grading system used at UET Taxila?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "8a6badf336c6f4718678dd324f003349789299bd686a7bd425c393b462658141",
+        "feb75c0c6f30c59bf07ab501c622c727cf2cd2b8ba90e42a92bda679986ffdae",
+        "8a5f1523621f157e26d7aed08a88f9fe485eb074f5d329acc96ae0bcf73af90d",
+        "c4a06785c311d32cdf5f3a8609813e9fbf77ffb46a6b24e30f929f454aa08cfd",
+        "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e"
+      ],
+      "lexicalTop5": [
+        "3c37fba0004a0c89c90cb91d58a83bad0c47f791b31c627d1b3c58a1194add9c",
+        "9c20c86e98a4b6e65d50dd5b1e44e3bc412a736e443d006369ff999131d0be71",
+        "f684374e00de60a6a26c9966a8e32f5c67fd99b1eecea2aaf532024c1dadb3db",
+        "b4b31308b4aa90f53d3fd88bf02a684e823bcb6679cd0d159b7356b1572adb4f",
+        "2546a416dbe23fdaabf42d8407e1a53ce10a26a0249065a948f34ab5413ffeed"
+      ],
+      "fusedTop5": [
+        "8a6badf336c6f4718678dd324f003349789299bd686a7bd425c393b462658141",
+        "3c37fba0004a0c89c90cb91d58a83bad0c47f791b31c627d1b3c58a1194add9c",
+        "feb75c0c6f30c59bf07ab501c622c727cf2cd2b8ba90e42a92bda679986ffdae",
+        "9c20c86e98a4b6e65d50dd5b1e44e3bc412a736e443d006369ff999131d0be71",
+        "8a5f1523621f157e26d7aed08a88f9fe485eb074f5d329acc96ae0bcf73af90d"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "d9fc562f95137dc3",
+      "query": "daakhila ki akhri tarikh kab hai UET Taxila mein?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "3a22ea073b800dff443977207583d48d95a36c8f5aea6c3edb522cdc65167f1c",
+        "d61dec49b36d2653f743c4036a034104c9424800c828caac8650f46b4e3bf7bb",
+        "366a04b4a44519c2a78810de048fe934bdec6db0dd1d6d76a904d2f129a3a4e3",
+        "078c315352e10e413eb33c7de77919bd1986b5a2011036c2c0d0ddfada3050c1",
+        "501aeb0bba903003520af603e1351c877baa2dc3d6fbc33874b4056a8f12ae08"
+      ],
+      "lexicalTop5": [
+        "600a24fc072266a4e03fd3ad8c1de1d49a1f7eac27c10dc4752eb6cd6207bfe5",
+        "02e43b61eaec86257686ff74cf61bc9fab23ad96fdfde6040857eae3490824f3",
+        "506793d1c1d5efe7971cb2e082f75d5edd7ae73bddb087f827b50b3ebd7fd24e",
+        "15898a1b2562b172a20dd1258dd8432f5cd76a489df89aed44d6e55dcc18a0fa",
+        "9dca16c85ac4173bfd7a4f69a26f97e00e9072634f6d78f9cae4f64d48e94d14"
+      ],
+      "fusedTop5": [
+        "3a22ea073b800dff443977207583d48d95a36c8f5aea6c3edb522cdc65167f1c",
+        "600a24fc072266a4e03fd3ad8c1de1d49a1f7eac27c10dc4752eb6cd6207bfe5",
+        "d61dec49b36d2653f743c4036a034104c9424800c828caac8650f46b4e3bf7bb",
+        "02e43b61eaec86257686ff74cf61bc9fab23ad96fdfde6040857eae3490824f3",
+        "366a04b4a44519c2a78810de048fe934bdec6db0dd1d6d76a904d2f129a3a4e3"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "b87404f973dbea76",
+      "query": "fees jama karwane ka tariqa kya hai UET Taxila mein?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "3a22ea073b800dff443977207583d48d95a36c8f5aea6c3edb522cdc65167f1c",
+        "d61dec49b36d2653f743c4036a034104c9424800c828caac8650f46b4e3bf7bb",
+        "366a04b4a44519c2a78810de048fe934bdec6db0dd1d6d76a904d2f129a3a4e3",
+        "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
+        "b1f66bcd4cef6138b5cdcac02649a193e4c0e18bfa6c507493bc48ba3e10856b"
+      ],
+      "lexicalTop5": [
+        "97a7d36f1467e07c0b16fc66de0547cfa257b06eb82243d8c3ce5f2ea765f256",
+        "d335472b52f99caf8d8d7a0d35c8906939b9b18c7c7d981626c096782530dc38",
+        "6074be175431057c92bde34206c32b49be9817317043391a4364c596b7c7a693",
+        "8389703f0672a49818b4bdf0937799955e75370f9420e0329123f385eb680ee6",
+        "2449fc7207c12d4667bafd09e463ec3e720ef04eba8d00c68b9f3ca335d914cd"
+      ],
+      "fusedTop5": [
+        "3a22ea073b800dff443977207583d48d95a36c8f5aea6c3edb522cdc65167f1c",
+        "97a7d36f1467e07c0b16fc66de0547cfa257b06eb82243d8c3ce5f2ea765f256",
+        "d61dec49b36d2653f743c4036a034104c9424800c828caac8650f46b4e3bf7bb",
+        "d335472b52f99caf8d8d7a0d35c8906939b9b18c7c7d981626c096782530dc38",
+        "366a04b4a44519c2a78810de048fe934bdec6db0dd1d6d76a904d2f129a3a4e3"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "1591838299e34517",
+      "query": "chuttiyan kab hongi UET Taxila mein?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "366a04b4a44519c2a78810de048fe934bdec6db0dd1d6d76a904d2f129a3a4e3",
+        "3a22ea073b800dff443977207583d48d95a36c8f5aea6c3edb522cdc65167f1c",
+        "d61dec49b36d2653f743c4036a034104c9424800c828caac8650f46b4e3bf7bb",
+        "501aeb0bba903003520af603e1351c877baa2dc3d6fbc33874b4056a8f12ae08",
+        "b1f66bcd4cef6138b5cdcac02649a193e4c0e18bfa6c507493bc48ba3e10856b"
+      ],
+      "lexicalTop5": [
+        "22d9801ec2a5cf97cc3502140454c5b83f67a2e5a3029a1cd937e5ca32485b52",
+        "bcd24ad51165e062d1e5ef98a49aea70869c6d03b6396ad2a109df8f3afe0f4f",
+        "7524ff2faae61b7dbf4dc119a0801d346d920f316efdca38c3cda15a6236a749",
+        "9e03dd504c8d1fcf019b678a229d642b2306e2ced1f272b730f5f8d12bfee00c",
+        "274f60bf12400113058496bec0f4a41c3f6356c78a76d9e82340a43f58710213"
+      ],
+      "fusedTop5": [
+        "366a04b4a44519c2a78810de048fe934bdec6db0dd1d6d76a904d2f129a3a4e3",
+        "22d9801ec2a5cf97cc3502140454c5b83f67a2e5a3029a1cd937e5ca32485b52",
+        "3a22ea073b800dff443977207583d48d95a36c8f5aea6c3edb522cdc65167f1c",
+        "bcd24ad51165e062d1e5ef98a49aea70869c6d03b6396ad2a109df8f3afe0f4f",
+        "d61dec49b36d2653f743c4036a034104c9424800c828caac8650f46b4e3bf7bb"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "57aa4c0c6221f855",
+      "query": "UET Taxila mein hostel ki fees kitni hai?",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "2a22b33fbe225ae2e2b21e257306422447d88759050bdd2a6d76a3ac2d1a8bb3",
+        "dd07c8de833a42a30de0ac141458e9770d9718381c65c2a585c37cfdbcb5fca9",
+        "6179a97b2494db2aca3135acb3b8280304cbbf367e5221a3bccbc2fd7563d53c",
+        "503f5da3ef8fd3790ac8fe4c589c69441779335e3a947fdfb40a77307ad830bc",
+        "5a235ddd3d18ae323581977fa2de347228b4789f62efccf08416aa751aae8b05"
+      ],
+      "lexicalTop5": [
+        "cb587c85f079a9730d0945e5488585b5666b2d850509ced8d46ff1ad61cabbe3",
+        "6c0bde7ab78b2243e92331198d77a31572727d3da9e6a0844025a3f1d85c5734",
+        "8d13010759c89460948e6108186e932fa79f6b6ac9cf576ac70b9e071b3438cf",
+        "03d37693a9f4e8bb803034436c1add5df9474cd6c9b87d1847b64a9d9905fe1b",
+        "57e8dbf5131d4b1b6aa970a6fa6f05918f52da638a848b107470308a9f47823b"
+      ],
+      "fusedTop5": [
+        "03d37693a9f4e8bb803034436c1add5df9474cd6c9b87d1847b64a9d9905fe1b",
+        "bad3d7685f3b66873c9e29c05af72e143ef67c9aa57dffa57636749109fc8523",
+        "8dc76acb131cb67942db2677b1893a9b26cda339b787e0fd4557948be73c37ba",
+        "2a22b33fbe225ae2e2b21e257306422447d88759050bdd2a6d76a3ac2d1a8bb3",
+        "cb587c85f079a9730d0945e5488585b5666b2d850509ced8d46ff1ad61cabbe3"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "a670a78c21212bf6",
+      "query": "admission k liye zaruri documents kya hain?",
+      "relevantChunkKeys": [
+        "72dfb5b6f2334d9edc6744468f9e445e5c4810a7960c7a200346c279227b2b6b",
+        "1030850755a855894136841cc7cc5e1c07305c8f5fa6e3f8047518e0dab8f150"
+      ],
+      "denseTop5": [
+        "72dfb5b6f2334d9edc6744468f9e445e5c4810a7960c7a200346c279227b2b6b",
+        "bb2312c31951d094f3ce123c99acf430957c2280c42d92651c466931efedc6d1",
+        "1efadc56fc54d052aece13664c1a911d674b2cc6d31fb2b53d40bd3fce5458bc",
+        "1030850755a855894136841cc7cc5e1c07305c8f5fa6e3f8047518e0dab8f150",
+        "ac15d4eb308ecf1d300bd220ed1eb0fd9f04b23d43d724c3b043a4269f8a0068"
+      ],
+      "lexicalTop5": [
+        "7cccd5d43ef84b4703dec04e2da3058c5e99d9526f43a389bd47eb08a9847042",
+        "04a9ad0b6370a0b4fed776e31b26a97d88cee12bb5f25e02b019d37a4603aaac",
+        "5974cc6d5abeb90686c61fed087fcdb1c3f70fe54bdfccd8751b463f9586ba04",
+        "9aeb9183037286db650f8b735bbdad28f20fdc271d974cecb29aebdbcc8f72af",
+        "539dc7ce483ceccbd30054a2fa7549c83c7a8938950c67e6a6774fd211874a2c"
+      ],
+      "fusedTop5": [
+        "04a9ad0b6370a0b4fed776e31b26a97d88cee12bb5f25e02b019d37a4603aaac",
+        "72dfb5b6f2334d9edc6744468f9e445e5c4810a7960c7a200346c279227b2b6b",
+        "7cccd5d43ef84b4703dec04e2da3058c5e99d9526f43a389bd47eb08a9847042",
+        "bb2312c31951d094f3ce123c99acf430957c2280c42d92651c466931efedc6d1",
+        "1efadc56fc54d052aece13664c1a911d674b2cc6d31fb2b53d40bd3fce5458bc"
+      ],
+      "hitAt5": 1,
+      "mrr": 0.5
+    },
+    {
+      "queryId": "26e877048af0f6ee",
+      "query": "eligibility criteria",
+      "relevantChunkKeys": [
+        "7b6c2da68f148c00a079606f2385e748b51ac18d215d8df968aa29750c079980"
+      ],
+      "denseTop5": [
+        "3d21e74897c9edc70e38f3456bbc3a317ae81f546d087cca503b465eaa7bf78f",
+        "fae958328bf81721bcb44749642c8e352e0d7899acb58bbb16394f75bd6079a8",
+        "10d1c684ad96d6ad45f265a91c10351dd07f5a696f319ed6c37f844ccacd2159",
+        "6d0c1b163d3c089d1d3d5149299fcb2d605f6f0fddd6a93f2dcb1931b4bf2f45",
+        "7b6c2da68f148c00a079606f2385e748b51ac18d215d8df968aa29750c079980"
+      ],
+      "lexicalTop5": [
+        "0e2158efe612dd1cb090ff32dcafff31b05359924cd8e44349e283bc5dfa2c53",
+        "1e7297fd0bcc2b0445f716ffff3ecd3668fd23d15310972a8d5db7d8bcd4dbbb",
+        "539187345dc9cae2503e02d2d237c0daa6cdc03229942ef1e0c64ae2c979b590",
+        "bb2a71cffabe357f586c57b69078e9aeb3f1c0cd81d2ce9dcf513e6e594c6c2c",
+        "58065ab99f7faff5d62215adeab0256d2f3fcb4bc6f207a58dcc6567d82acc75"
+      ],
+      "fusedTop5": [
+        "3d21e74897c9edc70e38f3456bbc3a317ae81f546d087cca503b465eaa7bf78f",
+        "0e2158efe612dd1cb090ff32dcafff31b05359924cd8e44349e283bc5dfa2c53",
+        "fae958328bf81721bcb44749642c8e352e0d7899acb58bbb16394f75bd6079a8",
+        "1e7297fd0bcc2b0445f716ffff3ecd3668fd23d15310972a8d5db7d8bcd4dbbb",
+        "10d1c684ad96d6ad45f265a91c10351dd07f5a696f319ed6c37f844ccacd2159"
+      ],
+      "hitAt5": 0,
+      "mrr": 0.1111111111111111
+    },
+    {
+      "queryId": "f3d60458e68e2e86",
+      "query": "important dates",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "fa6b0ad6b3c47608e0e6cd55f98a78b47d0c45c0fb46f4e88b0933b5712b7397",
+        "389efc32203242a95150e0939f0f92bd49e6fd1a1fd4024d58517184d348df20",
+        "3bc4e45f0beb7fbffb2934ce916a502d9af8b8929445589ce0be3f4e54cc0bd6",
+        "2eec8b3009225e3542021d7f998a0f2d3cd04c477e26bd182f9bda5601fb783a",
+        "bff595c14fc058fffd51fa100167b05c7160039925f05ba1092bd61177af6e1a"
+      ],
+      "lexicalTop5": [
+        "b5bb836b20b655ec592639db601c090fc0d896de48ab0a4e34f6b7eee7b6f246",
+        "1a2a0ad826897420566df1326844e431a9e3752b14dfeded507a619be162355e",
+        "24ee2e8b5beedc9221f2641c769660b6d6130badb06b7d528d7fa282718cb4a3",
+        "60f8b8390a1e8b2c298be8abb84f1dd565a65552705ba5740b3670fd6fbbeda2",
+        "e86de2d4791c3a4c7d8d0c5c925e058782e0fa44e921a1c75e1a72fb5be0acb8"
+      ],
+      "fusedTop5": [
+        "fa6b0ad6b3c47608e0e6cd55f98a78b47d0c45c0fb46f4e88b0933b5712b7397",
+        "b5bb836b20b655ec592639db601c090fc0d896de48ab0a4e34f6b7eee7b6f246",
+        "389efc32203242a95150e0939f0f92bd49e6fd1a1fd4024d58517184d348df20",
+        "1a2a0ad826897420566df1326844e431a9e3752b14dfeded507a619be162355e",
+        "3bc4e45f0beb7fbffb2934ce916a502d9af8b8929445589ce0be3f4e54cc0bd6"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "a694cc1c788c4df0",
+      "query": "contact number",
+      "relevantChunkKeys": [
+        "15aa1d8d47c0ea7aa35e2ce33f796c9fb3b1a56b9b00cf2a67230170122bf974",
+        "3c2c9d32d949e3b3159d8f811239c9bd6f67e234c45a08a96c86bb6039f09f3a",
+        "fe430112f351b69fd0cd98cc44e83a75dd5c58833b73881a533194035288bac6",
+        "08267cc9065712031986fcf0a7a4b150fbf1045d9961bfab133b004becb06a5f",
+        "c2faac008d55d4d4057b08263597fa9d40df8e9f0fa509b8ae68fabdb1503cf5"
+      ],
+      "denseTop5": [
+        "15aa1d8d47c0ea7aa35e2ce33f796c9fb3b1a56b9b00cf2a67230170122bf974",
+        "3c2c9d32d949e3b3159d8f811239c9bd6f67e234c45a08a96c86bb6039f09f3a",
+        "fe430112f351b69fd0cd98cc44e83a75dd5c58833b73881a533194035288bac6",
+        "08267cc9065712031986fcf0a7a4b150fbf1045d9961bfab133b004becb06a5f",
+        "c2faac008d55d4d4057b08263597fa9d40df8e9f0fa509b8ae68fabdb1503cf5"
+      ],
+      "lexicalTop5": [
+        "803c4e7251b17bad938dbc02d6a5eed6dec61d58be1b159e99540d27824d8677",
+        "11258309726bdf5146c070e97d47a66c2f7364934b1dd71a9c16e93b48ffdc22",
+        "894377c375537c9082cffe7382e57952bd70a1a4bfc0746a2d9c2ae4ca42a7ce",
+        "e0ccf68706bf283b6688bb8f6a1065f201563239f11924f970354a8ecea9f52c",
+        "61e5bb81fe221b687f77af71dde832e42eca90d58c231b6b18bca1d5831f87d1"
+      ],
+      "fusedTop5": [
+        "15aa1d8d47c0ea7aa35e2ce33f796c9fb3b1a56b9b00cf2a67230170122bf974",
+        "803c4e7251b17bad938dbc02d6a5eed6dec61d58be1b159e99540d27824d8677",
+        "3c2c9d32d949e3b3159d8f811239c9bd6f67e234c45a08a96c86bb6039f09f3a",
+        "11258309726bdf5146c070e97d47a66c2f7364934b1dd71a9c16e93b48ffdc22",
+        "fe430112f351b69fd0cd98cc44e83a75dd5c58833b73881a533194035288bac6"
+      ],
+      "hitAt5": 1,
+      "mrr": 1
+    },
+    {
+      "queryId": "876b5dc3e98c81ea",
+      "query": "how to apply",
+      "relevantChunkKeys": [],
+      "denseTop5": [
+        "8930881db0743fead108036573f599141139e347ce49591a9a113adda5cba127",
+        "ef511e4b7d337e12a720eafc5bf87ac4944256934d4913aaf3bdd3c3aa7eddc4",
+        "c71f7c04013c92e551c6000cddf11989103a3d5d7043670221b6779ab0bf4c84",
+        "3f178a632717313aa7f6d0a5db08173822b8225a5db271daa926ae47f3f70cd5",
+        "4f6fc8cb0adaff68d94b8251629abd642a102d296b44a63af3c4fa0c19848e20"
+      ],
+      "lexicalTop5": [
+        "bd0e7da4063f867918c891fd9c682982821e797175336f633f1f30cffbecb193",
+        "26bd588d9279e7620dfd4538b2810009dcc8fe1beb7d5890e906e4cf2f17142a",
+        "ec4d8ef248692006222622f3b2eb89ccd788efe301f47f342e10f498882cedf5",
+        "4f6fc8cb0adaff68d94b8251629abd642a102d296b44a63af3c4fa0c19848e20",
+        "c71f7c04013c92e551c6000cddf11989103a3d5d7043670221b6779ab0bf4c84"
+      ],
+      "fusedTop5": [
+        "c71f7c04013c92e551c6000cddf11989103a3d5d7043670221b6779ab0bf4c84",
+        "4f6fc8cb0adaff68d94b8251629abd642a102d296b44a63af3c4fa0c19848e20",
+        "3f178a632717313aa7f6d0a5db08173822b8225a5db271daa926ae47f3f70cd5",
+        "8930881db0743fead108036573f599141139e347ce49591a9a113adda5cba127",
+        "bd0e7da4063f867918c891fd9c682982821e797175336f633f1f30cffbecb193"
+      ],
+      "hitAt5": null,
+      "mrr": null
+    },
+    {
+      "queryId": "2dfb5097fc1ca481",
+      "query": "fee structure",
+      "relevantChunkKeys": [
+        "f6c98d25d4918bf272b2a5a07ff75e88e23aa9135b5aee0b8664c290bbc53abb"
+      ],
+      "denseTop5": [
+        "acce89ad270f648d56934e32ec5f230b264628c896cb86f0038c8c6d3a4389c9",
+        "f6c98d25d4918bf272b2a5a07ff75e88e23aa9135b5aee0b8664c290bbc53abb",
+        "6273ddf24a205a5108e701ef282f78b1d99ef90e71cd451c5dd739a48f98841c",
+        "cc116ad650d868f087a5c6b8eeb24d89ea6519b755f0a83c83fd01ffd31ee71b",
+        "3ce7afdc2fd7803b1f51d30d2867dc654475b352ba97fc59087443d0fb91ec67"
+      ],
+      "lexicalTop5": [
+        "047ea82187b988440580aa7760da5ee71889c0eb0a0896d05b5c12b45a2b6183",
+        "44322626d94f0977d9103331b9e003897f50c40b370dedd25f90f5c4891743d1",
+        "ad0d1204284f691b41ac070084d42f2e0893187d8ce733f3b303d05cec7df3ba",
+        "b5ef1ef4ca84250383b69e19cd6e0172f27107def916f509c0224a8396a7c4ea",
+        "1f588b5e438f7ca33c3baaa6c49e583a9ca7272f02de2268a37bc316bfb24d7b"
+      ],
+      "fusedTop5": [
+        "acce89ad270f648d56934e32ec5f230b264628c896cb86f0038c8c6d3a4389c9",
+        "047ea82187b988440580aa7760da5ee71889c0eb0a0896d05b5c12b45a2b6183",
+        "f6c98d25d4918bf272b2a5a07ff75e88e23aa9135b5aee0b8664c290bbc53abb",
+        "44322626d94f0977d9103331b9e003897f50c40b370dedd25f90f5c4891743d1",
+        "6273ddf24a205a5108e701ef282f78b1d99ef90e71cd451c5dd739a48f98841c"
+      ],
+      "hitAt5": 1,
+      "mrr": 0.3333333333333333
+    }
+  ],
+  "meanHitAt5": 0.9473684210526315,
+  "meanMrr": 0.7076023391812866,
+  "scoredQueryCount": 19
+}

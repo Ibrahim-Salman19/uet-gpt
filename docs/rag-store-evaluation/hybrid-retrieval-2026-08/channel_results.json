@@ -1,0 +1,4517 @@
+[
+  {
+    "queryId": "8fe9e8f2dfe15d2e",
+    "query": "What is the fee structure for BS Software Engineering at UET Taxila?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "73013e45ac0a8d6d271f6d29a459152945d83a69536abe113ef847b35135d5c5",
+        "score": 0.799133301
+      },
+      {
+        "id": "08e11f9fada79dceb862bb6253e69dc60c96854b0bb9ac0f300e6fb78afbe0b3",
+        "score": 0.765610695
+      },
+      {
+        "id": "c2da4330d73b7080e7efd4380521b422aa9f5678dcffc6eb7ef6d0c426fdcebd",
+        "score": 0.763240814
+      },
+      {
+        "id": "538f04e55d143eab5ca5ca549d9a686fe1feb6c24e847be75b43b9f99779aacc",
+        "score": 0.762982368
+      },
+      {
+        "id": "368e6cf3d46a2c7b4269bc9941b87555a1739e267634d2a487705bcb1f825da9",
+        "score": 0.762809813
+      },
+      {
+        "id": "562d4ff2db8c3e53fd51c833210cf9b8aeec45ca568bd970d43a263c321bfd41",
+        "score": 0.762370169
+      },
+      {
+        "id": "289664903f20ee380b25be0174aedc8539385cef016db152bfd49040befeb35e",
+        "score": 0.759003699
+      },
+      {
+        "id": "14f6370371495f2fea49908cb35977c7f13bfa6da1c959136b53cb845da97b13",
+        "score": 0.753109038
+      },
+      {
+        "id": "b6514fb58451eaec8a865c67bbcfcf5c97bdd0ff7c2c7ab65ef73270bc6e9595",
+        "score": 0.747613907
+      },
+      {
+        "id": "d1ed8cd64ffb722b0c90638b5d4ed1f6855ea6aa94b0563a3ad65fec577ba464",
+        "score": 0.747264862
+      }
+    ],
+    "lexical": [
+      {
+        "id": "0d1734dac162a74e4d566720f6639a2abd3ca0fed083eb3e6f78d6c138fce9dd",
+        "score": 0
+      },
+      {
+        "id": "047ea82187b988440580aa7760da5ee71889c0eb0a0896d05b5c12b45a2b6183",
+        "score": 0
+      },
+      {
+        "id": "73013e45ac0a8d6d271f6d29a459152945d83a69536abe113ef847b35135d5c5",
+        "score": 0
+      },
+      {
+        "id": "afa29583b507bb36d2ed54298d4edf1ae9b4090d5a9f9f8b3223b854f34d6ebd",
+        "score": 0
+      },
+      {
+        "id": "d35634ccf15fdfc9e9775827541b6019292c256c5a306c8fefa3de5c5e746726",
+        "score": 0
+      },
+      {
+        "id": "3e8c4b6a4dcaa341eaa9abb52a3c2d639926efb489c3e58af254d7301b354701",
+        "score": 0
+      },
+      {
+        "id": "c8b14990ebf49eb142b7f53383fe1a8fb365ecec2d16ec4b1dc349dc2597f5ff",
+        "score": 0
+      },
+      {
+        "id": "49ba3a767c08218c224360e50e002c21a8732932ebd002e29da4efe34fb033e2",
+        "score": 0
+      },
+      {
+        "id": "da2ef01e083ccaf626903aeb1e54869c4ec32611820ae513c55ea992e46f0b9d",
+        "score": 0
+      },
+      {
+        "id": "b122e45dfa9111e5a5cc30a8f618b70330957d7a2a6f6c36675eb70aeed2865a",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "74c9b0d4368cc597",
+    "query": "How much does a student pay per semester in BS Computer Science?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "a482af051ae78e23b79ab75d79e663a46f56575855be4cf5f4fb1ef0343d3c1e",
+        "score": 0.661978722
+      },
+      {
+        "id": "594948699286e930bfef8b9b8ae5bd6ffdd98e13c8ee997821c5bd665e88824f",
+        "score": 0.656554282
+      },
+      {
+        "id": "c34064eaf9ed88a349b2021f2e3cb2e3116936715fc0dc6a22eb423164565bc1",
+        "score": 0.644802153
+      },
+      {
+        "id": "949279a6fb6616a837cfd94f54e76cdc3239a1ee9958275d6e2db44dbf64988e",
+        "score": 0.643503189
+      },
+      {
+        "id": "d370f50c85e6d3ff17a335282486c2d2a65f36859567a877d05eb0a06f3f84a3",
+        "score": 0.64162159
+      },
+      {
+        "id": "abe87f4da8e4b2c874e6974d60d2266608b9bb3e63b371b0ec8f9788a141e8e2",
+        "score": 0.624464035
+      },
+      {
+        "id": "e02b0f061061013e38e0cfd0b68b78b40d1aa6476b4d361d136fa33187413887",
+        "score": 0.62430197
+      },
+      {
+        "id": "2536d2143ee8b5192b32bd85473e015a1363154ff27dd6592d95e1855a2c2e0d",
+        "score": 0.62391
+      },
+      {
+        "id": "e032cd102cd0b6cb2274375d7e4cd3488e4ed0f524d8dad07476abdfe503845f",
+        "score": 0.622784615
+      },
+      {
+        "id": "95f0b055341f10f2b35518ff57d9a5fa7a73b1c65ee108e4a1a011647afd5d93",
+        "score": 0.62071991
+      }
+    ],
+    "lexical": [
+      {
+        "id": "b7997624fbc0f7d118e045a843264c8e3e55864f573110e7f1023cb1b22887af",
+        "score": 0
+      },
+      {
+        "id": "dffb35cff2a1ef9647a66ac914ee6a7eb47790869b434021e8d61cc465adb940",
+        "score": 0
+      },
+      {
+        "id": "b2ce4bbe52cc1b8216e30d720f3ba535b0a6f99dbac03b2bb9d64967e4f01672",
+        "score": 0
+      },
+      {
+        "id": "12b8c5d82a0aaebe77680c1e1e55d0254154e17260499dc2d61cb7f17e59f810",
+        "score": 0
+      },
+      {
+        "id": "e453fcf3dac462866ea8071db9371721f1be1c9ca3e906445f601c4c636a75e3",
+        "score": 0
+      },
+      {
+        "id": "81e19f5f0e08d80cd104b98e7e0ba0ec5b68e116e49e336340bcb2f74113d971",
+        "score": 0
+      },
+      {
+        "id": "863137dbff34cf642aa471ea7d0fc6b9cc4000ece75c4ff07691670655d54e91",
+        "score": 0
+      },
+      {
+        "id": "6e02e61b5906ae7376d15458ef9083ed94bed30b3be20c8b9078ffe6dd6a12af",
+        "score": 0
+      },
+      {
+        "id": "7cc666c853b3df465955df1476855de69abdc02d615b8c32f200a933e1a40c22",
+        "score": 0
+      },
+      {
+        "id": "a1da1f050043ca91173e71b18b0637624b8a0c1138a09ddf2db862b483403035",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "fc1c0652eda046e9",
+    "query": "What is the total tuition cost for a 4-year BS program at UET Taxila?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "8a6badf336c6f4718678dd324f003349789299bd686a7bd425c393b462658141",
+        "score": 0.678790152
+      },
+      {
+        "id": "7a3156675bf22e1742af21f2f38ad80ac867d7794a3b549e92a188f95e00433f",
+        "score": 0.670062125
+      },
+      {
+        "id": "ca96eb44be062baa26fe7390c779d7492579fea25fd10dcd92e7a210a28b0935",
+        "score": 0.66959
+      },
+      {
+        "id": "b7ca5395d472fffbce9a5b7f2877b08c86814a80337f49ce9080cbe5fcb610c5",
+        "score": 0.667384148
+      },
+      {
+        "id": "9ccf8e2fa1c1bfb2e1f7d60fcf5ad599f738fb89d7171e9021cf32c4b3f2dd8a",
+        "score": 0.666903555
+      },
+      {
+        "id": "9e00aa8341e63ae5e5daa87db6b19070970b5767c297beb9219378e57a2fc5b8",
+        "score": 0.666023254
+      },
+      {
+        "id": "412255b5f41f076a0f742f2faa93d0c80a105f71a106ff39f6533b3538134126",
+        "score": 0.665665627
+      },
+      {
+        "id": "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
+        "score": 0.665594161
+      },
+      {
+        "id": "35e1547eaec65d9cde1c4220d405c99029ed1f914ee4464929b5d052ba705e01",
+        "score": 0.664954185
+      },
+      {
+        "id": "8e1fc606c5ec5ff5d1d6c9d89ff8bac34b7cfaa7c7544f1309505d6527621116",
+        "score": 0.66169548
+      }
+    ],
+    "lexical": [
+      {
+        "id": "e8b09c9efacc34306f2ab05ba6780e5be0b57ce0eedb36687652694991b936b9",
+        "score": 0
+      },
+      {
+        "id": "29cfbd27b1249d1a4ef98fc52502e810bc245f241901f61a715f636cc9470401",
+        "score": 0
+      },
+      {
+        "id": "b2ce4bbe52cc1b8216e30d720f3ba535b0a6f99dbac03b2bb9d64967e4f01672",
+        "score": 0
+      },
+      {
+        "id": "afa29583b507bb36d2ed54298d4edf1ae9b4090d5a9f9f8b3223b854f34d6ebd",
+        "score": 0
+      },
+      {
+        "id": "f62a353050eab6f859af3966b8f4202758436a5cda9affbcfd7ffdded029a82c",
+        "score": 0
+      },
+      {
+        "id": "eb0b6db889fe65b73edd2240f67797441d90795f021ff2b63ee8eeb8659dd937",
+        "score": 0
+      },
+      {
+        "id": "a61fd9a056524c07992fb8e8057017c0140db6a59665cc938bfd70d79103f7c8",
+        "score": 0
+      },
+      {
+        "id": "379bbe346ab81b57629e87fdf8b6cb90f407ed069db98c5d48d97c86671a0290",
+        "score": 0
+      },
+      {
+        "id": "9e00aa8341e63ae5e5daa87db6b19070970b5767c297beb9219378e57a2fc5b8",
+        "score": 0
+      },
+      {
+        "id": "4b295e666757224ff066072e7bcc39aa9b3ae488306a233e8daa710c5a9975bc",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "d9ad8a444d6c7741",
+    "query": "Are there any additional charges apart from tuition in UET Taxila fee structure?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "73ce047edb4008ce197d3c5cf14012f5daf0e7dd4ca38d60a9efe47f2ce2aa39",
+        "score": 0.683846474
+      },
+      {
+        "id": "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
+        "score": 0.669519484
+      },
+      {
+        "id": "d335472b52f99caf8d8d7a0d35c8906939b9b18c7c7d981626c096782530dc38",
+        "score": 0.669459343
+      },
+      {
+        "id": "6cac46287dd7852d3bda0f66a760a2d7e606807ce57fee80d9286b4d08541b94",
+        "score": 0.669012129
+      },
+      {
+        "id": "8e1fc606c5ec5ff5d1d6c9d89ff8bac34b7cfaa7c7544f1309505d6527621116",
+        "score": 0.664227486
+      },
+      {
+        "id": "fa8af94bdc5162a928852cac8bf8eb591f021a8319789c34419abe266345471d",
+        "score": 0.663871765
+      },
+      {
+        "id": "30117c7928a312d6df618fa2211bc880cb0f5e3282d64970d6fecdd81dfe27df",
+        "score": 0.663212776
+      },
+      {
+        "id": "5879738f15f64bdd6a6a8665fbe8d2b2804b9921aef960b755fd6a5c87317bac",
+        "score": 0.663212776
+      },
+      {
+        "id": "c10a9c3ea43230541d463ce557af798f7c18f3323d0e02a8f8e3e16fc0f6ff02",
+        "score": 0.661839545
+      },
+      {
+        "id": "d53a608dc0fa31df6612056b560a4e4b42ff1189872322d821be9ea03e259876",
+        "score": 0.661827087
+      }
+    ],
+    "lexical": [
+      {
+        "id": "6dffa71b3dc95ec8d513db321fef381e91a9a88529dee29d66eb604a4327f484",
+        "score": 0
+      },
+      {
+        "id": "dc1a97efd60d1452aa96410cf7b2714da2ecbbf330c52ebca864e37fc9dc5276",
+        "score": 0
+      },
+      {
+        "id": "e8c1aee125b92facb5142ea65a3c34b0b06d81818d6c59dd1222422936cdeb91",
+        "score": 0
+      },
+      {
+        "id": "e6e3aac609d049f97b5954311762d5e165acb7ee1a3e6e64810cdf3e584612b2",
+        "score": 0
+      },
+      {
+        "id": "79d4936e82a4b3077abfaa37996f7870a5d121bb902a59a05a7362214d57e27f",
+        "score": 0
+      },
+      {
+        "id": "fd3de694e85c1f9fde41e756f6bb37d36d3ba66c4d93451c98400b224ae069b0",
+        "score": 0
+      },
+      {
+        "id": "955071897156b3892e3c089515470d636b15b9e64df356cedc454e7ac0e60795",
+        "score": 0
+      },
+      {
+        "id": "a46137813636ddf70a355143bacdd00e4ab736bf247fb4dededaef5bc0e933c3",
+        "score": 0
+      },
+      {
+        "id": "30bba4b847fd56e0498529ba396b303d77931665cbc779f64a0e1cf806a12575",
+        "score": 0
+      },
+      {
+        "id": "962b96a85a6b2660fb1dc3703ae863213cb016705e4de978a939c7044f666c35",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "e1f643e47aede4e3",
+    "query": "What is the fee difference between engineering and computer science programs?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "2886ef826a6586ce1557d404ddd43f22a3ae1ae1277d35b3d96551cb8cfd7a4d",
+        "score": 0.625056326
+      },
+      {
+        "id": "02a83a101cbda158371defb21a7584acacc4b239154bd2ea1c86a6995164fb22",
+        "score": 0.624526
+      },
+      {
+        "id": "951802928a97f125d12e4dc981296336af34a3de2c56ca1a102977694c5e96ec",
+        "score": 0.618160248
+      },
+      {
+        "id": "f688c1d459c2b1c3e1729729b71ad35db9ef2073f8396b029ff7aec58223d397",
+        "score": 0.598156035
+      },
+      {
+        "id": "cb6a315433b42b34711471fac967067a62c08a0e5bb2e7dc917664cb9a6c7276",
+        "score": 0.596406
+      },
+      {
+        "id": "51596bdd7cf0e0c287e249cfd31862783b1f44fcf2a4e9aedd29a7eeabd332e9",
+        "score": 0.595742226
+      },
+      {
+        "id": "7072e7dd7663491cb30782c48e1746ec973bf01e00a47d173d494a32ffc3c7df",
+        "score": 0.593888342
+      },
+      {
+        "id": "4e8652bf9164626d33cf04fd9e0c8789c93608830369b78f1f42420849a5f785",
+        "score": 0.591740668
+      },
+      {
+        "id": "634584f6d08dec83f79adfb572908ae8193ea21af4baf30011bf730c543af157",
+        "score": 0.587765753
+      },
+      {
+        "id": "da2ef01e083ccaf626903aeb1e54869c4ec32611820ae513c55ea992e46f0b9d",
+        "score": 0.584573805
+      }
+    ],
+    "lexical": [
+      {
+        "id": "49ba3a767c08218c224360e50e002c21a8732932ebd002e29da4efe34fb033e2",
+        "score": 0
+      },
+      {
+        "id": "da2ef01e083ccaf626903aeb1e54869c4ec32611820ae513c55ea992e46f0b9d",
+        "score": 0
+      },
+      {
+        "id": "8a5e10e5bfaaa50545005b0d7b44b3c5266c6b2fd275c49ed652d3f26b02fded",
+        "score": 0
+      },
+      {
+        "id": "11b54e9de5aedf2c712ec60e28abba8a1483e848adf16c79cf607b17816f4ecd",
+        "score": 0
+      },
+      {
+        "id": "d35634ccf15fdfc9e9775827541b6019292c256c5a306c8fefa3de5c5e746726",
+        "score": 0
+      },
+      {
+        "id": "3e8c4b6a4dcaa341eaa9abb52a3c2d639926efb489c3e58af254d7301b354701",
+        "score": 0
+      },
+      {
+        "id": "86706479c23ade80e3ed60964dd80e4ae6a0c6bc1f5c7f410f8f36cdf3fb9fab",
+        "score": 0
+      },
+      {
+        "id": "f0c5a5e2c343219a5905b82569add439cf92f165800cf46ee275a22ea74f9d99",
+        "score": 0
+      },
+      {
+        "id": "42adcbd56e342b4bda7147b57ba013edb0f23258b3616ea2f8a46a7ad1479f5d",
+        "score": 0
+      },
+      {
+        "id": "f4c4c5f4ee67688b76a487da5622e65825421c61ea73e2796c29467ab56397fd",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "6f79337e4985ea52",
+    "query": "How can I pay my semester fee at UET Taxila?",
+    "relevantChunkKeys": [
+      "019e75af934e50252dcf8498a967749e5bed789308421c6372ba6bd9026df7d2"
+    ],
+    "dense": [
+      {
+        "id": "019e75af934e50252dcf8498a967749e5bed789308421c6372ba6bd9026df7d2",
+        "score": 0.737311423
+      },
+      {
+        "id": "28596a605f45070c7b9541ffdbf656b726ce18fbbf1ed66ae44af4cacbe830b0",
+        "score": 0.69336319
+      },
+      {
+        "id": "ac2f10660ca28a0e47ad7e26b9e88ec591faaf063e2a86baa846feec024be561",
+        "score": 0.693292618
+      },
+      {
+        "id": "018ff629cf095f6f32bbb18f70fd9877b8b56215be63547cd4424064228e7be4",
+        "score": 0.692134857
+      },
+      {
+        "id": "549036e9c37315e68fec9ae6c06d62c1a0a05d7e9fb50f4aaa9b25a5c14995f1",
+        "score": 0.690528
+      },
+      {
+        "id": "02f0c9e683384690182f13c006f017443df01364382d61290266842a9d254734",
+        "score": 0.689888954
+      },
+      {
+        "id": "3dfbd2435cf76d657db960c2976e188739e0e44d1f9c6811cf1e7f82bfe5164e",
+        "score": 0.689142227
+      },
+      {
+        "id": "52ef0624891c218ebb90d07e0b000a202ba11abfa57c1a357d9006f8e675f92b",
+        "score": 0.689142227
+      },
+      {
+        "id": "9b721e741d4b1bf0cafecd9f78bd52621712c6e64db86a0aff9d6c429ea676c3",
+        "score": 0.687875748
+      },
+      {
+        "id": "9bb2f4b29798c44b85b881cdaf3a18b9c72991cd44ed1cc6b8f2ac97589ef542",
+        "score": 0.687832832
+      }
+    ],
+    "lexical": [
+      {
+        "id": "1853094b29f420c4977cca082f10ebf889a9323e25f0c3b8861d67e7fd0bdee2",
+        "score": 0
+      },
+      {
+        "id": "a3176eaceb0c9e8b45b05085fa5d5057dd01fa3506d41c541aaae1c9737feba5",
+        "score": 0
+      },
+      {
+        "id": "64537e12778f1b5f3a8c0baad704c203451cf3f0f993f7380970efb49484c6ca",
+        "score": 0
+      },
+      {
+        "id": "4243962217b961221d046871cf046ab24afadfdb09dbcf3023f21ae7fa4c43b3",
+        "score": 0
+      },
+      {
+        "id": "193edb426f50f4a0a86c16c0f06da03966ce0e7718cf6886bedbecf3f52efcc6",
+        "score": 0
+      },
+      {
+        "id": "549036e9c37315e68fec9ae6c06d62c1a0a05d7e9fb50f4aaa9b25a5c14995f1",
+        "score": 0
+      },
+      {
+        "id": "766e783bc4ac4420e8670f27488e8b5555a7d75da2788b545d7bb39197d70b86",
+        "score": 0
+      },
+      {
+        "id": "bc84608f5a6f70473b692b78b38e728a3bc6b385ed87e9776f5545782dd271f8",
+        "score": 0
+      },
+      {
+        "id": "e5f6e053b6ab854c1781fef3c72ab6db6a21f213f67cbe2eb08ffb09d9d502ae",
+        "score": 0
+      },
+      {
+        "id": "09c864f62def4c6c6c423475afea781e5006fc9eed1f450dccc9142ce44c4cda",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "a4d3227f8a1b046e",
+    "query": "Is there a fine for late fee submission at UET Taxila?",
+    "relevantChunkKeys": [
+      "fc11e6092df4b89ebbfee2575a4a56dcb7e5c096a5b09cc4441a847d56f48d5c"
+    ],
+    "dense": [
+      {
+        "id": "019e75af934e50252dcf8498a967749e5bed789308421c6372ba6bd9026df7d2",
+        "score": 0.708694518
+      },
+      {
+        "id": "ac2f10660ca28a0e47ad7e26b9e88ec591faaf063e2a86baa846feec024be561",
+        "score": 0.6683321
+      },
+      {
+        "id": "5dc5996c2be8011b3546106233b998c3fc3f412f3c0f20defe046a3c5c1c2407",
+        "score": 0.663600922
+      },
+      {
+        "id": "c45444bc7b602c7c32149b74f1ad1e207869a7fa2d971ce89fb92e633490ebda",
+        "score": 0.661087036
+      },
+      {
+        "id": "fc11e6092df4b89ebbfee2575a4a56dcb7e5c096a5b09cc4441a847d56f48d5c",
+        "score": 0.659258842
+      },
+      {
+        "id": "d19c79ab521e71936d73049c8de2d335d2138884bb3de213e58ef3c2e96667ff",
+        "score": 0.655118942
+      },
+      {
+        "id": "830bde58c30b4d45036b30d224b218cfae4e670409bd18bb3bd40fb6dae1cd9a",
+        "score": 0.652158737
+      },
+      {
+        "id": "db51adbb8a5258d4a6f2e526603e098e9c4dec114f593dfa7baaa2b746b9f50e",
+        "score": 0.644644737
+      },
+      {
+        "id": "f51aa6d0650a65ed6a142648dbb9b264d9be4862af658581880ed7d5352dd423",
+        "score": 0.643164694
+      },
+      {
+        "id": "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
+        "score": 0.637366354
+      }
+    ],
+    "lexical": [
+      {
+        "id": "fc11e6092df4b89ebbfee2575a4a56dcb7e5c096a5b09cc4441a847d56f48d5c",
+        "score": 0
+      },
+      {
+        "id": "d19c79ab521e71936d73049c8de2d335d2138884bb3de213e58ef3c2e96667ff",
+        "score": 0
+      },
+      {
+        "id": "893cf7fe947d8222041db638b248e1ffa0a03b5b1365794ca10b0a4be0e426a2",
+        "score": 0
+      },
+      {
+        "id": "08f2c4d437f4c134e5a1d7e7e281a01541a1990b206acfa30c4cd0119daa958c",
+        "score": 0
+      },
+      {
+        "id": "38192ba75e13e04113c60b92ee4a058a672ca3fed9669efc92afe09825e33991",
+        "score": 0
+      },
+      {
+        "id": "184e9c636d29878439b2b71c6f8d8698f36694fd9132628c296625c4ff4fedb8",
+        "score": 0
+      },
+      {
+        "id": "d33e2ff53ff3d2c5cbc5ec072917933781e879e4b39566f4811fd48112ba3843",
+        "score": 0
+      },
+      {
+        "id": "1f824d21bf6d1f13bf203b3d446fc54b2acc807fd1b177e5456cbeb3188475af",
+        "score": 0
+      },
+      {
+        "id": "8e29e650c5522bf2b31647e630d6b9f70bd1ef99d8ffe610931e9ceca380ab04",
+        "score": 0
+      },
+      {
+        "id": "c9c679862a5201e0cabdcf841703a945593cfd7c874a7d35aab54b715a96a06d",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "379d79b1e7ee91b2",
+    "query": "What are the eligibility criteria for admission to BS Computer Science at UET Taxila?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "cf3fc98f2f04452f2395a23e123b64c55b7b7f5167ccb49b00cb3baf2af3ba2c",
+        "score": 0.744228363
+      },
+      {
+        "id": "6326985b139fce911b7846fa022b5d5230f29144e3366871c3a16d4979769b25",
+        "score": 0.74379158
+      },
+      {
+        "id": "024526b3e1752da66899b578ee7f0639326761826489756a2d552eb0da57e076",
+        "score": 0.736099243
+      },
+      {
+        "id": "e1a69ffd3cb7ce4d542126dc92ce497d3896829d21ccdea0dbeefc90b1da6e9a",
+        "score": 0.725023329
+      },
+      {
+        "id": "1ecef200c005d0eb891cc53c082a7bef33e93a762a719e2c048c3d9e8758c38c",
+        "score": 0.721263945
+      },
+      {
+        "id": "27a87fd8e12896b14a778358c8d6551d743426e1fdc9956c6882908115781fcf",
+        "score": 0.719280243
+      },
+      {
+        "id": "b62d9211913a85cf9d151820f9afad9e240d98bd1408d97b1a7307b70cb3ffed",
+        "score": 0.713886261
+      },
+      {
+        "id": "2bc0eb6d1fd60b8fd787663a7b58f0babfbca170f6c9b3fd3c440c41b3194368",
+        "score": 0.712518752
+      },
+      {
+        "id": "1826f02db63693610ca30d0bc857413829c7c32b2f4a6281eac0932a3071bcaa",
+        "score": 0.712341309
+      },
+      {
+        "id": "bc557f2f2a6ccf7a5889a166676312580f52ed91934226592a31b5ebb1a5a61e",
+        "score": 0.71212393
+      }
+    ],
+    "lexical": [
+      {
+        "id": "49ba3a767c08218c224360e50e002c21a8732932ebd002e29da4efe34fb033e2",
+        "score": 0
+      },
+      {
+        "id": "c9119673b0afb01ba3559055d77f9e58354bbf961251df532517d7fa4d35ebff",
+        "score": 0
+      },
+      {
+        "id": "bc557f2f2a6ccf7a5889a166676312580f52ed91934226592a31b5ebb1a5a61e",
+        "score": 0
+      },
+      {
+        "id": "2bc0eb6d1fd60b8fd787663a7b58f0babfbca170f6c9b3fd3c440c41b3194368",
+        "score": 0
+      },
+      {
+        "id": "83bb7fa39863ba727755d3753134d2b0542aa8dc2fb1d87a9ea6f4cdaeef5409",
+        "score": 0
+      },
+      {
+        "id": "fcf4c3a5fe953d24ca8d0423101fe3d292b8f27d5695c0fff89ceae240b124a7",
+        "score": 0
+      },
+      {
+        "id": "d02fd5871a098c9f90e5476fb09d1a2a8383d6cabc95bf290eca56cc2bf5e2f9",
+        "score": 0
+      },
+      {
+        "id": "ddd250205a9d405a30541409b18087e86197451531508dd6c7d7c0a9e72531e3",
+        "score": 0
+      },
+      {
+        "id": "b122e45dfa9111e5a5cc30a8f618b70330957d7a2a6f6c36675eb70aeed2865a",
+        "score": 0
+      },
+      {
+        "id": "dfcd25d71e12a936845599b6f5925e73030c33a8892dc97e815fae504374fbd3",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "9e51f9dc27154685",
+    "query": "What is the minimum percentage required in FSc for admission to UET Taxila?",
+    "relevantChunkKeys": [
+      "5d4dc9002869fa5e66bf13f54354e02d95a4a8bb6a45055dae14e75d030eca9c"
+    ],
+    "dense": [
+      {
+        "id": "5d4dc9002869fa5e66bf13f54354e02d95a4a8bb6a45055dae14e75d030eca9c",
+        "score": 0.677249
+      },
+      {
+        "id": "7a3156675bf22e1742af21f2f38ad80ac867d7794a3b549e92a188f95e00433f",
+        "score": 0.676172316
+      },
+      {
+        "id": "8a6badf336c6f4718678dd324f003349789299bd686a7bd425c393b462658141",
+        "score": 0.674484313
+      },
+      {
+        "id": "3872fe48e0c7cf4b2d209e1aa17e743d44f1392b4edddce31e14e6f2686b313f",
+        "score": 0.668974
+      },
+      {
+        "id": "abf448db72516de55d5d0fa51a82ab400daff990e839a74db94c67d91dba596c",
+        "score": 0.668716431
+      },
+      {
+        "id": "b73269d761d764eb0ea619d0297d51e54dc16671ef743731824393737c9c08bb",
+        "score": 0.668716431
+      },
+      {
+        "id": "19be0e76c6f156ada11aa46f96cf7915d0cce6873f716d275f13e9a8ced4b3a7",
+        "score": 0.667962074
+      },
+      {
+        "id": "d53a608dc0fa31df6612056b560a4e4b42ff1189872322d821be9ea03e259876",
+        "score": 0.665226936
+      },
+      {
+        "id": "8f61b313f57a227321bbddcc80ce74c4ae3250a3392b15c58340b288fb90ffef",
+        "score": 0.664488792
+      },
+      {
+        "id": "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
+        "score": 0.663413107
+      }
+    ],
+    "lexical": [
+      {
+        "id": "d35634ccf15fdfc9e9775827541b6019292c256c5a306c8fefa3de5c5e746726",
+        "score": 0
+      },
+      {
+        "id": "3e8c4b6a4dcaa341eaa9abb52a3c2d639926efb489c3e58af254d7301b354701",
+        "score": 0
+      },
+      {
+        "id": "ecc3275bd0ae2d1755e46c56b1b2f08b94059f7213407b0e2daff910e33f7511",
+        "score": 0
+      },
+      {
+        "id": "c8f096fb6be6280415d3bafb1da18e725ff56f431d63ac84e42bcedaff92084e",
+        "score": 0
+      },
+      {
+        "id": "589f2a71a19f245e897d15a6b2339ce8eadc55db2640fa41b7cac78593cb849f",
+        "score": 0
+      },
+      {
+        "id": "7aab99c8c46580bc1f4d67b237873c5f597209c41f67e7e18780a502be790cec",
+        "score": 0
+      },
+      {
+        "id": "10bf0b10ff432400c7b43f4bec5b5583f2af6333e90bf024f712a808c7001aec",
+        "score": 0
+      },
+      {
+        "id": "400b96363a29a9f22a4f017d9317fd3fc77574a09a560a49d06fbf7f4b4e7a06",
+        "score": 0
+      },
+      {
+        "id": "4969a5e65a35dc0417314a3bf6f3f001fcd999b656ffb4ec89a7839a4d09db7a",
+        "score": 0
+      },
+      {
+        "id": "fc49f5a13cc451ecb3b6575b1a7a3931f254febb4be3377a9274f65752a1969a",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "c5ee1c9ad958ad05",
+    "query": "What is the last date to apply for UET Taxila undergraduate admissions?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
+        "score": 0.831219733
+      },
+      {
+        "id": "d061d7a5b2d027bd5a061f726ffcc6334195e235956d24d6720422e10bce9846",
+        "score": 0.825533
+      },
+      {
+        "id": "ad5b591a08fd654d8d0848113523bffbf10fe8f395daf511e1bf3d635ad7497b",
+        "score": 0.820556641
+      },
+      {
+        "id": "70491f1163e21db561b5d5a715c8b2a23d11d96d155369b603362640ba00441e",
+        "score": 0.819462836
+      },
+      {
+        "id": "8a6badf336c6f4718678dd324f003349789299bd686a7bd425c393b462658141",
+        "score": 0.818205893
+      },
+      {
+        "id": "2c8a045e6ae52c325883ea73ea10be83e111a176bfc504fc2092a46c41d7adf8",
+        "score": 0.816963196
+      },
+      {
+        "id": "d78714c266dfd9ef7c9d23ba0396171d8ee687d4721ccae975f3ee3f6de06b15",
+        "score": 0.81613636
+      },
+      {
+        "id": "60f8b8390a1e8b2c298be8abb84f1dd565a65552705ba5740b3670fd6fbbeda2",
+        "score": 0.813973427
+      },
+      {
+        "id": "d53a608dc0fa31df6612056b560a4e4b42ff1189872322d821be9ea03e259876",
+        "score": 0.809778214
+      },
+      {
+        "id": "6cac46287dd7852d3bda0f66a760a2d7e606807ce57fee80d9286b4d08541b94",
+        "score": 0.808359206
+      }
+    ],
+    "lexical": [
+      {
+        "id": "41b163937386bf57e54dd669cebb235bdd4b4f0b18ffbd687464472bb48ad12e",
+        "score": 0
+      },
+      {
+        "id": "a7c0e00c9a2dd77ccf229092702195cba3e1a3de32c9dbbd54e4e51c870ee3b6",
+        "score": 0
+      },
+      {
+        "id": "650c0ec324ca8ae8bd8ce75b904d51f7bcd0d5573c2e004da40abb67161d7a4f",
+        "score": 0
+      },
+      {
+        "id": "3c358ae6a97dfbac4f73f80b5caae19c105b626217a7cbdf3e7d74fb4307d815",
+        "score": 0
+      },
+      {
+        "id": "08246b00a240e56e626d79acb30fb7c159d6afff4285399ae4d1f57485265440",
+        "score": 0
+      },
+      {
+        "id": "86604ab96ed2ccb2a430628a922e9781cc5dbbc6b8c149d8b2a922b70c8c37cf",
+        "score": 0
+      },
+      {
+        "id": "6893701df7cf5a975de46788caf2874ae8ac5f6811b210572f39dd7340883837",
+        "score": 0
+      },
+      {
+        "id": "85d44ce74e609b2d95bb223cb21d4962eb5b9f94b61135faf640cb5ec81bf350",
+        "score": 0
+      },
+      {
+        "id": "8f68fd95c103f4f1a895763f0ecbefac034b9487a75893b11093054e5a7bc00c",
+        "score": 0
+      },
+      {
+        "id": "338120a50977f439484bdd7a0ae3635a671081e8da27741b07cca84cd8c5de73",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "928451f564ccf0a4",
+    "query": "Does UET Taxila accept DAE students for lateral entry?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
+        "score": 0.741175711
+      },
+      {
+        "id": "2c8a045e6ae52c325883ea73ea10be83e111a176bfc504fc2092a46c41d7adf8",
+        "score": 0.732367575
+      },
+      {
+        "id": "c4a06785c311d32cdf5f3a8609813e9fbf77ffb46a6b24e30f929f454aa08cfd",
+        "score": 0.731078207
+      },
+      {
+        "id": "8a5f1523621f157e26d7aed08a88f9fe485eb074f5d329acc96ae0bcf73af90d",
+        "score": 0.730331481
+      },
+      {
+        "id": "19be0e76c6f156ada11aa46f96cf7915d0cce6873f716d275f13e9a8ced4b3a7",
+        "score": 0.729185164
+      },
+      {
+        "id": "8a6badf336c6f4718678dd324f003349789299bd686a7bd425c393b462658141",
+        "score": 0.728976309
+      },
+      {
+        "id": "d53a608dc0fa31df6612056b560a4e4b42ff1189872322d821be9ea03e259876",
+        "score": 0.72879988
+      },
+      {
+        "id": "6cac46287dd7852d3bda0f66a760a2d7e606807ce57fee80d9286b4d08541b94",
+        "score": 0.728696883
+      },
+      {
+        "id": "b3a4566b33d7e94b91c60b89e164d1ded98c003200398e737550f92398a52448",
+        "score": 0.721322119
+      },
+      {
+        "id": "26927c58f45401c8dfc6b3409cbab08c455a1a9cce43b03f7deaa3057f33dd83",
+        "score": 0.719643652
+      }
+    ],
+    "lexical": [
+      {
+        "id": "5d4dc9002869fa5e66bf13f54354e02d95a4a8bb6a45055dae14e75d030eca9c",
+        "score": 0
+      },
+      {
+        "id": "729ae8a0e4767919576f46f3ffbb285e8d4ac3ba4ae7bc6080e87ceaaab50b43",
+        "score": 0
+      },
+      {
+        "id": "7d721d2410fb8295634a91909ef335cbe590c9bad34a3843f39065c46e247963",
+        "score": 0
+      },
+      {
+        "id": "0e1452eac70bf4018dd78ba49f73ec202b8d44850a70bf8cff6388ddbb43cc76",
+        "score": 0
+      },
+      {
+        "id": "e685e0c1dc4d0582d8f0ffed9fba309ae82f0c46d1a93f84292cfa1005903eef",
+        "score": 0
+      },
+      {
+        "id": "7de427ce516427318bfadcf0fa48bf07a4782eb72ce23b4ada365a3638d78834",
+        "score": 0
+      },
+      {
+        "id": "4f57510b90ca5e66d9c6878fad9cd7e0e99d784770459ab2eed2a5e746a2b99c",
+        "score": 0
+      },
+      {
+        "id": "f4e9c703e95a404f5a30fe831e90be2a1d7139b3fa127c670fb23b86ca522b5c",
+        "score": 0
+      },
+      {
+        "id": "96216ac0127394a6d40eeecc604dd388ee2ac42cc3a93d24922f204fb6be5187",
+        "score": 0
+      },
+      {
+        "id": "1a1c7ba8b254ed26863dac6afa239d910a27c558368194df1abc04b24cd74895",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "f36e58e0f4ae2b8c",
+    "query": "How many seats are available for BS Electrical Engineering at UET Taxila?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "710589581d3ee752264e3491f7a2fdae2431b19fdd2c9e33f1dbe5e933f0405d",
+        "score": 0.748049796
+      },
+      {
+        "id": "577f26d758be5b04a4686ca6ab2a82c9aed1639a83a2a79a0b1928f1c9945305",
+        "score": 0.72165966
+      },
+      {
+        "id": "0ef4202b67630015fde6bd94df556225ce1dc636ba8fbaf347e0af4420e99169",
+        "score": 0.721655846
+      },
+      {
+        "id": "b41ec1462a25be808621378807e29439b08b502b57c4bdc6ebb8283dd83e0904",
+        "score": 0.719008446
+      },
+      {
+        "id": "a0d513a9b801349b7596d0b9d7329d7b21ae74b6d3e349151a17d4ad3ee51d8f",
+        "score": 0.71808058
+      },
+      {
+        "id": "54ebbf097e455b4000cc9f34ffc26011373c10d9430ccb51902c61b863d30b7a",
+        "score": 0.717740059
+      },
+      {
+        "id": "1b3b25c150dc3262d8fca02a55f5bc5099a9317b458a6aab918acd8c8962db05",
+        "score": 0.717506468
+      },
+      {
+        "id": "787bf874e7554820937547e2b783ee599b2f2145831277bbf5bf8e8bfc84154f",
+        "score": 0.716469824
+      },
+      {
+        "id": "f2b315980dcfe814a220a322c20eec53ff3b48e1debbd85c93d9f25f2e2a755e",
+        "score": 0.716261923
+      },
+      {
+        "id": "f786620ad3674f0c5d13ebffe10e89eb720e9110ced5d5595a9777039dcd050e",
+        "score": 0.715472221
+      }
+    ],
+    "lexical": [
+      {
+        "id": "b122e45dfa9111e5a5cc30a8f618b70330957d7a2a6f6c36675eb70aeed2865a",
+        "score": 0
+      },
+      {
+        "id": "2595a9e6b98b0631e0f67fab26d33b8383a1e80ebffdef63a221249bd8c2094f",
+        "score": 0
+      },
+      {
+        "id": "2155c7093d1e74ed2d43246d6398e854574e36eedfac22afe80d1fa28dfe8d98",
+        "score": 0
+      },
+      {
+        "id": "63ba5c1c2eb3db29b3894084cd9a64a114e0386e20483e1715f0eae264182beb",
+        "score": 0
+      },
+      {
+        "id": "21c65da49e7a5ed887e9a27071578dab3b4fe86f73e9d543c3254879789c17d3",
+        "score": 0
+      },
+      {
+        "id": "0de7295db7944e693fd3beffb1bd7b10dd340d7e1a0ae74f0ecb0e6f511a189c",
+        "score": 0
+      },
+      {
+        "id": "e37fa5390558479b461e45817852fe83c5178ed1aaf240d3db72f8908cdb05e0",
+        "score": 0
+      },
+      {
+        "id": "47cc4a5cb653ffec6c9d999fbcf045c13617665348548b4e459b6926cfa1103f",
+        "score": 0
+      },
+      {
+        "id": "41c64d32e6be679910471e484bafd1bc9bda122289c426ed20122a8aa2bd1379",
+        "score": 0
+      },
+      {
+        "id": "326c9f63dd095e247021a7516da8acf6c465ebeb97867d917dd149df88339953",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "fa7779e221583d3d",
+    "query": "What is the merit list procedure for UET Taxila admissions?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "7a3156675bf22e1742af21f2f38ad80ac867d7794a3b549e92a188f95e00433f",
+        "score": 0.834017813
+      },
+      {
+        "id": "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
+        "score": 0.8211146
+      },
+      {
+        "id": "8a5f1523621f157e26d7aed08a88f9fe485eb074f5d329acc96ae0bcf73af90d",
+        "score": 0.813499451
+      },
+      {
+        "id": "2c8a045e6ae52c325883ea73ea10be83e111a176bfc504fc2092a46c41d7adf8",
+        "score": 0.812465668
+      },
+      {
+        "id": "c4a06785c311d32cdf5f3a8609813e9fbf77ffb46a6b24e30f929f454aa08cfd",
+        "score": 0.810852051
+      },
+      {
+        "id": "fa8af94bdc5162a928852cac8bf8eb591f021a8319789c34419abe266345471d",
+        "score": 0.809347153
+      },
+      {
+        "id": "d53a608dc0fa31df6612056b560a4e4b42ff1189872322d821be9ea03e259876",
+        "score": 0.809269905
+      },
+      {
+        "id": "6074be175431057c92bde34206c32b49be9817317043391a4364c596b7c7a693",
+        "score": 0.808102667
+      },
+      {
+        "id": "2449fc7207c12d4667bafd09e463ec3e720ef04eba8d00c68b9f3ca335d914cd",
+        "score": 0.807843268
+      },
+      {
+        "id": "5eb0cee2aba27e9c89017e52b785393e95b74f534ff2a470ac6391c90f1fcb2f",
+        "score": 0.80755043
+      }
+    ],
+    "lexical": [
+      {
+        "id": "dfcd25d71e12a936845599b6f5925e73030c33a8892dc97e815fae504374fbd3",
+        "score": 0
+      },
+      {
+        "id": "18a60f68944fbff3d204ca9790356b91b08baec53f14315a8b177b4d280e5886",
+        "score": 0
+      },
+      {
+        "id": "6074be175431057c92bde34206c32b49be9817317043391a4364c596b7c7a693",
+        "score": 0
+      },
+      {
+        "id": "8389703f0672a49818b4bdf0937799955e75370f9420e0329123f385eb680ee6",
+        "score": 0
+      },
+      {
+        "id": "2449fc7207c12d4667bafd09e463ec3e720ef04eba8d00c68b9f3ca335d914cd",
+        "score": 0
+      },
+      {
+        "id": "c5fdf5facd05fb6988e74e5964d11db98aff199dcf4f2bf90a58f1f2267fb235",
+        "score": 0
+      },
+      {
+        "id": "d335472b52f99caf8d8d7a0d35c8906939b9b18c7c7d981626c096782530dc38",
+        "score": 0
+      },
+      {
+        "id": "c10a9c3ea43230541d463ce557af798f7c18f3323d0e02a8f8e3e16fc0f6ff02",
+        "score": 0
+      },
+      {
+        "id": "c64f30b378f8b71be8be8ab36b031702f008fbbf309b22d2ef60bcc5644d1c59",
+        "score": 0
+      },
+      {
+        "id": "5879738f15f64bdd6a6a8665fbe8d2b2804b9921aef960b755fd6a5c87317bac",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "cb7a97774e15f4e9",
+    "query": "When are the midterm exams held at UET Taxila?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "e732a12e5e3d98b57b66144df505e94284caf4f229db44e1cf9a09ecd6f013cb",
+        "score": 0.684717178
+      },
+      {
+        "id": "c4a06785c311d32cdf5f3a8609813e9fbf77ffb46a6b24e30f929f454aa08cfd",
+        "score": 0.681652069
+      },
+      {
+        "id": "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
+        "score": 0.679349
+      },
+      {
+        "id": "8a6badf336c6f4718678dd324f003349789299bd686a7bd425c393b462658141",
+        "score": 0.672652304
+      },
+      {
+        "id": "b1f66bcd4cef6138b5cdcac02649a193e4c0e18bfa6c507493bc48ba3e10856b",
+        "score": 0.662216246
+      },
+      {
+        "id": "d061d7a5b2d027bd5a061f726ffcc6334195e235956d24d6720422e10bce9846",
+        "score": 0.662125647
+      },
+      {
+        "id": "74600dfc9c826ddd636bc2e2fd4042da75f050903f7786e88e5039eca0f2c38e",
+        "score": 0.660398543
+      },
+      {
+        "id": "2c8a045e6ae52c325883ea73ea10be83e111a176bfc504fc2092a46c41d7adf8",
+        "score": 0.660051346
+      },
+      {
+        "id": "3d8bdb58e0a89b17ea9266de4d07c045c9188ce22e67a987814842dcad227234",
+        "score": 0.65731436
+      },
+      {
+        "id": "8a5f1523621f157e26d7aed08a88f9fe485eb074f5d329acc96ae0bcf73af90d",
+        "score": 0.657207489
+      }
+    ],
+    "lexical": [
+      {
+        "id": "f19ca0b777765efb13d18a675e8bd437dd4f091b424f43ee4e9e86b13b2d16dc",
+        "score": 0
+      },
+      {
+        "id": "fc6095544026a5f41138acf894be92956d1b6f8418e655ef0558e6e0ee4134d2",
+        "score": 0
+      },
+      {
+        "id": "fc5261c73538c67f7481d1949af980e601e954e40b9e6be3b51df65458f5a21e",
+        "score": 0
+      },
+      {
+        "id": "65a59a1987074fd36d3e49e5d0bee1c87aa762eeaf048218e7f077bdfc027e7b",
+        "score": 0
+      },
+      {
+        "id": "c8fb1c97c55f46b4eedf4a1fbb53277b133e2f87e40baa6e88fb21a0e7fc3281",
+        "score": 0
+      },
+      {
+        "id": "13b3d504c1629ab79909149c73463aeae9af438fde25cc7f2ce45a82b5590625",
+        "score": 0
+      },
+      {
+        "id": "3845a29ed4714b3813462e0d876ddcda2cd057712efb9ed919beb9886b16a18f",
+        "score": 0
+      },
+      {
+        "id": "17e0b3092eb383b434741cc3b1b682bf1c77cf7b9f656b99001dcf7fd9ec0dba",
+        "score": 0
+      },
+      {
+        "id": "ad4f660f722453cd56208fc53870c905837c4bb10ca7ac7ed833407b9566845d",
+        "score": 0
+      },
+      {
+        "id": "28bc7992d2e46a462e8525450dc939f02169f69bc22e4fd23468377a12cf43f0",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "0516bcbb0e07b76d",
+    "query": "What is the schedule for final exams in spring semester 2025 at UET Taxila?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "617275529fb23360479ef650cf4bb7765a9bf3b38d0d8009aa2af41139665968",
+        "score": 0.737398148
+      },
+      {
+        "id": "765c1849d2d385542b47eb2c0ebae3fd8eedcb00c200e8830e1487759c54e92c",
+        "score": 0.7281304
+      },
+      {
+        "id": "b5bb836b20b655ec592639db601c090fc0d896de48ab0a4e34f6b7eee7b6f246",
+        "score": 0.7121315
+      },
+      {
+        "id": "0fff3651ff9810bec8fc5ab1a89b4aa963dace600116a47902e9043c7c7ff21b",
+        "score": 0.709243774
+      },
+      {
+        "id": "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
+        "score": 0.701629698
+      },
+      {
+        "id": "ad5b591a08fd654d8d0848113523bffbf10fe8f395daf511e1bf3d635ad7497b",
+        "score": 0.691804886
+      },
+      {
+        "id": "d061d7a5b2d027bd5a061f726ffcc6334195e235956d24d6720422e10bce9846",
+        "score": 0.691462576
+      },
+      {
+        "id": "75345a653d58c8143e0dd35c38542bd543adefe30457f4c5d1d677fa43789f93",
+        "score": 0.689661
+      },
+      {
+        "id": "8a6badf336c6f4718678dd324f003349789299bd686a7bd425c393b462658141",
+        "score": 0.688881934
+      },
+      {
+        "id": "877edea4095395be23c0e9aacba29a224210232b787ec81517406736878118a9",
+        "score": 0.685318
+      }
+    ],
+    "lexical": [
+      {
+        "id": "338120a50977f439484bdd7a0ae3635a671081e8da27741b07cca84cd8c5de73",
+        "score": 0
+      },
+      {
+        "id": "ab2ea20165b8f2eca74ebd72353f72421fd6c5f7c6e25629fdb9487b2bea996b",
+        "score": 0
+      },
+      {
+        "id": "14f16e454c9752ea53cdbb67433d098a6d57789411e762db464c40f6d4c55861",
+        "score": 0
+      },
+      {
+        "id": "91488539d1fadcf3072e2b8a9050b85b4f72a9750de8fbddaced5a20efa83dda",
+        "score": 0
+      },
+      {
+        "id": "ce71de666af8123ca61028e53ac4102f566e6f1897e791620bc1940b3fc80a94",
+        "score": 0
+      },
+      {
+        "id": "47e215f45bea24038b103fa6c2d2bd2b36e78becd43e28a9295270cdad3e222a",
+        "score": 0
+      },
+      {
+        "id": "9ba74a612f6590a214c75a629ebd33bb0e550f40381dd2cf8ea8719fc6a5f0d8",
+        "score": 0
+      },
+      {
+        "id": "d3ab27c1652ce4c061f9cdc70beb7d375a713b57ac014b2e43ef13f35e76aab6",
+        "score": 0
+      },
+      {
+        "id": "8ff4542ddc136a6cc5e62b87650c6bd43c2da6f325543a052658f33ad1ae8809",
+        "score": 0
+      },
+      {
+        "id": "d19c79ab521e71936d73049c8de2d335d2138884bb3de213e58ef3c2e96667ff",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "d05381af7512b11d",
+    "query": "When does the spring semester 2025 start at UET Taxila?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "ad5b591a08fd654d8d0848113523bffbf10fe8f395daf511e1bf3d635ad7497b",
+        "score": 0.728559494
+      },
+      {
+        "id": "d061d7a5b2d027bd5a061f726ffcc6334195e235956d24d6720422e10bce9846",
+        "score": 0.718165457
+      },
+      {
+        "id": "70491f1163e21db561b5d5a715c8b2a23d11d96d155369b603362640ba00441e",
+        "score": 0.71248728
+      },
+      {
+        "id": "0fff3651ff9810bec8fc5ab1a89b4aa963dace600116a47902e9043c7c7ff21b",
+        "score": 0.706372261
+      },
+      {
+        "id": "617275529fb23360479ef650cf4bb7765a9bf3b38d0d8009aa2af41139665968",
+        "score": 0.699887276
+      },
+      {
+        "id": "b5bb836b20b655ec592639db601c090fc0d896de48ab0a4e34f6b7eee7b6f246",
+        "score": 0.697861671
+      },
+      {
+        "id": "9dab977457b9e7d209975d1b699efc862a3da0c33dd63f88e24ae4ea0e5a733b",
+        "score": 0.692771
+      },
+      {
+        "id": "a11db0a353db19dba8950ef9a0a6299ad6e7fc4a105f290ba95bb5b8c6c982d8",
+        "score": 0.689437
+      },
+      {
+        "id": "2e1b7b0dcb507ccf03759bcb2d95a333ea12ac5b03c1a0353fbd4f637feb28df",
+        "score": 0.685791075
+      },
+      {
+        "id": "c57f6069451da974c09d0b02e92c97ca94330758f2ba56255f66b114e120b562",
+        "score": 0.683693
+      }
+    ],
+    "lexical": [
+      {
+        "id": "e4f7886b70676f65ffbac281a976e9c71a24dac9de6092a65a0691b907fbd606",
+        "score": 0
+      },
+      {
+        "id": "14f16e454c9752ea53cdbb67433d098a6d57789411e762db464c40f6d4c55861",
+        "score": 0
+      },
+      {
+        "id": "08f2c4d437f4c134e5a1d7e7e281a01541a1990b206acfa30c4cd0119daa958c",
+        "score": 0
+      },
+      {
+        "id": "9ba9df538d8d625fed2766fb4ec8632d3efcd1cea6f186736bb756486f8c6d8c",
+        "score": 0
+      },
+      {
+        "id": "b7997624fbc0f7d118e045a843264c8e3e55864f573110e7f1023cb1b22887af",
+        "score": 0
+      },
+      {
+        "id": "3f8839857341edfe74d51d53c1d41c73252f8259355b65c066db8e0e0981ecd9",
+        "score": 0
+      },
+      {
+        "id": "a1da1f050043ca91173e71b18b0637624b8a0c1138a09ddf2db862b483403035",
+        "score": 0
+      },
+      {
+        "id": "9a6ff12f0dd5dd62a96ef24855845147461b67c2b091d5951ea6cbfbae8a5f00",
+        "score": 0
+      },
+      {
+        "id": "eb3f75034a421412a3e4b2fd7085d131a73c2bd78c22b5684d56bcde5e260318",
+        "score": 0
+      },
+      {
+        "id": "2e1b7b0dcb507ccf03759bcb2d95a333ea12ac5b03c1a0353fbd4f637feb28df",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "93971e85e247fde9",
+    "query": "What are the important dates in the UET Taxila academic calendar?",
+    "relevantChunkKeys": [
+      "b5bb836b20b655ec592639db601c090fc0d896de48ab0a4e34f6b7eee7b6f246"
+    ],
+    "dense": [
+      {
+        "id": "b5bb836b20b655ec592639db601c090fc0d896de48ab0a4e34f6b7eee7b6f246",
+        "score": 0.801301
+      },
+      {
+        "id": "3d8bdb58e0a89b17ea9266de4d07c045c9188ce22e67a987814842dcad227234",
+        "score": 0.798991263
+      },
+      {
+        "id": "a9bf73c6816855aa2d6f5b695b8cc64733b614cfb7ac15ad3a4e8b6cb8fba955",
+        "score": 0.796585143
+      },
+      {
+        "id": "948c11e8a9508af7a9fec13ae72dece5f30f3b2e44d0379c14ba4402163cdec9",
+        "score": 0.796585143
+      },
+      {
+        "id": "6fa4f408d2be30043d3d8a4b011002ffba9ee0f13cd33f2eb94a13541675a44e",
+        "score": 0.794334412
+      },
+      {
+        "id": "47b6b4d0995c52cc5cd97c6bffa8d48d22371f5bd24ba186dafdf7aa33b299c5",
+        "score": 0.794332504
+      },
+      {
+        "id": "ecca36b9ec04509bec8213b21a33acf4d5c2a7350f734da3326b75ab53537d77",
+        "score": 0.79043293
+      },
+      {
+        "id": "72bd5cd8103c7a900913ceb8b73098fff3062cc0eb953ad4ba57c4e46fd6b3f4",
+        "score": 0.790419579
+      },
+      {
+        "id": "edc43edbf865f368f101b8e20361a35261fc09efcf22ede7eb4c01f18181a69e",
+        "score": 0.78996855
+      },
+      {
+        "id": "8a6badf336c6f4718678dd324f003349789299bd686a7bd425c393b462658141",
+        "score": 0.789416373
+      }
+    ],
+    "lexical": [
+      {
+        "id": "6893701df7cf5a975de46788caf2874ae8ac5f6811b210572f39dd7340883837",
+        "score": 0
+      },
+      {
+        "id": "51d03678b58edabf5f71a168e73456848709158bf9c3778b796b8252d9c719aa",
+        "score": 0
+      },
+      {
+        "id": "6a3232b98c785fddc01857b2b9787cbf3fd7430a28381d6a6b0ec4fe6c630ac3",
+        "score": 0
+      },
+      {
+        "id": "24ee2e8b5beedc9221f2641c769660b6d6130badb06b7d528d7fa282718cb4a3",
+        "score": 0
+      },
+      {
+        "id": "acbc44fec64636705646f9e41e33ea1298f9cf6e94d1fe1b3c548312c1e37951",
+        "score": 0
+      },
+      {
+        "id": "b0abff867b39315283279afb668e946f134be62d0164c78ad4b9d9fcd622574d",
+        "score": 0
+      },
+      {
+        "id": "fa872d11f45d74e3b1ff42025f8dbd9a206395a1f2f53121c62ab31adb8589a5",
+        "score": 0
+      },
+      {
+        "id": "5906a77fbe74bdb635de4215e17324434c1c0a29be78d2d428728872f0c44401",
+        "score": 0
+      },
+      {
+        "id": "eb7496a579d3aa74d924b25f7f291272e4ed4704f6c871451ffeae36cf13c922",
+        "score": 0
+      },
+      {
+        "id": "38a8719e73d680a42cdf00b8536fa4867768ef39f8cb615ea2151e2547299400",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "2ea89221212da31c",
+    "query": "When is the summer break at UET Taxila university?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "d061d7a5b2d027bd5a061f726ffcc6334195e235956d24d6720422e10bce9846",
+        "score": 0.72759825
+      },
+      {
+        "id": "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
+        "score": 0.714557707
+      },
+      {
+        "id": "9dab977457b9e7d209975d1b699efc862a3da0c33dd63f88e24ae4ea0e5a733b",
+        "score": 0.712908804
+      },
+      {
+        "id": "ad5b591a08fd654d8d0848113523bffbf10fe8f395daf511e1bf3d635ad7497b",
+        "score": 0.706817687
+      },
+      {
+        "id": "8a6badf336c6f4718678dd324f003349789299bd686a7bd425c393b462658141",
+        "score": 0.705657065
+      },
+      {
+        "id": "70491f1163e21db561b5d5a715c8b2a23d11d96d155369b603362640ba00441e",
+        "score": 0.698348105
+      },
+      {
+        "id": "b5bb836b20b655ec592639db601c090fc0d896de48ab0a4e34f6b7eee7b6f246",
+        "score": 0.697720587
+      },
+      {
+        "id": "27da931de6c19502d73e0c92d4004d2cad9a1181fbde91cfc857fbf1082dca6d",
+        "score": 0.696300566
+      },
+      {
+        "id": "5a235ddd3d18ae323581977fa2de347228b4789f62efccf08416aa751aae8b05",
+        "score": 0.696059287
+      },
+      {
+        "id": "412255b5f41f076a0f742f2faa93d0c80a105f71a106ff39f6533b3538134126",
+        "score": 0.695770323
+      }
+    ],
+    "lexical": [
+      {
+        "id": "29cfbd27b1249d1a4ef98fc52502e810bc245f241901f61a715f636cc9470401",
+        "score": 0
+      },
+      {
+        "id": "b2ce4bbe52cc1b8216e30d720f3ba535b0a6f99dbac03b2bb9d64967e4f01672",
+        "score": 0
+      },
+      {
+        "id": "eb0b6db889fe65b73edd2240f67797441d90795f021ff2b63ee8eeb8659dd937",
+        "score": 0
+      },
+      {
+        "id": "870f59ced294c5691750aab1a97cb90acaf2b60663f9bd5679666d497a056902",
+        "score": 0
+      },
+      {
+        "id": "747b5a382bd6fdf7afc68e714ec776191e0388916f64a056528b130a4f85adec",
+        "score": 0
+      },
+      {
+        "id": "25a35f2bef510ad52882ab9835ec11fca4aee561d4dd4100172e2fd9b2129666",
+        "score": 0
+      },
+      {
+        "id": "4aaffb1f553db6d3dae42515f0ba4946ad47d3729955acf6eedee2182c09d915",
+        "score": 0
+      },
+      {
+        "id": "833c43478bc2127204f34748166d6e3eb1c3776625608b960b09fa0253867d6c",
+        "score": 0
+      },
+      {
+        "id": "498e36b6e785c2e14bf6b5ccd380b8a15645cea3223a5184ac7ce09e0223f5b9",
+        "score": 0
+      },
+      {
+        "id": "f640fe1438aa1439bc3272009485a071295589dcf88a261d3b3a72f2d6e13da7",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "7b5d19924011310c",
+    "query": "What are the prerequisites for the Data Structures course at UET Taxila?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "eed14e184563be44581747a3e524e09ee0eb4a323479a423db43d177967acfb7",
+        "score": 0.695063591
+      },
+      {
+        "id": "eb13f7856abb78eef69d637b8c3af6f8973401679dfa0769c083d801c0869cf2",
+        "score": 0.664624214
+      },
+      {
+        "id": "07739da427051d379d0df9c502326240f3960e9174343fe0a8742152a86beff3",
+        "score": 0.656928062
+      },
+      {
+        "id": "0f2c7544eac5866250d873674047d2bb9169ace30cdf856c5d66f0d78fe8bba0",
+        "score": 0.638201714
+      },
+      {
+        "id": "5e1206eb07d99d5e1876888f3298a77860ee61ec128d0bd4a408ecfa332828bc",
+        "score": 0.637849808
+      },
+      {
+        "id": "8ef2053f51526a21e6e87409150dc28e7e1d93a7ddf9da8a2ed846fa537755e8",
+        "score": 0.636024475
+      },
+      {
+        "id": "7c16f17b09783b08481613320321bec00da7e1c7ea029b33c9fdaf17497df9b2",
+        "score": 0.634977341
+      },
+      {
+        "id": "6f75d6811e9d889f6ec939ceb89ecc56055f2bd9a6ac76eabea093a72df20e0f",
+        "score": 0.634812355
+      },
+      {
+        "id": "84bb86f35fea37fee00fca9b427536d40f3e7e5a1f373c571032e10b9e892e6c",
+        "score": 0.633640349
+      },
+      {
+        "id": "295d43a48f6087469d4597a75acbc26a99f5aeaea30a0d1b63a022f7113cbfca",
+        "score": 0.632716238
+      }
+    ],
+    "lexical": [
+      {
+        "id": "796ec7e820929ef9216bb370273ad5c898b2f0f2234c692745a3cdb2b86104d5",
+        "score": 0
+      },
+      {
+        "id": "c0ff3c7a56f9be264faf3b8e6da422b2dd533bc25bd8fd2c07d283e24e96dd6c",
+        "score": 0
+      },
+      {
+        "id": "86706479c23ade80e3ed60964dd80e4ae6a0c6bc1f5c7f410f8f36cdf3fb9fab",
+        "score": 0
+      },
+      {
+        "id": "fa2e516bb0600a1decb3447e0966e114c9f0dde1e0362dfba0f8fce806bdb420",
+        "score": 0
+      },
+      {
+        "id": "7574d847164155a4891acfe8a981d593636b75e1ec5a80fb8fb2f9e7bfb98720",
+        "score": 0
+      },
+      {
+        "id": "d3c5d6a7a3655c34d1faa289b5b5fc0743ac4c9ff30e4641445d6c8aef8f0e38",
+        "score": 0
+      },
+      {
+        "id": "3d690f7b1a65737c1ac1b2795a418203a022e7e8d0a9f5a43312d138d35270ff",
+        "score": 0
+      },
+      {
+        "id": "b0abff867b39315283279afb668e946f134be62d0164c78ad4b9d9fcd622574d",
+        "score": 0
+      },
+      {
+        "id": "fa872d11f45d74e3b1ff42025f8dbd9a206395a1f2f53121c62ab31adb8589a5",
+        "score": 0
+      },
+      {
+        "id": "cb946b7e741dedb7a03e747b968ce8f69f0d4b8b27654df4e8d04268dc4044dd",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "28c28a292f783f28",
+    "query": "How many credit hours is the Programming Fundamentals course at UET Taxila?",
+    "relevantChunkKeys": [
+      "8aee572b1c180b8dedf84fbf270625f30f5733972c4d6917b2f8c3070c6ea499",
+      "d4ae0318d1e26573e9ce22e8fe62d04faf7a092d21b1beec84dcc85e11037b4e",
+      "d3b2910fc4aa9b58c44ae8e608b6c37841be7950ccc0220971fd7a5ad0739b6a"
+    ],
+    "dense": [
+      {
+        "id": "8aee572b1c180b8dedf84fbf270625f30f5733972c4d6917b2f8c3070c6ea499",
+        "score": 0.652648
+      },
+      {
+        "id": "9b2669acf19154abfe3d441d4b939e378f731b05792bc588faa394348946b3bf",
+        "score": 0.646944046
+      },
+      {
+        "id": "d4ae0318d1e26573e9ce22e8fe62d04faf7a092d21b1beec84dcc85e11037b4e",
+        "score": 0.642550468
+      },
+      {
+        "id": "d3b2910fc4aa9b58c44ae8e608b6c37841be7950ccc0220971fd7a5ad0739b6a",
+        "score": 0.641530097
+      },
+      {
+        "id": "a7926abdeca8986d513af1d32fef27994899b477c6c0d398b92043b7aaa63aea",
+        "score": 0.637613297
+      },
+      {
+        "id": "6723735986b15f4d0f493b28d58f1d59053572f007295756eee4cae7b1db88e2",
+        "score": 0.634372711
+      },
+      {
+        "id": "d609099b918b1381f2626d7db1d0fa879c2e483ac105d9d066400b8ffc5612df",
+        "score": 0.633799553
+      },
+      {
+        "id": "578b13e13b5ae05fbe9c165ccb472cd4eba32c183227a49907b00f89a5091506",
+        "score": 0.632158279
+      },
+      {
+        "id": "4da9c018ae201f9f8639e36ebd2e3e54adbd4b987576026e7546f7bc6a134724",
+        "score": 0.629406929
+      },
+      {
+        "id": "639a7c8a4e08571fde069c639c4bf872e9dd83bac709d21b6dcfff090ba9c540",
+        "score": 0.628471375
+      }
+    ],
+    "lexical": [
+      {
+        "id": "578b13e13b5ae05fbe9c165ccb472cd4eba32c183227a49907b00f89a5091506",
+        "score": 0
+      },
+      {
+        "id": "796ec7e820929ef9216bb370273ad5c898b2f0f2234c692745a3cdb2b86104d5",
+        "score": 0
+      },
+      {
+        "id": "c0ff3c7a56f9be264faf3b8e6da422b2dd533bc25bd8fd2c07d283e24e96dd6c",
+        "score": 0
+      },
+      {
+        "id": "b118df79e5bb2413f23f340b12eb5db33d3eb12e0f0d166cc3ae7e015fee4f55",
+        "score": 0
+      },
+      {
+        "id": "fbb38e41732a2a2c0d66cecc9ea22fbf2116768128640d7f5e928d3b252fa530",
+        "score": 0
+      },
+      {
+        "id": "bf3392c9c0694126cda979ed7e019e1ee0604ec1a961e1b7db9e481a069f14d2",
+        "score": 0
+      },
+      {
+        "id": "76eed80276d443cbc04126a46ca3e650a05721c03fd2f4266c6f7f94a40a1526",
+        "score": 0
+      },
+      {
+        "id": "11bb280b9b52442c0795a185c5b85fbcdbd82dac65e0ce1bbfdaad03b641b566",
+        "score": 0
+      },
+      {
+        "id": "f692ca677779739116e0e001a84971065f4ac54c26bd6afeb368b4b7230db135",
+        "score": 0
+      },
+      {
+        "id": "f210afbf74284c40726f84224f41e3fd52d5e67fac4093647842fd7e0243f590",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "d401ee13982062e9",
+    "query": "What courses are offered in the 3rd semester of BS Computer Science?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "a482af051ae78e23b79ab75d79e663a46f56575855be4cf5f4fb1ef0343d3c1e",
+        "score": 0.752884865
+      },
+      {
+        "id": "594948699286e930bfef8b9b8ae5bd6ffdd98e13c8ee997821c5bd665e88824f",
+        "score": 0.752160132
+      },
+      {
+        "id": "c34064eaf9ed88a349b2021f2e3cb2e3116936715fc0dc6a22eb423164565bc1",
+        "score": 0.741992056
+      },
+      {
+        "id": "949279a6fb6616a837cfd94f54e76cdc3239a1ee9958275d6e2db44dbf64988e",
+        "score": 0.741148949
+      },
+      {
+        "id": "1058fb810aaaa2c4fab3a0c09d590a76243f03edbf69ef270e85ca8cdb01f14e",
+        "score": 0.711029053
+      },
+      {
+        "id": "7dea40237734a45b8fd755c557241ffc65bb359b9cc82f186ddd7ce7e10d591e",
+        "score": 0.709376395
+      },
+      {
+        "id": "153fe5a81ef050854b40250ecd22b5f2023dfc1ab28f23eac4137e7008aec5fb",
+        "score": 0.673181534
+      },
+      {
+        "id": "7f7f7848df2ed609274c7acfedab375f25a5d6a5af990b90fc5ad6e0ba2f0b12",
+        "score": 0.671134055
+      },
+      {
+        "id": "abe87f4da8e4b2c874e6974d60d2266608b9bb3e63b371b0ec8f9788a141e8e2",
+        "score": 0.671125412
+      },
+      {
+        "id": "2536d2143ee8b5192b32bd85473e015a1363154ff27dd6592d95e1855a2c2e0d",
+        "score": 0.670893729
+      }
+    ],
+    "lexical": [
+      {
+        "id": "da2ef01e083ccaf626903aeb1e54869c4ec32611820ae513c55ea992e46f0b9d",
+        "score": 0
+      },
+      {
+        "id": "eb0b6db889fe65b73edd2240f67797441d90795f021ff2b63ee8eeb8659dd937",
+        "score": 0
+      },
+      {
+        "id": "b2ce4bbe52cc1b8216e30d720f3ba535b0a6f99dbac03b2bb9d64967e4f01672",
+        "score": 0
+      },
+      {
+        "id": "d370f50c85e6d3ff17a335282486c2d2a65f36859567a877d05eb0a06f3f84a3",
+        "score": 0
+      },
+      {
+        "id": "e032cd102cd0b6cb2274375d7e4cd3488e4ed0f524d8dad07476abdfe503845f",
+        "score": 0
+      },
+      {
+        "id": "e67ee1068067c24098c32ce615a5286f1e28f9a01320374926caea03bca0ae2b",
+        "score": 0
+      },
+      {
+        "id": "2fb4aeed8ad4783d87482f2e38a4b8658c2eec15f6f63370c90c75739fa3a6cf",
+        "score": 0
+      },
+      {
+        "id": "29cfbd27b1249d1a4ef98fc52502e810bc245f241901f61a715f636cc9470401",
+        "score": 0
+      },
+      {
+        "id": "31567558d9cc85a813cd64769526a7314ed21990710c9bcaa2cc03685c22d29e",
+        "score": 0
+      },
+      {
+        "id": "796ec7e820929ef9216bb370273ad5c898b2f0f2234c692745a3cdb2b86104d5",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "32bd7727e786b6c1",
+    "query": "Is there a lab component for Operating Systems at UET Taxila?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "c384d5aef64d7bf75753e0c1d97a80846e55d79bd6558f95a3a64c9306e25741",
+        "score": 0.684134543
+      },
+      {
+        "id": "91854c6927fe41f96894c56159a350c3174ba234eb16e25a7c1567a6c766ae0c",
+        "score": 0.683131278
+      },
+      {
+        "id": "cc6379e6eae7df51f5c553852f5cb7b87065da0ac92d8d4f4608ff3dc6b7c174",
+        "score": 0.679469168
+      },
+      {
+        "id": "525bb7339c45c0d85d3edeaf85482d46f6fa05a90f615c5b03c1a3a0ac040051",
+        "score": 0.6762
+      },
+      {
+        "id": "a96cb0885502224d7b3ef3548ec8ee5d6b68691245d46ef7854cf2260093a19c",
+        "score": 0.668213904
+      },
+      {
+        "id": "746919df0544c48487bd1e89f8fd05aebff1ea7a02be638e00d488c824b93dce",
+        "score": 0.66363436
+      },
+      {
+        "id": "1074c17a5f0726140b7ea3897bcb60899d67573daad5a3fc2ce814e3d2a29d29",
+        "score": 0.663508475
+      },
+      {
+        "id": "a055f2c5f8921861787879699659140b9a4857bc93a58ce1f604d3923a4f1b60",
+        "score": 0.660458624
+      },
+      {
+        "id": "cdb85fbf489b8a3a9e98bdefdde4c3e81acba060264f631162a66a5f3fbf16b3",
+        "score": 0.659755766
+      },
+      {
+        "id": "eb598ad2967b8bd39ed3c7976bd1ffb96d00310c41dfc58384fb73b6609eb2fe",
+        "score": 0.658558905
+      }
+    ],
+    "lexical": [
+      {
+        "id": "44b54bca0f022224ea01807d64dcf55d3fd08ceebe69b9c335ec73ce384d9974",
+        "score": 0
+      },
+      {
+        "id": "ba116d9711875f63818f8358a5725f69856fed8b919322ab9f2d2c0d926db624",
+        "score": 0
+      },
+      {
+        "id": "863b6210184cc3c4427c3262f15a0593c0873ddef60acdfd173e72584fbb0b59",
+        "score": 0
+      },
+      {
+        "id": "c7b4b3bb28ad4e0a69df780bb851ef02ca80151518ae126e8877ae7097b72dcd",
+        "score": 0
+      },
+      {
+        "id": "c48a55eea15c8a7e2f9573a944afd02ed6637949288b91979627cb011ca01aea",
+        "score": 0
+      },
+      {
+        "id": "b2faa1728b6d0893a071cb0ec7fdc8948ee049190a901afb8cdd2620cc8b6f6b",
+        "score": 0
+      },
+      {
+        "id": "8b6909ea9919ef2bfb7e221f11933a536931f230ad0500b9052b527884932332",
+        "score": 0
+      },
+      {
+        "id": "b534e8466def74dd2e8a4b3751b8247b5e0d59844aac37602088212959a5f873",
+        "score": 0
+      },
+      {
+        "id": "22955268f847d95bddecbf0b639107effc60149215d75e1f2d867602ca3f00ec",
+        "score": 0
+      },
+      {
+        "id": "99bed7528bfcfed8006a40bb37abc90002f4fb87d432d7eca9754206cb358c4a",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "0a6d92d625563c42",
+    "query": "What is the course outline for Database Systems at UET Taxila?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "44e8c771bed986eda978af142abf1c245b81b1456dc890d7217130c9b3568ffd",
+        "score": 0.691755354
+      },
+      {
+        "id": "996adc4698031cce609f542d946190b5cddb96e70cdd5e6a5a6d4b0a9155c9a2",
+        "score": 0.688119888
+      },
+      {
+        "id": "2d14c52d812f952df62092e58d1d4ffb523b2c8ced2d38511130cc8ac34e7795",
+        "score": 0.685360909
+      },
+      {
+        "id": "a4f84c633ef42c65cacd7beaf6c11562c042772bfc556cb0f9781b02fae3c0f7",
+        "score": 0.679373741
+      },
+      {
+        "id": "d2cbff227c8b159c159fa344098f6c86bd0d5982dca5a3b27148857b5518f4b4",
+        "score": 0.678524
+      },
+      {
+        "id": "d1f16078ce0de74a854bacafcfc3f2576caf4f4f2ffe852e35484fd88a8dbc24",
+        "score": 0.672757149
+      },
+      {
+        "id": "d397dbb474e6073e05ea6e344f081c66c3bd2960ec6851b4fb09ebffcb12d4a8",
+        "score": 0.670840323
+      },
+      {
+        "id": "ea835ea5cc3c3c94826afe5a023a155082e9834ec178cb2f4bde75eb4d3d513a",
+        "score": 0.667808533
+      },
+      {
+        "id": "33e22dc94ed11cb73cba94bd462871a7d04ea9de1a4a5ad94648d55518fa21e1",
+        "score": 0.667286
+      },
+      {
+        "id": "c81b4d9170d9acc36d1024429ac6314d678c71e737b4c3e04277efc0a576a37e",
+        "score": 0.665267
+      }
+    ],
+    "lexical": [
+      {
+        "id": "7200c8c09cced315c9efc4066d6143befa306501b84eb4c5b511e0dcb34c58a7",
+        "score": 0
+      },
+      {
+        "id": "796ec7e820929ef9216bb370273ad5c898b2f0f2234c692745a3cdb2b86104d5",
+        "score": 0
+      },
+      {
+        "id": "c0ff3c7a56f9be264faf3b8e6da422b2dd533bc25bd8fd2c07d283e24e96dd6c",
+        "score": 0
+      },
+      {
+        "id": "3f941424126d5d26b47f56273be736f956ccf0a47895eae5398b3ce578e57e1c",
+        "score": 0
+      },
+      {
+        "id": "86e24c2432d32c321d168722aca493d20a2d555a0475fbd17e070f82d60f3ed4",
+        "score": 0
+      },
+      {
+        "id": "2546a416dbe23fdaabf42d8407e1a53ce10a26a0249065a948f34ab5413ffeed",
+        "score": 0
+      },
+      {
+        "id": "11e4e87ec118dc0e16c985c738003a77d3e2004aa0048943a0802afb18992953",
+        "score": 0
+      },
+      {
+        "id": "ebb7fd9a734263246502e79a9e6fb480371174363e64dfb51794a46a093b3e41",
+        "score": 0
+      },
+      {
+        "id": "643a6ac83183733ac0e1a55dd7b537eb00eb1a85adcb959bf43b5280f2845391",
+        "score": 0
+      },
+      {
+        "id": "213f45f4f79545cd15f2c13079bcd1cf3e53bd11493cfec58ff1ef05ebd7600e",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "07002b9f761478bc",
+    "query": "How do I contact the Dean of the Faculty of Engineering at UET Taxila?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "588534697690840a24d8ee703c4c4227123fe383b2365488570873796ff82310",
+        "score": 0.81360352
+      },
+      {
+        "id": "b32bfe9efac3b71971cab8b36f666022f33df2fce0e0d128713f3bf9bb870fbe",
+        "score": 0.796242833
+      },
+      {
+        "id": "33a09249f4a587412bbc9355c75c98f8fc46a7cd0eecd435caf44317d9b04707",
+        "score": 0.79195416
+      },
+      {
+        "id": "80c5e48964adb28b1253d0949dc388fe8440592f0215181841f1a36c2a12d1c8",
+        "score": 0.790089726
+      },
+      {
+        "id": "77028e777a28646f13aee2cc26bb51b0b1d9004ad05fbe9665e5a26eff5c9ac7",
+        "score": 0.78840363
+      },
+      {
+        "id": "4f8bf0d9b58fb4a33d2badb9e4686205c639cffc5421054f9250aa00fa11ce8c",
+        "score": 0.785151601
+      },
+      {
+        "id": "04919b8122bc402334fb9351d73e12430f60bbf5ee2ecbde4bedb8f29bab4b95",
+        "score": 0.782273412
+      },
+      {
+        "id": "1cc52a6af0bf237ec29942a06b8f87e15acac95dc939f5387ef3d1546eb56b5f",
+        "score": 0.78131783
+      },
+      {
+        "id": "f3491b4d834c87e6535dcdd60a5c53765f63c448cdc3700933e5422e8bbf7835",
+        "score": 0.779320836
+      },
+      {
+        "id": "6a54c008697dd57a851c13edc62c8b4f8b81dbf0e060e1808c81cc94bf177541",
+        "score": 0.77662003
+      }
+    ],
+    "lexical": [
+      {
+        "id": "f365b2f41b6c8686dae1189048ad023163e77546bf053802dde49840e7a2d06b",
+        "score": 0
+      },
+      {
+        "id": "9d19d311b2784e0c5f3fd965c4e069be107fb880a635f1a7db42ee3ca2786450",
+        "score": 0
+      },
+      {
+        "id": "e04e2d338b1456fc2cee4288972a710f0c89235d6ae2252fb5ed13519e7a3cdb",
+        "score": 0
+      },
+      {
+        "id": "a174e0b4ceef7a28ffdfe4beba35e613502b4b8fb80f7d62c65a1404cbe65ec9",
+        "score": 0
+      },
+      {
+        "id": "a26559419dbcd4b39246be1615eb5e3aa66dc0801318f53d63456a7d4c29437e",
+        "score": 0
+      },
+      {
+        "id": "c162ca75699b3603351c1916265f63203f76ce9822dcd17a306e9bc2807fe351",
+        "score": 0
+      },
+      {
+        "id": "d1ab78e6b2b9dec6bebc6a900f88dd5f0326e5f0cd251a75dac9d4f1a330c0ec",
+        "score": 0
+      },
+      {
+        "id": "180f19ebbaab1ee885b47786a379eef52ada07887a069d5a716877f7ad9e51da",
+        "score": 0
+      },
+      {
+        "id": "150f9c6c30bff62bcd68449e5e98dec0d32bf7bb6cb85424f9950d2db9bc8223",
+        "score": 0
+      },
+      {
+        "id": "26e8ffa076406c36cc64d851b5aed74ed791e6eab636c5b57e7aa37dc2392eb7",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "809427d946da55fe",
+    "query": "What is the email address of the CS department head at UET Taxila?",
+    "relevantChunkKeys": [
+      "491f704ab01374604892239079710fc86fa76abecf9733eb382e5b93fa2c2e77",
+      "b5f7330baeafd71f6b577fcd878ba4a66aaf1790b5cc4e40e44c8f03a8614cd6",
+      "4aa06117613a1655c388c91d83e14270da1473e9feb433963a40735e0771fe56",
+      "0e363892f9fb7860989c238d4d217efc3cdbd9d6ae340315d74e97d316bdd3e2",
+      "7a01b32a0d203f122fee8037219953fa39dd800b85079de8a043d9a4c838bbf1"
+    ],
+    "dense": [
+      {
+        "id": "491f704ab01374604892239079710fc86fa76abecf9733eb382e5b93fa2c2e77",
+        "score": 0.813380241
+      },
+      {
+        "id": "b5f7330baeafd71f6b577fcd878ba4a66aaf1790b5cc4e40e44c8f03a8614cd6",
+        "score": 0.812137604
+      },
+      {
+        "id": "4aa06117613a1655c388c91d83e14270da1473e9feb433963a40735e0771fe56",
+        "score": 0.806643546
+      },
+      {
+        "id": "0e363892f9fb7860989c238d4d217efc3cdbd9d6ae340315d74e97d316bdd3e2",
+        "score": 0.806388855
+      },
+      {
+        "id": "7a01b32a0d203f122fee8037219953fa39dd800b85079de8a043d9a4c838bbf1",
+        "score": 0.782136917
+      },
+      {
+        "id": "8d07dc6b2f485ca16570e1301d8dec6cc7609dfebd489cd01e5c8cfcdd85516d",
+        "score": 0.781061172
+      },
+      {
+        "id": "8f7efd5a7e3ceefd81043d4a2ddc2cd7694eb4198bfec84da5cdaf5e5d970a8d",
+        "score": 0.761769295
+      },
+      {
+        "id": "94ed26ebffe17a173f3e555cdc4e2e4e841d4ba4acdabe4ab3a8ac4c3026ac38",
+        "score": 0.760662138
+      },
+      {
+        "id": "51a62e937ffae1ddbd69b97e30ed4f731458b5655da0306aab4e83b3639fdaf3",
+        "score": 0.759538651
+      },
+      {
+        "id": "0023672854639b7036f6827f3eb0859dd18a385ab7edf55a4b04b0b25227118b",
+        "score": 0.758065224
+      }
+    ],
+    "lexical": [
+      {
+        "id": "e66b2ca560e34fdb217184043b98fbd32eb7cfd74befe6a74de8bbb671e704dc",
+        "score": 0
+      },
+      {
+        "id": "c8a583f5a6d6b9f25a86788ba39ee24744e9c1cfe04b317df82feda38a80484a",
+        "score": 0
+      },
+      {
+        "id": "75cb69964786deac40820f8a07d389bc9218ff41ab1ee20de4e0fe4cb8ec36d6",
+        "score": 0
+      },
+      {
+        "id": "d35634ccf15fdfc9e9775827541b6019292c256c5a306c8fefa3de5c5e746726",
+        "score": 0
+      },
+      {
+        "id": "3e8c4b6a4dcaa341eaa9abb52a3c2d639926efb489c3e58af254d7301b354701",
+        "score": 0
+      },
+      {
+        "id": "7b957142464e626c49cb6a4894a5295fc3aed424ebfad0bffcdfbd0672e374e3",
+        "score": 0
+      },
+      {
+        "id": "2c7108e94b35ad422328bd7566cd18d0e9cb0aff69bc48dda17390c15313ff72",
+        "score": 0
+      },
+      {
+        "id": "163c847f1f512ab7b6c54913176383e6d919ac86a99ead296ba174252f644619",
+        "score": 0
+      },
+      {
+        "id": "322f8505b65610e1a3e25f544ebb983eb914f560ef24923bbde40bc24348fd54",
+        "score": 0
+      },
+      {
+        "id": "7f77bbd63be2ae44b26b2fb08728f05fc2e6c410a8b093d755ea2547ff5fb335",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "0a5abd0e1ccc4e3a",
+    "query": "Who is the Vice Chancellor of UET Taxila?",
+    "relevantChunkKeys": [
+      "b6e2619e6c2d615ad3a14f1240af0141f169274b77f093ed4b760cbcf1a6e136"
+    ],
+    "dense": [
+      {
+        "id": "b6e2619e6c2d615ad3a14f1240af0141f169274b77f093ed4b760cbcf1a6e136",
+        "score": 0.724648476
+      },
+      {
+        "id": "c78c4846fd4f669b198e160246b71bc43c19e46cda1ec74c08ffd8b9f30a63d7",
+        "score": 0.714090407
+      },
+      {
+        "id": "ecdabef613f5cd5d2d5fa1f2ddad45ef598d399190c849c82f59540f4b39dd3f",
+        "score": 0.710576057
+      },
+      {
+        "id": "ffa96c516dc58306d28ece9733e1562a3f698bb4be220094f6c729b9e266cbd2",
+        "score": 0.708699226
+      },
+      {
+        "id": "366a04b4a44519c2a78810de048fe934bdec6db0dd1d6d76a904d2f129a3a4e3",
+        "score": 0.706731796
+      },
+      {
+        "id": "f6108f56f484f856bf531cb5678cd1e9a1fb5ed6afe0e179d397941caf332422",
+        "score": 0.706066132
+      },
+      {
+        "id": "dab02929bf98a57f66b2ab085a02c288f582b1ff9eea532aeabad9efacf585ca",
+        "score": 0.704500198
+      },
+      {
+        "id": "b9c07e0d5f33c25fcb923a89a10a7fb1a465d99a0a02c4bc279706ca6eb4dc8d",
+        "score": 0.701402664
+      },
+      {
+        "id": "72c38b1dc000f94b73e27370f6436c2f347af6af50c452b1b9e2be8143778499",
+        "score": 0.700549185
+      },
+      {
+        "id": "3a22ea073b800dff443977207583d48d95a36c8f5aea6c3edb522cdc65167f1c",
+        "score": 0.699692726
+      }
+    ],
+    "lexical": [
+      {
+        "id": "b7bf7a051de5a04db0743bc72341f8a4c59f1a3deb3c608c6f5af64d9a27b8dd",
+        "score": 0
+      },
+      {
+        "id": "0d74f2aecbe2fca49a167b4537383c0f084b72fc67652990aa77ae50dc330953",
+        "score": 0
+      },
+      {
+        "id": "69d2d6372846cf39a1a78bd9ee6e3250bc3cb132a647685e3f36a76aa747516e",
+        "score": 0
+      },
+      {
+        "id": "7057aa5fd03454b85f25064a24432a4e8ee9de2908cd8c5712fbeb19c4c64462",
+        "score": 0
+      },
+      {
+        "id": "9350b018c1025d7219fcf0d952f2e4dcc0ebf7d6d018280e3eb45c7dcd745edb",
+        "score": 0
+      },
+      {
+        "id": "0ad75b03aeb6ffd716404db6894c380bfcb1c1dd26a8dc6bd9445e0f8300ddf6",
+        "score": 0
+      },
+      {
+        "id": "4dd4250bc9596bfdae9bbf2c355822ab6618a8572efd5bf12d9e0b42cea525f7",
+        "score": 0
+      },
+      {
+        "id": "f3fe7c9e3cab2272daa0dca205d50fa206d8b0aaa5726b6baf28c949a1b690d6",
+        "score": 0
+      },
+      {
+        "id": "cbfd84ba08154084d06037542b4c6e865aca822945fe85d71dbca1c6dbd14395",
+        "score": 0
+      },
+      {
+        "id": "39d834c47c2a85d4f6413b31380308183651cc9c8f334fb57913eb8f0ada7e58",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "067a5f0f244a6e34",
+    "query": "How can I contact the registrar office at UET Taxila?",
+    "relevantChunkKeys": [
+      "a7e5a404a4626b95fd9b5a7ab0772cffd03fad7765d1a965fac01d8fe35a2212",
+      "beeeaca047e6dd4b662a414b0ae5369d9633da1a6ea984c9bbb61c4d278ecdc5",
+      "73e71c7d7418ac1d6d5560e1840c1c31e9072a4237bd0fb6fd005186ca993390"
+    ],
+    "dense": [
+      {
+        "id": "a7e5a404a4626b95fd9b5a7ab0772cffd03fad7765d1a965fac01d8fe35a2212",
+        "score": 0.827864647
+      },
+      {
+        "id": "beeeaca047e6dd4b662a414b0ae5369d9633da1a6ea984c9bbb61c4d278ecdc5",
+        "score": 0.818638861
+      },
+      {
+        "id": "73e71c7d7418ac1d6d5560e1840c1c31e9072a4237bd0fb6fd005186ca993390",
+        "score": 0.815704405
+      },
+      {
+        "id": "b4222c5451c5548d9374f082fed820cbf141f95c0f458960bddefca535b8743d",
+        "score": 0.812665
+      },
+      {
+        "id": "60cfadcc37bdc013aab7547d2bb8c43d73a1e195c5883aa9289e3e32d7c37037",
+        "score": 0.812648773
+      },
+      {
+        "id": "a5740aa475a844678b5d0cb815a68096b8fdb95f6a35a867c4945efe3464ce43",
+        "score": 0.79256916
+      },
+      {
+        "id": "c2a8655cf96992d4b5b70a027ab6ec8f998b15a86692eafbb4be644c5fdce45e",
+        "score": 0.790486336
+      },
+      {
+        "id": "418d2e122542a48d18531232b69153673a9f6724bb6640ed6e4c00fb5eb1819d",
+        "score": 0.787347794
+      },
+      {
+        "id": "7f0662ebf824910b55a9cee95b9e6637db02c80d9defbc0fefa2f17b944096f1",
+        "score": 0.785071373
+      },
+      {
+        "id": "519489578cdb78c393d69aa08ef0dabe22ca3064f82f0b8b2f7dddc36fb4d5cb",
+        "score": 0.782469749
+      }
+    ],
+    "lexical": [
+      {
+        "id": "7f0662ebf824910b55a9cee95b9e6637db02c80d9defbc0fefa2f17b944096f1",
+        "score": 0
+      },
+      {
+        "id": "c403164d2c6f07d789bc6ea898d263bdd3cfd0b9b1638264eddcba0e965db9a0",
+        "score": 0
+      },
+      {
+        "id": "7c4504156961eab8da2431de972448bfb5482c9696afd42daf378b1d473717e2",
+        "score": 0
+      },
+      {
+        "id": "07fd16e0b2a8645b0f4efabfecd3ccebc99c61e3867cdba5a899640e241d7a07",
+        "score": 0
+      },
+      {
+        "id": "f365b2f41b6c8686dae1189048ad023163e77546bf053802dde49840e7a2d06b",
+        "score": 0
+      },
+      {
+        "id": "81f406a7ee78ce0f5dcaf60043fb35560a47f3e833eb6e4db546803fa5f00552",
+        "score": 0
+      },
+      {
+        "id": "e04e2d338b1456fc2cee4288972a710f0c89235d6ae2252fb5ed13519e7a3cdb",
+        "score": 0
+      },
+      {
+        "id": "9d19d311b2784e0c5f3fd965c4e069be107fb880a635f1a7db42ee3ca2786450",
+        "score": 0
+      },
+      {
+        "id": "a174e0b4ceef7a28ffdfe4beba35e613502b4b8fb80f7d62c65a1404cbe65ec9",
+        "score": 0
+      },
+      {
+        "id": "a26559419dbcd4b39246be1615eb5e3aa66dc0801318f53d63456a7d4c29437e",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "1e3f0c84cff8af35",
+    "query": "What is the phone number of UET Taxila main campus?",
+    "relevantChunkKeys": [
+      "60cfadcc37bdc013aab7547d2bb8c43d73a1e195c5883aa9289e3e32d7c37037",
+      "b4222c5451c5548d9374f082fed820cbf141f95c0f458960bddefca535b8743d",
+      "4738f2e1a87b10b3da3ffc8ad21214fb3f322c788b6c87b1d5b6527f3013cd2b",
+      "418d2e122542a48d18531232b69153673a9f6724bb6640ed6e4c00fb5eb1819d",
+      "04919b8122bc402334fb9351d73e12430f60bbf5ee2ecbde4bedb8f29bab4b95"
+    ],
+    "dense": [
+      {
+        "id": "60cfadcc37bdc013aab7547d2bb8c43d73a1e195c5883aa9289e3e32d7c37037",
+        "score": 0.85903728
+      },
+      {
+        "id": "b4222c5451c5548d9374f082fed820cbf141f95c0f458960bddefca535b8743d",
+        "score": 0.85121429
+      },
+      {
+        "id": "4738f2e1a87b10b3da3ffc8ad21214fb3f322c788b6c87b1d5b6527f3013cd2b",
+        "score": 0.850018322
+      },
+      {
+        "id": "418d2e122542a48d18531232b69153673a9f6724bb6640ed6e4c00fb5eb1819d",
+        "score": 0.831641078
+      },
+      {
+        "id": "04919b8122bc402334fb9351d73e12430f60bbf5ee2ecbde4bedb8f29bab4b95",
+        "score": 0.82557106
+      },
+      {
+        "id": "c2a8655cf96992d4b5b70a027ab6ec8f998b15a86692eafbb4be644c5fdce45e",
+        "score": 0.824904323
+      },
+      {
+        "id": "a7046d19e1fb7a23362b36aeee1c0348e7e54939d2b927505c54eec27c13289f",
+        "score": 0.816619754
+      },
+      {
+        "id": "82218d78887387a2db703cfb9a6a94709e43d1517de6c12c92a47ba92407bca7",
+        "score": 0.814383388
+      },
+      {
+        "id": "1fadd95b56087c94eb2cdbc55928cdb496627cfdc234a67f4ca58fff3ad9735c",
+        "score": 0.805128
+      },
+      {
+        "id": "c67aab14778280c67582707066a0af49715f508cf0b665233417b460f1239ff5",
+        "score": 0.80080688
+      }
+    ],
+    "lexical": [
+      {
+        "id": "7e44552a2f9c3cf75eeaa138f72fdab78d87b76e13c066d11d386ee10ba1d929",
+        "score": 0
+      },
+      {
+        "id": "317209eb7b1570f5d5e2f498723611645a6bf43967526c3595b815c3759f964f",
+        "score": 0
+      },
+      {
+        "id": "6c51931edcace62831fc31c7e91ae44e5ea67635dd59e8eeb827ae580d9ee8fe",
+        "score": 0
+      },
+      {
+        "id": "f06191415eb603dd2fe70dd572093ea90f18f29d13b6c659cf6713d20df09998",
+        "score": 0
+      },
+      {
+        "id": "981573423e72d2aeffa1425b345bb294051d0c751ac1bb9d87ee05d1187636ac",
+        "score": 0
+      },
+      {
+        "id": "e3d5ee9ce817188f009b0f8526a4cb496e717a1c1ea0e67798b35dc04cc49102",
+        "score": 0
+      },
+      {
+        "id": "0293fdd0528d9e4a0fa77e0bdc1872813aea5ea8b029e355cacec37cfa9e29d9",
+        "score": 0
+      },
+      {
+        "id": "f5a41c9e3a7128720865ad30feae6ab2c48c159bf6f307737e049a6d26ab7dc0",
+        "score": 0
+      },
+      {
+        "id": "39513ce191e49fc010451a71a2b91420d5e7d1e163c9227e026e735c5a03915f",
+        "score": 0
+      },
+      {
+        "id": "da2a62794a68ea8a34da9db9169c3a06d43136da0cd644a65fabd4549e2ed820",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "0826c56fb3e9e670",
+    "query": "How do I apply for the HEC need-based scholarship at UET Taxila?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "f120e2b0134997c65d4ec381b7e3398e0da42861cff2454a70cb1aae5ec293ca",
+        "score": 0.731422484
+      },
+      {
+        "id": "4784abffdbb2aa0013cbc77f8c7422bf36ac10f5676e1422537782021b5b2062",
+        "score": 0.727251053
+      },
+      {
+        "id": "7a7bcbb014628245b76babc9e0c6038d39718551fc37df1fa85f0549f6e80565",
+        "score": 0.724713385
+      },
+      {
+        "id": "ebe092c436eb0ea3a1048e9c1b77d10822bc6c432f6352a6fb3801e16999b33f",
+        "score": 0.716444969
+      },
+      {
+        "id": "85f018173dfc3a5429a83b35978c896f0bd5cdc35bd7240c7eb671bcdd48e8fb",
+        "score": 0.716444969
+      },
+      {
+        "id": "2803d6854ca2291f76374bab92d04edfc70673f93b14c8f0210b56fed4517b79",
+        "score": 0.716444969
+      },
+      {
+        "id": "549036e9c37315e68fec9ae6c06d62c1a0a05d7e9fb50f4aaa9b25a5c14995f1",
+        "score": 0.712463439
+      },
+      {
+        "id": "e0bd52a69f0cb71550bcc5468e5acb5ea3d9cf7cee3c7f2e5639296f86d3d500",
+        "score": 0.710727692
+      },
+      {
+        "id": "d99cb127a84911d357ddb07a5d42f2a05c3c5d6ec76eded81df255aa34f45dfc",
+        "score": 0.708244324
+      },
+      {
+        "id": "342f44bead2e403cd97945c8d36feb3196c7db0cc17e885d5837b22ae113e275",
+        "score": 0.708242476
+      }
+    ],
+    "lexical": [
+      {
+        "id": "6782cb5608f0be8f6a9794c4c50b09bb222d563988ea2da9ae02ed1e0a363427",
+        "score": 0
+      },
+      {
+        "id": "3fcbf5a940f3273f7ad29e98af44762eab10806ef41ff39a5d93f446c059c34b",
+        "score": 0
+      },
+      {
+        "id": "8c10cd8397b2e4199e0e2cd35866f7639ee85ac4f6dfd10e8f91964a34a5c638",
+        "score": 0
+      },
+      {
+        "id": "54d626b48cada687e1120a927ef6ed04d4147270445a503115658569f12ff939",
+        "score": 0
+      },
+      {
+        "id": "59dd1f04271dec43bdfb43805531da44294fd1372ef5181e494d311fc742070f",
+        "score": 0
+      },
+      {
+        "id": "085d9f9541c1f53f41c5c0dfb6cdbedaf8ef5d93c8998459810232fa4960c93f",
+        "score": 0
+      },
+      {
+        "id": "cdd40e52a6c6fec417448bfc9f6f64efc405ed5c34c2eecf6f7a7633bb0bf6a3",
+        "score": 0
+      },
+      {
+        "id": "df45904b4168fd120cb8b53a3708d538fbecb3c67a7b19f1120922965b00bbfb",
+        "score": 0
+      },
+      {
+        "id": "1ecf1b9902447fd2831e08631abcb4805690685d783e4d4881c4745a7d791299",
+        "score": 0
+      },
+      {
+        "id": "3b38237b9a5ce4611dbce4312adb1abc0601e59083dd6e4c9befb1b3c82f6384",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "ed64320d24518201",
+    "query": "What merit scholarships are available for top students at UET Taxila?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "8a5297c4ba7b5ae51968230851b72f698fed7ed162f3015f5ce3fe752fa17eee",
+        "score": 0.77283
+      },
+      {
+        "id": "5c5de983dab13e98508832098b9ee7aa1fcb40ad4fe7c85c5ef5e64d5ee6c549",
+        "score": 0.732871056
+      },
+      {
+        "id": "85f018173dfc3a5429a83b35978c896f0bd5cdc35bd7240c7eb671bcdd48e8fb",
+        "score": 0.725121498
+      },
+      {
+        "id": "2803d6854ca2291f76374bab92d04edfc70673f93b14c8f0210b56fed4517b79",
+        "score": 0.725121498
+      },
+      {
+        "id": "ebe092c436eb0ea3a1048e9c1b77d10822bc6c432f6352a6fb3801e16999b33f",
+        "score": 0.725121498
+      },
+      {
+        "id": "2c8a045e6ae52c325883ea73ea10be83e111a176bfc504fc2092a46c41d7adf8",
+        "score": 0.723335266
+      },
+      {
+        "id": "d335472b52f99caf8d8d7a0d35c8906939b9b18c7c7d981626c096782530dc38",
+        "score": 0.721835136
+      },
+      {
+        "id": "cec8695361dbc3848ce35e54a184f3ddce5fa0ce76523207d907863f062ff1bb",
+        "score": 0.719882
+      },
+      {
+        "id": "2a14d36ab44db318930c8494bd56d9c5e7f2f9bb5e03754ff304d2fd56e1af4e",
+        "score": 0.719882
+      },
+      {
+        "id": "389afb3b8c53026da044722299b6f1199ccae913d5ff6a5d44a9543d012c06fd",
+        "score": 0.719882
+      }
+    ],
+    "lexical": [
+      {
+        "id": "9a84f832d30b1c83f103eff219ac53d684e1edd19cf5d4e23747159e618b338b",
+        "score": 0
+      },
+      {
+        "id": "e37fa5390558479b461e45817852fe83c5178ed1aaf240d3db72f8908cdb05e0",
+        "score": 0
+      },
+      {
+        "id": "d58a2347e262afd46a726990d5ad42559b35e2f41c6827ebb1866136a0d34845",
+        "score": 0
+      },
+      {
+        "id": "fe01005fce446eccec63d4ec90da3dfd92da23fa7b36f7a8121e3e533694d646",
+        "score": 0
+      },
+      {
+        "id": "0b0532e3b4620188eac416defd6efd09c92b3c82c422430dd1a69cd483593d0e",
+        "score": 0
+      },
+      {
+        "id": "72dfb5b6f2334d9edc6744468f9e445e5c4810a7960c7a200346c279227b2b6b",
+        "score": 0
+      },
+      {
+        "id": "22631e4fe7f01715703afca8f810ea67eeb732be8dc13cc6aec27929a3db7584",
+        "score": 0
+      },
+      {
+        "id": "eda5217cacbc716dc969b31230cd742720f9f59ef04b42dfb328c8c345b407df",
+        "score": 0
+      },
+      {
+        "id": "fc62c516be9dc84cdfa86904e11aa6bae81a039e2162de199e439275c3d79b4b",
+        "score": 0
+      },
+      {
+        "id": "ef54bb98a6a656d98f0d9a5919df99bafc10715a2fea1fc7bbe2375ad0c98820",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "4b515ce39511ff1b",
+    "query": "Is there a fee waiver program for financially needy students at UET Taxila?",
+    "relevantChunkKeys": [
+      "9e8723a93be0ccacc05877d21901d82e6d7b0b48f01131590d3337cf1afb8e05"
+    ],
+    "dense": [
+      {
+        "id": "51bdbc92a4674d7c23a251cdf084f6c0d78dea87f675677a925191fe2ba7b7dc",
+        "score": 0.72502619
+      },
+      {
+        "id": "9e8723a93be0ccacc05877d21901d82e6d7b0b48f01131590d3337cf1afb8e05",
+        "score": 0.714982033
+      },
+      {
+        "id": "abf448db72516de55d5d0fa51a82ab400daff990e839a74db94c67d91dba596c",
+        "score": 0.712359428
+      },
+      {
+        "id": "b73269d761d764eb0ea619d0297d51e54dc16671ef743731824393737c9c08bb",
+        "score": 0.712359428
+      },
+      {
+        "id": "d335472b52f99caf8d8d7a0d35c8906939b9b18c7c7d981626c096782530dc38",
+        "score": 0.712106705
+      },
+      {
+        "id": "73ce047edb4008ce197d3c5cf14012f5daf0e7dd4ca38d60a9efe47f2ce2aa39",
+        "score": 0.708067894
+      },
+      {
+        "id": "5879738f15f64bdd6a6a8665fbe8d2b2804b9921aef960b755fd6a5c87317bac",
+        "score": 0.707194328
+      },
+      {
+        "id": "30117c7928a312d6df618fa2211bc880cb0f5e3282d64970d6fecdd81dfe27df",
+        "score": 0.707192421
+      },
+      {
+        "id": "3f453510373f466e6661652f8052b3afbb96e1c97265b7e6379a335299dd13b9",
+        "score": 0.706021309
+      },
+      {
+        "id": "95117c5518ee2d4b05e18643e0a6b28670a9ee1cdd459ca340708caf42c2568a",
+        "score": 0.706016541
+      }
+    ],
+    "lexical": [
+      {
+        "id": "73c5f654fd6fd7482328b06e7a819dbddae7cf3791f2e760a0cd4585c3db601d",
+        "score": 0
+      },
+      {
+        "id": "3d5128c75c3faf9fe0fca44e704b7a4dac1fd6998d6e61cecd13af8a2f818083",
+        "score": 0
+      },
+      {
+        "id": "fc11e6092df4b89ebbfee2575a4a56dcb7e5c096a5b09cc4441a847d56f48d5c",
+        "score": 0
+      },
+      {
+        "id": "d19c79ab521e71936d73049c8de2d335d2138884bb3de213e58ef3c2e96667ff",
+        "score": 0
+      },
+      {
+        "id": "96969304e592f46bdb3003da7f2207f2321cfe76f4a2dce4709fdc74ab5c3a7d",
+        "score": 0
+      },
+      {
+        "id": "5e591e611aae6f479382d983195f6be486a976b2aaf0fba4442ee256aa22794d",
+        "score": 0
+      },
+      {
+        "id": "e9aeeb5cc685ff0dd7427ad790ff441b1b1dcfaffb65b725036951f6def3cc7f",
+        "score": 0
+      },
+      {
+        "id": "6dffa71b3dc95ec8d513db321fef381e91a9a88529dee29d66eb604a4327f484",
+        "score": 0
+      },
+      {
+        "id": "45ad7f2485d019a629bc2c70e640eb23ee5b58246c7dbe6c0fe36facf3967157",
+        "score": 0
+      },
+      {
+        "id": "88398ca311aea9bc6f7831991472d33523f3c84fdf7b5d0d841e694f8723aaab",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "92caae0e08262a70",
+    "query": "Where is the UET Taxila main campus located?",
+    "relevantChunkKeys": [
+      "fb432fb00678ad965cf9952186b747a88f68722d3867aca276df63794348d909",
+      "da2a62794a68ea8a34da9db9169c3a06d43136da0cd644a65fabd4549e2ed820",
+      "28656442d346a1b2858b9abb79ce05f3d28335b4b6b7748298dea5dc181f926a",
+      "f6007caa25253ff95e277886d05326ce68225991347d4ffc0dd17a425e18118f"
+    ],
+    "dense": [
+      {
+        "id": "fb432fb00678ad965cf9952186b747a88f68722d3867aca276df63794348d909",
+        "score": 0.809719086
+      },
+      {
+        "id": "da2a62794a68ea8a34da9db9169c3a06d43136da0cd644a65fabd4549e2ed820",
+        "score": 0.801567078
+      },
+      {
+        "id": "366a04b4a44519c2a78810de048fe934bdec6db0dd1d6d76a904d2f129a3a4e3",
+        "score": 0.787302
+      },
+      {
+        "id": "28656442d346a1b2858b9abb79ce05f3d28335b4b6b7748298dea5dc181f926a",
+        "score": 0.783971786
+      },
+      {
+        "id": "f6007caa25253ff95e277886d05326ce68225991347d4ffc0dd17a425e18118f",
+        "score": 0.782378197
+      },
+      {
+        "id": "3a22ea073b800dff443977207583d48d95a36c8f5aea6c3edb522cdc65167f1c",
+        "score": 0.774850845
+      },
+      {
+        "id": "d61dec49b36d2653f743c4036a034104c9424800c828caac8650f46b4e3bf7bb",
+        "score": 0.774849892
+      },
+      {
+        "id": "5a235ddd3d18ae323581977fa2de347228b4789f62efccf08416aa751aae8b05",
+        "score": 0.772798538
+      },
+      {
+        "id": "b1f66bcd4cef6138b5cdcac02649a193e4c0e18bfa6c507493bc48ba3e10856b",
+        "score": 0.769849837
+      },
+      {
+        "id": "078c315352e10e413eb33c7de77919bd1986b5a2011036c2c0d0ddfada3050c1",
+        "score": 0.762696266
+      }
+    ],
+    "lexical": [
+      {
+        "id": "981573423e72d2aeffa1425b345bb294051d0c751ac1bb9d87ee05d1187636ac",
+        "score": 0
+      },
+      {
+        "id": "0293fdd0528d9e4a0fa77e0bdc1872813aea5ea8b029e355cacec37cfa9e29d9",
+        "score": 0
+      },
+      {
+        "id": "f5a41c9e3a7128720865ad30feae6ab2c48c159bf6f307737e049a6d26ab7dc0",
+        "score": 0
+      },
+      {
+        "id": "f6007caa25253ff95e277886d05326ce68225991347d4ffc0dd17a425e18118f",
+        "score": 0
+      },
+      {
+        "id": "da2a62794a68ea8a34da9db9169c3a06d43136da0cd644a65fabd4549e2ed820",
+        "score": 0
+      },
+      {
+        "id": "fb432fb00678ad965cf9952186b747a88f68722d3867aca276df63794348d909",
+        "score": 0
+      },
+      {
+        "id": "b2866105b23d00c37a459688b5321f3833bdcd3ef38d3875e002cb1e92f0cc64",
+        "score": 0
+      },
+      {
+        "id": "28656442d346a1b2858b9abb79ce05f3d28335b4b6b7748298dea5dc181f926a",
+        "score": 0
+      },
+      {
+        "id": "fe2beac15dbcf28abd62f9032b688cdce61bf66661c9c03ad24c4b9e8af6aa2c",
+        "score": 0
+      },
+      {
+        "id": "55f1db955f681425efeb7da73d6f785150922f519762cf16769937622e700a2b",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "e1d169833b2c6fe2",
+    "query": "Does UET Taxila have a student hostel on campus?",
+    "relevantChunkKeys": [
+      "ecb02a527482f3183fac55c355b7e6843c1841514a0b7b7c1df24e10e1a890a2",
+      "5a235ddd3d18ae323581977fa2de347228b4789f62efccf08416aa751aae8b05",
+      "1471c51933271a97c105c46f55583809d72b89a12fdcca157bf9533659920e6c",
+      "f535f741a88abc79e86cfc4e700f0424ff021c28c7a046451d435d5ad55af39b",
+      "e5a1a739dcb84b4ce5bdaca8d29bed6bda97165754deddba58c41b50d1f07ac8"
+    ],
+    "dense": [
+      {
+        "id": "ecb02a527482f3183fac55c355b7e6843c1841514a0b7b7c1df24e10e1a890a2",
+        "score": 0.792904854
+      },
+      {
+        "id": "5a235ddd3d18ae323581977fa2de347228b4789f62efccf08416aa751aae8b05",
+        "score": 0.792568207
+      },
+      {
+        "id": "1471c51933271a97c105c46f55583809d72b89a12fdcca157bf9533659920e6c",
+        "score": 0.774866164
+      },
+      {
+        "id": "f535f741a88abc79e86cfc4e700f0424ff021c28c7a046451d435d5ad55af39b",
+        "score": 0.770507812
+      },
+      {
+        "id": "e5a1a739dcb84b4ce5bdaca8d29bed6bda97165754deddba58c41b50d1f07ac8",
+        "score": 0.762946129
+      },
+      {
+        "id": "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
+        "score": 0.730840743
+      },
+      {
+        "id": "8dc76acb131cb67942db2677b1893a9b26cda339b787e0fd4557948be73c37ba",
+        "score": 0.730698586
+      },
+      {
+        "id": "bad3d7685f3b66873c9e29c05af72e143ef67c9aa57dffa57636749109fc8523",
+        "score": 0.730697632
+      },
+      {
+        "id": "6cac46287dd7852d3bda0f66a760a2d7e606807ce57fee80d9286b4d08541b94",
+        "score": 0.727562
+      },
+      {
+        "id": "2a22b33fbe225ae2e2b21e257306422447d88759050bdd2a6d76a3ac2d1a8bb3",
+        "score": 0.727154732
+      }
+    ],
+    "lexical": [
+      {
+        "id": "12649df966b6d49c0cab78818792affc237db9ae391381f0992a322e20bb1c1a",
+        "score": 0
+      },
+      {
+        "id": "7e44552a2f9c3cf75eeaa138f72fdab78d87b76e13c066d11d386ee10ba1d929",
+        "score": 0
+      },
+      {
+        "id": "249088e5f563a42f5deda52f4ead7498fcf32da8143e070c7cef968efc71c461",
+        "score": 0
+      },
+      {
+        "id": "da467d2344cfb0aaf201ea81179edd019f16fad1f2c8a27ea6fd1c6cd1af9ec5",
+        "score": 0
+      },
+      {
+        "id": "1ed571cf6ba75c1c398372e8f04462cb832a296a5ee01f8c5560901b88a07f33",
+        "score": 0
+      },
+      {
+        "id": "4d42486c561be0b45448721cbfb2f8c9aa8cec592a99f8b85344de3d50587564",
+        "score": 0
+      },
+      {
+        "id": "863137dbff34cf642aa471ea7d0fc6b9cc4000ece75c4ff07691670655d54e91",
+        "score": 0
+      },
+      {
+        "id": "c9772bb4ab2aadd6c17c5cffcebebef7eb0031dd7dbd2dc13b2aca7bf9b22364",
+        "score": 0
+      },
+      {
+        "id": "0f29514a4f3b810ccdee5c864f0f570be6143daacb9dc276b18ebd8cd6fbdea2",
+        "score": 0
+      },
+      {
+        "id": "daf1a4c9c1d59d333620274fa4be7bf85777f40ce7dbb60517b223afb7f12108",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "bb92759aba56e8f6",
+    "query": "What transport facilities does UET Taxila provide for students?",
+    "relevantChunkKeys": [
+      "d2fcfbfa12f8f0c3effd969ec4b7f9de01269fbaa05010a801c5615eeb3f3cfd",
+      "02fd6588dc612d043caf6ba9f51ce49b1bbf2fdfd45ac68a1ff62bed30297a65"
+    ],
+    "dense": [
+      {
+        "id": "02fd6588dc612d043caf6ba9f51ce49b1bbf2fdfd45ac68a1ff62bed30297a65",
+        "score": 0.792811394
+      },
+      {
+        "id": "d2fcfbfa12f8f0c3effd969ec4b7f9de01269fbaa05010a801c5615eeb3f3cfd",
+        "score": 0.792630255
+      },
+      {
+        "id": "1471c51933271a97c105c46f55583809d72b89a12fdcca157bf9533659920e6c",
+        "score": 0.754551947
+      },
+      {
+        "id": "937ad17feac70bec38a2b707e2606a1e76bdafd88390df95c5009a932f8f4764",
+        "score": 0.750431061
+      },
+      {
+        "id": "5a235ddd3d18ae323581977fa2de347228b4789f62efccf08416aa751aae8b05",
+        "score": 0.742775917
+      },
+      {
+        "id": "ecb02a527482f3183fac55c355b7e6843c1841514a0b7b7c1df24e10e1a890a2",
+        "score": 0.742445946
+      },
+      {
+        "id": "e5a1a739dcb84b4ce5bdaca8d29bed6bda97165754deddba58c41b50d1f07ac8",
+        "score": 0.741892815
+      },
+      {
+        "id": "7901cbbc448499147511dc4eed63b9269d09607fbcb782a12bdbae17f5612f84",
+        "score": 0.733943939
+      },
+      {
+        "id": "03853871f2ae2a3dbe92f5460388a315c7649dc62b64f116e69240d28a4f2791",
+        "score": 0.732424736
+      },
+      {
+        "id": "6cac46287dd7852d3bda0f66a760a2d7e606807ce57fee80d9286b4d08541b94",
+        "score": 0.732409537
+      }
+    ],
+    "lexical": [
+      {
+        "id": "5f17ce948b89dcdb2e49f7f8f95d99feab050f70a1b2a551d029dacf7c0d67bf",
+        "score": 0
+      },
+      {
+        "id": "a865a1229fd572763d7ecf401247258c9d338894a90059a29a6f8a1cb15597a4",
+        "score": 0
+      },
+      {
+        "id": "e04e2d338b1456fc2cee4288972a710f0c89235d6ae2252fb5ed13519e7a3cdb",
+        "score": 0
+      },
+      {
+        "id": "f365b2f41b6c8686dae1189048ad023163e77546bf053802dde49840e7a2d06b",
+        "score": 0
+      },
+      {
+        "id": "150f9c6c30bff62bcd68449e5e98dec0d32bf7bb6cb85424f9950d2db9bc8223",
+        "score": 0
+      },
+      {
+        "id": "26e8ffa076406c36cc64d851b5aed74ed791e6eab636c5b57e7aa37dc2392eb7",
+        "score": 0
+      },
+      {
+        "id": "07bbf7f51b703211d938d4582de319b6d7bfec5b5c0f1d12b65a959c9794f814",
+        "score": 0
+      },
+      {
+        "id": "a174e0b4ceef7a28ffdfe4beba35e613502b4b8fb80f7d62c65a1404cbe65ec9",
+        "score": 0
+      },
+      {
+        "id": "a26559419dbcd4b39246be1615eb5e3aa66dc0801318f53d63456a7d4c29437e",
+        "score": 0
+      },
+      {
+        "id": "9d19d311b2784e0c5f3fd965c4e069be107fb880a635f1a7db42ee3ca2786450",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "f86cfd8aa6d35c49",
+    "query": "What is the library timing at UET Taxila?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "dd23ce96a8aa1d8ab769eeade44c4eb6018a603730c4dce12f9f26b89f6cfd0c",
+        "score": 0.738779068
+      },
+      {
+        "id": "f046789127bd9414ae00f7676a0ebb4135617b5fb96b2dba1484b4c0ce2e0289",
+        "score": 0.72403717
+      },
+      {
+        "id": "a428769fbf99509e45a47972b0ada96d693df2fd66cacdce5edd104acf678a45",
+        "score": 0.724013329
+      },
+      {
+        "id": "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
+        "score": 0.723507
+      },
+      {
+        "id": "ec69b56ed39f02239ee746dc38896baea2453b82fc8020a471a0adbb51b628e8",
+        "score": 0.723303795
+      },
+      {
+        "id": "5a235ddd3d18ae323581977fa2de347228b4789f62efccf08416aa751aae8b05",
+        "score": 0.718103409
+      },
+      {
+        "id": "366a04b4a44519c2a78810de048fe934bdec6db0dd1d6d76a904d2f129a3a4e3",
+        "score": 0.717474
+      },
+      {
+        "id": "ae4b3c8912690e4d7b6b79349a6e62ced6edbb200d0495240f3c95eb688692fa",
+        "score": 0.716087401
+      },
+      {
+        "id": "8a6badf336c6f4718678dd324f003349789299bd686a7bd425c393b462658141",
+        "score": 0.716011107
+      },
+      {
+        "id": "27da931de6c19502d73e0c92d4004d2cad9a1181fbde91cfc857fbf1082dca6d",
+        "score": 0.715360701
+      }
+    ],
+    "lexical": [
+      {
+        "id": "7b56e94dae60576c388bc8f74c77f5739e9a64b6bb7d1dbaa6c4133575d519b2",
+        "score": 0
+      },
+      {
+        "id": "a15694659884f9b2aefc0c9a1779026e8e3f7355fc5010d02f5ce5aaa110353b",
+        "score": 0
+      },
+      {
+        "id": "5f17ce948b89dcdb2e49f7f8f95d99feab050f70a1b2a551d029dacf7c0d67bf",
+        "score": 0
+      },
+      {
+        "id": "0d1734dac162a74e4d566720f6639a2abd3ca0fed083eb3e6f78d6c138fce9dd",
+        "score": 0
+      },
+      {
+        "id": "13b3d504c1629ab79909149c73463aeae9af438fde25cc7f2ce45a82b5590625",
+        "score": 0
+      },
+      {
+        "id": "fa9a78d166c0f3da072c16887ea5b3a31ce0dafef5b350c949ad14f496315424",
+        "score": 0
+      },
+      {
+        "id": "64f02be06ab7e38d71f94ea71f27b0d07fe2d77d1215eccdbbff21d3dc4f6a3d",
+        "score": 0
+      },
+      {
+        "id": "f365b2f41b6c8686dae1189048ad023163e77546bf053802dde49840e7a2d06b",
+        "score": 0
+      },
+      {
+        "id": "9d19d311b2784e0c5f3fd965c4e069be107fb880a635f1a7db42ee3ca2786450",
+        "score": 0
+      },
+      {
+        "id": "d35634ccf15fdfc9e9775827541b6019292c256c5a306c8fefa3de5c5e746726",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "136c2516eded904b",
+    "query": "Where do I submit form 17-B for clearance at UET Taxila?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "a79924742cd764cb0a73daa2a6957e57ad7e463c4fb5cc09373b93e716618f76",
+        "score": 0.685393333
+      },
+      {
+        "id": "026accb5be0716971521c037d9821484c57fdce03b3ff4a8a8e85a6f5632855a",
+        "score": 0.677717209
+      },
+      {
+        "id": "14e94df4164e484950e4dbce3f5654e8b27e2e2358cd63819d0fbba6cff3548f",
+        "score": 0.67679882
+      },
+      {
+        "id": "5dc5996c2be8011b3546106233b998c3fc3f412f3c0f20defe046a3c5c1c2407",
+        "score": 0.673630714
+      },
+      {
+        "id": "ef00f8eee0c19ad46896456d290d97e89976d3bbc3db9735a6430742f8e344ac",
+        "score": 0.673453391
+      },
+      {
+        "id": "26927c58f45401c8dfc6b3409cbab08c455a1a9cce43b03f7deaa3057f33dd83",
+        "score": 0.670254707
+      },
+      {
+        "id": "12087883204a242ce2265b1eb5c2b44b1239215441958a902fb8075676d853b9",
+        "score": 0.66704464
+      },
+      {
+        "id": "723a53ab0ac1dffe4765faebb9ba8c5d64fd408da7e50c13ddd675ac2b57113e",
+        "score": 0.666965485
+      },
+      {
+        "id": "549036e9c37315e68fec9ae6c06d62c1a0a05d7e9fb50f4aaa9b25a5c14995f1",
+        "score": 0.66650492
+      },
+      {
+        "id": "7a3156675bf22e1742af21f2f38ad80ac867d7794a3b549e92a188f95e00433f",
+        "score": 0.665590346
+      }
+    ],
+    "lexical": [
+      {
+        "id": "1e5e1ef3488fd2bd561db76f2ddfeff9ff9d33d00c049eab6014fd81e3b51da1",
+        "score": 0
+      },
+      {
+        "id": "675a37c274a3a4b4510d2e311ae6284455f90bc2403360edff1519667ed507b0",
+        "score": 0
+      },
+      {
+        "id": "585747f3422277744bb2af2a2d6e4734ce44950e9cfc49a1ccb3b4b0da9be5c0",
+        "score": 0
+      },
+      {
+        "id": "8be4bc42bbf1eb616207ccf1b3a49d1f65386a65815f5118c8c62ef0ea798e13",
+        "score": 0
+      },
+      {
+        "id": "c0d85fb09cbaa8989c7398907755b110d6d2edcc72aa552d81f5231e2eafb8c2",
+        "score": 0
+      },
+      {
+        "id": "12b43819a2e1f6608daa5f2f275b3aa1890b247446da8727dc25ebf2919ddfdb",
+        "score": 0
+      },
+      {
+        "id": "1fab7d21791658be62610c98df887a9887ce02be3ad7a456fbc581e560380c3b",
+        "score": 0
+      },
+      {
+        "id": "6dad5bc49331495df1ea8f109a05f792186973cb0f730d2acbbf6a491dfbee37",
+        "score": 0
+      },
+      {
+        "id": "b122e45dfa9111e5a5cc30a8f618b70330957d7a2a6f6c36675eb70aeed2865a",
+        "score": 0
+      },
+      {
+        "id": "742c11b95956d1643072a79bfde6fa1cba7ba50726081c95b63dbe7058ee1546",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "c6d36166ce93efaf",
+    "query": "Is CS-301 equivalent to SE-301 at UET Taxila?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "746919df0544c48487bd1e89f8fd05aebff1ea7a02be638e00d488c824b93dce",
+        "score": 0.628334105
+      },
+      {
+        "id": "87af7841a9e856c9d2163452063374701f00ea02cc495ad1ff31075e4ebed971",
+        "score": 0.614748061
+      },
+      {
+        "id": "d8f448402ae71fa80b1e69ef8cd605bc4883af8c02a57493a5e8c267a292b77a",
+        "score": 0.614224494
+      },
+      {
+        "id": "ccc9fe69fabdd7deda55f1a1cfc7f30fd478d24f6c908e6e9a548081093bbf97",
+        "score": 0.614195883
+      },
+      {
+        "id": "8a6badf336c6f4718678dd324f003349789299bd686a7bd425c393b462658141",
+        "score": 0.611637175
+      },
+      {
+        "id": "b1f66bcd4cef6138b5cdcac02649a193e4c0e18bfa6c507493bc48ba3e10856b",
+        "score": 0.609258711
+      },
+      {
+        "id": "54ead5a69760658e502d2e392c158b169924253e0beae9312011060021991638",
+        "score": 0.607315123
+      },
+      {
+        "id": "2ead6dbef6cf4f982e4631e1bf27b4a10f41141763b606d556b1a9915c96e23b",
+        "score": 0.606410086
+      },
+      {
+        "id": "9dd7aa3c5cd61d97fe4f72cb8df399f8ab1fb5a51f176239211c682260082665",
+        "score": 0.604915679
+      },
+      {
+        "id": "27da931de6c19502d73e0c92d4004d2cad9a1181fbde91cfc857fbf1082dca6d",
+        "score": 0.604549468
+      }
+    ],
+    "lexical": [
+      {
+        "id": "4fe51670bece41e5b3e602c2a1a65f931d68e8fa8fdf64d6f1d5d5fc8c74d19a",
+        "score": 0
+      },
+      {
+        "id": "3e6fcac011b60dc7979e094d8257081db0295a4aeee40816d3480f86066fbd53",
+        "score": 0
+      },
+      {
+        "id": "103a800584ca740e57d0631f90b81282bfecd6eaec26055d20e0919d3860dc16",
+        "score": 0
+      },
+      {
+        "id": "fab501d6ee5eadfca62825fb8abc5d5effc03da435202c8224624c0be6d8ec19",
+        "score": 0
+      },
+      {
+        "id": "dd6a6e11ada5cd1aaabbe2c07386cf8fee960af697ae042034dd2dc1faf169b6",
+        "score": 0
+      },
+      {
+        "id": "d72ed5185295a04ef7c2322fe11dedb7246ad8fdac1cc0dacc14184f17fd5a41",
+        "score": 0
+      },
+      {
+        "id": "5bef96421bcf3ecdd0c730fe5a9a4dcd315826fc54c0fb625f8297fdc09281f5",
+        "score": 0
+      },
+      {
+        "id": "133a244b8f9ce7057f8005ee474ec51b43ebe2799e0b151b726574d507f53fef",
+        "score": 0
+      },
+      {
+        "id": "b122e45dfa9111e5a5cc30a8f618b70330957d7a2a6f6c36675eb70aeed2865a",
+        "score": 0
+      },
+      {
+        "id": "e12981b7a13ad133832988336a266e7464aa3a330a64a0daf01a62717a50b052",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "21ce9642f1250090",
+    "query": "What is the procedure to apply for a degree certificate at UET Taxila?",
+    "relevantChunkKeys": [
+      "a79924742cd764cb0a73daa2a6957e57ad7e463c4fb5cc09373b93e716618f76"
+    ],
+    "dense": [
+      {
+        "id": "7a3156675bf22e1742af21f2f38ad80ac867d7794a3b549e92a188f95e00433f",
+        "score": 0.784466863
+      },
+      {
+        "id": "a79924742cd764cb0a73daa2a6957e57ad7e463c4fb5cc09373b93e716618f76",
+        "score": 0.767990172
+      },
+      {
+        "id": "549036e9c37315e68fec9ae6c06d62c1a0a05d7e9fb50f4aaa9b25a5c14995f1",
+        "score": 0.764871716
+      },
+      {
+        "id": "6cac46287dd7852d3bda0f66a760a2d7e606807ce57fee80d9286b4d08541b94",
+        "score": 0.763289571
+      },
+      {
+        "id": "3f76c3ea700d3862d2411e5d8b2e19423d9d1785c0c2ef0ea1a4c120a9102bf6",
+        "score": 0.76226908
+      },
+      {
+        "id": "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
+        "score": 0.753437161
+      },
+      {
+        "id": "51a41a665749a8af5817f8c439434b1b6a321ccda6c453107292fff428d5e420",
+        "score": 0.751563132
+      },
+      {
+        "id": "c4a06785c311d32cdf5f3a8609813e9fbf77ffb46a6b24e30f929f454aa08cfd",
+        "score": 0.748255789
+      },
+      {
+        "id": "d53a608dc0fa31df6612056b560a4e4b42ff1189872322d821be9ea03e259876",
+        "score": 0.746246397
+      },
+      {
+        "id": "b7ca5395d472fffbce9a5b7f2877b08c86814a80337f49ce9080cbe5fcb610c5",
+        "score": 0.745368063
+      }
+    ],
+    "lexical": [
+      {
+        "id": "608165094f6c8b23bab789c81b280cb897327318fb66cf10476a953badea8176",
+        "score": 0
+      },
+      {
+        "id": "916b1b237f7cb8369eceeffdc956ec1dcc1d1b2c5579a7cbfe38c24e80026f34",
+        "score": 0
+      },
+      {
+        "id": "0cb6397f908e6fe541539c632dfb79754513259d7fa1bbaec180b40b72b406a5",
+        "score": 0
+      },
+      {
+        "id": "25c2fc97f63450c0459043e187e25595b04111c814af22388f81d80607869024",
+        "score": 0
+      },
+      {
+        "id": "e5d332248282220d88d494f9bb272a0c4c51d0162cd38cb01f2d47b68acf37c9",
+        "score": 0
+      },
+      {
+        "id": "3e0c25210986d84937ae747ca63e89b7c9ed880300cbeccea1c6d9b1b26022f7",
+        "score": 0
+      },
+      {
+        "id": "39f641ffef7209a250d907db16133b6feb5ae4683f6c203d932673fac99ec279",
+        "score": 0
+      },
+      {
+        "id": "4db8a429cde06a9d12143311f268dd0e0d051871d857d4194787c3bbfac71de2",
+        "score": 0
+      },
+      {
+        "id": "4f6fc8cb0adaff68d94b8251629abd642a102d296b44a63af3c4fa0c19848e20",
+        "score": 0
+      },
+      {
+        "id": "37daa74a4e294f63f46ecf51b99ecf826e4b34f2c17aebfa4047ed07725d4a0e",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "9a07498d5501476c",
+    "query": "Can I freeze my semester at UET Taxila and what is the procedure?",
+    "relevantChunkKeys": [
+      "132cc45bfc91bd0fee26227bd1790990dba64825b93d0de035fe3e077713ed98",
+      "1bfe40dd95c20fd48bade917418dbb39ec24eacb80fb23200b3204fb709bd542",
+      "f5ec67ad032d40a574afd5710573f5e66455941833bc41cdc6cd8534a1879ade"
+    ],
+    "dense": [
+      {
+        "id": "f68a8c83695e81f4f16d850438d104a99aa0730f194667eaca73e7918c643067",
+        "score": 0.717632294
+      },
+      {
+        "id": "132cc45bfc91bd0fee26227bd1790990dba64825b93d0de035fe3e077713ed98",
+        "score": 0.710025787
+      },
+      {
+        "id": "1bfe40dd95c20fd48bade917418dbb39ec24eacb80fb23200b3204fb709bd542",
+        "score": 0.698540747
+      },
+      {
+        "id": "f5ec67ad032d40a574afd5710573f5e66455941833bc41cdc6cd8534a1879ade",
+        "score": 0.68948561
+      },
+      {
+        "id": "e732a12e5e3d98b57b66144df505e94284caf4f229db44e1cf9a09ecd6f013cb",
+        "score": 0.687516212
+      },
+      {
+        "id": "fc49f5a13cc451ecb3b6575b1a7a3931f254febb4be3377a9274f65752a1969a",
+        "score": 0.678565
+      },
+      {
+        "id": "4969a5e65a35dc0417314a3bf6f3f001fcd999b656ffb4ec89a7839a4d09db7a",
+        "score": 0.678563118
+      },
+      {
+        "id": "ad5b591a08fd654d8d0848113523bffbf10fe8f395daf511e1bf3d635ad7497b",
+        "score": 0.677886963
+      },
+      {
+        "id": "64887b1b75191de6ff2c8dd7a09962e719a1e78fb721ad90f44428ba6e7d8b30",
+        "score": 0.675894737
+      },
+      {
+        "id": "d061d7a5b2d027bd5a061f726ffcc6334195e235956d24d6720422e10bce9846",
+        "score": 0.674542487
+      }
+    ],
+    "lexical": [
+      {
+        "id": "5f17ce948b89dcdb2e49f7f8f95d99feab050f70a1b2a551d029dacf7c0d67bf",
+        "score": 0
+      },
+      {
+        "id": "f365b2f41b6c8686dae1189048ad023163e77546bf053802dde49840e7a2d06b",
+        "score": 0
+      },
+      {
+        "id": "e04e2d338b1456fc2cee4288972a710f0c89235d6ae2252fb5ed13519e7a3cdb",
+        "score": 0
+      },
+      {
+        "id": "9d19d311b2784e0c5f3fd965c4e069be107fb880a635f1a7db42ee3ca2786450",
+        "score": 0
+      },
+      {
+        "id": "99e8b67311e9c2ce8d10f734822c287393189307545e6da3f7df914c0f763300",
+        "score": 0
+      },
+      {
+        "id": "a174e0b4ceef7a28ffdfe4beba35e613502b4b8fb80f7d62c65a1404cbe65ec9",
+        "score": 0
+      },
+      {
+        "id": "a26559419dbcd4b39246be1615eb5e3aa66dc0801318f53d63456a7d4c29437e",
+        "score": 0
+      },
+      {
+        "id": "150f9c6c30bff62bcd68449e5e98dec0d32bf7bb6cb85424f9950d2db9bc8223",
+        "score": 0
+      },
+      {
+        "id": "26e8ffa076406c36cc64d851b5aed74ed791e6eab636c5b57e7aa37dc2392eb7",
+        "score": 0
+      },
+      {
+        "id": "c162ca75699b3603351c1916265f63203f76ce9822dcd17a306e9bc2807fe351",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "6988aa3c5815e338",
+    "query": "What is the grading system used at UET Taxila?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "8a6badf336c6f4718678dd324f003349789299bd686a7bd425c393b462658141",
+        "score": 0.760901511
+      },
+      {
+        "id": "feb75c0c6f30c59bf07ab501c622c727cf2cd2b8ba90e42a92bda679986ffdae",
+        "score": 0.757959366
+      },
+      {
+        "id": "8a5f1523621f157e26d7aed08a88f9fe485eb074f5d329acc96ae0bcf73af90d",
+        "score": 0.753829
+      },
+      {
+        "id": "c4a06785c311d32cdf5f3a8609813e9fbf77ffb46a6b24e30f929f454aa08cfd",
+        "score": 0.751610756
+      },
+      {
+        "id": "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
+        "score": 0.75145632
+      },
+      {
+        "id": "ae6b169162411c869fdc73160be6703bd3b84d600c1ab0adae64da9e2fafb00a",
+        "score": 0.744335234
+      },
+      {
+        "id": "b1f66bcd4cef6138b5cdcac02649a193e4c0e18bfa6c507493bc48ba3e10856b",
+        "score": 0.742662489
+      },
+      {
+        "id": "27da931de6c19502d73e0c92d4004d2cad9a1181fbde91cfc857fbf1082dca6d",
+        "score": 0.741768897
+      },
+      {
+        "id": "2b5c181f98a2805e989d3c41cee4e0272d854362c72d9f25c16edb80abb1e0c8",
+        "score": 0.738725662
+      },
+      {
+        "id": "32518651a1e597d1488dea6696cfa564966d5693e6a1ff1b67262e9ee0ccda09",
+        "score": 0.738225937
+      }
+    ],
+    "lexical": [
+      {
+        "id": "3c37fba0004a0c89c90cb91d58a83bad0c47f791b31c627d1b3c58a1194add9c",
+        "score": 0
+      },
+      {
+        "id": "9c20c86e98a4b6e65d50dd5b1e44e3bc412a736e443d006369ff999131d0be71",
+        "score": 0
+      },
+      {
+        "id": "f684374e00de60a6a26c9966a8e32f5c67fd99b1eecea2aaf532024c1dadb3db",
+        "score": 0
+      },
+      {
+        "id": "b4b31308b4aa90f53d3fd88bf02a684e823bcb6679cd0d159b7356b1572adb4f",
+        "score": 0
+      },
+      {
+        "id": "2546a416dbe23fdaabf42d8407e1a53ce10a26a0249065a948f34ab5413ffeed",
+        "score": 0
+      },
+      {
+        "id": "7c88bc70a47f8df8b9b450dca667cbd0475687e325a0e1b1799f9a5d2b73322d",
+        "score": 0
+      },
+      {
+        "id": "612cfa202fb25e55b405ba9d069d60d08fa3041a88d395b0d592565833397122",
+        "score": 0
+      },
+      {
+        "id": "d3c5d6a7a3655c34d1faa289b5b5fc0743ac4c9ff30e4641445d6c8aef8f0e38",
+        "score": 0
+      },
+      {
+        "id": "e71b6eb282ac738e1ed9537795d285f4830fe2757adcc0993197a67d4e90c689",
+        "score": 0
+      },
+      {
+        "id": "8a247af5bf271efa22f5a70873a4ee4fe76e5ed0a29efe17b65fd25ca076afd7",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "d9fc562f95137dc3",
+    "query": "daakhila ki akhri tarikh kab hai UET Taxila mein?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "3a22ea073b800dff443977207583d48d95a36c8f5aea6c3edb522cdc65167f1c",
+        "score": 0.73349762
+      },
+      {
+        "id": "d61dec49b36d2653f743c4036a034104c9424800c828caac8650f46b4e3bf7bb",
+        "score": 0.733496666
+      },
+      {
+        "id": "366a04b4a44519c2a78810de048fe934bdec6db0dd1d6d76a904d2f129a3a4e3",
+        "score": 0.71556282
+      },
+      {
+        "id": "078c315352e10e413eb33c7de77919bd1986b5a2011036c2c0d0ddfada3050c1",
+        "score": 0.707700729
+      },
+      {
+        "id": "501aeb0bba903003520af603e1351c877baa2dc3d6fbc33874b4056a8f12ae08",
+        "score": 0.700795233
+      },
+      {
+        "id": "b1f66bcd4cef6138b5cdcac02649a193e4c0e18bfa6c507493bc48ba3e10856b",
+        "score": 0.698709548
+      },
+      {
+        "id": "9ba5b22bd18306a44c5fa5163642a975ea97c684a329b5c68ef351567e073532",
+        "score": 0.695838034
+      },
+      {
+        "id": "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
+        "score": 0.69291693
+      },
+      {
+        "id": "e732a12e5e3d98b57b66144df505e94284caf4f229db44e1cf9a09ecd6f013cb",
+        "score": 0.692647
+      },
+      {
+        "id": "251bd1383c7f6ea08e2fbd7bb998b192e405dec9fb55dc1e94667a507de9f19f",
+        "score": 0.692396224
+      }
+    ],
+    "lexical": [
+      {
+        "id": "600a24fc072266a4e03fd3ad8c1de1d49a1f7eac27c10dc4752eb6cd6207bfe5",
+        "score": 0
+      },
+      {
+        "id": "02e43b61eaec86257686ff74cf61bc9fab23ad96fdfde6040857eae3490824f3",
+        "score": 0
+      },
+      {
+        "id": "506793d1c1d5efe7971cb2e082f75d5edd7ae73bddb087f827b50b3ebd7fd24e",
+        "score": 0
+      },
+      {
+        "id": "15898a1b2562b172a20dd1258dd8432f5cd76a489df89aed44d6e55dcc18a0fa",
+        "score": 0
+      },
+      {
+        "id": "9dca16c85ac4173bfd7a4f69a26f97e00e9072634f6d78f9cae4f64d48e94d14",
+        "score": 0
+      },
+      {
+        "id": "8a0b391e10525d367490d6393b32b8b6c27e7753c6821ccf819d75b5222b32f4",
+        "score": 0
+      },
+      {
+        "id": "2352dda892d39d949adedc08f62d652fa669b7bcd81be1353dca1b14b162701c",
+        "score": 0
+      },
+      {
+        "id": "a42f66c33e555aed37a78ed91caa863fec512938421b444f758022f0d755ff98",
+        "score": 0
+      },
+      {
+        "id": "b33ae778abde1c937fc71b1f897336837b01e1acba47202c8c5252c582382e6b",
+        "score": 0
+      },
+      {
+        "id": "e03cc863ea1371462cf2b78584762626814e01aced2299cafe81fe69abdea194",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "b87404f973dbea76",
+    "query": "fees jama karwane ka tariqa kya hai UET Taxila mein?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "3a22ea073b800dff443977207583d48d95a36c8f5aea6c3edb522cdc65167f1c",
+        "score": 0.689677298
+      },
+      {
+        "id": "d61dec49b36d2653f743c4036a034104c9424800c828caac8650f46b4e3bf7bb",
+        "score": 0.689675391
+      },
+      {
+        "id": "366a04b4a44519c2a78810de048fe934bdec6db0dd1d6d76a904d2f129a3a4e3",
+        "score": 0.676403105
+      },
+      {
+        "id": "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
+        "score": 0.674947798
+      },
+      {
+        "id": "b1f66bcd4cef6138b5cdcac02649a193e4c0e18bfa6c507493bc48ba3e10856b",
+        "score": 0.673448622
+      },
+      {
+        "id": "e732a12e5e3d98b57b66144df505e94284caf4f229db44e1cf9a09ecd6f013cb",
+        "score": 0.669931471
+      },
+      {
+        "id": "6cac46287dd7852d3bda0f66a760a2d7e606807ce57fee80d9286b4d08541b94",
+        "score": 0.669064581
+      },
+      {
+        "id": "c4a06785c311d32cdf5f3a8609813e9fbf77ffb46a6b24e30f929f454aa08cfd",
+        "score": 0.668983519
+      },
+      {
+        "id": "d53a608dc0fa31df6612056b560a4e4b42ff1189872322d821be9ea03e259876",
+        "score": 0.66890341
+      },
+      {
+        "id": "1e4fe8e294b88befda6d318b17ac288359bdf15eed9cb8b615ef1f1942bd8e6c",
+        "score": 0.666903555
+      }
+    ],
+    "lexical": [
+      {
+        "id": "97a7d36f1467e07c0b16fc66de0547cfa257b06eb82243d8c3ce5f2ea765f256",
+        "score": 0
+      },
+      {
+        "id": "d335472b52f99caf8d8d7a0d35c8906939b9b18c7c7d981626c096782530dc38",
+        "score": 0
+      },
+      {
+        "id": "6074be175431057c92bde34206c32b49be9817317043391a4364c596b7c7a693",
+        "score": 0
+      },
+      {
+        "id": "8389703f0672a49818b4bdf0937799955e75370f9420e0329123f385eb680ee6",
+        "score": 0
+      },
+      {
+        "id": "2449fc7207c12d4667bafd09e463ec3e720ef04eba8d00c68b9f3ca335d914cd",
+        "score": 0
+      },
+      {
+        "id": "fa8af94bdc5162a928852cac8bf8eb591f021a8319789c34419abe266345471d",
+        "score": 0
+      },
+      {
+        "id": "c64f30b378f8b71be8be8ab36b031702f008fbbf309b22d2ef60bcc5644d1c59",
+        "score": 0
+      },
+      {
+        "id": "c5fdf5facd05fb6988e74e5964d11db98aff199dcf4f2bf90a58f1f2267fb235",
+        "score": 0
+      },
+      {
+        "id": "5879738f15f64bdd6a6a8665fbe8d2b2804b9921aef960b755fd6a5c87317bac",
+        "score": 0
+      },
+      {
+        "id": "30117c7928a312d6df618fa2211bc880cb0f5e3282d64970d6fecdd81dfe27df",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "1591838299e34517",
+    "query": "chuttiyan kab hongi UET Taxila mein?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "366a04b4a44519c2a78810de048fe934bdec6db0dd1d6d76a904d2f129a3a4e3",
+        "score": 0.72048378
+      },
+      {
+        "id": "3a22ea073b800dff443977207583d48d95a36c8f5aea6c3edb522cdc65167f1c",
+        "score": 0.705979347
+      },
+      {
+        "id": "d61dec49b36d2653f743c4036a034104c9424800c828caac8650f46b4e3bf7bb",
+        "score": 0.705979347
+      },
+      {
+        "id": "501aeb0bba903003520af603e1351c877baa2dc3d6fbc33874b4056a8f12ae08",
+        "score": 0.683340132
+      },
+      {
+        "id": "b1f66bcd4cef6138b5cdcac02649a193e4c0e18bfa6c507493bc48ba3e10856b",
+        "score": 0.681119
+      },
+      {
+        "id": "5a235ddd3d18ae323581977fa2de347228b4789f62efccf08416aa751aae8b05",
+        "score": 0.675038338
+      },
+      {
+        "id": "c4a06785c311d32cdf5f3a8609813e9fbf77ffb46a6b24e30f929f454aa08cfd",
+        "score": 0.672523499
+      },
+      {
+        "id": "dc8c342fec4bd0072ea39a1d353310f026b79a40ad76b0c74ef9cdbd3e55b372",
+        "score": 0.672276497
+      },
+      {
+        "id": "55a8f1971a2f8cf40c3c12d4b062c2d7fd538801d457bd6938340da236c69d42",
+        "score": 0.671636641
+      },
+      {
+        "id": "e732a12e5e3d98b57b66144df505e94284caf4f229db44e1cf9a09ecd6f013cb",
+        "score": 0.671530724
+      }
+    ],
+    "lexical": [
+      {
+        "id": "22d9801ec2a5cf97cc3502140454c5b83f67a2e5a3029a1cd937e5ca32485b52",
+        "score": 0
+      },
+      {
+        "id": "bcd24ad51165e062d1e5ef98a49aea70869c6d03b6396ad2a109df8f3afe0f4f",
+        "score": 0
+      },
+      {
+        "id": "7524ff2faae61b7dbf4dc119a0801d346d920f316efdca38c3cda15a6236a749",
+        "score": 0
+      },
+      {
+        "id": "9e03dd504c8d1fcf019b678a229d642b2306e2ced1f272b730f5f8d12bfee00c",
+        "score": 0
+      },
+      {
+        "id": "274f60bf12400113058496bec0f4a41c3f6356c78a76d9e82340a43f58710213",
+        "score": 0
+      },
+      {
+        "id": "0b69659c2b58ef48f5f61ce2d0d407f945e9462b0875d8ecab6fb382b5729945",
+        "score": 0
+      },
+      {
+        "id": "b1d8f2cf6162e4f9b4646ce33d198401c7335ea03849654894e57aab0b1ffade",
+        "score": 0
+      },
+      {
+        "id": "9e82f4ee85d9d6fe5ac5422435e67c78f93bbc05d8787b418da3b73135d047cf",
+        "score": 0
+      },
+      {
+        "id": "ff74bc589fc0c7b412c48e74bba2c9a76155c1cbe37da611e8db33b5db3fd34b",
+        "score": 0
+      },
+      {
+        "id": "b4eab9683d4fce986fbf3a506e54d3ea0d7aa1ae2b95e33cbcd222c81d39136f",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "57aa4c0c6221f855",
+    "query": "UET Taxila mein hostel ki fees kitni hai?",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "2a22b33fbe225ae2e2b21e257306422447d88759050bdd2a6d76a3ac2d1a8bb3",
+        "score": 0.683493614
+      },
+      {
+        "id": "dd07c8de833a42a30de0ac141458e9770d9718381c65c2a585c37cfdbcb5fca9",
+        "score": 0.633797646
+      },
+      {
+        "id": "6179a97b2494db2aca3135acb3b8280304cbbf367e5221a3bccbc2fd7563d53c",
+        "score": 0.628593445
+      },
+      {
+        "id": "503f5da3ef8fd3790ac8fe4c589c69441779335e3a947fdfb40a77307ad830bc",
+        "score": 0.621975899
+      },
+      {
+        "id": "5a235ddd3d18ae323581977fa2de347228b4789f62efccf08416aa751aae8b05",
+        "score": 0.611737251
+      },
+      {
+        "id": "bad3d7685f3b66873c9e29c05af72e143ef67c9aa57dffa57636749109fc8523",
+        "score": 0.611491203
+      },
+      {
+        "id": "8dc76acb131cb67942db2677b1893a9b26cda339b787e0fd4557948be73c37ba",
+        "score": 0.611491203
+      },
+      {
+        "id": "206bb3c72fda7276dd790b9374763451d539f81b9e39e953e99bb8ee5e905dcd",
+        "score": 0.611245096
+      },
+      {
+        "id": "1543e3228942cace6b3d8c80a5a49864b19e71d541701290d024b6b734ce83ca",
+        "score": 0.607198715
+      },
+      {
+        "id": "03d37693a9f4e8bb803034436c1add5df9474cd6c9b87d1847b64a9d9905fe1b",
+        "score": 0.60565
+      }
+    ],
+    "lexical": [
+      {
+        "id": "cb587c85f079a9730d0945e5488585b5666b2d850509ced8d46ff1ad61cabbe3",
+        "score": 0
+      },
+      {
+        "id": "6c0bde7ab78b2243e92331198d77a31572727d3da9e6a0844025a3f1d85c5734",
+        "score": 0
+      },
+      {
+        "id": "8d13010759c89460948e6108186e932fa79f6b6ac9cf576ac70b9e071b3438cf",
+        "score": 0
+      },
+      {
+        "id": "03d37693a9f4e8bb803034436c1add5df9474cd6c9b87d1847b64a9d9905fe1b",
+        "score": 0
+      },
+      {
+        "id": "57e8dbf5131d4b1b6aa970a6fa6f05918f52da638a848b107470308a9f47823b",
+        "score": 0
+      },
+      {
+        "id": "be5883b5f876ac2445805d64f617cb7710298e29eb5883423ec19b7ffbd4ce52",
+        "score": 0
+      },
+      {
+        "id": "d9ccae850b6f3f08b70d877191ef7e4eb2c1fa0ac4853385f8608d5ec74da774",
+        "score": 0
+      },
+      {
+        "id": "afddf38eb782ed10e3564da5641ff9fabb8bab258925c5fd93ab590736d58b00",
+        "score": 0
+      },
+      {
+        "id": "8dc76acb131cb67942db2677b1893a9b26cda339b787e0fd4557948be73c37ba",
+        "score": 0
+      },
+      {
+        "id": "bad3d7685f3b66873c9e29c05af72e143ef67c9aa57dffa57636749109fc8523",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "a670a78c21212bf6",
+    "query": "admission k liye zaruri documents kya hain?",
+    "relevantChunkKeys": [
+      "72dfb5b6f2334d9edc6744468f9e445e5c4810a7960c7a200346c279227b2b6b",
+      "1030850755a855894136841cc7cc5e1c07305c8f5fa6e3f8047518e0dab8f150"
+    ],
+    "dense": [
+      {
+        "id": "72dfb5b6f2334d9edc6744468f9e445e5c4810a7960c7a200346c279227b2b6b",
+        "score": 0.641388893
+      },
+      {
+        "id": "bb2312c31951d094f3ce123c99acf430957c2280c42d92651c466931efedc6d1",
+        "score": 0.562922478
+      },
+      {
+        "id": "1efadc56fc54d052aece13664c1a911d674b2cc6d31fb2b53d40bd3fce5458bc",
+        "score": 0.554973602
+      },
+      {
+        "id": "1030850755a855894136841cc7cc5e1c07305c8f5fa6e3f8047518e0dab8f150",
+        "score": 0.549999297
+      },
+      {
+        "id": "ac15d4eb308ecf1d300bd220ed1eb0fd9f04b23d43d724c3b043a4269f8a0068",
+        "score": 0.544586182
+      },
+      {
+        "id": "04a9ad0b6370a0b4fed776e31b26a97d88cee12bb5f25e02b019d37a4603aaac",
+        "score": 0.543185294
+      },
+      {
+        "id": "57c9de445a4aab8e3e7376f0e0097adf3dbb8f5a618f3327509a7e4041fe7c96",
+        "score": 0.538143158
+      },
+      {
+        "id": "b0c8bcc5e42743b3f18cf36536e16e568eb7ae12f59ed7fc5c38e3c894f78cbc",
+        "score": 0.53622818
+      },
+      {
+        "id": "18f5c8a8f605ad574dad4362e016a84bb40c97a260473c22d63e31c09cfff570",
+        "score": 0.53269577
+      },
+      {
+        "id": "d30b78a28bc54baf740b34357e97ed1e98e3bdab3580d0c1f4be6ac92f0cc48b",
+        "score": 0.524395943
+      }
+    ],
+    "lexical": [
+      {
+        "id": "7cccd5d43ef84b4703dec04e2da3058c5e99d9526f43a389bd47eb08a9847042",
+        "score": 0
+      },
+      {
+        "id": "04a9ad0b6370a0b4fed776e31b26a97d88cee12bb5f25e02b019d37a4603aaac",
+        "score": 0
+      },
+      {
+        "id": "5974cc6d5abeb90686c61fed087fcdb1c3f70fe54bdfccd8751b463f9586ba04",
+        "score": 0
+      },
+      {
+        "id": "9aeb9183037286db650f8b735bbdad28f20fdc271d974cecb29aebdbcc8f72af",
+        "score": 0
+      },
+      {
+        "id": "539dc7ce483ceccbd30054a2fa7549c83c7a8938950c67e6a6774fd211874a2c",
+        "score": 0
+      },
+      {
+        "id": "16c233c92839c7dd64f3951387b85c079fc038fee0f7206850829eb4cd91d8e5",
+        "score": 0
+      },
+      {
+        "id": "97ac74af4d0c581e6f00a18fc6130eea37ad3ddf3a8c0cafa2aff0ecd4698fe5",
+        "score": 0
+      },
+      {
+        "id": "4e8652bf9164626d33cf04fd9e0c8789c93608830369b78f1f42420849a5f785",
+        "score": 0
+      },
+      {
+        "id": "4ef3634ac3979e93cbdc607ae5f1ca34f0a83ae28ca6be36585ad57a4e41cb77",
+        "score": 0
+      },
+      {
+        "id": "027bf0ff7eec42cd6ecdefd2a12a94bf2f5ec0c0093931cf4e79b9c5a5692ce2",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "26e877048af0f6ee",
+    "query": "eligibility criteria",
+    "relevantChunkKeys": [
+      "7b6c2da68f148c00a079606f2385e748b51ac18d215d8df968aa29750c079980"
+    ],
+    "dense": [
+      {
+        "id": "3d21e74897c9edc70e38f3456bbc3a317ae81f546d087cca503b465eaa7bf78f",
+        "score": 0.694703102
+      },
+      {
+        "id": "fae958328bf81721bcb44749642c8e352e0d7899acb58bbb16394f75bd6079a8",
+        "score": 0.655070305
+      },
+      {
+        "id": "10d1c684ad96d6ad45f265a91c10351dd07f5a696f319ed6c37f844ccacd2159",
+        "score": 0.608570099
+      },
+      {
+        "id": "6d0c1b163d3c089d1d3d5149299fcb2d605f6f0fddd6a93f2dcb1931b4bf2f45",
+        "score": 0.601829588
+      },
+      {
+        "id": "7b6c2da68f148c00a079606f2385e748b51ac18d215d8df968aa29750c079980",
+        "score": 0.587427139
+      },
+      {
+        "id": "3e49966b4806007e23a41947198117f96eed6d8ab1c3a9f73997f02fe5d4221e",
+        "score": 0.584259033
+      },
+      {
+        "id": "c4601320ffbcc346ea4c02288919fb60364f24ea04dcc84d784243e256aaae46",
+        "score": 0.58283329
+      },
+      {
+        "id": "bee2d7b208a555b7e4a01819f23ef17e7829bcc65e90c504816afa37005971b3",
+        "score": 0.563790381
+      },
+      {
+        "id": "dfa55d34cef686b024d95f78c233be2597f47e287693a6b6b2fa3b5ea40269b5",
+        "score": 0.56258589
+      },
+      {
+        "id": "088ba0d726bf117cf19322ac276f0368f270ef5f31220cc2d0cd9d36362dd5c8",
+        "score": 0.562578261
+      }
+    ],
+    "lexical": [
+      {
+        "id": "0e2158efe612dd1cb090ff32dcafff31b05359924cd8e44349e283bc5dfa2c53",
+        "score": 0
+      },
+      {
+        "id": "1e7297fd0bcc2b0445f716ffff3ecd3668fd23d15310972a8d5db7d8bcd4dbbb",
+        "score": 0
+      },
+      {
+        "id": "539187345dc9cae2503e02d2d237c0daa6cdc03229942ef1e0c64ae2c979b590",
+        "score": 0
+      },
+      {
+        "id": "bb2a71cffabe357f586c57b69078e9aeb3f1c0cd81d2ce9dcf513e6e594c6c2c",
+        "score": 0
+      },
+      {
+        "id": "58065ab99f7faff5d62215adeab0256d2f3fcb4bc6f207a58dcc6567d82acc75",
+        "score": 0
+      },
+      {
+        "id": "a502d1cfad056c0a785d48dfb9eebf891e0a44bb1909107969aca4bb2b2c7f2f",
+        "score": 0
+      },
+      {
+        "id": "3d21e74897c9edc70e38f3456bbc3a317ae81f546d087cca503b465eaa7bf78f",
+        "score": 0
+      },
+      {
+        "id": "e96415bad8916fd08479c7282aa19f92aefc1d78c688c443e045877dd83508d3",
+        "score": 0
+      },
+      {
+        "id": "c51abf0d4da7f033a09c88f9576575998e63cc97e1af88b496c889a5f7bb3924",
+        "score": 0
+      },
+      {
+        "id": "7d8d836921edc07994ff56ee3ac6206445a30e22c57d6ce602c02c45cb6f9989",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "f3d60458e68e2e86",
+    "query": "important dates",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "fa6b0ad6b3c47608e0e6cd55f98a78b47d0c45c0fb46f4e88b0933b5712b7397",
+        "score": 0.617625237
+      },
+      {
+        "id": "389efc32203242a95150e0939f0f92bd49e6fd1a1fd4024d58517184d348df20",
+        "score": 0.617502213
+      },
+      {
+        "id": "3bc4e45f0beb7fbffb2934ce916a502d9af8b8929445589ce0be3f4e54cc0bd6",
+        "score": 0.604302406
+      },
+      {
+        "id": "2eec8b3009225e3542021d7f998a0f2d3cd04c477e26bd182f9bda5601fb783a",
+        "score": 0.601708472
+      },
+      {
+        "id": "bff595c14fc058fffd51fa100167b05c7160039925f05ba1092bd61177af6e1a",
+        "score": 0.599674225
+      },
+      {
+        "id": "eb19a3be89460b09d94ea358f7319f8f1c7d476b4225c299b6f653b85817bedb",
+        "score": 0.593743384
+      },
+      {
+        "id": "d1da8c5f3ae44f36797ee352fa83e6575ddae458e1f505e3314401776020bb7e",
+        "score": 0.587626457
+      },
+      {
+        "id": "d9262f8f9a7ed4976565abe990ae2f5c06a7593b20fab27e78bc5dc66d19d2f5",
+        "score": 0.580006599
+      },
+      {
+        "id": "648accc1141f82a0229387b14052823b235db2d56359dafbb66c300eb49d3671",
+        "score": 0.575972557
+      },
+      {
+        "id": "fac7e969993ab21f0b2e129192fb9ed00a9081d172e1235a52059ac356037ccc",
+        "score": 0.57529068
+      }
+    ],
+    "lexical": [
+      {
+        "id": "b5bb836b20b655ec592639db601c090fc0d896de48ab0a4e34f6b7eee7b6f246",
+        "score": 0
+      },
+      {
+        "id": "1a2a0ad826897420566df1326844e431a9e3752b14dfeded507a619be162355e",
+        "score": 0
+      },
+      {
+        "id": "24ee2e8b5beedc9221f2641c769660b6d6130badb06b7d528d7fa282718cb4a3",
+        "score": 0
+      },
+      {
+        "id": "60f8b8390a1e8b2c298be8abb84f1dd565a65552705ba5740b3670fd6fbbeda2",
+        "score": 0
+      },
+      {
+        "id": "e86de2d4791c3a4c7d8d0c5c925e058782e0fa44e921a1c75e1a72fb5be0acb8",
+        "score": 0
+      },
+      {
+        "id": "51d03678b58edabf5f71a168e73456848709158bf9c3778b796b8252d9c719aa",
+        "score": 0
+      },
+      {
+        "id": "5c11903137f1397094e7449cdfc69f5fe65dfbf97b17486fa3632a0fdfbf722a",
+        "score": 0
+      },
+      {
+        "id": "1d41ec890e45627595d108ec50b4a881f6011524f2e377cf9f31031fd9295d60",
+        "score": 0
+      },
+      {
+        "id": "59173cd661b7d5c4d21d7f6732733887a9e988ef2adc41a6111cfcdcfedf48f6",
+        "score": 0
+      },
+      {
+        "id": "6893701df7cf5a975de46788caf2874ae8ac5f6811b210572f39dd7340883837",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "a694cc1c788c4df0",
+    "query": "contact number",
+    "relevantChunkKeys": [
+      "15aa1d8d47c0ea7aa35e2ce33f796c9fb3b1a56b9b00cf2a67230170122bf974",
+      "3c2c9d32d949e3b3159d8f811239c9bd6f67e234c45a08a96c86bb6039f09f3a",
+      "fe430112f351b69fd0cd98cc44e83a75dd5c58833b73881a533194035288bac6",
+      "08267cc9065712031986fcf0a7a4b150fbf1045d9961bfab133b004becb06a5f",
+      "c2faac008d55d4d4057b08263597fa9d40df8e9f0fa509b8ae68fabdb1503cf5"
+    ],
+    "dense": [
+      {
+        "id": "15aa1d8d47c0ea7aa35e2ce33f796c9fb3b1a56b9b00cf2a67230170122bf974",
+        "score": 0.707875311
+      },
+      {
+        "id": "3c2c9d32d949e3b3159d8f811239c9bd6f67e234c45a08a96c86bb6039f09f3a",
+        "score": 0.698787689
+      },
+      {
+        "id": "fe430112f351b69fd0cd98cc44e83a75dd5c58833b73881a533194035288bac6",
+        "score": 0.687421799
+      },
+      {
+        "id": "08267cc9065712031986fcf0a7a4b150fbf1045d9961bfab133b004becb06a5f",
+        "score": 0.679105759
+      },
+      {
+        "id": "c2faac008d55d4d4057b08263597fa9d40df8e9f0fa509b8ae68fabdb1503cf5",
+        "score": 0.670705795
+      },
+      {
+        "id": "39db7e955e091dc21990448deea3bc5cde5952d85fca12d61422a865686a6f79",
+        "score": 0.66372776
+      },
+      {
+        "id": "a9a68cf3bbdb1a79723454a1081bc49bac5e4932884e70d44d774872c12e12ba",
+        "score": 0.662797928
+      },
+      {
+        "id": "fffa333d5cdc2163bb4124b8d7c8dd9576115daf27d899c51774f20263a93de7",
+        "score": 0.654837608
+      },
+      {
+        "id": "5c9bd1bf8e7bc39a8fb239ee2183ab3f64f8aa434ad303b47ffa846a6595015d",
+        "score": 0.652866364
+      },
+      {
+        "id": "5aacbb98ee73bf7bbaa9cb96c472bac62f492d359f59636be7ed9b298f8d2df5",
+        "score": 0.651583672
+      }
+    ],
+    "lexical": [
+      {
+        "id": "803c4e7251b17bad938dbc02d6a5eed6dec61d58be1b159e99540d27824d8677",
+        "score": 0
+      },
+      {
+        "id": "11258309726bdf5146c070e97d47a66c2f7364934b1dd71a9c16e93b48ffdc22",
+        "score": 0
+      },
+      {
+        "id": "894377c375537c9082cffe7382e57952bd70a1a4bfc0746a2d9c2ae4ca42a7ce",
+        "score": 0
+      },
+      {
+        "id": "e0ccf68706bf283b6688bb8f6a1065f201563239f11924f970354a8ecea9f52c",
+        "score": 0
+      },
+      {
+        "id": "61e5bb81fe221b687f77af71dde832e42eca90d58c231b6b18bca1d5831f87d1",
+        "score": 0
+      },
+      {
+        "id": "407cb88ecda4198b18b95739f8063aea4e7f9eaf4008eba081816fba35907062",
+        "score": 0
+      },
+      {
+        "id": "d9b1cfefa41c2a7b9da3f311d521fa4046be8569362a56a1674bc13436709965",
+        "score": 0
+      },
+      {
+        "id": "bf2d7670eec601313c7a5087f4cbf46751397c5cebbde31aea992b18f2e56302",
+        "score": 0
+      },
+      {
+        "id": "250202ecbcb11500e8f19a10b14458f4bd4dbf7f1c1f3458df1556fc991554d4",
+        "score": 0
+      },
+      {
+        "id": "ee52ebdf91a980dca3123e6ddbb4fe03d9db334090f25099fdb00ece38267cbd",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "876b5dc3e98c81ea",
+    "query": "how to apply",
+    "relevantChunkKeys": [],
+    "dense": [
+      {
+        "id": "8930881db0743fead108036573f599141139e347ce49591a9a113adda5cba127",
+        "score": 0.612764359
+      },
+      {
+        "id": "ef511e4b7d337e12a720eafc5bf87ac4944256934d4913aaf3bdd3c3aa7eddc4",
+        "score": 0.571115553
+      },
+      {
+        "id": "c71f7c04013c92e551c6000cddf11989103a3d5d7043670221b6779ab0bf4c84",
+        "score": 0.567679405
+      },
+      {
+        "id": "3f178a632717313aa7f6d0a5db08173822b8225a5db271daa926ae47f3f70cd5",
+        "score": 0.566027641
+      },
+      {
+        "id": "4f6fc8cb0adaff68d94b8251629abd642a102d296b44a63af3c4fa0c19848e20",
+        "score": 0.560731888
+      },
+      {
+        "id": "291783af324d8b5fcec3ee52b703366ff990333705255dd2ee3008e715149461",
+        "score": 0.554267
+      },
+      {
+        "id": "7b6c2da68f148c00a079606f2385e748b51ac18d215d8df968aa29750c079980",
+        "score": 0.554041862
+      },
+      {
+        "id": "6d0c1b163d3c089d1d3d5149299fcb2d605f6f0fddd6a93f2dcb1931b4bf2f45",
+        "score": 0.551797926
+      },
+      {
+        "id": "a4b57558bf994d657ebae878916ae9b47411ccf1b5348782b309424eea024855",
+        "score": 0.548116684
+      },
+      {
+        "id": "2cf6381f2fe9b10be1d82a14df80700a528be5eba69fd043e4117de9184f255f",
+        "score": 0.544466
+      }
+    ],
+    "lexical": [
+      {
+        "id": "bd0e7da4063f867918c891fd9c682982821e797175336f633f1f30cffbecb193",
+        "score": 0
+      },
+      {
+        "id": "26bd588d9279e7620dfd4538b2810009dcc8fe1beb7d5890e906e4cf2f17142a",
+        "score": 0
+      },
+      {
+        "id": "ec4d8ef248692006222622f3b2eb89ccd788efe301f47f342e10f498882cedf5",
+        "score": 0
+      },
+      {
+        "id": "4f6fc8cb0adaff68d94b8251629abd642a102d296b44a63af3c4fa0c19848e20",
+        "score": 0
+      },
+      {
+        "id": "c71f7c04013c92e551c6000cddf11989103a3d5d7043670221b6779ab0bf4c84",
+        "score": 0
+      },
+      {
+        "id": "da77dd1f009d9584a855c1e4500e50f90835f14a66baec7f0075ae60f23c3bee",
+        "score": 0
+      },
+      {
+        "id": "3f178a632717313aa7f6d0a5db08173822b8225a5db271daa926ae47f3f70cd5",
+        "score": 0
+      },
+      {
+        "id": "dbe4de99f5e1c1cd804458d8146084a38a7cdb63e6aecb4669ed2e7660194206",
+        "score": 0
+      },
+      {
+        "id": "cdee4998fb6ab44095e2c8f8e5e878dbacea8b4422b9e6fae23915f2904ad55a",
+        "score": 0
+      },
+      {
+        "id": "39f641ffef7209a250d907db16133b6feb5ae4683f6c203d932673fac99ec279",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "queryId": "2dfb5097fc1ca481",
+    "query": "fee structure",
+    "relevantChunkKeys": [
+      "f6c98d25d4918bf272b2a5a07ff75e88e23aa9135b5aee0b8664c290bbc53abb"
+    ],
+    "dense": [
+      {
+        "id": "acce89ad270f648d56934e32ec5f230b264628c896cb86f0038c8c6d3a4389c9",
+        "score": 0.652650833
+      },
+      {
+        "id": "f6c98d25d4918bf272b2a5a07ff75e88e23aa9135b5aee0b8664c290bbc53abb",
+        "score": 0.619868279
+      },
+      {
+        "id": "6273ddf24a205a5108e701ef282f78b1d99ef90e71cd451c5dd739a48f98841c",
+        "score": 0.614901543
+      },
+      {
+        "id": "cc116ad650d868f087a5c6b8eeb24d89ea6519b755f0a83c83fd01ffd31ee71b",
+        "score": 0.609297752
+      },
+      {
+        "id": "3ce7afdc2fd7803b1f51d30d2867dc654475b352ba97fc59087443d0fb91ec67",
+        "score": 0.600600243
+      },
+      {
+        "id": "3e3377ae6821b002a7c1a0864630d73c79c761e17562eb27d184617fdeb7cda5",
+        "score": 0.600598335
+      },
+      {
+        "id": "eca627576b659fb0335a8df97f5a5f00dfa358747d6679e3d7465d4ecd965905",
+        "score": 0.600597382
+      },
+      {
+        "id": "58cae810481b44475a532d8bd7d53342e92eba8fbf15f432ee4062ab6d3f2a00",
+        "score": 0.600593626
+      },
+      {
+        "id": "04d66272b7c06a6805d70fdaefccec35a08bd2d8cfe7b91b53cf03dcd0e07b0e",
+        "score": 0.598434448
+      },
+      {
+        "id": "886fe3ff7007af4ecdb403b900d8914d26eba437ca3fe0f8e15f30fe01ff0839",
+        "score": 0.59569931
+      }
+    ],
+    "lexical": [
+      {
+        "id": "047ea82187b988440580aa7760da5ee71889c0eb0a0896d05b5c12b45a2b6183",
+        "score": 0
+      },
+      {
+        "id": "44322626d94f0977d9103331b9e003897f50c40b370dedd25f90f5c4891743d1",
+        "score": 0
+      },
+      {
+        "id": "ad0d1204284f691b41ac070084d42f2e0893187d8ce733f3b303d05cec7df3ba",
+        "score": 0
+      },
+      {
+        "id": "b5ef1ef4ca84250383b69e19cd6e0172f27107def916f509c0224a8396a7c4ea",
+        "score": 0
+      },
+      {
+        "id": "1f588b5e438f7ca33c3baaa6c49e583a9ca7272f02de2268a37bc316bfb24d7b",
+        "score": 0
+      },
+      {
+        "id": "48f39c1526a12ebb56ff81bd17b0188e7c7850c85c34414ebed84bf016afa5e8",
+        "score": 0
+      },
+      {
+        "id": "07f5a20e2a61da03c22d18a45efe55656dda79c831f74efdb409676691bd4d29",
+        "score": 0
+      },
+      {
+        "id": "275ad881fb349d310ecc52de4bd0e338826f91470dc06cc2c390f00f0dd26393",
+        "score": 0
+      },
+      {
+        "id": "88d0be0dc32ffc9f87cf1e486d652b6b14ed718fd60ecf330c0f05754a106f22",
+        "score": 0
+      },
+      {
+        "id": "fc9b6873e1c5abdfdfb0af6f838bd1afb3a6cafb982e75e20adbb9a906db9824",
+        "score": 0
+      }
+    ]
+  }
+]
