@@ -144,6 +144,9 @@ importers:
       '@convex-dev/eslint-plugin':
         specifier: ^2.0.0
         version: 2.0.0(convex@1.40.0(@clerk/react@6.7.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4))(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
+      '@edge-runtime/vm':
+        specifier: ^5.0.0
+        version: 5.0.0
       '@playwright/test':
         specifier: ^1.60.0
         version: 1.60.0
@@ -174,6 +177,9 @@ importers:
       convex:
         specifier: ^1.40.0
         version: 1.40.0(@clerk/react@6.7.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
+      convex-test:
+        specifier: 0.0.54
+        version: 0.0.54(convex@1.40.0(@clerk/react@6.7.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4))
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
@@ -201,9 +207,12 @@ importers:
       vercel:
         specifier: ^54.17.1
         version: 54.21.1(@emnapi/core@1.10.0)(@emnapi/runtime@1.11.0)(rollup@4.61.1)
+      vite:
+        specifier: ^8.0.16
+        version: 8.0.16(@types/node@20.19.42)(esbuild@0.27.0)(jiti@2.7.0)(terser@5.48.0)(tsx@4.21.0)
       vitest:
         specifier: ^4.1.7
-        version: 4.1.8(@edge-runtime/vm@3.2.0)(@opentelemetry/api@1.9.1)(@types/node@20.19.42)(@vitest/coverage-v8@4.1.8)(happy-dom@20.10.2)(jsdom@29.1.1)(vite@8.0.16(@types/node@20.19.42)(esbuild@0.27.0)(jiti@2.7.0)(terser@5.48.0)(tsx@4.21.0))
+        version: 4.1.8(@edge-runtime/vm@5.0.0)(@opentelemetry/api@1.9.1)(@types/node@20.19.42)(@vitest/coverage-v8@4.1.8)(happy-dom@20.10.2)(jsdom@29.1.1)(vite@8.0.16(@types/node@20.19.42)(esbuild@0.27.0)(jiti@2.7.0)(terser@5.48.0)(tsx@4.21.0))
 
 packages:
 
@@ -626,9 +635,17 @@ packages:
     resolution: {integrity: sha512-Vw0lbJ2lvRUqc7/soqygUX216Xb8T3WBZ987oywz6aJqRxcwSVWwr9e+Nqo2m9bxobA9mdbWNNoRY6S9eko1EQ==}
     engines: {node: '>=16'}
 
+  '@edge-runtime/primitives@6.0.0':
+    resolution: {integrity: sha512-FqoxaBT+prPBHBwE1WXS1ocnu/VLTQyZ6NMUBAdbP7N2hsFTTxMC/jMu2D/8GAlMQfxeuppcPuCUk/HO3fpIvA==}
+    engines: {node: '>=18'}
+
   '@edge-runtime/vm@3.2.0':
     resolution: {integrity: sha512-0dEVyRLM/lG4gp1R/Ik5bfPl/1wX00xFwd5KcNH602tzBa09oF7pbTKETEhR1GjZ75K6OJnYFu8II2dyMhONMw==}
     engines: {node: '>=16'}
+
+  '@edge-runtime/vm@5.0.0':
+    resolution: {integrity: sha512-NKBGBSIKUG584qrS1tyxVpX/AKJKQw5HgjYEnPLC0QsTw79JrGn+qUr8CXFb955Iy7GUdiiUv1rJ6JBGvaKb6w==}
+    engines: {node: '>=18'}
 
   '@emnapi/core@1.10.0':
     resolution: {integrity: sha512-yq6OkJ4p82CAfPl0u9mQebQHKPJkY7WrIuk205cTYnYe+k2Z8YBh11FrbRG/H6ihirqcacOgl2BIO8oyMQLeXw==}
@@ -3830,6 +3847,11 @@ packages:
         optional: true
       zod:
         optional: true
+
+  convex-test@0.0.54:
+    resolution: {integrity: sha512-C0v2SQcuxrELAJRNzE6fQ686XDPor7UFoC22jcoJXeCRqhLo8ZIMZ4jyUHoo1UdAL2enCb0AbiprCVpLDN8u9Q==}
+    peerDependencies:
+      convex: ^1.32.0
 
   convex@1.40.0:
     resolution: {integrity: sha512-jChWEB45q+9Ibryc7hg0l6hB1xA4zwE2y6ZhkhGP6oJkqYeiURkMagA2ZQZYMy1/T8PZ9ztoVJJtbL/+Ob851Q==}
@@ -7175,9 +7197,15 @@ snapshots:
 
   '@edge-runtime/primitives@4.1.0': {}
 
+  '@edge-runtime/primitives@6.0.0': {}
+
   '@edge-runtime/vm@3.2.0':
     dependencies:
       '@edge-runtime/primitives': 4.1.0
+
+  '@edge-runtime/vm@5.0.0':
+    dependencies:
+      '@edge-runtime/primitives': 6.0.0
 
   '@emnapi/core@1.10.0':
     dependencies:
@@ -9769,7 +9797,7 @@ snapshots:
       obug: 2.1.2
       std-env: 4.1.0
       tinyrainbow: 3.1.0
-      vitest: 4.1.8(@edge-runtime/vm@3.2.0)(@opentelemetry/api@1.9.1)(@types/node@20.19.42)(@vitest/coverage-v8@4.1.8)(happy-dom@20.10.2)(jsdom@29.1.1)(vite@8.0.16(@types/node@20.19.42)(esbuild@0.27.0)(jiti@2.7.0)(terser@5.48.0)(tsx@4.21.0))
+      vitest: 4.1.8(@edge-runtime/vm@5.0.0)(@opentelemetry/api@1.9.1)(@types/node@20.19.42)(@vitest/coverage-v8@4.1.8)(happy-dom@20.10.2)(jsdom@29.1.1)(vite@8.0.16(@types/node@20.19.42)(esbuild@0.27.0)(jiti@2.7.0)(terser@5.48.0)(tsx@4.21.0))
 
   '@vitest/expect@4.1.8':
     dependencies:
@@ -10303,6 +10331,10 @@ snapshots:
       react: 19.2.4
       typescript: 5.9.3
       zod: 4.4.3
+
+  convex-test@0.0.54(convex@1.40.0(@clerk/react@6.7.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)):
+    dependencies:
+      convex: 1.40.0(@clerk/react@6.7.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
 
   convex@1.40.0(@clerk/react@6.7.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4):
     dependencies:
@@ -13505,7 +13537,7 @@ snapshots:
       terser: 5.48.0
       tsx: 4.21.0
 
-  vitest@4.1.8(@edge-runtime/vm@3.2.0)(@opentelemetry/api@1.9.1)(@types/node@20.19.42)(@vitest/coverage-v8@4.1.8)(happy-dom@20.10.2)(jsdom@29.1.1)(vite@8.0.16(@types/node@20.19.42)(esbuild@0.27.0)(jiti@2.7.0)(terser@5.48.0)(tsx@4.21.0)):
+  vitest@4.1.8(@edge-runtime/vm@5.0.0)(@opentelemetry/api@1.9.1)(@types/node@20.19.42)(@vitest/coverage-v8@4.1.8)(happy-dom@20.10.2)(jsdom@29.1.1)(vite@8.0.16(@types/node@20.19.42)(esbuild@0.27.0)(jiti@2.7.0)(terser@5.48.0)(tsx@4.21.0)):
     dependencies:
       '@vitest/expect': 4.1.8
       '@vitest/mocker': 4.1.8(vite@8.0.16(@types/node@20.19.42)(esbuild@0.27.0)(jiti@2.7.0)(terser@5.48.0)(tsx@4.21.0))
@@ -13528,7 +13560,7 @@ snapshots:
       vite: 8.0.16(@types/node@20.19.42)(esbuild@0.27.0)(jiti@2.7.0)(terser@5.48.0)(tsx@4.21.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@edge-runtime/vm': 3.2.0
+      '@edge-runtime/vm': 5.0.0
       '@opentelemetry/api': 1.9.1
       '@types/node': 20.19.42
       '@vitest/coverage-v8': 4.1.8(vitest@4.1.8)
