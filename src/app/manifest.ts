@@ -6,15 +6,16 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: "UET GPT",
     description:
       "An intelligent AI assistant that answers any question about UET Taxila - admissions, programs, campus life, faculty, departments, and more.",
-    start_url: "/chat",
+    start_url: "/",
     display: "standalone",
     background_color: "#070708",
     theme_color: "#070708",
     icons: [
       {
         src: "/uet-logo.jpg",
-        sizes: "any",
+        sizes: "192x192 512x512",
         type: "image/jpeg",
+        purpose: "maskable",
       },
     ],
   };
