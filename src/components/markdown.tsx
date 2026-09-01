@@ -169,10 +169,11 @@ export function Markdown({ content, className }: MarkdownProps) {
           img({ src, alt, node: _node, ...props }) {
             if (!src) return null;
             return (
+              // biome-ignore lint/performance/noImgElement: dynamic user/agent markdown image
               <img
                 {...props}
                 src={src}
-                alt={alt ?? ""}
+                alt={alt || "Content image"}
                 loading="lazy"
                 decoding="async"
                 referrerPolicy="no-referrer"
@@ -241,14 +242,12 @@ export function Markdown({ content, className }: MarkdownProps) {
           },
           table({ children }) {
             return (
-              <div
+              <section
                 className="my-4 max-w-full overflow-x-auto rounded-[var(--radius-md)] border border-[var(--border)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
-                role="region"
                 aria-label="Scrollable table"
-                tabIndex={0}
               >
                 <table className="w-full min-w-max border-collapse text-sm">{children}</table>
-              </div>
+              </section>
             );
           },
           thead({ children }) {
