@@ -2,7 +2,9 @@
   {
     "queryId": "8fe9e8f2dfe15d2e",
     "query": "What is the fee structure for BS Software Engineering at UET Taxila?",
-    "relevantChunkKeys": [],
+    "relevantChunkKeys": [
+      "047ea82187b988440580aa7760da5ee71889c0eb0a0896d05b5c12b45a2b6183"
+    ],
     "dense": [
       {
         "id": "73013e45ac0a8d6d271f6d29a459152945d83a69536abe113ef847b35135d5c5",
@@ -448,7 +450,9 @@
     "queryId": "6f79337e4985ea52",
     "query": "How can I pay my semester fee at UET Taxila?",
     "relevantChunkKeys": [
-      "019e75af934e50252dcf8498a967749e5bed789308421c6372ba6bd9026df7d2"
+      "019e75af934e50252dcf8498a967749e5bed789308421c6372ba6bd9026df7d2",
+      "1853094b29f420c4977cca082f10ebf889a9323e25f0c3b8861d67e7fd0bdee2",
+      "a3176eaceb0c9e8b45b05085fa5d5057dd01fa3506d41c541aaae1c9737feba5"
     ],
     "dense": [
       {
@@ -539,7 +543,8 @@
     "queryId": "a4d3227f8a1b046e",
     "query": "Is there a fine for late fee submission at UET Taxila?",
     "relevantChunkKeys": [
-      "fc11e6092df4b89ebbfee2575a4a56dcb7e5c096a5b09cc4441a847d56f48d5c"
+      "fc11e6092df4b89ebbfee2575a4a56dcb7e5c096a5b09cc4441a847d56f48d5c",
+      "d19c79ab521e71936d73049c8de2d335d2138884bb3de213e58ef3c2e96667ff"
     ],
     "dense": [
       {
@@ -629,7 +634,9 @@
   {
     "queryId": "379d79b1e7ee91b2",
     "query": "What are the eligibility criteria for admission to BS Computer Science at UET Taxila?",
-    "relevantChunkKeys": [],
+    "relevantChunkKeys": [
+      "49ba3a767c08218c224360e50e002c21a8732932ebd002e29da4efe34fb033e2"
+    ],
     "dense": [
       {
         "id": "cf3fc98f2f04452f2395a23e123b64c55b7b7f5167ccb49b00cb3baf2af3ba2c",
@@ -898,7 +905,10 @@
   {
     "queryId": "928451f564ccf0a4",
     "query": "Does UET Taxila accept DAE students for lateral entry?",
-    "relevantChunkKeys": [],
+    "relevantChunkKeys": [
+      "5d4dc9002869fa5e66bf13f54354e02d95a4a8bb6a45055dae14e75d030eca9c",
+      "729ae8a0e4767919576f46f3ffbb285e8d4ac3ba4ae7bc6080e87ceaaab50b43"
+    ],
     "dense": [
       {
         "id": "33f4179c6c4036574fda1b0417bb3f62f3d26220356b361f23b0eb57cdc35e1e",
@@ -1704,7 +1714,8 @@
     "relevantChunkKeys": [
       "8aee572b1c180b8dedf84fbf270625f30f5733972c4d6917b2f8c3070c6ea499",
       "d4ae0318d1e26573e9ce22e8fe62d04faf7a092d21b1beec84dcc85e11037b4e",
-      "d3b2910fc4aa9b58c44ae8e608b6c37841be7950ccc0220971fd7a5ad0739b6a"
+      "d3b2910fc4aa9b58c44ae8e608b6c37841be7950ccc0220971fd7a5ad0739b6a",
+      "578b13e13b5ae05fbe9c165ccb472cd4eba32c183227a49907b00f89a5091506"
     ],
     "dense": [
       {
@@ -2339,7 +2350,8 @@
     "relevantChunkKeys": [
       "a7e5a404a4626b95fd9b5a7ab0772cffd03fad7765d1a965fac01d8fe35a2212",
       "beeeaca047e6dd4b662a414b0ae5369d9633da1a6ea984c9bbb61c4d278ecdc5",
-      "73e71c7d7418ac1d6d5560e1840c1c31e9072a4237bd0fb6fd005186ca993390"
+      "73e71c7d7418ac1d6d5560e1840c1c31e9072a4237bd0fb6fd005186ca993390",
+      "7f0662ebf824910b55a9cee95b9e6637db02c80d9defbc0fefa2f17b944096f1"
     ],
     "dense": [
       {
@@ -2703,7 +2715,8 @@
     "queryId": "4b515ce39511ff1b",
     "query": "Is there a fee waiver program for financially needy students at UET Taxila?",
     "relevantChunkKeys": [
-      "9e8723a93be0ccacc05877d21901d82e6d7b0b48f01131590d3337cf1afb8e05"
+      "9e8723a93be0ccacc05877d21901d82e6d7b0b48f01131590d3337cf1afb8e05",
+      "73c5f654fd6fd7482328b06e7a819dbddae7cf3791f2e760a0cd4585c3db601d"
     ],
     "dense": [
       {
@@ -2797,7 +2810,8 @@
       "fb432fb00678ad965cf9952186b747a88f68722d3867aca276df63794348d909",
       "da2a62794a68ea8a34da9db9169c3a06d43136da0cd644a65fabd4549e2ed820",
       "28656442d346a1b2858b9abb79ce05f3d28335b4b6b7748298dea5dc181f926a",
-      "f6007caa25253ff95e277886d05326ce68225991347d4ffc0dd17a425e18118f"
+      "f6007caa25253ff95e277886d05326ce68225991347d4ffc0dd17a425e18118f",
+      "981573423e72d2aeffa1425b345bb294051d0c751ac1bb9d87ee05d1187636ac"
     ],
     "dense": [
       {
@@ -2892,7 +2906,8 @@
       "5a235ddd3d18ae323581977fa2de347228b4789f62efccf08416aa751aae8b05",
       "1471c51933271a97c105c46f55583809d72b89a12fdcca157bf9533659920e6c",
       "f535f741a88abc79e86cfc4e700f0424ff021c28c7a046451d435d5ad55af39b",
-      "e5a1a739dcb84b4ce5bdaca8d29bed6bda97165754deddba58c41b50d1f07ac8"
+      "e5a1a739dcb84b4ce5bdaca8d29bed6bda97165754deddba58c41b50d1f07ac8",
+      "12649df966b6d49c0cab78818792affc237db9ae391381f0992a322e20bb1c1a"
     ],
     "dense": [
       {
@@ -3972,7 +3987,8 @@
     "query": "admission k liye zaruri documents kya hain?",
     "relevantChunkKeys": [
       "72dfb5b6f2334d9edc6744468f9e445e5c4810a7960c7a200346c279227b2b6b",
-      "1030850755a855894136841cc7cc5e1c07305c8f5fa6e3f8047518e0dab8f150"
+      "1030850755a855894136841cc7cc5e1c07305c8f5fa6e3f8047518e0dab8f150",
+      "04a9ad0b6370a0b4fed776e31b26a97d88cee12bb5f25e02b019d37a4603aaac"
     ],
     "dense": [
       {
@@ -4153,7 +4169,9 @@
   {
     "queryId": "f3d60458e68e2e86",
     "query": "important dates",
-    "relevantChunkKeys": [],
+    "relevantChunkKeys": [
+      "b5bb836b20b655ec592639db601c090fc0d896de48ab0a4e34f6b7eee7b6f246"
+    ],
     "dense": [
       {
         "id": "fa6b0ad6b3c47608e0e6cd55f98a78b47d0c45c0fb46f4e88b0933b5712b7397",
@@ -4427,7 +4445,8 @@
     "queryId": "2dfb5097fc1ca481",
     "query": "fee structure",
     "relevantChunkKeys": [
-      "f6c98d25d4918bf272b2a5a07ff75e88e23aa9135b5aee0b8664c290bbc53abb"
+      "f6c98d25d4918bf272b2a5a07ff75e88e23aa9135b5aee0b8664c290bbc53abb",
+      "047ea82187b988440580aa7760da5ee71889c0eb0a0896d05b5c12b45a2b6183"
     ],
     "dense": [
       {

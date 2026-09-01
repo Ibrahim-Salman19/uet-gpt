@@ -1,51 +1,63 @@
-# Phase 6 — Hybrid Retrieval Quality (mandate §45/46/57) — 2026-08-31
+# Phase 6 — Hybrid Retrieval Quality (mandate §45/46/57) — 2026-08-31, updated 2026-09-02
 
-**Base commit:** `49ca5d3` (dirty tree at time of writing — see §5). Scores
+**Base commit:** `49ca5d3` (dirty tree at time of original writing). Scores
 the production hybrid fusion path (`fuse_and_score.ts`, driving the real
 Convex `hybridRank`/RRF logic via `channel_results.json`'s dense+lexical
 channel outputs) against `scripts/eval/golden_set_verified.jsonl`, the
 manually-reviewed 50-query label set described in
 `scripts/eval/label_review.md`.
 
-This report was written by a separate session picking up work already run.
-Its job is to state honestly what the existing run output does and does not
-license, not to re-run or extend the evaluation. No cloud calls were made to
-produce this document — it is entirely a re-read of local files already on
-disk (Gemini/Pinecone/Convex Cloud calls this session: 0).
+**2026-09-02 update:** §2's pool-bias defect (below) has been remediated —
+see §6. All numbers in this Verdict block and elsewhere in the document
+reflect the post-remediation state; §2's original measurement is kept
+verbatim as the record of what was found. No Gemini/Pinecone/Convex Cloud
+calls were made to produce either the original report or this update —
+the remediation in §6 used already-cached local channel results and a
+purely local re-run of the real production fusion code (Gemini/Pinecone/
+Convex Cloud calls this session: 0).
 
 ## Verdict
 
 ```text
 QUERIES IN GOLDEN SET:            50
 QUERIES WITH >=1 LABELED-RELEVANT
-  CHUNK (scorable):               19 / 50
+  CHUNK (scorable):               23 / 50   (was 19/50 before §6's fix)
 QUERIES WITH ZERO LABELED-RELEVANT
   CHUNK (unscorable, excluded
-  from the mean):                 31 / 50
+  from the mean):                 27 / 50   (was 31/50)
 
-meanHitAt5 (over the 19 scorable):  0.9474
-meanMrr    (over the 19 scorable):  0.7076
+meanHitAt5 (over the 23 scorable):  0.9565  (was 0.9474 over 19)
+meanMrr    (over the 23 scorable):  0.7295  (was 0.7076 over 19)
 
-HUMAN_VERIFIED labels:              0 / 50
-LLM_JUDGED labels:                  39 / 50 (incl. all 31 unscorable)
-AUTHORITATIVE_SOURCE_MATCH labels:  11 / 50 (the 9 fee/charges queries
-                                    cross-checked against the Prospectus
-                                    PDF page images, per label_review.md's
-                                    2026-08-31 addendum)
+HUMAN_VERIFIED labels:              0 / 50  (unchanged - see §1)
+Queries with >=1 AUTHORITATIVE_SOURCE_MATCH
+  component in their provenance:    12 / 50 (was 9/50)
+Queries with only LLM_JUDGED
+  provenance:                       38 / 50 (was 41/50)
 
-POOL-BIAS CHECK (measured, see §2): fusedTop5 introduces at least one
-  chunk absent from the original denseTop5 label pool in 50 / 50 queries
-  (103 such unlabeled slots total). Of the 31 unscorable queries, all 31
-  have this property.
+POOL-BIAS CHECK (originally measured, see §2 - now remediated, see §6):
+  fusedTop5 introduced at least one chunk absent from the original
+  denseTop5 label pool in 50 / 50 queries (103 such unlabeled slots
+  total). All 103 have now been reviewed; 15 were genuinely relevant and
+  are folded into the counts above. 88 were reviewed and confirmed not
+  relevant (see §6 and delta_label_review.md for the reasoning on each).
 
-MANDATE §63 GATE:  NOT CLEARED — not because retrieval measured poorly,
-  but because the label set cannot currently support a production verdict
-  (see §1, §3). This is a labeling-methodology gap, not a Pinecone or
+MANDATE §63 GATE:  STILL NOT CLEARED — the specific pool-bias defect in
+  §2 is fixed, but the underlying reason §63 doesn't clear is unchanged:
+  0/50 labels are HUMAN_VERIFIED and N=23/50 is still a modest sample
+  (see §1, §3). This remains a labeling-provenance gap, not a Pinecone or
   hybrid-fusion performance failure. Neither §64 ("PINECONE BENCHMARK
   PASS") nor §65 ("PINECONE BENCHMARK FAILED") applies yet.
 ```
 
 ## 1. Why 0.9474 / 0.7076 is not a production number
+
+*(§1–§3 describe the original 2026-08-31 measurement and are kept as
+written for the historical record. The current numbers, post-§6's
+pool-bias fix, are 0.9565/0.7295 over 23 scorable queries — see the
+Verdict block above and §6. §1's core argument — N is small, 0 labels are
+HUMAN_VERIFIED — still applies to the current numbers essentially
+unchanged, just with N=23 instead of 19.)*
 
 §47 of the mandate is explicit: *"If the labeled set is too small to
 support a production verdict: say so."* Two things say so here:
@@ -110,10 +122,10 @@ dense top 5 shown for labeling. Whether the hybrid system's unlabeled
 `fusedTop5` picks now include that true answer is unknown — it was never
 checked, because the label set was frozen before the hybrid run existed.
 Determining that would require a second, small labeling pass over just
-those unlabeled `fusedTop5` chunks; that pass has not been done and is not
-done as part of this report (writing this report is a read-only,
-zero-cloud-call task; running a further labeling pass is separate scoped
-work).
+those unlabeled `fusedTop5` chunks. **That pass has now been done — see
+§6.** (At the time this section was first written, it had not: writing
+the original report was a read-only, zero-cloud-call task, and the
+labeling pass was separate scoped work completed afterward.)
 
 ## 3. What this run does establish
 
@@ -122,23 +134,30 @@ work).
   reproducible output — `hybrid_eval_results.json` is deterministic given
   its two inputs (`channel_results.json`, `golden_set_verified.jsonl`).
 - Where a scorable ground truth exists, hybrid retrieval finds it in the
-  top 5 94.7% of the time with a mean reciprocal rank of 0.71 — a
-  reasonable signal, but one drawn from a small, partially-LLM-labeled,
-  dense-pool-biased sample, not a certified production benchmark.
+  top 5 95.7% of the time with a mean reciprocal rank of 0.73 (post-§6;
+  94.7%/0.71 before it) — a reasonable signal, but one drawn from a
+  small, partially-LLM-labeled sample, not a certified production
+  benchmark.
 - The bilingual/short-form/generic queries (41–50, incl. Roman-Urdu
   queries 41/43/44) are part of the 50 and behaved the same as the rest of
   the pipeline — no separate failure mode observed there, though the same
-  N=19/label caveats apply.
+  small-N/label caveats apply. §6's delta review found no relevant chunks
+  for any of the three Roman-Urdu queries (41/43/44) even after
+  considering the hybrid-only candidates — consistent with §2/§6's
+  finding that this is a genuine cross-lingual retrieval gap, not a
+  labeling artifact.
 
-## 4. Two gates this leaves open (not resolved here)
+## 4. Two gates this leaves open (updated 2026-09-02)
 
-1. **§45/46/57 hybrid quality — open.** Needs either (a) a real
-   HUMAN_VERIFIED pass over the 39 queries the user did not personally
-   review, and/or (b) a widened label pool that includes `fusedTop5`
-   candidates (not just `denseTop5`) so the pool-bias in §2 stops
-   silently undercounting hybrid's hits. Both are local, zero-cloud-call
-   tasks (reading golden set files against the already-frozen corpus) and
-   do not require new Pinecone/Gemini/Convex Cloud activity.
+1. **§45/46/57 hybrid quality — open, narrower than before.** §2's
+   pool-bias half of this gap is now fixed (§6): the label pool has been
+   widened to include every `fusedTop5` candidate, not just `denseTop5`.
+   What remains is the other half — a real HUMAN_VERIFIED pass over the
+   39 (now still 39; §6 added judgments, not human review) queries the
+   user did not personally review. That is a local, zero-cloud-call task
+   (reading golden set files against the already-frozen corpus) but it
+   does require the project's user's own time, which §6 could not
+   substitute for — see §6's provenance discipline.
 2. **§58 lifecycle matrix (7/7 PASS) was run against the older 768-dim
    index, not the currently-populated 1024-dim (`qwen3-embedding-0.6b`)
    Pinecone index** (flagged by the state-reconstruction pass that
@@ -147,17 +166,25 @@ work).
    resource-safety rule that "continue" does not itself authorize a cloud
    operation. Not attempted here.
 
-Because of (1), **§63's final gate is not cleared and §64/§65 do not
-fire.** This is not a Pinecone failure — ANN Recall@10 (0.98, §56) and the
-resource projections (§62) already passed on their own evidence — it is
-that the retrieval-quality gate specifically needs a better label set
-before a verdict can be certified either way.
+Because of (1), **§63's final gate is still not cleared and §64/§65 do
+not fire.** This is not a Pinecone failure — ANN Recall@10 (0.98, §56) and
+the resource projections (§62) already passed on their own evidence — it
+is that the retrieval-quality gate specifically needs real human
+provenance on more of the label set before a verdict can be certified
+either way.
 
-## 5. Evidence contract (§71)
+## 5. Evidence contract (§71) — original 2026-08-31 report
 
 This report was produced by reading existing artifacts, not by executing
 a new eval run. Per §71, claims below are classified honestly rather than
-presented as a fresh `EXECUTED` run:
+presented as a fresh `EXECUTED` run.
+
+**Note (2026-09-02): the hashes below are for the pre-remediation state.**
+`golden_set_verified.jsonl`, `channel_results.json`, and
+`hybrid_eval_results.json` were all rewritten by §6's remediation and no
+longer match these hashes — this block is kept as the historical record
+of what was originally measured; §6 has its own evidence contract for the
+updated files.
 
 ```text
 Claim class:            NOT_EXECUTED_BY_THIS_SESSION (the hybrid eval run
@@ -217,4 +244,126 @@ Claims in this report classified MEASURED: the verdict block's counts,
 
 Cloud activity this session (report-writing only): Convex Cloud 0,
   Gemini 0, Pinecone 0, Neon 0.
+```
+
+## 6. Pool-bias remediation (2026-09-02)
+
+Closes the specific defect measured in §2: 103 chunks across all 50
+queries appeared in `fusedTop5` but were never in the original
+`denseTop5` label pool, so were scored as misses regardless of actual
+relevance.
+
+**Tooling.** `scripts/eval/generate_delta_label_review.py` reads the
+already-computed `hybrid_eval_results.json` (no re-fetch, no cloud call —
+`denseTop5`/`fusedTop5` were already on disk) and, for each query,
+computes `fusedTop5 - denseTop5` — the exact chunks never shown to a
+labeler. It looked up full chunk text for each from the local corpus
+(`/mnt/d/uetgpt_corpus_v1/embeddings/all_chunks.jsonl`, the same source
+`generate_label_review.py` uses) and wrote `scripts/eval/
+delta_label_review.md`: 50 queries × 103 candidates, each echoing the
+query's existing relevant chunk(s)/note for context. Confirmed the
+generated count matched the measured 103 before review began.
+
+**Review.** All 103 candidates were read in full (not just the 400-char
+preview shown in the review file — for genuinely ambiguous cases the
+complete chunk text was fetched directly from `all_chunks.jsonl` and
+checked against the query before judging; see the per-query
+`_delta_note:_` entries in `delta_label_review.md` for the reasoning kept
+for every candidate, relevant or not). This review was done by an AI
+session, not the project's user — provenance is marked accordingly
+throughout, never `HUMAN_VERIFIED`: **`LLM_JUDGED`** by default (read
+against the query, no independent second source checked), upgraded to
+**`AUTHORITATIVE_SOURCE_MATCH`** only on the 4 queries (20, 27, 32, 45)
+where a candidate was cross-checked against — and corroborated —
+specific content already independently verified elsewhere in this
+project's evidence trail (e.g. query 20's Programming Fundamentals
+credit-hour figure matching the original review's already-verified
+Computer Engineering total; query 27's Registrar Office contact chunk
+matching the phone number already established as correct, while also
+surfacing and explicitly flagging a genuine discrepancy — a different
+named Registrar than the original review's candidate — as a finding, not
+something silently resolved).
+
+**Result.** 15 of the 103 candidates were genuinely relevant (not a
+rubber-stamp: 88 were read and rejected with a stated reason each). They
+were merged additively into `golden_set_verified.jsonl` via
+`scripts/eval/parse_delta_label_review.py` — existing relevant chunks and
+provenance were kept as-is; new ones were appended, with each query's
+`provenance` field extended to record the delta judgment as its own
+attributed segment (e.g. `AUTHORITATIVE_SOURCE_MATCH (...) | delta review
+(1 chunk(s)): AUTHORITATIVE_SOURCE_MATCH (...)`), never overwriting the
+original attribution. Of the 15, 4 landed on queries that previously had
+*zero* labeled-relevant chunks at all (queries 1, 8, 11, 47) — meaning 4
+of the 50 queries went from "no scorable answer exists in this label set"
+to "hybrid retrieval's answer is now credited," which is exactly the
+failure mode §2 predicted. The other 11 added corroborating/additional
+relevant chunks to queries that already had at least one.
+
+`channel_results.json`'s per-query `relevantChunkKeys` field was then
+patched to match the updated golden set (a local JSON edit — the cached
+`dense`/`lexical` raw ranked lists themselves were untouched, so this
+required no new Pinecone/Convex fetch), and `fuse_and_score.ts` was
+re-run locally (`npx tsx docs/rag-store-evaluation/hybrid-retrieval-2026-08/fuse_and_score.ts`)
+to regenerate `hybrid_eval_results.json` against the same real,
+unmodified `hybridRank.ts` fusion logic — no re-fetch of dense/lexical
+results, no cloud call of any kind. Result: `scoredQueryCount` 19→23,
+`meanHitAt5` 0.9474→0.9565, `meanMrr` 0.7076→0.7295 (all reported in the
+updated Verdict block above).
+
+**What this does and does not resolve.** The pool-bias-driven undercount
+is fixed. What is unchanged: 0/50 labels are `HUMAN_VERIFIED`, and the
+scorable sample (23/50) is still modest. §63 does not clear on this
+alone — see §4(1). This section's own labeling work is itself
+`LLM_JUDGED`/`AUTHORITATIVE_SOURCE_MATCH`, not a substitute for §47's
+human-review requirement; it is a legitimate, honestly-provenanced
+improvement to the *existing* AI-reviewed portion of the label set, not a
+claim that the set is now human-verified.
+
+**Evidence contract (§71):**
+
+```text
+Claim class:             EXECUTED (this session ran the generation
+                         script, performed the review, ran the merge
+                         parser, patched channel_results.json, and
+                         re-ran fuse_and_score.ts directly)
+Git HEAD (uet-gpt) at
+  start of this work:     6321b2b4ea7478d103bace6159b9f855981ad714
+Branch:                   agent/2026-08-12-turso-knowledge-store
+Commands run (in order, all local, cwd uet-gpt/):
+  python3 scripts/eval/generate_delta_label_review.py
+  [103 candidates reviewed in full, edits applied to delta_label_review.md]
+  python3 scripts/eval/parse_delta_label_review.py
+  [Python one-off: patched channel_results.json's relevantChunkKeys from
+   the updated golden_set_verified.jsonl]
+  npx tsx docs/rag-store-evaluation/hybrid-retrieval-2026-08/fuse_and_score.ts
+Exit codes:               0 for all of the above
+API mode:                 N/A (no API calls; all inputs already local)
+
+Output artifact hashes (SHA-256, MEASURED, post-remediation):
+  scripts/eval/generate_delta_label_review.py
+    9bc037fd2d07f67ed32e8e60a085e540e52623584a36eb7b005290f031240b07
+  scripts/eval/parse_delta_label_review.py
+    b2ad3db4034cfef91c30dceae2d4a2770894a8b859b27822e39dc3d078ed139c
+  scripts/eval/delta_label_review.md
+    d2661708f19f038b9895b5555b5d4d7480ad4382449f1fa2b026b0032c293c41
+  scripts/eval/golden_set_verified.jsonl (post-merge)
+    3258d7f7cabbd144b7b205c25d9e44828008362a4034d8a379d4e0d8ec99131c
+  docs/rag-store-evaluation/hybrid-retrieval-2026-08/channel_results.json
+    (post-patch)
+    013e7cfd8d414e516c373a42ab685394ad2402e3c44c60f3519511ab353b755b
+  docs/rag-store-evaluation/hybrid-retrieval-2026-08/hybrid_eval_results.json
+    (post-rerun)
+    c2c98f0a3834f88f15e73f3c44458fc1659c550477f0531f4e88031282186636
+
+Claims classified MEASURED: the 15/103 relevant count, the
+  scoredQueryCount/meanHitAt5/meanMrr deltas, all hashes above. Classified
+  INFERENCE: the relevance judgments themselves on each of the 103
+  candidates (an LLM_JUDGED/AUTHORITATIVE_SOURCE_MATCH review, not a
+  ground truth) — see delta_label_review.md's per-query notes for the
+  reasoning behind each, which is the actual auditable evidence, not
+  this summary.
+
+Cloud activity this section: Convex Cloud 0, Gemini 0, Pinecone 0, Neon 0
+  (channel_results.json's dense/lexical raw results were reused verbatim
+  from the 2026-08-31 fetch, not re-fetched).
 ```
