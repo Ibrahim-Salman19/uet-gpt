@@ -9,7 +9,7 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app"
 export const metadata: Metadata = {
   title: "UET Taxila Glossary - Learn Key Terms - UET GPT",
   description:
-    "The UET GPT glossary explains key UET Taxila terms: ECAT, merit formula, eligibility criteria, hostel allotment, scholarships, and fee structure - grounded in the official 2025 prospectus.",
+    "The UET GPT glossary explains key UET Taxila terms: ECAT, merit formula, eligibility criteria, hostel allotment, scholarships, and fee structures in detail.",
   alternates: {
     canonical: `${siteUrl}/learn`,
   },

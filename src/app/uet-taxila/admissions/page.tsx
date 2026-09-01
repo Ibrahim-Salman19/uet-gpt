@@ -8,7 +8,7 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app"
 export const metadata: Metadata = {
   title: "UET Taxila Admissions 2026: ECAT, Merit & Guide",
   description:
-    "UET Taxila admissions guide: UET Taxila ECAT entry test, 60%/50% eligibility, how merit is calculated (ECAT 33%, HSSC 50%, SSC 17%), merit lists, required documents, and how UET GPT helps applicants.",
+    "Complete guide to UET Taxila admissions: ECAT entry test, 60%/50% eligibility, merit formula (33% ECAT, 50% HSSC, 17% SSC), merit lists, and required documents.",
   alternates: {
     canonical: `${siteUrl}/uet-taxila/admissions`,
   },

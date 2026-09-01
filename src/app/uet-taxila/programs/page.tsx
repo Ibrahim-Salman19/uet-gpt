@@ -8,7 +8,7 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app"
 export const metadata: Metadata = {
   title: "UET Taxila Programs & Departments: BS, MS, PhD",
   description:
-    "Explore UET Taxila programs and UET Taxila departments: 14 departments across 6 faculties offering undergraduate, graduate (MS/MPhil), and PhD degrees - and how UET GPT helps you choose.",
+    "Explore 14 departments and 6 faculties at UET Taxila offering accredited undergraduate (BSc/BS), graduate (MS/MSc), and PhD degree programs in engineering.",
   alternates: {
     canonical: `${siteUrl}/uet-taxila/programs`,
   },

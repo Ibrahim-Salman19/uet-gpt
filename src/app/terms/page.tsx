@@ -7,54 +7,87 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app"
 export const metadata: Metadata = {
   title: "Terms of Service - UET GPT",
   description:
-    "Terms of Service for UET GPT. Information on acceptable use, academic disclaimers, open-source licensing, and liability limitations.",
-  alternates: { canonical: `${siteUrl}/terms` },
+    "Terms of Service for UET GPT. Information on informational use, student community guidance, and non-affiliation disclaimers with official bodies.",
+  alternates: {
+    canonical: `${siteUrl}/terms`,
+  },
   openGraph: {
     title: "Terms of Service - UET GPT",
-    description: "Acceptable use and disclaimers for UET GPT.",
+    description:
+      "Terms of Service for UET GPT. Information on informational use, student community guidance, and non-affiliation disclaimers with official bodies.",
     url: `${siteUrl}/terms`,
     type: "website",
+    images: [
+      {
+        url: `${siteUrl}/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: "Terms of Service — UET GPT",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Terms of Service - UET GPT",
+    description: "Terms of Service and legal disclosures for UET GPT users.",
+    images: [`${siteUrl}/opengraph-image`],
   },
 };
 
 export default function TermsPage() {
   return (
-    <>
+    <div className="min-h-screen bg-[#070708] text-[#e4e4e7]">
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: siteUrl },
-          { name: "Terms of Service", url: `${siteUrl}/terms` },
+          { name: "Terms", url: `${siteUrl}/terms` },
         ]}
       />
-      <div className="min-h-screen bg-[#070708] text-[#e1e1e2]">
-        <main id="main-content" className="max-w-4xl mx-auto px-6 py-20">
-          <nav className="text-xs font-mono text-[#a1a1aa] mb-8" aria-label="Breadcrumb">
-            <Link href="/" className="hover:text-white">
-              Home
-            </Link>{" "}
-            / <span>Terms of Service</span>
-          </nav>
-          <h1 className="text-3xl sm:text-4xl font-bold mb-6 text-white">Terms of Service</h1>
-          <p className="text-sm text-[#a1a1aa] mb-8">Last Updated: September 1, 2026</p>
-          <div className="space-y-8 text-sm text-[#d4d4d8] leading-relaxed font-light">
-            <section>
-              <h2 className="text-lg font-semibold text-white mb-2">1. Informational Disclaimer</h2>
-              <p>
-                UET GPT is an independent, open-source AI guide. It provides retrieval-grounded
-                guidance based on official university records, but official administrative decisions
-                must always be verified directly with UET Taxila authorities.
-              </p>
-            </section>
-            <section>
-              <h2 className="text-lg font-semibold text-white mb-2">2. Acceptable Use</h2>
-              <p>
-                Users agree not to exploit the platform for malicious crawling, denial of service,
-                prompt injection attacks, or abusive automation.
-              </p>
-            </section>
+      <main id="main-content" className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
+        <nav className="mb-8 flex items-center text-sm text-[#a1a1aa]" aria-label="Breadcrumb">
+          <Link href="/" className="hover:text-white transition-colors">
+            Home
+          </Link>
+          <span className="mx-2 text-[#52525b]">/</span>
+          <span className="text-white font-medium">Terms of Service</span>
+        </nav>
+
+        <header className="mb-12 border-b border-[#27272a] pb-8">
+          <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl mb-4">
+            Terms of Service
+          </h1>
+          <p className="text-sm text-[#a1a1aa]">Last Updated: September 1, 2026</p>
+        </header>
+
+        <section className="space-y-8 text-base text-[#a1a1aa] leading-relaxed">
+          <div>
+            <h2 className="text-xl font-semibold text-white mb-3">1. Informational Purpose</h2>
+            <p>
+              UET GPT is provided strictly for informational and navigational assistance. While we
+              ground all generated responses in official documents, users must verify official
+              admission dates, fee receipts, and binding legal decisions through official university
+              administration channels.
+            </p>
           </div>
-        </main>
-      </div>
-    </>
+
+          <div>
+            <h2 className="text-xl font-semibold text-white mb-3">2. Non-Affiliation Disclaimer</h2>
+            <p>
+              UET GPT is an independent, community-driven initiative. It is not affiliated with,
+              endorsed by, or operated by the University of Engineering and Technology, Taxila, or
+              any other university body.
+            </p>
+          </div>
+
+          <div>
+            <h2 className="text-xl font-semibold text-white mb-3">3. Acceptable Use</h2>
+            <p>
+              Users agree not to attempt to reverse engineer, disrupt, or flood the API services, nor
+              to extract data in violation of privacy or applicable laws.
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
   );
 }

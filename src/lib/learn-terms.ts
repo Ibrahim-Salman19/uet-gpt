@@ -41,7 +41,7 @@ export const LEARN_TERMS: LearnTerm[] = [
     title: "ECAT (Engineering College Admission Test)",
     pageTitle: "What is ECAT? UET Entry Test Explained | UET GPT",
     metaDescription:
-      "ECAT is the Engineering College Admission Test required for UET Taxila admissions. Learn what ECAT is, how it is scored, and how it counts in the UET Taxila merit formula.",
+      "Understand the ECAT entry test for UET Taxila: format, 33% merit weightage, scoring, eligibility, and preparation guidance from official sources.",
     lead: "ECAT — Engineering College Admission Test — is the standardized entry test that applicants to undergraduate engineering and computing programs at UET Taxila must sit before their admission merit can be calculated. Conducted annually by UET Lahore for Punjab-domicile students, ECAT is mandatory for engineering programs and BS Computer Science.",
     sections: [
       {
@@ -105,7 +105,7 @@ export const LEARN_TERMS: LearnTerm[] = [
     title: "UET Taxila Merit Formula (Aggregate Marks)",
     pageTitle: "UET Taxila Merit Formula: Calculation Guide | UET GPT",
     metaDescription:
-      "The UET Taxila merit formula combines ECAT 33%, HSSC 50%, and SSC 17%. Learn how aggregate admission marks are calculated with a worked example from the official prospectus.",
+      "Calculate your UET Taxila admission aggregate: ECAT (33%), HSSC (50%), SSC (17%), plus Hifz-e-Quran/NCC bonus marks with official worked examples.",
     lead: "The UET Taxila merit formula — officially called the admission marks formula — calculates a weighted percentage from three components: the ECAT entry test (33%), the HSSC or equivalent higher qualification (50%), and the SSC or equivalent (17%). This aggregate determines where an applicant stands on the merit list for their chosen discipline and category.",
     sections: [
       {

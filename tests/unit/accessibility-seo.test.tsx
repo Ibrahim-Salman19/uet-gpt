@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 describe("Accessibility & Touch Target Standards", () => {
   it("ensures markdown images provide alt text fallback", () => {
     const mdSrc = fs.readFileSync("src/components/markdown.tsx", "utf8");
-    expect(mdSrc).toContain("alt =");
+    expect(mdSrc).toContain('alt={alt || "Content image"}');
   });
 
   it("ensures auth guard loading states have aria-hidden on decorative spinners", () => {

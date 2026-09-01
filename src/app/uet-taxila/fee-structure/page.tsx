@@ -8,7 +8,7 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app"
 export const metadata: Metadata = {
   title: "UET Taxila Fee Structure: Tuition & Hostel Fees",
   description:
-    "UET Taxila fee structure explained: subsidized and partial-subsidized (S and X) undergraduate tuition, hostel and other charges, payment schedules, and the admission fee refund policy - with how UET GPT provides current figures.",
+    "Explore UET Taxila undergraduate fee structures: subsidized and partial-subsidized tuition, hostel fees, payment schedules, and admission fee refund policy.",
   alternates: {
     canonical: `${siteUrl}/uet-taxila/fee-structure`,
   },
