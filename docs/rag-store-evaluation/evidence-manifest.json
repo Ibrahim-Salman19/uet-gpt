@@ -9,8 +9,8 @@
     "NOT_EXECUTED": "Explicitly not run/verified - a gap, honestly labeled rather than hidden or implied.",
     "EVIDENCE_LOST": "Known from prior conversation context but the original supporting artifact no longer exists; not re-fabricated to look pristine."
   },
-  "generated": "2026-08-15",
-  "generated_at_git_head": "2397c7adc7005d26198a8690b5c4d4689fb9fcfd",
+  "generated": "2026-08-29",
+  "generated_at_git_head": "9b1840971bd1fbb90a2e79a1038ee6a45bc76f7a",
   "files": [
     {
       "path": "acceptance-gates.json",
@@ -115,10 +115,351 @@
       "sha256": "4b4e96adaf62e2ccb1edda49f4964a447db14cb03472c2e064b05456b4345ce2",
       "classification": "EXECUTED (raw research-agent output, unedited)",
       "describes": "The complete, unedited output of the background research agent that produced pinecone/research-findings.json. Kept verbatim so the structured JSON's claims can be checked against their original phrasing and source list."
+    },
+    {
+      "path": "pinecone/upsert-authorization-request.md",
+      "sha256": "ce20b54a8b9287828dc9332a5cfaeeb98ad8b8d097a91e7d7a498e5cb7ed4fb4",
+      "classification": "DERIVED (real per-vector byte counts from source-confirmed metadata fields, real Starter-plan limits from research-findings.json's OFFICIAL_VENDOR_FACT entries) + NOT_EXECUTED (the upsert itself, as of first version) + EXECUTED (decision record, added after asking the user directly)",
+      "describes": "2026-08-29 mandate §51 authorization report. Metadata shape (documentId/chunkKey/category/generation, no chunk text) confirmed directly from pineconeAdapter.ts:173, not assumed. Vector-count/byte projections: 185.5MB/371.0MB/543.4MB raw-payload lower bound at 1x/2x/3x (44,792/89,584/134,376 vectors), comfortably under the 2GB Starter storage limit even at 3x - unlike the Convex lexical finding, this one shows real headroom, not risk. Two decisions asked directly via AskUserQuestion and recorded here: (1) full-corpus upsert - user response ('100% sure... no chance we mess up') read as conditional authorization requiring a verified small-scale test before the full upsert, not a blind go-ahead; (2) eval labels - user chose invest in real HUMAN_VERIFIED labels first, so §45/§57/§63 are now PAUSED (not attempted with the existing weak query sets), while §56 ANN recall proceeds unaffected."
+    },
+    {
+      "path": "cloudflare-workers-ai-2026-08/report.md",
+      "sha256": "124ce6978acaa2d51c5830a8b7464289b7d4653990011fab3fd3b6be7433f619",
+      "classification": "EXECUTED / MEASURED",
+      "describes": "Central Cloudflare Workers AI evaluation report. Measured bake-off selecting @cf/qwen/qwen3-embedding-0.6b (1024d) over bge-m3, embeddinggemma-300m (disqualified: silently truncates, verified via an appended-marker test, not just catalog specs), and the bge-{s,b,l} family (would truncate 30.8% of chunks). Neuron cost measured via the real cf-ai-neurons response header on random+stratified samples (corrected a 6x-wrong estimate from an earlier 10-chunk convenience sample). Retrieval quality bake-off: R@1/R@5/MRR@10 via known-item retrieval, 1000 chunks/1000 docs, no labels needed. Records a real concurrent-writer incident (\u00a79: 979 duplicate rows, ~819 neurons wasted, root-caused to a stale-process misdetection, fixed with a PID lockfile) and the reranker/embedding shared-daily-budget finding (\u00a76a/\u00a78, corroborated directly in cloudflareRerank-live-test.ts, read this pass)."
+    },
+    {
+      "path": "cloudflare-workers-ai-2026-08/GAPS.md",
+      "sha256": "43047f79ae8ab5ebea250d08e6a99db6bab171c918f008f174b819851ed4b61f",
+      "classification": "DERIVED, indexing EXECUTED/MEASURED evidence elsewhere in this tree",
+      "describes": "Living gap register (2026-08-24) cross-referencing every closed and open item in the Cloudflare/Pinecone evaluation, each with its own evidence citation. Read in full this pass. Section H's 17.1%-duplicate-chunk-text finding and its measured retrieval-impact figures (mean 0.93/10 redundant slots, 31.3% of queries affected) are original measurements recorded here, not just an index."
+    },
+    {
+      "path": "cloudflare-workers-ai-2026-08/pineconeAdapter-live-test.ts",
+      "sha256": "c71cf3e1aeccd6bcbecb80cf5ba8bb6f1614f30dec4471921dce6e624e7912f3",
+      "classification": "EXECUTED",
+      "describes": "Live integration test of convex/knowledgeStore/pineconeAdapter.ts against the real uetgpt-corpus-v1-qwen1024 index (isolated 'adapter-contract-test' namespace). Read in full this pass: 17 check() assertions directly counted in source (health, upsert-is-no-op, denseSearch round-trip, category filtering, generation-replacement stale-deletion semantics including a case where the test's own first-draft assumption was wrong and the adapter was right, lexicalSearch/getChunks correctly unsupported, deleteDocument, stats). INDEPENDENT_REVIEW.md's summary describes this as '20 checks' - close but not exact against a direct count; 17 is what is directly verifiable from the file's own check() call sites.",
+      "satisfies_gate": "pineconeAdapter built and tested against live infra"
+    },
+    {
+      "path": "cloudflare-workers-ai-2026-08/cloudflareRerank-live-test.ts",
+      "sha256": "2f1851dbf8de7792538824b73484e287ed4ad4c468361bc01c8222d8cc09c919",
+      "classification": "EXECUTED",
+      "describes": "Live test of convex/reranking/cloudflareRerank.ts's actual exported internalAction (via its real _handler property, confirmed by inspection after a first assumption of `.handler` failed correctly). Read in full this pass. Contains a precise fallback-signature detector (exact 1, 1-1/topK, ... score sequence) that distinguishes 'real inference ran' from 'gracefully degraded under quota exhaustion' without needing to intercept logs - this is the direct source of the shared-Cloudflare-budget finding recorded in GAPS.md \u00a7I and cited in INDEPENDENT_REVIEW.md."
+    },
+    {
+      "path": "cloudflare-workers-ai-2026-08/cf_verify.py",
+      "sha256": "53a76b361d46978d98605627bc018361e02a49776dd7fb777f94755c635179f0",
+      "classification": "EXECUTED",
+      "describes": "Supporting script (per report.md \u00a77): confirms API token validity, dims/batching/normalization per candidate model. Not independently re-read line-by-line this pass; purpose grounded in report.md's own description."
+    },
+    {
+      "path": "cloudflare-workers-ai-2026-08/cf_measure.py",
+      "sha256": "158f6511fee51a7a5eb84a22c0ec964ccc6ecf8d312255fed8b1324e35af32d9",
+      "classification": "EXECUTED / MEASURED",
+      "describes": "Supporting script (per report.md \u00a77 and \u00a72): measures real neuron cost via the cf-ai-neurons header against real corpus chunks, random + stratified sampling. Source of report.md \u00a72's cost table. Not independently re-read line-by-line this pass."
+    },
+    {
+      "path": "cloudflare-workers-ai-2026-08/cf_truncation_test.py",
+      "sha256": "23683906e97874aa3c5facad747a1e7dc7d1b50cd3edca2b4ef6b017939a7cf1",
+      "classification": "EXECUTED / MEASURED",
+      "describes": "Supporting script (per report.md \u00a73 and \u00a77): appended-marker truncation test (embed a chunk, then the same chunk with a distinctive tail sentence; identical vectors = truncation). Source of the embeddinggemma-300m disqualification. Not independently re-read line-by-line this pass."
+    },
+    {
+      "path": "cloudflare-workers-ai-2026-08/cf_dilution_control.py",
+      "sha256": "a2d8db1446f315661e285f53fa2c8c17ffa9b2bf72b0de6b4a42001ef00d9ff5",
+      "classification": "EXECUTED / MEASURED",
+      "describes": "Supporting script (per report.md \u00a73 and \u00a77): prefix-length sweep separating dilution (full text read, similarity falls smoothly) from truncation (hard cliff to cosine 1.0). Source of report.md \u00a73's sweep table. Not independently re-read line-by-line this pass."
+    },
+    {
+      "path": "cloudflare-workers-ai-2026-08/cf_quality_bakeoff.py",
+      "sha256": "06a797216ef5844a6eae1733b6ba166d2a4e4e5991347bf9c1c484b94e048858",
+      "classification": "EXECUTED / MEASURED",
+      "describes": "Supporting script (per report.md \u00a74 and \u00a77): known-item retrieval bake-off, R@1/R@5/MRR@10, 1000 chunks/1000 distinct documents, label-free ground truth (probe = a distinctive sentence extracted from its own source chunk). Source of report.md \u00a74's quality table and quality-bakeoff-run.log. Not independently re-read line-by-line this pass."
+    },
+    {
+      "path": "cloudflare-workers-ai-2026-08/cf_final_checks.py",
+      "sha256": "3a1eec34f3b2a1abc39c272dab70e2da881f2c2aca313b7a8023ccdb77193dfb",
+      "classification": "EXECUTED / MEASURED",
+      "describes": "Supporting script (per report.md \u00a77): final truncation check specifically for qwen3-embedding-0.6b plus a clean cost measurement pass. Not independently re-read line-by-line this pass."
+    },
+    {
+      "path": "cloudflare-workers-ai-2026-08/measure_duplicate_impact.py",
+      "sha256": "044dc2abc825aa885ca2fce340625d6fe295a218fc60f34f8c4da25c74c84dca",
+      "classification": "EXECUTED / MEASURED",
+      "describes": "Zero-API-cost script measuring real top-10 retrieval redundancy from already-embedded chunks (300 probes). Its output is quoted verbatim in GAPS.md \u00a7H (read in full this pass): mean 0.93/10 redundant slots, 31.3% of queries with >=1 duplicate, full histogram. Not independently re-read line-by-line this pass; its reported output was read directly via GAPS.md's quotation."
+    },
+    {
+      "path": "cloudflare-workers-ai-2026-08/quality-bakeoff-run.log",
+      "sha256": "2d288736a52fd6a7a51a08cfab9b18324521ee352b6dc9afcd2dca849ac3a576",
+      "classification": "EXECUTED",
+      "describes": "Raw run log backing report.md \u00a74's bake-off table. Not read line-by-line this pass."
+    },
+    {
+      "path": "cloudflare-workers-ai-2026-08/verify_embeddings.py",
+      "sha256": "a5460d89777b117edda3909da9607896d5b942b765df27bd64c9124e0f89d01d",
+      "classification": "EXECUTED",
+      "describes": "Snapshot copy of the completeness/integrity/distinctness/auditability gate script. NOTE: the WORKING copy at /mnt/d/uetgpt_corpus_v1/embeddings/verify_embeddings.py was directly read and edited earlier this session (a real false-positive distinctness bug was found and fixed - a repeated embedding fingerprint was flagged without cross-referencing contentHash, producing a false 'do not upsert' verdict on a genuinely duplicated source chunk, not a degenerate embedding). This evidence-directory copy has not been byte-diffed against the working copy to confirm it reflects the same fix - flagged, not assumed identical."
+    },
+    {
+      "path": "cloudflare-workers-ai-2026-08/cf_embed_corpus.py",
+      "sha256": "1e9e874b6fade548210a5258ec915aeecd23fd0283319fa6f665787fd1efcd5d",
+      "classification": "EXECUTED",
+      "describes": "Snapshot copy of the production embedding ingest script (idempotent, char-budgeted batching, PID-lockfile single-writer enforcement, daily-quota-vs-rate-limit distinction). The WORKING copy at /mnt/d/uetgpt_corpus_v1/embeddings/cf_embed_corpus.py was directly read and run to completion earlier this session (44,792/44,792 chunks, 0 failures). This evidence-directory copy has not been byte-diffed against the working copy - flagged, not assumed identical."
+    },
+    {
+      "path": "cloudflare-workers-ai-2026-08/reranker-worker/worker.js",
+      "sha256": "03c2af05345ef10cbffab67a27b689aefe7933fff26d9d2681b31585ed28702c",
+      "classification": "EXECUTED",
+      "describes": "Cloudflare Worker exposing POST /rerank in cascade.ts's expected contract shape ({query, documents} -> {index,score,text}), adapting it to @cf/baai/bge-reranker-base's real API shape. Per GAPS.md \u00a7C: built and its contract proven against the live model via test_contract.py; not yet `wrangler deploy`-ed to a live URL (needs user approval) and RERANKER_URL is not yet set, so this worker is not wired into production cascade.ts. Not independently re-read line-by-line this pass."
+    },
+    {
+      "path": "cloudflare-workers-ai-2026-08/reranker-worker/test_contract.py",
+      "sha256": "b1efb312146392ef053f48a5b103a5dfc29c21a9a255e115613696131ac7a6d8",
+      "classification": "EXECUTED",
+      "describes": "Reproduces the worker's exact request/response mapping and asserts shape, index/text alignment, descending order, and semantic correctness against the live model, per GAPS.md \u00a7C ('Test passes'). Not independently re-read line-by-line this pass."
+    },
+    {
+      "path": "cloudflare-workers-ai-2026-08/reranker-worker/wrangler.toml",
+      "sha256": "cdb71c48987ce1c729d52e3498ad0f5982c1ea2aee92e5722d14f5a993b09b4c",
+      "classification": "NOT_EXECUTED (config only)",
+      "describes": "Cloudflare Worker deployment config for reranker-worker/worker.js. The worker has not been deployed (`wrangler deploy` not run - needs user approval per GAPS.md \u00a7C)."
+    },
+    {
+      "path": "fresh-corpus-crawl-2026-08/pre-crawl-evidence.json",
+      "sha256": "81c487286a8b80afea0191e6a1308a25915277efee2d11548ed47f4f5e58aecb",
+      "classification": "EXECUTED / MEASURED (pre-crawl state only - crawl outcome NOT captured)",
+      "describes": "Read in full this pass. Documents a DIFFERENT, earlier crawl effort than the local-corpus-v1-freeze-2026-08 one: a live-cloud, production-equivalent crawl (`scripts/crawler.py --no-resume`, webhook push, not --dry-run) into rugged-bird-156, authorized 2026-08-15 for the retrieval-baseline-remediation work. Confirms rugged-bird-156 was verified EMPTY (0 documents/chunks) immediately before that crawl started, via three independent identity signals. It does NOT capture what the crawl actually produced - no post-crawl evidence file exists in this directory, and the later mandate work (Phase 2-4) proceeds via a separate, local-only --dry-run crawl into /mnt/d/uetgpt_corpus_v1 instead. Whether this earlier cloud crawl ever completed, and whether rugged-bird-156 currently holds its output, remains exactly the open question INDEPENDENT_REVIEW.md \u00a73 already flags as blocked on Clerk admin access - this file sharpens that question (confirms a crawl was at least started) but does not resolve it."
+    },
+    {
+      "path": "gemini-embedding-workload-2026-08/report.md",
+      "sha256": "55aff68aaf0950ba6c5e56d209780b06985aa299d5530cccc22b4193b7c88667",
+      "classification": "DERIVED (from Phase 5's real local measurements + vendor pricing facts)",
+      "describes": "Read in full this pass. Pre-embedding cost/time report for the then-current Gemini plan (45,306 total calls, ~33.4M input tokens extrapolated from a 62.7%-sampled real character count, $3.48-6.83, ~50h throttled / ~15min at Paid Tier 1). Zero Gemini calls made to produce it. SUPERSEDED: the project subsequently moved to Cloudflare qwen3-embedding-0.6b (1024d) for the actual corpus embed, per cloudflare-workers-ai-2026-08/report.md \u00a71/\u00a75 - this report's numbers describe a plan that was not the one ultimately executed."
+    },
+    {
+      "path": "local-convex-lexical-proof-2026-08/report.md",
+      "sha256": "c5ba246d85cbf416a774f95069f90b1b4721ad4677a5eaacad56c115fddd299f",
+      "classification": "EXECUTED / MEASURED",
+      "describes": "Read in full and extended this pass (\u00a77 added 2026-08-29, then corrected same day - see below). Phase 5 proof: full frozen corpus (1,891/1,891 docs, 44,792 chunks) loaded into local self-hosted Convex (http://127.0.0.1:3210, 0 cloud/Gemini calls, structurally guaranteed via placeholder API keys + a 300-row scan confirming 0 embedded rows), full-text search proven with 5 real queries (109-562ms). Two real engineering bugs found and fixed (CLI arg-size ceiling, a write-rate-limit idempotency gap). \u00a77 closes both gaps this entry previously flagged: (a) 2x/3x projection - first attempt compared a 474MB `du` filesystem measurement directly to the 276MB adamant-stork-623 Cloud-billed figure for a differently-composed corpus; both problems (filesystem-vs-content, differently-composed corpus) were caught on review and the comparison was REPLACED, not caveated - corrected measurement sums real logical content bytes for exactly the fields the lexical schema stores: 247.3MB at 1x (MEASURED_LOCAL content lower bound, excludes index/storage-format overhead), 494.6MB/741.9MB at 2x/3x (DERIVED linear). CONVEX_LEXICAL_CAPACITY_RISK recorded on this corrected basis: content alone, before overhead, is already roughly half a typical ~0.5GB free tier at 1x and would reach it at 2x - a self-contained finding that does not depend on the old 276MB figure being comparable. (b) exact-term correctness (\u00a732) - single-token identifiers (course codes, acronyms) mostly relevant (4/6 strong-to-plausible, 2/6 coincidental, HEURISTIC judgment per \u00a747, explicitly labeled as such), but multi-word phrase queries return identical, non-phrase-precise top hits - confirmed as expected Convex search-index ranking behavior (bag-of-words 'best match', per convex/_generated/ai/guidelines.md), not a bug.",
+      "satisfies_gate": "local Convex minimal lexical capacity proof (mandate \u00a728-32)"
+    },
+    {
+      "path": "local-convex-lexical-proof-2026-08/ingest-driver.py",
+      "sha256": "0cabf92cddadd0b18238f86e26b15fb60da20f15de5b7ad1313c890fb4107e32",
+      "classification": "EXECUTED",
+      "describes": "Driver script for the Phase 5 proof above (per report.md \u00a72: fixed batch budget ~120KB, 0.5s inter-batch delay, exponential-backoff retry on rate-limit, and the chunkCount-based skip/re-chunk idempotency fix). Not independently re-read line-by-line this pass."
+    },
+    {
+      "path": "local-convex-lexical-proof-2026-08/ingest-run.log",
+      "sha256": "017b331792a3770179c05cc358d1c00981b8d6fab4158428bff4139876a58c6b",
+      "classification": "EXECUTED",
+      "describes": "Full run log backing the Phase 5 report above. Not read line-by-line this pass."
+    },
+    {
+      "path": "local-convex-lexical-proof-2026-08/exact_term_queries.py",
+      "sha256": "cf685dff8007808cacbf7ce773e49c7a96baf8dd3d6febd635b5bf3a0dde6895",
+      "classification": "EXECUTED",
+      "describes": "2026-08-29 follow-up driver for report.md \u00a77.2. 8 exact-term queries (course codes, acronyms, department/program phrases) pulled from a real regex scan of all_chunks.jsonl, not invented, run against the restarted local Convex deployment via the same HTTP /api/action pattern ingest-driver.py established. Reuses searchChunksForProof (crawl/lexicalProof.ts), the same production search_text index the original Phase 5 proof used - not a Python BM25 substitute."
+    },
+    {
+      "path": "local-convex-lexical-proof-2026-08/exact_term_run.log",
+      "sha256": "2600c9da4cf27023a7e682ef9db65e821dff7a9fd673a13608865dc34d163592",
+      "classification": "EXECUTED",
+      "describes": "Raw stdout of exact_term_queries.py: hit counts and top-result text preview per query, backing report.md \u00a77.2's per-query relevance table."
+    },
+    {
+      "path": "local-convex-lexical-proof-2026-08/content_bytes.py",
+      "sha256": "e2cf6b6fb3750d0b0fc8dc96f5d96ae6362bc6eb274c97624a74e661271aa90b",
+      "classification": "EXECUTED",
+      "describes": "2026-08-29 corrected \u00a77.1 storage measurement, written after the original du-based comparison was found invalid (filesystem measurement compared to a cloud-billed metric for a differently-composed corpus). Sums real UTF-8 content bytes for exactly the fields the lexical schema stores, reading directly from all_chunks.jsonl and documents.jsonl - no Convex query, no du, no filesystem measurement. Re-run once to confirm determinism (identical output both runs)."
+    },
+    {
+      "path": "local-convex-lexical-proof-2026-08/content_bytes_run.log",
+      "sha256": "7eb01eae9645931306582f3476fd0aa253a633ce6d3b90b553872e68c8f58deb",
+      "classification": "EXECUTED / MEASURED",
+      "describes": "Output of content_bytes.py: 247.3MB total content bytes at 1x (247.0MB crawledChunks + 0.3MB documents), 494.6MB/741.9MB DERIVED 2x/3x linear projections. This is the number report.md \u00a77.1 and candidate-matrix.json's P2 entry now cite - supersedes the original 474MB du figure as the basis for CONVEX_LEXICAL_CAPACITY_RISK."
+    },
+    {
+      "path": "local-corpus-v1-freeze-2026-08/manifest.json",
+      "sha256": "58cc5435bc2035115e1caeb0499e6316fc242ba915f8cd7ad4adb8a87d41c9be",
+      "classification": "EXECUTED / MEASURED",
+      "describes": "Read in full this pass. Phase 4 freeze manifest matching the mandate \u00a726 contract: corpusVersion-equivalent fields, git commit e48421d, crawl start/finish timestamps, completionReason FRONTIER_EXHAUSTED (coverageComplete/exhaustive true, capReached false), full document/chunk/raw-cache counts and SHA-256 hashes. 1,891 documents (1,890 unique + 1 disclosed benign duplicate documentId), 385 PDF / 1,506 HTML. Cross-checked this session against the corpus's own all_chunks.jsonl line count (44,792, exact match) and cf_embeddings.jsonl's final line count (44,792, exact match).",
+      "satisfies_gate": "Corpus V1 freeze (mandate \u00a722-26)"
+    },
+    {
+      "path": "local-corpus-v1-freeze-2026-08/report.md",
+      "sha256": "0f29edf988c426ab495deff8c9a1494d59d6bb1d2050a56cccef53f634a7eb93",
+      "classification": "EXECUTED / MEASURED",
+      "describes": "Read in full this pass. Narrates manifest.json above. Records 3 real crawler bugs found and fixed (DeadLetterQueue not reporting dead-lettering, failed_extract missing from TERMINAL_STATES, begin_run()'s exhaustive-detection using max_depth instead of max_pages making FRONTIER_EXHAUSTED unreachable for any real --exhaustive invocation) with 3 new regression tests, 70 passed / 9 subtests. An extended web.uettaxila.edu.pk outage (~2026-08-21T06:20Z to 2026-08-22T12:35Z) is independently confirmed via direct curl HTTP 522/timeout checks, not assumed from crawler-side symptoms alone."
+    },
+    {
+      "path": "local-corpus-v1-freeze-2026-08/documents-sample.jsonl",
+      "sha256": "b9a35b0a1aad2a2c11ba3422b63678dfc2171edd7cb8258ac464c8e158fc98cc",
+      "classification": "EXECUTED (sample)",
+      "describes": "3-entry sample of documents.jsonl, per report.md \u00a75 - the full 16MB file is not committed to git (manifest-not-payload convention). Not independently re-read this pass."
+    },
+    {
+      "path": "local-corpus-v1-freeze-2026-08/raw-manifest-sample.jsonl",
+      "sha256": "7e374c65a0dfcf5256b95c3271f7e5dc8b086b132de07a04ab1076efc7cf57f1",
+      "classification": "EXECUTED (sample)",
+      "describes": "3-entry sample of raw-manifest.jsonl, per report.md \u00a75. Not independently re-read this pass."
+    },
+    {
+      "path": "market-screen-2026-08/shortlist.json",
+      "sha256": "f1c4fff16922ff9acdc92f5dca883f2f57a131f5150b2852bc3b3cdd88fd0b86",
+      "classification": "DERIVED (from OFFICIAL_VENDOR_FACT research, explicitly not benchmarked)",
+      "describes": "Read in full this pass. 2026-08 market-wide RAG storage screen's final shortlist: Pinecone ranked #1 (SCREENING_PASS / BENCHMARK_PENDING / PRODUCTION_NOT_APPROVED - own explicit classification, self-consistent with this manifest's taxonomy), Neon ranked #2 fallback (SCREENING_PASS_WITH_CAPACITY_RISK - open gate on 2x/3x storage growth, explicitly left UNKNOWN rather than forced to a false-precision answer). 6 other candidates researched and explicitly held back with reasons (Weaviate, LambdaDB, Lantern, TiDB, Cloudflare Vectorize, LanceDB Cloud). This is the document that originally established Pinecone-then-Neon as the evaluation order the current mandate also specifies."
+    },
+    {
+      "path": "market-screen-2026-08/candidates.json",
+      "sha256": "4cedb07dad332f124fd90422829620963813a4979ed6235baf2ab5aec71a398b",
+      "classification": "OFFICIAL_VENDOR_FACT / DERIVED",
+      "describes": "Full candidate research backing shortlist.json above. Not independently re-read this pass."
+    },
+    {
+      "path": "market-screen-2026-08/evidence.json",
+      "sha256": "d700f053ccc8c43e430074f5d6c693b627223456852688020197153acf827f05",
+      "classification": "OFFICIAL_VENDOR_FACT",
+      "describes": "Supporting vendor-documentation evidence for the market screen. Not independently re-read this pass."
+    },
+    {
+      "path": "market-screen-2026-08/hard-gate-matrix.csv",
+      "sha256": "f2b5f6cd156d5b760141bd06a0e8305899478037488075f9f8d2eff5f2642a11",
+      "classification": "DERIVED",
+      "describes": "Gate-by-gate pass/fail/unknown matrix across all candidates researched. Not independently re-read this pass."
+    },
+    {
+      "path": "market-screen-2026-08/requirements.json",
+      "sha256": "aba4c66c5a9e3cbbe48a7956d77f27ed227e3b9020955e59e4d94cb1d0476f1f",
+      "classification": "DERIVED",
+      "describes": "Machine-readable statement of the hard gates every candidate was screened against (referenced by shortlist.json's own classification legend). Not independently re-read this pass."
+    },
+    {
+      "path": "market-screen-2026-08/research-notes.md",
+      "sha256": "5f15e132a84f9b1814baf44b6adc1e4a76df93c2601460ee2b743bef517a879b",
+      "classification": "OFFICIAL_VENDOR_FACT / DERIVED",
+      "describes": "Narrative research notes backing the market screen. Not independently re-read this pass."
+    },
+    {
+      "path": "pdf-path-unification-2026-08/report.md",
+      "sha256": "98edca259dee89e211061d6c63764865d4a0cbe8eb190714f0e776c5b2c9ff8d",
+      "classification": "EXECUTED / MEASURED",
+      "describes": "Read in full this pass, and the stale line corrected in-file 2026-08-29 (not just noted here). Mandate \u00a77 acceptance gate PASSED: byte-identical output between crawler.extract_pdf_sync and the fixed harness on all 3 real local PDF fixtures (including peeda-2006-2, whose originally-cited OCR-page-count divergence did NOT reproduce against the real committed functions - the real, independently-confirmed divergence was in post-processing/cleaning, not OCR decisions). 43-fixture harness: 100% pass rate, 100% two-pass determinism. Regression suites: 109 passed (targeted) + 417 passed/90 subtests (full repo), matching the pre-existing baseline exactly. Fix committed as a6ee46b, 2026-08-20 (independently confirmed via `git log --oneline --all` this pass, separately from the fork's earlier finding). The report's own 'COMMIT: NOT YET MADE' line was stale (written pre-commit, never updated) and has now been corrected in the file itself.",
+      "satisfies_gate": "PDF extraction path unification (mandate \u00a75-7)"
+    },
+    {
+      "path": "pdf-path-unification-2026-08/dual-path-comparison.json",
+      "sha256": "5a4df84145ce81a80e8ee4ee06826f48b4f053a461851a79cdd5a361e3a5eb3e",
+      "classification": "EXECUTED / MEASURED",
+      "describes": "Direct crawler-vs-harness byte comparison on all 3 real local PDF fixtures, per report.md \u00a74's quoted fixture hashes/output hashes. Not independently re-parsed this pass beyond what report.md quotes directly."
+    },
+    {
+      "path": "pdf-path-unification-2026-08/harness-43fixture-twopass-report.json",
+      "sha256": "6a820b59417584614b75f15c80c8eddef69ea11d36f8ecc6505032f1f58a65fe",
+      "classification": "EXECUTED / MEASURED",
+      "describes": "Full unrestricted 43-fixture harness run backing report.md \u00a74's 100%/100% pass-rate/determinism-rate figures and corpus_manifest_hash. Not independently re-parsed this pass beyond what report.md quotes directly."
+    },
+    {
+      "path": "pinecone-p2-proof-2026-08/report.md",
+      "sha256": "871ccacb2f2f3b63ce2a628de6b812eff4c4ce8e515cc4112387bb437f84398a",
+      "classification": "EXECUTED / MEASURED",
+      "describes": "Read in full this pass. Phase 7: first real, billed Pinecone/Gemini calls in this evaluation, explicitly user-authorized. Proves the P2 architecture (Convex app state + minimal lexical + Pinecone dense only) end-to-end: 100-chunk proof + a genuinely stratified 117-chunk retrieval verification (\u00a79, explicitly correcting a weaker, near-tautological \u00a75 self-similarity claim) showing non-tautological, correctly-topical results (0.55-0.70 cosine range, spread across distinct documents). Real Pinecone write-unit cost formula applied to measured record size (3,244 bytes/vector), not guessed. \u00a710: a real extraction-truncation bug found and fixed BEFORE spending embedding money (a .take(60) cap silently dropped chunks from 101 large documents; caught by cross-checking against the documents table's own chunkCount sum), and a hard Gemini free-tier daily-quota discovery (1,000 requests/day/key, not the ~1,500 RPD figure gemini-embedding-workload-2026-08/report.md had assumed). NOTE: this phase's own Pinecone index (uetgpt-p2-proof) is 768-dim, Gemini-era - superseded by the 1024-dim uetgpt-corpus-v1-qwen1024 index used in later cloudflare-workers-ai-2026-08 work, per GAPS.md \u00a7C."
+    },
+    {
+      "path": "pinecone-p2-proof-2026-08/lifecycle-matrix-report.md",
+      "sha256": "2c2c3d968ef3d3e6ea8325877fc4e7f65121f7746e9b49f13ef1eb92f430a8cd",
+      "classification": "EXECUTED / MEASURED",
+      "describes": "Read in full this pass. Mandate \u00a758 lifecycle matrix: 7/7 scenarios PASS against the live uetgpt-p2-proof index. Mandate \u00a759 concurrent-generation torture test: PASS (a late gen-3 write never becomes authoritative after gen-4 already committed). A real installed-SDK bug found (Pinecone Python SDK 9.1.0's .lsn_committed/.is_reconciled() convenience properties return wrong/None values despite raw_headers being correct - worked around by reading raw_headers directly, exactly the fallback mandate \u00a754 anticipates). A real, measured reliability finding: delete-by-metadata-filter failed twice in three repeated runs (once leaving stale vectors after a 30s timeout); delete-by-explicit-id was 0.6s and 100% reliable across all runs - this is the direct evidence behind pineconeAdapter.ts's delete-by-id-only design. IMPORTANT: this matrix ran against the 768-dim uetgpt-p2-proof index (git HEAD 521f5ed, 2026-08-24), not the current 1024-dim uetgpt-corpus-v1-qwen1024 index - not yet re-verified there. The underlying LSN/delete/generation-commit mechanics are Pinecone-platform behavior, not embedding-dimension-dependent, so carrying over is plausible but this is inference, not a re-run fact.",
+      "satisfies_gate": "Pinecone lifecycle matrix + concurrent-generation torture test (mandate \u00a758-61)"
+    },
+    {
+      "path": "pinecone-p2-proof-2026-08/lifecycle-matrix-run.log",
+      "sha256": "709bf5206964b70da745e27089acc37e275eb58c8f7b2152ccadf1b58970909e",
+      "classification": "EXECUTED",
+      "describes": "Full run log backing lifecycle-matrix-report.md above. SHA-256 computed this pass (709bf5206964b70da745e27089acc37e275eb58c8f7b2152ccadf1b58970909e) exactly matches the hash lifecycle-matrix-report.md itself quotes for this file - a genuine, independent integrity cross-check, not merely trusted from the report's own claim."
+    },
+    {
+      "path": "pinecone-p2-proof-2026-08/embed_sample.py",
+      "sha256": "b89590e6a0256791cec806eb4a325b998bd75adb66a6f0660eb030c038414b2f",
+      "classification": "EXECUTED",
+      "describes": "Embeds a chunk sample via Gemini and persists to disk before any Pinecone call (per report.md \u00a71's fetch-once-parse-many rationale). Not independently re-read line-by-line this pass."
+    },
+    {
+      "path": "pinecone-p2-proof-2026-08/pinecone_proof.py",
+      "sha256": "7d98b0d5b76d883eef6332f23d7d381a67f25a49399182770d0f0d05822e60ba",
+      "classification": "EXECUTED",
+      "describes": "Creates the uetgpt-p2-proof index, upserts, and queries it (per report.md \u00a74). Not independently re-read line-by-line this pass."
+    },
+    {
+      "path": "pinecone-p2-proof-2026-08/stratified_retrieval_verify.py",
+      "sha256": "29fb8b03faf2f835da4ca6d2526c47c0b437382d3daa7b1aeb5795c81caa691d",
+      "classification": "EXECUTED / MEASURED",
+      "describes": "Produces report.md \u00a79's non-tautological stratified retrieval results (117 chunks from 40 evenly-spaced distinct documents). Not independently re-read line-by-line this pass."
+    },
+    {
+      "path": "pinecone-p2-proof-2026-08/extract_all_chunks.py",
+      "sha256": "76c0e10f503853e8bc70d792dff94568b04f3d8d6792e2a4017c4de4bda59246",
+      "classification": "EXECUTED (superseded by extract_over60_and_merge.py for correctness)",
+      "describes": "First-pass chunk extractor; per report.md \u00a710, used .take(60) per document and silently truncated 101 documents with >60 chunks (27,580 of 44,792 extracted). Kept as evidence of the bug, not as a correct extraction path."
+    },
+    {
+      "path": "pinecone-p2-proof-2026-08/extract_over60_and_merge.py",
+      "sha256": "1e831c258e2c6ad8f39c42540be3531ae8d6979e91511059a5368867798e70d2",
+      "classification": "EXECUTED / MEASURED",
+      "describes": "Fix for the extract_all_chunks.py truncation bug: re-extracts the 101 affected documents with each one's real chunkCount as the take limit, merges and dedupes by chunkKey. Per report.md \u00a710, verified result was 44,792 unique chunks across all 1,891 documents - exact match against the documents table's own chunkCount sum. This is the direct origin of all_chunks.jsonl, the source file this session independently re-verified (wc -l = 44,792, exact match to cf_embeddings.jsonl's final line count)."
+    },
+    {
+      "path": "pinecone-p2-proof-2026-08/embed_full_corpus.py",
+      "sha256": "886f8566789733a40cfab4d783ec3f54803962d00ed9c2aa9b287b8a54fe15ef",
+      "classification": "EXECUTED (Gemini-based; SUPERSEDED - not the script that finished the corpus)",
+      "describes": "Per report.md \u00a710: round-robins 3 Gemini API keys, bisects failing batches down to individual chunks, resumable by chunkKey. Reached 3,000/44,792 (6.7%) before this evaluation moved to Cloudflare Workers AI instead (see cloudflare-workers-ai-2026-08/report.md \u00a71/\u00a75) - the corpus was ultimately completed to 44,792/44,792 via cf_embed_corpus.py, not this script. Kept as evidence of the reliability hardening applied and the real Gemini daily-quota discovery (1,000 requests/day/key), not as the path actually taken to completion."
+    },
+    {
+      "path": "pinecone-p2-proof-2026-08/lsn_utils.py",
+      "sha256": "4dc8b75925959881665a662d62470609fe5656b381e37e2c32d9e1b776446603",
+      "classification": "EXECUTED",
+      "describes": "Reads raw_headers directly for LSN-based write-visibility confirmation, working around the Pinecone SDK bug documented in lifecycle-matrix-report.md \u00a71. Not independently re-read line-by-line this pass."
+    },
+    {
+      "path": "pinecone-p2-proof-2026-08/lifecycle_matrix.py",
+      "sha256": "98d1365e61126afb73bd2b2859fea1c45fa5c9d648ab993a1bb2b3858c512e4a",
+      "classification": "EXECUTED",
+      "describes": "Implements the 7-scenario lifecycle matrix + concurrent-generation torture test described in lifecycle-matrix-report.md. Not independently re-read line-by-line this pass."
+    },
+    {
+      "path": "pinecone-p2-proof-2026-08/sample-embeddings-preview.jsonl",
+      "sha256": "89f0a15ad0e4a3dfa0899896a5774add5e45e6b3742744df688d2e2f37d39a1d",
+      "classification": "EXECUTED (sample)",
+      "describes": "Small preview of embedded sample vectors from this phase. Not independently re-read this pass."
+    },
+    {
+      "path": "retrieval-baseline-2026-08/control-verification-findings.json",
+      "sha256": "0ad69e33aba4ff3bafeca2bd748680bd075090631fef5fe6debc3d6b2d8f1993",
+      "classification": "EXECUTED (verification only - the baseline itself was NOT run)",
+      "describes": "Read in full this pass. Authoritative machine-readable source for control-verification-findings.md."
+    },
+    {
+      "path": "retrieval-baseline-2026-08/control-verification-findings.md",
+      "sha256": "0b5fd3c49459aa65099ba54f6bd7fbed22e8c0bed6535ad1b064286f8659b418",
+      "classification": "EXECUTED (verification only - the baseline itself was NOT run)",
+      "describes": "Read in full this pass. Verdict: 'BASELINE TOOLING DEFECT FOUND - BENCHMARK NOT AUTHORIZED.' scripts/stage_e_retrieval_eval.py (2,844 lines) was read in full and cross-referenced line-by-line against the real production retrieval pipeline; found 3 confirmed HIGH-severity defects (query/document embedding-input formatting mismatch vs. production's real raw-text calls; a 2-channel fixed-weight fusion standing in for production's real 3-channel adaptive-weight RRF; no freshness/eligibility data at all, which the corpus export doesn't even carry). No embeddings generated, no Gemini calls made, nothing modified except this evidence record - exactly per the instruction to prove the evaluator matches production semantics before running it. Also classifies the evaluator's built-in 6-query DEFAULT_QUERY_ROWS as EXISTING_TEST, not HUMAN_VERIFIED - no record found that the domain-expert review its own code comment calls for has ever happened. This is the same class of finding as this session's own golden_set.jsonl label-quality gap (scripts/eval/golden_set.jsonl, found independently this session): this project now has 3 separate, mutually-inconsistent evaluation query sets (this 6-query set, golden_set.jsonl's 50, and generate_golden.py's 75-query generator whose output doesn't even match golden_set.jsonl), none meeting mandate \u00a747's HUMAN_VERIFIED bar.",
+      "satisfies_gate": "NOT SATISFIED - hybrid retrieval evaluation (mandate \u00a745/\u00a746/\u00a757) remains blocked on this defect, separate from the corpus-availability blocker"
+    },
+    {
+      "path": "retrieval-baseline-2026-08/source-of-truth-specification.json",
+      "sha256": "dc119cacb8d683819ea5589c2634c978bc4a8971570ec70b18be64b890499ede",
+      "classification": "EXECUTED (direct code trace, not benchmark output)",
+      "describes": "Read in full this pass. File/function/line-cited trace of the real production retrieval pipeline (18 stages, query input through citations), built from direct inspection of convex/rag/retrieval.ts, convex/embeddings/{generate,search,idf}.ts, convex/crawl/queries.ts, convex/shared/freshnessPolicy.ts, convex/reranking/cascade.ts, and more. Surfaces two previously-undocumented stages relative to both the original evaluator and the user's own enumerated pipeline list (query rewrite/HyDE, semantic cache check). Defines Baseline A (pre-rerank) and Baseline B (post-Cascade-rerank) scope precisely, explicitly excluding intent classification, rewrite/HyDE, semantic cache, CRAG, and answer generation with stated reasons for each. This is the control specification control-verification-findings.md checks stage_e_retrieval_eval.py against - NOTE: it describes the Gemini/768d query-embedding call path (generateQueryEmbedding -> embedNativeGemini), which per GAPS.md \u00a7E has not yet been switched to Cloudflare - still accurate as a description of the current live production code path."
     }
   ],
   "known_gaps_not_yet_covered_by_this_manifest": [
-    "Pinecone implementation, lifecycle/concurrency tests, full-corpus benchmark, P1 sparse feasibility, P2 Convex-footprint measurement, and the real retrieval baseline are all NOT_EXECUTED as of this manifest's generation - see candidate-matrix.json and tasks #35-41. This manifest will be extended as that work produces artifacts; it is not being backfilled or predicted now.",
-    "The lifecycle torture-test matrix's full 7-scenario coverage (fresh load, exact replay, changed document, removed chunk, removed document, interrupted ingestion+retry, concurrent generations) has not been executed as a single complete matrix against any backend - convex-generation-lifecycle-PASS-evidence.json and the KnowledgeStore contract suites cover overlapping but not identical ground. Recorded here as an honest gap, not papered over."
+    "Full-corpus Pinecone benchmark: the real uetgpt-corpus-v1-qwen1024 index holds 0 vectors as of last check (confirmed in INDEPENDENT_REVIEW.md and this session's own investigation) - the full 44,792-chunk embed is complete, but full-corpus upsert, ANN Recall@10 vs. exact ground truth (mandate \u00a744/\u00a756), and real hybrid retrieval-quality metrics (\u00a745/\u00a746/\u00a757) have not been run.",
+    "RESOLVED 2026-08-29 (was: Convex minimal-lexical 2x/3x capacity projection, mandate \u00a731, and exact-term correctness, \u00a732): local-convex-lexical-proof-2026-08/report.md \u00a77 now covers both, on a corrected basis after an initial du-vs-cloud-billing comparison was found invalid and replaced (see the report.md entry above for the full correction). Net result is a real open risk, not a closed gap: CONVEX_LEXICAL_CAPACITY_RISK is formally recorded on real content-byte measurement (247.3MB at 1x, before any index overhead, already roughly half a typical free tier), and multi-word lexical queries are confirmed non-phrase-precise (expected Convex behavior, not a defect) - see candidate-matrix.json's P2 architecture entry for how this now reads as a decision input.",
+    "Evidence durability: two files this manifest hashes (local-convex-lexical-proof-2026-08/ingest-run.log and exact_term_run.log) are excluded from git by the repo-wide *.log rule (.gitignore:56). They exist on this local filesystem and their hashes here are real, but a fresh clone of this repository will not contain them - only the .md reports that narrate their contents will survive. Not fixed (changing a repo-wide gitignore rule for two evidence files is a policy call outside this manifest's scope), only disclosed, per this manifest's own stated purpose of auditability 'without access to this project's conversation history.'",
+    "Real labeled evaluation query set: no query set in this repo meets mandate \u00a747's HUMAN_VERIFIED bar - see the finding recorded on retrieval-baseline-2026-08/control-verification-findings.md's entry above (3 separate, mutually-inconsistent, none-adequate query sets now exist in this repo).",
+    "Pinecone lifecycle/concurrency re-verification against the current 1024-dim index: pinecone-p2-proof-2026-08/lifecycle-matrix-report.md's 7/7 PASS and concurrent-generation torture test PASS were measured against the older, now-superseded 768-dim uetgpt-p2-proof index, not yet re-run against uetgpt-corpus-v1-qwen1024. Plausible carry-over (LSN/delete/generation mechanics are not embedding-dependent) but not re-confirmed.",
+    "local-corpus-pilot-2026-08/ (pilot-4-and-5-console.log, pilot-documents-sample.jsonl, pilot-raw-manifest-sample.jsonl, report.md) was not read this pass and remains outside this manifest - unlike the 9 directories added above, no claim is made about its content.",
+    "reranker-worker/.env exists on disk in cloudflare-workers-ai-2026-08/ but is deliberately excluded from this manifest: gitignored (.gitignore:27), not tracked by git, and contains real Cloudflare credentials - cataloging it as evidence would be inappropriate regardless of hash-only referencing."
   ]
 }

@@ -106,13 +106,18 @@ authoritative corpus stores."
 
 ## 4. Sequence
 
-### Step 1 - finish the corpus embedding  [owner: automated]
+### Step 1 - finish the corpus embedding  [DONE]
 
 ```text
-status:    4,448 / 44,792 as of writing
-mechanism: cron 66497bff, daily 06:13 local, resumable and idempotent
-verify:    python3 verify_embeddings.py exits 0
-eta:       ~2.8 days
+status:    44,792 / 44,792 (100%) as of 2026-08-29
+verify:    python3 verify_embeddings.py exits 0 - VERIFICATION PASSED
+           (completeness, integrity, and distinctness all clean; the one
+           210-vector fingerprint collision found on the first run was
+           confirmed to be a single genuinely-duplicated source chunk of
+           text (identical contentHash), not a degenerate embedding - the
+           verify script's distinctness check was corrected to cross-
+           reference contentHash before flagging a collision, since it was
+           loading that field but never using it)
 ```
 
 ### Step 2 - create the Pinecone index  [DONE]
@@ -427,7 +432,7 @@ Per mandate §68/§73 a passing benchmark does not by itself authorize cutover,
 and I must not self-certify. Before step 7:
 
 ```text
-[ ] verify_embeddings.py exits 0
+[x] verify_embeddings.py exits 0 - DONE 2026-08-29, 44,792/44,792
 [ ] ANN Recall@10 >= 0.98 vs exact ground truth
 [ ] hybrid retrieval evaluated with the REAL Convex lexical path and the real
     hybridRank/reranker, not a Python reimplementation
