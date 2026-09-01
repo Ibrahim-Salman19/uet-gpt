@@ -1,4 +1,4 @@
-# Phase 6 — Hybrid Retrieval Quality (mandate §45/46/57) — 2026-08-31, updated 2026-09-02
+# Phase 6 — Hybrid Retrieval Quality (mandate §45/46/57) — 2026-08-31, updated 2026-09-02 (twice)
 
 **Base commit:** `49ca5d3` (dirty tree at time of original writing). Scores
 the production hybrid fusion path (`fuse_and_score.ts`, driving the real
@@ -7,14 +7,20 @@ channel outputs) against `scripts/eval/golden_set_verified.jsonl`, the
 manually-reviewed 50-query label set described in
 `scripts/eval/label_review.md`.
 
-**2026-09-02 update:** §2's pool-bias defect (below) has been remediated —
-see §6. All numbers in this Verdict block and elsewhere in the document
-reflect the post-remediation state; §2's original measurement is kept
-verbatim as the record of what was found. No Gemini/Pinecone/Convex Cloud
-calls were made to produce either the original report or this update —
-the remediation in §6 used already-cached local channel results and a
-purely local re-run of the real production fusion code (Gemini/Pinecone/
-Convex Cloud calls this session: 0).
+**2026-09-02 updates (two, same day):** §2's pool-bias defect has been
+remediated (§6). Separately, since no human with domain knowledge of UET
+Taxila facts was available to provide `HUMAN_VERIFIED` labels (confirmed
+directly with the project's user — they could not personally verify
+these answers, the same constraint already documented for the fee
+queries in `label_review.md`'s addendum), a cross-corroboration pass
+(§7) searched the corpus for independent second sources for every
+still-`LLM_JUDGED` query that asserts an answer, upgrading provenance
+honestly where genuine corroboration was found and documenting the
+search where it was not. All numbers in this Verdict block reflect both
+updates; §2's original measurement is kept verbatim as the record of
+what was found. No Gemini/Pinecone/Convex Cloud calls were made for
+either update — both used already-local data (Gemini/Pinecone/Convex
+Cloud calls this session: 0).
 
 ## Verdict
 
@@ -29,11 +35,22 @@ QUERIES WITH ZERO LABELED-RELEVANT
 meanHitAt5 (over the 23 scorable):  0.9565  (was 0.9474 over 19)
 meanMrr    (over the 23 scorable):  0.7295  (was 0.7076 over 19)
 
-HUMAN_VERIFIED labels:              0 / 50  (unchanged - see §1)
+HUMAN_VERIFIED labels:              0 / 50  (still 0 - see §1 and §7;
+                                    confirmed unreachable, not merely
+                                    not-yet-done - no available reviewer
+                                    has personal domain knowledge of
+                                    these UET Taxila facts)
 Queries with >=1 AUTHORITATIVE_SOURCE_MATCH
-  component in their provenance:    12 / 50 (was 9/50)
+  component in their provenance:    22 / 50 (was 9/50 originally,
+                                    12/50 after §6, 22/50 after §7)
 Queries with only LLM_JUDGED
-  provenance:                       38 / 50 (was 41/50)
+  provenance:                       28 / 50 (of which only 6 assert an
+                                    answer at all - the other 22 are
+                                    "no relevant chunk found" queries,
+                                    which have nothing to corroborate;
+                                    see §7 for all 6 of the answer-
+                                    asserting ones, each explicitly
+                                    searched and documented)
 
 POOL-BIAS CHECK (originally measured, see §2 - now remediated, see §6):
   fusedTop5 introduced at least one chunk absent from the original
@@ -42,12 +59,19 @@ POOL-BIAS CHECK (originally measured, see §2 - now remediated, see §6):
   are folded into the counts above. 88 were reviewed and confirmed not
   relevant (see §6 and delta_label_review.md for the reasoning on each).
 
-MANDATE §63 GATE:  STILL NOT CLEARED — the specific pool-bias defect in
-  §2 is fixed, but the underlying reason §63 doesn't clear is unchanged:
-  0/50 labels are HUMAN_VERIFIED and N=23/50 is still a modest sample
-  (see §1, §3). This remains a labeling-provenance gap, not a Pinecone or
-  hybrid-fusion performance failure. Neither §64 ("PINECONE BENCHMARK
-  PASS") nor §65 ("PINECONE BENCHMARK FAILED") applies yet.
+MANDATE §63 GATE:  STILL NOT CLEARED, AND THIS IS NOW THE PRACTICAL
+  CEILING, NOT A TO-DO — 0/50 labels are HUMAN_VERIFIED, confirmed
+  unreachable (§7), and N=23/50 is a modest sample. §6 fixed the
+  measurable pool-bias defect and §7 maximized corroboration-based
+  provenance quality within what's actually achievable without a UET
+  Taxila domain expert. This remains a labeling-provenance gap, not a
+  Pinecone or hybrid-fusion performance failure, and further AI-only
+  effort on this label set has materially diminishing returns from here.
+  Neither §64 ("PINECONE BENCHMARK PASS") nor §65 ("PINECONE BENCHMARK
+  FAILED") applies — a verdict on this axis requires either accepting
+  AUTHORITATIVE_SOURCE_MATCH/LLM_JUDGED as sufficient evidence quality
+  for this decision, or sourcing an actual UET Taxila domain reviewer.
+  That is a decision for the project's user/Agent B, not this session.
 ```
 
 ## 1. Why 0.9474 / 0.7076 is not a production number
@@ -377,4 +401,117 @@ Claims classified MEASURED: the 15/103 relevant count, the
 Cloud activity this section: Convex Cloud 0, Gemini 0, Pinecone 0, Neon 0
   (channel_results.json's dense/lexical raw results were reused verbatim
   from the 2026-08-31 fetch, not re-fetched).
+```
+
+## 7. Cross-corroboration pass (2026-09-02)
+
+**Why.** §4(1) previously named a real HUMAN_VERIFIED review of the
+project's user as the remaining gap. Asked directly, the user confirmed
+they cannot personally verify these answers — they lack domain knowledge
+of UET Taxila's internal facts, the same limitation already documented
+in `label_review.md`'s 2026-08-31 addendum for the fee queries. This is
+not a scheduling gap to revisit later; there is no available reviewer
+with the required knowledge. `HUMAN_VERIFIED` is therefore confirmed
+**unreachable** for this label set, not merely not-yet-done.
+
+**What's actually achievable instead.** §47's provenance taxonomy has a
+second, weaker-than-human but stronger-than-single-read tier:
+`AUTHORITATIVE_SOURCE_MATCH` — a judgment cross-checked against
+independent source content. This project has already used it
+successfully (the fee-query Prospectus cross-checks, §6's Q20/Q27/Q32/
+Q45). This pass systematically applied the same method to every
+remaining query that (a) had at least one relevant chunk asserting a
+fact and (b) was still on plain `LLM_JUDGED` provenance — 16 queries.
+The other 34 either already had `AUTHORITATIVE_SOURCE_MATCH` provenance
+or assert no answer at all (nothing to corroborate).
+
+**Method.** For each of the 16, searched the full local corpus
+(`all_chunks.jsonl`, regex over chunk text — not the embedding index, so
+no cloud call) for a second source stating the same fact, then read the
+candidate's full text to confirm it is (a) genuinely a *different*
+document (checked by comparing `Document Title`/`URL Path`, not just a
+different chunk of the same page — this check caught a real error, see
+below) and (b) actually states the same fact, not merely a related one.
+
+**Results — 10 upgraded, 6 searched-and-not-found:**
+
+Upgraded to `AUTHORITATIVE_SOURCE_MATCH` (independent second/third source
+confirmed, reasoning recorded in each query's `provenance` field in
+`golden_set_verified.jsonl`):
+
+- Q6 (pay semester fee) — Dues Notice PDF + 2024 Prospectus
+- Q7 (late fee fine) — same §30.4 text in two independent Prospectus
+  editions (2024 and 2025)
+- Q8 (BS CS eligibility 50%) — corroborated by 2 further independent
+  documents beyond the original FAQ: `Admission_Eligibility.php`'s table
+  and `Admission_Guidelines_2023.pdf`'s explicit text, both stating 50%
+- Q11 (DAE lateral entry) — Eligibility page + Prospectus merit table
+- Q25 (CS dept head contact) — already-documented 5-page corroboration
+- Q26 (Vice Chancellor name) — VC Office page corroborated by 2 further
+  independent pages found this pass: VC Message and Leadership
+- Q28 (main campus phone number) — already-documented 5-page
+  corroboration
+- Q31 (fee waiver program) — 2023 flood-waiver notice + 2014-15 progress
+  report's general need-based concession scheme
+- Q39 (semester freeze procedure) — verified this pass that its 3
+  relevant chunks are genuinely 3 separate documents (Examination FAQ,
+  FORM UG-V PDF, Freezing-Semester-Form-FS1.pdf), not chunks of one page
+- Q50 (fee structure) — Rule Book refund-policy section + FAQ figures
+
+Searched but no independent corroboration found (provenance stays
+`LLM_JUDGED`, search documented in `golden_set_verified.jsonl` rather
+than left silent):
+
+- Q9 (FSc percentage breakdown) — only the same source page found again
+- Q17 / Q47 (important dates, same chunk) — no second source with actual
+  date values, only a link/image reference
+- Q21ce9642 / query 38 (degree certificate procedure) — only further
+  chunks of the same Examination FAQ page
+- **Q34 (transport facilities) — correction to the record, not just a
+  non-finding:** this query's two relevant chunks were assumed
+  plausible-independent from the original review's phrasing ("both state
+  real, detailed transport information"), but checking their document
+  titles this pass found **both are chunks of the same page**
+  ("Strategic Academia-Industry Collaboration Between UET Taxila and
+  Fast Cables Limited"). Not independent. The relevance judgment itself
+  is unaffected (both chunks were separately confirmed to state real
+  transport content) — only the never-explicitly-claimed independence
+  assumption is corrected here.
+- Q46 (generic "eligibility criteria") — the only repeated matches were
+  the same site-wide admission-procedure title text appearing on many
+  page chunks, not a distinct second document
+
+**Net effect:** every query in the golden set that asserts an answer at
+all (28 of 50) now has either `AUTHORITATIVE_SOURCE_MATCH` provenance or
+an explicit, documented search-and-not-found — none are silently
+unexamined. 22/50 queries overall carry `AUTHORITATIVE_SOURCE_MATCH`
+(up from 12 after §6, 9 originally). This did not change any
+`relevantChunkKeys` — only `provenance` metadata — so `hybrid_eval_results.json`
+did not need to be regenerated for this pass.
+
+**Evidence contract (§71):**
+
+```text
+Claim class:              EXECUTED (corpus search, full-text reads, and
+                          the provenance-patch script were all run
+                          directly by this session)
+Method:                   Python regex search over
+                          /mnt/d/uetgpt_corpus_v1/embeddings/all_chunks.jsonl
+                          (44,792 chunks) - local file, not the Pinecone
+                          index, so no cloud call
+Queries examined:         16 (every query with >=1 relevant chunk still
+                          on plain LLM_JUDGED provenance)
+Upgraded:                 10 (see list above)
+Searched, not found:      6 (see list above, including 1 correction to
+                          a prior independence assumption)
+golden_set_verified.jsonl SHA-256 (post-pass, MEASURED):
+                          594ceb4dfba33405e430bca62ef8943485f2337ae420e8eb95a6b3840906379d
+Idempotency:              verified - re-running the patch script against
+                          its own output reports 0 upgraded / 0 annotated
+Claims classified MEASURED: the upgrade/not-found counts, the Q34
+  independence correction, the final hash. Classified INFERENCE: whether
+  each corroborating source is "independent enough" to count - a
+  judgment call, not a mechanical fact; the reasoning for each is in
+  golden_set_verified.jsonl's provenance field for audit.
+Cloud activity this section: Convex Cloud 0, Gemini 0, Pinecone 0, Neon 0.
 ```
