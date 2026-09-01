@@ -299,6 +299,17 @@ to "hybrid retrieval's answer is now credited," which is exactly the
 failure mode §2 predicted. The other 11 added corroborating/additional
 relevant chunks to queries that already had at least one.
 
+**Disclosure: queries 17 and 47 now share their entire ground truth.**
+Query 47's one new relevant chunk (`b5bb836b20b6...`, "Admission Schedule
+Entry Fall 2026 — Important Dates & Deadlines") is the *same* chunk that
+was already query 17's sole relevant chunk in the original review — both
+are generic "important dates" queries and the same content genuinely
+answers both, so the mark is correct, but it means 2 of the 23 scorable
+queries are not independent: if the fused ranking retrieves that one
+chunk, both score a hit off the same evidence; if it doesn't, both miss
+together. A reader weighting `scoredQueryCount=23` as 23 independent data
+points should discount this pair to effectively ~22.
+
 `channel_results.json`'s per-query `relevantChunkKeys` field was then
 patched to match the updated golden set (a local JSON edit — the cached
 `dense`/`lexical` raw ranked lists themselves were untouched, so this

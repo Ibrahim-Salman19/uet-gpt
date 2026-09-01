@@ -107,7 +107,7 @@ def main():
         else:
             reviewed_nothing_new.append(qid)
 
-        if b["delta_note"]:
+        if b["delta_note"] and b["delta_note"] not in (rec.get("note") or ""):
             rec["note"] = f"{rec['note']} | delta: {b['delta_note']}" if rec.get("note") else f"delta: {b['delta_note']}"
 
     print(f"total delta blocks: {len(blocks)}")
