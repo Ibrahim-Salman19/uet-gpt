@@ -52,5 +52,25 @@ test.describe("SEO Remediation End-to-End Audit Compliance", () => {
     await page.goto("/uet-taxila/admissions");
     const feeLink = page.locator('a[href="/uet-taxila/fee-structure"]');
     await expect(feeLink.first()).toBeVisible();
+
+    const calcLink = page.locator('a[href="/calculator"]');
+    await expect(calcLink.first()).toBeVisible();
+  });
+
+  test("merit calculator computes live aggregate and renders WebApplication schema", async ({
+    page,
+  }) => {
+    await page.goto("/calculator");
+    await expect(page).toHaveTitle(/UET Taxila Merit Calculator/);
+
+    const heading = page.locator("h1");
+    await expect(heading).toContainText("UET Taxila Merit Calculator");
+
+    const main = page.locator("main#main-content");
+    await expect(main).toBeVisible();
+
+    const schemas = await page.locator('script[type="application/ld+json"]').allTextContents();
+    const hasWebApp = schemas.some((s) => s.includes("WebApplication"));
+    expect(hasWebApp).toBe(true);
   });
 });

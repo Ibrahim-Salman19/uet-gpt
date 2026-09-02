@@ -97,6 +97,12 @@ export default function HomePage() {
           </Link>
           <nav className="flex items-center gap-4 text-xs font-mono tracking-wider uppercase">
             <Link
+              href="/calculator"
+              className="text-[#d9b451] hover:text-[#f0d178] transition-colors font-semibold"
+            >
+              Calculator
+            </Link>
+            <Link
               href="/uet-taxila"
               className="hidden sm:inline-block text-white/70 hover:text-white transition-colors"
             >
@@ -141,15 +147,21 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/chat"
-                className="w-full sm:w-auto px-8 py-4 rounded bg-[#d9b451] text-[#07080a] font-semibold hover:bg-[#f0d178] transition-all text-sm font-mono tracking-wider uppercase shadow-lg shadow-[#d9b451]/10"
+                className="w-full sm:w-auto px-8 py-4 rounded bg-[#d9b451] text-[#07080a] font-semibold hover:bg-[#f0d178] transition-all text-sm font-mono tracking-wider uppercase shadow-lg shadow-[#d9b451]/10 min-h-[44px] flex items-center justify-center"
               >
                 Ask UET GPT Anything &rarr;
               </Link>
               <Link
-                href="/uet-taxila"
-                className="w-full sm:w-auto px-8 py-4 rounded border border-white/20 text-white/80 hover:text-white hover:border-white/40 transition-all text-sm font-mono tracking-wider uppercase"
+                href="/calculator"
+                className="w-full sm:w-auto px-8 py-4 rounded border border-[#d9b451]/40 text-[#d9b451] hover:bg-[#d9b451]/10 transition-all text-sm font-mono tracking-wider uppercase min-h-[44px] flex items-center justify-center"
               >
-                Explore UET Taxila Hub
+                Calculate Aggregate
+              </Link>
+              <Link
+                href="/uet-taxila"
+                className="w-full sm:w-auto px-8 py-4 rounded border border-white/20 text-white/80 hover:text-white hover:border-white/40 transition-all text-sm font-mono tracking-wider uppercase min-h-[44px] flex items-center justify-center"
+              >
+                Explore UET Taxila
               </Link>
             </div>
           </section>
@@ -158,10 +170,23 @@ export default function HomePage() {
           <section className="px-6 py-16 max-w-6xl mx-auto">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <Link
+                href="/calculator"
+                className="p-6 rounded border border-[#d9b451]/30 bg-[#d9b451]/5 hover:border-[#d9b451] hover:bg-[#d9b451]/10 transition-all group"
+              >
+                <div className="text-xs font-mono text-[#d9b451] mb-2">01 / TOOL</div>
+                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
+                  Merit Calculator
+                </h2>
+                <p className="text-xs text-white/60 leading-relaxed">
+                  Instant aggregate computation: 33% ECAT, 50% HSSC, 17% SSC with live eligibility.
+                </p>
+              </Link>
+
+              <Link
                 href="/uet-taxila/admissions"
                 className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
               >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">01 / ADMISSIONS</div>
+                <div className="text-xs font-mono text-[#d9b451] mb-2">02 / ADMISSIONS</div>
                 <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
                   ECAT &amp; Merit Guide
                 </h2>
@@ -174,7 +199,7 @@ export default function HomePage() {
                 href="/uet-taxila/fee-structure"
                 className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
               >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">02 / FINANCES</div>
+                <div className="text-xs font-mono text-[#d9b451] mb-2">03 / FINANCES</div>
                 <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
                   Fee Structure 2026
                 </h2>
@@ -187,25 +212,12 @@ export default function HomePage() {
                 href="/uet-taxila/programs"
                 className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
               >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">03 / ACADEMICS</div>
+                <div className="text-xs font-mono text-[#d9b451] mb-2">04 / ACADEMICS</div>
                 <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
                   Programs &amp; Departments
                 </h2>
                 <p className="text-xs text-white/60 leading-relaxed">
                   14 departments across 6 faculties from undergraduate BS to PhD.
-                </p>
-              </Link>
-
-              <Link
-                href="/learn"
-                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
-              >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">04 / GLOSSARY</div>
-                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
-                  Taxila Glossary
-                </h2>
-                <p className="text-xs text-white/60 leading-relaxed">
-                  Key terms explained: ECAT, merit credit, hostel allotment, and scholarships.
                 </p>
               </Link>
             </div>
@@ -247,6 +259,9 @@ export default function HomePage() {
             <div className="flex flex-wrap items-center gap-6">
               <Link href="/" className="hover:text-white transition-colors">
                 Home
+              </Link>
+              <Link href="/calculator" className="hover:text-white transition-colors">
+                Calculator
               </Link>
               <Link href="/uet-taxila" className="hover:text-white transition-colors">
                 UET Taxila

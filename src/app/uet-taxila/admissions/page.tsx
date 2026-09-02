@@ -66,6 +66,7 @@ const FAQ_ITEMS = [
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  "@id": `${siteUrl}/uet-taxila/admissions#faq`,
   dateModified: SCHEMA_DATE_MODIFIED,
   mainEntity: FAQ_ITEMS.map((item) => ({
     "@type": "Question",
@@ -75,6 +76,45 @@ const faqSchema = {
       text: item.a,
     },
   })),
+};
+
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "@id": `${siteUrl}/uet-taxila/admissions#howto`,
+  name: "How to Apply for Undergraduate Admissions at UET Taxila (2026)",
+  description:
+    "Step-by-step guide to applying for undergraduate engineering and computing programs at the University of Engineering and Technology, Taxila.",
+  step: [
+    {
+      "@type": "HowToStep",
+      position: 1,
+      name: "Verify Academic Eligibility & Requirements",
+      text: "Ensure you meet the minimum requirement: at least 60% unadjusted marks in F.Sc Pre-Engineering for engineering programs, or 50% for BS Computer Science, BS Mathematics, and BS Physics.",
+      url: `${siteUrl}/uet-taxila/admissions#eligibility`,
+    },
+    {
+      "@type": "HowToStep",
+      position: 2,
+      name: "Register & Appear in the ECAT Entry Test",
+      text: "Register for and take the ECAT (Engineering College Admission Test) conducted by UET Lahore. The entry test carries a 33% weight in your aggregate merit.",
+      url: `${siteUrl}/learn/ecat`,
+    },
+    {
+      "@type": "HowToStep",
+      position: 3,
+      name: "Calculate Aggregate & Submit Online Admission Application",
+      text: "Compute your merit aggregate (33% ECAT + 50% HSSC + 17% SSC) and submit the online application form with attested copies of domicile and academic certificates on the UET Taxila admission portal.",
+      url: `${siteUrl}/calculator`,
+    },
+    {
+      "@type": "HowToStep",
+      position: 4,
+      name: "Check Category-wise Merit Lists & Deposit Semester Fees",
+      text: "Monitor the merit list display on the notified dates. If selected in your preferred discipline, deposit the required admission and tuition fees to secure your seat.",
+      url: `${siteUrl}/uet-taxila/fee-structure`,
+    },
+  ],
 };
 
 export default function UetTaxilaAdmissionsPage() {
@@ -92,6 +132,11 @@ export default function UetTaxilaAdmissionsPage() {
         // biome-ignore lint/security/noDangerouslySetInnerHtml: Needed for JSON-LD schema
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
+      <script
+        type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: Needed for JSON-LD schema
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+      />
       <div className="flex min-h-screen flex-col bg-[#070708] text-zinc-100">
         <header className="flex items-center justify-between px-6 py-4 border-b border-[#1a1a1e]">
           <div className="flex items-center gap-3">
@@ -103,6 +148,12 @@ export default function UetTaxilaAdmissionsPage() {
           <nav className="flex items-center gap-4">
             <Link href="/" className="text-sm text-zinc-400 hover:text-zinc-200 transition-colors">
               UET GPT Home
+            </Link>
+            <Link
+              href="/calculator"
+              className="text-sm text-[#d9b451] hover:text-[#f0d178] transition-colors"
+            >
+              Merit Calculator
             </Link>
             <Link
               href="/uet-taxila"
@@ -132,10 +183,16 @@ export default function UetTaxilaAdmissionsPage() {
               Engineering and Technology, Taxila - the entry test, who is eligible, how your merit
               is calculated, merit lists, and the documents you need. Brought to you by UET GPT.
             </p>
-            <div className="flex items-center justify-center gap-4">
+            <div className="flex items-center justify-center flex-wrap gap-4">
+              <Link
+                href="/calculator"
+                className="px-6 py-3 rounded-xl bg-[#d9b451] text-[#07080a] font-semibold hover:bg-[#f0d178] transition-colors text-base"
+              >
+                Calculate Your Aggregate
+              </Link>
               <Link
                 href="/chat"
-                className="px-6 py-3 rounded-xl bg-[#d9b451] text-[#07080a] font-semibold hover:bg-[#f0d178] transition-colors text-base"
+                className="px-6 py-3 rounded-xl border border-[#d9b451]/40 text-[#d9b451] hover:bg-[#d9b451]/10 transition-colors text-base"
               >
                 Ask UET GPT
               </Link>
@@ -320,6 +377,21 @@ export default function UetTaxilaAdmissionsPage() {
                   SSC/HSSC components.
                 </p>
               </div>
+            </div>
+            <div className="mt-8 rounded-xl border border-[#d9b451]/30 bg-[#14151a] p-6 text-center">
+              <h3 className="text-lg font-bold text-white mb-2">
+                Want to calculate your exact aggregate?
+              </h3>
+              <p className="text-sm text-[#a1a1aa] max-w-xl mx-auto mb-4">
+                Use our free interactive calculator with live eligibility checking and department
+                closing merit comparisons.
+              </p>
+              <Link
+                href="/calculator"
+                className="inline-flex items-center gap-2 rounded-lg bg-[#d9b451] px-5 py-2.5 text-sm font-semibold text-[#07080a] hover:bg-[#f0d178] transition-colors min-h-[44px]"
+              >
+                Launch UET Taxila Merit Calculator &rarr;
+              </Link>
             </div>
           </section>
 
