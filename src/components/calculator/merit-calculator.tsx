@@ -122,6 +122,7 @@ export function MeritCalculator() {
   const [isHifzOrNcc, setIsHifzOrNcc] = useState<boolean>(false);
   const [track, setTrack] = useState<"fsc-part1" | "fsc-full" | "dae">("fsc-part1");
   const [filterTab, setFilterTab] = useState<"all" | "competitive" | "borderline">("all");
+  const [selectedDeptSlug, setSelectedDeptSlug] = useState<string>("software-engineering");
   const [copied, setCopied] = useState<boolean>(false);
 
   const ecatId = useId();
@@ -130,6 +131,7 @@ export function MeritCalculator() {
   const hsscTotalId = useId();
   const sscId = useId();
   const sscTotalId = useId();
+  const targetDeptId = useId();
 
   // Calculation
   const result = useMemo(() => {
@@ -166,8 +168,41 @@ export function MeritCalculator() {
     };
   }, [ecatMarks, ecatTotal, hsscMarks, hsscTotal, sscMarks, sscTotal, isHifzOrNcc]);
 
+  // Target Department Gap Analysis
+  const targetDept = useMemo(() => {
+    return (
+      HISTORICAL_BENCHMARKS.find((d) => d.slug === selectedDeptSlug) ?? HISTORICAL_BENCHMARKS[0]
+    );
+  }, [selectedDeptSlug]);
+
+  const targetAnalysis = useMemo(() => {
+    const diff = targetDept.estimatedMerit - result.aggregate;
+    const isAhead = diff <= 0;
+    const safeEcatTotal = ecatTotal > 0 ? ecatTotal : 400;
+    const safeHsscTotal = hsscTotal > 0 ? hsscTotal : 550;
+
+    // Additional marks needed
+    const additionalEcatMarksNeeded = Math.ceil((diff / 33) * safeEcatTotal);
+    const additionalHsscMarksNeeded = Math.ceil((diff / 50) * safeHsscTotal);
+
+    return {
+      diff,
+      isAhead,
+      additionalEcatMarksNeeded: Math.max(0, additionalEcatMarksNeeded),
+      additionalHsscMarksNeeded: Math.max(0, additionalHsscMarksNeeded),
+      projectedEcatMarks: Math.min(
+        safeEcatTotal,
+        ecatMarks + Math.max(0, additionalEcatMarksNeeded),
+      ),
+      projectedHsscMarks: Math.min(
+        safeHsscTotal,
+        hsscMarks + Math.max(0, additionalHsscMarksNeeded),
+      ),
+    };
+  }, [targetDept, result.aggregate, ecatMarks, ecatTotal, hsscMarks, hsscTotal]);
+
   const handleCopySummary = () => {
-    const text = `UET Taxila Admission Aggregate 2026: ${result.aggregate.toFixed(3)}%\nECAT (33%): ${result.ecatWeighted.toFixed(3)}% | HSSC (50%): ${result.hsscWeighted.toFixed(3)}% | SSC (17%): ${result.sscWeighted.toFixed(3)}%\nCalculated via UET GPT (https://uet-gpt.vercel.app/tools)`;
+    const text = `UET Taxila Admission Aggregate 2026: ${result.aggregate.toFixed(3)}%\nTarget: ${targetDept.department} (Cutoff ~${targetDept.estimatedMerit.toFixed(2)}%)\nECAT (33%): ${result.ecatWeighted.toFixed(3)}% | HSSC (50%): ${result.hsscWeighted.toFixed(3)}% | SSC (17%): ${result.sscWeighted.toFixed(3)}%\nCalculated via UET GPT (https://uet-gpt.vercel.app/tools?tab=merit)`;
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -183,9 +218,9 @@ export function MeritCalculator() {
   }, [result.aggregate, filterTab]);
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#0c0d10] p-6 sm:p-8 shadow-2xl backdrop-blur-sm">
+    <div className="rounded-2xl border border-white/10 bg-[#0c0d10] p-6 sm:p-8 shadow-2xl backdrop-blur-sm space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column: Inputs */}
+        {/* Left Column: Inputs & Real-time Sliders */}
         <div className="lg:col-span-7 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/10">
             <div>
@@ -242,7 +277,7 @@ export function MeritCalculator() {
           </div>
 
           {/* 1. ECAT Marks */}
-          <div className="space-y-2">
+          <div className="space-y-2 rounded-xl border border-white/5 bg-[#14151a]/60 p-4">
             <div className="flex justify-between items-center text-sm font-medium">
               <label htmlFor={ecatId} className="text-white flex items-center gap-2">
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#d9b451]/20 text-[10px] text-[#d9b451] font-bold font-mono">
@@ -263,7 +298,7 @@ export function MeritCalculator() {
                   max={ecatTotal}
                   value={ecatMarks}
                   onChange={(e) => setEcatMarks(Number(e.target.value))}
-                  className="w-full rounded-lg border border-white/15 bg-[#14151a] px-3.5 py-2 text-sm font-mono text-white focus:border-[#d9b451] focus:outline-none focus:ring-1 focus:ring-[#d9b451]"
+                  className="w-full rounded-lg border border-white/15 bg-[#07080a] px-3.5 py-2 text-sm font-mono text-white focus:border-[#d9b451] focus:outline-none"
                   placeholder="Marks Obtained"
                 />
               </div>
@@ -274,15 +309,24 @@ export function MeritCalculator() {
                   min={1}
                   value={ecatTotal}
                   onChange={(e) => setEcatTotal(Number(e.target.value))}
-                  className="w-full rounded-lg border border-white/15 bg-[#14151a] px-3.5 py-2 text-sm font-mono text-[#a1a1aa] focus:border-[#d9b451] focus:outline-none focus:ring-1 focus:ring-[#d9b451]"
+                  className="w-full rounded-lg border border-white/15 bg-[#07080a] px-3.5 py-2 text-sm font-mono text-[#a1a1aa] focus:border-[#d9b451] focus:outline-none"
                   placeholder="Total Marks (400)"
                 />
               </div>
             </div>
+            {/* Live Slider */}
+            <input
+              type="range"
+              min={0}
+              max={ecatTotal}
+              value={ecatMarks}
+              onChange={(e) => setEcatMarks(Number(e.target.value))}
+              className="w-full accent-[#d9b451] cursor-pointer pt-1"
+            />
           </div>
 
           {/* 2. HSSC Marks */}
-          <div className="space-y-2">
+          <div className="space-y-2 rounded-xl border border-white/5 bg-[#14151a]/60 p-4">
             <div className="flex justify-between items-center text-sm font-medium">
               <label htmlFor={hsscId} className="text-white flex items-center gap-2">
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#d9b451]/20 text-[10px] text-[#d9b451] font-bold font-mono">
@@ -303,7 +347,7 @@ export function MeritCalculator() {
                   max={hsscTotal}
                   value={hsscMarks}
                   onChange={(e) => setHsscMarks(Number(e.target.value))}
-                  className="w-full rounded-lg border border-white/15 bg-[#14151a] px-3.5 py-2 text-sm font-mono text-white focus:border-[#d9b451] focus:outline-none focus:ring-1 focus:ring-[#d9b451]"
+                  className="w-full rounded-lg border border-white/15 bg-[#07080a] px-3.5 py-2 text-sm font-mono text-white focus:border-[#d9b451] focus:outline-none"
                   placeholder="Marks Obtained"
                 />
               </div>
@@ -314,15 +358,24 @@ export function MeritCalculator() {
                   min={1}
                   value={hsscTotal}
                   onChange={(e) => setHsscTotal(Number(e.target.value))}
-                  className="w-full rounded-lg border border-white/15 bg-[#14151a] px-3.5 py-2 text-sm font-mono text-[#a1a1aa] focus:border-[#d9b451] focus:outline-none focus:ring-1 focus:ring-[#d9b451]"
+                  className="w-full rounded-lg border border-white/15 bg-[#07080a] px-3.5 py-2 text-sm font-mono text-[#a1a1aa] focus:border-[#d9b451] focus:outline-none"
                   placeholder="Total Marks"
                 />
               </div>
             </div>
+            {/* Live Slider */}
+            <input
+              type="range"
+              min={0}
+              max={hsscTotal}
+              value={hsscMarks}
+              onChange={(e) => setHsscMarks(Number(e.target.value))}
+              className="w-full accent-[#6366f1] cursor-pointer pt-1"
+            />
           </div>
 
           {/* 3. SSC Marks */}
-          <div className="space-y-2">
+          <div className="space-y-2 rounded-xl border border-white/5 bg-[#14151a]/60 p-4">
             <div className="flex justify-between items-center text-sm font-medium">
               <label htmlFor={sscId} className="text-white flex items-center gap-2">
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#d9b451]/20 text-[10px] text-[#d9b451] font-bold font-mono">
@@ -343,7 +396,7 @@ export function MeritCalculator() {
                   max={sscTotal}
                   value={sscMarks}
                   onChange={(e) => setSscMarks(Number(e.target.value))}
-                  className="w-full rounded-lg border border-white/15 bg-[#14151a] px-3.5 py-2 text-sm font-mono text-white focus:border-[#d9b451] focus:outline-none focus:ring-1 focus:ring-[#d9b451]"
+                  className="w-full rounded-lg border border-white/15 bg-[#07080a] px-3.5 py-2 text-sm font-mono text-white focus:border-[#d9b451] focus:outline-none"
                   placeholder="Marks Obtained"
                 />
               </div>
@@ -354,11 +407,20 @@ export function MeritCalculator() {
                   min={1}
                   value={sscTotal}
                   onChange={(e) => setSscTotal(Number(e.target.value))}
-                  className="w-full rounded-lg border border-white/15 bg-[#14151a] px-3.5 py-2 text-sm font-mono text-[#a1a1aa] focus:border-[#d9b451] focus:outline-none focus:ring-1 focus:ring-[#d9b451]"
+                  className="w-full rounded-lg border border-white/15 bg-[#07080a] px-3.5 py-2 text-sm font-mono text-[#a1a1aa] focus:border-[#d9b451] focus:outline-none"
                   placeholder="Total Marks (1100)"
                 />
               </div>
             </div>
+            {/* Live Slider */}
+            <input
+              type="range"
+              min={0}
+              max={sscTotal}
+              value={sscMarks}
+              onChange={(e) => setSscMarks(Number(e.target.value))}
+              className="w-full accent-[#10b981] cursor-pointer pt-1"
+            />
           </div>
 
           {/* 4. Bonus Checkbox */}
@@ -377,7 +439,7 @@ export function MeritCalculator() {
           </div>
         </div>
 
-        {/* Right Column: Results & Eligibility Card */}
+        {/* Right Column: Calculated Aggregate & Target Gap Card */}
         <div className="lg:col-span-5 flex flex-col justify-between rounded-xl border border-[#d9b451]/30 bg-gradient-to-b from-[#14151a] to-[#0d0e12] p-6 shadow-xl">
           <div>
             <div className="flex items-center justify-between text-xs font-mono uppercase tracking-widest text-[#a1a1aa]">
@@ -472,6 +534,74 @@ export function MeritCalculator() {
                 )}
               </div>
             </div>
+
+            {/* Target Department Selection */}
+            <div className="mt-6 pt-4 border-t border-white/10">
+              <label
+                htmlFor={targetDeptId}
+                className="text-[11px] font-mono uppercase text-[#d9b451] block font-bold mb-1.5"
+              >
+                Select Your Target Department:
+              </label>
+              <select
+                id={targetDeptId}
+                value={selectedDeptSlug}
+                onChange={(e) => setSelectedDeptSlug(e.target.value)}
+                className="w-full rounded-lg border border-white/15 bg-[#07080a] px-3 py-2 text-xs font-mono text-white focus:border-[#d9b451] focus:outline-none"
+              >
+                {HISTORICAL_BENCHMARKS.map((dept) => (
+                  <option key={dept.slug} value={dept.slug}>
+                    {dept.department} (~{dept.estimatedMerit.toFixed(2)}%)
+                  </option>
+                ))}
+              </select>
+
+              {/* Target Gap Plan */}
+              <div className="mt-3 rounded-lg border border-white/10 bg-[#07080a] p-3 text-xs">
+                {targetAnalysis.isAhead ? (
+                  <div className="text-emerald-400 space-y-1">
+                    <div className="font-bold flex items-center gap-1">
+                      <span>✓</span> You meet the benchmark!
+                    </div>
+                    <p className="text-[11px] text-[#a1a1aa]">
+                      Your aggregate is{" "}
+                      <strong className="text-emerald-400">
+                        +{Math.abs(targetAnalysis.diff).toFixed(3)}%
+                      </strong>{" "}
+                      above the recent cutoff for {targetDept.department}.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="text-rose-400 font-bold flex items-center gap-1">
+                      <span>⚠</span> Gap: {targetAnalysis.diff.toFixed(3)}%
+                    </div>
+                    <p className="text-[11px] text-[#a1a1aa]">
+                      To reach {targetDept.department} (~{targetDept.estimatedMerit.toFixed(2)}%),
+                      you need:
+                    </p>
+                    <div className="grid grid-cols-2 gap-2 font-mono text-[10px]">
+                      <div className="rounded bg-white/5 p-2">
+                        <span className="text-[#d9b451] block font-bold">
+                          +{targetAnalysis.additionalEcatMarksNeeded} Marks
+                        </span>
+                        <span className="text-[#71717a]">
+                          in ECAT (Score: {targetAnalysis.projectedEcatMarks}/400)
+                        </span>
+                      </div>
+                      <div className="rounded bg-white/5 p-2">
+                        <span className="text-[#6366f1] block font-bold">
+                          +{targetAnalysis.additionalHsscMarksNeeded} Marks
+                        </span>
+                        <span className="text-[#71717a]">
+                          in F.Sc (Score: {targetAnalysis.projectedHsscMarks}/{hsscTotal})
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="mt-6 space-y-2">
@@ -500,8 +630,8 @@ export function MeritCalculator() {
               All 14 Department Closing Merit Benchmarks (Category A Open Merit)
             </h3>
             <p className="text-xs text-[#a1a1aa] mt-0.5">
-              Live qualification assessment for your calculated aggregate of{" "}
-              <strong className="text-[#d9b451] font-mono">{result.aggregate.toFixed(3)}%</strong>.
+              Click any department below to inspect your required mark gap and admission
+              probabilities.
             </p>
           </div>
 
@@ -551,7 +681,7 @@ export function MeritCalculator() {
                 <th className="px-4 py-3">Faculty / Discipline</th>
                 <th className="px-4 py-3">Benchmark Cutoff</th>
                 <th className="px-4 py-3">Your Margin</th>
-                <th className="px-4 py-3">Admission Chance</th>
+                <th className="px-4 py-3">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5 bg-[#09090b]">
@@ -559,16 +689,23 @@ export function MeritCalculator() {
                 const diff = result.aggregate - dept.estimatedMerit;
                 const isLikely = diff >= 0;
                 const isBorderline = diff >= -2.0 && diff < 0;
+                const isSelected = selectedDeptSlug === dept.slug;
 
                 return (
-                  <tr key={dept.department} className="hover:bg-white/5 transition-colors">
+                  <tr
+                    key={dept.department}
+                    onClick={() => setSelectedDeptSlug(dept.slug)}
+                    className={`cursor-pointer transition-colors ${
+                      isSelected
+                        ? "bg-[#d9b451]/10 border-l-2 border-l-[#d9b451]"
+                        : "hover:bg-white/5"
+                    }`}
+                  >
                     <td className="px-4 py-3 font-semibold text-white">
-                      <Link
-                        href={`/uet-taxila/programs/${dept.slug}`}
-                        className="hover:text-[#d9b451] hover:underline transition-colors"
-                      >
-                        {dept.department}
-                      </Link>
+                      <div className="flex items-center gap-2">
+                        {isSelected && <span className="text-[#d9b451]">▶</span>}
+                        <span>{dept.department}</span>
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-[#a1a1aa]">{dept.faculty}</td>
                     <td className="px-4 py-3 font-mono font-bold text-[#d9b451]">
@@ -582,11 +719,11 @@ export function MeritCalculator() {
                     <td className="px-4 py-3">
                       {isLikely ? (
                         <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-medium text-emerald-400 border border-emerald-500/20">
-                          Highly Competitive
+                          Competitive
                         </span>
                       ) : isBorderline ? (
                         <span className="inline-flex items-center rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-medium text-amber-400 border border-amber-500/20">
-                          Borderline / 2nd List
+                          Borderline
                         </span>
                       ) : (
                         <span className="inline-flex items-center rounded-full bg-zinc-500/10 px-2.5 py-0.5 text-[10px] font-medium text-zinc-400 border border-zinc-500/20">

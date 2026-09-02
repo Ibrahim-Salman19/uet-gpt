@@ -299,14 +299,14 @@ export function SocietiesDirectory() {
   }, [selectedCategory, searchQuery]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Controls */}
-      <div className="rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-sm dark:border-zinc-800/80 dark:bg-zinc-900/60">
+      <div className="rounded-xl border border-white/10 bg-[#0c0d10] p-4 sm:p-5">
         <div className="grid gap-4 md:grid-cols-2">
           <div>
             <label
               htmlFor={searchInputId}
-              className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400"
+              className="block text-xs font-mono uppercase tracking-wider text-[#71717a] mb-1"
             >
               Search Societies, Events or Disciplines
             </label>
@@ -316,30 +316,30 @@ export function SocietiesDirectory() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="e.g. IEEE, GDG, HackXila, AutoShow, Debates, Sports..."
-              className="mt-1 w-full rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500"
+              className="w-full rounded-lg border border-white/15 bg-[#07080a] px-3.5 py-2 text-xs font-mono text-white placeholder-[#71717a] focus:border-[#d9b451] focus:outline-none"
             />
           </div>
 
           <div>
-            <span className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+            <span className="block text-xs font-mono uppercase tracking-wider text-[#71717a] mb-1">
               Filter by Category
             </span>
-            <div className="mt-1 flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1 font-mono text-xs">
               {[
                 { id: "all", label: "All Societies" },
-                { id: "technical", label: "Technical & Engineering" },
-                { id: "cultural", label: "Cultural & Literary" },
-                { id: "welfare", label: "Welfare & Ethics" },
-                { id: "sports", label: "Sports & Athletics" },
+                { id: "technical", label: "Technical" },
+                { id: "cultural", label: "Cultural" },
+                { id: "welfare", label: "Welfare" },
+                { id: "sports", label: "Sports" },
               ].map((btn) => (
                 <button
                   key={btn.id}
                   type="button"
                   onClick={() => setSelectedCategory(btn.id)}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                  className={`rounded-lg px-2.5 py-1.5 transition-colors ${
                     selectedCategory === btn.id
-                      ? "bg-emerald-600 text-white shadow-sm dark:bg-emerald-500"
-                      : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                      ? "bg-[#d9b451] text-[#07080a] font-bold"
+                      : "border border-white/10 bg-[#14151a] text-[#a1a1aa] hover:text-white"
                   }`}
                 >
                   {btn.label}
@@ -351,48 +351,42 @@ export function SocietiesDirectory() {
       </div>
 
       {/* Societies Grid */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2">
         {filteredSocieties.length === 0 ? (
-          <div className="col-span-full rounded-2xl border border-dashed border-zinc-300 p-12 text-center text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
+          <div className="col-span-full rounded-xl border border-dashed border-white/15 p-12 text-center text-sm font-mono text-[#a1a1aa]">
             No student societies match your search. Try a broader search term.
           </div>
         ) : (
           filteredSocieties.map((soc) => (
             <div
               key={soc.id}
-              className="flex flex-col justify-between rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-sm transition-all hover:border-emerald-500/40 hover:shadow-md dark:border-zinc-800/80 dark:bg-zinc-900/60"
+              className="flex flex-col justify-between rounded-xl border border-white/10 bg-[#07080a] p-5 hover:border-[#d9b451]/40 transition-colors"
             >
               <div>
-                <div className="flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <span className="inline-flex items-center rounded bg-[#d9b451]/10 px-2 py-0.5 text-[10px] font-mono font-bold text-[#d9b451]">
                     {soc.acronym}
                   </span>
-                  <span className="capitalize text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                  <span className="capitalize text-[10px] font-mono text-[#71717a] bg-white/5 px-2 py-0.5 rounded">
                     {soc.category}
                   </span>
                 </div>
 
-                <h3 className="mt-3 text-lg font-bold text-zinc-900 dark:text-zinc-100">
-                  {soc.name}
-                </h3>
-                <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
-                  {soc.department}
-                </p>
+                <h3 className="text-base font-bold text-white mb-0.5">{soc.name}</h3>
+                <p className="text-xs font-mono text-emerald-400 mb-2">{soc.department}</p>
 
-                <p className="mt-2 text-xs leading-relaxed text-zinc-600 dark:text-zinc-400">
-                  {soc.description}
-                </p>
+                <p className="text-xs leading-relaxed text-[#a1a1aa] mb-4">{soc.description}</p>
 
                 {/* Flagship Events */}
-                <div className="mt-4">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                <div className="mb-3">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#71717a] block mb-1.5">
                     Flagship Events &amp; Competitions
                   </span>
-                  <div className="mt-2 flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-1">
                     {soc.flagshipEvents.map((ev) => (
                       <span
                         key={ev}
-                        className="rounded-md bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+                        className="rounded bg-white/5 border border-white/5 px-2 py-0.5 text-[10px] font-mono text-zinc-300"
                       >
                         {ev}
                       </span>
@@ -401,14 +395,14 @@ export function SocietiesDirectory() {
                 </div>
 
                 {/* Core Activities */}
-                <div className="mt-4">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                <div>
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#71717a] block mb-1.5">
                     Core Activities
                   </span>
-                  <ul className="mt-1.5 space-y-1 text-xs text-zinc-600 dark:text-zinc-400">
+                  <ul className="space-y-1 text-xs text-[#a1a1aa]">
                     {soc.activities.map((act) => (
                       <li key={act} className="flex items-center gap-1.5">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-[#d9b451]" />
                         <span>{act}</span>
                       </li>
                     ))}
@@ -416,9 +410,8 @@ export function SocietiesDirectory() {
                 </div>
               </div>
 
-              <div className="mt-6 border-t border-zinc-100 pt-3 text-[11px] text-zinc-500 dark:border-zinc-800/60 dark:text-zinc-400">
-                Advisor:{" "}
-                <strong className="text-zinc-700 dark:text-zinc-300">{soc.facultyAdvisor}</strong>
+              <div className="mt-5 border-t border-white/5 pt-3 text-[11px] font-mono text-[#71717a]">
+                Faculty Advisor: <strong className="text-zinc-300">{soc.facultyAdvisor}</strong>
               </div>
             </div>
           ))

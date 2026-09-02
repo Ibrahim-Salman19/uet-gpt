@@ -98,7 +98,7 @@ export const BUS_ROUTES: BusRoute[] = [
       "UET Taxila Campus",
     ],
     description:
-      "Serving Satellite Town, Murree Road commercial belt, 6th Road, and connected Rawalpindi residential sectors.",
+      "Direct transit connecting Murree Road arterial hubs, Satellite Town student hostels, and northern Rawalpindi.",
   },
   {
     id: "route-wah-1",
@@ -108,18 +108,18 @@ export const BUS_ROUTES: BusRoute[] = [
     departureTime: "07:15 AM",
     returnTimes: ["02:15 PM", "04:30 PM"],
     keyStops: [
+      "Lala Rukh",
+      "Aslam Market",
+      "Officers Colony",
+      "Basti",
       "Barrier No. 3",
-      "Mall Road Wah",
-      "23 Area POF",
-      "6 Area POF",
-      "Gulistan Colony",
-      "POF Hotel & Officers Club",
-      "Basti Chowk",
-      "Taxila Museum Road",
+      "Wah Cantt Railway Station",
+      "GT Road Wah",
+      "Taxila Museum Chowk",
       "UET Taxila Campus",
     ],
     description:
-      "Direct rapid transit for POF employees' children and Wah Cantt residents with frequent morning and afternoon loops.",
+      "Fast shuttle service serving Wah Cantt residential colonies, POF sectors, and central Taxila city.",
   },
   {
     id: "route-attock-1",
@@ -129,17 +129,17 @@ export const BUS_ROUTES: BusRoute[] = [
     departureTime: "06:40 AM",
     returnTimes: ["02:15 PM", "04:30 PM"],
     keyStops: [
-      "Attock City Bus Terminal",
+      "Attock City Kachehri",
+      "Kamra Road",
       "Sanjwal Cantt",
-      "Lawrencepur Phattak",
-      "Hassan Abdal GT Road",
-      "Gurdwara Panja Sahib Mor",
-      "Wah Cantt Barrier 1",
-      "Taxila Bypass",
+      "Hassan Abdal Bus Stand",
+      "Cadet College Mor",
+      "Burhan Interchange",
+      "Margalla Mor",
       "UET Taxila Campus",
     ],
     description:
-      "Long-range regional commuter bus connecting Attock district, Sanjwal, Lawrencepur, and Hassan Abdal to campus.",
+      "Regional commuter connector linking western Punjab, Attock district, and Hassan Abdal students.",
   },
 ];
 
@@ -151,60 +151,62 @@ export function BusRoutesExplorer() {
   const filteredRoutes = useMemo(() => {
     return BUS_ROUTES.filter((route) => {
       const matchesRegion = selectedRegion === "all" || route.region === selectedRegion;
-      const query = searchQuery.toLowerCase().trim();
+      const q = searchQuery.toLowerCase().trim();
       const matchesSearch =
-        !query ||
-        route.routeName.toLowerCase().includes(query) ||
-        route.routeNumber.toLowerCase().includes(query) ||
-        route.description.toLowerCase().includes(query) ||
-        route.keyStops.some((stop) => stop.toLowerCase().includes(query));
+        q === "" ||
+        route.routeName.toLowerCase().includes(q) ||
+        route.routeNumber.toLowerCase().includes(q) ||
+        route.description.toLowerCase().includes(q) ||
+        route.keyStops.some((stop) => stop.toLowerCase().includes(q));
 
       return matchesRegion && matchesSearch;
     });
   }, [selectedRegion, searchQuery]);
 
   return (
-    <div className="space-y-8">
-      {/* Search & Filter Controls */}
-      <div className="rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-sm dark:border-zinc-800/80 dark:bg-zinc-900/60">
-        <div className="grid gap-4 md:grid-cols-2">
-          <div>
+    <div className="space-y-6">
+      {/* Search & Filter Bar */}
+      <div className="rounded-xl border border-white/10 bg-[#0c0d10] p-4 sm:p-5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          {/* Search Input */}
+          <div className="flex-1">
             <label
               htmlFor={searchInputId}
-              className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400"
+              className="text-xs font-mono uppercase text-[#71717a] block mb-1"
             >
-              Search Stops, Sectors, or Route
+              Search by neighborhood or pickup stop:
             </label>
             <input
               id={searchInputId}
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="e.g. Faizabad, Zero Point, Saddar, Wah Cantt, Attock..."
-              className="mt-1 w-full rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500"
+              placeholder="e.g. F-10, Saddar, Aabpara, Faizabad, Wah Cantt..."
+              className="w-full rounded-lg border border-white/15 bg-[#07080a] px-3.5 py-2 text-xs font-mono text-white placeholder-[#71717a] focus:border-[#d9b451] focus:outline-none"
             />
           </div>
 
+          {/* Region Tabs */}
           <div>
-            <span className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-              Filter by Region
+            <span className="text-xs font-mono uppercase text-[#71717a] block mb-1">
+              Filter by Region:
             </span>
-            <div className="mt-1 flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1 font-mono text-xs">
               {[
                 { id: "all", label: "All Routes" },
                 { id: "islamabad", label: "Islamabad" },
                 { id: "rawalpindi", label: "Rawalpindi" },
                 { id: "wah-cantt", label: "Wah Cantt" },
-                { id: "attock", label: "Hassan Abdal / Attock" },
+                { id: "attock", label: "Attock" },
               ].map((btn) => (
                 <button
                   key={btn.id}
                   type="button"
                   onClick={() => setSelectedRegion(btn.id)}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                  className={`rounded-lg px-2.5 py-1.5 transition-colors ${
                     selectedRegion === btn.id
-                      ? "bg-emerald-600 text-white shadow-sm dark:bg-emerald-500"
-                      : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                      ? "bg-[#d9b451] text-[#07080a] font-bold"
+                      : "border border-white/10 bg-[#14151a] text-[#a1a1aa] hover:text-white"
                   }`}
                 >
                   {btn.label}
@@ -215,65 +217,63 @@ export function BusRoutesExplorer() {
         </div>
       </div>
 
-      {/* Route Cards Grid */}
-      <div className="grid gap-6 md:grid-cols-2">
+      {/* Routes Grid */}
+      <div className="grid gap-4 md:grid-cols-2">
         {filteredRoutes.length === 0 ? (
-          <div className="col-span-full rounded-2xl border border-dashed border-zinc-300 p-12 text-center text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
-            No commuter routes match your search criteria. Try a different stop or keyword.
+          <div className="col-span-full rounded-xl border border-dashed border-white/15 p-12 text-center text-sm font-mono text-[#a1a1aa]">
+            No commuter routes match your search for &quot;{searchQuery}&quot;. Try searching
+            another stop or select All Routes.
           </div>
         ) : (
           filteredRoutes.map((route) => (
             <div
               key={route.id}
-              className="flex flex-col justify-between rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-sm transition-all hover:border-emerald-500/40 hover:shadow-md dark:border-zinc-800/80 dark:bg-zinc-900/60"
+              className="rounded-xl border border-white/10 bg-[#07080a] p-5 flex flex-col justify-between hover:border-[#d9b451]/40 transition-colors"
             >
               <div>
-                <div className="flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <span className="rounded bg-[#d9b451]/10 px-2 py-0.5 font-mono text-[10px] font-bold text-[#d9b451]">
                     {route.routeNumber}
                   </span>
-                  <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                    Dept:{" "}
-                    <strong className="text-zinc-900 dark:text-zinc-100">
-                      {route.departureTime}
-                    </strong>
+                  <span className="text-xs font-mono text-emerald-400">
+                    Dept: {route.departureTime}
                   </span>
                 </div>
 
-                <h3 className="mt-3 text-lg font-bold text-zinc-900 dark:text-zinc-100">
-                  {route.routeName}
-                </h3>
-                <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">{route.description}</p>
+                <h3 className="text-base font-bold text-white mb-1">{route.routeName}</h3>
+                <p className="text-xs text-[#a1a1aa] leading-relaxed mb-4">{route.description}</p>
 
-                <div className="mt-4">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-                    Key Stops &amp; Waypoints
+                <div>
+                  <span className="text-[10px] font-mono uppercase text-[#71717a] block mb-1.5 font-bold">
+                    Key Stops &amp; Waypoints ({route.keyStops.length}):
                   </span>
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {route.keyStops.map((stop) => (
-                      <span
-                        key={stop}
-                        className="rounded-md bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
-                      >
-                        {stop}
-                      </span>
-                    ))}
+                  <div className="flex flex-wrap gap-1">
+                    {route.keyStops.map((stop) => {
+                      const isMatched =
+                        searchQuery.trim() !== "" &&
+                        stop.toLowerCase().includes(searchQuery.toLowerCase().trim());
+                      return (
+                        <span
+                          key={stop}
+                          className={`rounded px-2 py-0.5 text-[10px] font-mono transition-colors ${
+                            isMatched
+                              ? "bg-[#d9b451] text-[#07080a] font-bold"
+                              : "bg-[#14151a] text-zinc-300 border border-white/5"
+                          }`}
+                        >
+                          {stop}
+                        </span>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 border-t border-zinc-100 pt-4 dark:border-zinc-800/60">
-                <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
-                  <span>
-                    Return Departure:{" "}
-                    <strong className="text-zinc-700 dark:text-zinc-300">
-                      {route.returnTimes.join(" & ")}
-                    </strong>
-                  </span>
-                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                    Official Fleet
-                  </span>
-                </div>
+              <div className="mt-5 border-t border-white/5 pt-3 flex items-center justify-between text-xs font-mono text-[#71717a]">
+                <span>
+                  Return: <strong className="text-zinc-300">{route.returnTimes.join(" & ")}</strong>
+                </span>
+                <span className="text-[#d9b451] font-bold">Official Fleet</span>
               </div>
             </div>
           ))

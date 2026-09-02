@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { CampusDirectory } from "@/components/directory/campus-directory";
 import { SocietiesDirectory } from "@/components/societies/societies-directory";
 import { BusRoutesExplorer } from "@/components/transport/bus-routes-explorer";
@@ -13,7 +13,7 @@ const TABS: { id: CampusTab; label: string; badge?: string; desc: string }[] = [
     id: "hostels",
     label: "Hostels & Residence",
     badge: "5 Halls",
-    desc: "On-campus residential facilities, mess system, Wi-Fi connectivity, and room allotments",
+    desc: "On-campus residential facilities, mess calculator, Wi-Fi connectivity, and room allotments",
   },
   {
     id: "transport",
@@ -102,6 +102,37 @@ export function CampusLifeHub() {
       : "hostels",
   );
 
+  // Interactive Hostel Mess Simulator
+  const [messDays, setMessDays] = useState<number>(26);
+  const [mealPlan, setMealPlan] = useState<"standard" | "light" | "custom">("standard");
+  const [hasCooler, setHasCooler] = useState<boolean>(false);
+  const [hasLaundry, setHasLaundry] = useState<boolean>(true);
+
+  // Allotment Priority Checker
+  const [homeRegion, setHomeRegion] = useState<"outstation" | "distant" | "commuter">("outstation");
+
+  const daysSliderId = useId();
+  const coolerCheckboxId = useId();
+  const laundryCheckboxId = useId();
+  const regionSelectId = useId();
+
+  const messCalculation = useMemo(() => {
+    const dailyRate = mealPlan === "standard" ? 390 : mealPlan === "light" ? 270 : 340;
+    const foodCost = messDays * dailyRate;
+    const coolerCost = hasCooler ? 1500 : 0;
+    const laundryCost = hasLaundry ? 900 : 0;
+    const monthlyTotal = foodCost + coolerCost + laundryCost;
+
+    return {
+      dailyRate,
+      foodCost,
+      coolerCost,
+      laundryCost,
+      monthlyTotal,
+      semesterDues: 28000,
+    };
+  }, [messDays, mealPlan, hasCooler, hasLaundry]);
+
   return (
     <div className="space-y-8">
       {/* Tab Selector Bar */}
@@ -149,12 +180,13 @@ export function CampusLifeHub() {
                   Residential Halls &amp; Student Housing
                 </h2>
                 <p className="mt-1 text-xs text-[#a1a1aa]">
-                  5 on-campus halls providing secure accommodation (~PKR 28,000/semester room dues)
-                  with 24/7 security and dining mess.
+                  5 on-campus residential halls (~PKR 28,000/semester room dues) with 24/7 security,
+                  uninterrupted solar backup, and student-run dining mess.
                 </p>
               </div>
             </div>
 
+            {/* 5 Hostels Cards */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {HOSTELS.map((hostel) => (
                 <div
@@ -178,14 +210,14 @@ export function CampusLifeHub() {
                   </div>
 
                   <div className="border-t border-white/5 pt-3">
-                    <span className="text-[10px] font-mono uppercase text-[#71717a] block mb-1.5">
+                    <span className="text-[10px] font-mono uppercase text-[#71717a] block mb-1.5 font-bold">
                       Key Amenities:
                     </span>
                     <div className="flex flex-wrap gap-1">
                       {hostel.facilities.map((fac) => (
                         <span
                           key={fac}
-                          className="rounded bg-white/5 px-2 py-0.5 text-[10px] text-zinc-300"
+                          className="rounded bg-white/5 border border-white/5 px-2 py-0.5 text-[10px] font-mono text-zinc-300"
                         >
                           {fac}
                         </span>
@@ -196,47 +228,222 @@ export function CampusLifeHub() {
               ))}
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 border-t border-white/10 pt-6">
-              <div className="rounded-xl border border-white/10 bg-[#07080a] p-5">
-                <h3 className="text-sm font-bold text-[#d9b451]">
-                  Hostel Allotment &amp; Priority Rules
-                </h3>
-                <ul className="mt-2 space-y-1.5 text-xs text-[#a1a1aa] leading-relaxed">
-                  <li>
-                    &bull; Allotments are managed online by the Senior Warden Office at the start of
-                    each academic year.
-                  </li>
-                  <li>
-                    &bull; <strong className="text-white">Priority 1:</strong> Outstation students
-                    whose domicile is outside the university bus network boundaries (beyond
-                    Islamabad/Rawalpindi/Attock).
-                  </li>
-                  <li>
-                    &bull; <strong className="text-white">Priority 2:</strong> Top merit list
-                    position holders and provincial quota seats.
-                  </li>
-                </ul>
+            {/* Interactive Living Expense & Mess Simulator */}
+            <div className="rounded-xl border border-[#d9b451]/30 bg-[#07080a] p-6 space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+                <div>
+                  <span className="text-xs font-mono uppercase text-[#d9b451] font-bold block">
+                    Interactive Living Cost Calculator
+                  </span>
+                  <h3 className="text-lg font-bold text-white">
+                    Monthly Mess Bill &amp; Living Expenses
+                  </h3>
+                </div>
+                <span className="text-xs font-mono text-emerald-400">
+                  Estimated Monthly Total: ~PKR {messCalculation.monthlyTotal.toLocaleString()}
+                </span>
               </div>
 
-              <div className="rounded-xl border border-white/10 bg-[#07080a] p-5">
-                <h3 className="text-sm font-bold text-[#d9b451]">
-                  Mess System &amp; Dining Charges
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                {/* Inputs */}
+                <div className="lg:col-span-7 space-y-4">
+                  <div>
+                    <label
+                      htmlFor={daysSliderId}
+                      className="text-xs font-mono uppercase text-[#a1a1aa] block mb-1"
+                    >
+                      Days on Campus Per Month:{" "}
+                      <strong className="text-white">{messDays} Days</strong>
+                    </label>
+                    <input
+                      id={daysSliderId}
+                      type="range"
+                      min={10}
+                      max={31}
+                      value={messDays}
+                      onChange={(e) => setMessDays(Number(e.target.value))}
+                      className="w-full accent-[#d9b451] cursor-pointer"
+                    />
+                  </div>
+
+                  <div>
+                    <span className="text-xs font-mono uppercase text-[#a1a1aa] block mb-1.5">
+                      Meal Plan Selection:
+                    </span>
+                    <div className="grid grid-cols-3 gap-2 text-xs font-mono">
+                      {[
+                        { id: "standard", label: "3 Meals (PKR 390/d)" },
+                        { id: "light", label: "2 Meals (PKR 270/d)" },
+                        { id: "custom", label: "Balanced (PKR 340/d)" },
+                      ].map((plan) => (
+                        <button
+                          key={plan.id}
+                          type="button"
+                          onClick={() => setMealPlan(plan.id as typeof mealPlan)}
+                          className={`rounded-lg p-2 text-center transition-colors ${
+                            mealPlan === plan.id
+                              ? "bg-[#d9b451] text-[#07080a] font-bold"
+                              : "border border-white/10 bg-[#14151a] text-[#a1a1aa] hover:text-white"
+                          }`}
+                        >
+                          {plan.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    <div className="flex items-center gap-2.5 rounded-lg border border-white/10 bg-[#14151a] p-3">
+                      <input
+                        id={coolerCheckboxId}
+                        type="checkbox"
+                        checked={hasCooler}
+                        onChange={(e) => setHasCooler(e.target.checked)}
+                        className="h-4 w-4 rounded border-white/20 bg-[#07080a] text-[#d9b451]"
+                      />
+                      <label
+                        htmlFor={coolerCheckboxId}
+                        className="text-xs text-[#d4d4d8] cursor-pointer"
+                      >
+                        Summer Room Cooler (+PKR 1,500/mo)
+                      </label>
+                    </div>
+
+                    <div className="flex items-center gap-2.5 rounded-lg border border-white/10 bg-[#14151a] p-3">
+                      <input
+                        id={laundryCheckboxId}
+                        type="checkbox"
+                        checked={hasLaundry}
+                        onChange={(e) => setHasLaundry(e.target.checked)}
+                        className="h-4 w-4 rounded border-white/20 bg-[#07080a] text-[#d9b451]"
+                      />
+                      <label
+                        htmlFor={laundryCheckboxId}
+                        className="text-xs text-[#d4d4d8] cursor-pointer"
+                      >
+                        Hostel Laundry Service (+PKR 900/mo)
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bill Breakdown */}
+                <div className="lg:col-span-5 rounded-xl border border-white/10 bg-[#14151a] p-5 space-y-3 font-mono text-xs flex flex-col justify-between">
+                  <div className="space-y-2.5">
+                    <span className="text-[10px] uppercase tracking-wider text-[#71717a] block font-bold">
+                      Estimated Monthly Invoice
+                    </span>
+                    <div className="flex justify-between text-[#a1a1aa] border-b border-white/5 pb-1.5">
+                      <span>
+                        Dining Mess ({messDays} days @ PKR {messCalculation.dailyRate}/d):
+                      </span>
+                      <span className="text-white font-bold">
+                        PKR {messCalculation.foodCost.toLocaleString()}
+                      </span>
+                    </div>
+                    {hasCooler && (
+                      <div className="flex justify-between text-[#a1a1aa] border-b border-white/5 pb-1.5">
+                        <span>Cooler Surcharge:</span>
+                        <span className="text-white font-bold">
+                          PKR {messCalculation.coolerCost.toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+                    {hasLaundry && (
+                      <div className="flex justify-between text-[#a1a1aa] border-b border-white/5 pb-1.5">
+                        <span>Laundry Facility:</span>
+                        <span className="text-white font-bold">
+                          PKR {messCalculation.laundryCost.toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex justify-between text-[#d9b451] pt-1 text-sm font-bold">
+                      <span>Total Monthly Out-of-Pocket:</span>
+                      <span>PKR {messCalculation.monthlyTotal.toLocaleString()}</span>
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg bg-white/5 p-3 text-[11px] text-[#a1a1aa] font-sans">
+                    <strong className="text-white font-mono block mb-0.5">
+                      Fixed Semester Dues:
+                    </strong>
+                    Room dues (~PKR 28,000) and refundable mess security deposit (PKR 8,000) are
+                    charged per semester at registration.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Allotment Priority Checker */}
+            <div className="rounded-xl border border-white/10 bg-[#07080a] p-6 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+                <h3 className="text-base font-bold text-white">
+                  Hostel Allotment Priority Checker
                 </h3>
-                <ul className="mt-2 space-y-1.5 text-xs text-[#a1a1aa] leading-relaxed">
-                  <li>
-                    &bull; Cooperative student-managed mess system serving breakfast, lunch, and
-                    dinner.
-                  </li>
-                  <li>
-                    &bull; Monthly dining expense averages{" "}
-                    <strong className="text-white">PKR 10,000 – 12,000/month</strong> based on
-                    consumption.
-                  </li>
-                  <li>
-                    &bull; Refundable mess security deposit of PKR 8,000 collected once at the time
-                    of admission.
-                  </li>
-                </ul>
+                <span className="text-xs font-mono text-[#d9b451]">Senior Warden Regulations</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+                <div className="sm:col-span-6">
+                  <label
+                    htmlFor={regionSelectId}
+                    className="text-xs font-mono uppercase text-[#71717a] block mb-1"
+                  >
+                    Select Your Permanent Domicile / City:
+                  </label>
+                  <select
+                    id={regionSelectId}
+                    value={homeRegion}
+                    onChange={(e) => setHomeRegion(e.target.value as typeof homeRegion)}
+                    className="w-full rounded-lg border border-white/15 bg-[#14151a] px-3.5 py-2 text-xs font-mono text-white focus:border-[#d9b451] focus:outline-none"
+                  >
+                    <option value="outstation">
+                      Southern Punjab / Sindh / KPK / Balochistan / AJK / GB
+                    </option>
+                    <option value="distant">
+                      Intermediate Distance (&gt;50km: Jhelum, Chakwal, Mianwali)
+                    </option>
+                    <option value="commuter">
+                      Twin Cities &amp; Local (Islamabad, Rawalpindi, Wah, Hassan Abdal)
+                    </option>
+                  </select>
+                </div>
+
+                <div className="sm:col-span-6 rounded-lg border border-white/10 bg-[#14151a] p-4 text-xs">
+                  {homeRegion === "outstation" && (
+                    <div className="text-emerald-400 space-y-1">
+                      <span className="font-bold font-mono block">
+                        ✓ Priority 1: Guaranteed On-Campus Bed
+                      </span>
+                      <p className="text-[11px] text-[#a1a1aa] font-sans">
+                        Outstation candidates located outside commuter route reach receive top
+                        priority allotment in Sir Syed Hall (Boys) or Fatima Jinnah Hall (Girls).
+                      </p>
+                    </div>
+                  )}
+                  {homeRegion === "distant" && (
+                    <div className="text-amber-400 space-y-1">
+                      <span className="font-bold font-mono block">
+                        ★ Priority 2: High Allocation Probability
+                      </span>
+                      <p className="text-[11px] text-[#a1a1aa] font-sans">
+                        Allotment granted based on academic merit standing in the first and second
+                        rounds of hostel admissions.
+                      </p>
+                    </div>
+                  )}
+                  {homeRegion === "commuter" && (
+                    <div className="text-[#a1a1aa] space-y-1">
+                      <span className="font-bold font-mono text-zinc-300 block">
+                        ℹ Priority 3: Commuter Transit Recommended
+                      </span>
+                      <p className="text-[11px] text-[#a1a1aa] font-sans">
+                        Students from Twin Cities and Wah Cantt are strongly encouraged to use the
+                        university&apos;s 25+ daily point buses (~PKR 18,000/sem).
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
