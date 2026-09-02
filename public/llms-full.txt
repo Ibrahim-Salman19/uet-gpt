@@ -90,6 +90,9 @@ UET GPT is an open-source, AI-powered RAG (Retrieval-Augmented Generation) chatb
 
 - Main Application / Chat: https://uet-gpt.vercel.app/chat
 - Interactive Merit Calculator: https://uet-gpt.vercel.app/calculator
+- GPA & CGPA Calculator: https://uet-gpt.vercel.app/gpa-calculator
+- University Comparison Matrix: https://uet-gpt.vercel.app/compare
+- ECAT 2026 Strategy Guide: https://uet-gpt.vercel.app/ecat-guide
 - Institutional Guide (UET): https://uet-gpt.vercel.app/uet
 - University Hub (UET Taxila): https://uet-gpt.vercel.app/uet-taxila
 - Product Overview (UET GPT): https://uet-gpt.vercel.app/uet-gpt

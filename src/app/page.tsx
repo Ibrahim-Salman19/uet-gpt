@@ -144,15 +144,54 @@ export default function HomePage() {
               </Link>
 
               <Link
+                href="/gpa-calculator"
+                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
+              >
+                <div className="text-xs font-mono text-[#d9b451] mb-2">02 / TOOL</div>
+                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
+                  GPA &amp; CGPA Calculator
+                </h2>
+                <p className="text-xs text-white/60 leading-relaxed">
+                  Calculate semester SGPA and cumulative CGPA on official UET Taxila 4.00 scale.
+                </p>
+              </Link>
+
+              <Link
+                href="/compare"
+                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
+              >
+                <div className="text-xs font-mono text-[#d9b451] mb-2">03 / DECISION MATRIX</div>
+                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
+                  Compare Universities
+                </h2>
+                <p className="text-xs text-white/60 leading-relaxed">
+                  Side-by-side comparison: UET Taxila vs NUST, FAST-NUCES, UET Lahore, and GIKI.
+                </p>
+              </Link>
+
+              <Link
+                href="/ecat-guide"
+                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
+              >
+                <div className="text-xs font-mono text-[#d9b451] mb-2">04 / STRATEGY</div>
+                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
+                  ECAT 2026 Guide
+                </h2>
+                <p className="text-xs text-white/60 leading-relaxed">
+                  400-marks syllabus breakdown, negative marking (-1) rules, and high-yield topics.
+                </p>
+              </Link>
+
+              <Link
                 href="/uet-taxila/admissions"
                 className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
               >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">02 / ADMISSIONS</div>
+                <div className="text-xs font-mono text-[#d9b451] mb-2">05 / ADMISSIONS</div>
                 <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
-                  ECAT &amp; Merit Guide
+                  Admissions Guide
                 </h2>
                 <p className="text-xs text-white/60 leading-relaxed">
-                  Eligibility criteria (60%/50%), merit aggregate formula, and application steps.
+                  Eligibility criteria (60%/50%), quota categories A/S/X, and application deadlines.
                 </p>
               </Link>
 
@@ -160,7 +199,7 @@ export default function HomePage() {
                 href="/uet-taxila/fee-structure"
                 className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
               >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">03 / FINANCES</div>
+                <div className="text-xs font-mono text-[#d9b451] mb-2">06 / FINANCES</div>
                 <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
                   Fee Structure 2026
                 </h2>
@@ -173,7 +212,7 @@ export default function HomePage() {
                 href="/scholarships"
                 className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
               >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">04 / AID</div>
+                <div className="text-xs font-mono text-[#d9b451] mb-2">07 / AID</div>
                 <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
                   Scholarships &amp; Grants
                 </h2>
@@ -186,13 +225,12 @@ export default function HomePage() {
                 href="/campus-life"
                 className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
               >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">05 / CAMPUS</div>
+                <div className="text-xs font-mono text-[#d9b451] mb-2">08 / CAMPUS</div>
                 <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
                   Campus Life &amp; Hostels
                 </h2>
                 <p className="text-xs text-white/60 leading-relaxed">
-                  On-campus residence halls, bus transport routes, central library, and student
-                  societies.
+                  5 residential halls, daily bus commuter network, central library, and clubs.
                 </p>
               </Link>
 
@@ -200,12 +238,12 @@ export default function HomePage() {
                 href="/uet-taxila/programs"
                 className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
               >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">06 / ACADEMICS</div>
+                <div className="text-xs font-mono text-[#d9b451] mb-2">09 / ACADEMICS</div>
                 <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
                   14 Degree Programs
                 </h2>
                 <p className="text-xs text-white/60 leading-relaxed">
-                  Accredited undergraduate engineering, computing, basic sciences, and PhD degrees.
+                  Accredited undergraduate engineering (OBE Level-II), computing, and PhD degrees.
                 </p>
               </Link>
             </div>

@@ -41,8 +41,35 @@ export function PublicFooter() {
                 >
                   <span>Merit Calculator</span>
                   <span className="rounded bg-[#d9b451]/20 px-1 py-0.2 text-[9px] font-bold">
+                    Tool
+                  </span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/gpa-calculator"
+                  className="hover:text-white hover:underline transition-colors flex items-center gap-1.5 text-[#d9b451]"
+                >
+                  <span>GPA &amp; CGPA Calculator</span>
+                  <span className="rounded bg-[#d9b451]/20 px-1 py-0.2 text-[9px] font-bold">
                     New
                   </span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/compare"
+                  className="hover:text-white hover:underline transition-colors flex items-center gap-1.5 text-white"
+                >
+                  <span>University Comparison</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/ecat-guide"
+                  className="hover:text-white hover:underline transition-colors"
+                >
+                  ECAT 2026 Strategy Guide
                 </Link>
               </li>
               <li>
@@ -51,14 +78,6 @@ export function PublicFooter() {
                   className="hover:text-white hover:underline transition-colors"
                 >
                   Admissions Guide {CURRENT_ACADEMIC_YEAR}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/learn/ecat"
-                  className="hover:text-white hover:underline transition-colors"
-                >
-                  ECAT Entry Test Guide
                 </Link>
               </li>
               <li>

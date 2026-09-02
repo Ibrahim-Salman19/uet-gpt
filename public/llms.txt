@@ -16,6 +16,9 @@ Content is continuously updated as UET Taxila publishes new admissions notices, 
 
 - UET Taxila Hub: https://uet-gpt.vercel.app/uet-taxila
 - Interactive Merit Calculator: https://uet-gpt.vercel.app/calculator
+- GPA & CGPA Calculator: https://uet-gpt.vercel.app/gpa-calculator
+- University Comparison Matrix: https://uet-gpt.vercel.app/compare
+- ECAT 2026 Strategy Guide: https://uet-gpt.vercel.app/ecat-guide
 - Admissions & ECAT Guide: https://uet-gpt.vercel.app/uet-taxila/admissions
 - Programs & Departments: https://uet-gpt.vercel.app/uet-taxila/programs
 - Fee Structure Breakdown: https://uet-gpt.vercel.app/uet-taxila/fee-structure

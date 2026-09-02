@@ -9,13 +9,14 @@ describe("Public Navigation & Footer System", () => {
 
     expect(html).toContain("Skip to main content");
     expect(html).toContain('href="/calculator"');
+    expect(html).toContain('href="/gpa-calculator"');
     expect(html).toContain('href="/uet-taxila/admissions"');
     expect(html).toContain('href="/uet-taxila/fee-structure"');
-    expect(html).toContain('href="/uet-taxila/programs"');
+    expect(html).toContain('href="/compare"');
+    expect(html).toContain('href="/ecat-guide"');
     expect(html).toContain('href="/scholarships"');
     expect(html).toContain('href="/campus-life"');
     expect(html).toContain('href="/learn"');
-    expect(html).toContain('href="/about"');
     expect(html).toContain('href="/chat"');
     expect(html).toContain('aria-label="Main Navigation"');
   });

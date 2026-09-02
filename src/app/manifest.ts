@@ -18,5 +18,32 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: "maskable",
       },
     ],
+    categories: ["education", "productivity", "utilities"],
+    shortcuts: [
+      {
+        name: "Merit Calculator",
+        short_name: "Merit Calc",
+        description: "Calculate UET Taxila admission merit aggregate",
+        url: "/calculator",
+      },
+      {
+        name: "GPA Calculator",
+        short_name: "GPA Calc",
+        description: "Calculate semester SGPA and cumulative CGPA",
+        url: "/gpa-calculator",
+      },
+      {
+        name: "Ask AI Assistant",
+        short_name: "AI Chat",
+        description: "Ask questions to UET GPT AI assistant",
+        url: "/chat",
+      },
+      {
+        name: "Scholarships & Aid",
+        short_name: "Scholarships",
+        description: "View HEC Need-Based and Ehsaas scholarships",
+        url: "/scholarships",
+      },
+    ],
   };
 }

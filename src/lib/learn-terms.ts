@@ -422,6 +422,156 @@ export const LEARN_TERMS: LearnTerm[] = [
     datePublished: "2026-07-16",
     dateModified: LEARN_TERMS_DATE_MODIFIED,
   },
+  {
+    slug: "obe-framework",
+    title: "OBE Framework & Washington Accord",
+    pageTitle: "What is OBE Framework at UET Taxila? | UET GPT",
+    metaDescription:
+      "Explore the Outcome-Based Education (OBE) Level-II accreditation and Washington Accord recognition for UET Taxila engineering graduates.",
+    lead: "The Outcome-Based Education (OBE) framework is an international accreditation standard adopted by Pakistan Engineering Council (PEC) under the Washington Accord. UET Taxila delivers its undergraduate engineering curriculum under OBE Level-II, guaranteeing global equivalence and mobility for its graduates.",
+    sections: [
+      {
+        heading: "What OBE Level-II Means for Graduates",
+        paragraphs: [
+          "Under the OBE model, student performance is assessed against predefined Program Learning Outcomes (PLOs) including Engineering Knowledge, Problem Analysis, Design of Solutions, Ethics, and Lifelong Learning. Rather than measuring rote recall, OBE evaluates complex engineering problem solving.",
+          "Graduating from a PEC Level-II accredited program means the degree is directly recognized in all 20+ Washington Accord signatory countries (including the USA, UK, Canada, Australia, Japan, and Singapore) without requiring foreign qualification equivalence exams.",
+        ],
+      },
+      {
+        heading: "Continuous Quality Improvement (CQI)",
+        paragraphs: [
+          "Each academic department at UET Taxila operates a Continuous Quality Improvement (CQI) cycle with Course Learning Outcomes (CLOs) mapped to departmental PLOs. Assessments, laboratory experiments, and Final Year Projects (FYDP) are rigorously audited.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        q: "Are UET Taxila engineering degrees recognized internationally?",
+        a: "Yes. UET Taxila is fully accredited under PEC OBE Level-II, making its engineering degrees recognized across all Washington Accord signatory nations for professional engineer (PE) licensing.",
+      },
+      {
+        q: "What is the difference between PEC Level-I and Level-II?",
+        a: "Level-I indicates traditional non-OBE accreditation valid only within Pakistan. Level-II signifies full OBE compliance with international substantial equivalence under the Washington Accord.",
+      },
+    ],
+    hubLinks: [
+      { label: "UET Taxila Programs", href: `${siteUrl}/uet-taxila/programs` },
+      { label: "University Comparison", href: `${siteUrl}/compare` },
+      { label: "Ask UET GPT", href: siteUrl },
+    ],
+    datePublished: "2026-07-16",
+    dateModified: LEARN_TERMS_DATE_MODIFIED,
+  },
+  {
+    slug: "cgpa-system",
+    title: "Semester Grading & CGPA System",
+    pageTitle: "UET Taxila CGPA & Grading Scale Explained | UET GPT",
+    metaDescription:
+      "Official UET Taxila 4.00 grading scale, SGPA and CGPA computation formulas, academic probation rules, and Dean's Honors List criteria.",
+    lead: "The UET Taxila semester grading system calculates student academic performance on a 4.00 Grade Point Average (GPA) scale. Quality points are computed by multiplying course grade points with credit hours, determining semester SGPA and cumulative CGPA.",
+    sections: [
+      {
+        heading: "Grading Scale & Letter Grades",
+        paragraphs: [
+          "Letter grades range from A (4.00, 85%+) down to D (1.00, 50-53%) and F (0.00, <50%). Intermediate grades include A- (3.70), B+ (3.30), B (3.00), B- (2.70), C+ (2.30), C (2.00), and C- (1.70).",
+          "A minimum passing grade of D (1.00) is required for individual subjects, but a cumulative CGPA of at least 2.00 is required to remain in good academic standing and earn the Bachelor of Science degree.",
+        ],
+      },
+      {
+        heading: "Academic Probation and Dismissal",
+        paragraphs: [
+          "If a student's SGPA falls below 2.00, they are placed on Academic Probation. If the CGPA remains below 2.00 for two consecutive semesters, the university initiates academic dismissal procedures according to semester regulations.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        q: "What is the minimum CGPA to graduate from UET Taxila?",
+        a: "A cumulative CGPA of at least 2.00 out of 4.00 across all 8 semesters (130-136 credit hours) is mandatory to receive the BSc Engineering / BS Computing degree.",
+      },
+      {
+        q: "What is the criteria for the Dean's Honors List?",
+        a: "An undergraduate student who scores an SGPA of 3.70 or above in a regular semester with a minimum of 12 credit hours is placed on the Dean's Honors List.",
+      },
+    ],
+    hubLinks: [
+      { label: "GPA & CGPA Calculator", href: `${siteUrl}/gpa-calculator` },
+      { label: "Admissions Guide", href: `${siteUrl}/uet-taxila/admissions` },
+      { label: "Ask UET GPT", href: siteUrl },
+    ],
+    datePublished: "2026-07-16",
+    dateModified: LEARN_TERMS_DATE_MODIFIED,
+  },
+  {
+    slug: "hostel-allotment",
+    title: "Hostel Allotment & Accommodation",
+    pageTitle: "UET Taxila Hostel Accommodation & Rules | UET GPT",
+    metaDescription:
+      "Guide to UET Taxila residential halls: Quaid, Iqbal, Ali, Umar, and Ayesha halls, allotment merit, mess dues, and on-campus facilities.",
+    lead: "UET Taxila provides on-campus residential accommodation for over 2,000 students across 5 male and female residential halls. Allotment is merit-based and distance-weighted, offering affordable living with dining messes, sports grounds, and high-speed PERN Wi-Fi.",
+    sections: [
+      {
+        heading: "Residential Halls Overview",
+        paragraphs: [
+          "Undergraduate male students reside in Quaid-e-Azam Hall, Allama Iqbal Hall, Ali Hall, and Umar Hall. Postgraduates and research scholars reside in Usman Hall. Female undergraduate and postgraduate students are housed in the secure Ayesha Hall complex.",
+          "First-year students are typically allotted 3-seater dormitories, progressing to 2-seater and single cubicles in senior 3rd and 4th years based on academic standing.",
+        ],
+      },
+      {
+        heading: "Hostel Charges and Mess System",
+        paragraphs: [
+          "Non-refundable hostel room rent and utility charges are approximately PKR 16,000 per semester. Students pay a one-time refundable hostel & mess security deposit of PKR 16,000 at admission. Dining operates on a cooperative non-profit mess system managed by elected student mess committees.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        q: "Are all admitted students guaranteed hostel accommodation?",
+        a: "Students residing outside the Rawalpindi/Islamabad/Wah Cantt commuter zone are given priority hostel allotment based on merit and distance.",
+      },
+      {
+        q: "What facilities are provided in UET Taxila hostels?",
+        a: "Hostels feature 24/7 electricity backup, PERN Wi-Fi, indoor badminton/table tennis courts, study halls, television lounges, and hygienic dining messes.",
+      },
+    ],
+    hubLinks: [
+      { label: "Campus Life Guide", href: `${siteUrl}/campus-life` },
+      { label: "Fee Structure", href: `${siteUrl}/uet-taxila/fee-structure` },
+      { label: "Ask UET GPT", href: siteUrl },
+    ],
+    datePublished: "2026-07-16",
+    dateModified: LEARN_TERMS_DATE_MODIFIED,
+  },
+  {
+    slug: "scholarships-aid",
+    title: "Financial Aid & Scholarships",
+    pageTitle: "UET Taxila Scholarships & Financial Aid Guide | UET GPT",
+    metaDescription:
+      "Complete guide to HEC Need-Based, Ehsaas / BISP, PEEF, and UET Alumni scholarships at UET Taxila. Eligibility, stipends, and application steps.",
+    lead: "UET Taxila offers extensive need-based and merit-based financial aid through HEC, provincial governments, and alumni endowments. Over 30% of undergraduate students receive partial or full tuition fee waivers along with monthly living stipends.",
+    sections: [
+      {
+        heading: "Major Scholarship Schemes",
+        paragraphs: [
+          "HEC Need-Based Scholarships cover 100% of undergraduate tuition fees plus a monthly stipend of PKR 6,000. Ehsaas/BISP scholarships similarly cover full tuition and annual transport/hostel allowances.",
+          "The Punjab Educational Endowment Fund (PEEF) and UET Taxila Alumni Association (UETTAA) provide emergency grants and merit-cum-poverty fee remissions for deserving students.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        q: "How can I apply for financial aid at UET Taxila?",
+        a: "Applications are submitted through the Directorate of Financial Aid during the first month of the Fall semester, followed by an interview before the Institutional Scholarship Award Committee (ISAC).",
+      },
+    ],
+    hubLinks: [
+      { label: "Scholarships Directory", href: `${siteUrl}/scholarships` },
+      { label: "Fee Structure", href: `${siteUrl}/uet-taxila/fee-structure` },
+      { label: "Ask UET GPT", href: siteUrl },
+    ],
+    datePublished: "2026-07-16",
+    dateModified: LEARN_TERMS_DATE_MODIFIED,
+  },
 ];
 
 /** Returns a single term by slug, or undefined if not found. */
