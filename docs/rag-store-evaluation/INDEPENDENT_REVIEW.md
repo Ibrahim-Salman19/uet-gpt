@@ -1,4 +1,4 @@
-# Independent review package (Agent B) - status as of 2026-08-29
+# Independent review package (Agent B) - status as of 2026-08-29, last updated 2026-09-02
 
 Prepared per mandate §68/§73: a passing benchmark does not authorize
 production cutover, and the agent who built the system must not self-certify
@@ -53,6 +53,60 @@ that row for detail) - but the scope has narrowed from "the whole lifecycle
 matrix plus these three" to just these three. §68/§73 (this document's own
 purpose) remains the one gate that structurally cannot be self-executed by
 this session.
+
+**Updated 2026-09-02 (§45/§46/§57, the "unbiased lexical-value test" item
+from the paragraph above): DONE, with a ceiling that is now confirmed
+permanent rather than open.** A separate session (this document's author
+did not do this work directly, but is the one recording it, so treat the
+distinction as: measured by this project, not self-certified by whoever
+built the retrieval code) found and fixed the exact defect this document
+had flagged as open: the golden set's label pool was dense-only
+(`generate_label_review.py` sourced candidates from dense top-5 only), so
+`fusedTop5 - denseTop5` was measured directly - **103 chunks across all
+50 queries had never been eligible to be marked relevant, by
+construction.** All 103 were read in full and honestly judged (not a
+rubber stamp: 15 relevant, 88 rejected with a stated reason each,
+recorded in `scripts/eval/delta_label_review.md`), merged additively into
+`golden_set_verified.jsonl`, and the real production fusion re-scored
+locally: `scoredQueryCount` 19→23, `meanHitAt5` 0.9474→0.9565, `meanMrr`
+0.7076→0.7295. 4 of the 15 newly-relevant chunks closed queries that
+previously had *zero* labeled answer at all - exactly the failure mode
+predicted. Full evidence, methodology, and a self-caught idempotency bug
+(fixed and verified) are in
+`docs/rag-store-evaluation/hybrid-retrieval-2026-08/report.md` §6.
+
+**Separately, and this is the part that does not resolve:** asked
+directly, the project's user confirmed they cannot personally verify
+these UET Taxila facts (no domain knowledge) - the same limitation
+already on file for the fee queries. `HUMAN_VERIFIED` is therefore
+**confirmed unreachable** for this label set, not merely not-yet-done. A
+cross-corroboration pass then searched the local corpus for independent
+sources on every remaining plain-`LLM_JUDGED` query that asserts an
+answer (16 queries): 10 upgraded to `AUTHORITATIVE_SOURCE_MATCH` with the
+specific corroborating sources cited (7 same-fact confirmations, 3
+weaker topical-consistency corroborations, explicitly distinguished, not
+presented as one tier), 6 searched and documented as not-found - one of
+which corrected a prior independence assumption (query 34's two "relevant"
+chunks turned out to be the same document). `AUTHORITATIVE_SOURCE_MATCH`
+coverage: 9→12→22 of 50 queries. Full detail, including a self-caught
+Q8 evidence-conflict that needed reconciling (50% vs 60% CS eligibility -
+both correct, not contradictory, now stated explicitly), is in the same
+report.md's §7.
+
+**Net effect on §63:** the "unbiased lexical-value test" item is closed
+and should be struck from the §63 blocking-gates list below (see that
+row for the correction) - but §63 still does not clear, for a reason that
+is now a documented, permanent ceiling rather than an open task: 0/50
+labels are `HUMAN_VERIFIED`, confirmed unreachable, and N=23/50 remains
+modest. This is the specific decision Agent B (or the project's user)
+needs to make that this session structurally cannot: whether
+`AUTHORITATIVE_SOURCE_MATCH`/`LLM_JUDGED` evidence at this coverage is
+sufficient to certify retrieval quality for a hosting decision, given no
+UET Taxila domain expert is available to do better. New commits this
+round: `f5c1f09` (pool-bias fix), `b5eac06` (idempotency fix + a
+disclosure), `cc1c6d6` (corroboration pass), `6d12639` (Q8 reconciliation
++ tier disclosure) - all on `agent/2026-08-12-turso-knowledge-store`,
+zero Gemini/Pinecone/Convex Cloud calls across all four.
 
 ## 1. What is verified and can be checked right now
 
@@ -304,21 +358,47 @@ hybrid retrieval evaluated with     PASS*       all 50/50 queries
                                                  hurt one query (marginal
                                                  dense rank-5 hit pushed
                                                  to rank 9) - an unbiased
-                                                 result. An unbiased
-                                                 lexical-value test (dense
-                                                 UNION lexical candidate
-                                                 pool, both reviewed) is
-                                                 not yet done - open item.
-                                                 Raw query text only, no
-                                                 HyDE/rewrite (blocked,
-                                                 see §3) - *PASS is on
-                                                 retrieval mechanics
-                                                 tested, not a
+                                                 result. UPDATED 2026-09-02
+                                                 (see §0's same-date
+                                                 paragraph and report.md
+                                                 §6/§7 for full evidence):
+                                                 the unbiased lexical-value
+                                                 test (dense UNION lexical
+                                                 candidate pool, both
+                                                 reviewed) IS NOW DONE -
+                                                 all 103 fusedTop5-minus-
+                                                 denseTop5 chunks read and
+                                                 judged, 15 genuinely
+                                                 relevant, merged in.
+                                                 Re-scored: 23/50 scorable
+                                                 (was 19/50), HitRate@5
+                                                 0.9565 (was 0.9474), mean
+                                                 MRR 0.7295 (was 0.7076).
+                                                 Separately, HUMAN_VERIFIED
+                                                 is now CONFIRMED
+                                                 UNREACHABLE (user has no
+                                                 personal domain knowledge
+                                                 of these facts, asked
+                                                 directly) rather than
+                                                 merely not-yet-done; a
+                                                 cross-corroboration pass
+                                                 raised AUTHORITATIVE_
+                                                 SOURCE_MATCH coverage
+                                                 9->12->22/50 as the
+                                                 practical substitute
+                                                 ceiling. Raw query text
+                                                 only, no HyDE/rewrite
+                                                 (blocked, see §3) - *PASS
+                                                 is on retrieval mechanics
+                                                 tested and now on an
+                                                 unbiased label pool too,
+                                                 but still not a
                                                  production-quality
-                                                 verdict; the corrected
-                                                 scope above and the HyDE
-                                                 path are real open
-                                                 findings, not a clean
+                                                 verdict: the label set's
+                                                 provenance ceiling (0
+                                                 HUMAN_VERIFIED, N=23) and
+                                                 the HyDE path are real
+                                                 open findings, not a clean
                                                  bill of health.
 resource projection at 2x/3x        PARTIAL     Convex: local-convex-
   scale (§62)                                   lexical-proof-2026-08/
@@ -792,28 +872,52 @@ Pinecone final gate declaration      NOT         §63/64/65 - still cannot
                                                  dominant storage term, and
                                                  write/read-unit/latency
                                                  telemetry is not yet
-                                                 collected; (2) hybrid
-                                                 retrieval quality (§45/§46/
-                                                 §57, PASS* above) - the
-                                                 unbiased lexical-value test
-                                                 (dense UNION lexical
-                                                 candidate pool) is not yet
-                                                 done, and the PASS is on
-                                                 retrieval mechanics tested,
-                                                 not a production-quality
-                                                 verdict; (3) LSN write-
+                                                 collected; (2) LSN write-
                                                  visibility polling (§54/§60,
                                                  PARTIAL above) - only
                                                  covers the initial
                                                  full-corpus upload, not the
                                                  lifecycle-test write path.
-                                                 The scope of what blocks
-                                                 §63/§64/§65 has narrowed
-                                                 from "one race plus these
-                                                 three" to just these three -
-                                                 real progress, not a
-                                                 formality, but still not a
-                                                 PASS.
+                                                 UPDATED 2026-09-02: item
+                                                 (2) in this list used to be
+                                                 "hybrid retrieval quality -
+                                                 the unbiased lexical-value
+                                                 test is not yet done" -
+                                                 that specific test IS NOW
+                                                 DONE (see the hybrid-
+                                                 retrieval row above and
+                                                 report.md §6), so it is
+                                                 struck from this blocking
+                                                 list, not renumbered around
+                                                 - what replaces it as an
+                                                 open concern is NOT a
+                                                 to-do but a confirmed
+                                                 permanent ceiling: 0/50
+                                                 labels are HUMAN_VERIFIED
+                                                 (confirmed unreachable, not
+                                                 pending) and N=23/50 is
+                                                 modest even after fixing
+                                                 the pool bias (report.md
+                                                 §7). This is a decision
+                                                 for Agent B/the user, not
+                                                 an execution gap: is
+                                                 AUTHORITATIVE_SOURCE_MATCH/
+                                                 LLM_JUDGED evidence at this
+                                                 coverage sufficient to
+                                                 certify retrieval quality,
+                                                 given no UET Taxila domain
+                                                 expert is available? The
+                                                 scope of what blocks
+                                                 §63/§64/§65 has narrowed to:
+                                                 (1) resource projection at
+                                                 2x/3x scale, (2) LSN write-
+                                                 visibility on the
+                                                 lifecycle-test path, and
+                                                 (3) the label-provenance-
+                                                 sufficiency judgment call
+                                                 above - real progress, not
+                                                 a formality, but still not
+                                                 a PASS.
 independent review (this            IN PROGRESS this document
   document, §68/§73)
 production cutover to the target    NOT STARTED behind every gate above
@@ -1094,6 +1198,19 @@ See §2's gates table for the full assertion list and reproduction command.
 - Check rugged-bird-156's actual document/chunk counts via the Convex
   dashboard (Clerk admin auth was not available in this session) before
   treating the interim fix as safe to leave in place long-term.
+- 2026-09-02 additions: independently spot-check a sample of the 15
+  chunks the delta review (report.md §6) marked newly-relevant, and the
+  10 corroboration upgrades (report.md §7) - both are one AI session's
+  judgment calls, documented with reasoning in
+  scripts/eval/golden_set_verified.jsonl and delta_label_review.md, but
+  not independently verified by a second reviewer. Re-run
+  scripts/eval/parse_delta_label_review.py twice against a copy of the
+  committed golden set and confirm zero diff (idempotency was fixed and
+  verified once already in commit b5eac06 - do not just trust that log,
+  reproduce it). Confirm scoredQueryCount/meanHitAt5/meanMrr in
+  hybrid_eval_results.json actually match what a fresh
+  `npx tsx docs/rag-store-evaluation/hybrid-retrieval-2026-08/fuse_and_score.ts`
+  run produces against the committed channel_results.json.
 ```
 
 ## 5. Cloud/cost activity this session (cumulative, for audit)
@@ -1132,6 +1249,15 @@ Convex Cloud:           0 writes to application data; read-only queries
                         test's guidelines-mandated
                         `/// <reference types="vite/client" />` needs it
                         resolvable there).
+Hybrid pool-bias fix    0 Gemini / 0 Pinecone / 0 Convex Cloud calls -
+  + corroboration pass  the delta-review candidates (fusedTop5) were
+  (2026-09-02):          already cached in hybrid_eval_results.json from
+                        the 2026-08-31 fetch; the corroboration-pass
+                        searches ran a Python regex over the local
+                        all_chunks.jsonl file (44,792 chunks), not the
+                        Pinecone index. fuse_and_score.ts's re-run reused
+                        the same cached dense/lexical channel results,
+                        only re-computing the local fusion+scoring logic.
 Money spent:            $0
 ```
 
