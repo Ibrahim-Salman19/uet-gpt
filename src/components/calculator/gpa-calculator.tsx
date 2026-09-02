@@ -22,19 +22,46 @@ const GRADE_POINTS: Record<string, number> = {
   F: 0.0,
 };
 
-const INITIAL_COURSES: CourseRow[] = [
-  { id: "1", name: "Engineering Mechanics / Programming", creditHours: 3, grade: "A" },
-  { id: "2", name: "Calculus & Analytical Geometry", creditHours: 3, grade: "B+" },
-  { id: "3", name: "Applied Physics", creditHours: 3, grade: "A-" },
-  { id: "4", name: "Functional English", creditHours: 2, grade: "A" },
-  { id: "5", name: "Engineering Drawing & Workshop / Lab", creditHours: 2, grade: "B+" },
-  { id: "6", name: "Islamic / Pakistan Studies", creditHours: 2, grade: "A" },
-];
+const PRESETS: Record<string, { label: string; courses: CourseRow[] }> = {
+  eng_sem1: {
+    label: "BSc Engineering Sem 1 (18 CH)",
+    courses: [
+      { id: "1", name: "Linear Circuit Analysis / Statics", creditHours: 4, grade: "A" },
+      { id: "2", name: "Calculus & Analytical Geometry", creditHours: 3, grade: "B+" },
+      { id: "3", name: "Applied Physics", creditHours: 3, grade: "A-" },
+      { id: "4", name: "Functional English", creditHours: 3, grade: "A" },
+      { id: "5", name: "Engineering Drawing & Workshop Practice", creditHours: 3, grade: "B+" },
+      { id: "6", name: "Islamic Studies / Ethics", creditHours: 2, grade: "A" },
+    ],
+  },
+  cs_sem1: {
+    label: "BS Computer Science Sem 1 (17 CH)",
+    courses: [
+      { id: "1", name: "Programming Fundamentals", creditHours: 4, grade: "A" },
+      { id: "2", name: "Application of Information Technologies", creditHours: 3, grade: "A-" },
+      { id: "3", name: "Calculus & Analytical Geometry", creditHours: 3, grade: "B+" },
+      { id: "4", name: "Functional English", creditHours: 3, grade: "A" },
+      { id: "5", name: "Applied Physics", creditHours: 2, grade: "A" },
+      { id: "6", name: "Pakistan Studies", creditHours: 2, grade: "A" },
+    ],
+  },
+  deans_honor: {
+    label: "Dean's Honors Target (3.80+ GPA)",
+    courses: [
+      { id: "1", name: "Core Engineering Subject I", creditHours: 4, grade: "A" },
+      { id: "2", name: "Core Engineering Subject II", creditHours: 4, grade: "A" },
+      { id: "3", name: "Applied Mathematics / Differential Equations", creditHours: 3, grade: "A" },
+      { id: "4", name: "Engineering Laboratory Practice", creditHours: 2, grade: "A-" },
+      { id: "5", name: "Technical Report Writing", creditHours: 3, grade: "A" },
+    ],
+  },
+};
 
 export function GpaCalculator() {
-  const [courses, setCourses] = useState<CourseRow[]>(INITIAL_COURSES);
+  const [courses, setCourses] = useState<CourseRow[]>(PRESETS.eng_sem1.courses);
   const [previousCgpa, setPreviousCgpa] = useState<string>("");
   const [previousCredits, setPreviousCredits] = useState<string>("");
+  const [copied, setCopied] = useState<boolean>(false);
 
   const prevCgpaId = useId();
   const prevCreditsId = useId();
@@ -54,6 +81,12 @@ export function GpaCalculator() {
 
   const updateCourse = (id: string, field: keyof CourseRow, value: string | number) => {
     setCourses((prev) => prev.map((c) => (c.id === id ? { ...c, [field]: value } : c)));
+  };
+
+  const loadPreset = (presetKey: string) => {
+    if (PRESETS[presetKey]) {
+      setCourses(PRESETS[presetKey].courses);
+    }
   };
 
   const calculation = useMemo(() => {
@@ -88,54 +121,122 @@ export function GpaCalculator() {
     };
   }, [courses, previousCgpa, previousCredits]);
 
+  const handleCopyTranscript = () => {
+    const text = `UET Taxila SGPA Calculation: ${calculation.currentGpa.toFixed(3)} | Total Credits: ${calculation.currentCredits} CH\nCumulative CGPA: ${calculation.cumulativeCgpa.toFixed(3)} | Cumulative Credits: ${calculation.cumulativeCredits} CH\nCalculated via UET GPT (https://uet-gpt.vercel.app/tools?tab=gpa)`;
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div className="rounded-2xl border border-white/10 bg-[#0c0d10] p-6 sm:p-8 shadow-2xl backdrop-blur-sm">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Form: Semester Courses */}
         <div className="lg:col-span-8 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
             <div>
-              <h2 className="text-xl font-bold text-white">Semester Courses &amp; Grades</h2>
+              <h3 className="text-lg font-bold text-white">
+                Semester Courses &amp; Quality Points
+              </h3>
               <p className="text-xs text-[#a1a1aa] mt-0.5">
-                Official UET Taxila 4.00 grading scale. Add course titles, credit hours, and
-                expected letter grades.
+                Official UET Taxila 4.00 grading regulations and course credit weightages.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={addCourse}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-[#d9b451]/50 bg-[#d9b451]/10 px-3 py-1.5 text-xs font-mono font-semibold text-[#d9b451] hover:bg-[#d9b451]/20 transition-colors w-fit"
-            >
-              <span>+ Add Course</span>
-            </button>
+
+            {/* Quick Preset Buttons */}
+            <div className="flex flex-wrap gap-1.5">
+              <button
+                type="button"
+                onClick={() => loadPreset("eng_sem1")}
+                className="rounded-lg border border-white/10 bg-[#14151a] px-2 py-1 text-[11px] font-mono text-[#a1a1aa] hover:border-[#d9b451] hover:text-white transition-colors"
+              >
+                Eng Sem-1
+              </button>
+              <button
+                type="button"
+                onClick={() => loadPreset("cs_sem1")}
+                className="rounded-lg border border-white/10 bg-[#14151a] px-2 py-1 text-[11px] font-mono text-[#a1a1aa] hover:border-[#d9b451] hover:text-white transition-colors"
+              >
+                CS Sem-1
+              </button>
+              <button
+                type="button"
+                onClick={() => loadPreset("deans_honor")}
+                className="rounded-lg border border-white/10 bg-[#14151a] px-2 py-1 text-[11px] font-mono text-[#d9b451] hover:border-[#d9b451] hover:bg-[#d9b451]/10 transition-colors"
+              >
+                Dean&apos;s Honor Target
+              </button>
+            </div>
           </div>
 
-          {/* Courses Table / List */}
-          <div className="space-y-3">
-            {courses.map((course, idx) => (
+          {/* Cumulative Prior Semesters (Optional) */}
+          <div className="rounded-xl border border-white/10 bg-[#14151a]/50 p-4 space-y-3">
+            <span className="text-xs font-mono uppercase tracking-wider text-[#d9b451] font-bold block">
+              Optional: Cumulative CGPA Mode
+            </span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label htmlFor={prevCgpaId} className="text-xs text-[#a1a1aa] block mb-1">
+                  Previous Cumulative CGPA
+                </label>
+                <input
+                  id={prevCgpaId}
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="4"
+                  value={previousCgpa}
+                  onChange={(e) => setPreviousCgpa(e.target.value)}
+                  placeholder="e.g. 3.45"
+                  className="w-full rounded-lg border border-white/15 bg-[#07080a] px-3 py-1.5 text-sm font-mono text-white focus:border-[#d9b451] focus:outline-none"
+                />
+              </div>
+              <div>
+                <label htmlFor={prevCreditsId} className="text-xs text-[#a1a1aa] block mb-1">
+                  Previous Total Credit Hours
+                </label>
+                <input
+                  id={prevCreditsId}
+                  type="number"
+                  min="0"
+                  max="140"
+                  value={previousCredits}
+                  onChange={(e) => setPreviousCredits(e.target.value)}
+                  placeholder="e.g. 68"
+                  className="w-full rounded-lg border border-white/15 bg-[#07080a] px-3 py-1.5 text-sm font-mono text-white focus:border-[#d9b451] focus:outline-none"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Courses List Table */}
+          <div className="space-y-2">
+            <div className="grid grid-cols-12 gap-2 text-xs font-mono uppercase tracking-wider text-[#a1a1aa] px-2">
+              <span className="col-span-6 sm:col-span-7">Course Title</span>
+              <span className="col-span-3 sm:col-span-2 text-center">Credits</span>
+              <span className="col-span-2 text-center">Grade</span>
+              <span className="col-span-1 text-center" />
+            </div>
+
+            {courses.map((course) => (
               <div
                 key={course.id}
-                className="grid grid-cols-12 gap-2.5 items-center p-3 rounded-xl border border-white/5 bg-[#14151a]"
+                className="grid grid-cols-12 gap-2 items-center rounded-xl border border-white/5 bg-[#14151a] p-2 hover:border-white/15 transition-colors"
               >
-                {/* Course Name */}
-                <div className="col-span-6 sm:col-span-6">
+                <div className="col-span-6 sm:col-span-7">
                   <input
                     type="text"
                     value={course.name}
-                    aria-label={`Course ${idx + 1} Name`}
                     onChange={(e) => updateCourse(course.id, "name", e.target.value)}
-                    className="w-full rounded-lg border border-white/10 bg-[#07080a] px-3 py-2 text-xs text-white focus:border-[#d9b451] focus:outline-none"
+                    className="w-full bg-transparent px-2 py-1 text-xs text-white focus:outline-none"
                     placeholder="Course name"
                   />
                 </div>
-
-                {/* Credit Hours */}
                 <div className="col-span-3 sm:col-span-2">
                   <select
                     value={course.creditHours}
-                    aria-label={`Course ${idx + 1} Credit Hours`}
                     onChange={(e) => updateCourse(course.id, "creditHours", Number(e.target.value))}
-                    className="w-full rounded-lg border border-white/10 bg-[#07080a] px-2 py-2 text-xs text-white focus:border-[#d9b451] focus:outline-none font-mono"
+                    className="w-full rounded bg-[#07080a] border border-white/10 px-2 py-1 text-xs font-mono text-center text-white focus:outline-none"
                   >
                     <option value={1}>1 CH</option>
                     <option value={2}>2 CH</option>
@@ -143,14 +244,11 @@ export function GpaCalculator() {
                     <option value={4}>4 CH</option>
                   </select>
                 </div>
-
-                {/* Grade */}
-                <div className="col-span-2 sm:col-span-3">
+                <div className="col-span-2">
                   <select
                     value={course.grade}
-                    aria-label={`Course ${idx + 1} Grade`}
                     onChange={(e) => updateCourse(course.id, "grade", e.target.value)}
-                    className="w-full rounded-lg border border-white/10 bg-[#07080a] px-2 py-2 text-xs text-[#d9b451] focus:border-[#d9b451] focus:outline-none font-mono font-bold"
+                    className="w-full rounded bg-[#07080a] border border-white/10 px-2 py-1 text-xs font-mono font-bold text-center text-[#d9b451] focus:outline-none"
                   >
                     {Object.entries(GRADE_POINTS).map(([letter, pts]) => (
                       <option key={letter} value={letter}>
@@ -159,15 +257,12 @@ export function GpaCalculator() {
                     ))}
                   </select>
                 </div>
-
-                {/* Remove Button */}
-                <div className="col-span-1 text-right">
+                <div className="col-span-1 text-center">
                   <button
                     type="button"
                     onClick={() => removeCourse(course.id)}
-                    disabled={courses.length <= 1}
-                    className="text-[#71717a] hover:text-rose-400 disabled:opacity-30 transition-colors p-1"
-                    aria-label="Remove Course"
+                    className="text-[#71717a] hover:text-rose-400 text-sm font-mono"
+                    title="Remove course"
                   >
                     &times;
                   </button>
@@ -176,101 +271,93 @@ export function GpaCalculator() {
             ))}
           </div>
 
-          {/* Optional Previous CGPA Inputs for Cumulative calculation */}
-          <div className="rounded-xl border border-white/10 bg-[#14151a] p-4 space-y-3">
-            <h3 className="text-xs font-semibold text-white uppercase tracking-wider">
-              Cumulative CGPA Projection (Optional)
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div>
-                <label htmlFor={prevCgpaId} className="text-[#a1a1aa] block mb-1">
-                  Previous CGPA (e.g. 3.45):
-                </label>
-                <input
-                  id={prevCgpaId}
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max="4.0"
-                  value={previousCgpa}
-                  onChange={(e) => setPreviousCgpa(e.target.value)}
-                  placeholder="0.00"
-                  className="w-full rounded-lg border border-white/10 bg-[#07080a] px-3 py-2 text-white focus:border-[#d9b451] focus:outline-none font-mono"
-                />
-              </div>
-              <div>
-                <label htmlFor={prevCreditsId} className="text-[#a1a1aa] block mb-1">
-                  Total Completed Credit Hours:
-                </label>
-                <input
-                  id={prevCreditsId}
-                  type="number"
-                  min="0"
-                  max="160"
-                  value={previousCredits}
-                  onChange={(e) => setPreviousCredits(e.target.value)}
-                  placeholder="e.g. 36"
-                  className="w-full rounded-lg border border-white/10 bg-[#07080a] px-3 py-2 text-white focus:border-[#d9b451] focus:outline-none font-mono"
-                />
-              </div>
-            </div>
+          <div className="flex items-center justify-between pt-2">
+            <button
+              type="button"
+              onClick={addCourse}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-[#14151a] px-3.5 py-1.5 text-xs font-mono font-semibold text-white hover:border-[#d9b451] hover:text-[#d9b451] transition-colors"
+            >
+              <span>+ Add Course</span>
+            </button>
+
+            <span className="text-xs font-mono text-[#a1a1aa]">
+              Total Semester Credits:{" "}
+              <strong className="text-white">{calculation.currentCredits} CH</strong>
+            </span>
           </div>
         </div>
 
-        {/* Right Output: GPA Summary Card */}
-        <div className="lg:col-span-4 rounded-xl border border-[#d9b451]/30 bg-gradient-to-b from-[#14151a] to-[#0d0e12] p-6 shadow-xl flex flex-col justify-between">
-          <div className="space-y-6">
-            <div className="border-b border-white/10 pb-3">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-[#a1a1aa] block">
-                Calculated Standing
+        {/* Right Card: GPA Output Dial & Regulation Badges */}
+        <div className="lg:col-span-4 flex flex-col justify-between rounded-xl border border-[#d9b451]/30 bg-gradient-to-b from-[#14151a] to-[#0d0e12] p-6 shadow-xl">
+          <div>
+            <span className="text-xs font-mono uppercase tracking-widest text-[#a1a1aa] block text-center">
+              Semester SGPA
+            </span>
+            <div className="mt-3 text-center">
+              <span className="text-6xl font-black font-mono tracking-tight text-white">
+                {calculation.currentGpa.toFixed(2)}
               </span>
-              <span className="text-xs font-semibold text-[#d9b451]">UET Taxila Regulations</span>
+              <span className="text-xs text-[#d9b451] block font-mono mt-1">/ 4.00 Max Scale</span>
             </div>
 
-            {/* Semester GPA */}
-            <div className="text-center py-4 bg-white/5 rounded-xl border border-white/5">
-              <span className="text-xs text-[#a1a1aa] uppercase tracking-wider block mb-1">
-                Semester GPA (SGPA)
+            {/* Cumulative Summary */}
+            <div className="mt-6 rounded-xl border border-white/10 bg-[#07080a] p-4 text-center space-y-1">
+              <span className="text-[11px] font-mono text-[#a1a1aa] uppercase tracking-wider">
+                Updated Cumulative CGPA
               </span>
-              <span className="text-4xl sm:text-5xl font-extrabold font-mono text-[#d9b451]">
-                {calculation.currentGpa.toFixed(3)}
-              </span>
-              <span className="text-[11px] text-[#71717a] block mt-1">
-                {calculation.currentCredits} Semester Credit Hours
-              </span>
-            </div>
-
-            {/* Cumulative CGPA */}
-            <div className="p-4 bg-[#07080a] rounded-xl border border-white/10 flex items-center justify-between">
-              <div>
-                <span className="text-xs text-[#a1a1aa] block">Cumulative CGPA</span>
-                <span className="text-xs font-mono text-white">
-                  {calculation.cumulativeCredits} Total Credits
-                </span>
+              <div className="text-2xl font-black font-mono text-white">
+                {calculation.cumulativeCgpa.toFixed(2)}
               </div>
-              <span className="text-2xl font-bold font-mono text-white">
-                {calculation.cumulativeCgpa.toFixed(3)}
+              <span className="text-[10px] text-[#71717a] block font-mono">
+                Across {calculation.cumulativeCredits} Total Credit Hours
               </span>
             </div>
 
-            {/* Standing Alerts */}
-            {calculation.isProbation && (
-              <div className="rounded-lg bg-rose-500/10 border border-rose-500/30 p-3 text-xs text-rose-300">
-                ⚠️ <strong>Academic Warning / Probation:</strong> Semester GPA is below 2.00.
-                Students must maintain CGPA $\ge 2.00$ to avoid academic dismissal.
-              </div>
-            )}
+            {/* Academic Standing Status */}
+            <div className="mt-6 space-y-2.5">
+              {calculation.isDeanList && (
+                <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-center">
+                  <span className="text-xs font-bold text-emerald-400 block font-mono">
+                    ★ Dean&apos;s Honors List Candidate
+                  </span>
+                  <p className="text-[10px] text-emerald-300/80 mt-0.5">
+                    SGPA ≥ 3.70 with minimum 12 credit hours load.
+                  </p>
+                </div>
+              )}
 
-            {calculation.isDeanList && (
-              <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/30 p-3 text-xs text-emerald-300">
-                🌟 <strong>Dean&apos;s Honors List:</strong> Outstanding academic performance (SGPA
-                &ge; 3.70 with &ge; 12 CH).
-              </div>
-            )}
+              {calculation.isProbation && (
+                <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-center">
+                  <span className="text-xs font-bold text-rose-400 block font-mono">
+                    ⚠ Academic Probation Alert
+                  </span>
+                  <p className="text-[10px] text-rose-300/80 mt-0.5">
+                    SGPA &lt; 2.00 triggers academic probation per UET Taxila semester regulations.
+                  </p>
+                </div>
+              )}
+
+              {!calculation.isDeanList && !calculation.isProbation && (
+                <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-center">
+                  <span className="text-xs font-medium text-[#d4d4d8] block">
+                    Academic Standing: Good Standing
+                  </span>
+                  <p className="text-[10px] text-[#a1a1aa] mt-0.5">
+                    Meets the minimum 2.00 CGPA graduation threshold.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="mt-6 pt-4 border-t border-white/10 text-[11px] text-[#71717a] text-center">
-            Scale: A=4.0, A-=3.7, B+=3.3, B=3.0, B-=2.7, C+=2.3, C=2.0, C-=1.7, D=1.0, F=0.0
+          <div className="mt-6 space-y-2">
+            <button
+              type="button"
+              onClick={handleCopyTranscript}
+              className="w-full text-center rounded-lg border border-white/15 bg-[#07080a] px-4 py-2 text-xs font-mono font-semibold uppercase tracking-wider text-[#d9b451] hover:border-[#d9b451] hover:bg-[#d9b451]/10 transition-colors"
+            >
+              {copied ? "✓ Transcript Copied!" : "Copy Grade Transcript"}
+            </button>
           </div>
         </div>
       </div>

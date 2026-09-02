@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { FeeCalculator } from "@/components/calculator/fee-calculator";
 import { CURRENT_ACADEMIC_YEAR } from "@/lib/dates";
 
@@ -19,7 +19,7 @@ const TABS: { id: AdmissionTab; label: string; badge?: string; desc: string }[] 
     id: "ecat",
     label: "ECAT Strategy Guide",
     badge: "400 Marks",
-    desc: "Subject weightages, negative marking rules (-1), and high-yield preparation blueprint",
+    desc: "Subject weightages, negative marking rules (-1), and interactive score simulator",
   },
   {
     id: "fees",
@@ -84,6 +84,39 @@ const COMPARISON_DATA = [
   },
 ];
 
+const ADMISSION_STEPS = [
+  {
+    step: "01",
+    title: "ECAT Registration & Conduction",
+    timeline: "July – August 2026",
+    desc: "Register online via UET admission portal. Appear in the 100-MCQ computer-based entrance test at your designated center.",
+  },
+  {
+    step: "02",
+    title: "Online Application Submission",
+    timeline: "August 2026",
+    desc: "Fill the centralized preference form selecting degree programs in order of interest across Category A (Subsidized) and Category S.",
+  },
+  {
+    step: "03",
+    title: "Merit List Publication",
+    timeline: "September 2026",
+    desc: "1st, 2nd, and 3rd merit lists published online. Candidates receive SMS/Email notifications of program allocation.",
+  },
+  {
+    step: "04",
+    title: "Document Verification & Medical",
+    timeline: "September 2026",
+    desc: "Submit original HSSC, SSC, Domicile certificates, and medical fitness clearance at the Directorate of Admissions.",
+  },
+  {
+    step: "05",
+    title: "Fee Deposit & Orientation",
+    timeline: "Late September 2026",
+    desc: "Deposit semester dues at HBL UET Taxila branch or online, collect registration card, and attend freshmen orientation.",
+  },
+];
+
 export function AdmissionsHub() {
   const searchParams = useSearchParams();
   const initialTab = (searchParams.get("tab") as AdmissionTab) || "overview";
@@ -92,6 +125,49 @@ export function AdmissionsHub() {
       ? initialTab
       : "overview",
   );
+
+  // Interactive ECAT Simulator State
+  const [mathCorrect, setMathCorrect] = useState<number>(22);
+  const [mathWrong, setMathWrong] = useState<number>(5);
+
+  const [physicsCorrect, setPhysicsCorrect] = useState<number>(20);
+  const [physicsWrong, setPhysicsWrong] = useState<number>(6);
+
+  const [chemCorrect, setChemCorrect] = useState<number>(21);
+  const [chemWrong, setChemWrong] = useState<number>(5);
+
+  const [engCorrect, setEngCorrect] = useState<number>(7);
+  const [engWrong, setEngWrong] = useState<number>(2);
+
+  const ecatScore = useMemo(() => {
+    const totalCorrect = mathCorrect + physicsCorrect + chemCorrect + engCorrect;
+    const totalWrong = mathWrong + physicsWrong + chemWrong + engWrong;
+    const totalAttempted = totalCorrect + totalWrong;
+    const totalUnattempted = Math.max(0, 100 - totalAttempted);
+
+    const rawMarks = totalCorrect * 4 - totalWrong * 1;
+    const finalMarks = Math.max(0, Math.min(400, rawMarks));
+    const percentage = (finalMarks / 400) * 100;
+    const accuracy = totalAttempted > 0 ? (totalCorrect / totalAttempted) * 100 : 0;
+
+    return {
+      totalCorrect,
+      totalWrong,
+      totalUnattempted,
+      finalMarks,
+      percentage,
+      accuracy,
+    };
+  }, [
+    mathCorrect,
+    mathWrong,
+    physicsCorrect,
+    physicsWrong,
+    chemCorrect,
+    chemWrong,
+    engCorrect,
+    engWrong,
+  ]);
 
   return (
     <div className="space-y-8">
@@ -139,7 +215,8 @@ export function AdmissionsHub() {
                 Undergraduate Admissions &amp; Eligibility {CURRENT_ACADEMIC_YEAR}
               </h2>
               <p className="mt-1 text-xs text-[#a1a1aa]">
-                Official eligibility thresholds, quota distributions, and application procedure.
+                Official statutory criteria, quota distributions, and step-by-step application
+                walkthrough.
               </p>
             </div>
 
@@ -181,6 +258,31 @@ export function AdmissionsHub() {
               </div>
             </div>
 
+            {/* 5-Phase Application Process */}
+            <div className="space-y-4 border-t border-white/10 pt-6">
+              <h3 className="text-base font-bold text-white">5-Phase Admission Walkthrough</h3>
+              <div className="grid gap-3 sm:grid-cols-5">
+                {ADMISSION_STEPS.map((s) => (
+                  <div
+                    key={s.step}
+                    className="rounded-xl border border-white/10 bg-[#07080a] p-4 flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between text-xs font-mono mb-2">
+                        <span className="text-[#d9b451] font-bold">PHASE {s.step}</span>
+                      </div>
+                      <h4 className="text-xs font-bold text-white mb-1">{s.title}</h4>
+                      <p className="text-[11px] text-[#a1a1aa] leading-relaxed">{s.desc}</p>
+                    </div>
+                    <span className="mt-3 text-[10px] font-mono text-[#71717a] block border-t border-white/5 pt-2">
+                      {s.timeline}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Quotas & Categories */}
             <div className="space-y-4 border-t border-white/10 pt-6">
               <h3 className="text-base font-bold text-white">Seat Categories &amp; Quotas</h3>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -209,48 +311,246 @@ export function AdmissionsHub() {
         )}
 
         {activeTab === "ecat" && (
-          <div className="space-y-6">
+          <div className="space-y-8">
             <div>
               <h2 className="text-xl font-bold text-white">
-                ECAT 2026 Strategy Guide &amp; Blueprint
+                ECAT 2026 Strategy Guide &amp; Interactive Score Simulator
               </h2>
               <p className="mt-1 text-xs text-[#a1a1aa]">
-                400-marks computer-based test conducted by UET Lahore for all public engineering
-                universities in Punjab.
+                400-marks computer-based test conducted by UET Lahore (100 MCQs total: +4 marks per
+                correct answer, -1 mark penalty per incorrect answer).
               </p>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-4">
-              <div className="rounded-xl border border-white/10 bg-[#07080a] p-4 text-center">
-                <div className="font-mono text-xl font-bold text-[#d9b451]">100 Marks</div>
-                <div className="mt-1 text-xs font-semibold text-white">Mathematics</div>
-                <div className="text-[11px] text-[#a1a1aa]">30 MCQs &bull; 4 marks each</div>
+            {/* Interactive ECAT Simulator */}
+            <div className="rounded-xl border border-[#d9b451]/30 bg-gradient-to-b from-[#14151a] to-[#0d0e12] p-6 shadow-xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4 mb-6">
+                <div>
+                  <h3 className="text-base font-bold text-white">Live ECAT Score Simulator</h3>
+                  <p className="text-xs text-[#a1a1aa]">
+                    Simulate your correct vs incorrect responses to see your net score after
+                    negative marking.
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs font-mono uppercase text-[#a1a1aa] block">
+                    Simulated Score
+                  </span>
+                  <span className="text-3xl font-black font-mono text-[#d9b451]">
+                    {ecatScore.finalMarks}
+                  </span>
+                  <span className="text-xs text-[#71717a] font-mono">
+                    {" "}
+                    / 400 ({ecatScore.percentage.toFixed(1)}%)
+                  </span>
+                </div>
               </div>
-              <div className="rounded-xl border border-white/10 bg-[#07080a] p-4 text-center">
-                <div className="font-mono text-xl font-bold text-[#d9b451]">100 Marks</div>
-                <div className="mt-1 text-xs font-semibold text-white">Physics</div>
-                <div className="text-[11px] text-[#a1a1aa]">30 MCQs &bull; 4 marks each</div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Mathematics */}
+                <div className="rounded-lg border border-white/10 bg-[#07080a] p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-white">Mathematics (30 Qs)</span>
+                    <span className="text-[10px] font-mono text-[#d9b451]">Max 120</span>
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-emerald-400 block mb-0.5 cursor-pointer">
+                      <span>Correct (+4): {mathCorrect}</span>
+                      <input
+                        type="range"
+                        min={0}
+                        max={30}
+                        value={mathCorrect}
+                        onChange={(e) => setMathCorrect(Number(e.target.value))}
+                        className="w-full accent-emerald-400 mt-1 block"
+                      />
+                    </label>
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-rose-400 block mb-0.5 cursor-pointer">
+                      <span>Wrong (-1): {mathWrong}</span>
+                      <input
+                        type="range"
+                        min={0}
+                        max={30 - mathCorrect}
+                        value={mathWrong}
+                        onChange={(e) => setMathWrong(Number(e.target.value))}
+                        className="w-full accent-rose-400 mt-1 block"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Physics */}
+                <div className="rounded-lg border border-white/10 bg-[#07080a] p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-white">Physics (30 Qs)</span>
+                    <span className="text-[10px] font-mono text-[#d9b451]">Max 120</span>
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-emerald-400 block mb-0.5 cursor-pointer">
+                      <span>Correct (+4): {physicsCorrect}</span>
+                      <input
+                        type="range"
+                        min={0}
+                        max={30}
+                        value={physicsCorrect}
+                        onChange={(e) => setPhysicsCorrect(Number(e.target.value))}
+                        className="w-full accent-emerald-400 mt-1 block"
+                      />
+                    </label>
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-rose-400 block mb-0.5 cursor-pointer">
+                      <span>Wrong (-1): {physicsWrong}</span>
+                      <input
+                        type="range"
+                        min={0}
+                        max={30 - physicsCorrect}
+                        value={physicsWrong}
+                        onChange={(e) => setPhysicsWrong(Number(e.target.value))}
+                        className="w-full accent-rose-400 mt-1 block"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Chemistry / CS */}
+                <div className="rounded-lg border border-white/10 bg-[#07080a] p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-white">Chem / CS (30 Qs)</span>
+                    <span className="text-[10px] font-mono text-[#d9b451]">Max 120</span>
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-emerald-400 block mb-0.5 cursor-pointer">
+                      <span>Correct (+4): {chemCorrect}</span>
+                      <input
+                        type="range"
+                        min={0}
+                        max={30}
+                        value={chemCorrect}
+                        onChange={(e) => setChemCorrect(Number(e.target.value))}
+                        className="w-full accent-emerald-400 mt-1 block"
+                      />
+                    </label>
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-rose-400 block mb-0.5 cursor-pointer">
+                      <span>Wrong (-1): {chemWrong}</span>
+                      <input
+                        type="range"
+                        min={0}
+                        max={30 - chemCorrect}
+                        value={chemWrong}
+                        onChange={(e) => setChemWrong(Number(e.target.value))}
+                        className="w-full accent-rose-400 mt-1 block"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {/* English */}
+                <div className="rounded-lg border border-white/10 bg-[#07080a] p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-white">English (10 Qs)</span>
+                    <span className="text-[10px] font-mono text-[#d9b451]">Max 40</span>
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-emerald-400 block mb-0.5 cursor-pointer">
+                      <span>Correct (+4): {engCorrect}</span>
+                      <input
+                        type="range"
+                        min={0}
+                        max={10}
+                        value={engCorrect}
+                        onChange={(e) => setEngCorrect(Number(e.target.value))}
+                        className="w-full accent-emerald-400 mt-1 block"
+                      />
+                    </label>
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-rose-400 block mb-0.5 cursor-pointer">
+                      <span>Wrong (-1): {engWrong}</span>
+                      <input
+                        type="range"
+                        min={0}
+                        max={10 - engCorrect}
+                        value={engWrong}
+                        onChange={(e) => setEngWrong(Number(e.target.value))}
+                        className="w-full accent-rose-400 mt-1 block"
+                      />
+                    </label>
+                  </div>
+                </div>
               </div>
-              <div className="rounded-xl border border-white/10 bg-[#07080a] p-4 text-center">
-                <div className="font-mono text-xl font-bold text-[#d9b451]">100 Marks</div>
-                <div className="mt-1 text-xs font-semibold text-white">Chemistry / CS</div>
-                <div className="text-[11px] text-[#a1a1aa]">30 MCQs &bull; 4 marks each</div>
-              </div>
-              <div className="rounded-xl border border-white/10 bg-[#07080a] p-4 text-center">
-                <div className="font-mono text-xl font-bold text-[#d9b451]">100 Marks</div>
-                <div className="mt-1 text-xs font-semibold text-white">English</div>
-                <div className="text-[11px] text-[#a1a1aa]">10 MCQs &bull; 4 marks each</div>
+
+              <div className="mt-4 pt-4 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-4 text-[#a1a1aa] font-mono">
+                  <span>
+                    Correct: <strong className="text-emerald-400">{ecatScore.totalCorrect}</strong>
+                  </span>
+                  <span>
+                    Wrong: <strong className="text-rose-400">{ecatScore.totalWrong}</strong>
+                  </span>
+                  <span>
+                    Skipped: <strong className="text-white">{ecatScore.totalUnattempted}</strong>
+                  </span>
+                  <span>
+                    Accuracy:{" "}
+                    <strong className="text-[#d9b451]">{ecatScore.accuracy.toFixed(1)}%</strong>
+                  </span>
+                </div>
+                <Link
+                  href="/tools?tab=merit"
+                  className="inline-flex items-center gap-1 text-[#d9b451] font-mono font-bold hover:underline"
+                >
+                  <span>Plug into Merit Calculator &rarr;</span>
+                </Link>
               </div>
             </div>
 
-            <div className="rounded-xl border border-white/10 bg-[#07080a] p-5">
-              <h3 className="text-sm font-bold text-white">Negative Marking Rule (-1)</h3>
-              <p className="mt-1 text-xs text-[#a1a1aa] leading-relaxed">
-                Each correct answer awards <strong>+4 marks</strong>, while an incorrect response
-                deducts <strong>-1 mark</strong>. Unattempted questions yield 0 marks. Educated
-                elimination is statistically viable only when at least 2 incorrect options can be
-                ruled out.
-              </p>
+            {/* Preparation Strategies */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-xl border border-white/10 bg-[#07080a] p-5">
+                <h3 className="text-sm font-bold text-[#d9b451]">High-Yield ECAT Focus Areas</h3>
+                <ul className="mt-2 space-y-1.5 text-xs text-[#a1a1aa]">
+                  <li>
+                    &bull; <strong className="text-white">Mathematics:</strong> Conic Sections,
+                    Differentiation, Integration, Trigonometry, Vectors.
+                  </li>
+                  <li>
+                    &bull; <strong className="text-white">Physics:</strong> Electromagnetism,
+                    Alternating Current, Nuclear Physics, Thermodynamics.
+                  </li>
+                  <li>
+                    &bull; <strong className="text-white">Chemistry:</strong> Organic Reaction
+                    Mechanisms, Chemical Equilibrium, Electrochemistry.
+                  </li>
+                  <li>
+                    &bull; <strong className="text-white">English:</strong> Sentence completion,
+                    vocabulary in context, grammar correction.
+                  </li>
+                </ul>
+              </div>
+
+              <div className="rounded-xl border border-white/10 bg-[#07080a] p-5">
+                <h3 className="text-sm font-bold text-[#d9b451]">Time Management Blueprint</h3>
+                <ul className="mt-2 space-y-1.5 text-xs text-[#a1a1aa]">
+                  <li>&bull; Total Time: 100 minutes for 100 MCQs (exact 1 minute/question).</li>
+                  <li>
+                    &bull; <strong className="text-white">Pass 1 (0-40 min):</strong> Solve all
+                    direct theoretical and 1-step numerical questions.
+                  </li>
+                  <li>
+                    &bull; <strong className="text-white">Pass 2 (40-80 min):</strong> Tackle
+                    complex 2-step calculations in Physics &amp; Math.
+                  </li>
+                  <li>
+                    &bull; <strong className="text-white">Pass 3 (80-100 min):</strong> Review
+                    flagged questions; avoid pure random guessing.
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
         )}
