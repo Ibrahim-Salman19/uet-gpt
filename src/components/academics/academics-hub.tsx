@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { CURRENT_ACADEMIC_YEAR } from "@/lib/dates";
-import { PROGRAM_DATA } from "@/lib/programs-data";
+import { PROGRAMS_DATA } from "@/lib/programs-data";
 
 type AcademicTab = "programs" | "calendar" | "resources";
 
@@ -75,10 +75,10 @@ export function AcademicsHub() {
   );
   const [degreeFilter, setDegreeFilter] = useState<"all" | "engineering" | "computing">("all");
 
-  const filteredPrograms = PROGRAM_DATA.filter((p) => {
+  const filteredPrograms = PROGRAMS_DATA.filter((p) => {
     if (degreeFilter === "all") return true;
-    if (degreeFilter === "computing") return p.degreeType === "BS";
-    if (degreeFilter === "engineering") return p.degreeType === "BSc";
+    if (degreeFilter === "computing") return p.degreeType === "BS Computing";
+    if (degreeFilter === "engineering") return p.degreeType === "BSc Engineering";
     return true;
   });
 
@@ -181,16 +181,14 @@ export function AcademicsHub() {
                   <div>
                     <div className="flex items-center justify-between gap-2">
                       <span className="rounded bg-[#d9b451]/10 px-2 py-0.5 font-mono text-[10px] font-bold text-[#d9b451]">
-                        {prog.degreeType} &bull; {prog.creditHours} Credits
+                        {prog.degreeType} &bull; {prog.totalCreditHours} Credits
                       </span>
-                      <span className="font-mono text-[10px] text-[#71717a]">
-                        {prog.durationYears} Years
-                      </span>
+                      <span className="font-mono text-[10px] text-[#71717a]">{prog.duration}</span>
                     </div>
                     <h3 className="mt-3 text-sm font-bold text-white group-hover:text-[#d9b451] transition-colors">
-                      {prog.title}
+                      {prog.name}
                     </h3>
-                    <p className="mt-1.5 text-xs text-[#a1a1aa] line-clamp-2">{prog.description}</p>
+                    <p className="mt-1.5 text-xs text-[#a1a1aa] line-clamp-2">{prog.lead}</p>
                   </div>
                   <div className="mt-4 flex items-center justify-between border-t border-white/5 pt-3 text-[11px] font-mono text-[#d9b451]">
                     <span>View 8-Semester Roadmap</span>
