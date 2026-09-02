@@ -10,10 +10,14 @@ describe("Public Navigation & Footer System", () => {
     expect(html).toContain("Skip to main content");
     expect(html).toContain('href="/calculator"');
     expect(html).toContain('href="/gpa-calculator"');
+    expect(html).toContain('href="/scholarship-finder"');
     expect(html).toContain('href="/merit-archive"');
     expect(html).toContain('href="/uet-taxila/programs"');
+    expect(html).toContain('href="/resources"');
     expect(html).toContain('href="/calendar"');
     expect(html).toContain('href="/directory"');
+    expect(html).toContain('href="/bus-routes"');
+    expect(html).toContain('href="/societies"');
     expect(html).toContain('href="/compare"');
     expect(html).toContain('href="/ecat-guide"');
     expect(html).toContain('href="/scholarships"');

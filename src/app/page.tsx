@@ -157,10 +157,23 @@ export default function HomePage() {
               </Link>
 
               <Link
+                href="/scholarship-finder"
+                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
+              >
+                <div className="text-xs font-mono text-[#d9b451] mb-2">03 / AID SCREENER</div>
+                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
+                  Scholarship Finder
+                </h2>
+                <p className="text-xs text-white/60 leading-relaxed">
+                  Interactive screener matching Honhaar, HEC Need-Based, Ehsaas, and WWF grants.
+                </p>
+              </Link>
+
+              <Link
                 href="/merit-archive"
                 className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
               >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">03 / ARCHIVE</div>
+                <div className="text-xs font-mono text-[#d9b451] mb-2">04 / ARCHIVE</div>
                 <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
                   5-Yr Merit Cutoff Archive
                 </h2>
@@ -173,7 +186,7 @@ export default function HomePage() {
                 href="/uet-taxila/programs"
                 className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
               >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">04 / ACADEMICS</div>
+                <div className="text-xs font-mono text-[#d9b451] mb-2">05 / ACADEMICS</div>
                 <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
                   14 Degree Programs &amp; Syllabi
                 </h2>
@@ -183,10 +196,23 @@ export default function HomePage() {
               </Link>
 
               <Link
+                href="/resources"
+                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
+              >
+                <div className="text-xs font-mono text-[#d9b451] mb-2">06 / RESOURCES</div>
+                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
+                  Past Papers &amp; OBE Grading
+                </h2>
+                <p className="text-xs text-white/60 leading-relaxed">
+                  Course Learning Outcomes, exam rubrics, Central Library, and IEEE Xplore access.
+                </p>
+              </Link>
+
+              <Link
                 href="/calendar"
                 className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
               >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">05 / SCHEDULE</div>
+                <div className="text-xs font-mono text-[#d9b451] mb-2">07 / SCHEDULE</div>
                 <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
                   Academic Calendar 2026
                 </h2>
@@ -199,7 +225,7 @@ export default function HomePage() {
                 href="/directory"
                 className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
               >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">06 / DIRECTORY</div>
+                <div className="text-xs font-mono text-[#d9b451] mb-2">08 / DIRECTORY</div>
                 <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
                   Campus Directory &amp; Contacts
                 </h2>
@@ -209,10 +235,36 @@ export default function HomePage() {
               </Link>
 
               <Link
+                href="/bus-routes"
+                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
+              >
+                <div className="text-xs font-mono text-[#d9b451] mb-2">09 / TRANSIT</div>
+                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
+                  Bus Routes &amp; Fleet Schedules
+                </h2>
+                <p className="text-xs text-white/60 leading-relaxed">
+                  Morning and afternoon point bus routes across Islamabad, Rawalpindi, and Wah.
+                </p>
+              </Link>
+
+              <Link
+                href="/societies"
+                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
+              >
+                <div className="text-xs font-mono text-[#d9b451] mb-2">10 / LEADERSHIP</div>
+                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
+                  Student Societies &amp; Clubs
+                </h2>
+                <p className="text-xs text-white/60 leading-relaxed">
+                  IEEE, GDG on Campus, SOFTDESK, ASME, ICE, Debates, AutoShow, and HackXila.
+                </p>
+              </Link>
+
+              <Link
                 href="/compare"
                 className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
               >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">07 / DECISION MATRIX</div>
+                <div className="text-xs font-mono text-[#d9b451] mb-2">11 / DECISION MATRIX</div>
                 <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
                   Compare Universities
                 </h2>
@@ -225,7 +277,7 @@ export default function HomePage() {
                 href="/ecat-guide"
                 className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
               >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">08 / STRATEGY</div>
+                <div className="text-xs font-mono text-[#d9b451] mb-2">12 / STRATEGY</div>
                 <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
                   ECAT 2026 Guide
                 </h2>
@@ -238,7 +290,7 @@ export default function HomePage() {
                 href="/uet-taxila/admissions"
                 className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
               >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">09 / ADMISSIONS</div>
+                <div className="text-xs font-mono text-[#d9b451] mb-2">13 / ADMISSIONS</div>
                 <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
                   Admissions Guide
                 </h2>
@@ -251,7 +303,7 @@ export default function HomePage() {
                 href="/uet-taxila/fee-structure"
                 className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
               >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">10 / FINANCES</div>
+                <div className="text-xs font-mono text-[#d9b451] mb-2">14 / FINANCES</div>
                 <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
                   Fee Structure 2026
                 </h2>
@@ -264,7 +316,7 @@ export default function HomePage() {
                 href="/scholarships"
                 className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
               >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">11 / AID</div>
+                <div className="text-xs font-mono text-[#d9b451] mb-2">15 / AID</div>
                 <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
                   Scholarships &amp; Grants
                 </h2>
@@ -277,7 +329,7 @@ export default function HomePage() {
                 href="/campus-life"
                 className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
               >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">12 / CAMPUS</div>
+                <div className="text-xs font-mono text-[#d9b451] mb-2">16 / CAMPUS</div>
                 <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
                   Campus Life &amp; Hostels
                 </h2>

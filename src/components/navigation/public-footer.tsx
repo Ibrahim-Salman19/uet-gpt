@@ -179,6 +179,22 @@ export function PublicFooter() {
               </li>
               <li>
                 <Link
+                  href="/scholarship-finder"
+                  className="hover:text-white hover:underline transition-colors text-white"
+                >
+                  Aid Eligibility Screener
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/resources"
+                  className="hover:text-white hover:underline transition-colors"
+                >
+                  Past Papers &amp; OBE Grading
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/uet-taxila"
                   className="hover:text-white hover:underline transition-colors"
                 >
@@ -204,6 +220,22 @@ export function PublicFooter() {
               </li>
               <li>
                 <Link
+                  href="/bus-routes"
+                  className="hover:text-white hover:underline transition-colors text-white"
+                >
+                  Bus Routes &amp; Fleet Schedules
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/societies"
+                  className="hover:text-white hover:underline transition-colors text-white"
+                >
+                  Student Societies &amp; Clubs
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/learn/hostel-allotment"
                   className="hover:text-white hover:underline transition-colors"
                 >
@@ -212,26 +244,10 @@ export function PublicFooter() {
               </li>
               <li>
                 <Link
-                  href="/campus-life#transport"
-                  className="hover:text-white hover:underline transition-colors"
-                >
-                  Transport Bus Routes
-                </Link>
-              </li>
-              <li>
-                <Link
                   href="/campus-life#library"
                   className="hover:text-white hover:underline transition-colors"
                 >
                   Central Library Facilities
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/campus-life#societies"
-                  className="hover:text-white hover:underline transition-colors"
-                >
-                  Student Societies &amp; Clubs
                 </Link>
               </li>
             </ul>
