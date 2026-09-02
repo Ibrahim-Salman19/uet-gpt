@@ -126,6 +126,63 @@ export default function LearnIndexPage() {
             </div>
           </section>
 
+          {/* 4 Core Pillars Links */}
+          <section className="px-6 py-12 max-w-3xl mx-auto border-t border-white/10">
+            <h3 className="text-xs font-mono uppercase tracking-widest text-[#d9b451] font-bold mb-4">
+              Explore 4 Core University Pillars
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Link
+                href="/tools"
+                className="p-4 rounded-xl border border-white/10 bg-[#0c0d10] hover:border-[#d9b451]/50 transition-colors"
+              >
+                <div className="text-[10px] font-mono text-[#d9b451] uppercase font-bold">
+                  Pillar 01
+                </div>
+                <h4 className="text-sm font-bold text-white mt-1">Engineering Tools Suite</h4>
+                <p className="text-xs text-[#a1a1aa] mt-0.5">
+                  Merit calculator, GPA simulator, and 5-yr archive.
+                </p>
+              </Link>
+              <Link
+                href="/academics"
+                className="p-4 rounded-xl border border-white/10 bg-[#0c0d10] hover:border-[#d9b451]/50 transition-colors"
+              >
+                <div className="text-[10px] font-mono text-[#d9b451] uppercase font-bold">
+                  Pillar 02
+                </div>
+                <h4 className="text-sm font-bold text-white mt-1">Academics &amp; Syllabi</h4>
+                <p className="text-xs text-[#a1a1aa] mt-0.5">
+                  14 accredited degree roadmaps and academic calendar.
+                </p>
+              </Link>
+              <Link
+                href="/admissions"
+                className="p-4 rounded-xl border border-white/10 bg-[#0c0d10] hover:border-[#d9b451]/50 transition-colors"
+              >
+                <div className="text-[10px] font-mono text-[#d9b451] uppercase font-bold">
+                  Pillar 03
+                </div>
+                <h4 className="text-sm font-bold text-white mt-1">Admissions, Aid &amp; Fees</h4>
+                <p className="text-xs text-[#a1a1aa] mt-0.5">
+                  Eligibility criteria, ECAT blueprint, and fee simulator.
+                </p>
+              </Link>
+              <Link
+                href="/campus-life"
+                className="p-4 rounded-xl border border-white/10 bg-[#0c0d10] hover:border-[#d9b451]/50 transition-colors"
+              >
+                <div className="text-[10px] font-mono text-[#d9b451] uppercase font-bold">
+                  Pillar 04
+                </div>
+                <h4 className="text-sm font-bold text-white mt-1">Campus Life &amp; Facilities</h4>
+                <p className="text-xs text-[#a1a1aa] mt-0.5">
+                  5 residential halls, 25+ bus routes, and societies.
+                </p>
+              </Link>
+            </div>
+          </section>
+
           {/* CTA */}
           <section className="px-6 py-16 max-w-3xl mx-auto text-center border-t border-white/10">
             <h2 className="text-xl font-bold mb-3 text-white">Can&apos;t find your answer?</h2>
