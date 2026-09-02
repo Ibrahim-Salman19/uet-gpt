@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MedallionCanvas } from "@/components/landing/medallion-canvas";
+import { PublicFooter } from "@/components/navigation/public-footer";
+import { PublicNav } from "@/components/navigation/public-nav";
 import { SCHEMA_DATE_MODIFIED } from "@/lib/dates";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
@@ -83,54 +85,13 @@ export default function HomePage() {
         // biome-ignore lint/security/noDangerouslySetInnerHtml: static schema
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <div className="relative min-h-screen bg-[#07080a] text-[#edf0ec] selection:bg-[#d9b451] selection:text-[#07080a] overflow-x-hidden font-sans">
+      <div className="relative min-h-screen bg-[#07080a] text-[#edf0ec] selection:bg-[#d9b451] selection:text-[#07080a] overflow-x-hidden font-sans flex flex-col">
         <MedallionCanvas />
 
-        {/* Global Navigation Header */}
-        <header className="sticky top-0 z-50 flex items-center justify-between px-6 py-4 backdrop-blur-md bg-[#07080a]/80 border-b border-white/10">
-          <Link href="/" className="flex items-baseline gap-2 font-mono text-sm tracking-wide">
-            <span className="font-bold text-white text-base">UET</span>
-            <span className="text-[#d9b451] font-semibold">GPT</span>
-            <span className="text-[10px] text-white/40 uppercase tracking-widest pl-1">
-              AI Guide
-            </span>
-          </Link>
-          <nav className="flex items-center gap-4 text-xs font-mono tracking-wider uppercase">
-            <Link
-              href="/calculator"
-              className="text-[#d9b451] hover:text-[#f0d178] transition-colors font-semibold"
-            >
-              Calculator
-            </Link>
-            <Link
-              href="/uet-taxila"
-              className="hidden sm:inline-block text-white/70 hover:text-white transition-colors"
-            >
-              UET Taxila
-            </Link>
-            <Link
-              href="/learn"
-              className="hidden sm:inline-block text-white/70 hover:text-white transition-colors"
-            >
-              Glossary
-            </Link>
-            <Link
-              href="/about"
-              className="hidden md:inline-block text-white/70 hover:text-white transition-colors"
-            >
-              About
-            </Link>
-            <Link
-              href="/chat"
-              className="px-4 py-2 rounded border border-[#d9b451] text-[#d9b451] hover:bg-[#d9b451] hover:text-[#07080a] transition-all font-semibold"
-            >
-              Start Chat
-            </Link>
-          </nav>
-        </header>
+        <PublicNav />
 
-        <main id="main-content" className="relative z-10">
-          {/* Hero Section - Text decoupled with immediate opacity: 1 */}
+        <main id="main-content" className="relative z-10 flex-1">
+          {/* Hero Section */}
           <section className="px-6 pt-24 pb-20 max-w-5xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#d9b451]/30 bg-[#d9b451]/10 text-[#d9b451] text-xs font-mono uppercase tracking-wider mb-6">
               <span>●</span> Official AI Guide to UET Taxila
@@ -141,8 +102,8 @@ export default function HomePage() {
             </h1>
             <p className="text-base sm:text-lg text-white/70 max-w-2xl mx-auto mb-10 leading-relaxed font-light">
               Get instant, citation-backed answers on admissions, ECAT entry test, 2026 fee
-              structures, 14 departments, and campus life — powered by official university
-              documents.
+              structures, 14 departments, scholarships, and campus life — powered by official
+              university documents.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
@@ -155,20 +116,20 @@ export default function HomePage() {
                 href="/calculator"
                 className="w-full sm:w-auto px-8 py-4 rounded border border-[#d9b451]/40 text-[#d9b451] hover:bg-[#d9b451]/10 transition-all text-sm font-mono tracking-wider uppercase min-h-[44px] flex items-center justify-center"
               >
-                Calculate Aggregate
+                Merit Calculator
               </Link>
               <Link
-                href="/uet-taxila"
+                href="/scholarships"
                 className="w-full sm:w-auto px-8 py-4 rounded border border-white/20 text-white/80 hover:text-white hover:border-white/40 transition-all text-sm font-mono tracking-wider uppercase min-h-[44px] flex items-center justify-center"
               >
-                Explore UET Taxila
+                Scholarships Guide
               </Link>
             </div>
           </section>
 
           {/* Quick Hub Navigation Cards */}
           <section className="px-6 py-16 max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <Link
                 href="/calculator"
                 className="p-6 rounded border border-[#d9b451]/30 bg-[#d9b451]/5 hover:border-[#d9b451] hover:bg-[#d9b451]/10 transition-all group"
@@ -204,7 +165,34 @@ export default function HomePage() {
                   Fee Structure 2026
                 </h2>
                 <p className="text-xs text-white/60 leading-relaxed">
-                  Subsidized vs partial-subsidized tuition, hostel fees, and refund policy.
+                  Subsidized vs partial-subsidized tuition, hostel fees, and interactive simulator.
+                </p>
+              </Link>
+
+              <Link
+                href="/scholarships"
+                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
+              >
+                <div className="text-xs font-mono text-[#d9b451] mb-2">04 / AID</div>
+                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
+                  Scholarships &amp; Grants
+                </h2>
+                <p className="text-xs text-white/60 leading-relaxed">
+                  HEC Need-Based, Ehsaas, PEEF, and UET Alumni Association financial aid schemes.
+                </p>
+              </Link>
+
+              <Link
+                href="/campus-life"
+                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
+              >
+                <div className="text-xs font-mono text-[#d9b451] mb-2">05 / CAMPUS</div>
+                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
+                  Campus Life &amp; Hostels
+                </h2>
+                <p className="text-xs text-white/60 leading-relaxed">
+                  On-campus residence halls, bus transport routes, central library, and student
+                  societies.
                 </p>
               </Link>
 
@@ -212,12 +200,12 @@ export default function HomePage() {
                 href="/uet-taxila/programs"
                 className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
               >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">04 / ACADEMICS</div>
+                <div className="text-xs font-mono text-[#d9b451] mb-2">06 / ACADEMICS</div>
                 <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
-                  Programs &amp; Departments
+                  14 Degree Programs
                 </h2>
                 <p className="text-xs text-white/60 leading-relaxed">
-                  14 departments across 6 faculties from undergraduate BS to PhD.
+                  Accredited undergraduate engineering, computing, basic sciences, and PhD degrees.
                 </p>
               </Link>
             </div>
@@ -252,41 +240,7 @@ export default function HomePage() {
           </section>
         </main>
 
-        {/* Global Footer */}
-        <footer className="border-t border-white/10 px-6 py-12 bg-[#07080a] text-xs font-mono text-white/50">
-          <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-            <p>&copy; {new Date().getFullYear()} UET GPT Community. All rights reserved.</p>
-            <div className="flex flex-wrap items-center gap-6">
-              <Link href="/" className="hover:text-white transition-colors">
-                Home
-              </Link>
-              <Link href="/calculator" className="hover:text-white transition-colors">
-                Calculator
-              </Link>
-              <Link href="/uet-taxila" className="hover:text-white transition-colors">
-                UET Taxila
-              </Link>
-              <Link href="/learn" className="hover:text-white transition-colors">
-                Glossary
-              </Link>
-              <Link href="/uet-gpt" className="hover:text-white transition-colors">
-                About UET GPT
-              </Link>
-              <Link href="/about" className="hover:text-white transition-colors">
-                About
-              </Link>
-              <Link href="/privacy" className="hover:text-white transition-colors">
-                Privacy
-              </Link>
-              <Link href="/terms" className="hover:text-white transition-colors">
-                Terms
-              </Link>
-              <Link href="/contact" className="hover:text-white transition-colors">
-                Contact
-              </Link>
-            </div>
-          </div>
-        </footer>
+        <PublicFooter />
       </div>
     </>
   );

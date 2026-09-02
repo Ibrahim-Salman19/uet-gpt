@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MeritCalculator } from "@/components/calculator/merit-calculator";
+import { PublicFooter } from "@/components/navigation/public-footer";
+import { PublicNav } from "@/components/navigation/public-nav";
 import { BreadcrumbJsonLd } from "@/lib/json-ld";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
@@ -88,7 +90,9 @@ export default function CalculatorPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#070708] text-[#e4e4e7]">
+    <div className="min-h-screen bg-[#070708] text-[#e4e4e7] flex flex-col">
+      <PublicNav />
+
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: siteUrl },
@@ -106,8 +110,11 @@ export default function CalculatorPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(appSchema) }}
       />
 
-      <main id="main-content" className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
-        {/* Breadcrumb */}
+      <main
+        id="main-content"
+        className="flex-1 mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8 w-full"
+      >
+        {/* Breadcrumb Navigation */}
         <nav className="mb-8 flex items-center text-sm text-[#a1a1aa]" aria-label="Breadcrumb">
           <Link href="/" className="hover:text-white transition-colors">
             Home
@@ -117,36 +124,38 @@ export default function CalculatorPage() {
         </nav>
 
         {/* Page Header */}
-        <header className="mb-10 text-center sm:text-left">
+        <header className="mb-10 text-center max-w-3xl mx-auto">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-[#d9b451]/30 bg-[#d9b451]/10 px-3 py-1 text-xs font-semibold text-[#d9b451] uppercase tracking-wider mb-4">
-            Official 2026 Admissions Formula
+            Official 2026 Prospectus Formula
           </span>
           <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl mb-4">
-            UET Taxila Merit Calculator
+            UET Taxila Merit Calculator 2026
           </h1>
-          <p className="text-base sm:text-lg text-[#a1a1aa] max-w-3xl leading-relaxed">
-            Calculate your aggregate percentage for undergraduate admissions at UET Taxila.
-            Accurately weighted with <strong>33% ECAT</strong>, <strong>50% HSSC/FSc</strong>, and{" "}
-            <strong>17% SSC/Matric</strong>.
+          <p className="text-base sm:text-lg text-[#a1a1aa] leading-relaxed">
+            Compute your undergraduate admission aggregate in real-time according to Chapter 5 of
+            the official UET Taxila Prospectus (<strong>33% ECAT + 50% HSSC + 17% SSC</strong>).
           </p>
         </header>
 
-        {/* Interactive Calculator */}
-        <section aria-label="Merit Calculator Tool" className="mb-16">
+        {/* Interactive Calculator Section */}
+        <section aria-label="Calculator Tool" className="mb-16">
           <MeritCalculator />
         </section>
 
-        {/* Formula Explanation Section */}
+        {/* Educational Explanatory Section */}
         <section className="mb-16 rounded-2xl border border-white/10 bg-[#0c0d10] p-6 sm:p-8">
-          <h2 className="text-2xl font-bold text-white mb-4">How UET Taxila Calculates Merit</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">
+            How UET Taxila Admission Aggregate is Calculated
+          </h2>
           <div className="space-y-4 text-sm text-[#a1a1aa] leading-relaxed">
             <p>
-              According to Chapter 5 of the official UET Taxila Undergraduate Prospectus, admission
-              marks (aggregate) are calculated from three components:
+              According to Chapter 5, Section 5.1 of the UET Taxila Undergraduate Prospectus,
+              undergraduate admission merit across all engineering and computing disciplines is
+              determined by the weighted formula:
             </p>
-            <div className="rounded-xl border border-white/10 bg-[#14151a] p-4 font-mono text-xs sm:text-sm text-[#d9b451] overflow-x-auto">
-              Aggregate % = [33 &times; (ECAT Marks / 400)] + [50 &times; ((HSSC Marks + Bonus) /
-              Total)] + [17 &times; (SSC Marks / Total)]
+            <div className="rounded-xl bg-[#14151a] p-4 font-mono text-xs sm:text-sm text-[#d9b451] border border-white/5 overflow-x-auto">
+              Aggregate % = [33 &times; (ECAT / 400)] + [50 &times; ((HSSC + Bonus) / Total)] + [17
+              &times; (SSC / Total)]
             </div>
             <ul className="list-disc pl-5 space-y-2 pt-2">
               <li>
@@ -194,14 +203,14 @@ export default function CalculatorPage() {
             </p>
           </Link>
           <Link
-            href="/uet-taxila/programs"
+            href="/scholarships"
             className="rounded-xl border border-white/10 bg-[#0c0d10] p-5 hover:border-[#d9b451]/50 transition-colors group"
           >
             <h3 className="text-sm font-semibold text-white group-hover:text-[#d9b451] transition-colors mb-1">
-              Departments &amp; Programs &rarr;
+              Scholarships &amp; Aid &rarr;
             </h3>
             <p className="text-xs text-[#a1a1aa]">
-              Explore 14 accredited engineering and CS degree programs.
+              HEC Need-Based, Ehsaas, and alumni financial aid programs.
             </p>
           </Link>
         </section>
@@ -219,6 +228,8 @@ export default function CalculatorPage() {
           </dl>
         </section>
       </main>
+
+      <PublicFooter />
     </div>
   );
 }

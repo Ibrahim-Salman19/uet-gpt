@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PublicFooter } from "@/components/navigation/public-footer";
+import { PublicNav } from "@/components/navigation/public-nav";
+import { SCHEMA_DATE_MODIFIED } from "@/lib/dates";
 import { BreadcrumbJsonLd } from "@/lib/json-ld";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
@@ -52,6 +55,8 @@ const FAQ_ITEMS = [
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  "@id": `${siteUrl}/uet#faq`,
+  dateModified: SCHEMA_DATE_MODIFIED,
   mainEntity: FAQ_ITEMS.map((item) => ({
     "@type": "Question",
     name: item.q,
@@ -64,7 +69,9 @@ const faqSchema = {
 
 export default function UetPage() {
   return (
-    <div className="min-h-screen bg-[#070708] text-[#e4e4e7]">
+    <div className="min-h-screen bg-[#070708] text-[#e4e4e7] flex flex-col">
+      <PublicNav />
+
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: siteUrl },
@@ -77,7 +84,10 @@ export default function UetPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
-      <main id="main-content" className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+      <main
+        id="main-content"
+        className="flex-1 mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8 w-full"
+      >
         <nav className="mb-8 flex items-center text-sm text-[#a1a1aa]" aria-label="Breadcrumb">
           <Link href="/" className="hover:text-white transition-colors">
             Home
@@ -88,7 +98,7 @@ export default function UetPage() {
 
         <header className="mb-12 border-b border-[#27272a] pb-8">
           <span className="inline-block rounded-full bg-[#18181b] px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#d9b451] border border-[#27272a] mb-4">
-            Official Keyword Hub
+            Official Institutional Guide
           </span>
           <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl mb-4">
             UET (University of Engineering &amp; Technology)
@@ -100,29 +110,41 @@ export default function UetPage() {
           </p>
         </header>
 
-        <section className="mb-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <section className="mb-12 grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <Link
+            href="/calculator"
+            className="group block rounded-xl border border-[#d9b451]/30 bg-[#09090b] p-6 transition-all hover:border-[#d9b451] hover:bg-[#18181b]"
+          >
+            <h2 className="text-xl font-semibold text-white group-hover:text-[#d9b451] mb-2">
+              Merit Calculator &rarr;
+            </h2>
+            <p className="text-sm text-[#a1a1aa]">
+              Calculate your aggregate using the official 2026 formula: 33% ECAT, 50% HSSC, 17% SSC.
+            </p>
+          </Link>
+
           <Link
             href="/uet-taxila"
             className="group block rounded-xl border border-[#27272a] bg-[#09090b] p-6 transition-all hover:border-[#d9b451]/50 hover:bg-[#18181b]"
           >
             <h2 className="text-xl font-semibold text-white group-hover:text-[#d9b451] mb-2">
-              UET Taxila Guide &rarr;
+              UET Taxila Main Hub &rarr;
             </h2>
             <p className="text-sm text-[#a1a1aa]">
-              Comprehensive overview of UET Taxila history, campuses, 14 departments, and faculties.
+              History, 14 engineering &amp; computing departments, faculties, and campus life
+              overview.
             </p>
           </Link>
 
           <Link
-            href="/uet-gpt"
+            href="/uet-taxila/fee-structure"
             className="group block rounded-xl border border-[#27272a] bg-[#09090b] p-6 transition-all hover:border-[#d9b451]/50 hover:bg-[#18181b]"
           >
             <h2 className="text-xl font-semibold text-white group-hover:text-[#d9b451] mb-2">
-              About UET GPT &rarr;
+              Fee Structure Breakdown &rarr;
             </h2>
             <p className="text-sm text-[#a1a1aa]">
-              Learn how the RAG-powered AI chatbot helps students find instant answers with
-              citations.
+              Undergraduate and graduate semester fees, hostel charges, and payment schedules.
             </p>
           </Link>
 
@@ -149,7 +171,7 @@ export default function UetPage() {
             </p>
             <Link
               href="/chat"
-              className="inline-flex items-center justify-center rounded-lg bg-[#d9b451] px-6 py-3 text-sm font-semibold text-[#07080a] hover:bg-[#f0d178] transition-colors"
+              className="inline-flex items-center justify-center rounded-lg bg-[#d9b451] px-6 py-3 text-sm font-semibold text-[#07080a] hover:bg-[#f0d178] transition-colors min-h-[44px]"
             >
               Start Free Chat with UET GPT
             </Link>
@@ -168,6 +190,8 @@ export default function UetPage() {
           </div>
         </section>
       </main>
+
+      <PublicFooter />
     </div>
   );
 }

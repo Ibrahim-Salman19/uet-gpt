@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PublicFooter } from "@/components/navigation/public-footer";
+import { PublicNav } from "@/components/navigation/public-nav";
 import { BreadcrumbJsonLd } from "@/lib/json-ld";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
@@ -36,14 +38,20 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <div className="min-h-screen bg-[#070708] text-[#e4e4e7]">
+    <div className="min-h-screen bg-[#070708] text-[#e4e4e7] flex flex-col">
+      <PublicNav />
+
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: siteUrl },
           { name: "Contact", url: `${siteUrl}/contact` },
         ]}
       />
-      <main id="main-content" className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
+
+      <main
+        id="main-content"
+        className="flex-1 mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8 w-full"
+      >
         <nav className="mb-8 flex items-center text-sm text-[#a1a1aa]" aria-label="Breadcrumb">
           <Link href="/" className="hover:text-white transition-colors">
             Home
@@ -62,37 +70,41 @@ export default function ContactPage() {
         </header>
 
         <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="rounded-xl border border-[#27272a] bg-[#09090b] p-6">
+          <div className="rounded-xl border border-white/10 bg-[#0c0d10] p-6 hover:border-[#d9b451]/40 transition-colors">
             <h2 className="text-xl font-semibold text-white mb-2">Feedback &amp; Corrections</h2>
-            <p className="text-sm text-[#a1a1aa] mb-4">
+            <p className="text-sm text-[#a1a1aa] mb-4 leading-relaxed">
               If you notice any outdated prospectus data or policy changes, let our editorial team
               know so we can update the knowledge base.
             </p>
             <a
               href="mailto:contact@uet-gpt.com"
-              className="inline-block text-sm font-medium text-[#d9b451] hover:underline"
+              className="inline-flex items-center gap-1 text-sm font-medium text-[#d9b451] hover:underline"
             >
-              contact@uet-gpt.com &rarr;
+              <span>contact@uet-gpt.com</span>
+              <span>&rarr;</span>
             </a>
           </div>
 
-          <div className="rounded-xl border border-[#27272a] bg-[#09090b] p-6">
+          <div className="rounded-xl border border-white/10 bg-[#0c0d10] p-6 hover:border-[#d9b451]/40 transition-colors">
             <h2 className="text-xl font-semibold text-white mb-2">GitHub &amp; Contributions</h2>
-            <p className="text-sm text-[#a1a1aa] mb-4">
-              UET GPT is open-source. Report issues, request features, or submit pull requests on our
-              public repository.
+            <p className="text-sm text-[#a1a1aa] mb-4 leading-relaxed">
+              UET GPT is open-source. Report issues, request features, or submit pull requests on
+              our public repository.
             </p>
             <a
-              href="https://github.com"
+              href="https://github.com/devhms/uet_gpt"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block text-sm font-medium text-[#d9b451] hover:underline"
+              className="inline-flex items-center gap-1 text-sm font-medium text-[#d9b451] hover:underline"
             >
-              View on GitHub &rarr;
+              <span>View on GitHub</span>
+              <span className="text-xs">&nearr;</span>
             </a>
           </div>
         </section>
       </main>
+
+      <PublicFooter />
     </div>
   );
 }

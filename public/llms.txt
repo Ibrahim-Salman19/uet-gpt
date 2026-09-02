@@ -2,7 +2,7 @@
 
 > UET GPT is an open-source AI chatbot and educational guide to the University of Engineering and Technology (UET), Taxila campus, Pakistan. It answers questions about UET Taxila using RAG-powered retrieval from official university documents, prospectuses, fee schedules, syllabi, and directories.
 
-Last updated: 2026-09-01
+Last updated: 2026-09-02
 
 Content is continuously updated as UET Taxila publishes new admissions notices, fee updates, and academic schedules.
 
@@ -19,6 +19,8 @@ Content is continuously updated as UET Taxila publishes new admissions notices, 
 - Admissions & ECAT Guide: https://uet-gpt.vercel.app/uet-taxila/admissions
 - Programs & Departments: https://uet-gpt.vercel.app/uet-taxila/programs
 - Fee Structure Breakdown: https://uet-gpt.vercel.app/uet-taxila/fee-structure
+- Scholarships & Financial Aid Guide: https://uet-gpt.vercel.app/scholarships
+- Campus Life, Hostels & Transport Guide: https://uet-gpt.vercel.app/campus-life
 - Institutional Guide (UET System): https://uet-gpt.vercel.app/uet
 - UET GPT Product Overview: https://uet-gpt.vercel.app/uet-gpt
 - About the Project & Founder: https://uet-gpt.vercel.app/about

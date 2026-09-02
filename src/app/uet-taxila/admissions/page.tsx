@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PublicFooter } from "@/components/navigation/public-footer";
+import { PublicNav } from "@/components/navigation/public-nav";
 import { SCHEMA_DATE_MODIFIED } from "@/lib/dates";
 import { BreadcrumbJsonLd } from "@/lib/json-ld";
 
@@ -138,37 +140,7 @@ export default function UetTaxilaAdmissionsPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
       <div className="flex min-h-screen flex-col bg-[#070708] text-zinc-100">
-        <header className="flex items-center justify-between px-6 py-4 border-b border-[#1a1a1e]">
-          <div className="flex items-center gap-3">
-            <div className="size-8 rounded-lg bg-[#d9b451] flex items-center justify-center text-[#07080a] font-bold text-sm">
-              U
-            </div>
-            <span className="font-semibold text-base font-mono">UET GPT</span>
-          </div>
-          <nav className="flex items-center gap-4">
-            <Link href="/" className="text-sm text-zinc-400 hover:text-zinc-200 transition-colors">
-              UET GPT Home
-            </Link>
-            <Link
-              href="/calculator"
-              className="text-sm text-[#d9b451] hover:text-[#f0d178] transition-colors"
-            >
-              Merit Calculator
-            </Link>
-            <Link
-              href="/uet-taxila"
-              className="text-sm text-[#a1a1aa] hover:text-[#e1e1e2] transition-colors"
-            >
-              UET Taxila Hub
-            </Link>
-            <Link
-              href="/chat"
-              className="text-sm px-4 py-2 rounded-lg bg-[#d9b451] text-[#07080a] font-semibold hover:bg-[#f0d178] transition-colors"
-            >
-              Start Chat
-            </Link>
-          </nav>
-        </header>
+        <PublicNav />
 
         <main id="main-content" className="flex-1">
           <section className="px-6 pt-24 pb-16 max-w-3xl mx-auto text-center">
@@ -460,31 +432,7 @@ export default function UetTaxilaAdmissionsPage() {
             </div>
           </section>
         </main>
-
-        <footer className="border-t border-[#1a1a1e] px-6 py-8">
-          <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-[#a1a1aa]">
-              &copy; {new Date().getFullYear()} UET GPT Community. All rights reserved.
-            </p>
-            <div className="flex flex-wrap items-center gap-6 text-sm text-[#a1a1aa]">
-              <Link href="/" className="hover:text-[#e1e1e2] transition-colors">
-                Home
-              </Link>
-              <Link href="/uet-taxila" className="hover:text-[#e1e1e2] transition-colors">
-                UET Taxila Hub
-              </Link>
-              <Link href="/learn" className="hover:text-[#e1e1e2] transition-colors">
-                Glossary
-              </Link>
-              <Link href="/about" className="hover:text-[#e1e1e2] transition-colors">
-                About
-              </Link>
-              <Link href="/privacy" className="hover:text-[#e1e1e2] transition-colors">
-                Privacy
-              </Link>
-            </div>
-          </div>
-        </footer>
+        <PublicFooter />
       </div>
     </>
   );

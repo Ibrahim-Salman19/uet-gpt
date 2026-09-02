@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { SCHEMA_DATE_MODIFIED } from "@/lib/dates";
+import { FeeCalculator } from "@/components/calculator/fee-calculator";
+import { PublicFooter } from "@/components/navigation/public-footer";
+import { PublicNav } from "@/components/navigation/public-nav";
+import { CURRENT_ACADEMIC_YEAR, SCHEMA_DATE_MODIFIED } from "@/lib/dates";
 import { BreadcrumbJsonLd } from "@/lib/json-ld";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
@@ -70,6 +73,7 @@ const FAQ_ITEMS = [
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  "@id": `${siteUrl}/uet-taxila/fee-structure#faq`,
   dateModified: SCHEMA_DATE_MODIFIED,
   mainEntity: FAQ_ITEMS.map((item) => ({
     "@type": "Question",
@@ -121,7 +125,9 @@ const hostelRows = [
 
 export default function UetTaxilaFeeStructurePage() {
   return (
-    <>
+    <div className="flex min-h-screen flex-col bg-[#070708] text-[#e1e1e2]">
+      <PublicNav />
+
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: siteUrl },
@@ -134,296 +140,197 @@ export default function UetTaxilaFeeStructurePage() {
         // biome-ignore lint/security/noDangerouslySetInnerHtml: static schema
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <div className="flex min-h-screen flex-col bg-[#070708] text-[#e1e1e2]">
-        <header className="flex items-center justify-between px-6 py-4 border-b border-[#1a1a1e]">
-          <div className="flex items-center gap-3">
-            <div className="size-8 rounded-lg bg-[#d9b451] flex items-center justify-center text-[#07080a] font-bold text-sm">
-              U
-            </div>
-            <span className="font-semibold text-base font-mono">UET GPT</span>
-          </div>
-          <nav className="flex items-center gap-4">
+
+      <main id="main-content" className="flex-1">
+        <section className="px-6 pt-24 pb-16 max-w-3xl mx-auto text-center">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#d9b451]/30 bg-[#d9b451]/10 px-3 py-1 text-xs font-semibold text-[#d9b451] uppercase tracking-wider mb-4">
+            Official Schedule {CURRENT_ACADEMIC_YEAR}
+          </span>
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-white">
+            UET Taxila Fee Structure
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#d9b451] to-[#f0d178] mt-2">
+              Tuition, Hostel &amp; Other Charges
+            </span>
+          </h1>
+          <p className="text-lg text-[#a1a1aa] max-w-2xl mx-auto mb-8 leading-relaxed">
+            A clear breakdown of the undergraduate fee schedule at the University of Engineering and
+            Technology, Taxila - grounded in the official UET Taxila undergraduate prospectus and
+            verified by UET GPT.
+          </p>
+          <div className="flex items-center justify-center flex-wrap gap-4">
             <Link
-              href="/"
-              className="text-sm text-[#a1a1aa] hover:text-[#e1e1e2] transition-colors"
+              href="#calculator"
+              className="px-6 py-3 rounded-xl bg-[#d9b451] text-[#07080a] font-semibold hover:bg-[#f0d178] transition-colors text-base min-h-[44px] flex items-center justify-center"
             >
-              UET GPT Home
+              Simulate Semester Fees
+            </Link>
+            <Link
+              href="/scholarships"
+              className="px-6 py-3 rounded-xl border border-[#d9b451]/40 text-[#d9b451] hover:bg-[#d9b451]/10 transition-colors text-base min-h-[44px] flex items-center justify-center"
+            >
+              Financial Aid &amp; Scholarships
             </Link>
             <Link
               href="/uet-taxila"
-              className="text-sm text-[#a1a1aa] hover:text-[#e1e1e2] transition-colors"
+              className="px-6 py-3 rounded-xl border border-[#27272a] text-[#a1a1aa] hover:text-[#e1e1e2] hover:border-[#3f3f46] transition-colors text-base min-h-[44px] flex items-center justify-center"
             >
               UET Taxila Hub
             </Link>
-            <Link
-              href="/chat"
-              className="text-sm px-4 py-2 rounded-lg bg-[#d9b451] text-[#07080a] font-semibold hover:bg-[#f0d178] transition-colors"
-            >
-              Start Chat
-            </Link>
-          </nav>
-        </header>
+          </div>
+        </section>
 
-        <main id="main-content" className="flex-1">
-          <section className="px-6 pt-24 pb-16 max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
-              UET Taxila Fee Structure
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#d9b451] to-[#f0d178] mt-2">
-                Tuition, Hostel &amp; Other Charges
-              </span>
-            </h1>
-            <p className="text-lg text-[#a1a1aa] max-w-2xl mx-auto mb-8">
-              A clear breakdown of the undergraduate fee schedule at the University of Engineering
-              and Technology, Taxila - grounded in the official UET Taxila undergraduate prospectus
-              and explained the way UET GPT delivers it.
-            </p>
-            <div className="flex items-center justify-center gap-4">
-              <Link
-                href="/chat"
-                className="px-6 py-3 rounded-xl bg-[#d9b451] text-[#07080a] font-semibold hover:bg-[#f0d178] transition-colors text-base"
-              >
-                Ask UET GPT
-              </Link>
-              <Link
-                href="/uet-taxila"
-                className="px-6 py-3 rounded-xl border border-[#27272a] text-[#a1a1aa] hover:text-[#e1e1e2] hover:border-[#3f3f46] transition-colors text-base"
-              >
-                UET Taxila Hub
-              </Link>
-            </div>
-          </section>
+        {/* Interactive Fee Calculator Section */}
+        <section id="calculator" className="px-6 py-12 max-w-5xl mx-auto">
+          <FeeCalculator />
+        </section>
 
-          <section className="px-6 py-16 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-semibold text-center mb-4">
-              Overview of the UET Taxila Fee Structure
-            </h2>
-            <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto">
-              How the university organizes fees into non-recurring and recurring charges
-            </p>
-            <div className="space-y-4">
-              <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
-                  Non-recurring charges (paid at admission)
-                </h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  These are charged once, when a student is admitted. They include admission
-                  charges, re-admission charges, the student identity card, the document
-                  verification fee, and the refundable library security deposit. Together with the
-                  first semester&apos;s recurring charges, they make up the amount due at the start
-                  of the program.
-                </p>
-              </div>
-              <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">
-                  Recurring charges (paid per semester)
-                </h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  These are charged every semester (Fall or Spring) and include registration,
-                  tuition, sports, magazine, medical, laboratory, examination, book bank rent,
-                  instructional tour, recreation, Smart &amp; Safe Campus, and digital library
-                  charges. Survey camp charges apply to Civil Engineering students, and bus fares
-                  apply to students using university transport. The recurring total for the first
-                  semester is Rs. 101,800 for subsidized students and Rs. 256,800 for
-                  partial-subsidized students.
-                </p>
-              </div>
-              <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">Why the two totals differ</h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  The large gap between the subsidized and partial-subsidized first-semester totals
-                  comes almost entirely from admission charges (Rs. 7,000 vs Rs. 300,000) and
-                  per-semester tuition (Rs. 38,000 vs Rs. 130,000). All other recurring components
-                  are identical across categories. The full schedule is published in Table 30.1 of
-                  the UET Taxila undergraduate prospectus.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <section className="px-6 py-16 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-semibold text-center mb-4">
-              Undergraduate Fee Schedule (Table 30.1)
-            </h2>
-            <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto">
-              Amounts in Pakistani Rupees. Subsidized vs partial-subsidized (Category S and Category
-              X)
-            </p>
-            <div className="overflow-x-auto rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-[#1a1a1e] text-left">
-                    <th className="p-4 font-semibold">Fee Component</th>
-                    <th className="p-4 font-semibold text-right">Subsidized</th>
-                    <th className="p-4 font-semibold text-right">Partial-Subsidized</th>
+        {/* Official Fee Schedule Table Section */}
+        <section className="px-6 py-16 max-w-4xl mx-auto">
+          <h2 className="text-2xl font-semibold text-center mb-4 text-white">
+            Undergraduate Fee Schedule (Table 30.1)
+          </h2>
+          <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto text-sm">
+            All amounts in Pakistan Rupees (PKR). Non-recurring charges are payable once at the time
+            of admission; recurring charges are payable before the start of each semester.
+          </p>
+          <div className="overflow-x-auto rounded-xl border border-[#1a1a1e]">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-[#1a1a1e] bg-[#0c0c0f] text-xs uppercase text-[#a1a1aa] font-mono">
+                <tr>
+                  <th className="px-6 py-4">Item of Charges</th>
+                  <th className="px-6 py-4">Subsidized (Rs.)</th>
+                  <th className="px-6 py-4">Partial-Subsidized (S &amp; X) (Rs.)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#1a1a1e] bg-[#070708]">
+                {feeRows.map((row) => (
+                  <tr key={row.item} className="hover:bg-[#0c0c0f] transition-colors">
+                    <td className="px-6 py-3.5 text-zinc-300">{row.item}</td>
+                    <td className="px-6 py-3.5 font-mono text-[#d9b451]">{row.subsidized}</td>
+                    <td className="px-6 py-3.5 font-mono text-[#d9b451]">{row.partial}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {feeRows.map((row) => (
-                    <tr key={row.item} className="border-b border-[#141417] last:border-0">
-                      <td className="p-4 text-[#e1e1e2]">{row.item}</td>
-                      <td className="p-4 text-right text-[#a1a1aa]">{row.subsidized}</td>
-                      <td className="p-4 text-right text-[#a1a1aa]">{row.partial}</td>
-                    </tr>
-                  ))}
-                  <tr className="border-t-2 border-[#1a1a1e] font-medium">
-                    <td className="p-4">Total for First Semester</td>
-                    <td className="p-4 text-right text-[#e1e1e2]">101,800</td>
-                    <td className="p-4 text-right text-[#e1e1e2]">256,800</td>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        {/* Hostel Charges Table Section */}
+        <section className="px-6 py-16 max-w-4xl mx-auto">
+          <h2 className="text-2xl font-semibold text-center mb-4 text-white">
+            Hostel Charges for Resident Students
+          </h2>
+          <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto text-sm">
+            Charged in addition to tuition. Refundable securities are returned on clearance upon
+            leaving the university, subject to deduction of outstanding dues.
+          </p>
+          <div className="overflow-x-auto rounded-xl border border-[#1a1a1e]">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-[#1a1a1e] bg-[#0c0c0f] text-xs uppercase text-[#a1a1aa] font-mono">
+                <tr>
+                  <th className="px-6 py-4">Hostel Item</th>
+                  <th className="px-6 py-4">Amount (Rs.)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#1a1a1e] bg-[#070708]">
+                {hostelRows.map((row) => (
+                  <tr key={row.item} className="hover:bg-[#0c0c0f] transition-colors">
+                    <td className="px-6 py-3.5 text-zinc-300">{row.item}</td>
+                    <td className="px-6 py-3.5 font-mono text-[#d9b451]">{row.amount}</td>
                   </tr>
-                </tbody>
-              </table>
-            </div>
-            <p className="text-xs text-[#a1a1aa] mt-4">
-              Source: UET Taxila Undergraduate Prospectus 2025, Table 30.1. Bus fares, electricity,
-              and gas charges are revised each semester based on government-fixed fuel, electricity,
-              and gas rates, and the university may change fees without prior notice. UET GPT
-              provides the current figures.
-            </p>
-          </section>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-          <section className="px-6 py-16 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-semibold text-center mb-4">Hostel &amp; Other Charges</h2>
-            <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto">
-              Additional charges paid by students residing in UET Taxila hostels
-            </p>
-            <div className="space-y-4">
-              <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">Hostel resident charges</h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  In addition to tuition and semester dues, hostel residents pay hostel and mess
-                  securities (both refundable) plus per-semester services &amp; contingencies, room
-                  rent, masjid fund, electricity, and Sui gas charges. For the first semester the
-                  non-refundable hostel charges total Rs. 24,000, with refundable hostel and mess
-                  securities of Rs. 8,000 each also collected at admission.
-                </p>
-              </div>
-              <div className="overflow-x-auto rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-[#1a1a1e] text-left">
-                      <th className="p-4 font-semibold">Hostel Component</th>
-                      <th className="p-4 font-semibold text-right">Amount (Rs.)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {hostelRows.map((row) => (
-                      <tr key={row.item} className="border-b border-[#141417] last:border-0">
-                        <td className="p-4 text-[#e1e1e2]">{row.item}</td>
-                        <td className="p-4 text-right text-[#a1a1aa]">{row.amount}</td>
-                      </tr>
-                    ))}
-                    <tr className="border-t-2 border-[#1a1a1e] font-medium">
-                      <td className="p-4">Total for First Semester (Resident, non-refundable)</td>
-                      <td className="p-4 text-right text-[#e1e1e2]">24,000</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
-                <h3 className="font-semibold text-base mb-2">Refundable securities</h3>
-                <p className="text-sm text-[#a1a1aa]">
-                  Library security, hostel security, and mess security are refundable. They are
-                  returned on clearance when a student leaves the university or hostel, subject to
-                  deduction of outstanding dues - provided the claim is made within two years, after
-                  which unclaimed securities lapse to the university Welfare Fund.
-                </p>
-              </div>
+        {/* Refund Policy Section */}
+        <section className="px-6 py-16 max-w-4xl mx-auto">
+          <h2 className="text-2xl font-semibold text-center mb-4 text-white">
+            Admission Withdrawal &amp; Fee Refund Policy
+          </h2>
+          <p className="text-[#a1a1aa] text-center mb-12 max-w-3xl mx-auto text-sm">
+            Per the National Level Fee-Refund Policy adopted by UET Taxila, calculated from the
+            commencement of classes:
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
+              <div className="text-2xl font-bold text-emerald-400 font-mono mb-2">100% Refund</div>
+              <h3 className="font-semibold text-sm mb-2 text-white">Up to 7th Day</h3>
+              <p className="text-xs text-[#a1a1aa] leading-relaxed">
+                Full refund of tuition and recurring fees if applied up to the 7th day of classes.
+              </p>
             </div>
-          </section>
-
-          {/* Sibling Cross-Links & Navigation */}
-          <section className="px-6 py-12 max-w-4xl mx-auto border-t border-white/10">
-            <h2 className="text-xl font-semibold mb-6 text-white">Related UET Taxila Hub Guides</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <Link
-                href="/uet-taxila/admissions"
-                className="p-4 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f] hover:border-[#d9b451]/50 transition-colors"
-              >
-                <div className="text-xs text-[#d9b451] font-mono mb-1">ADMISSIONS</div>
-                <h3 className="font-medium text-sm text-white">ECAT &amp; Merit 2026</h3>
-                <p className="text-xs text-[#a1a1aa] mt-1">
-                  Eligibility, aggregate, and application.
-                </p>
-              </Link>
-              <Link
-                href="/uet-taxila/programs"
-                className="p-4 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f] hover:border-[#d9b451]/50 transition-colors"
-              >
-                <div className="text-xs text-[#d9b451] font-mono mb-1">ACADEMICS</div>
-                <h3 className="font-medium text-sm text-white">Programs &amp; Departments</h3>
-                <p className="text-xs text-[#a1a1aa] mt-1">14 departments across 6 faculties.</p>
-              </Link>
-              <Link
-                href="/learn/fee-structure"
-                className="p-4 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f] hover:border-[#d9b451]/50 transition-colors"
-              >
-                <div className="text-xs text-[#d9b451] font-mono mb-1">GLOSSARY</div>
-                <h3 className="font-medium text-sm text-white">Fee Structure Explained</h3>
-                <p className="text-xs text-[#a1a1aa] mt-1">
-                  Subsidized seats vs Category S &amp; X.
-                </p>
-              </Link>
+            <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
+              <div className="text-2xl font-bold text-[#d9b451] font-mono mb-2">50% Refund</div>
+              <h3 className="font-semibold text-sm mb-2 text-white">8th to 15th Day</h3>
+              <p className="text-xs text-[#a1a1aa] leading-relaxed">
+                Half fee refund if applied between the 8th and 15th calendar day.
+              </p>
             </div>
-
-            {/* Editorial byline and official portal link */}
-            <div className="text-xs text-[#a1a1aa] border-t border-white/10 pt-4 mt-8 flex flex-col sm:flex-row justify-between items-center gap-2 font-mono">
-              <span>
-                Published by UET GPT Editorial Team • Verified against official Prospectus
-              </span>
-              <a
-                href="https://web.uettaxila.edu.pk"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#d9b451] hover:underline"
-              >
-                Official UET Taxila Portal &rarr;
-              </a>
-            </div>
-          </section>
-
-          <section className="px-6 py-16 max-w-3xl mx-auto">
-            <h2 className="text-2xl font-semibold text-center mb-4">
-              Frequently Asked Questions about UET Taxila Fees
-            </h2>
-            <div className="space-y-4 mt-8">
-              {FAQ_ITEMS.map((faq) => (
-                <details
-                  key={faq.q}
-                  className="p-4 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]"
-                >
-                  <summary className="font-medium text-sm cursor-pointer">{faq.q}</summary>
-                  <p className="mt-3 text-sm text-[#a1a1aa]">{faq.a}</p>
-                </details>
-              ))}
-            </div>
-          </section>
-        </main>
-
-        <footer className="border-t border-[#1a1a1e] px-6 py-8">
-          <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-[#a1a1aa]">
-              &copy; {new Date().getFullYear()} UET GPT Community. All rights reserved.
-            </p>
-            <div className="flex flex-wrap items-center gap-6 text-sm text-[#a1a1aa]">
-              <Link href="/" className="hover:text-[#e1e1e2] transition-colors">
-                Home
-              </Link>
-              <Link href="/uet-taxila" className="hover:text-[#e1e1e2] transition-colors">
-                UET Taxila Hub
-              </Link>
-              <Link href="/learn" className="hover:text-[#e1e1e2] transition-colors">
-                Glossary
-              </Link>
-              <Link href="/about" className="hover:text-[#e1e1e2] transition-colors">
-                About
-              </Link>
-              <Link href="/privacy" className="hover:text-[#e1e1e2] transition-colors">
-                Privacy
-              </Link>
+            <div className="p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]">
+              <div className="text-2xl font-bold text-rose-400 font-mono mb-2">0% Refund</div>
+              <h3 className="font-semibold text-sm mb-2 text-white">16th Day Onward</h3>
+              <p className="text-xs text-[#a1a1aa] leading-relaxed">
+                No fee refund after the 15th day of commencement of academic sessions.
+              </p>
             </div>
           </div>
-        </footer>
-      </div>
-    </>
+        </section>
+
+        {/* Sibling Cross-Links & Navigation */}
+        <section className="px-6 py-8 max-w-4xl mx-auto">
+          <h2 className="text-xl font-semibold mb-4 text-white">Related University Resources</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Link
+              href="/scholarships"
+              className="p-4 rounded-xl border border-white/10 bg-[#0c0c0f] hover:border-[#d9b451]/50 transition-colors"
+            >
+              <div className="text-xs text-[#d9b451] font-mono mb-1">FINANCIAL AID</div>
+              <h3 className="font-medium text-sm text-white">Scholarships &amp; Grants</h3>
+              <p className="text-xs text-[#a1a1aa] mt-1">HEC Need-Based, Ehsaas, and alumni aid.</p>
+            </Link>
+            <Link
+              href="/uet-taxila/admissions"
+              className="p-4 rounded-xl border border-white/10 bg-[#0c0c0f] hover:border-[#d9b451]/50 transition-colors"
+            >
+              <div className="text-xs text-[#d9b451] font-mono mb-1">ADMISSIONS</div>
+              <h3 className="font-medium text-sm text-white">Admissions &amp; ECAT</h3>
+              <p className="text-xs text-[#a1a1aa] mt-1">
+                ECAT entry test and eligibility criteria.
+              </p>
+            </Link>
+            <Link
+              href="/campus-life"
+              className="p-4 rounded-xl border border-white/10 bg-[#0c0c0f] hover:border-[#d9b451]/50 transition-colors"
+            >
+              <div className="text-xs text-[#d9b451] font-mono mb-1">CAMPUS</div>
+              <h3 className="font-medium text-sm text-white">Hostels &amp; Transport</h3>
+              <p className="text-xs text-[#a1a1aa] mt-1">Bus routes and residential halls.</p>
+            </Link>
+          </div>
+        </section>
+
+        {/* FAQ Section */}
+        <section className="px-6 py-16 max-w-3xl mx-auto border-t border-white/10">
+          <h2 className="text-2xl font-semibold text-center mb-6 text-white">
+            Frequently Asked Questions about UET Taxila Fees
+          </h2>
+          <div className="space-y-4">
+            {FAQ_ITEMS.map((faq) => (
+              <details
+                key={faq.q}
+                className="p-4 rounded-xl border border-white/10 bg-[#0c0c0f] transition-all"
+              >
+                <summary className="font-medium text-sm cursor-pointer text-white">{faq.q}</summary>
+                <p className="mt-3 text-sm text-[#a1a1aa] leading-relaxed">{faq.a}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+      </main>
+
+      <PublicFooter />
+    </div>
   );
 }

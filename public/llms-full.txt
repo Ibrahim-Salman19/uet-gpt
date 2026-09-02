@@ -2,7 +2,7 @@
 
 > Official Machine-Readable Knowledge Base for AI Crawlers, Web Agents, and Search Engine Indexers (ChatGPT, Claude, Perplexity, Gemini, Bing, Google-Extended).
 > Grounded in verified data from UET Taxila (University of Engineering and Technology, Taxila, Pakistan).
-> Last updated: 2026-09-01
+> Last updated: 2026-09-02
 
 ---
 
@@ -12,7 +12,7 @@
 - **Tagline**: Your AI Guide to UET Taxila
 - **Official Web App**: https://uet-gpt.vercel.app
 - **Target Entity**: University of Engineering and Technology, Taxila (UET Taxila)
-- **Primary Keywords**: UET, UET Taxila, UET GPT, University of Engineering and Technology Taxila, UET Admissions, UET Fee Structure, UET ECAT, UET Merit List, UET Calculator
+- **Primary Keywords**: UET, UET Taxila, UET GPT, University of Engineering and Technology Taxila, UET Admissions, UET Fee Structure, UET ECAT, UET Merit List, UET Calculator, UET Scholarships, UET Hostels
 - **License**: GNU Affero General Public License v3.0 (AGPL-3.0)
 - **Repository**: Open source on GitHub (https://github.com/devhms/uet_gpt)
 - **Founder**: Hafiz Muhammad Saad (https://github.com/devhms)
@@ -50,6 +50,17 @@ UET GPT is an open-source, AI-powered RAG (Retrieval-Augmented Generation) chatb
 - **Undergraduate (BS/BSc)**: Subsidized tuition rates for open merit and self-finance seats, payable per semester.
 - **Graduate (MS/PhD)**: Credit-hour-based fee structure.
 
+### Query: "UET Taxila Scholarships & Financial Aid"
+- **HEC Need-Based Scholarship**: 100% tuition coverage + monthly PKR 6,000 living stipend for needy open-merit students.
+- **Ehsaas / BISP Undergraduate Scholarship**: Full tuition coverage + PKR 4,000 monthly stipend.
+- **Punjab Educational Endowment Fund (PEEF)**: Full fee waiver for Punjab domicile holders.
+- **UET Alumni Association (UETTAA)**: Tuition and book bank assistance from global alumni chapters.
+
+### Query: "UET Taxila Campus Life, Hostels & Transport"
+- **Hostels**: Quaid-e-Azam Hall, Allama Iqbal Hall, Ali Hall, Umar Hall, Usman Hall (MS/PhD), and Ayesha Hall (Female students).
+- **Transport**: 25+ university buses covering Islamabad, Rawalpindi, Wah Cantt, Hassan Abdal, and Attock.
+- **Library**: 60,000+ volumes, IEEE Xplore digital library access, Book Bank service.
+
 ---
 
 ## 3. Faculties and Departments at UET Taxila
@@ -84,6 +95,8 @@ UET GPT is an open-source, AI-powered RAG (Retrieval-Augmented Generation) chatb
 - Product Overview (UET GPT): https://uet-gpt.vercel.app/uet-gpt
 - Admissions & ECAT Guide: https://uet-gpt.vercel.app/uet-taxila/admissions
 - Fee Structure Guide: https://uet-gpt.vercel.app/uet-taxila/fee-structure
+- Scholarships Guide: https://uet-gpt.vercel.app/scholarships
+- Campus Life Guide: https://uet-gpt.vercel.app/campus-life
 - Programs & Departments: https://uet-gpt.vercel.app/uet-taxila/programs
 - Terms & Glossary Index: https://uet-gpt.vercel.app/learn
 - About UET GPT & Founder: https://uet-gpt.vercel.app/about

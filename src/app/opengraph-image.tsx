@@ -13,53 +13,117 @@ export default function OpengraphImage() {
         width: "100%",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "center",
+        justifyContent: "space-between",
         padding: "80px",
-        background: "#070708",
-        color: "#e1e1e2",
+        background: "linear-gradient(135deg, #07080a 0%, #0f1015 100%)",
+        color: "#edf0ec",
         fontFamily: "sans-serif",
       }}
     >
+      {/* Top Brand Tag */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
-          gap: "24px",
-          marginBottom: "40px",
+          justifyContent: "space-between",
         }}
       >
         <div
           style={{
-            width: "88px",
-            height: "88px",
-            borderRadius: "20px",
-            background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-            fontSize: "48px",
-            fontWeight: 700,
+            gap: "20px",
+          }}
+        >
+          <div
+            style={{
+              width: "72px",
+              height: "72px",
+              borderRadius: "16px",
+              background: "#d9b451",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "40px",
+              fontWeight: 800,
+              color: "#07080a",
+            }}
+          >
+            U
+          </div>
+          <div
+            style={{
+              fontSize: "40px",
+              fontWeight: 800,
+              letterSpacing: "-0.5px",
+            }}
+          >
+            UET <span style={{ color: "#d9b451" }}>GPT</span>
+          </div>
+        </div>
+
+        <div
+          style={{
+            padding: "8px 20px",
+            borderRadius: "9999px",
+            border: "1px solid rgba(217, 180, 81, 0.3)",
+            background: "rgba(217, 180, 81, 0.1)",
+            color: "#d9b451",
+            fontSize: "18px",
+            fontWeight: 600,
+            textTransform: "uppercase",
+            letterSpacing: "2px",
+          }}
+        >
+          AI Guide to UET Taxila
+        </div>
+      </div>
+
+      {/* Center Heading */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "16px",
+          maxWidth: "1000px",
+        }}
+      >
+        <div
+          style={{
+            fontSize: "64px",
+            fontWeight: 800,
+            lineHeight: 1.15,
             color: "#ffffff",
           }}
         >
-          U
+          Admissions, Fees, Merit Calculator &amp; Campus Guide
         </div>
-        <div style={{ fontSize: "44px", fontWeight: 700 }}>{APP_NAME}</div>
+        <div
+          style={{
+            fontSize: "26px",
+            lineHeight: 1.4,
+            color: "#a1a1aa",
+          }}
+        >
+          {APP_DESCRIPTION}
+        </div>
       </div>
+
+      {/* Bottom Footer Info */}
       <div
         style={{
-          fontSize: "68px",
-          fontWeight: 700,
-          lineHeight: 1.1,
-          marginBottom: "28px",
-          background: "linear-gradient(90deg, #818cf8, #c4b5fd)",
-          backgroundClip: "text",
-          color: "transparent",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+          paddingTop: "24px",
+          fontSize: "20px",
+          color: "#71717a",
         }}
       >
-        {APP_TAGLINE}
+        <div>uet-gpt.vercel.app</div>
+        <div style={{ color: "#d9b451" }}>RAG Synced 2026 • Verified Prospectus Data</div>
       </div>
-      <div style={{ fontSize: "30px", color: "#a1a1aa", maxWidth: "900px" }}>{APP_DESCRIPTION}</div>
     </div>,
     { ...size },
   );

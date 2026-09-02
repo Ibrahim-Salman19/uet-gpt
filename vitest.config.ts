@@ -7,7 +7,7 @@ export default defineConfig({
     environment: "node",
     setupFiles: ["./tests/setup.ts"],
     testTimeout: 30000,
-    exclude: ["tests/e2e/**", "node_modules/**", ".next/**", "dist"],
+    exclude: ["tests/e2e/**", "node_modules/**", ".next/**", "dist", ".claude/**"],
     // Use child-process forks instead of worker threads. Worker threads
     // deadlock on startup in this WSL2 environment; forks do not.
     // Run at most 3 files concurrently to avoid resource exhaustion when

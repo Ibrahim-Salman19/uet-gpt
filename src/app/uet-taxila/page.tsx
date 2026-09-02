@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PublicFooter } from "@/components/navigation/public-footer";
+import { PublicNav } from "@/components/navigation/public-nav";
 import { SCHEMA_DATE_MODIFIED } from "@/lib/dates";
 import { BreadcrumbJsonLd } from "@/lib/json-ld";
 
@@ -90,36 +92,8 @@ export default function UetTaxilaPage() {
         // biome-ignore lint/security/noDangerouslySetInnerHtml: static schema
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <div className="flex min-h-screen flex-col bg-[var(--surface-base)] text-[var(--text-primary)] selection:bg-[var(--accent)] selection:text-[var(--accent-fg)]">
-        {/* Navigation Header */}
-        <header className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)] bg-[var(--surface-base)]/80 backdrop-blur-md sticky top-0 z-50">
-          <div className="flex items-center gap-3">
-            <div className="size-8 rounded-lg bg-gradient-to-br from-[var(--accent)] to-[var(--accent-hover)] flex items-center justify-center text-[var(--accent-fg)] font-bold text-sm font-mono shadow-[0_0_15px_rgba(202,138,4,0.15)]">
-              U
-            </div>
-            <span className="font-semibold text-base font-mono tracking-tight">UET GPT</span>
-          </div>
-          <nav className="flex items-center gap-5">
-            <Link
-              href="/"
-              className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors font-mono font-medium"
-            >
-              UET GPT Home
-            </Link>
-            <Link
-              href="/learn"
-              className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors font-mono font-medium"
-            >
-              Glossary
-            </Link>
-            <Link
-              href="/chat"
-              className="text-xs px-4 py-2 rounded-md bg-[var(--accent)] text-[var(--accent-fg)] hover:bg-[var(--accent-hover)] transition-all font-mono font-semibold tracking-wider uppercase active:scale-[0.97] shadow-[0_2px_10px_rgba(202,138,4,0.15)]"
-            >
-              Start Chat
-            </Link>
-          </nav>
-        </header>
+      <div className="flex min-h-screen flex-col bg-[#070708] text-[#e1e1e2]">
+        <PublicNav />
 
         <main id="main-content" className="flex-1">
           {/* Hero Section */}
@@ -456,33 +430,7 @@ export default function UetTaxilaPage() {
             </div>
           </section>
         </main>
-
-        {/* Footer */}
-        <footer className="border-t border-[var(--border)] px-6 py-8 bg-[var(--surface-base)] text-[var(--text-secondary)] font-mono text-xs">
-          <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            <p>&copy; {new Date().getFullYear()} UET GPT Community. All rights reserved.</p>
-            <div className="flex flex-wrap items-center gap-6">
-              <Link href="/" className="hover:text-[var(--text-primary)] transition-colors">
-                Home
-              </Link>
-              <Link href="/learn" className="hover:text-[var(--text-primary)] transition-colors">
-                Glossary
-              </Link>
-              <Link href="/about" className="hover:text-[var(--text-primary)] transition-colors">
-                About
-              </Link>
-              <Link href="/privacy" className="hover:text-[var(--text-primary)] transition-colors">
-                Privacy
-              </Link>
-              <Link href="/terms" className="hover:text-[var(--text-primary)] transition-colors">
-                Terms
-              </Link>
-              <Link href="/contact" className="hover:text-[var(--text-primary)] transition-colors">
-                Contact
-              </Link>
-            </div>
-          </div>
-        </footer>
+        <PublicFooter />
       </div>
     </>
   );

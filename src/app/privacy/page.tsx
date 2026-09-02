@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PublicFooter } from "@/components/navigation/public-footer";
+import { PublicNav } from "@/components/navigation/public-nav";
 import { BreadcrumbJsonLd } from "@/lib/json-ld";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
@@ -36,14 +38,20 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-[#070708] text-[#e4e4e7]">
+    <div className="min-h-screen bg-[#070708] text-[#e4e4e7] flex flex-col">
+      <PublicNav />
+
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: siteUrl },
           { name: "Privacy", url: `${siteUrl}/privacy` },
         ]}
       />
-      <main id="main-content" className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
+
+      <main
+        id="main-content"
+        className="flex-1 mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8 w-full"
+      >
         <nav className="mb-8 flex items-center text-sm text-[#a1a1aa]" aria-label="Breadcrumb">
           <Link href="/" className="hover:text-white transition-colors">
             Home
@@ -60,7 +68,7 @@ export default function PrivacyPage() {
         </header>
 
         <section className="space-y-8 text-base text-[#a1a1aa] leading-relaxed">
-          <div>
+          <div className="rounded-xl border border-white/10 bg-[#0c0d10] p-6">
             <h2 className="text-xl font-semibold text-white mb-3">1. Information We Collect</h2>
             <p>
               UET GPT collects minimal information necessary to provide conversational answers and
@@ -70,7 +78,7 @@ export default function PrivacyPage() {
             </p>
           </div>
 
-          <div>
+          <div className="rounded-xl border border-white/10 bg-[#0c0d10] p-6">
             <h2 className="text-xl font-semibold text-white mb-3">
               2. How We Use Your Information
             </h2>
@@ -81,15 +89,17 @@ export default function PrivacyPage() {
             </p>
           </div>
 
-          <div>
-            <h2 className="text-xl font-semibold text-white mb-3">3. Cookies &amp; Local Storage</h2>
+          <div className="rounded-xl border border-white/10 bg-[#0c0d10] p-6">
+            <h2 className="text-xl font-semibold text-white mb-3">
+              3. Cookies &amp; Local Storage
+            </h2>
             <p>
               We use local storage strictly for essential user preferences, such as selected model
               modes, UI preferences, and cookie consent status.
             </p>
           </div>
 
-          <div>
+          <div className="rounded-xl border border-white/10 bg-[#0c0d10] p-6">
             <h2 className="text-xl font-semibold text-white mb-3">4. Contact Us</h2>
             <p>
               If you have any questions regarding this Privacy Policy, you can reach out via our{" "}
@@ -101,6 +111,8 @@ export default function PrivacyPage() {
           </div>
         </section>
       </main>
+
+      <PublicFooter />
     </div>
   );
 }

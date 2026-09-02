@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PublicFooter } from "@/components/navigation/public-footer";
+import { PublicNav } from "@/components/navigation/public-nav";
 import { BreadcrumbJsonLd } from "@/lib/json-ld";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
@@ -36,14 +38,20 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-[#070708] text-[#e4e4e7]">
+    <div className="min-h-screen bg-[#070708] text-[#e4e4e7] flex flex-col">
+      <PublicNav />
+
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: siteUrl },
           { name: "Terms", url: `${siteUrl}/terms` },
         ]}
       />
-      <main id="main-content" className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
+
+      <main
+        id="main-content"
+        className="flex-1 mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8 w-full"
+      >
         <nav className="mb-8 flex items-center text-sm text-[#a1a1aa]" aria-label="Breadcrumb">
           <Link href="/" className="hover:text-white transition-colors">
             Home
@@ -60,7 +68,7 @@ export default function TermsPage() {
         </header>
 
         <section className="space-y-8 text-base text-[#a1a1aa] leading-relaxed">
-          <div>
+          <div className="rounded-xl border border-white/10 bg-[#0c0d10] p-6">
             <h2 className="text-xl font-semibold text-white mb-3">1. Informational Purpose</h2>
             <p>
               UET GPT is provided strictly for informational and navigational assistance. While we
@@ -70,7 +78,7 @@ export default function TermsPage() {
             </p>
           </div>
 
-          <div>
+          <div className="rounded-xl border border-white/10 bg-[#0c0d10] p-6">
             <h2 className="text-xl font-semibold text-white mb-3">2. Non-Affiliation Disclaimer</h2>
             <p>
               UET GPT is an independent, community-driven initiative. It is not affiliated with,
@@ -79,15 +87,17 @@ export default function TermsPage() {
             </p>
           </div>
 
-          <div>
+          <div className="rounded-xl border border-white/10 bg-[#0c0d10] p-6">
             <h2 className="text-xl font-semibold text-white mb-3">3. Acceptable Use</h2>
             <p>
-              Users agree not to attempt to reverse engineer, disrupt, or flood the API services, nor
-              to extract data in violation of privacy or applicable laws.
+              Users agree not to attempt to reverse engineer, disrupt, or flood the API services,
+              nor to extract data in violation of privacy or applicable laws.
             </p>
           </div>
         </section>
       </main>
+
+      <PublicFooter />
     </div>
   );
 }
