@@ -175,13 +175,13 @@ export default function UetTaxilaProgramsPage() {
           </p>
           <div className="flex items-center justify-center flex-wrap gap-4">
             <Link
-              href="/calculator"
+              href="/tools?tab=merit"
               className="px-6 py-3 rounded-xl bg-[#d9b451] text-[#07080a] font-semibold hover:bg-[#f0d178] transition-colors text-base min-h-[44px] flex items-center justify-center"
             >
               Check Department Merits
             </Link>
             <Link
-              href="/uet-taxila/admissions"
+              href="/admissions?tab=overview"
               className="px-6 py-3 rounded-xl border border-[#d9b451]/40 text-[#d9b451] hover:bg-[#d9b451]/10 transition-colors text-base min-h-[44px] flex items-center justify-center"
             >
               Admissions Guide
@@ -273,7 +273,7 @@ export default function UetTaxilaProgramsPage() {
           <h2 className="text-xl font-semibold mb-4 text-white">Related University Resources</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Link
-              href="/calculator"
+              href="/tools?tab=merit"
               className="p-4 rounded-xl border border-white/10 bg-[#0c0c0f] hover:border-[#d9b451]/50 transition-colors"
             >
               <div className="text-xs text-[#d9b451] font-mono mb-1">TOOL</div>
@@ -281,7 +281,7 @@ export default function UetTaxilaProgramsPage() {
               <p className="text-xs text-[#a1a1aa] mt-1">Compute your department aggregate.</p>
             </Link>
             <Link
-              href="/uet-taxila/admissions"
+              href="/admissions?tab=overview"
               className="p-4 rounded-xl border border-white/10 bg-[#0c0c0f] hover:border-[#d9b451]/50 transition-colors"
             >
               <div className="text-xs text-[#d9b451] font-mono mb-1">ADMISSIONS</div>
@@ -289,7 +289,7 @@ export default function UetTaxilaProgramsPage() {
               <p className="text-xs text-[#a1a1aa] mt-1">60% vs 50% threshold rules and dates.</p>
             </Link>
             <Link
-              href="/uet-taxila/fee-structure"
+              href="/admissions?tab=fees"
               className="p-4 rounded-xl border border-white/10 bg-[#0c0c0f] hover:border-[#d9b451]/50 transition-colors"
             >
               <div className="text-xs text-[#d9b451] font-mono mb-1">FINANCES</div>

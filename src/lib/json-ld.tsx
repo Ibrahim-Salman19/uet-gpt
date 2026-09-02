@@ -139,21 +139,34 @@ export function JsonLd() {
 /**
  * Google BreadcrumbList schema helper.
  * Omits the `item` property on the last entry per Google's explicit Search Central specification.
+ * Automatically formats relative URLs into fully qualified canonical URLs.
  */
-export function BreadcrumbJsonLd({ items }: { items: { name: string; url: string }[] }) {
+export function BreadcrumbJsonLd({
+  items,
+}: {
+  items: { name: string; url?: string; item?: string; href?: string }[];
+}) {
   const schema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    itemListElement: items.map((item, i) => {
+    itemListElement: items.map((crumb, i) => {
       const isLast = i === items.length - 1;
+      const rawUrl = crumb.url || crumb.item || crumb.href || "";
+      const canonicalUrl = rawUrl
+        ? rawUrl.startsWith("http")
+          ? rawUrl
+          : `${siteUrl}${rawUrl.startsWith("/") ? rawUrl : `/${rawUrl}`}`
+        : undefined;
+
       return {
         "@type": "ListItem",
         position: i + 1,
-        name: item.name,
-        ...(isLast ? {} : { item: item.url }),
+        name: crumb.name,
+        ...(isLast || !canonicalUrl ? {} : { item: canonicalUrl }),
       };
     }),
   };
+
   return (
     <script
       type="application/ld+json"

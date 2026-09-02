@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PublicFooter } from "@/components/navigation/public-footer";
+import { PublicNav } from "@/components/navigation/public-nav";
 import { BreadcrumbJsonLd } from "@/lib/json-ld";
 import { getAllSlugs, getTermBySlug, LEARN_TERMS } from "@/lib/learn-terms";
 
@@ -128,36 +130,8 @@ export default async function LearnTermPage({ params }: { params: Promise<{ slug
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
-      <div className="flex min-h-screen flex-col bg-[#070708] text-[#e1e1e2]">
-        {/* Header */}
-        <header className="flex items-center justify-between px-6 py-4 border-b border-[#1a1a1e]">
-          <div className="flex items-center gap-3">
-            <div className="size-8 rounded-lg bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white font-bold text-sm">
-              U
-            </div>
-            <span className="font-semibold text-base">UET GPT</span>
-          </div>
-          <nav className="flex items-center gap-4">
-            <Link
-              href="/"
-              className="text-sm text-[#a1a1aa] hover:text-[#e1e1e2] transition-colors"
-            >
-              UET GPT Home
-            </Link>
-            <Link
-              href="/uet-taxila"
-              className="text-sm text-[#a1a1aa] hover:text-[#e1e1e2] transition-colors"
-            >
-              UET Taxila Hub
-            </Link>
-            <Link
-              href="/chat"
-              className="text-sm px-4 py-2 rounded-lg bg-[#d9b451] text-[#07080a] font-semibold hover:bg-[#f0d178] transition-colors"
-            >
-              Start Chat
-            </Link>
-          </nav>
-        </header>
+      <div className="flex min-h-screen flex-col bg-[#07080a] text-[#edf0ec]">
+        <PublicNav />
 
         <main id="main-content" className="flex-1">
           {/* Hero */}
@@ -165,30 +139,32 @@ export default async function LearnTermPage({ params }: { params: Promise<{ slug
             {/* Breadcrumb trail (visible) */}
             <nav
               aria-label="Breadcrumb"
-              className="text-xs text-[#71717a] mb-6 flex items-center gap-1"
+              className="text-xs text-[#71717a] mb-6 flex items-center gap-1.5"
             >
-              <Link href="/" className="hover:text-[#a1a1aa] transition-colors">
+              <Link href="/" className="hover:text-white transition-colors">
                 Home
               </Link>
               <span>/</span>
-              <Link href="/learn" className="hover:text-[#a1a1aa] transition-colors">
+              <Link href="/learn" className="hover:text-white transition-colors">
                 Learn
               </Link>
               <span>/</span>
-              <span className="text-[#a1a1aa]">{term.title}</span>
+              <span className="text-[#d9b451]">{term.title}</span>
             </nav>
 
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">{term.title}</h1>
-            <p className="text-base text-[#a1a1aa] leading-relaxed mb-8">{term.lead}</p>
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4 text-white">
+              {term.title}
+            </h1>
+            <p className="text-base sm:text-lg text-[#a1a1aa] leading-relaxed mb-8">{term.lead}</p>
 
             <div className="flex flex-wrap gap-3">
               {term.hubLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-sm px-4 py-2 rounded-lg bg-[#6366f1] text-white hover:bg-[#5558e6] transition-colors"
+                  className="text-xs font-mono font-bold uppercase tracking-wider px-4 py-2 rounded-lg bg-[#d9b451]/15 text-[#d9b451] border border-[#d9b451]/30 hover:bg-[#d9b451] hover:text-[#07080a] transition-all"
                 >
-                  {link.label}
+                  {link.label} &rarr;
                 </Link>
               ))}
             </div>
@@ -197,8 +173,11 @@ export default async function LearnTermPage({ params }: { params: Promise<{ slug
           {/* Body sections */}
           <section className="px-6 pb-12 max-w-3xl mx-auto space-y-10">
             {term.sections.map((section) => (
-              <div key={section.heading}>
-                <h2 className="text-xl font-semibold mb-4 text-[#e1e1e2]">{section.heading}</h2>
+              <div
+                key={section.heading}
+                className="rounded-2xl border border-white/10 bg-[#0c0d10] p-6 sm:p-8"
+              >
+                <h2 className="text-xl font-bold mb-4 text-white">{section.heading}</h2>
                 <div className="space-y-3">
                   {section.paragraphs.map((para, i) => (
                     // biome-ignore lint/suspicious/noArrayIndexKey: static list of paragraphs that never reorders
@@ -213,14 +192,16 @@ export default async function LearnTermPage({ params }: { params: Promise<{ slug
 
           {/* FAQ */}
           <section className="px-6 py-12 max-w-3xl mx-auto">
-            <h2 className="text-xl font-semibold mb-6">Frequently Asked Questions</h2>
+            <h2 className="text-2xl font-bold mb-6 text-white">Frequently Asked Questions</h2>
             <div className="space-y-4">
               {term.faqs.map((faq) => (
                 <details
                   key={faq.q}
-                  className="p-4 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f]"
+                  className="p-5 rounded-xl border border-white/10 bg-[#0c0d10] group"
                 >
-                  <summary className="font-medium text-sm cursor-pointer">{faq.q}</summary>
+                  <summary className="font-semibold text-sm cursor-pointer text-white group-hover:text-[#d9b451] transition-colors">
+                    {faq.q}
+                  </summary>
                   <p className="mt-3 text-sm text-[#a1a1aa] leading-relaxed">{faq.a}</p>
                 </details>
               ))}
@@ -229,19 +210,21 @@ export default async function LearnTermPage({ params }: { params: Promise<{ slug
 
           {/* Related terms */}
           {related.length > 0 && (
-            <section className="px-6 py-12 max-w-3xl mx-auto border-t border-[#1a1a1e]">
-              <h2 className="text-lg font-semibold mb-6 text-[#a1a1aa]">
-                Related UET Taxila Terms
+            <section className="px-6 py-12 max-w-3xl mx-auto border-t border-white/10">
+              <h2 className="text-lg font-bold mb-6 text-white font-mono uppercase tracking-wider text-xs">
+                Related Knowledge Base Guides
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {related.map((t) => (
                   <Link
                     key={t.slug}
                     href={`/learn/${t.slug}`}
-                    className="p-4 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f] hover:border-[#3f3f46] transition-colors"
+                    className="p-5 rounded-xl border border-white/10 bg-[#0c0d10] hover:border-[#d9b451]/50 hover:bg-white/[0.02] transition-all group"
                   >
-                    <p className="text-sm font-medium text-[#e1e1e2] mb-1">{t.title}</p>
-                    <p className="text-xs text-[#71717a] line-clamp-2">{t.lead.slice(0, 80)}...</p>
+                    <p className="text-sm font-bold text-white mb-1 group-hover:text-[#d9b451] transition-colors">
+                      {t.title}
+                    </p>
+                    <p className="text-xs text-[#a1a1aa] line-clamp-2">{t.lead.slice(0, 80)}...</p>
                   </Link>
                 ))}
               </div>
@@ -249,46 +232,25 @@ export default async function LearnTermPage({ params }: { params: Promise<{ slug
           )}
 
           {/* CTA */}
-          <section className="px-6 py-16 max-w-3xl mx-auto text-center">
-            <h2 className="text-xl font-semibold mb-3">Still have questions about UET Taxila?</h2>
-            <p className="text-sm text-[#a1a1aa] mb-6">
+          <section className="px-6 py-16 max-w-3xl mx-auto text-center border-t border-white/10">
+            <h2 className="text-xl font-bold mb-3 text-white">
+              Still have questions about UET Taxila?
+            </h2>
+            <p className="text-sm text-[#a1a1aa] mb-6 max-w-xl mx-auto leading-relaxed">
               UET GPT is the AI guide to UET Taxila. Ask anything about admissions, programs, fees,
               campus life, and more — grounded in official sources, free for every student.
             </p>
             <Link
               href="/chat"
-              className="px-6 py-3 rounded-xl bg-[#d9b451] text-[#07080a] font-semibold hover:bg-[#f0d178] transition-colors text-base"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[#d9b451] text-[#07080a] font-bold hover:bg-[#f0d178] transition-colors text-xs font-mono uppercase tracking-wider"
             >
-              Ask UET GPT
+              <span>Ask UET GPT Assistant</span>
+              <span>&rarr;</span>
             </Link>
           </section>
         </main>
 
-        {/* Footer */}
-        <footer className="border-t border-[#1a1a1e] px-6 py-8">
-          <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-[#a1a1aa]">
-              &copy; {new Date().getFullYear()} UET GPT Community. All rights reserved.
-            </p>
-            <div className="flex items-center gap-6 text-sm text-[#a1a1aa]">
-              <Link href="/" className="hover:text-[#e1e1e2] transition-colors">
-                UET GPT Home
-              </Link>
-              <Link href="/uet-taxila" className="hover:text-[#e1e1e2] transition-colors">
-                UET Taxila Hub
-              </Link>
-              <Link href="/learn" className="hover:text-[#e1e1e2] transition-colors">
-                Learn
-              </Link>
-              <Link href="/about" className="hover:text-[#e1e1e2] transition-colors">
-                About
-              </Link>
-              <Link href="/privacy" className="hover:text-[#e1e1e2] transition-colors">
-                Privacy
-              </Link>
-            </div>
-          </div>
-        </footer>
+        <PublicFooter />
       </div>
     </>
   );

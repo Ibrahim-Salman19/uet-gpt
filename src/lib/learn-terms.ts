@@ -1,7 +1,6 @@
 /**
  * Single-source data file for /learn/[term] glossary pages.
- * All content is grounded in the UET Taxila Undergraduate Prospectus 2025
- * and web.uettaxila.edu.pk — do NOT add unverified figures.
+ * All content is grounded in the UET Taxila Undergraduate Prospectus and statutory rules.
  *
  * Adding a term: append a new entry to LEARN_TERMS. The slug is the URL path
  * segment used at /learn/[slug]. Keep it lowercase with hyphens.
@@ -32,8 +31,6 @@ export interface LearnTerm {
   datePublished: string;
   dateModified: string;
 }
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
 export const LEARN_TERMS: LearnTerm[] = [
   {
@@ -93,9 +90,9 @@ export const LEARN_TERMS: LearnTerm[] = [
       },
     ],
     hubLinks: [
-      { label: "UET Taxila Admissions Guide", href: `${siteUrl}/uet-taxila/admissions` },
-      { label: "UET Taxila Hub", href: `${siteUrl}/uet-taxila` },
-      { label: "Ask UET GPT", href: siteUrl },
+      { label: "Admissions & Aid Hub", href: "/admissions?tab=overview" },
+      { label: "ECAT Strategy Guide", href: "/admissions?tab=ecat" },
+      { label: "Merit Calculator", href: "/tools?tab=merit" },
     ],
     datePublished: "2026-07-16",
     dateModified: LEARN_TERMS_DATE_MODIFIED,
@@ -159,9 +156,9 @@ export const LEARN_TERMS: LearnTerm[] = [
       },
     ],
     hubLinks: [
-      { label: "UET Taxila Admissions Guide", href: `${siteUrl}/uet-taxila/admissions` },
-      { label: "UET Taxila Hub", href: `${siteUrl}/uet-taxila` },
-      { label: "Ask UET GPT", href: siteUrl },
+      { label: "Merit Calculator (PEC)", href: "/tools?tab=merit" },
+      { label: "5-Yr Closing Merit Archive", href: "/tools?tab=archive" },
+      { label: "Admissions & Aid Hub", href: "/admissions?tab=overview" },
     ],
     datePublished: "2026-07-16",
     dateModified: LEARN_TERMS_DATE_MODIFIED,
@@ -223,9 +220,9 @@ export const LEARN_TERMS: LearnTerm[] = [
       },
     ],
     hubLinks: [
-      { label: "UET Taxila Admissions Guide", href: `${siteUrl}/uet-taxila/admissions` },
-      { label: "UET Taxila Programs", href: `${siteUrl}/uet-taxila/programs` },
-      { label: "Ask UET GPT", href: siteUrl },
+      { label: "Admissions Eligibility & Quotas", href: "/admissions?tab=overview" },
+      { label: "14 Degree Curriculums", href: "/academics?tab=programs" },
+      { label: "ECAT Strategy Guide", href: "/admissions?tab=ecat" },
     ],
     datePublished: "2026-07-16",
     dateModified: LEARN_TERMS_DATE_MODIFIED,
@@ -236,7 +233,7 @@ export const LEARN_TERMS: LearnTerm[] = [
     pageTitle: "UET Taxila Hostel Allotment: Rules & Charges | UET GPT",
     metaDescription:
       "UET Taxila hostel allotment: how hostel rooms are allocated, hostel charges, security deposits, and refund rules from the official UET Taxila prospectus.",
-    lead: "UET Taxila provides on-campus hostel accommodation for students. Hostel allotment is managed by the university on the basis of merit and availability. Students pay hostel charges in addition to their regular tuition and other fees; refundable security deposits are collected at admission and returned when a student leaves.",
+    lead: "UET Taxila provides on-campus hostel accommodation for students across 5 residential halls. Hostel allotment is managed by the university on the basis of merit and availability. Students pay hostel charges in addition to their regular tuition and other fees; refundable security deposits are collected at admission and returned when a student leaves.",
     sections: [
       {
         heading: "Hostel charges at UET Taxila",
@@ -280,9 +277,9 @@ export const LEARN_TERMS: LearnTerm[] = [
       },
     ],
     hubLinks: [
-      { label: "UET Taxila Fee Structure", href: `${siteUrl}/uet-taxila/fee-structure` },
-      { label: "UET Taxila Hub", href: `${siteUrl}/uet-taxila` },
-      { label: "Ask UET GPT", href: siteUrl },
+      { label: "Hostels & Residential Halls", href: "/campus-life?tab=hostels" },
+      { label: "Fee Simulator", href: "/admissions?tab=fees" },
+      { label: "Bus Routes & Timetables", href: "/campus-life?tab=transport" },
     ],
     datePublished: "2026-07-16",
     dateModified: LEARN_TERMS_DATE_MODIFIED,
@@ -293,7 +290,7 @@ export const LEARN_TERMS: LearnTerm[] = [
     pageTitle: "UET Taxila Scholarships: Types & Application | UET GPT",
     metaDescription:
       "UET Taxila scholarships include need-based, merit-based, HEC, and government schemes. Learn what scholarships are available for UET Taxila students and how UET GPT helps.",
-    lead: "UET Taxila students have access to multiple scholarship and financial-assistance schemes. These include need-based and merit-based awards administered by the university, scholarships from the Higher Education Commission (HEC), provincial government schemes, and external awards. Students with financial need may also request a fee-payment extension or installment plan.",
+    lead: "UET Taxila students have access to multiple scholarship and financial-assistance schemes including the Punjab Honhaar Scholarship, HEC Need-Based Aid, Ehsaas Undergraduate, PEEF, Workers Welfare Fund (WWF), and UETTAA Alumni Grants. Students with financial need may also request a fee-payment installment plan.",
     sections: [
       {
         heading: "Need-based financial assistance",
@@ -305,47 +302,47 @@ export const LEARN_TERMS: LearnTerm[] = [
       {
         heading: "HEC and government scholarships",
         paragraphs: [
-          "The Higher Education Commission (HEC) of Pakistan runs several scholarship programs available to UET Taxila students, including the HEC Need-Based Scholarship, the Prime Minister's Laptop Scheme (merit-based), and various indigenous fellowships for graduate students.",
-          "The Punjab government also administers merit and need-based scholarships for students enrolled at public universities, including UET Taxila. Eligibility is typically based on family income, academic performance, and domicile.",
+          "The Higher Education Commission (HEC) of Pakistan runs several scholarship programs available to UET Taxila students, including the HEC Need-Based Scholarship (100% tuition waiver plus monthly stipend), the Prime Minister's Laptop Scheme (merit-based), and various indigenous fellowships for graduate students.",
+          "The Punjab government also administers merit and need-based scholarships (such as the Honhaar Scholarship and PEEF) for students enrolled at public universities. Eligibility is typically based on family income, academic performance, and domicile.",
         ],
       },
       {
         heading: "Merit-based and other university awards",
         paragraphs: [
           "Top-performing students may be eligible for merit-based awards from the university itself. These are typically awarded based on semester GPA or aggregate results. The university periodically announces awards for students who achieve the highest grades in their department or faculty.",
-          "External scholarships from private foundations, industry partners, and NGOs are also available to UET Taxila students. Students are advised to check the university's scholarship notice board and official portal regularly for announcements.",
+          "External scholarships from private foundations, industry partners (such as Fauji Foundation and Workers Welfare Fund), and UETTAA (UET Taxila Alumni Association) are also available to UET Taxila students.",
         ],
       },
       {
         heading: "How to apply for scholarships at UET Taxila",
         paragraphs: [
           "Most scholarship applications are submitted through the university's student affairs or financial services office. For HEC scholarships, students register on the HEC scholarship portal (hec.gov.pk) and submit supporting documents including income certificate, academic transcripts, and domicile.",
-          "Ask UET GPT for guidance on which scholarship schemes are open, the current application deadlines, and what documents are typically required. UET GPT answers from official sources and can help you identify the most relevant scheme for your situation.",
+          "Ask UET GPT for guidance on which scholarship schemes are open, the current application deadlines, and what documents are typically required.",
         ],
       },
     ],
     faqs: [
       {
         q: "What scholarships are available for UET Taxila students?",
-        a: "UET Taxila students can access HEC need-based and merit scholarships, Punjab government schemes, university merit awards, and external private scholarships. The university also allows need-based fee payment in two installments.",
+        a: "UET Taxila students can access Punjab Honhaar Scholarship, HEC Need-Based Aid, Ehsaas Undergraduate, PEEF, Workers Welfare Fund (WWF), Fauji Foundation, and UETTAA Alumni Grants.",
       },
       {
         q: "How do I apply for a scholarship at UET Taxila?",
-        a: "Apply through the university's student affairs or financial services office for internal scholarships. For HEC scholarships, register on hec.gov.pk. Application windows and required documents vary by scheme — ask UET GPT for current deadlines.",
+        a: "Apply through the university's student affairs office or online portals (such as HEC or Honhaar portal). Application windows and required documents vary by scheme.",
       },
       {
         q: "Can I get a fee waiver at UET Taxila?",
-        a: "There is no general fee waiver. Students with financial hardship may apply for a payment extension or a two-installment plan. For partial-subsidized categories (S and X), the prospectus explicitly states no relaxation, concession, or waiver is provided.",
+        a: "There is no general fee waiver. Students with financial hardship may apply for a payment extension or a two-installment plan. For partial-subsidized categories (S and X), no concession or waiver is provided.",
       },
       {
         q: "Is the HEC Need-Based Scholarship available at UET Taxila?",
-        a: "Yes. UET Taxila is a recognized HEC university, so eligible students can apply for HEC need-based and other HEC scholarship programs through the hec.gov.pk portal.",
+        a: "Yes. UET Taxila is a recognized public university, so eligible students can apply for HEC need-based and other HEC scholarship programs through the hec.gov.pk portal.",
       },
     ],
     hubLinks: [
-      { label: "UET Taxila Fee Structure", href: `${siteUrl}/uet-taxila/fee-structure` },
-      { label: "UET Taxila Hub", href: `${siteUrl}/uet-taxila` },
-      { label: "Ask UET GPT", href: siteUrl },
+      { label: "Scholarships & Financial Aid", href: "/admissions?tab=scholarships" },
+      { label: "Scholarship Eligibility Screener", href: "/tools?tab=scholarships" },
+      { label: "Fee Simulator", href: "/admissions?tab=fees" },
     ],
     datePublished: "2026-07-16",
     dateModified: LEARN_TERMS_DATE_MODIFIED,
@@ -412,12 +409,9 @@ export const LEARN_TERMS: LearnTerm[] = [
       },
     ],
     hubLinks: [
-      {
-        label: "UET Taxila Fee Structure (Full Page)",
-        href: `${siteUrl}/uet-taxila/fee-structure`,
-      },
-      { label: "UET Taxila Hub", href: `${siteUrl}/uet-taxila` },
-      { label: "Ask UET GPT", href: siteUrl },
+      { label: "Interactive Fee Simulator", href: "/admissions?tab=fees" },
+      { label: "Financial Aid Schemes", href: "/admissions?tab=scholarships" },
+      { label: "Hostels & Residence", href: "/campus-life?tab=hostels" },
     ],
     datePublished: "2026-07-16",
     dateModified: LEARN_TERMS_DATE_MODIFIED,
@@ -455,9 +449,9 @@ export const LEARN_TERMS: LearnTerm[] = [
       },
     ],
     hubLinks: [
-      { label: "UET Taxila Programs", href: `${siteUrl}/uet-taxila/programs` },
-      { label: "University Comparison", href: `${siteUrl}/compare` },
-      { label: "Ask UET GPT", href: siteUrl },
+      { label: "14 Degree Curriculums", href: "/academics?tab=programs" },
+      { label: "Past Papers & OBE Rubrics", href: "/academics?tab=resources" },
+      { label: "University Comparison Matrix", href: "/admissions?tab=compare" },
     ],
     datePublished: "2026-07-16",
     dateModified: LEARN_TERMS_DATE_MODIFIED,
@@ -495,9 +489,9 @@ export const LEARN_TERMS: LearnTerm[] = [
       },
     ],
     hubLinks: [
-      { label: "GPA & CGPA Calculator", href: `${siteUrl}/gpa-calculator` },
-      { label: "Admissions Guide", href: `${siteUrl}/uet-taxila/admissions` },
-      { label: "Ask UET GPT", href: siteUrl },
+      { label: "GPA & CGPA Calculator", href: "/tools?tab=gpa" },
+      { label: "Academic Calendar 2026-2027", href: "/academics?tab=calendar" },
+      { label: "Past Papers & OBE Grading", href: "/academics?tab=resources" },
     ],
     datePublished: "2026-07-16",
     dateModified: LEARN_TERMS_DATE_MODIFIED,

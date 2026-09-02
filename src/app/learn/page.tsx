@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PublicFooter } from "@/components/navigation/public-footer";
+import { PublicNav } from "@/components/navigation/public-nav";
 import { SCHEMA_DATE_MODIFIED } from "@/lib/dates";
 import { BreadcrumbJsonLd } from "@/lib/json-ld";
 import { LEARN_TERMS } from "@/lib/learn-terms";
@@ -76,55 +78,28 @@ export default function LearnIndexPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionSchema) }}
       />
 
-      <div className="flex min-h-screen flex-col bg-[#070708] text-[#e1e1e2]">
-        {/* Header */}
-        <header className="flex items-center justify-between px-6 py-4 border-b border-[#1a1a1e]">
-          <div className="flex items-center gap-3">
-            <div className="size-8 rounded-lg bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white font-bold text-sm">
-              U
-            </div>
-            <span className="font-semibold text-base">UET GPT</span>
-          </div>
-          <nav className="flex items-center gap-4">
-            <Link
-              href="/"
-              className="text-sm text-[#a1a1aa] hover:text-[#e1e1e2] transition-colors"
-            >
-              UET GPT Home
-            </Link>
-            <Link
-              href="/uet-taxila"
-              className="text-sm text-[#a1a1aa] hover:text-[#e1e1e2] transition-colors"
-            >
-              UET Taxila Hub
-            </Link>
-            <Link
-              href="/chat"
-              className="text-sm px-4 py-2 rounded-lg bg-[#d9b451] text-[#07080a] font-semibold hover:bg-[#f0d178] transition-colors"
-            >
-              Start Chat
-            </Link>
-          </nav>
-        </header>
+      <div className="flex min-h-screen flex-col bg-[#07080a] text-[#edf0ec]">
+        <PublicNav />
 
         <main id="main-content" className="flex-1">
           {/* Hero */}
           <section className="px-6 pt-24 pb-12 max-w-3xl mx-auto text-center">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#d9b451]/30 bg-[#d9b451]/10 px-3.5 py-1 text-xs font-mono font-semibold uppercase tracking-wider text-[#d9b451] mb-6">
+              Taxila Knowledge Base
+            </span>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
-              UET Taxila{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6366f1] to-[#a78bfa]">
-                Glossary
-              </span>
+              UET Taxila <span className="text-[#d9b451]">Glossary</span>
             </h1>
-            <p className="text-lg text-[#a1a1aa] max-w-2xl mx-auto mb-8">
+            <p className="text-base sm:text-lg text-[#a1a1aa] max-w-2xl mx-auto mb-8 leading-relaxed">
               Key terms every UET Taxila applicant and student should know — explained clearly and
-              sourced from the official 2025 undergraduate prospectus.
+              sourced from the official undergraduate prospectus and statutory rules.
             </p>
             <Link
               href="/chat"
-              className="px-6 py-3 rounded-xl bg-[#d9b451] text-[#07080a] font-semibold hover:bg-[#f0d178] transition-colors text-base"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[#d9b451] text-[#07080a] font-bold hover:bg-[#f0d178] transition-colors text-xs font-mono uppercase tracking-wider shadow-md shadow-[#d9b451]/10"
             >
-              Ask UET GPT Anything
+              <span>Ask UET GPT Anything</span>
+              <span>&rarr;</span>
             </Link>
           </section>
 
@@ -135,16 +110,16 @@ export default function LearnIndexPage() {
                 <Link
                   key={term.slug}
                   href={`/learn/${term.slug}`}
-                  className="block p-6 rounded-xl border border-[#1a1a1e] bg-[#0c0c0f] hover:border-[#3f3f46] transition-colors group"
+                  className="block p-6 rounded-xl border border-white/10 bg-[#0c0d10] hover:border-[#d9b451]/50 hover:bg-white/[0.02] transition-all group"
                 >
-                  <h2 className="font-semibold text-base mb-2 group-hover:text-[#a78bfa] transition-colors">
+                  <h2 className="font-bold text-base mb-2 text-white group-hover:text-[#d9b451] transition-colors">
                     {term.title}
                   </h2>
-                  <p className="text-sm text-[#71717a] line-clamp-2">
+                  <p className="text-sm text-[#a1a1aa] line-clamp-2 leading-relaxed">
                     {term.lead.slice(0, 140)}...
                   </p>
-                  <span className="mt-3 inline-block text-xs text-[#6366f1] font-medium">
-                    Read more &rarr;
+                  <span className="mt-3 inline-block text-xs font-mono text-[#d9b451] font-semibold">
+                    Read detailed breakdown &rarr;
                   </span>
                 </Link>
               ))}
@@ -152,50 +127,24 @@ export default function LearnIndexPage() {
           </section>
 
           {/* CTA */}
-          <section className="px-6 py-16 max-w-3xl mx-auto text-center border-t border-[#1a1a1e]">
-            <h2 className="text-xl font-semibold mb-3">Can&apos;t find your answer?</h2>
-            <p className="text-sm text-[#a1a1aa] mb-6">
+          <section className="px-6 py-16 max-w-3xl mx-auto text-center border-t border-white/10">
+            <h2 className="text-xl font-bold mb-3 text-white">Can&apos;t find your answer?</h2>
+            <p className="text-sm text-[#a1a1aa] mb-6 leading-relaxed max-w-xl mx-auto">
               UET GPT answers any question about UET Taxila — admissions, programs, fees, campus
               life, scholarships — using official university documents. Free for every student and
               applicant.
             </p>
             <Link
               href="/chat"
-              className="px-6 py-3 rounded-xl bg-[#d9b451] text-[#07080a] font-semibold hover:bg-[#f0d178] transition-colors text-base"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[#d9b451] text-[#07080a] font-bold hover:bg-[#f0d178] transition-colors text-xs font-mono uppercase tracking-wider"
             >
-              Ask UET GPT
+              <span>Ask UET GPT Assistant</span>
+              <span>&rarr;</span>
             </Link>
           </section>
         </main>
 
-        {/* Footer */}
-        <footer className="border-t border-[#1a1a1e] px-6 py-8">
-          <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-[#a1a1aa]">
-              &copy; {new Date().getFullYear()} UET GPT Community. All rights reserved.
-            </p>
-            <div className="flex items-center gap-6 text-sm text-[#a1a1aa]">
-              <Link href="/" className="hover:text-[#e1e1e2] transition-colors">
-                UET GPT Home
-              </Link>
-              <Link href="/uet-taxila" className="hover:text-[#e1e1e2] transition-colors">
-                UET Taxila Hub
-              </Link>
-              <Link
-                href="/uet-taxila/admissions"
-                className="hover:text-[#e1e1e2] transition-colors"
-              >
-                Admissions
-              </Link>
-              <Link href="/about" className="hover:text-[#e1e1e2] transition-colors">
-                About
-              </Link>
-              <Link href="/privacy" className="hover:text-[#e1e1e2] transition-colors">
-                Privacy
-              </Link>
-            </div>
-          </div>
-        </footer>
+        <PublicFooter />
       </div>
     </>
   );

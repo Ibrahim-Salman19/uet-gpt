@@ -280,7 +280,7 @@ export default async function ProgramDetailPage({ params }: PageProps) {
         {/* Quick Calculator & Compare CTAs */}
         <section className="mb-14 grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Link
-            href="/calculator"
+            href="/tools?tab=merit"
             className="rounded-xl border border-white/10 bg-[#0c0d10] p-5 hover:border-[#d9b451]/50 transition-colors group"
           >
             <h3 className="text-sm font-semibold text-white group-hover:text-[#d9b451] transition-colors mb-1">
@@ -291,7 +291,7 @@ export default async function ProgramDetailPage({ params }: PageProps) {
             </p>
           </Link>
           <Link
-            href="/uet-taxila/fee-structure"
+            href="/admissions?tab=fees"
             className="rounded-xl border border-white/10 bg-[#0c0d10] p-5 hover:border-[#d9b451]/50 transition-colors group"
           >
             <h3 className="text-sm font-semibold text-white group-hover:text-[#d9b451] transition-colors mb-1">
@@ -302,7 +302,7 @@ export default async function ProgramDetailPage({ params }: PageProps) {
             </p>
           </Link>
           <Link
-            href="/compare"
+            href="/admissions?tab=compare"
             className="rounded-xl border border-white/10 bg-[#0c0d10] p-5 hover:border-[#d9b451]/50 transition-colors group"
           >
             <h3 className="text-sm font-semibold text-white group-hover:text-[#d9b451] transition-colors mb-1">
