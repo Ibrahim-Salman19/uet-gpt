@@ -263,8 +263,8 @@ export function GpaCalculator() {
 
             {calculation.isDeanList && (
               <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/30 p-3 text-xs text-emerald-300">
-                🌟 <strong>Dean&apos;s Honors List:</strong> Outstanding academic performance
-                ($\text{SGPA} \ge 3.70$).
+                🌟 <strong>Dean&apos;s Honors List:</strong> Outstanding academic performance (SGPA
+                &ge; 3.70 with &ge; 12 CH).
               </div>
             )}
           </div>
