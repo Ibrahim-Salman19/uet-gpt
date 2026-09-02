@@ -4,6 +4,7 @@ import { PublicFooter } from "@/components/navigation/public-footer";
 import { PublicNav } from "@/components/navigation/public-nav";
 import { CURRENT_ACADEMIC_YEAR, SCHEMA_DATE_MODIFIED } from "@/lib/dates";
 import { BreadcrumbJsonLd } from "@/lib/json-ld";
+import { PROGRAMS_DATA } from "@/lib/programs-data";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
@@ -191,6 +192,49 @@ export default function UetTaxilaProgramsPage() {
             >
               UET Taxila Hub
             </Link>
+          </div>
+        </section>
+
+        {/* 14 Undergraduate Degree Programs Grid */}
+        <section className="px-6 py-16 max-w-5xl mx-auto border-t border-white/5">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold text-white mb-3">14 Undergraduate Degree Programs</h2>
+            <p className="text-sm text-[#a1a1aa] max-w-2xl mx-auto">
+              Select any engineering or computing program to explore its 4-year semester roadmap,
+              course codes, laboratory facilities, and closing merit benchmarks.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {PROGRAMS_DATA.map((prog) => (
+              <Link
+                key={prog.slug}
+                href={`/uet-taxila/programs/${prog.slug}`}
+                className="group p-5 rounded-xl border border-white/10 bg-[#0c0d10] hover:border-[#d9b451]/50 hover:bg-[#121318] transition-all flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-[#d9b451] bg-[#d9b451]/10 px-2 py-0.5 rounded">
+                      {prog.degreeType}
+                    </span>
+                    <span className="text-[10px] font-mono text-emerald-400">
+                      {prog.accreditationBody}
+                    </span>
+                  </div>
+                  <h3 className="font-semibold text-base text-white group-hover:text-[#d9b451] transition-colors mb-1.5">
+                    {prog.name}
+                  </h3>
+                  <p className="text-xs text-[#a1a1aa] line-clamp-2 mb-4 leading-relaxed">
+                    {prog.lead}
+                  </p>
+                </div>
+                <div className="border-t border-white/5 pt-3 flex items-center justify-between text-xs font-mono">
+                  <span className="text-[#71717a]">{prog.totalCreditHours} CH</span>
+                  <span className="text-zinc-300 group-hover:text-[#d9b451] transition-colors">
+                    View Syllabus &rarr;
+                  </span>
+                </div>
+              </Link>
+            ))}
           </div>
         </section>
 

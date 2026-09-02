@@ -13,12 +13,14 @@ interface NavLink {
 const PRIMARY_LINKS: NavLink[] = [
   { href: "/calculator", label: "Merit Calc", badge: "Live" },
   { href: "/gpa-calculator", label: "GPA Calc", badge: "New" },
-  { href: "/uet-taxila/admissions", label: "Admissions" },
-  { href: "/uet-taxila/fee-structure", label: "Fees" },
+  { href: "/merit-archive", label: "Archive" },
+  { href: "/uet-taxila/programs", label: "Programs" },
+  { href: "/calendar", label: "Calendar" },
+  { href: "/directory", label: "Directory" },
   { href: "/compare", label: "Compare" },
   { href: "/ecat-guide", label: "ECAT" },
   { href: "/scholarships", label: "Scholarships" },
-  { href: "/campus-life", label: "Campus Life" },
+  { href: "/campus-life", label: "Campus" },
   { href: "/learn", label: "Glossary" },
 ];
 

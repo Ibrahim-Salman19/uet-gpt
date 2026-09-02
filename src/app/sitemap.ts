@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getAllSlugs } from "@/lib/learn-terms";
+import { getAllProgramSlugs } from "@/lib/programs-data";
 
 // Force dynamic rendering so Vercel CDN never serves a stale cached copy.
 // A cached sitemap.xml with old CSP headers causes GSC "could not be read" errors.
@@ -89,6 +90,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.85,
     },
     {
+      url: `${SITE_URL}/calendar`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.85,
+    },
+    {
+      url: `${SITE_URL}/directory`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
+      url: `${SITE_URL}/merit-archive`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.85,
+    },
+    {
       url: `${SITE_URL}/uet-gpt`,
       lastModified: new Date(),
       changeFrequency: "monthly",
@@ -105,6 +124,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: "monthly" as const,
       priority: 0.7,
+    })),
+    ...getAllProgramSlugs().map((slug) => ({
+      url: `${SITE_URL}/uet-taxila/programs/${slug}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
     })),
     {
       url: `${SITE_URL}/about`,

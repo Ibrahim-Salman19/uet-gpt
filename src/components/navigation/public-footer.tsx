@@ -58,6 +58,30 @@ export function PublicFooter() {
               </li>
               <li>
                 <Link
+                  href="/merit-archive"
+                  className="hover:text-white hover:underline transition-colors text-[#d9b451]"
+                >
+                  Merit Archive (5-Yr Cutoffs)
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/calendar"
+                  className="hover:text-white hover:underline transition-colors text-white"
+                >
+                  Academic Calendar {CURRENT_ACADEMIC_YEAR}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/directory"
+                  className="hover:text-white hover:underline transition-colors"
+                >
+                  Campus Directory &amp; Contacts
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/compare"
                   className="hover:text-white hover:underline transition-colors flex items-center gap-1.5 text-white"
                 >
@@ -108,9 +132,33 @@ export function PublicFooter() {
               <li>
                 <Link
                   href="/uet-taxila/programs"
+                  className="hover:text-white hover:underline transition-colors text-[#d9b451]"
+                >
+                  14 Degree Programs &amp; Syllabi
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/uet-taxila/programs/computer-science"
                   className="hover:text-white hover:underline transition-colors"
                 >
-                  14 Degree Programs
+                  BS Computer Science
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/uet-taxila/programs/software-engineering"
+                  className="hover:text-white hover:underline transition-colors"
+                >
+                  BS Software Engineering
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/uet-taxila/programs/electrical-engineering"
+                  className="hover:text-white hover:underline transition-colors"
+                >
+                  BSc Electrical Engineering
                 </Link>
               </li>
               <li>
@@ -135,14 +183,6 @@ export function PublicFooter() {
                   className="hover:text-white hover:underline transition-colors"
                 >
                   6 Academic Faculties
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/learn/fee-structure"
-                  className="hover:text-white hover:underline transition-colors"
-                >
-                  Subsidized vs Self-Finance
                 </Link>
               </li>
             </ul>

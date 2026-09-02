@@ -91,6 +91,9 @@ UET GPT is an open-source, AI-powered RAG (Retrieval-Augmented Generation) chatb
 - Main Application / Chat: https://uet-gpt.vercel.app/chat
 - Interactive Merit Calculator: https://uet-gpt.vercel.app/calculator
 - GPA & CGPA Calculator: https://uet-gpt.vercel.app/gpa-calculator
+- 5-Year Closing Merit Archive: https://uet-gpt.vercel.app/merit-archive
+- Academic Calendar: https://uet-gpt.vercel.app/calendar
+- Campus Directory & Contacts: https://uet-gpt.vercel.app/directory
 - University Comparison Matrix: https://uet-gpt.vercel.app/compare
 - ECAT 2026 Strategy Guide: https://uet-gpt.vercel.app/ecat-guide
 - Institutional Guide (UET): https://uet-gpt.vercel.app/uet
@@ -100,7 +103,12 @@ UET GPT is an open-source, AI-powered RAG (Retrieval-Augmented Generation) chatb
 - Fee Structure Guide: https://uet-gpt.vercel.app/uet-taxila/fee-structure
 - Scholarships Guide: https://uet-gpt.vercel.app/scholarships
 - Campus Life Guide: https://uet-gpt.vercel.app/campus-life
-- Programs & Departments: https://uet-gpt.vercel.app/uet-taxila/programs
+- Programs & Departments (14 Syllabi): https://uet-gpt.vercel.app/uet-taxila/programs
+- BS Computer Science Program: https://uet-gpt.vercel.app/uet-taxila/programs/computer-science
+- BS Software Engineering Program: https://uet-gpt.vercel.app/uet-taxila/programs/software-engineering
+- BSc Electrical Engineering Program: https://uet-gpt.vercel.app/uet-taxila/programs/electrical-engineering
+- BSc Mechanical Engineering Program: https://uet-gpt.vercel.app/uet-taxila/programs/mechanical-engineering
+- BSc Civil Engineering Program: https://uet-gpt.vercel.app/uet-taxila/programs/civil-engineering
 - Terms & Glossary Index: https://uet-gpt.vercel.app/learn
 - About UET GPT & Founder: https://uet-gpt.vercel.app/about
 - Privacy Policy: https://uet-gpt.vercel.app/privacy

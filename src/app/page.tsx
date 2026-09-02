@@ -157,10 +157,62 @@ export default function HomePage() {
               </Link>
 
               <Link
+                href="/merit-archive"
+                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
+              >
+                <div className="text-xs font-mono text-[#d9b451] mb-2">03 / ARCHIVE</div>
+                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
+                  5-Yr Merit Cutoff Archive
+                </h2>
+                <p className="text-xs text-white/60 leading-relaxed">
+                  Historical closing merit trends for all 14 programs across Category A and S.
+                </p>
+              </Link>
+
+              <Link
+                href="/uet-taxila/programs"
+                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
+              >
+                <div className="text-xs font-mono text-[#d9b451] mb-2">04 / ACADEMICS</div>
+                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
+                  14 Degree Programs &amp; Syllabi
+                </h2>
+                <p className="text-xs text-white/60 leading-relaxed">
+                  4-year semester roadmaps, course codes, and PEC OBE Level-II accreditations.
+                </p>
+              </Link>
+
+              <Link
+                href="/calendar"
+                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
+              >
+                <div className="text-xs font-mono text-[#d9b451] mb-2">05 / SCHEDULE</div>
+                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
+                  Academic Calendar 2026
+                </h2>
+                <p className="text-xs text-white/60 leading-relaxed">
+                  ECAT dates, merit lists, semester starts, midterm assessments, and final exams.
+                </p>
+              </Link>
+
+              <Link
+                href="/directory"
+                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
+              >
+                <div className="text-xs font-mono text-[#d9b451] mb-2">06 / DIRECTORY</div>
+                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
+                  Campus Directory &amp; Contacts
+                </h2>
+                <p className="text-xs text-white/60 leading-relaxed">
+                  Search phone extensions, official emails, and offices for all departments.
+                </p>
+              </Link>
+
+              <Link
                 href="/compare"
                 className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
               >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">03 / DECISION MATRIX</div>
+                <div className="text-xs font-mono text-[#d9b451] mb-2">07 / DECISION MATRIX</div>
                 <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
                   Compare Universities
                 </h2>
@@ -173,7 +225,7 @@ export default function HomePage() {
                 href="/ecat-guide"
                 className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
               >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">04 / STRATEGY</div>
+                <div className="text-xs font-mono text-[#d9b451] mb-2">08 / STRATEGY</div>
                 <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
                   ECAT 2026 Guide
                 </h2>
@@ -186,7 +238,7 @@ export default function HomePage() {
                 href="/uet-taxila/admissions"
                 className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
               >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">05 / ADMISSIONS</div>
+                <div className="text-xs font-mono text-[#d9b451] mb-2">09 / ADMISSIONS</div>
                 <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
                   Admissions Guide
                 </h2>
@@ -199,7 +251,7 @@ export default function HomePage() {
                 href="/uet-taxila/fee-structure"
                 className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
               >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">06 / FINANCES</div>
+                <div className="text-xs font-mono text-[#d9b451] mb-2">10 / FINANCES</div>
                 <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
                   Fee Structure 2026
                 </h2>
@@ -212,7 +264,7 @@ export default function HomePage() {
                 href="/scholarships"
                 className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
               >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">07 / AID</div>
+                <div className="text-xs font-mono text-[#d9b451] mb-2">11 / AID</div>
                 <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
                   Scholarships &amp; Grants
                 </h2>
@@ -225,25 +277,12 @@ export default function HomePage() {
                 href="/campus-life"
                 className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
               >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">08 / CAMPUS</div>
+                <div className="text-xs font-mono text-[#d9b451] mb-2">12 / CAMPUS</div>
                 <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
                   Campus Life &amp; Hostels
                 </h2>
                 <p className="text-xs text-white/60 leading-relaxed">
                   5 residential halls, daily bus commuter network, central library, and clubs.
-                </p>
-              </Link>
-
-              <Link
-                href="/uet-taxila/programs"
-                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
-              >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">09 / ACADEMICS</div>
-                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
-                  14 Degree Programs
-                </h2>
-                <p className="text-xs text-white/60 leading-relaxed">
-                  Accredited undergraduate engineering (OBE Level-II), computing, and PhD degrees.
                 </p>
               </Link>
             </div>

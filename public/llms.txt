@@ -17,10 +17,18 @@ Content is continuously updated as UET Taxila publishes new admissions notices, 
 - UET Taxila Hub: https://uet-gpt.vercel.app/uet-taxila
 - Interactive Merit Calculator: https://uet-gpt.vercel.app/calculator
 - GPA & CGPA Calculator: https://uet-gpt.vercel.app/gpa-calculator
+- 5-Year Closing Merit Archive: https://uet-gpt.vercel.app/merit-archive
+- Academic Calendar 2026-2027: https://uet-gpt.vercel.app/calendar
+- Campus Directory & Contacts: https://uet-gpt.vercel.app/directory
 - University Comparison Matrix: https://uet-gpt.vercel.app/compare
 - ECAT 2026 Strategy Guide: https://uet-gpt.vercel.app/ecat-guide
 - Admissions & ECAT Guide: https://uet-gpt.vercel.app/uet-taxila/admissions
-- Programs & Departments: https://uet-gpt.vercel.app/uet-taxila/programs
+- Programs & Departments (14 Syllabi): https://uet-gpt.vercel.app/uet-taxila/programs
+- BS Computer Science Program: https://uet-gpt.vercel.app/uet-taxila/programs/computer-science
+- BS Software Engineering Program: https://uet-gpt.vercel.app/uet-taxila/programs/software-engineering
+- BSc Electrical Engineering Program: https://uet-gpt.vercel.app/uet-taxila/programs/electrical-engineering
+- BSc Mechanical Engineering Program: https://uet-gpt.vercel.app/uet-taxila/programs/mechanical-engineering
+- BSc Civil Engineering Program: https://uet-gpt.vercel.app/uet-taxila/programs/civil-engineering
 - Fee Structure Breakdown: https://uet-gpt.vercel.app/uet-taxila/fee-structure
 - Scholarships & Financial Aid Guide: https://uet-gpt.vercel.app/scholarships
 - Campus Life, Hostels & Transport Guide: https://uet-gpt.vercel.app/campus-life
