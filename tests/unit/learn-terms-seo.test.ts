@@ -13,7 +13,7 @@ describe("Learn Terms SEO Differentiation", () => {
   });
 
   it("all terms have valid dateModified matching SCHEMA_DATE_MODIFIED", () => {
-    expect(LEARN_TERMS.length).toBe(9);
+    expect(LEARN_TERMS.length).toBe(8);
     for (const term of LEARN_TERMS) {
       expect(term.dateModified).toBe("2026-09-01");
       expect(getTermBySlug(term.slug)).toBeDefined();

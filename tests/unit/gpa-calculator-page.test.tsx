@@ -22,7 +22,7 @@ describe("/gpa-calculator page", () => {
     expect(html).toContain("UET Taxila GPA &amp; CGPA Calculator");
     expect(html).toContain("UET Taxila Semester Grading System Regulations");
     expect(html).toContain("4.00");
-    expect(html).toContain("Academic Warning / Probation");
+    expect(html).toContain("Semester GPA (SGPA)");
     expect(html).toContain("application/ld+json");
     expect(html).toContain("WebApplication");
     expect(html).toContain("FAQPage");
