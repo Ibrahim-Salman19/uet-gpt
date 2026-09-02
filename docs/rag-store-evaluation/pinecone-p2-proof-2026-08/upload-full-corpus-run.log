@@ -1,0 +1,29 @@
+loading and hashing all chunks...
+loaded 44,792 records (expected 44,792)
+  batch 50/747  (3,000/44,792 records)  lsn=50  elapsed=34s
+  batch 100/747  (6,000/44,792 records)  lsn=100  elapsed=65s
+  batch 150/747  (9,000/44,792 records)  lsn=150  elapsed=95s
+  batch 200/747  (12,000/44,792 records)  lsn=200  elapsed=127s
+  batch 250/747  (15,000/44,792 records)  lsn=250  elapsed=156s
+  batch 300/747  (18,000/44,792 records)  lsn=300  elapsed=185s
+  batch 350/747  (21,000/44,792 records)  lsn=350  elapsed=216s
+  batch 400/747  (24,000/44,792 records)  lsn=400  elapsed=245s
+  batch 450/747  (27,000/44,792 records)  lsn=450  elapsed=275s
+  batch 500/747  (30,000/44,792 records)  lsn=500  elapsed=306s
+  batch 550/747  (33,000/44,792 records)  lsn=550  elapsed=336s
+  batch 600/747  (36,000/44,792 records)  lsn=600  elapsed=368s
+  batch 650/747  (39,000/44,792 records)  lsn=650  elapsed=400s
+  batch 700/747  (42,000/44,792 records)  lsn=700  elapsed=433s
+  batch 747/747  (44,792/44,792 records)  lsn=747  elapsed=461s
+
+all 747 batches upserted in 461s. last write LSN: 747
+waiting for write visibility (LSN-verified, not slept)...
+  reconciled after 1 polls, max_indexed_lsn=747
+
+verifying final count via describeIndexStats...
+  vectors in corpus-v1-full: 44,792 (expected 44,792)
+
+spot-checking 20 records by fetch-by-id...
+  20/20 spot-checked records verified correct
+
+DONE. 44,792 vectors uploaded to uetgpt-corpus-v1-qwen1024/corpus-v1-full. PASS
