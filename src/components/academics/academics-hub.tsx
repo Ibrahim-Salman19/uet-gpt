@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { CURRENT_ACADEMIC_YEAR } from "@/lib/dates";
-import { PROGRAMS_DATA } from "@/lib/programs-data";
+import { PROGRAMS_DATA, type ProgramDetail } from "@/lib/programs-data";
 
 type AcademicTab = "programs" | "calendar" | "resources";
 
@@ -87,6 +87,7 @@ export function AcademicsHub() {
   const [calendarCategory, setCalendarCategory] = useState<
     "all" | "admissions" | "classes" | "exams"
   >("all");
+  const [selectedProgram, setSelectedProgram] = useState<ProgramDetail | null>(null);
 
   const filteredPrograms = useMemo(() => {
     return PROGRAMS_DATA.filter((p) => {
@@ -98,21 +99,19 @@ export function AcademicsHub() {
       // Text search
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
-        const matchName = p.name.toLowerCase().includes(query);
-        const matchDept = p.department.toLowerCase().includes(query);
-        const matchLead = p.lead.toLowerCase().includes(query);
-        return matchName || matchDept || matchLead;
+        return (
+          p.name.toLowerCase().includes(query) ||
+          p.department.toLowerCase().includes(query) ||
+          p.faculty.toLowerCase().includes(query)
+        );
       }
-
       return true;
     });
   }, [degreeFilter, searchQuery]);
 
   const filteredCalendar = useMemo(() => {
-    return CALENDAR_EVENTS.filter((e) => {
-      if (calendarCategory === "all") return true;
-      return e.category === calendarCategory;
-    });
+    if (calendarCategory === "all") return CALENDAR_EVENTS;
+    return CALENDAR_EVENTS.filter((e) => e.category === calendarCategory);
   }, [calendarCategory]);
 
   return (
@@ -163,7 +162,7 @@ export function AcademicsHub() {
                 </h2>
                 <p className="mt-1 text-xs text-[#a1a1aa]">
                   Accredited by Pakistan Engineering Council (PEC) under Washington Accord Level-II
-                  &amp; NCEAC Category &apos;W&apos;.
+                  &amp; NCEAC Category &apos;W&apos;. Click any card for instant syllabus preview.
                 </p>
               </div>
 
@@ -227,17 +226,19 @@ export function AcademicsHub() {
               </button>
             </div>
 
+            {/* Programs Grid */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {filteredPrograms.map((prog) => (
-                <Link
+                <button
+                  type="button"
                   key={prog.slug}
-                  href={`/uet-taxila/programs/${prog.slug}`}
-                  className="group flex flex-col justify-between rounded-xl border border-white/10 bg-[#07080a] p-5 transition-all hover:border-[#d9b451]/50 hover:bg-white/[0.02]"
+                  onClick={() => setSelectedProgram(prog)}
+                  className="group flex flex-col justify-between rounded-xl border border-white/10 bg-[#07080a] p-5 text-left transition-all hover:border-[#d9b451]/50 hover:bg-white/[0.02] cursor-pointer"
                 >
                   <div>
                     <div className="flex items-center justify-between gap-2">
                       <span className="rounded bg-[#d9b451]/10 px-2 py-0.5 font-mono text-[10px] font-bold text-[#d9b451]">
-                        {prog.degreeType} &bull; {prog.totalCreditHours} Credits
+                        {prog.degreeType} &bull; {prog.totalCreditHours} CH
                       </span>
                       <span className="font-mono text-[10px] text-emerald-400">
                         {prog.accreditationBody}
@@ -254,12 +255,128 @@ export function AcademicsHub() {
                   <div className="mt-5 flex items-center justify-between border-t border-white/5 pt-3 text-xs font-mono text-[#d9b451]">
                     <span>Closing Merit: {prog.benchmarkClosingMerit}</span>
                     <span className="group-hover:translate-x-1 transition-transform font-bold">
-                      &rarr;
+                      View Syllabus &rarr;
                     </span>
                   </div>
-                </Link>
+                </button>
               ))}
             </div>
+
+            {/* Instant Syllabus Preview Modal */}
+            {selectedProgram && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+                <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-[#d9b451]/40 bg-[#0c0d10] p-6 sm:p-8 shadow-2xl space-y-6">
+                  <div className="flex items-start justify-between gap-4 border-b border-white/10 pb-4">
+                    <div>
+                      <div className="inline-flex items-center gap-2 rounded bg-[#d9b451]/10 px-2.5 py-0.5 text-xs font-mono font-bold text-[#d9b451] mb-2">
+                        <span>{selectedProgram.degreeType}</span> &bull;{" "}
+                        <span>{selectedProgram.duration}</span> &bull;{" "}
+                        <span>{selectedProgram.totalCreditHours} Credit Hours</span>
+                      </div>
+                      <h2 className="text-2xl font-bold text-white">{selectedProgram.name}</h2>
+                      <p className="text-xs font-mono text-emerald-400 mt-0.5">
+                        {selectedProgram.accreditation} &bull; {selectedProgram.obeLevel}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedProgram(null)}
+                      className="rounded-lg border border-white/10 bg-[#14151a] px-3 py-1.5 text-xs font-mono text-[#a1a1aa] hover:text-white"
+                    >
+                      &times; Close
+                    </button>
+                  </div>
+
+                  {/* Program Description */}
+                  <p className="text-xs sm:text-sm text-[#a1a1aa] leading-relaxed">
+                    {selectedProgram.lead}
+                  </p>
+
+                  {/* Semesters Roadmap Preview */}
+                  <div>
+                    <h3 className="text-sm font-bold text-white mb-3">
+                      Core Semester Roadmap (Sample Semesters 1 &amp; 2):
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {selectedProgram.semesters.map((sem) => (
+                        <div
+                          key={sem.semesterNumber}
+                          className="rounded-xl border border-white/10 bg-[#07080a] p-4 space-y-2"
+                        >
+                          <div className="flex items-center justify-between font-mono text-xs font-bold text-[#d9b451] border-b border-white/5 pb-1.5">
+                            <span>Semester {sem.semesterNumber}</span>
+                            <span>{sem.totalCredits} Credit Hours</span>
+                          </div>
+                          <ul className="space-y-1 text-xs">
+                            {sem.courses.map((c) => (
+                              <li
+                                key={c.code}
+                                className="flex items-center justify-between text-[#d4d4d8]"
+                              >
+                                <span className="font-mono text-[11px] text-[#71717a]">
+                                  {c.code}: {c.title}
+                                </span>
+                                <span className="font-mono text-[10px] text-[#d9b451] font-bold">
+                                  {c.creditHours}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Laboratory Infrastructure */}
+                  <div>
+                    <h3 className="text-sm font-bold text-white mb-2">
+                      Departmental Laboratories &amp; Research Centers:
+                    </h3>
+                    <div className="flex flex-wrap gap-1.5">
+                      {selectedProgram.labs.map((lab) => (
+                        <span
+                          key={lab}
+                          className="rounded-lg border border-white/10 bg-[#14151a] px-2.5 py-1 text-xs font-mono text-zinc-300"
+                        >
+                          {lab}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Career Pathways */}
+                  <div>
+                    <h3 className="text-sm font-bold text-white mb-2">Key Career Destinations:</h3>
+                    <div className="flex flex-wrap gap-1.5">
+                      {selectedProgram.careerProspects.map((dest) => (
+                        <span
+                          key={dest}
+                          className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 text-xs font-mono text-emerald-300"
+                        >
+                          {dest}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Bottom Action Footer */}
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-white/10 pt-4">
+                    <Link
+                      href={`/tools?tab=merit`}
+                      className="w-full sm:w-auto rounded-lg border border-[#d9b451] bg-[#d9b451]/10 px-4 py-2 text-center text-xs font-mono font-bold text-[#d9b451] hover:bg-[#d9b451] hover:text-[#07080a] transition-colors"
+                    >
+                      Calculate Merit for this Degree &rarr;
+                    </Link>
+                    <Link
+                      href={`/uet-taxila/programs/${selectedProgram.slug}`}
+                      className="w-full sm:w-auto rounded-lg bg-[#d9b451] px-4 py-2 text-center text-xs font-mono font-bold text-[#07080a] hover:bg-[#f0d178] transition-colors"
+                    >
+                      Full 8-Semester Syllabus Page &rarr;
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -325,23 +442,29 @@ export function AcademicsHub() {
               </div>
             </div>
 
-            <div className="space-y-3">
-              {filteredCalendar.map((event, idx) => (
+            <div className="divide-y divide-white/5 rounded-xl border border-white/10 bg-[#07080a]">
+              {filteredCalendar.map((item) => (
                 <div
-                  key={event.title}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-white/10 bg-[#07080a] p-4 hover:border-white/20 transition-colors"
+                  key={item.title}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 gap-2 hover:bg-white/[0.01] transition-colors"
                 >
-                  <div className="flex items-start gap-3">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#d9b451]/20 font-mono text-[11px] font-bold text-[#d9b451]">
-                      {idx + 1}
+                  <div className="space-y-1">
+                    <span className="font-mono text-xs text-[#d9b451] font-bold uppercase tracking-wider block">
+                      {item.date}
                     </span>
-                    <div>
-                      <h3 className="text-sm font-bold text-white">{event.title}</h3>
-                      <p className="mt-0.5 text-xs text-[#a1a1aa]">{event.desc}</p>
-                    </div>
+                    <h3 className="text-sm font-semibold text-white">{item.title}</h3>
+                    <p className="text-xs text-[#a1a1aa]">{item.desc}</p>
                   </div>
-                  <span className="shrink-0 font-mono text-xs font-bold text-[#d9b451] sm:text-right">
-                    {event.date}
+                  <span
+                    className={`self-start sm:self-center shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-mono capitalize ${
+                      item.category === "admissions"
+                        ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                        : item.category === "classes"
+                          ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                          : "bg-purple-500/10 text-purple-400 border border-purple-500/20"
+                    }`}
+                  >
+                    {item.category}
                   </span>
                 </div>
               ))}
@@ -350,62 +473,57 @@ export function AcademicsHub() {
         )}
 
         {activeTab === "resources" && (
-          <div className="space-y-8">
+          <div className="space-y-6">
             <div>
               <h2 className="text-xl font-bold text-white">
-                Outcome-Based Education (OBE) &amp; Study Resources
+                OBE Examination Rubrics &amp; Academic Regulations
               </h2>
               <p className="mt-1 text-xs text-[#a1a1aa]">
-                Assessment rubrics, Central Library digital resources, and semester past paper
-                archives.
+                Statutory grading policies compliant with PEC Level-II Washington Accord guidelines.
               </p>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div className="rounded-xl border border-white/10 bg-[#07080a] p-5">
-                <span className="font-mono text-[10px] font-bold text-[#d9b451] uppercase">
-                  Continuous (20% – 30%)
-                </span>
-                <h3 className="mt-2 text-sm font-bold text-white">Quizzes &amp; CEPs</h3>
-                <p className="mt-1 text-xs text-[#a1a1aa] leading-relaxed">
-                  3-4 announced quizzes, numerical problem sets, and a team-based Complex
-                  Engineering Problem (Bloom&apos;s C3-C5).
-                </p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-xl border border-white/10 bg-[#07080a] p-5 space-y-3">
+                <h3 className="text-sm font-bold text-[#d9b451]">
+                  Outcome-Based Education (OBE) Weightage
+                </h3>
+                <ul className="space-y-2 text-xs text-[#a1a1aa] leading-relaxed">
+                  <li>
+                    &bull; <strong className="text-white">Continuous Assessments (20-30%):</strong>{" "}
+                    Quizzes, assignments, and Complex Engineering Problems (CEPs).
+                  </li>
+                  <li>
+                    &bull; <strong className="text-white">Midterm Exam (20-25%):</strong> Formal
+                    written examination testing CLO-1 and CLO-2 cognitive levels.
+                  </li>
+                  <li>
+                    &bull; <strong className="text-white">Final Exam (40-50%):</strong>{" "}
+                    Comprehensive 18th-week assessment covering all course CLOs.
+                  </li>
+                </ul>
               </div>
 
-              <div className="rounded-xl border border-white/10 bg-[#07080a] p-5">
-                <span className="font-mono text-[10px] font-bold text-[#d9b451] uppercase">
-                  Midterm (20% – 25%)
-                </span>
-                <h3 className="mt-2 text-sm font-bold text-white">9th-Week Exam</h3>
-                <p className="mt-1 text-xs text-[#a1a1aa] leading-relaxed">
-                  Centralized 90-minute examination covering the first 8 weeks of course syllabi
-                  with explicit CLO mapping.
-                </p>
+              <div className="rounded-xl border border-white/10 bg-[#07080a] p-5 space-y-3">
+                <h3 className="text-sm font-bold text-[#d9b451]">
+                  Academic Probation &amp; Good Standing
+                </h3>
+                <ul className="space-y-2 text-xs text-[#a1a1aa] leading-relaxed">
+                  <li>
+                    &bull; <strong className="text-white">Good Standing:</strong> Cumulative CGPA
+                    &ge; 2.00 across all registered semester credit hours.
+                  </li>
+                  <li>
+                    &bull; <strong className="text-white">Probation 1:</strong> Triggered when SGPA
+                    drops below 2.00 in any semester.
+                  </li>
+                  <li>
+                    &bull; <strong className="text-white">Course Retakes:</strong> Allowed for
+                    grades of &apos;C-&apos;, &apos;D&apos;, or &apos;F&apos; to replace earlier
+                    quality points.
+                  </li>
+                </ul>
               </div>
-
-              <div className="rounded-xl border border-white/10 bg-[#07080a] p-5">
-                <span className="font-mono text-[10px] font-bold text-[#d9b451] uppercase">
-                  Final Exam (40% – 50%)
-                </span>
-                <h3 className="mt-2 text-sm font-bold text-white">18th-Week Exam</h3>
-                <p className="mt-1 text-xs text-[#a1a1aa] leading-relaxed">
-                  Comprehensive 3-hour examination covering the entire semester syllabus. 50%
-                  cumulative threshold required for CLO attainment.
-                </p>
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-white/10 bg-[#07080a] p-6">
-              <h3 className="text-base font-bold text-white">
-                Dr. Muhammad Akram Central Library &amp; Digital Databases
-              </h3>
-              <p className="mt-2 text-xs text-[#a1a1aa] leading-relaxed">
-                Campus-wide optical fiber terminals provide full-text institutional access to IEEE
-                Xplore, ScienceDirect, SpringerLink, and the HEC National Digital Library. Students
-                can borrow up to 6 core prescribed textbooks for the full semester via the Book Bank
-                program.
-              </p>
             </div>
           </div>
         )}
