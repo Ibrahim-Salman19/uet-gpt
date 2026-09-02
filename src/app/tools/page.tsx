@@ -33,18 +33,23 @@ const toolsFaqs = [
   {
     question: "What is the official merit aggregate formula at UET Taxila?",
     answer:
-      "UET Taxila calculates merit aggregate as: 33% ECAT score + 50% Intermediate (HSSC/FSc) marks + 17% Matriculation (SSC) marks. For A-Level and DAE candidates, IBCC equivalence is utilized.",
+      "UET Taxila calculates merit aggregate as: 33% ECAT score + 50% Intermediate (HSSC/FSc) marks + 17% Matriculation (SSC) marks. For A-Level and DAE candidates, IBCC equivalence is utilized. Hafiz-e-Quran and NCC certificate holders receive +20 marks added to their HSSC component.",
   },
   {
     question: "How is SGPA and CGPA calculated at UET Taxila?",
     answer:
-      "UET Taxila operates on a 4.00 semester GPA system where Course Grade Points are multiplied by Credit Hours, summed, and divided by total registered credits (excluding non-credit courses).",
+      "UET Taxila operates on a 4.00 semester GPA system where Course Grade Points (A=4.0, A-=3.7, B+=3.3, B=3.0, etc.) are multiplied by Credit Hours, summed, and divided by total registered semester credits. A minimum CGPA of 2.00 is required to graduate without probation.",
   },
   {
     question:
       "Where can I view historical merit cutoffs for Computer Science and Software Engineering?",
     answer:
-      "The 5-Year Closing Merit Archive tab above provides official 2021-2025 round-by-round merit list closing percentiles for Category A (Subsidized) and Category S (Self-Finance).",
+      "The 5-Year Closing Merit Archive tab provides official round-by-round merit list closing percentiles for Category A (Subsidized) and Category S (Self-Finance) spanning 2021 through 2025 across all 14 disciplines.",
+  },
+  {
+    question: "How does the Scholarship Screener match financial aid?",
+    answer:
+      "The screener matches your intermediate percentage, family income, and domicile against eligibility criteria for Punjab Chief Minister Honhaar Scholarship, HEC Need-Based Aid, Workers Welfare Fund, and PEEF.",
   },
 ];
 
@@ -78,21 +83,46 @@ export default function ToolsPage() {
 
       <PublicNav />
 
-      <main id="main-content" className="min-h-screen bg-[#07080a] text-white">
-        {/* Header */}
-        <section className="relative border-b border-white/10 bg-gradient-to-b from-[#d9b451]/10 via-[#07080a] to-[#07080a] py-16">
+      <main
+        id="main-content"
+        className="min-h-screen bg-[#07080a] text-white selection:bg-[#d9b451] selection:text-[#07080a]"
+      >
+        {/* Asymmetric High-Contrast Header */}
+        <section className="border-b border-white/10 bg-[#0c0d10] py-16">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-3xl text-center">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#d9b451]/30 bg-[#d9b451]/10 px-3.5 py-1 text-xs font-mono font-semibold uppercase tracking-wider text-[#d9b451]">
-                Unified Suite
-              </span>
-              <h1 className="mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
-                Engineering Tools &amp; Calculators
-              </h1>
-              <p className="mt-4 text-sm leading-relaxed text-[#a1a1aa] sm:text-base">
-                Everything you need for admissions, academic grade planning, historical closing
-                merit research, and financial aid matching in one integrated suite.
-              </p>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              <div className="lg:col-span-8 space-y-4">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[#d9b451]/30 bg-[#d9b451]/10 px-3.5 py-1 text-xs font-mono font-bold uppercase tracking-widest text-[#d9b451]">
+                  <span>PILLAR 01</span> &bull; <span>ENGINEERING DECISION SUITE</span>
+                </div>
+                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-none">
+                  Engineering Tools &amp; Calculators
+                </h1>
+                <p className="text-sm sm:text-base text-[#a1a1aa] leading-relaxed max-w-2xl">
+                  Accurate, statutory decision models for UET Taxila: Real-time admission aggregate
+                  calculator, semester GPA tracking, 5-year closing cutoffs, and need-based
+                  scholarship matching.
+                </p>
+              </div>
+
+              <div className="lg:col-span-4 rounded-xl border border-white/10 bg-[#14151a] p-5 space-y-3 font-mono text-xs">
+                <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                  <span className="text-[#71717a] uppercase">Merit Weight:</span>
+                  <span className="text-[#d9b451] font-bold">
+                    33% ECAT &bull; 50% F.Sc &bull; 17% SSC
+                  </span>
+                </div>
+                <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                  <span className="text-[#71717a] uppercase">Grading Scale:</span>
+                  <span className="text-white font-bold">4.00 Max &bull; 2.00 Good Standing</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[#71717a] uppercase">Archive Scope:</span>
+                  <span className="text-emerald-400 font-bold">
+                    2021 &ndash; 2025 (14 Programs)
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -113,18 +143,23 @@ export default function ToolsPage() {
         </section>
 
         {/* FAQs */}
-        <section className="border-t border-white/10 bg-[#0c0d10]/60 py-12">
+        <section className="border-t border-white/10 bg-[#0c0d10]/60 py-16">
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <h2 className="text-xl font-bold tracking-tight text-white sm:text-2xl">
-              Frequently Asked Questions About Tools
-            </h2>
-            <div className="mt-6 space-y-4">
+            <div className="text-center mb-10">
+              <span className="text-xs font-mono uppercase tracking-widest text-[#d9b451] font-bold">
+                Knowledge Base
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mt-1">
+                Frequently Asked Questions About Tools
+              </h2>
+            </div>
+            <div className="space-y-4">
               {toolsFaqs.map((faq) => (
                 <div
                   key={faq.question}
-                  className="rounded-xl border border-white/10 bg-[#07080a] p-6"
+                  className="rounded-xl border border-white/10 bg-[#07080a] p-6 hover:border-white/20 transition-colors"
                 >
-                  <h3 className="text-sm font-semibold text-white">{faq.question}</h3>
+                  <h3 className="text-sm font-bold text-white">{faq.question}</h3>
                   <p className="mt-2 text-xs leading-relaxed text-[#a1a1aa]">{faq.answer}</p>
                 </div>
               ))}

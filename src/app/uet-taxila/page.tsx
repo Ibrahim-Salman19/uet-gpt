@@ -117,10 +117,10 @@ export default function UetTaxilaPage() {
                 Ask UET GPT
               </Link>
               <Link
-                href="/uet-taxila/admissions"
+                href="/admissions?tab=overview"
                 className="w-full sm:w-auto px-6 py-3.5 rounded-md border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent)]/30 active:scale-[0.98] transition-all text-xs font-mono tracking-wider uppercase"
               >
-                Admissions 2026
+                Admissions Guide
               </Link>
             </div>
           </section>
@@ -344,47 +344,47 @@ export default function UetTaxilaPage() {
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Link
-                href="/uet-taxila/admissions"
+                href="/admissions?tab=overview"
                 className="p-5 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/20 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-card)]/30 transition-all"
               >
                 <h3 className="font-semibold text-base mb-1 text-[var(--text-primary)]">
                   Admissions &amp; ECAT
                 </h3>
                 <p className="text-sm text-[var(--text-secondary)] font-sans">
-                  Eligibility, merit, entry test, and how to apply.
+                  Eligibility thresholds, seat quotas, and application steps.
                 </p>
               </Link>
               <Link
-                href="/uet-taxila/programs"
+                href="/academics?tab=programs"
                 className="p-5 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/20 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-card)]/30 transition-all"
               >
                 <h3 className="font-semibold text-base mb-1 text-[var(--text-primary)]">
-                  Programs &amp; Departments
+                  Programs &amp; Syllabi
                 </h3>
                 <p className="text-sm text-[var(--text-secondary)] font-sans">
-                  Six faculties, 14 departments, undergraduate to PhD.
+                  14 PEC-accredited engineering and computing roadmaps.
                 </p>
               </Link>
               <Link
-                href="/uet-taxila/fee-structure"
+                href="/admissions?tab=fees"
                 className="p-5 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/20 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-card)]/30 transition-all"
               >
                 <h3 className="font-semibold text-base mb-1 text-[var(--text-primary)]">
-                  Fee Structure
+                  Fee Simulator
                 </h3>
                 <p className="text-sm text-[var(--text-secondary)] font-sans">
-                  Tuition, hostel, and other charges, explained.
+                  Tuition, hostel dues, and 4-year degree cost forecast.
                 </p>
               </Link>
               <Link
-                href="/uet"
+                href="/tools?tab=merit"
                 className="p-5 rounded-xl border border-[var(--border)] bg-[var(--surface-card)]/20 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-card)]/30 transition-all"
               >
                 <h3 className="font-semibold text-base mb-1 text-[var(--text-primary)]">
-                  UET Keyword Hub
+                  Merit Calculator
                 </h3>
                 <p className="text-sm text-[var(--text-secondary)] font-sans">
-                  Quick overview of all UET pages.
+                  Calculate admission aggregate using statutory 33/50/17 formula.
                 </p>
               </Link>
             </div>
