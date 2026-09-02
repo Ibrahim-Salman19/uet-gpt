@@ -108,6 +108,29 @@ disclosure), `cc1c6d6` (corroboration pass), `6d12639` (Q8 reconciliation
 + tier disclosure) - all on `agent/2026-08-12-turso-knowledge-store`,
 zero Gemini/Pinecone/Convex Cloud calls across all four.
 
+**Agent B's independent review has now happened — see
+`AGENT_B_REVIEW_2026-09-02.md` (commit `0e0904d`).** Verdict:
+**NOT-PRODUCTION-READY**, agreeing with this document's own status - and
+not a rubber stamp: Agent B independently reproduced the headline
+hybrid-retrieval metric byte-for-byte from committed inputs in an
+isolated worktree with zero cloud calls, verified all four commit SHAs
+above match their diffs, confirmed the §59 concurrency test proves both
+halves of its invariant, and found real (not fabricated) gaps this
+document had missed: a load-bearing evidence log
+(`upload-full-corpus-run.log`) that was never committed to git (now
+fixed, commit `0e0904d`), the stale 768d/1024d caveat addressed above
+(now fixed in this document, `candidate-matrix.json`, and
+`evidence-manifest.json`), and an under-disclosed fusion-fidelity gap
+(now surfaced in the gates table above and in
+`hybrid-retrieval-2026-08/report.md`). Agent B's own answer to the label-
+provenance judgment call, worth reading in full (its §5): the ANN-recall
+store-selection decision (§56) can ship on its own label-free evidence,
+but end-to-end retrieval-quality certification for production (§45/46/57)
+cannot be closed by more AI-only labeling regardless of volume - it needs
+either a real UET Taxila domain reviewer or a differently-designed
+evaluation that doesn't depend on hand labels at all. That recommendation
+is not yet acted on and is a decision for the project's user.
+
 ## 1. What is verified and can be checked right now
 
 ```text
@@ -388,18 +411,43 @@ hybrid retrieval evaluated with     PASS*       all 50/50 queries
                                                  practical substitute
                                                  ceiling. Raw query text
                                                  only, no HyDE/rewrite
-                                                 (blocked, see §3) - *PASS
-                                                 is on retrieval mechanics
+                                                 (blocked, see §3). ALSO
+                                                 flagged by Agent B
+                                                 2026-09-02 (previously
+                                                 disclosed only in the
+                                                 superseded hybrid_eval.ts
+                                                 pilot script's header, not
+                                                 here): the eval invokes
+                                                 the real hybridRank()
+                                                 function genuinely
+                                                 unmodified, but as a
+                                                 simplified 2-channel,
+                                                 equal-weight call, not
+                                                 production's real
+                                                 IDF-adaptive weights,
+                                                 3rd fusion channel
+                                                 (chunkTextSearch), or
+                                                 freshness/status
+                                                 filtering - "real
+                                                 hybridRank, not
+                                                 reimplemented" is accurate
+                                                 at the function-import
+                                                 level, not a claim the
+                                                 full production pipeline
+                                                 was exercised - *PASS is
+                                                 on retrieval mechanics
                                                  tested and now on an
                                                  unbiased label pool too,
                                                  but still not a
                                                  production-quality
                                                  verdict: the label set's
                                                  provenance ceiling (0
-                                                 HUMAN_VERIFIED, N=23) and
-                                                 the HyDE path are real
-                                                 open findings, not a clean
-                                                 bill of health.
+                                                 HUMAN_VERIFIED, N=23), the
+                                                 simplified-fusion scope
+                                                 above, and the HyDE path
+                                                 are real open findings,
+                                                 not a clean bill of
+                                                 health.
 resource projection at 2x/3x        PARTIAL     Convex: local-convex-
   scale (§62)                                   lexical-proof-2026-08/
                                                  report.md §7.1 - real

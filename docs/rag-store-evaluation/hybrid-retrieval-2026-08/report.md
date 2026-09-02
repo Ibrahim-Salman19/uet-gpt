@@ -153,10 +153,25 @@ labeling pass was separate scoped work completed afterward.)
 
 ## 3. What this run does establish
 
-- The real production fusion code path (not a Python approximation) runs
+- The real production fusion *function* (not a Python approximation) runs
   end-to-end against the frozen, real corpus and produces stable,
   reproducible output — `hybrid_eval_results.json` is deterministic given
   its two inputs (`channel_results.json`, `golden_set_verified.jsonl`).
+  **What "real fusion function" does and does not mean here (surfaced
+  prominently per Agent B's 2026-09-02 review — this caveat previously
+  existed only in the superseded `hybrid_eval.ts` pilot script's header
+  comment, not here or in `INDEPENDENT_REVIEW.md`'s gates table, where a
+  reader would actually see it):** `fuse_and_score.ts` calls the real,
+  unmodified `hybridRank()` from `convex/embeddings/hybridRank.ts` — the
+  RRF math itself is genuinely production code, not reimplemented. But
+  the *invocation* is a simplified 2-channel, equal-weight call
+  (`{vector: 1.0, text: 1.0}`), not the full pipeline `search.ts` actually
+  runs in production, which uses real IDF-adaptive weights, a third
+  fusion channel (`chunkTextSearch`), and post-fusion freshness/status
+  filtering — none of which this eval exercises. The claim "real
+  `hybridRank`, not reimplemented" is accurate at the function-import
+  level; it should not be read as "the full production retrieval
+  pipeline was exercised."
 - Where a scorable ground truth exists, hybrid retrieval finds it in the
   top 5 95.7% of the time with a mean reciprocal rank of 0.73 (post-§6;
   94.7%/0.71 before it) — a reasonable signal, but one drawn from a
@@ -173,22 +188,39 @@ labeling pass was separate scoped work completed afterward.)
 
 ## 4. Two gates this leaves open (updated 2026-09-02)
 
-1. **§45/46/57 hybrid quality — open, narrower than before.** §2's
-   pool-bias half of this gap is now fixed (§6): the label pool has been
-   widened to include every `fusedTop5` candidate, not just `denseTop5`.
-   What remains is the other half — a real HUMAN_VERIFIED pass over the
-   39 (now still 39; §6 added judgments, not human review) queries the
-   user did not personally review. That is a local, zero-cloud-call task
-   (reading golden set files against the already-frozen corpus) but it
-   does require the project's user's own time, which §6 could not
-   substitute for — see §6's provenance discipline.
-2. **§58 lifecycle matrix (7/7 PASS) was run against the older 768-dim
-   index, not the currently-populated 1024-dim (`qwen3-embedding-0.6b`)
-   Pinecone index** (flagged by the state-reconstruction pass that
-   preceded this report). Re-verifying it touches live Pinecone — a
-   separate authorization under mandate §51/§59 and `uet-gpt/CLAUDE.md`'s
-   resource-safety rule that "continue" does not itself authorize a cloud
-   operation. Not attempted here.
+1. **§45/46/57 hybrid quality — open, and now a confirmed permanent
+   ceiling rather than a remaining task.** §2's pool-bias half of this gap
+   is fixed (§6). The other half — real `HUMAN_VERIFIED` labels — was
+   found to be genuinely unreachable, not merely undone: asked directly,
+   the project's user confirmed they lack personal domain knowledge of
+   these UET Taxila facts (§7). A cross-corroboration pass raised
+   `AUTHORITATIVE_SOURCE_MATCH` coverage to 22/50 as the practical
+   substitute (§7). Agent B's independent review
+   (`../AGENT_B_REVIEW_2026-09-02.md` §5) concludes this ceiling is
+   sufficient for the label-free store-selection decision (§56 ANN
+   recall) but not sufficient to certify end-to-end retrieval quality for
+   production — and that no further AI-only labeling can close it; it
+   needs either a real domain reviewer or a differently-designed
+   evaluation that doesn't depend on hand labels.
+2. **§58 lifecycle matrix — RESOLVED, this item was stale.** This
+   originally said the 7/7 PASS was only against the older 768-dim index.
+   That was true when written; it no longer is. A separate 2026-09-01
+   session re-ran the lifecycle/concurrency checks live against the
+   current 1024-dim `uetgpt-corpus-v1-qwen1024` index
+   (`convex/knowledgeStore/pineconeLifecycleTest.ts`, 10/10 checks
+   passed, independently confirmed clean afterward) — see
+   `INDEPENDENT_REVIEW.md`'s §58/§59/§61 section for full evidence. This
+   report's own copy of the caveat went unreconciled until Agent B's
+   review flagged it (`AGENT_B_REVIEW_2026-09-02.md` §4b) alongside the
+   same stale caveat in `candidate-matrix.json` and
+   `evidence-manifest.json` — all three are now fixed.
+3. **Agent B's own recommendation, not yet acted on.** §63/§45/46/57
+   cannot be closed by more AI-only labeling per (1) above. The two
+   concrete paths forward — a real UET Taxila domain reviewer, or a
+   differently-designed evaluation not dependent on hand labels — are
+   both new work this report does not attempt; they are a decision for
+   the project's user, not something this evidence trail can resolve on
+   its own.
 
 Because of (1), **§63's final gate is still not cleared and §64/§65 do
 not fire.** This is not a Pinecone failure — ANN Recall@10 (0.98, §56) and

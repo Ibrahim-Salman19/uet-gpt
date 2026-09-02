@@ -3,9 +3,13 @@
 
 Fetches REAL dense (Pinecone, corpus-v1-full namespace, same index this
 session's full-corpus upload verified) and REAL lexical (local Convex
-search_text via crawl/lexicalProof:searchChunksForProof) results for the 11
-AI-reviewed fee queries in scripts/eval/golden_set_verified.jsonl. Writes
-raw ranked (chunkKey, score) lists to channel_results.json.
+search_text via crawl/lexicalProof:searchChunksForProof) results for all 50
+queries in scripts/eval/golden_set_verified.jsonl (originally written when
+the set was 11 AI-reviewed fee queries; the label set was expanded to 50
+afterward - this docstring was stale until Agent B's 2026-09-02 review
+flagged it, see AGENT_B_REVIEW_2026-09-02.md §4a - the code and data
+themselves were already current, only this comment lagged). Writes raw
+ranked (chunkKey, score) lists to channel_results.json.
 
 Why Python for the fetch, not TypeScript: importing the
 @pinecone-database/pinecone SDK via `npx tsx` was found to hang
