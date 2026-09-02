@@ -11,20 +11,10 @@ interface NavLink {
 }
 
 const PRIMARY_LINKS: NavLink[] = [
-  { href: "/calculator", label: "Merit Calc", badge: "Live" },
-  { href: "/gpa-calculator", label: "GPA Calc", badge: "New" },
-  { href: "/scholarship-finder", label: "Aid Finder" },
-  { href: "/merit-archive", label: "Archive" },
-  { href: "/uet-taxila/programs", label: "Programs" },
-  { href: "/resources", label: "Resources" },
-  { href: "/calendar", label: "Calendar" },
-  { href: "/directory", label: "Directory" },
-  { href: "/bus-routes", label: "Bus Routes" },
-  { href: "/societies", label: "Societies" },
-  { href: "/compare", label: "Compare" },
-  { href: "/ecat-guide", label: "ECAT" },
-  { href: "/scholarships", label: "Scholarships" },
-  { href: "/campus-life", label: "Campus" },
+  { href: "/tools", label: "Tools Suite", badge: "4-in-1" },
+  { href: "/academics", label: "Academics", badge: "14 Degrees" },
+  { href: "/admissions", label: "Admissions & Aid" },
+  { href: "/campus-life", label: "Campus Life" },
   { href: "/learn", label: "Glossary" },
 ];
 
@@ -66,7 +56,7 @@ export function PublicNav() {
           {/* Desktop Navigation */}
           <nav
             aria-label="Main Navigation"
-            className="hidden xl:flex items-center gap-1 text-xs font-mono tracking-wider uppercase"
+            className="hidden md:flex items-center gap-1.5 text-xs font-mono tracking-wider uppercase"
           >
             {PRIMARY_LINKS.map((link) => {
               const isActive =
@@ -76,7 +66,7 @@ export function PublicNav() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`relative rounded-md px-3 py-2 transition-colors ${
+                  className={`relative rounded-md px-3.5 py-2 transition-colors ${
                     isActive
                       ? "text-[#d9b451] font-semibold bg-white/5"
                       : "text-[#a1a1aa] hover:text-white hover:bg-white/[0.03]"
@@ -107,7 +97,7 @@ export function PublicNav() {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="xl:hidden flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 text-[#a1a1aa] hover:text-white hover:bg-white/5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#d9b451]"
+              className="md:hidden flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 text-[#a1a1aa] hover:text-white hover:bg-white/5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#d9b451]"
               aria-expanded={mobileMenuOpen}
               aria-label="Toggle mobile menu"
             >
@@ -135,7 +125,7 @@ export function PublicNav() {
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div className="xl:hidden border-t border-white/10 bg-[#0c0d10] px-4 py-6 sm:px-6 animate-in slide-in-from-top-2 duration-200">
+          <div className="md:hidden border-t border-white/10 bg-[#0c0d10] px-4 py-6 sm:px-6 animate-in slide-in-from-top-2 duration-200">
             <nav
               aria-label="Mobile Navigation"
               className="flex flex-col space-y-2 text-sm font-mono uppercase tracking-wider"
@@ -150,17 +140,6 @@ export function PublicNav() {
                 }`}
               >
                 <span>Home</span>
-              </Link>
-              <Link
-                href="/uet-taxila"
-                onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center justify-between rounded-lg px-3 py-2.5 min-h-[44px] ${
-                  pathname === "/uet-taxila"
-                    ? "bg-[#d9b451]/10 text-[#d9b451] font-bold"
-                    : "text-[#a1a1aa] hover:text-white hover:bg-white/5"
-                }`}
-              >
-                <span>UET Taxila Hub</span>
               </Link>
               {PRIMARY_LINKS.map((link) => {
                 const isActive =

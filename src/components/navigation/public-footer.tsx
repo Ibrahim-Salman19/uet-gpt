@@ -28,166 +28,91 @@ export function PublicFooter() {
       {/* Main Multi-Column Link Directory */}
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-5">
-          {/* Column 1: Admissions & Tools */}
+          {/* Column 1: Engineering Tools */}
           <div className="space-y-3">
             <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-white">
-              Admissions &amp; Tools
+              Engineering Tools
             </h3>
             <ul className="space-y-2">
               <li>
                 <Link
-                  href="/calculator"
+                  href="/tools"
                   className="hover:text-white hover:underline transition-colors flex items-center gap-1.5 text-[#d9b451]"
                 >
-                  <span>Merit Calculator</span>
+                  <span>Tools Suite Hub</span>
                   <span className="rounded bg-[#d9b451]/20 px-1 py-0.2 text-[9px] font-bold">
-                    Tool
+                    4-in-1
                   </span>
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/gpa-calculator"
-                  className="hover:text-white hover:underline transition-colors flex items-center gap-1.5 text-[#d9b451]"
+                  href="/tools?tab=merit"
+                  className="hover:text-white hover:underline transition-colors"
                 >
-                  <span>GPA &amp; CGPA Calculator</span>
-                  <span className="rounded bg-[#d9b451]/20 px-1 py-0.2 text-[9px] font-bold">
-                    New
-                  </span>
+                  Merit Calculator (PEC)
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/merit-archive"
+                  href="/tools?tab=gpa"
+                  className="hover:text-white hover:underline transition-colors"
+                >
+                  GPA &amp; CGPA Simulator
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/tools?tab=archive"
+                  className="hover:text-white hover:underline transition-colors"
+                >
+                  5-Yr Closing Merit Archive
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/tools?tab=scholarships"
+                  className="hover:text-white hover:underline transition-colors"
+                >
+                  Scholarship Eligibility Screener
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 2: Academics */}
+          <div className="space-y-3">
+            <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-white">
+              Academics &amp; Syllabi
+            </h3>
+            <ul className="space-y-2">
+              <li>
+                <Link
+                  href="/academics"
                   className="hover:text-white hover:underline transition-colors text-[#d9b451]"
                 >
-                  Merit Archive (5-Yr Cutoffs)
+                  Academics Hub
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/calendar"
-                  className="hover:text-white hover:underline transition-colors text-white"
+                  href="/academics?tab=programs"
+                  className="hover:text-white hover:underline transition-colors"
+                >
+                  14 Degree Curriculums
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/academics?tab=calendar"
+                  className="hover:text-white hover:underline transition-colors"
                 >
                   Academic Calendar {CURRENT_ACADEMIC_YEAR}
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/directory"
-                  className="hover:text-white hover:underline transition-colors"
-                >
-                  Campus Directory &amp; Contacts
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/compare"
-                  className="hover:text-white hover:underline transition-colors flex items-center gap-1.5 text-white"
-                >
-                  <span>University Comparison</span>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/ecat-guide"
-                  className="hover:text-white hover:underline transition-colors"
-                >
-                  ECAT 2026 Strategy Guide
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/uet-taxila/admissions"
-                  className="hover:text-white hover:underline transition-colors"
-                >
-                  Admissions Guide {CURRENT_ACADEMIC_YEAR}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/learn/merit-formula"
-                  className="hover:text-white hover:underline transition-colors"
-                >
-                  Merit Formula Breakdown
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/learn/eligibility-criteria"
-                  className="hover:text-white hover:underline transition-colors"
-                >
-                  Eligibility Criteria (60%/50%)
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Column 2: Academics & Fees */}
-          <div className="space-y-3">
-            <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-white">
-              Academics &amp; Fees
-            </h3>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/uet-taxila/programs"
-                  className="hover:text-white hover:underline transition-colors text-[#d9b451]"
-                >
-                  14 Degree Programs &amp; Syllabi
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/uet-taxila/programs/computer-science"
-                  className="hover:text-white hover:underline transition-colors"
-                >
-                  BS Computer Science
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/uet-taxila/programs/software-engineering"
-                  className="hover:text-white hover:underline transition-colors"
-                >
-                  BS Software Engineering
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/uet-taxila/programs/electrical-engineering"
-                  className="hover:text-white hover:underline transition-colors"
-                >
-                  BSc Electrical Engineering
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/uet-taxila/fee-structure"
-                  className="hover:text-white hover:underline transition-colors"
-                >
-                  Fee Structure {CURRENT_ACADEMIC_YEAR}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/scholarships"
-                  className="hover:text-white hover:underline transition-colors text-[#d9b451]"
-                >
-                  Scholarships &amp; Financial Aid
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/scholarship-finder"
-                  className="hover:text-white hover:underline transition-colors text-white"
-                >
-                  Aid Eligibility Screener
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/resources"
+                  href="/academics?tab=resources"
                   className="hover:text-white hover:underline transition-colors"
                 >
                   Past Papers &amp; OBE Grading
@@ -195,16 +120,81 @@ export function PublicFooter() {
               </li>
               <li>
                 <Link
-                  href="/uet-taxila"
+                  href="/uet-taxila/programs/computer-science"
                   className="hover:text-white hover:underline transition-colors"
                 >
-                  6 Academic Faculties
+                  BS Computer Science Roadmap
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/uet-taxila/programs/software-engineering"
+                  className="hover:text-white hover:underline transition-colors"
+                >
+                  BS Software Engineering Roadmap
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Column 3: Campus & Facilities */}
+          {/* Column 3: Admissions & Aid */}
+          <div className="space-y-3">
+            <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-white">
+              Admissions &amp; Aid
+            </h3>
+            <ul className="space-y-2">
+              <li>
+                <Link
+                  href="/admissions"
+                  className="hover:text-white hover:underline transition-colors text-[#d9b451]"
+                >
+                  Admissions Hub {CURRENT_ACADEMIC_YEAR}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/admissions?tab=overview"
+                  className="hover:text-white hover:underline transition-colors"
+                >
+                  Eligibility Criteria &amp; Quotas
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/admissions?tab=ecat"
+                  className="hover:text-white hover:underline transition-colors"
+                >
+                  ECAT 2026 Strategy Blueprint
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/admissions?tab=fees"
+                  className="hover:text-white hover:underline transition-colors"
+                >
+                  Fee Structure &amp; Simulator
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/admissions?tab=scholarships"
+                  className="hover:text-white hover:underline transition-colors"
+                >
+                  Financial Aid Programs
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/admissions?tab=compare"
+                  className="hover:text-white hover:underline transition-colors"
+                >
+                  University Comparison Matrix
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 4: Campus Life */}
           <div className="space-y-3">
             <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-white">
               Campus Life
@@ -215,48 +205,48 @@ export function PublicFooter() {
                   href="/campus-life"
                   className="hover:text-white hover:underline transition-colors text-[#d9b451]"
                 >
-                  Campus Life Overview
+                  Campus Life Hub
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/bus-routes"
-                  className="hover:text-white hover:underline transition-colors text-white"
+                  href="/campus-life?tab=hostels"
+                  className="hover:text-white hover:underline transition-colors"
+                >
+                  Residential Halls &amp; Hostels
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/campus-life?tab=transport"
+                  className="hover:text-white hover:underline transition-colors"
                 >
                   Bus Routes &amp; Fleet Schedules
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/societies"
-                  className="hover:text-white hover:underline transition-colors text-white"
+                  href="/campus-life?tab=societies"
+                  className="hover:text-white hover:underline transition-colors"
                 >
-                  Student Societies &amp; Clubs
+                  12 Student Societies &amp; Clubs
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/learn/hostel-allotment"
+                  href="/campus-life?tab=directory"
                   className="hover:text-white hover:underline transition-colors"
                 >
-                  Hostels &amp; Allotment
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/campus-life#library"
-                  className="hover:text-white hover:underline transition-colors"
-                >
-                  Central Library Facilities
+                  Campus Directory Phonebook
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Column 4: Knowledge Base & AI */}
+          {/* Column 5: Knowledge, Legal & Trust */}
           <div className="space-y-3">
             <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-white">
-              Knowledge &amp; AI
+              Knowledge &amp; Trust
             </h3>
             <ul className="space-y-2">
               <li>
@@ -264,48 +254,6 @@ export function PublicFooter() {
                   Taxila Glossary Index
                 </Link>
               </li>
-              <li>
-                <Link href="/uet" className="hover:text-white hover:underline transition-colors">
-                  Institutional Guide (UET)
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/uet-gpt"
-                  className="hover:text-white hover:underline transition-colors"
-                >
-                  About UET GPT AI
-                </Link>
-              </li>
-              <li>
-                <a
-                  href="/llms.txt"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-white hover:underline transition-colors"
-                >
-                  llms.txt (AI Index)
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/llms-full.txt"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-white hover:underline transition-colors"
-                >
-                  llms-full.txt (Full Spec)
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Column 5: Trust, Legal & Team */}
-          <div className="space-y-3">
-            <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-white">
-              About &amp; Trust
-            </h3>
-            <ul className="space-y-2">
               <li>
                 <Link href="/about" className="hover:text-white hover:underline transition-colors">
                   Founder &amp; Mission
@@ -334,13 +282,12 @@ export function PublicFooter() {
               </li>
               <li>
                 <a
-                  href="https://web.uettaxila.edu.pk"
+                  href="/llms.txt"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-white hover:underline transition-colors inline-flex items-center gap-1"
+                  className="hover:text-white hover:underline transition-colors"
                 >
-                  <span>Official University Site</span>
-                  <span className="text-[10px]">&nearr;</span>
+                  llms.txt (AI Index)
                 </a>
               </li>
             </ul>

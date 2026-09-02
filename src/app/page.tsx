@@ -3,7 +3,7 @@ import Link from "next/link";
 import { MedallionCanvas } from "@/components/landing/medallion-canvas";
 import { PublicFooter } from "@/components/navigation/public-footer";
 import { PublicNav } from "@/components/navigation/public-nav";
-import { SCHEMA_DATE_MODIFIED } from "@/lib/dates";
+import { CURRENT_ACADEMIC_YEAR, SCHEMA_DATE_MODIFIED } from "@/lib/dates";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
@@ -77,6 +77,61 @@ const faqSchema = {
   })),
 };
 
+const PILLARS = [
+  {
+    id: "01",
+    title: "Engineering Tools Suite",
+    badge: "4-in-1 Suite",
+    href: "/tools",
+    desc: "Interactive tools for real-time aggregate calculation, semester GPA simulation, 5-year closing merit cutoffs archive, and financial aid qualification.",
+    subLinks: [
+      { label: "Merit Calculator", href: "/tools?tab=merit" },
+      { label: "GPA & CGPA Calc", href: "/tools?tab=gpa" },
+      { label: "5-Yr Closing Merit", href: "/tools?tab=archive" },
+      { label: "Scholarship Screener", href: "/tools?tab=scholarships" },
+    ],
+  },
+  {
+    id: "02",
+    title: "Academics & Syllabi",
+    badge: "Washington Accord",
+    href: "/academics",
+    desc: "14 PEC Level-II accredited undergraduate engineering and computing roadmaps, official course syllabi, semester academic calendar, and OBE assessment rubrics.",
+    subLinks: [
+      { label: "14 Degree Curriculums", href: "/academics?tab=programs" },
+      { label: "Academic Calendar", href: "/academics?tab=calendar" },
+      { label: "Past Papers & OBE", href: "/academics?tab=resources" },
+      { label: "CS & SE Roadmaps", href: "/uet-taxila/programs" },
+    ],
+  },
+  {
+    id: "03",
+    title: "Admissions & Aid",
+    badge: `${CURRENT_ACADEMIC_YEAR} Gateway`,
+    href: "/admissions",
+    desc: "Step-by-step admissions walkthrough, ECAT 400-mark preparation strategy, interactive semester fee simulator, and comprehensive financial aid grants.",
+    subLinks: [
+      { label: "Eligibility & Quotas", href: "/admissions?tab=overview" },
+      { label: "ECAT 2026 Strategy", href: "/admissions?tab=ecat" },
+      { label: "Fee Simulator", href: "/admissions?tab=fees" },
+      { label: "Honhaar & HEC Aid", href: "/admissions?tab=scholarships" },
+    ],
+  },
+  {
+    id: "04",
+    title: "Campus Life & Transit",
+    badge: "Student Guide",
+    href: "/campus-life",
+    desc: "Everything about life on campus: 5 residential halls and hostel allotments, 25+ point bus route schedules across the Twin Cities, 12 student societies, and directory.",
+    subLinks: [
+      { label: "Hostels & Residence", href: "/campus-life?tab=hostels" },
+      { label: "Bus Route Schedules", href: "/campus-life?tab=transport" },
+      { label: "12 Student Societies", href: "/campus-life?tab=societies" },
+      { label: "Campus Phonebook", href: "/campus-life?tab=directory" },
+    ],
+  },
+];
+
 export default function HomePage() {
   return (
     <>
@@ -113,230 +168,74 @@ export default function HomePage() {
                 Ask UET GPT Anything &rarr;
               </Link>
               <Link
-                href="/calculator"
+                href="/tools"
                 className="w-full sm:w-auto px-8 py-4 rounded border border-[#d9b451]/40 text-[#d9b451] hover:bg-[#d9b451]/10 transition-all text-sm font-mono tracking-wider uppercase min-h-[44px] flex items-center justify-center"
               >
-                Merit Calculator
+                Launch Tools Suite
               </Link>
               <Link
-                href="/scholarships"
+                href="/admissions"
                 className="w-full sm:w-auto px-8 py-4 rounded border border-white/20 text-white/80 hover:text-white hover:border-white/40 transition-all text-sm font-mono tracking-wider uppercase min-h-[44px] flex items-center justify-center"
               >
-                Scholarships Guide
+                Admissions {CURRENT_ACADEMIC_YEAR}
               </Link>
             </div>
           </section>
 
-          {/* Quick Hub Navigation Cards */}
+          {/* 4 Core Pillars Architecture Showcase */}
           <section className="px-6 py-16 max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <Link
-                href="/calculator"
-                className="p-6 rounded border border-[#d9b451]/30 bg-[#d9b451]/5 hover:border-[#d9b451] hover:bg-[#d9b451]/10 transition-all group"
-              >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">01 / TOOL</div>
-                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
-                  Merit Calculator
-                </h2>
-                <p className="text-xs text-white/60 leading-relaxed">
-                  Instant aggregate computation: 33% ECAT, 50% HSSC, 17% SSC with live eligibility.
-                </p>
-              </Link>
+            <div className="text-center mb-10">
+              <span className="text-xs font-mono text-[#d9b451] uppercase tracking-widest">
+                Platform Architecture
+              </span>
+              <h2 className="mt-2 text-2xl sm:text-3xl font-light text-white">
+                4 Core Engineering Pillars
+              </h2>
+            </div>
 
-              <Link
-                href="/gpa-calculator"
-                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
-              >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">02 / TOOL</div>
-                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
-                  GPA &amp; CGPA Calculator
-                </h2>
-                <p className="text-xs text-white/60 leading-relaxed">
-                  Calculate semester SGPA and cumulative CGPA on official UET Taxila 4.00 scale.
-                </p>
-              </Link>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {PILLARS.map((pillar) => (
+                <div
+                  key={pillar.id}
+                  className="rounded-2xl border border-white/10 bg-[#0c0d10] p-6 sm:p-8 flex flex-col justify-between hover:border-[#d9b451]/40 transition-all group"
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-mono text-xs font-bold text-[#d9b451]">
+                        {pillar.id} / PILLAR
+                      </span>
+                      <span className="rounded bg-[#d9b451]/10 px-2 py-0.5 font-mono text-[10px] font-bold text-[#d9b451]">
+                        {pillar.badge}
+                      </span>
+                    </div>
 
-              <Link
-                href="/scholarship-finder"
-                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
-              >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">03 / AID SCREENER</div>
-                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
-                  Scholarship Finder
-                </h2>
-                <p className="text-xs text-white/60 leading-relaxed">
-                  Interactive screener matching Honhaar, HEC Need-Based, Ehsaas, and WWF grants.
-                </p>
-              </Link>
+                    <Link href={pillar.href}>
+                      <h3 className="mt-3 text-xl font-bold text-white group-hover:text-[#d9b451] transition-colors">
+                        {pillar.title}
+                      </h3>
+                    </Link>
 
-              <Link
-                href="/merit-archive"
-                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
-              >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">04 / ARCHIVE</div>
-                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
-                  5-Yr Merit Cutoff Archive
-                </h2>
-                <p className="text-xs text-white/60 leading-relaxed">
-                  Historical closing merit trends for all 14 programs across Category A and S.
-                </p>
-              </Link>
+                    <p className="mt-2 text-xs leading-relaxed text-[#a1a1aa]">{pillar.desc}</p>
+                  </div>
 
-              <Link
-                href="/uet-taxila/programs"
-                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
-              >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">05 / ACADEMICS</div>
-                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
-                  14 Degree Programs &amp; Syllabi
-                </h2>
-                <p className="text-xs text-white/60 leading-relaxed">
-                  4-year semester roadmaps, course codes, and PEC OBE Level-II accreditations.
-                </p>
-              </Link>
-
-              <Link
-                href="/resources"
-                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
-              >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">06 / RESOURCES</div>
-                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
-                  Past Papers &amp; OBE Grading
-                </h2>
-                <p className="text-xs text-white/60 leading-relaxed">
-                  Course Learning Outcomes, exam rubrics, Central Library, and IEEE Xplore access.
-                </p>
-              </Link>
-
-              <Link
-                href="/calendar"
-                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
-              >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">07 / SCHEDULE</div>
-                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
-                  Academic Calendar 2026
-                </h2>
-                <p className="text-xs text-white/60 leading-relaxed">
-                  ECAT dates, merit lists, semester starts, midterm assessments, and final exams.
-                </p>
-              </Link>
-
-              <Link
-                href="/directory"
-                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
-              >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">08 / DIRECTORY</div>
-                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
-                  Campus Directory &amp; Contacts
-                </h2>
-                <p className="text-xs text-white/60 leading-relaxed">
-                  Search phone extensions, official emails, and offices for all departments.
-                </p>
-              </Link>
-
-              <Link
-                href="/bus-routes"
-                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
-              >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">09 / TRANSIT</div>
-                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
-                  Bus Routes &amp; Fleet Schedules
-                </h2>
-                <p className="text-xs text-white/60 leading-relaxed">
-                  Morning and afternoon point bus routes across Islamabad, Rawalpindi, and Wah.
-                </p>
-              </Link>
-
-              <Link
-                href="/societies"
-                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
-              >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">10 / LEADERSHIP</div>
-                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
-                  Student Societies &amp; Clubs
-                </h2>
-                <p className="text-xs text-white/60 leading-relaxed">
-                  IEEE, GDG on Campus, SOFTDESK, ASME, ICE, Debates, AutoShow, and HackXila.
-                </p>
-              </Link>
-
-              <Link
-                href="/compare"
-                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
-              >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">11 / DECISION MATRIX</div>
-                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
-                  Compare Universities
-                </h2>
-                <p className="text-xs text-white/60 leading-relaxed">
-                  Side-by-side comparison: UET Taxila vs NUST, FAST-NUCES, UET Lahore, and GIKI.
-                </p>
-              </Link>
-
-              <Link
-                href="/ecat-guide"
-                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
-              >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">12 / STRATEGY</div>
-                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
-                  ECAT 2026 Guide
-                </h2>
-                <p className="text-xs text-white/60 leading-relaxed">
-                  400-marks syllabus breakdown, negative marking (-1) rules, and high-yield topics.
-                </p>
-              </Link>
-
-              <Link
-                href="/uet-taxila/admissions"
-                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
-              >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">13 / ADMISSIONS</div>
-                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
-                  Admissions Guide
-                </h2>
-                <p className="text-xs text-white/60 leading-relaxed">
-                  Eligibility criteria (60%/50%), quota categories A/S/X, and application deadlines.
-                </p>
-              </Link>
-
-              <Link
-                href="/uet-taxila/fee-structure"
-                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
-              >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">14 / FINANCES</div>
-                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
-                  Fee Structure 2026
-                </h2>
-                <p className="text-xs text-white/60 leading-relaxed">
-                  Subsidized vs partial-subsidized tuition, hostel fees, and interactive simulator.
-                </p>
-              </Link>
-
-              <Link
-                href="/scholarships"
-                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
-              >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">15 / AID</div>
-                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
-                  Scholarships &amp; Grants
-                </h2>
-                <p className="text-xs text-white/60 leading-relaxed">
-                  HEC Need-Based, Ehsaas, PEEF, and UET Alumni Association financial aid schemes.
-                </p>
-              </Link>
-
-              <Link
-                href="/campus-life"
-                className="p-6 rounded border border-white/10 bg-white/[0.02] hover:border-[#d9b451]/50 hover:bg-white/[0.04] transition-all group"
-              >
-                <div className="text-xs font-mono text-[#d9b451] mb-2">16 / CAMPUS</div>
-                <h2 className="text-lg font-normal mb-2 text-white group-hover:text-[#d9b451] transition-colors">
-                  Campus Life &amp; Hostels
-                </h2>
-                <p className="text-xs text-white/60 leading-relaxed">
-                  5 residential halls, daily bus commuter network, central library, and clubs.
-                </p>
-              </Link>
+                  <div className="mt-6 pt-4 border-t border-white/5">
+                    <div className="text-[10px] font-mono uppercase text-[#71717a] mb-2">
+                      Quick Access:
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {pillar.subLinks.map((sub) => (
+                        <Link
+                          key={sub.label}
+                          href={sub.href}
+                          className="rounded-lg border border-white/10 bg-[#07080a] px-2.5 py-1 text-xs font-mono text-[#a1a1aa] hover:border-[#d9b451] hover:text-white transition-colors"
+                        >
+                          {sub.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </section>
 

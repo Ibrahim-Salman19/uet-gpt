@@ -42,6 +42,80 @@ const nextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: "/calculator",
+        destination: "/tools?tab=merit",
+        permanent: true,
+      },
+      {
+        source: "/gpa-calculator",
+        destination: "/tools?tab=gpa",
+        permanent: true,
+      },
+      {
+        source: "/merit-archive",
+        destination: "/tools?tab=archive",
+        permanent: true,
+      },
+      {
+        source: "/scholarship-finder",
+        destination: "/tools?tab=scholarships",
+        permanent: true,
+      },
+      {
+        source: "/calendar",
+        destination: "/academics?tab=calendar",
+        permanent: true,
+      },
+      {
+        source: "/resources",
+        destination: "/academics?tab=resources",
+        permanent: true,
+      },
+      {
+        source: "/uet-taxila/admissions",
+        destination: "/admissions?tab=overview",
+        permanent: true,
+      },
+      {
+        source: "/ecat-guide",
+        destination: "/admissions?tab=ecat",
+        permanent: true,
+      },
+      {
+        source: "/uet-taxila/fee-structure",
+        destination: "/admissions?tab=fees",
+        permanent: true,
+      },
+      {
+        source: "/scholarships",
+        destination: "/admissions?tab=scholarships",
+        permanent: true,
+      },
+      {
+        source: "/compare",
+        destination: "/admissions?tab=compare",
+        permanent: true,
+      },
+      {
+        source: "/bus-routes",
+        destination: "/campus-life?tab=transport",
+        permanent: true,
+      },
+      {
+        source: "/societies",
+        destination: "/campus-life?tab=societies",
+        permanent: true,
+      },
+      {
+        source: "/directory",
+        destination: "/campus-life?tab=directory",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

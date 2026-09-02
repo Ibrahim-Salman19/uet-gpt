@@ -1,41 +1,42 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { CampusLifeHub } from "@/components/campus/campus-life-hub";
+import { AcademicsHub } from "@/components/academics/academics-hub";
 import { PublicFooter } from "@/components/navigation/public-footer";
 import { PublicNav } from "@/components/navigation/public-nav";
+import { CURRENT_ACADEMIC_YEAR } from "@/lib/dates";
 import { BreadcrumbJsonLd } from "@/lib/json-ld";
 
 export const metadata: Metadata = {
-  title: "Campus Life, Hostels, Transport & Societies | UET GPT",
+  title: `Academics, Degree Syllabi & Calendar | UET GPT`,
   description:
-    "Official campus life guide for UET Taxila: Student hostels, 25+ commuter bus route schedules, 12 registered societies, and campus telephone directory.",
+    "Official academic hub for UET Taxila: 14 PEC-accredited degree curriculums, 8-semester roadmaps, academic calendar, and OBE examination guidelines.",
   alternates: {
-    canonical: "https://uet-gpt.vercel.app/campus-life",
+    canonical: "https://uet-gpt.vercel.app/academics",
   },
   openGraph: {
-    title: "Campus Life, Hostels, Transport & Societies | UET GPT",
+    title: `Academics, Degree Syllabi & Calendar | UET GPT`,
     description:
-      "Official campus life guide for UET Taxila: Student hostels, 25+ commuter bus route schedules, 12 registered societies, and campus telephone directory.",
-    url: "https://uet-gpt.vercel.app/campus-life",
+      "Official academic hub for UET Taxila: 14 PEC-accredited degree curriculums, 8-semester roadmaps, academic calendar, and OBE examination guidelines.",
+    url: "https://uet-gpt.vercel.app/academics",
     siteName: "UET GPT",
     locale: "en_PK",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Campus Life, Hostels, Transport & Societies | UET GPT",
+    title: `Academics, Degree Syllabi & Calendar | UET GPT`,
     description:
-      "Official campus life guide for UET Taxila: Student hostels, 25+ commuter bus route schedules, 12 registered societies, and campus telephone directory.",
+      "Official academic hub for UET Taxila: 14 PEC-accredited degree curriculums, 8-semester roadmaps, academic calendar, and OBE examination guidelines.",
   },
 };
 
-export default function CampusLifePage() {
+export default function AcademicsPage() {
   return (
     <>
       <BreadcrumbJsonLd
         items={[
           { name: "Home", item: "/" },
-          { name: "Campus Life", item: "/campus-life" },
+          { name: "Academics", item: "/academics" },
         ]}
       />
 
@@ -47,30 +48,31 @@ export default function CampusLifePage() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-3xl text-center">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-[#d9b451]/30 bg-[#d9b451]/10 px-3.5 py-1 text-xs font-mono font-semibold uppercase tracking-wider text-[#d9b451]">
-                Student Experience
+                Academic Excellence
               </span>
               <h1 className="mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
-                Campus Life &amp; Facilities
+                Academics, Syllabi &amp; Calendar
               </h1>
               <p className="mt-4 text-sm leading-relaxed text-[#a1a1aa] sm:text-base">
-                Discover student housing, commuter transport fleet timetables, registered technical
-                &amp; cultural societies, and the official campus directory.
+                Explore Washington Accord Level-II accredited engineering degrees, computing
+                disciplines, official semester roadmaps, examination rubrics, and the academic
+                calendar {CURRENT_ACADEMIC_YEAR}.
               </p>
             </div>
           </div>
         </section>
 
-        {/* Content Section */}
+        {/* Academics Section */}
         <section className="py-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <Suspense
               fallback={
                 <div className="rounded-2xl border border-white/10 bg-[#0c0d10] p-12 text-center text-sm font-mono text-[#a1a1aa]">
-                  Loading campus life hub...
+                  Loading academic programs and schedules...
                 </div>
               }
             >
-              <CampusLifeHub />
+              <AcademicsHub />
             </Suspense>
           </div>
         </section>
