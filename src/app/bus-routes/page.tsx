@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BreadcrumbJsonLd } from "@/components/json-ld";
 import { PublicFooter } from "@/components/navigation/public-footer";
 import { PublicNav } from "@/components/navigation/public-nav";
 import { BusRoutesExplorer } from "@/components/transport/bus-routes-explorer";
+import { BreadcrumbJsonLd } from "@/lib/json-ld";
 
 export const metadata: Metadata = {
   title: "UET Taxila Bus Routes & Schedule | Commuter Fleet",
