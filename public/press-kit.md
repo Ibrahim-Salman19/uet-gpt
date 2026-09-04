@@ -32,19 +32,24 @@ Rather than searching through scattered pages and PDFs, users get grounded answe
 
 ## Technology Stack
 
-- **Frontend:** Next.js, React, Tailwind CSS
-- **Backend:** Convex (real-time database + serverless functions, native vector index)
+- **Frontend:** Next.js 16 (App Router), React 19, Tailwind CSS, TypeScript
+- **Backend:** Convex (real-time database + serverless functions) with Turso/SQLite hybrid retrieval
 - **Auth:** Clerk (RBAC: user / admin / superadmin)
-- **LLM:** Vercel AI SDK with a multi-provider fallback chain
-- **Vector Search:** Convex vector indexes with Gemini embeddings
+- **LLM:** Llama 4 Scout (Groq) for deep reasoning, Llama 3.1 8B (Groq) for speed
+- **Vector Search:** Convex vector indexes with Gemini embedding-2
 - **Crawler:** Python async BFS crawler (`curl_cffi`, `trafilatura`)
 - **Deployment:** Vercel
+
+## Founder
+
+UET GPT was built and is maintained by **Ibrahim Salman** ([github.com/Ibrahim-Salman19](https://github.com/Ibrahim-Salman19), [portfolio](https://ibrahimsalman.vercel.app)), who designed the RAG retrieval pipeline, the crawler infrastructure, and the calculator tools. The full source is open (AGPL-3.0) for independent verification.
 
 ## Links
 
 - **Live app:** https://uet-gpt.vercel.app
 - **Chat:** https://uet-gpt.vercel.app/chat
 - **About UET Taxila:** https://uet-gpt.vercel.app/about
+- **Source code:** https://github.com/Ibrahim-Salman19/uet-gpt
 - **Press kit:** https://uet-gpt.vercel.app/press-kit.md
 
 ## About UET Taxila

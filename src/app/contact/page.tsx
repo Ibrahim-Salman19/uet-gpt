@@ -92,7 +92,7 @@ export default function ContactPage() {
               our public repository.
             </p>
             <a
-              href="https://github.com/devhms/uet_gpt"
+              href="https://github.com/Ibrahim-Salman19/uet-gpt"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-sm font-medium text-[#d9b451] hover:underline"

@@ -12,7 +12,7 @@
 | **Instance of** | chatbot (Q844614), virtual assistant (Q11028), software (Q7397) |
 | **Official website** | https://uet-gpt.vercel.app |
 | **Described by source** | https://uet-gpt.vercel.app (official website) |
-| **Developer / author** | UET GPT Team |
+| **Developer / author** | Ibrahim Salman |
 | **License** | AGPL-3.0 - the repository ships a LICENSE file (GNU Affero General Public License v3.0). Assert `AGPL-3.0` (Q38339) as the license (P275) on Wikidata. |
 | **Programming language** | TypeScript (frontend/backend), Python (crawler) |
 | **Official website (P856)** | https://uet-gpt.vercel.app |
@@ -27,7 +27,7 @@ Use these property IDs when creating statements on the item:
   - `Q7397` - software
 - **P856 (official website)**: `https://uet-gpt.vercel.app`
 - **P837 (described by source)**: `https://uet-gpt.vercel.app`
-- **P178 (developer)**: `UET GPT Team`
+- **P178 (developer)**: `Ibrahim Salman`
 - **P277 (programming language)**: `Q200686` (TypeScript), `Q28865` (Python)
 - **P159 (headquarters location)** *(optional)*: Taxila, Punjab, Pakistan
 - **P17 (country)**: `Q843` (Pakistan) *(optional)*
@@ -39,7 +39,7 @@ Use these property IDs when creating statements on the item:
 Every statement should carry at least one reference. Suggested references:
 
 1. **Project site** - https://uet-gpt.vercel.app
-   - Supports: instance of (software), developer (UET GPT Team), described by source, programming language, official website.
+   - Supports: instance of (software), developer (Ibrahim Salman), described by source, programming language, official website.
 2. **Live website** - https://uet-gpt.vercel.app
    - Supports: official website, that it is an operational AI chatbot for UET Taxila.
 3. **About page** - https://uet-gpt.vercel.app/about
@@ -61,7 +61,7 @@ Every statement should carry at least one reference. Suggested references:
    - `instance of` → `chatbot` (and optionally `virtual assistant`, `software`).
    - `official website` → `https://uet-gpt.vercel.app`.
    - `described by source` → `https://uet-gpt.vercel.app`.
-   - `developer` → `UET GPT Team`.
+   - `developer` → `Ibrahim Salman`.
    - `programming language` → `TypeScript`, `Python`.
 7. For each statement, click the **reference** icon and add the supporting URL(s) from Section 3 (use the "reference URL" property `P854`).
 8. **Add an English Wikipedia article link** only if a corresponding Wikipedia article exists (see Section 5).

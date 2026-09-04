@@ -28,7 +28,7 @@ not, e.g.:
   (`/uet-taxila/admissions`, `/uet-taxila/fee-structure`, `/uet-taxila/programs`)
   and to `/uet-gpt`. Hub-and-spoke.
 - **Schema** — each page gets `Article` (datePublished/dateModified, author =
-  UET GPT Team) + `FAQPage` + `BreadcrumbList`.
+  Ibrahim Salman) + `FAQPage` + `BreadcrumbList`.
 
 ## Target Terms (Phase 1 — verified data already on site)
 1. ECAT (entry test) — links to `/uet-taxila/admissions`

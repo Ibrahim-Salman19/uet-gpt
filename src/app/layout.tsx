@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { CookieConsent } from "@/components/cookie-consent";
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
   },
   description: APP_DESCRIPTION,
   keywords: [...APP_KEYWORDS],
-  authors: [{ name: "UET GPT Team" }],
+  authors: [{ name: "Ibrahim Salman" }],
   creator: "UET GPT",
   publisher: "UET GPT",
   appleWebApp: {
@@ -58,14 +59,12 @@ export const metadata: Metadata = {
         url: `${siteUrl}/opengraph-image`,
         width: 1200,
         height: 630,
-        alt: "UET GPT — AI Assistant for UET Taxila",
+        alt: "UET GPT: AI Assistant for UET Taxila",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    site: "@uet_gpt",
-    creator: "@uet_gpt",
     title,
     description: APP_DESCRIPTION,
     images: [`${siteUrl}/opengraph-image`],
@@ -97,6 +96,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
           <CookieConsent />
         </Providers>
+        <Analytics />
       </body>
     </html>
   );

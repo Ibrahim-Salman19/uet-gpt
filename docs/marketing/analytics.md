@@ -29,4 +29,4 @@ UET GPT is open source + student-facing → use a cookieless analytics tool:
 Google Analytics works but uses cookies; Plausible/Vercel Analytics align better with the privacy-first brand. If GA4 chosen, enable via GTM.
 
 ## Next Step
-Enable Vercel Web Analytics (fastest) + add to `llms.txt`/README that analytics are privacy-first.
+Done (2026-09-04): `@vercel/analytics` installed and `<Analytics />` mounted in `src/app/layout.tsx` — cookieless, zero-config, matches the privacy-first brand.

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PublicFooter } from "@/components/navigation/public-footer";
 import { PublicNav } from "@/components/navigation/public-nav";
+import { SCHEMA_DATE_MODIFIED } from "@/lib/dates";
 import { BreadcrumbJsonLd } from "@/lib/json-ld";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
@@ -68,6 +69,7 @@ export default function AboutPage() {
           <p className="text-lg text-[#a1a1aa] leading-relaxed">
             The mission, architecture, and student community behind the AI assistant for UET Taxila.
           </p>
+          <p className="mt-4 text-sm text-[#71717a]">Last updated: {SCHEMA_DATE_MODIFIED}</p>
         </header>
 
         <section className="space-y-10 text-base text-[#a1a1aa] leading-relaxed">
@@ -85,8 +87,8 @@ export default function AboutPage() {
             <h2 className="text-2xl font-semibold text-white mb-3">How It Works</h2>
             <p className="text-sm sm:text-base leading-relaxed mb-4">
               UET GPT employs Retrieval-Augmented Generation (RAG). When a user submits a query, our
-              retrieval system searches official UET Taxila documentation—including undergraduate
-              prospectuses, department bulletins, and fee schedules—and supplies this verified
+              retrieval system searches official UET Taxila documentation (including undergraduate
+              prospectuses, department bulletins, and fee schedules) and supplies this verified
               context to our language models. This prevents hallucinations and ensures all answers
               are backed by verifiable citations.
             </p>
@@ -112,6 +114,34 @@ export default function AboutPage() {
               UET GPT is an independent, open-source initiative built by students and alumni. It is
               not officially operated or endorsed by UET Taxila. We believe in transparent,
               accessible knowledge for every engineer and student.
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-white/10 bg-[#0c0d10] p-6 sm:p-8">
+            <h2 className="text-2xl font-semibold text-white mb-3">Founder</h2>
+            <p className="text-sm sm:text-base leading-relaxed">
+              UET GPT is founded and maintained by{" "}
+              <a
+                href="https://github.com/Ibrahim-Salman19"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#d9b451] hover:underline"
+              >
+                Ibrahim Salman
+              </a>
+              , who built the RAG pipeline, crawler infrastructure, and calculator tools that power
+              the platform. The project's source code is public on GitHub under the AGPL-3.0
+              license, so its retrieval logic and data sourcing can be independently verified. See
+              more of his work at{" "}
+              <a
+                href="https://ibrahimsalman.vercel.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#d9b451] hover:underline"
+              >
+                ibrahimsalman.vercel.app
+              </a>
+              .
             </p>
           </div>
         </section>

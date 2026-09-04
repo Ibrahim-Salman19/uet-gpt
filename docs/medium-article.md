@@ -134,7 +134,7 @@ We simplified ruthlessly. The chat input is always visible. Answers stream in re
 
 ## Open Source & Community
 
-UET GPT is released under AGPL-3.0. The full source is on [GitHub](https://github.com/devhms/uet_gpt).
+UET GPT is released under AGPL-3.0. The full source is on [GitHub](https://github.com/Ibrahim-Salman19/uet-gpt).
 
 We built this as a community project, student-built, student-maintained, free for everyone. If you're a UET Taxila student, faculty member, or prospective applicant, try it out at [uet-gpt.vercel.app](https://uet-gpt.vercel.app).
 
@@ -154,5 +154,5 @@ If you're building something similar for your university, we'd love to help you 
 *Built with love by UET Taxila students. Free forever.*
 
 **Try it:** [uet-gpt.vercel.app](https://uet-gpt.vercel.app)
-**Source code:** [github.com/devhms/uet_gpt](https://github.com/devhms/uet_gpt)
-**Questions?** Visit my [portfolio](https://portfoliofinal-lyart-tau.vercel.app/) or reach out on Twitter.
+**Source code:** [github.com/Ibrahim-Salman19/uet-gpt](https://github.com/Ibrahim-Salman19/uet-gpt)
+**Questions?** Visit my [portfolio](https://ibrahimsalman.vercel.app) or reach out via [GitHub](https://github.com/Ibrahim-Salman19).

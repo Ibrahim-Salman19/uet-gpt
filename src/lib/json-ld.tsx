@@ -15,20 +15,17 @@ export const organizationSchema = {
   dateModified: SCHEMA_DATE_MODIFIED,
   founder: {
     "@type": "Person",
-    name: "Hafiz Muhammad Saad",
-    url: "https://github.com/devhms",
+    name: "Ibrahim Salman",
+    url: "https://github.com/Ibrahim-Salman19",
+    sameAs: ["https://www.linkedin.com/in/ibrahim-salman-dev/", "https://ibrahimsalman.vercel.app"],
   },
   logo: {
     "@type": "ImageObject",
-    url: `${siteUrl}/uet-logo.jpg`,
+    url: `${siteUrl}/icon-512.png`,
     width: 512,
     height: 512,
   },
-  sameAs: [
-    "https://github.com/devhms/uet_gpt",
-    "https://twitter.com/uet_gpt",
-    "https://www.linkedin.com/company/uet-gpt",
-  ],
+  sameAs: ["https://github.com/Ibrahim-Salman19/uet-gpt"],
 };
 
 export const websiteSchema = {
@@ -94,7 +91,7 @@ export const collegeSchema = {
   url: "https://web.uettaxila.edu.pk",
   logo: {
     "@type": "ImageObject",
-    url: `${siteUrl}/uet-logo.jpg`,
+    url: `${siteUrl}/icon-512.png`,
     width: 512,
     height: 512,
   },

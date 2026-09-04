@@ -26,7 +26,7 @@ What makes it AI-first:
 • Real-time crawling - automatically updates from UET Taxila's website and admission portal
 • Citation-backed - every answer includes source references from university materials
 
-UET GPT is built on Convex (real-time backend), Next.js 15, and Clerk Auth. Use cases: admission guidance, fee/comparison queries, faculty research, campus information, scholarship discovery.
+UET GPT is built on Convex (real-time backend) with Turso/SQLite hybrid retrieval, Next.js 16, and Clerk Auth. Use cases: admission guidance, fee/comparison queries, faculty research, campus information, scholarship discovery.
 
 Free tier available. No API keys required.
 
@@ -153,12 +153,12 @@ AI chatbot, UET Taxila, educational AI, RAG chatbot, university assistant, Pakis
 | Instance of (P31) | software (Q7397) |
 | Official website (P856) | https://uet-gpt.vercel.app |
 | Inception (P571) | 21 May 2026 |
-| Developer (P178) | UET GPT Team |
+| Developer (P178) | Ibrahim Salman |
 | Programming language (P277) | TypeScript (Q23757187) |
 | Genre (P136) | chatbot (Q363045), educational software (Q952151) |
 | LinkedIn ID (P4264) | (after creating page) |
 | Crunchbase ID (P2088) | (after creating profile) |
-| Twitter username (P2002) | (once created) |
+| Twitter username (P2002) | N/A — no official UET GPT account exists |
 
 ---
 

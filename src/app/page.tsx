@@ -8,16 +8,16 @@ import { CURRENT_ACADEMIC_YEAR, SCHEMA_DATE_MODIFIED } from "@/lib/dates";
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
 export const metadata: Metadata = {
-  title: "UET GPT: Official AI Intelligence & Decision Platform for UET Taxila",
+  title: "UET GPT: AI Guide & Tools for UET Taxila Admissions",
   description:
-    "Official AI intelligence platform for UET Taxila: Real-time Merit Calculator, 14 PEC-accredited degree syllabi, ECAT 2026 strategy, fee simulator, and campus transit guide.",
+    "Independent, open-source AI guide & tools for UET Taxila: real-time merit calculator, ECAT 2026 aggregates, 14 engineering syllabi, fee simulator, and campus transit guide.",
   alternates: {
     canonical: siteUrl,
   },
   openGraph: {
-    title: "UET GPT: Official AI Intelligence & Decision Platform for UET Taxila",
+    title: "UET GPT: AI Guide & Tools for UET Taxila Admissions",
     description:
-      "Official AI intelligence platform for UET Taxila: Real-time Merit Calculator, 14 PEC-accredited degree syllabi, ECAT 2026 strategy, fee simulator, and campus transit guide.",
+      "Independent, open-source AI guide & tools for UET Taxila: real-time merit calculator, ECAT 2026 aggregates, 14 engineering syllabi, fee simulator, and campus transit guide.",
     url: siteUrl,
     type: "website",
     locale: "en_PK",
@@ -26,15 +26,15 @@ export const metadata: Metadata = {
         url: `${siteUrl}/opengraph-image`,
         width: 1200,
         height: 630,
-        alt: "UET GPT — Official AI Platform for UET Taxila",
+        alt: "UET GPT: Independent AI Guide for UET Taxila",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "UET GPT: Official AI Intelligence & Decision Platform for UET Taxila",
+    title: "UET GPT: AI Guide & Tools for UET Taxila Admissions",
     description:
-      "Official AI intelligence platform for UET Taxila: Real-time Merit Calculator, 14 PEC-accredited degree syllabi, ECAT 2026 strategy, fee simulator, and campus transit guide.",
+      "Independent, open-source AI guide & tools for UET Taxila: real-time merit calculator, ECAT 2026 aggregates, 14 engineering syllabi, fee simulator, and campus transit guide.",
     images: [`${siteUrl}/opengraph-image`],
   },
 };
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
 const HOMEPAGE_FAQS = [
   {
     q: "What is UET GPT?",
-    a: "UET GPT is an authoritative AI intelligence platform for UET Taxila. It combines real-time engineering calculation tools (Merit, SGPA/CGPA, Fees) with Retrieval-Augmented Generation (RAG) across official university documents, prospectuses, departmental syllabi, and statutory regulations.",
+    a: "UET GPT is an independent, open-source AI assistant for UET Taxila. It combines real-time engineering calculation tools (Merit, SGPA/CGPA, Fees) with Retrieval-Augmented Generation (RAG) across official university documents, prospectuses, departmental syllabi, and statutory regulations.",
   },
   {
     q: "How does the merit calculator work?",
@@ -112,7 +112,7 @@ export default function HomePage() {
             <div className="flex flex-col items-center text-center">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#d9b451]/30 bg-[#d9b451]/10 text-[#d9b451] text-xs font-mono uppercase tracking-widest mb-6">
                 <span className="h-2 w-2 rounded-full bg-[#d9b451] animate-pulse" />
-                <span>Official AI Intelligence Platform &bull; UET Taxila</span>
+                <span>Independent, Open-Source AI Guide &bull; UET Taxila</span>
               </div>
 
               <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-white mb-6 leading-[1.08] max-w-4xl">
@@ -123,8 +123,10 @@ export default function HomePage() {
               <p className="text-base sm:text-lg text-[#a1a1aa] max-w-2xl mx-auto mb-8 leading-relaxed font-normal">
                 Everything you need for undergraduate admissions, PEC Washington Accord degree
                 syllabi, real-time aggregate calculation, semester GPA tracking, and campus transit
-                — grounded in verified university data.
+                , grounded in verified university data.
               </p>
+
+              <p className="text-xs text-[#71717a] mb-8">Last updated: {SCHEMA_DATE_MODIFIED}</p>
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full sm:w-auto">

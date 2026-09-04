@@ -62,7 +62,7 @@ AI agents prioritize verified web entities. Performing the following submissions
 
 | Platform | Action Required | SEO / GEO Impact |
 |---|---|---|
-| **Wikidata** | Create item `UET GPT` with properties: `instance of: software`, `official website: uet-gpt.vercel.app`, `inception: 2026`, `programming language: TypeScript`, `developer: UET GPT Team`. | **Highest impact for ChatGPT, Perplexity, and Google Knowledge Graph.** |
+| **Wikidata** | Create item `UET GPT` with properties: `instance of: software`, `official website: uet-gpt.vercel.app`, `inception: 2026`, `programming language: TypeScript`, `developer: Ibrahim Salman`. | **Highest impact for ChatGPT, Perplexity, and Google Knowledge Graph.** |
 | **Crunchbase** | Add Organization profile `UET GPT` in Education & AI category. | High domain authority backlink (DR 91) + AI training corpus inclusion. |
 | **GitHub Repository** | Add tags: `uet-taxila`, `uet`, `rag-chatbot`, `nextjs`, `convex`, `groq`. Include `LLMs.txt` link in README. | GitHub is heavily indexed by technical LLMs. |
 | **LinkedIn Company Page** | Set up `UET GPT` company page and publish project updates. | Authority citation source for LLMs. |
@@ -94,7 +94,7 @@ Submit UET GPT to top AI and SaaS directories for backlink authority and direct 
    - Posts on `r/PakistaniTech`, `r/pakistan`, `r/chutyapa`, `r/UET`: *"We built UET GPT - an open-source AI chatbot for UET Taxila students to check admissions, fees, and merit lists instantly."*
 
 2. **Developer Blogging**:
-   - Dev.to & Hashnode articles: *"How We Built an Open-Source RAG Chatbot for UET Taxila using Next.js 15, Convex & Groq Llama 4 Scout"*.
+   - Dev.to & Hashnode articles: *"How We Built an Open-Source RAG Chatbot for UET Taxila using Next.js 16, Convex & Groq Llama 4 Scout"*.
 
 3. **Student Networks**:
    - Share across Facebook UET Taxila student groups, WhatsApp departmental groups, and LinkedIn UET alumni groups.

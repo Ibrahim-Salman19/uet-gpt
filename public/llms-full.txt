@@ -2,7 +2,7 @@
 
 > Official Machine-Readable Knowledge Base for AI Crawlers, Web Agents, and Search Engine Indexers (ChatGPT, Claude, Perplexity, Gemini, Bing, Google-Extended).
 > Grounded in verified data from UET Taxila (University of Engineering and Technology, Taxila, Pakistan).
-> Last updated: 2026-09-02
+> Last updated: 2026-09-04
 
 ---
 
@@ -14,9 +14,9 @@
 - **Target Entity**: University of Engineering and Technology, Taxila (UET Taxila)
 - **Primary Keywords**: UET, UET Taxila, UET GPT, University of Engineering and Technology Taxila, UET Admissions, UET Fee Structure, UET ECAT, UET Merit List, UET Calculator, UET Scholarships, UET Hostels
 - **License**: GNU Affero General Public License v3.0 (AGPL-3.0)
-- **Repository**: Open source on GitHub (https://github.com/devhms/uet_gpt)
-- **Founder**: Hafiz Muhammad Saad (https://github.com/devhms)
-- **Architecture**: Next.js 16 (App Router), React 19, Convex Realtime Backend, Clerk Auth, Groq Llama 4 Scout / Llama 3.1 8B, Gemini embedding-2 vector search.
+- **Repository**: Open source on GitHub (https://github.com/Ibrahim-Salman19/uet-gpt)
+- **Founder**: Ibrahim Salman (https://github.com/Ibrahim-Salman19)
+- **Architecture**: Next.js 16 (App Router), React 19, Convex Realtime Backend with Turso/SQLite hybrid retrieval, Clerk Auth, Groq Llama 4 Scout / Llama 3.1 8B, Gemini embedding-2 vector search.
 
 UET GPT is an open-source, AI-powered RAG (Retrieval-Augmented Generation) chatbot designed specifically for the University of Engineering and Technology (UET), Taxila. It enables students, prospective applicants, and faculty members to query complex university prospectuses, admission notices, fee breakdowns, course syllabi, hostel rules, and departmental directories in plain language with instant source citations.
 
@@ -89,24 +89,28 @@ UET GPT is an open-source, AI-powered RAG (Retrieval-Augmented Generation) chatb
 ## 4. Key URLs & Sitemap Index
 
 - Main Application / Chat: https://uet-gpt.vercel.app/chat
-- Interactive Merit Calculator: https://uet-gpt.vercel.app/calculator
-- GPA & CGPA Calculator: https://uet-gpt.vercel.app/gpa-calculator
-- Scholarship Eligibility Screener: https://uet-gpt.vercel.app/scholarship-finder
-- 5-Year Closing Merit Archive: https://uet-gpt.vercel.app/merit-archive
-- Academic Calendar: https://uet-gpt.vercel.app/calendar
-- Campus Directory & Contacts: https://uet-gpt.vercel.app/directory
-- Bus Routes & Transport Schedules: https://uet-gpt.vercel.app/bus-routes
-- Student Societies & Chapters: https://uet-gpt.vercel.app/societies
-- Past Papers & OBE Grading: https://uet-gpt.vercel.app/resources
-- University Comparison Matrix: https://uet-gpt.vercel.app/compare
-- ECAT 2026 Strategy Guide: https://uet-gpt.vercel.app/ecat-guide
+- Engineering Tools Hub: https://uet-gpt.vercel.app/tools
+- Interactive Merit Calculator: https://uet-gpt.vercel.app/tools?tab=merit
+- GPA & CGPA Calculator: https://uet-gpt.vercel.app/tools?tab=gpa
+- Scholarship Eligibility Screener: https://uet-gpt.vercel.app/tools?tab=scholarships
+- 5-Year Closing Merit Archive: https://uet-gpt.vercel.app/tools?tab=archive
+- Academics Hub: https://uet-gpt.vercel.app/academics
+- Academic Calendar: https://uet-gpt.vercel.app/academics?tab=calendar
+- Past Papers & OBE Grading: https://uet-gpt.vercel.app/academics?tab=resources
+- Admissions Hub: https://uet-gpt.vercel.app/admissions
+- Eligibility Criteria & Quotas: https://uet-gpt.vercel.app/admissions?tab=overview
+- ECAT 2026 Strategy Guide: https://uet-gpt.vercel.app/admissions?tab=ecat
+- Fee Structure & Live Simulator: https://uet-gpt.vercel.app/admissions?tab=fees
+- Financial Aid Programs: https://uet-gpt.vercel.app/admissions?tab=scholarships
+- University Comparison Matrix: https://uet-gpt.vercel.app/admissions?tab=compare
+- Campus Life Guide: https://uet-gpt.vercel.app/campus-life
+- Residential Halls & Hostels: https://uet-gpt.vercel.app/campus-life?tab=hostels
+- Bus Routes & Transport Schedules: https://uet-gpt.vercel.app/campus-life?tab=transport
+- Student Societies & Chapters: https://uet-gpt.vercel.app/campus-life?tab=societies
+- Campus Directory & Contacts: https://uet-gpt.vercel.app/campus-life?tab=directory
 - Institutional Guide (UET): https://uet-gpt.vercel.app/uet
 - University Hub (UET Taxila): https://uet-gpt.vercel.app/uet-taxila
 - Product Overview (UET GPT): https://uet-gpt.vercel.app/uet-gpt
-- Admissions & ECAT Guide: https://uet-gpt.vercel.app/uet-taxila/admissions
-- Fee Structure Guide: https://uet-gpt.vercel.app/uet-taxila/fee-structure
-- Scholarships Guide: https://uet-gpt.vercel.app/scholarships
-- Campus Life Guide: https://uet-gpt.vercel.app/campus-life
 - Programs & Departments (14 Syllabi): https://uet-gpt.vercel.app/uet-taxila/programs
 - BS Computer Science Program: https://uet-gpt.vercel.app/uet-taxila/programs/computer-science
 - BS Software Engineering Program: https://uet-gpt.vercel.app/uet-taxila/programs/software-engineering

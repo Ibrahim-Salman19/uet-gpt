@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { CampusLifeHub } from "@/components/campus/campus-life-hub";
 import { PublicFooter } from "@/components/navigation/public-footer";
 import { PublicNav } from "@/components/navigation/public-nav";
+import { SCHEMA_DATE_MODIFIED } from "@/lib/dates";
 import { BreadcrumbJsonLd } from "@/lib/json-ld";
 
 export const metadata: Metadata = {
@@ -20,12 +21,21 @@ export const metadata: Metadata = {
     siteName: "UET GPT",
     locale: "en_PK",
     type: "website",
+    images: [
+      {
+        url: "https://uet-gpt.vercel.app/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "Campus Life, Hostels, Transport & Societies | UET GPT",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Campus Life, Hostels, Transport & Societies | UET GPT",
     description:
       "Official campus life guide for UET Taxila: Student hostels, 25+ commuter bus route schedules, 12 registered societies, and campus telephone directory.",
+    images: ["https://uet-gpt.vercel.app/opengraph-image"],
   },
 };
 
@@ -51,6 +61,7 @@ export default function CampusLifePage() {
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
+    dateModified: SCHEMA_DATE_MODIFIED,
     mainEntity: campusFaqs.map((faq) => ({
       "@type": "Question",
       name: faq.question,

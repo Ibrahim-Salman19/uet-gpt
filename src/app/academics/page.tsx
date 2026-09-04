@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { AcademicsHub } from "@/components/academics/academics-hub";
 import { PublicFooter } from "@/components/navigation/public-footer";
 import { PublicNav } from "@/components/navigation/public-nav";
-import { CURRENT_ACADEMIC_YEAR } from "@/lib/dates";
+import { CURRENT_ACADEMIC_YEAR, SCHEMA_DATE_MODIFIED } from "@/lib/dates";
 import { BreadcrumbJsonLd } from "@/lib/json-ld";
 
 export const metadata: Metadata = {
@@ -21,12 +21,21 @@ export const metadata: Metadata = {
     siteName: "UET GPT",
     locale: "en_PK",
     type: "website",
+    images: [
+      {
+        url: "https://uet-gpt.vercel.app/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "Academics, Degree Syllabi & Calendar | UET GPT",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: `Academics, Degree Syllabi & Calendar | UET GPT`,
     description:
       "Official academic hub for UET Taxila: 14 PEC-accredited degree curriculums, 8-semester roadmaps, academic calendar, and OBE examination guidelines.",
+    images: ["https://uet-gpt.vercel.app/opengraph-image"],
   },
 };
 
@@ -52,6 +61,7 @@ export default function AcademicsPage() {
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
+    dateModified: SCHEMA_DATE_MODIFIED,
     mainEntity: academicFaqs.map((faq) => ({
       "@type": "Question",
       name: faq.question,

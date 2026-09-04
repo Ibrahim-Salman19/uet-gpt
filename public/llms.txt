@@ -2,7 +2,7 @@
 
 > UET GPT is an open-source AI chatbot and educational guide to the University of Engineering and Technology (UET), Taxila campus, Pakistan. It answers questions about UET Taxila using RAG-powered retrieval from official university documents, prospectuses, fee schedules, syllabi, and directories.
 
-Last updated: 2026-09-02
+Last updated: 2026-09-04
 
 Content is continuously updated as UET Taxila publishes new admissions notices, fee updates, and academic schedules.
 
@@ -73,7 +73,7 @@ Content is continuously updated as UET Taxila publishes new admissions notices, 
 ## Technology
 
 - Frontend: Next.js 16 (App Router), React 19, Tailwind CSS, TypeScript
-- Backend: Convex (real-time reactive database and serverless functions)
+- Backend: Convex (real-time reactive database and serverless functions) with Turso/SQLite hybrid retrieval
 - Authentication: Clerk
 - AI Models: Llama 4 Scout (Groq), Llama 3.1 8B (Groq)
 - Vector Indexing & Embeddings: Convex vector search with Gemini embedding-2
@@ -81,4 +81,4 @@ Content is continuously updated as UET Taxila publishes new admissions notices, 
 
 ## License & Source
 
-UET GPT is open-source under GNU AGPL-3.0. Source code: https://github.com/devhms/uet_gpt
+UET GPT is open-source under GNU AGPL-3.0. Source code: https://github.com/Ibrahim-Salman19/uet-gpt

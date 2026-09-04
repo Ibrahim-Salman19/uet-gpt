@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { PublicFooter } from "@/components/navigation/public-footer";
 import { PublicNav } from "@/components/navigation/public-nav";
 import { ToolsHub } from "@/components/tools/tools-hub";
+import { SCHEMA_DATE_MODIFIED } from "@/lib/dates";
 import { BreadcrumbJsonLd } from "@/lib/json-ld";
 
 export const metadata: Metadata = {
@@ -20,12 +21,21 @@ export const metadata: Metadata = {
     siteName: "UET GPT",
     locale: "en_PK",
     type: "website",
+    images: [
+      {
+        url: "https://uet-gpt.vercel.app/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "Engineering Tools & Calculators Suite | UET GPT",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Engineering Tools & Calculators Suite | UET GPT",
     description:
       "Official engineering tools for UET Taxila: Real-time Merit Calculator, GPA & CGPA Simulator, 5-Year Closing Merit Archive, and Scholarship Screener.",
+    images: ["https://uet-gpt.vercel.app/opengraph-image"],
   },
 };
 
@@ -57,6 +67,7 @@ export default function ToolsPage() {
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
+    dateModified: SCHEMA_DATE_MODIFIED,
     mainEntity: toolsFaqs.map((faq) => ({
       "@type": "Question",
       name: faq.question,
@@ -65,6 +76,48 @@ export default function ToolsPage() {
         text: faq.answer,
       },
     })),
+  };
+
+  const howToSchema = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: "How to Calculate Your UET Taxila Merit Aggregate",
+    description:
+      "Step-by-step process to calculate your UET Taxila admission merit aggregate using the statutory PEC formula.",
+    dateModified: SCHEMA_DATE_MODIFIED,
+    step: [
+      {
+        "@type": "HowToStep",
+        name: "Take 33% of your ECAT score",
+        text: "Multiply your ECAT (Engineering College Admission Test) score by 0.33.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Take 50% of your Intermediate percentage",
+        text: "Multiply your HSSC / FSc (Pre-Engineering) or equivalent percentage by 0.50.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Take 17% of your Matriculation percentage",
+        text: "Multiply your SSC / Matric percentage by 0.17.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Add the Hifz-e-Quran / NCC bonus, if applicable",
+        text: "Add 20 bonus marks to the aggregate if you hold a Hifz-e-Quran certificate or NCC certification.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Sum the weighted components",
+        text: "Add the weighted ECAT, Intermediate, and Matriculation components (plus any bonus) to get your final merit aggregate.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Compare against closing merit cutoffs",
+        text: "Check your aggregate against the 5-Year Closing Merit Archive for your target program to gauge admission likelihood.",
+        url: "https://uet-gpt.vercel.app/tools?tab=archive",
+      },
+    ],
   };
 
   return (
@@ -79,6 +132,11 @@ export default function ToolsPage() {
         type="application/ld+json"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: static schema
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: static schema
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
 
       <PublicNav />

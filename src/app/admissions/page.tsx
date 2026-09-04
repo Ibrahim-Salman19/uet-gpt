@@ -3,27 +3,36 @@ import { Suspense } from "react";
 import { AdmissionsHub } from "@/components/admissions/admissions-hub";
 import { PublicFooter } from "@/components/navigation/public-footer";
 import { PublicNav } from "@/components/navigation/public-nav";
-import { CURRENT_ACADEMIC_YEAR } from "@/lib/dates";
+import { CURRENT_ACADEMIC_YEAR, SCHEMA_DATE_MODIFIED } from "@/lib/dates";
 import { BreadcrumbJsonLd } from "@/lib/json-ld";
 
 export const metadata: Metadata = {
   title: `Admissions, ECAT Guide & Fee Structure | UET GPT`,
-  description: `Comprehensive UET Taxila admissions hub for ${CURRENT_ACADEMIC_YEAR}: Eligibility criteria, ECAT strategy blueprint, interactive fee simulator, and scholarships.`,
+  description: `UET Taxila admissions guide for ${CURRENT_ACADEMIC_YEAR}: Eligibility criteria, ECAT strategy blueprint, interactive fee simulator, and scholarship programs.`,
   alternates: {
     canonical: "https://uet-gpt.vercel.app/admissions",
   },
   openGraph: {
     title: `Admissions, ECAT Guide & Fee Structure | UET GPT`,
-    description: `Comprehensive UET Taxila admissions hub for ${CURRENT_ACADEMIC_YEAR}: Eligibility criteria, ECAT strategy blueprint, interactive fee simulator, and scholarships.`,
+    description: `UET Taxila admissions guide for ${CURRENT_ACADEMIC_YEAR}: Eligibility criteria, ECAT strategy blueprint, interactive fee simulator, and scholarship programs.`,
     url: "https://uet-gpt.vercel.app/admissions",
     siteName: "UET GPT",
     locale: "en_PK",
     type: "website",
+    images: [
+      {
+        url: "https://uet-gpt.vercel.app/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "UET Taxila Admissions, ECAT Guide & Fee Structure | UET GPT",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: `Admissions, ECAT Guide & Fee Structure | UET GPT`,
-    description: `Comprehensive UET Taxila admissions hub for ${CURRENT_ACADEMIC_YEAR}: Eligibility criteria, ECAT strategy blueprint, interactive fee simulator, and scholarships.`,
+    description: `UET Taxila admissions guide for ${CURRENT_ACADEMIC_YEAR}: Eligibility criteria, ECAT strategy blueprint, interactive fee simulator, and scholarship programs.`,
+    images: ["https://uet-gpt.vercel.app/opengraph-image"],
   },
 };
 
@@ -49,6 +58,7 @@ export default function AdmissionsPage() {
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
+    dateModified: SCHEMA_DATE_MODIFIED,
     mainEntity: admissionsFaqs.map((faq) => ({
       "@type": "Question",
       name: faq.question,

@@ -310,7 +310,7 @@ export function PublicFooter() {
 
           <div className="flex items-center gap-4 text-[#71717a]">
             <a
-              href="https://github.com/devhms/uet_gpt"
+              href="https://github.com/Ibrahim-Salman19/uet-gpt"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-white transition-colors"
@@ -318,7 +318,7 @@ export function PublicFooter() {
               GitHub Repository
             </a>
             <span>&bull;</span>
-            <span>Created by Hafiz Muhammad Saad</span>
+            <span>Created by Ibrahim Salman</span>
           </div>
         </div>
       </div>
