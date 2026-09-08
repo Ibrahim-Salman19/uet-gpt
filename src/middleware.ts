@@ -89,6 +89,15 @@ export default clerkMiddleware(async (auth, req) => {
       return NextResponse.redirect(new URL("/unauthorized", req.url));
     }
   }
+}, {
+  // uet-gpt.vercel.app is a shared Vercel subdomain - we don't own its DNS
+  // zone, so the CNAME-based custom-domain approach Clerk's dashboard
+  // defaulted to (clerk.uet-gpt.vercel.app) can never get a valid cert.
+  // Proxy the Frontend API through our own verified domain instead
+  // (matcher already had "/__clerk/(.*)" wired in below).
+  frontendApiProxy: {
+    enabled: true,
+  },
 });
 
 export const config = {
