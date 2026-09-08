@@ -1,7 +1,12 @@
 const isDev = process.env.NODE_ENV === "development";
+// challenges.cloudflare.com serves Clerk's bot-protection (Turnstile) CAPTCHA
+// widget; *.protect.clerk.com is Clerk's fraud-protection service. Both need
+// script-src (to load) and frame-src (the CAPTCHA renders in an iframe) -
+// without them the browser silently blocks it and Clerk shows
+// "The CAPTCHA failed to load".
 const scriptSrc = isDev
-  ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev https://*.clerk.com;"
-  : "script-src 'self' 'unsafe-inline' https://*.clerk.accounts.dev https://*.clerk.com;";
+  ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com https://*.protect.clerk.com;"
+  : "script-src 'self' 'unsafe-inline' https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com https://*.protect.clerk.com;";
 
 const securityHeaders = [
   {
@@ -26,7 +31,7 @@ const securityHeaders = [
   },
   {
     key: "Content-Security-Policy",
-    value: `default-src 'self'; ${scriptSrc} style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https: wss:; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self';`,
+    value: `default-src 'self'; ${scriptSrc} style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https: wss:; worker-src 'self' blob:; frame-src 'self' https://challenges.cloudflare.com https://*.protect.clerk.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self';`,
   },
 ];
 
