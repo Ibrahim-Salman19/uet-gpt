@@ -1,4 +1,4 @@
-# Phase 6 — Hybrid Retrieval Quality (mandate §45/46/57) — 2026-08-31, updated 2026-09-02 (twice)
+# Phase 6 — Hybrid Retrieval Quality (mandate §45/46/57) — 2026-08-31, updated 2026-09-02 (four times), 2026-09-03 (four times)
 
 **Base commit:** `49ca5d3` (dirty tree at time of original writing). Scores
 the production hybrid fusion path (`fuse_and_score.ts`, driving the real
@@ -7,20 +7,63 @@ channel outputs) against `scripts/eval/golden_set_verified.jsonl`, the
 manually-reviewed 50-query label set described in
 `scripts/eval/label_review.md`.
 
-**2026-09-02 updates (two, same day):** §2's pool-bias defect has been
-remediated (§6). Separately, since no human with domain knowledge of UET
-Taxila facts was available to provide `HUMAN_VERIFIED` labels (confirmed
-directly with the project's user — they could not personally verify
-these answers, the same constraint already documented for the fee
-queries in `label_review.md`'s addendum), a cross-corroboration pass
-(§7) searched the corpus for independent second sources for every
-still-`LLM_JUDGED` query that asserts an answer, upgrading provenance
-honestly where genuine corroboration was found and documenting the
-search where it was not. All numbers in this Verdict block reflect both
-updates; §2's original measurement is kept verbatim as the record of
-what was found. No Gemini/Pinecone/Convex Cloud calls were made for
-either update — both used already-local data (Gemini/Pinecone/Convex
-Cloud calls this session: 0).
+**2026-09-02 updates (four, same day):** §2's pool-bias defect has been
+remediated (§6). A cross-corroboration pass (§7) then searched the
+corpus for independent second sources for every still-`LLM_JUDGED`
+query that asserts an answer, since no human with domain knowledge of
+UET Taxila facts was available to provide `HUMAN_VERIFIED` labels
+(confirmed directly with the project's user — they could not personally
+verify these answers). §7's own independent reviewer (Agent B) then
+flagged that corpus-internal corroboration structurally cannot catch an
+error that's consistent across the whole corpus; the user asked to
+pursue certification anyway and to have real, clickable URLs to check
+things themselves, so a third pass (§8) fetched the *live*, currently-
+public UET Taxila pages behind 8 of the golden set's queries and
+compared them against the corpus, and a same-day extension (§8b) checked
+7 more, bringing live-checked coverage to 15/23 scorable queries — a
+genuinely external check, with every claim citable at its exact URL. All
+numbers in this Verdict block reflect all four updates; §2's original
+measurement is kept verbatim as the record of what was found. No
+Gemini/Pinecone/Convex Cloud calls were made for any of the four updates
+(Gemini/Pinecone/Convex Cloud calls this session: 0; §8+§8b made 18
+WebFetch calls total to public UET Taxila pages, not a "cloud call" in
+the mandate's project-infrastructure sense).
+
+**2026-09-03 updates (two):** the user began sending their own
+screenshots of primary sources instead of relying on WebFetch (prompted
+by §8c catching a WebFetch AI-summarization inaccuracy). This produced a
+fifth, strongest-yet provenance tier, `USER_SCREENSHOT_VERIFIED`, and
+surfaced a real, previously under-documented fee-table divergence between
+the 2024 and 2025 Prospectus editions — plus a new, currently unresolved
+discrepancy: the live FAQS.php fee figure matches neither edition's
+Table 30.1 first-semester total, and neither does any other existing
+prospectus edition (§9's follow-up ruled out a "wrong year" explanation).
+See §9. This downgrades two queries' original "visually verified"
+provenance claims to UNCONFIRMED rather than resolving them — disclosed,
+not smoothed over. §9b then closed out 4 of the 8 remaining unchecked
+scorable queries using raw `curl`+`pdftotext` (no AI-summarization layer
+at all). §9c then OCR'd the one remaining scanned PDF (`tesseract`, since
+`pdftotext` alone found no text layer) to confirm the semester-fee-
+payment query and surface a supplementary Rs. 100/day late-fee fine.
+**§9d then caught and corrected a real miscount**: the coverage fraction
+claimed at the end of §9c (22/23, 96%) was wrong — an unscorable query
+had been counted in, and two scorable queries covered by an
+already-checked shared page had never gotten their own provenance note.
+The script-verified true number, after fixing both, is **21 of 23
+scorable queries (91%)**; only the fee-waiver PDF and one already-known
+mislabeled-chunk query (Q34, transport) remain unchecked. §9d also
+resolved the CS-department email as a full match (it was Cloudflare's
+standard email-obfuscation encoding, decoded directly). See §9d for the
+full correction. **§9e (2026-09-04) then checked Q34 directly** rather
+than leaving it assumed-unresolvable: the corpus's chunk-labeling defect
+(§7) and the underlying claim's external checkability are different
+questions. The live official `Bus_Route.php` page is real but describes
+a narrower, different service (entry-test-day shuttle only, no Hassan
+Abdal) than the corpus's general year-round transport claim — a genuine,
+disclosed discrepancy, not a match, but it counts as checked. This
+brings the true number to **22 of 23 scorable queries (96%)**; only the
+fee-waiver PDF remains unchecked (still unreachable, re-confirmed
+2026-09-04). See §9e for the full detail.
 
 ## Verdict
 
@@ -51,6 +94,36 @@ Queries with only LLM_JUDGED
                                     see §7 for all 6 of the answer-
                                     asserting ones, each explicitly
                                     searched and documented)
+Queries with >=1 LIVE_SOURCE_VERIFIED
+  component in their provenance:    23 / 50 (SCRIPT-VERIFIED 2026-09-04,
+                                    not hand-counted - see §9d for the
+                                    counting bug this replaced, §9e for
+                                    the latest addition). Of these,
+                                    22 are also among the 23 scorable
+                                    queries - 22/23 scorable (96%), the
+                                    correct figure after §9e.
+                                    Findings across these: most are plain
+                                    matches; 1 confirmed live-site anomaly
+                                    (Q27, Registrar - two different names
+                                    both currently titled "Registrar" on
+                                    the live site itself, not a corpus
+                                    artifact); 2 confirmed corpus-now-stale
+                                    findings (schedule pages that were
+                                    accurate at crawl time and have since
+                                    been updated); 2 queries carry an
+                                    UNRESOLVED discrepancy (the FAQS.php
+                                    fee figure matching no real Prospectus
+                                    edition, §9); the CS-dept email that
+                                    was "inconclusive" is now a full match
+                                    (§9d decoded it directly); Q34
+                                    (transport) is checked but also a
+                                    disclosed discrepancy, not a clean
+                                    match (§9e - live entry-test shuttle
+                                    page does not corroborate the corpus's
+                                    general transport claim). Only the
+                                    fee-waiver PDF (server outage,
+                                    reconfirmed 2026-09-04) remains
+                                    unchecked - see §8/§8b/§9/§9b/§9c/§9d/§9e.)
 
 POOL-BIAS CHECK (originally measured, see §2 - now remediated, see §6):
   fusedTop5 introduced at least one chunk absent from the original
@@ -62,16 +135,45 @@ POOL-BIAS CHECK (originally measured, see §2 - now remediated, see §6):
 MANDATE §63 GATE:  STILL NOT CLEARED, AND THIS IS NOW THE PRACTICAL
   CEILING, NOT A TO-DO — 0/50 labels are HUMAN_VERIFIED, confirmed
   unreachable (§7), and N=23/50 is a modest sample. §6 fixed the
-  measurable pool-bias defect and §7 maximized corroboration-based
-  provenance quality within what's actually achievable without a UET
-  Taxila domain expert. This remains a labeling-provenance gap, not a
+  measurable pool-bias defect, §7 maximized corroboration-based
+  provenance quality within what's achievable without a UET Taxila
+  domain expert, and §8/§8b added the first genuinely external check
+  (15 of 23 scorable queries fetched against the live public site:
+  13/15 matched, 1 surfaced a real live-site inconsistency rather than
+  a corpus defect, 1 showed the corpus is now stale on a schedule page).
+  §9 (2026-09-03) added user-screenshotted primary-source evidence,
+  confirmed a real fee-table divergence between Prospectus editions, and
+  surfaced a new, unresolved three-way fee-figure discrepancy (FAQS.php
+  vs. both Prospectus editions) that downgrades 2 queries' earlier
+  "visually verified" claims to UNCONFIRMED - this GATE assessment is
+  unaffected in direction (still not cleared) but the evidence quality
+  underneath it is more honest than before §9. §9b/§9c (same day) pushed
+  live-checked coverage further via raw curl+pdftotext+OCR, zero
+  remaining AI-summarization risk in any of those checks - but §9c's own
+  "22/23 (96%)" tally was itself wrong (an unscorable query miscounted
+  in, 2 scorable queries missing their note); §9d caught and fixed this,
+  script-verified: the real number was **21/23 scorable queries (91%)**.
+  §9e (2026-09-04) then checked the one remaining query previously
+  assumed unresolvable (Q34, transport) directly via curl - the corpus's
+  chunk-labeling defect (§7) doesn't mean the underlying claim can't be
+  externally checked. It could: the live official transport page does
+  NOT corroborate the corpus's claim (different scope, different city
+  list) - a genuine, disclosed discrepancy, not a match, but counted as
+  checked, consistent with how the Q27 and staleness findings were
+  counted earlier. Script-verified: the real number is now **22/23
+  scorable queries (96%)**. Only 1 URL (fee waiver PDF, confirmed
+  still-unreachable via a fresh recheck 2026-09-04) remains unchecked -
+  and it is unreachable for a disclosed, external reason (HTTP 522),
+  not an unexamined gap. This remains a labeling-provenance gap, not a
   Pinecone or hybrid-fusion performance failure, and further AI-only
   effort on this label set has materially diminishing returns from here.
-  Neither §64 ("PINECONE BENCHMARK PASS") nor §65 ("PINECONE BENCHMARK
-  FAILED") applies — a verdict on this axis requires either accepting
-  AUTHORITATIVE_SOURCE_MATCH/LLM_JUDGED as sufficient evidence quality
-  for this decision, or sourcing an actual UET Taxila domain reviewer.
-  That is a decision for the project's user/Agent B, not this session.
+  Neither §64
+  ("PINECONE BENCHMARK PASS") nor §65 ("PINECONE BENCHMARK FAILED")
+  applies — a verdict on this axis requires either accepting
+  AUTHORITATIVE_SOURCE_MATCH/LIVE_SOURCE_VERIFIED/LLM_JUDGED as
+  sufficient evidence quality for this decision, or sourcing an actual
+  UET Taxila domain reviewer. That is a decision for the project's
+  user/Agent B, not this session.
 ```
 
 ## 1. Why 0.9474 / 0.7076 is not a production number
@@ -572,4 +674,695 @@ Claims classified MEASURED: the upgrade/not-found counts, the Q34
   judgment call, not a mechanical fact; the reasoning for each is in
   golden_set_verified.jsonl's provenance field for audit.
 Cloud activity this section: Convex Cloud 0, Gemini 0, Pinecone 0, Neon 0.
+```
+
+## 8. Live-source verification pass (2026-09-02) — a new `LIVE_SOURCE_VERIFIED` tier
+
+**Why this exists.** The independent reviewer (Agent B, see
+`AGENT_B_REVIEW_2026-09-02.md` and `INDEPENDENT_REVIEW.md`) found a
+structural objection to §7: `AUTHORITATIVE_SOURCE_MATCH` only proves two
+chunks *inside the frozen corpus* agree with each other. It cannot catch
+an error that is consistent across the whole corpus (the documented
+2024-vs-2025 Prospectus fee-table drift is exactly this kind of risk).
+The user, asked whether to pursue certification anyway, said yes, and
+asked explicitly for real clickable URLs so they can personally check
+results themselves rather than trust the process blindly.
+
+This pass adds a fourth provenance tier, weaker than `HUMAN_VERIFIED`
+but genuinely *external* to the corpus (unlike `AUTHORITATIVE_SOURCE_MATCH`):
+fetch the **currently live** UET Taxila page a golden-set chunk was
+originally crawled from, and check whether the live page still states
+the same fact. `HUMAN_VERIFIED` would mean a domain expert confirms an
+answer is correct and useful; `LIVE_SOURCE_VERIFIED` only means the
+corpus's snapshot of a fact still matches the outside world today. It
+does not close Agent B's gap on its own (a live page can itself be
+wrong, or a domain expert might judge a technically-accurate answer as
+unhelpful), but it is the first check in this whole evaluation that
+looks outside the frozen corpus at all.
+
+**Tool-transparency disclosure (must be stated, per the user's own
+request for something they can verify themselves).** The `WebFetch` tool
+used for every fetch below does **not** return raw HTML/text. Per its
+own tool description: it converts the page to markdown, then runs a
+small fast model over that markdown with a prompt, and returns *that
+model's answer*, not the raw content. Every "live page states X" claim
+below is therefore an AI-summarized read of the live page, one
+interpretation layer removed from the literal HTML — the same category
+of caveat `LLM_JUDGED` already carries for corpus reads, just applied to
+an external source instead of an internal one. The mitigation is the
+same one the user asked for: every claim below carries the exact URL so
+it can be opened directly and read by eye, with no tool in between.
+
+**Method.** `relevantChunkKeys` in `golden_set_verified.jsonl` are
+corpus chunk keys, not URLs. Each chunk's text carries a `Document
+Title:` / `URL Path:` header (its relative path only, no domain — the
+crawler didn't embed the domain per-chunk). The domain was recovered by
+matching that path against `canonicalUrl` in the frozen corpus's
+`/mnt/d/uetgpt_corpus_v1/documents.jsonl` (1,891 documents, 1,889
+distinct paths — effectively a 1:1 mapping; the one path-collision, a
+bare `/`, was on two different subdomains and didn't affect any golden-
+set query). This resolved 22/23 scorable queries to at least one live
+URL (34 distinct URLs across all 22); the 23rd (Q34, transport
+facilities) could not be resolved because its relevant chunk is itself
+mislabeled at the source — its `Document Title` field says "Strategic
+Academia-Industry Collaboration Between UET Taxila and Fast Cables
+Limited" but its actual text is hostel-facility content, a pre-existing
+corpus quality issue already flagged in §7, not something this pass
+could fix.
+
+Given 34 URLs and limited turns, this pass prioritized the queries
+carrying the *strongest* existing corpus-internal corroboration from §7
+(multi-page `AUTHORITATIVE_SOURCE_MATCH`) plus the flagship fee-figure
+claim — on the reasoning that these are exactly the claims most likely
+to look solid on weak corpus-internal evidence alone, so they're the
+most valuable place to spend an external check. This is a targeted
+sample (8 of 23 scorable queries), not full coverage of the golden set.
+
+**Results — 7 exact matches, 1 confirmed live anomaly, 3 pages
+unreachable (server error, not a finding):**
+
+| Query | Live URL (click to check yourself) | Result |
+| --- | --- | --- |
+| Q1 / Q50 — first-semester fee (Rs. 104,800 Subsidized / Rs. 339,800+ Partial-Subsidized) | https://admissions.uettaxila.edu.pk/FAQS.php | **MATCH** — live page states the identical figures |
+| Q8 — BS Computer Science eligibility (50%) | https://admissions.uettaxila.edu.pk/FAQS.php | **MATCH** — live page states "60% marks for Engineering programs and 50% marks for BS Math/Physics/Computer Science/Engineering Technology programs" |
+| Q9 — FSc subject-weighted eligibility breakdown | https://admissions.uettaxila.edu.pk/Eligiblity.php | **MATCH** — live page states "Physics 30%, Mathematics/Biology 30%, English 10%, Chemistry/Computer Science/Statistics 30%" (an extra Physics-30% line the corpus chunk didn't capture; not a contradiction, just more complete) |
+| Q26 — Vice Chancellor's name | https://web.uettaxila.edu.pk/VCOffice.aspx | **MATCH** — live page names "Prof. Dr. Muhammad Inayatullah Khan" |
+| Q27 — Registrar office contact | https://web.uettaxila.edu.pk/OR/index.asp?pageLink=link_A and https://web.uettaxila.edu.pk/ContactUs.aspx | **PHONE MATCHES (051-9047406); NAME IS A CONFIRMED LIVE ANOMALY** — see below |
+| Q32 — main campus location | https://web.uettaxila.edu.pk/AboutUs | **MATCH** — live page states the identical 5km/railway-station/35km-highway description |
+| Q48 — main contact number | https://web.uettaxila.edu.pk/ContactUs.aspx | **MATCH** — live page states "+92 51-9047-400" |
+| Q25 (CS dept email), Q33 (hostel confirmation) | https://web.uettaxila.edu.pk/CS/index.asp, https://web.uettaxila.edu.pk/Hostels.aspx, https://web.uettaxila.edu.pk/VCMessage | **NOT REACHED** — `web.uettaxila.edu.pk` returned HTTP 522 (server timeout) on 4 separate attempts across these 3 URLs, while every `admissions.uettaxila.edu.pk` fetch and 4 other `web.uettaxila.edu.pk` fetches in this same pass succeeded — a transient/intermittent server issue on that subdomain at fetch time, not a corpus-vs-reality disagreement. Left unverified rather than guessed at. |
+
+**The one real finding — Q27, Registrar office.** This is the specific
+kind of thing this pass exists to catch: a direct, verbatim read of the
+live staff-directory page (`https://web.uettaxila.edu.pk/OR/index.asp?pageLink=link_A`,
+click it) currently lists, among 8 names:
+
+```
+1. Dr. Mansoor A. Baluch - Registrar
+   Email: mansoor.baluch@uettaxila.edu.pk, Ph: 051-9047406, Fax: 051-9047420
+...
+3. Khalid Mahmood - Registrar
+   Email: khalid.mahmood@uettaxila.edu.pk, Ph: 051-9047406
+```
+
+Two different people, both currently titled "Registrar" on the
+university's own live site, sharing the same phone/fax number. §7's
+provenance note for this query had speculated this was "likely two
+different real crawl snapshots of an office-holder change" inside the
+corpus. That speculation is now **corrected, not confirmed**: both
+names are live, right now, on the same single page fetch — this is the
+university's own site not having resolved an apparent office-transition
+data entry, not a corpus artifact. A retrieval system asked "who is the
+registrar" would be right to be uncertain here, because the source
+itself is uncertain. This is exactly the kind of corpus-wide-consistent
+error Agent B's objection was about — except in this instance, checking
+outside the corpus didn't disprove the corpus, it showed the corpus had
+faithfully preserved a genuine ambiguity in its source.
+
+Secondary supporting check: `https://admissions.uettaxila.edu.pk/Downloads.php`
+was also fetched to confirm which Prospectus edition is currently live
+(relevant to the pre-existing, separately-documented 2024-vs-2025
+fee-table conflict in §1/§4) — the 2025 edition is confirmed current.
+The PDF's own "Grand Total of 4 years" field was not independently
+re-fetched this pass (fetching and reading a multi-page PDF through
+WebFetch is a larger, separate task); this remains an open item, not a
+resolved one.
+
+**What this does and doesn't establish.** 7 of 8 checked facts match
+the live site exactly, on facts that already carried the strongest
+internal corroboration — consistent with, not proof of, general corpus
+accuracy (a sample of 8 out of 23 scorable queries, chosen for where
+corroboration was already strongest, is not a random or exhaustive
+sample). The 1 anomaly found is a genuine, previously-mischaracterized
+inconsistency on the live source itself, not a corpus defect — arguably
+evidence the corpus is *not* introducing noise beyond what its source
+already contains. This still does not amount to `HUMAN_VERIFIED`: no
+domain expert has judged whether any of these answers are actually the
+*useful* answer to what an asker needs (e.g., the Registrar-office
+ambiguity above still leaves "who do I actually contact" unresolved for
+a real user, live-verified or not).
+
+**Evidence contract (§71):**
+
+```text
+Claim class:               EXECUTED (all fetches, the path-resolution
+                           script, and the provenance-patch script were
+                           run directly by this session)
+Method:                    (1) matched each golden-set chunk's `URL
+                           Path:` header against canonicalUrl in
+                           /mnt/d/uetgpt_corpus_v1/documents.jsonl to
+                           recover the live URL; (2) fetched each
+                           selected URL with the WebFetch tool (AI-
+                           summarized reads, see disclosure above); (3)
+                           compared the fetched claim against the
+                           corpus chunk's claim by eye.
+Queries with >=1 resolved live URL: 22 / 23 scorable queries (34 distinct
+                           URLs total; not all were fetched, see above)
+Queries actually live-checked this pass: 8 (Q1, Q8, Q9, Q26, Q27, Q32,
+                           Q48, plus Q50 sharing Q1's chunk)
+Exact matches:             7
+Confirmed live anomaly:    1 (Q27, Registrar — see above)
+Unreachable (522, not a finding): 3 URLs (Q25's dept page, Q33's hostel
+                           page, an alternate VC page)
+golden_set_verified.jsonl SHA-256 (post-pass, MEASURED):
+                           adf1b9a07f539695330154000467d08b0af10d20a3a1a3006f8d7e96cd24e07a
+Idempotency:               verified - re-running the merge script
+                           against its own output reports 0 changes
+                           (diff against the pre-run copy was empty)
+Claims classified MEASURED: which pages returned 522, the exact fetched
+                           text, the final hash. Classified INFERENCE:
+                           that the two Registrar entries constitute a
+                           genuine data-entry inconsistency rather than,
+                           say, a co-Registrar arrangement the page just
+                           doesn't label as such - the page states two
+                           names under the same title and no
+                           dual-Registrar policy is documented anywhere
+                           else in this evaluation.
+Cloud activity this section: Convex Cloud 0, Gemini 0, Pinecone 0, Neon 0.
+                           WebFetch calls: 12 (8 succeeded with content,
+                           1 succeeded on retry, 3 returned 522 and were
+                           not retried further).
+```
+
+### 8b. Extension (2026-09-02, same day) — 7 more queries checked
+
+Continuing the same pass with the same method, prioritizing the remaining
+non-PDF resolved URLs. Retried the CS-department page that previously
+returned 522 (succeeded this time); did not retry `Hostels.aspx` (a
+different URL for hostels, `explore.php`, was already in the resolved-URL
+list and was fetched instead) or `VCMessage` (a secondary URL for a query
+whose primary URL, `ContactUs.aspx`, already matched).
+
+| Query | Live URL (click to check yourself) | Result |
+| --- | --- | --- |
+| Programming Fundamentals credit hours (Computer Engineering) | https://web.uettaxila.edu.pk/cped/courses_UG.asp | **MATCH** — live table states "CP-108 Programming Fundamentals, 3 (Theory) + 1 (Lab) = 4 total", identical to the corpus |
+| CS department contact | https://web.uettaxila.edu.pk/CS/index.asp | **PHONE MATCHES** ("+92 (51) 9047846", identical to corpus); **email INCONCLUSIVE** — the live page renders its mailto link via obfuscated/JS-protected markup that the fetch tool could not read literally, so the email itself was neither confirmed nor contradicted |
+| Main campus phone number | https://admissions.uettaxila.edu.pk/explore.php | **CONSISTENT** — live page states "+92-51-9047400-412", which falls inside the corpus's cited 051-9047400/420 range (not identical text, not a contradiction) |
+| Student hostel on campus | https://admissions.uettaxila.edu.pk/explore.php | **MATCH** — live page confirms "Boys Hostels" and "Girls Hostels" sections |
+| Degree certificate application procedure | https://web.uettaxila.edu.pk/ExamsFAQ.aspx | **MATCH** — live FAQ answer text (Form H, Student Facilitation Center, Office of the Controller of Examinations) is an exact match |
+| "eligibility criteria" (generic query) | https://admissions.uettaxila.edu.pk/ProcedureAndRequirements.php | **MATCH** — live page states "Only those candidates are eligible to apply who appeared in TCAT/ECAT-2025... Entry Test is not required for BS Physics and Mathematics", identical to the corpus's document-title-sourced fact |
+| Academic calendar important dates | https://admissions.uettaxila.edu.pk/Schedule.php | **CORPUS NOW STALE, NOT WRONG** — see below |
+
+**A second finding — the academic-calendar query is now stale, not
+wrong.** At crawl time (2026-08-22) the golden-set chunk for this query
+correctly reported that the Fall 2026 admission schedule "will be
+uploaded" — no dates existed yet, and the corpus faithfully recorded that.
+The identical live page today lists real dates (forms open 4 May 2026,
+Hifz-e-Quran Test 24 May 2026, 1st Merit List 4 June 2026, classes start
+31 Aug 2026). The corpus was accurate for its crawl date and has since
+gone stale on this one page — a genuine freshness-lifecycle finding
+(relevant to this project's existing citation-freshness logic), not a
+retrieval or corpus-quality defect. Distinct in kind from the Q27
+Registrar finding: that was the live site itself being internally
+inconsistent; this is the live site changing after the crawl, exactly as
+expected of a schedule page.
+
+**Updated evidence contract (§71), cumulative across §8 and §8b:**
+
+```text
+Claim class:               EXECUTED (same as §8 above; this extension used
+                           the same fetch/compare method, run directly by
+                           this session)
+Queries actually live-checked, cumulative: 15 (the 8 from §8, plus 7 more:
+                           Programming-Fundamentals-credit-hours, CS-dept-
+                           contact, main-campus-phone, student-hostel,
+                           degree-certificate-procedure, generic-
+                           eligibility-criteria, academic-calendar-dates)
+Exact/consistent matches, cumulative: 13 (7 from §8 + 6 from §8b: credit
+                           hours, phone [consistent, not identical text],
+                           hostel, degree certificate, eligibility, plus
+                           the CS-dept phone half of that query)
+Confirmed live anomaly, cumulative: 1 (Q27 Registrar, unchanged)
+Confirmed corpus-now-stale (not wrong), new this pass: 1 (academic
+                           calendar dates)
+Inconclusive (tool could not read the relevant field), new this pass: 1
+                           (CS-dept email, obfuscated mailto link)
+golden_set_verified.jsonl SHA-256 (post-§8b, MEASURED):
+                           294047f62a6852186e952e27f9f329d172b60a6f89c3b4b0660c8e18e6fe88c1
+Idempotency:               verified - re-running the merge script against
+                           its own output reports 0 changes (diff against
+                           the pre-run copy was empty)
+Cloud activity this section: Convex Cloud 0, Gemini 0, Pinecone 0, Neon 0.
+                           WebFetch calls: 6 (all succeeded; the CS-dept
+                           page succeeded on this attempt after 2 prior
+                           522s in §8).
+Coverage after §8+§8b:      15 of 23 scorable queries (65%) now carry a
+                           LIVE_SOURCE_VERIFIED component. 8 scorable
+                           queries remain unchecked; still 0/50
+                           HUMAN_VERIFIED.
+```
+
+### 8c. User spot-check catches a WebFetch summarization error (2026-09-02)
+
+The user personally opened `https://admissions.uettaxila.edu.pk/Schedule.php`
+(the URL cited above for the academic-calendar query) and sent a screenshot
+of the live table, exactly the kind of independent check the tool-
+transparency disclosure in §8 exists to enable. The 5 dated rows this
+session had reported from WebFetch's AI-summarized read all matched the
+screenshot exactly (Start of Online Filling 4 May 2026, blank last-date
+field, Hifz-e-Quran Test 24 May 2026, 1st Merit List 4 June 2026, classes
+start 31 Aug 2026). But WebFetch's response had also included two further
+items — "Entry Test Conducted by UET Taxila, 15th July 2025" and
+"Allocation of Registration Numbers, To be announced" — that do not appear
+anywhere in the screenshot; the visible table ends at row 5, followed
+directly by a note and the page footer. Those two items were not written
+into `golden_set_verified.jsonl` or into the main §8b claims above (only
+the 5 confirmed rows were), so no correction to the permanent evidence
+record was needed — but this is now a **directly observed, user-caught
+instance** of the exact AI-summarization risk the §8 disclosure warned
+about in the abstract: WebFetch's small fast model added content beyond
+what the live page actually contains (most plausibly a hallucination, or
+content bled in from a different admissions cycle it has some other
+exposure to — the 15-July-2025 date pre-dates this cycle's own start
+date, so it isn't even internally consistent). This raises the standing
+caution for every other `LIVE_SOURCE_VERIFIED` claim in this document:
+each is only as reliable as this incident shows the underlying tool to
+be, which is "correct on the parts it reported that were checked, but not
+guaranteed complete or hallucination-free" — exactly why every claim
+carries its exact URL rather than asking for the tool's word to be taken
+alone.
+
+```text
+Claim class:      MEASURED (the mismatch is directly observed from the
+                  user's own screenshot, not inferred)
+Evidence:         user-supplied screenshot of admissions.uettaxila.edu.pk/
+                  Schedule.php, 2026-09-02 (image, not persisted to this
+                  repo)
+Result:           5/5 WebFetch-reported rows confirmed exact; 2/7
+                  WebFetch-reported items not present on the live page
+                  as screenshotted
+Corrective action needed: none - the 2 unconfirmed items were never
+                  written into golden_set_verified.jsonl or report.md's
+                  factual claims, only the 5 confirmed rows were
+Standing implication: every LIVE_SOURCE_VERIFIED claim in §8/§8b should
+                  be read as "matched what WebFetch reported, and the
+                  exact URL is provided for independent re-checking" -
+                  not as a guarantee WebFetch reported everything
+                  completely or without addition
+```
+
+## 9. User-verified primary-source screenshots (2026-09-03) — a fifth, strongest tier
+
+The user offered to screenshot pages directly rather than rely on
+WebFetch's AI-summarized reads, given §8c's caught inaccuracy. This
+produced `USER_SCREENSHOT_VERIFIED` evidence — the strongest tier this
+evaluation has produced: a human directly reading the primary source, no
+AI-summarization layer in between at all. Still short of
+`HUMAN_VERIFIED` in the mandate's §47 sense (nobody has judged whether an
+answer is the *useful* one for a real applicant), but stronger than
+`LIVE_SOURCE_VERIFIED`.
+
+**What was checked:** Table 30.1 ("Fees and other Charges") in both
+Prospectus editions, screenshotted with the browser URL bar and PDF page
+number visible:
+
+- `https://admissions.uettaxila.edu.pk/Downloads/UET-Prospectus-2024.pdf`, page 158/166
+- `https://admissions.uettaxila.edu.pk/Downloads/UET-Prospectus-2025.pdf`, page 157/165
+
+**Finding 1 — reconfirms a prior claim on stronger evidence.**
+`label_review.md` (line 149, written earlier this project) already
+claimed the 2025 edition's "Grand Total of 4 years" row is blank while
+2024's reads 654,000/1,453,000, based on an undocumented "visual page
+inspection." These fresh, URL-stamped screenshots independently confirm
+this exactly — and additionally show the *entire* "Total for Remaining 7
+Semesters" row is blank in 2025 too, not just the Grand Total row (a
+larger gap than the original note captured).
+
+**Finding 2 — new: the two editions genuinely diverge, not just via a
+blank cell.** Comparing Table 30.1 line-by-line where both editions DO
+have values:
+
+| Line item | 2024 | 2025 |
+| --- | --- | --- |
+| Admission Charges (Partial-Subsidized) | 70,000 | 300,000 |
+| Bus Fare, Non-Resident / Resident | 16,000 / 4,000 | 22,000 / 10,000 |
+| SAP Charges | *(no such line)* | 1,800 |
+| Survey Camp Charges (Civil Engg only) | 10,000 | *(no such line)* |
+| Total for First Semester | 94,000 / 249,000 | 101,800 / 256,800 |
+
+This is a real, substantive fee-structure change between the two
+published editions — exactly the kind of corpus-wide-consistent drift
+Agent B's original objection (§8's opening) warned an AI-only process
+could never independently confirm, now confirmed with primary-source
+screenshots.
+
+**Finding 3 — new discrepancy, NOT resolved, flagged rather than
+smoothed over.** §8 had reported the live FAQS.php page states
+first-semester fees of ≈104,800 (Subsidized) / ≈339,800+
+(Partial-Subsidized) and marked this a **MATCH** against the corpus
+chunk. Table 30.1's own "Total for First Semester" row, read directly
+from both PDFs above, does **not** equal that figure in either edition
+(94,000/249,000 in 2024; 101,800/256,800 in 2025). All three numbers —
+FAQS.php, 2024 Table 30.1, 2025 Table 30.1 — disagree with each other.
+This means query fc1c0652eda046e9's original provenance claim
+("AUTHORITATIVE_SOURCE_MATCH... visually verified against the source PDF
+page image earlier this session") and Q1's original provenance claim
+(same wording) cannot be reproduced against these fresh screenshots and
+must now be treated as **UNCONFIRMED**, not settled — this report is not
+going to guess which number (if any) is the one a real applicant should
+trust; that is a domain question outside this evaluation's scope. This
+is disclosed as an open discrepancy, not quietly resolved.
+
+**Follow-up — ruling out a "wrong prospectus year" explanation
+(2026-09-03, same day).** The user asked whether a 2026 edition, or an
+older one, might explain the mismatch. Checked directly: no
+`UET-Prospectus-2026.pdf` exists yet (HTTP 404 on the same naming
+pattern that resolves 2024/2025). A third edition, `UET-Prospectus-2023.pdf`,
+does exist on the server (not linked from the Downloads page, but
+reachable) — fetched and its fee section extracted with `pdftotext`
+directly (raw text, no AI-summarization layer, no screenshot, fully
+reproducible). All three PDFs (2023, 2024, 2025) were pulled this way and
+their Table 30.1 sections re-extracted as a stronger, independent
+confirmation of the screenshot findings above:
+
+| Edition | First-Semester total (Subsidized / Partial-Subsidized) |
+| --- | --- |
+| 2023 | Resident 97,000/251,000; Non-Resident 84,000/238,000 (different table structure — split by residency, not a single flat total) |
+| 2024 | 94,000/249,000 (`pdftotext` output matches the screenshot exactly) |
+| 2025 | 101,800/256,800 (`pdftotext` output matches the screenshot exactly; Grand Total row confirmed genuinely absent from the extracted text, not just visually blank) |
+| 2026 | does not exist |
+
+None of the 5 official first-semester totals across the 3 real editions
+equal FAQS.php's ≈104,800/339,800+. The "wrong year" hypothesis is
+therefore ruled out, not left open — this is a confirmed, currently
+unexplained discrepancy on the live FAQS.php page itself. One clue: the
+page's own raw HTML (fetched directly via `curl`, not WebFetch) hedges
+"Exact fee is mentioned in the prospectus and on the fee structure page"
+— i.e. even the site's own FAQ text treats this number as an
+approximation, not an authoritative figure, and does not link to
+whatever "fee structure page" it's referring to.
+
+**Evidence contract (§71):**
+
+```text
+Claim class:      MEASURED (screenshot figures read directly from
+                  user-supplied images with source URL/page number
+                  visible; the follow-up PDF figures are read directly
+                  from pdftotext's raw extracted text - two independent,
+                  non-AI-summarized methods now agreeing with each other)
+Evidence:         2 user-supplied screenshots (2024 p.158/166, 2025
+                  p.157/165) + 3 pdftotext extractions (2023, 2024, 2025
+                  editions, SHA-256 of each source PDF recorded in this
+                  session's tool output) + 1 raw curl fetch of FAQS.php's
+                  HTML + 4 HTTP HEAD/GET checks confirming 2023/2024/2025
+                  exist and 2026 does not (404)
+Confirmed:        2024 Grand Total 654,000/1,453,000; 2025 Grand Total
+                  AND remaining-7-semesters rows both blank (confirmed
+                  twice, screenshot + raw text extraction); 5 concrete
+                  line-item differences between 2024/2025 (table earlier
+                  in this section); "wrong prospectus year" hypothesis
+                  ruled out across all 3 real editions
+Still unresolved: FAQS.php's ≈104,800/339,800+ figure matches no
+                  existing edition's official Table 30.1 - not
+                  reconciled, not guessed at, disclosed as open
+Provenance downgraded: queries 8fe9e8f2dfe15d2e (Q1) and fc1c0652eda046e9
+                  had their original "visually verified against the
+                  source PDF page image earlier this session" claim
+                  marked UNCONFIRMED in golden_set_verified.jsonl (append-
+                  only - the old claim is kept, not deleted, with each new
+                  finding appended after it)
+golden_set_verified.jsonl SHA-256 (post- this follow-up, MEASURED):
+                  cf43f086038f83a7fd29b970876735e0083020a8df725e47bf96cc3d2f52c5d0
+Idempotency:      verified - re-running the merge script against its own
+                  output reports 0 changes, hash unchanged across both runs
+Cloud activity this section: Convex Cloud 0, Gemini 0, Pinecone 0, Neon 0,
+                  WebFetch 1 (Downloads.php list check, later independently
+                  verified via curl instead of trusted alone)
+```
+
+### 9b. Closing out remaining checks with raw curl+pdftotext (2026-09-03)
+
+With `curl`+`pdftotext` established as a reliable, zero-AI-layer method
+in the follow-up above, this pass used it to check 6 of the 8 remaining
+unchecked scorable queries directly against raw HTML/PDF text (no
+WebFetch summarization risk at all this time).
+
+| Query | Live source (raw fetch, click to check yourself) | Result |
+| --- | --- | --- |
+| Admission documents required | https://admissions.uettaxila.edu.pk/FAQS.php | **MATCH** — live checklist (SSC, HSSC/DAE, TCAT/ECAT result, CNIC/Form-B, Father's CNIC, Domicile, photographs) is identical to the corpus |
+| Late fee fine | https://admissions.uettaxila.edu.pk/Downloads/UET-Prospectus-2025.pdf | **MATCH** — §30.4 extension policy confirmed verbatim; the specific "Rs. 8,000/-" re-admission fine the corpus note flagged as present "elsewhere" in the Prospectus is confirmed to actually exist |
+| DAE lateral entry accepted | https://admissions.uettaxila.edu.pk/Eligiblity.php + Prospectus 2025 | **MATCH** — both confirm DAE (PBTE Lahore) is an accepted admission pathway |
+| Semester freeze procedure | https://web.uettaxila.edu.pk/ExamsFAQ.aspx | **MATCH** — live FAQ text matches the corpus's candidate-2 quote almost verbatim |
+| Fee waiver program | https://web.uettaxila.edu.pk/PageContents/DuesSection/Waiver-off-Tuition%20-fee-2023.pdf | **UNREACHABLE** — HTTP 522 on 2 attempts, consistent with this subdomain's known intermittent-failure pattern (§8); not a finding |
+| Semester fee payment method | https://web.uettaxila.edu.pk/PageContents/DuesSection/Dues-Notice-...pdf | **UNVERIFIABLE BY THIS METHOD** — the file downloads (2.2MB, valid PDF, `intsig.com pdf producer` — a phone-scanned document), but `pdftotext` extracts almost no text (3 bytes): it's a scanned image with no text layer, consistent with this exact query's own corpus note already flagging "badly garbled OCR/table extraction" as a known corpus quality issue for this document family. Not fetched via WebFetch either, to avoid re-introducing the AI-summarization risk on an already-known-bad source. |
+
+**Coverage after §9b: 21 of 23 scorable queries (91%) now carry at
+least one `LIVE_SOURCE_VERIFIED` or stronger component.** The 2 still
+open (fee waiver, semester-fee-payment-method) are open for a
+disclosed, structural reason — an intermittently-unreachable server and
+a scanned/no-text-layer PDF — not because they were skipped.
+
+**Evidence contract (§71):**
+
+```text
+Claim class:       MEASURED (curl raw HTML + pdftotext raw PDF text,
+                   zero AI-summarization layer involved in any of the 4
+                   confirmed matches)
+Confirmed matches: 4 (admission documents, late fee fine, DAE lateral
+                   entry, semester freeze)
+Unreachable:       1 URL (fee waiver PDF, HTTP 522 x2)
+Unverifiable by this method: 1 (semester fee payment - scanned PDF, no
+                   text layer; a pre-existing, already-documented corpus
+                   OCR-quality issue, not new)
+golden_set_verified.jsonl SHA-256 (post-§9b, MEASURED):
+                   6c1c63ef7ebf9e79c85ce005c867073e7eef361e068ab12407f11ad581b74e8b
+Idempotency:       verified - re-running the merge script against its own
+                   output reports 0 changes, hash unchanged across both runs
+Cloud activity this section: Convex Cloud 0, Gemini 0, Pinecone 0, Neon 0,
+                   WebFetch 0 (curl + pdftotext only)
+```
+
+### 9c. OCR closes the last resolvable gap (2026-09-03)
+
+The user asked to re-check the fee-waiver PDF link; it was retried 5 more
+times (4 spaced ~8s apart) and still returned HTTP 522 every time, while
+the domain root and other pages succeeded — confirmed as the same
+intermittent server flakiness already disclosed in §8, not a broken or
+removed link, and not something a same-session retry can fix.
+
+Separately, the semester-fee-payment PDF (`Dues-Notice-...pdf`, left
+"unverifiable" in §9b because `pdftotext` found no text layer) turned out
+to be a phone-scanned document, not a genuinely unreadable one. Ran it
+through `pdftoppm` (300 DPI) + `tesseract` OCR, 3 pages:
+
+```text
+1. The Bank of Punjab. (ERP Generated Challan Only)
+2. The Habib Bank Limited.(ERP Generated Challan Only)
+...
+A fine of Rs. 100/- per day will be charged for a period of Ten (10)
+days after the last date fixed for payment of fees and charges. After
+that, the name of the defaulter will be automatically struck off from
+the rolls of the university and he/she will have to pay the re-admission
+fee along with the fees and fine
+```
+
+This confirms the semester-fee-payment query's corpus claim exactly
+("Bank of Punjab (ERP Generated Challan Only)"), and also surfaces a
+concrete, previously-undocumented **Rs. 100/day late-fee fine figure**
+that directly strengthens the separate late-fee-fine query beyond what
+§9b already found (the Prospectus's extension policy + the flat Rs. 8,000
+re-admission fine) — the two fines are consistent with each other, not
+contradictory: a per-day fine during a grace period, and a flat fine once
+a student is struck off and must re-admit.
+
+**Coverage after §9c: 22 of 23 scorable queries (96%).** ~~Only the
+fee-waiver PDF remains open, for a disclosed, confirmed-still-current
+server-availability reason.~~ **CORRECTED in §9d — this "22/23" was
+wrong. See §9d for the real number (21/23) and why.**
+
+### 9d. Correcting a real miscount, and two cheap close-outs (2026-09-03)
+
+Before continuing to new work, an external review of this session's own
+process (not of the underlying facts) flagged that every coverage
+fraction from §9 onward had been hand-maintained across roughly a dozen
+edits in four files, with no script re-deriving it from the golden set
+itself — exactly the failure mode Agent B already caught once in this
+document family (the stale-768d-index caveat, `AGENT_B_REVIEW_2026-09-02.md`
+§4b). Checked directly:
+
+```python
+tiers = ('LIVE_SOURCE_VERIFIED', 'USER_SCREENSHOT_VERIFIED', 'PDFTOTEXT_VERIFIED')
+recs = [json.loads(l) for l in open('scripts/eval/golden_set_verified.jsonl')]
+scorable = [r for r in recs if r['relevantChunkKeys']]
+verified_scorable = [r for r in scorable if any(t in r.get('provenance', '') for t in tiers)]
+# -> scorable: 23, verified_scorable: 19 (before this section's fixes)
+```
+
+**The "22/23 (96%)" claimed at the end of §9c was wrong. The true number
+at that point was 19/23 (83%).** Two distinct bugs, found by reading the
+records the count was supposedly based on:
+
+1. `fc1c0652eda046e9` ("total tuition cost for a 4-year BS program") was
+   counted toward the scorable total. It has `relevantChunkKeys: []` —
+   it is one of the 27 unscorable queries, not one of the 23. It got a
+   `USER_SCREENSHOT_VERIFIED` note in §9 (legitimately — it's still one
+   of the 50), but that note doesn't belong in a "23 scorable" tally.
+2. Two scorable queries whose `relevantChunkKeys` happen to be the
+   *identical* chunk already live-checked for a sibling query —
+   `f3d60458e68e2e86` ("important dates", same chunk as
+   `93971e85e247fde9`) and `2dfb5097fc1ca481` ("fee structure", one of
+   its two chunks is the same as `8fe9e8f2dfe15d2e`'s) — were treated as
+   "covered" in prose because their source page had already been
+   fetched, but neither ever got its own provenance note written into
+   `golden_set_verified.jsonl`. Fixed: both now carry a note pointing at
+   the sibling query's finding (§9b's "important dates" staleness
+   finding for the first; §9's FAQS.php discrepancy caveat, not a clean
+   match, for the second — carried forward explicitly, not smoothed into
+   a false MATCH).
+
+**A genuine third fix, not just a count correction:** the CS-department
+email, left "inconclusive" since §8b because WebFetch couldn't read it,
+was resolved directly this pass. The raw HTML (`curl`, not WebFetch)
+shows `data-cfemail="a3cbc6cfd3c7c6d0c88dc0d0e3d6c6d7d7c2dbcacfc28dc6c7d68dd3c8"`
+— this is Cloudflare's standard email-obfuscation encoding (an XOR
+cipher against the hex string's own first byte, used site-wide to hide
+emails from scrapers, not project-specific or secret). Decoded directly:
+
+```python
+data = bytes.fromhex("a3cbc6cfd3c7c6d0c88dc0d0e3d6c6d7d7c2dbcacfc28dc6c7d68dd3c8")
+key = data[0]
+"".join(chr(b ^ key) for b in data[1:])
+# -> 'helpdesk.cs@uettaxila.edu.pk'
+```
+
+This is an **exact match** to the corpus chunk's stated email. Both
+phone and email for this query are now confirmed, not partial — the
+"inconclusive" status is fully resolved, not just re-flagged.
+
+**Corrected, script-verified final count:**
+
+```python
+scorable = [r for r in recs if r['relevantChunkKeys']]              # 23
+verified_scorable = [r for r in scorable if any(...)]                # 21
+# -> 21/23 scorable queries (91%), confirmed by re-running the same
+#    script after this section's 3 golden-set edits
+```
+
+Only 2 scorable queries remain unchecked: the fee-waiver PDF (server
+outage, independently re-confirmed unreachable — see the earlier
+recheck in this section) and Q34 (`bb92759aba56e8f6`, transport
+facilities — its relevant chunk is mislabeled at the source, a
+pre-existing corpus issue already documented in §7, not something a live
+fetch can resolve).
+
+**Evidence contract (§71):**
+
+```text
+Claim class:       MEASURED (the count bug is directly verified by
+                   re-reading the golden set's own relevantChunkKeys and
+                   provenance fields with a script, not inferred; the
+                   Cloudflare email decode is a deterministic, standard,
+                   publicly-documented algorithm applied to data read
+                   directly off the live page's raw HTML)
+Bug found:         "22/23 (96%)" claimed in §9c was actually 19/23 (83%)
+                   - 1 unscorable query wrongly counted in, 2 scorable
+                   queries with no provenance note despite being
+                   effectively covered
+Fixed:             3 golden_set_verified.jsonl edits (2 new provenance
+                   notes for the shared-chunk queries, 1 correction note
+                   upgrading the CS-dept email from inconclusive to
+                   confirmed match)
+Corrected coverage: 21/23 scorable queries (91%), 22/50 total queries
+                   with >=1 live-tier component (both script-verified,
+                   not hand-counted)
+golden_set_verified.jsonl SHA-256 (post-§9d, MEASURED):
+                   e87b2fec786f97e8fad1b15da94f5ed5626543fd4565a71ca6592671b403fa8a
+Idempotency:       verified - re-running the merge script against its own
+                   output reports 0 changes, hash unchanged across both runs
+Cloud activity this section: Convex Cloud 0, Gemini 0, Pinecone 0, Neon 0,
+                   WebFetch 0 (curl + local Cloudflare-email decode only)
+```
+
+**Evidence contract (§71):**
+
+```text
+Claim class:       MEASURED (OCR output from a locally-run tesseract pass
+                   over the PDF's own page images, not AI-summarized;
+                   waiver-PDF unreachability re-confirmed via 5 fresh HTTP
+                   attempts this session, all 522)
+Confirmed match:   1 (semester fee payment method)
+New supplementary finding: 1 (Rs. 100/day late fee fine, added to the
+                   late-fee-fine query's provenance)
+Re-confirmed unreachable: 1 (fee waiver PDF, 5/5 fresh attempts 522;
+                   sibling page on the same domain succeeded, root path
+                   succeeded, ruling out a full domain outage)
+golden_set_verified.jsonl SHA-256 (post-§9c, MEASURED):
+                   a70c4d070c8940486df432f5d4f303efdb3fabc39f00f5e2c6e99b2bad84e96c
+Idempotency:       verified - re-running the merge script against its own
+                   output reports 0 changes, hash unchanged across both runs
+Cloud activity this section: Convex Cloud 0, Gemini 0, Pinecone 0, Neon 0,
+                   WebFetch 0 (curl + pdftoppm + tesseract, all local/direct)
+```
+
+## §9e: Q34 (transport) checked live — a discrepancy, not a match (2026-09-04)
+
+§9d left Q34 (`bb92759aba56e8f6`, "What transport facilities does UET
+Taxila provide for students?") marked as "not resolvable via live-fetch"
+because its corpus chunk is mislabeled at the source (§7). That framing
+was checked directly rather than assumed: the corpus's chunk-labeling
+defect (which chunk got matched) is a separate question from whether the
+underlying transport claim is externally checkable — and it is.
+
+Fetched `https://admissions.uettaxila.edu.pk/Bus_Route.php` directly via
+curl (raw HTML, no AI-summarization layer): HTTP 200. (The
+`web.uettaxila.edu.pk` mirror of the same path is HTTP 522 — consistent
+with that subdomain's known outage pattern, not evidence the page itself
+doesn't exist.)
+
+The live page is real, but it does **not** corroborate the corpus's
+claim. The corpus's two marked chunks (already found in §7 to both be
+from one page, not independent sources) state general, year-round
+student transport "plying between Rawalpindi, Islamabad, Hassan Abdal,
+Wah Cantt" — sourced from an unrelated "Strategic Academia-Industry
+Collaboration Between UET Taxila and Fast Cables Limited" page, not an
+official transport page. The live `Bus_Route.php` page instead describes
+a narrower, different service: a one-time entry-test-day shuttle bus
+from Islamabad, Rawalpindi, and Wah Cantt/Taxila only — Hassan Abdal is
+not mentioned anywhere on the live page — and it explicitly states
+"candidates will travel on their own to their designated test centers,"
+with only the return leg (campus to Taxila stand/by-pass) guaranteed as
+provided transport.
+
+This is a genuine, disclosed discrepancy, not a clean confirmation:
+partial city-list overlap, but different scope (one-day entry-test
+shuttle vs. an implied ongoing student service) and no live
+corroboration of the corpus's specific claim. Consistent with how §8's
+Q27 anomaly and the academic-calendar staleness finding were counted,
+this is recorded as **checked** (live-tier evidence gathered, from a
+current, reachable, non-AI-summarized source) rather than **confirmed**
+— the note added to the golden set makes this distinction explicit so
+the discrepancy isn't laundered into a false match.
+
+**Corrected, script-verified count after this section:**
+
+```python
+scorable = [r for r in recs if r['relevantChunkKeys']]              # 23
+verified_scorable = [r for r in scorable if any(...)]                # 22
+# -> 22/23 scorable queries (96%)
+```
+
+Only 1 scorable query remains unchecked: the fee-waiver PDF
+(`4b515ce39511ff1b`), re-confirmed unreachable again this session (3/3
+fresh HTTP attempts, all 522; root domain still returns 200, ruling out
+a full domain outage).
+
+**Evidence contract (§71):**
+
+```text
+Claim class:       MEASURED (raw curl fetch, no WebFetch/AI-summarization
+                   layer; text extracted and compared directly)
+Finding:           Live Bus_Route.php page does NOT corroborate the
+                   corpus's general student-transport claim - different
+                   scope (entry-test-day only) and different city list
+                   (no Hassan Abdal); genuine discrepancy, disclosed, not
+                   smoothed into a match
+Corrected coverage: 22/23 scorable queries (96%), 23/50 total queries
+                   with >=1 live-tier component (both script-verified,
+                   not hand-counted)
+golden_set_verified.jsonl SHA-256 (post-§9e, MEASURED):
+                   4c9023025a71da9c34b9859215d9a8b01708428eef42243e3a9120cb3de83cfe
+Idempotency:       verified - re-running the merge script against its own
+                   output reports 0 changes, hash unchanged across both runs
+Cloud activity this section: Convex Cloud 0, Gemini 0, Pinecone 0, Neon 0,
+                   WebFetch 0 (curl only)
 ```

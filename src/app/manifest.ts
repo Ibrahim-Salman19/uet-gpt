@@ -12,10 +12,28 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#070708",
     icons: [
       {
-        src: "/uet-logo.jpg",
-        sizes: "192x192 512x512",
-        type: "image/jpeg",
+        src: "/icon-192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
         purpose: "maskable",
+      },
+      {
+        src: "/favicon.ico",
+        sizes: "48x48 32x32 16x16",
+        type: "image/x-icon",
+        purpose: "any",
       },
     ],
     categories: ["education", "productivity", "utilities"],
@@ -24,13 +42,13 @@ export default function manifest(): MetadataRoute.Manifest {
         name: "Merit Calculator",
         short_name: "Merit Calc",
         description: "Calculate UET Taxila admission merit aggregate",
-        url: "/calculator",
+        url: "/tools?tab=merit",
       },
       {
         name: "GPA Calculator",
         short_name: "GPA Calc",
         description: "Calculate semester SGPA and cumulative CGPA",
-        url: "/gpa-calculator",
+        url: "/tools?tab=gpa",
       },
       {
         name: "Ask AI Assistant",
@@ -42,7 +60,7 @@ export default function manifest(): MetadataRoute.Manifest {
         name: "Scholarships & Aid",
         short_name: "Scholarships",
         description: "View HEC Need-Based and Ehsaas scholarships",
-        url: "/scholarships",
+        url: "/admissions?tab=scholarships",
       },
     ],
   };

@@ -26,7 +26,7 @@ export const metadata: Metadata = {
         url: `${siteUrl}/opengraph-image`,
         width: 1200,
         height: 630,
-        alt: "UET Taxila Glossary — UET GPT",
+        alt: "UET Taxila Glossary | UET GPT",
       },
     ],
   },
@@ -91,7 +91,7 @@ export default function LearnIndexPage() {
               UET Taxila <span className="text-[#d9b451]">Glossary</span>
             </h1>
             <p className="text-base sm:text-lg text-[#a1a1aa] max-w-2xl mx-auto mb-8 leading-relaxed">
-              Key terms every UET Taxila applicant and student should know — explained clearly and
+              Key terms every UET Taxila applicant and student should know, explained clearly and
               sourced from the official undergraduate prospectus and statutory rules.
             </p>
             <Link
@@ -187,8 +187,8 @@ export default function LearnIndexPage() {
           <section className="px-6 py-16 max-w-3xl mx-auto text-center border-t border-white/10">
             <h2 className="text-xl font-bold mb-3 text-white">Can&apos;t find your answer?</h2>
             <p className="text-sm text-[#a1a1aa] mb-6 leading-relaxed max-w-xl mx-auto">
-              UET GPT answers any question about UET Taxila — admissions, programs, fees, campus
-              life, scholarships — using official university documents. Free for every student and
+              UET GPT answers any question about UET Taxila (admissions, programs, fees, campus
+              life, scholarships) using official university documents. Free for every student and
               applicant.
             </p>
             <Link

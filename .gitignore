@@ -27,6 +27,7 @@ pnpm-debug.log*
 .env
 .env.local
 .env*.local
+.env.local.backup-*
 
 # vercel
 .vercel
@@ -38,6 +39,7 @@ next-env.d.ts
 # local crawl corpus output (raw cache + extracted documents; never committed,
 # see docs/rag-store-evaluation/pdf-path-unification-2026-08/ and scripts/uet_crawler/corpus_sink.py)
 /local_corpus_pilot/
+/archive_c_drive_run_*/
 
 # convex (generated files committed for Vercel builds)
 
@@ -75,6 +77,10 @@ venv/
 /scratch/
 /recon-report.md
 eval_*.json
+
+# Convex CLI cross-filesystem tmpdir (CONVEX_TMPDIR) + per-table migration
+# export dumps (scripts/export_table.ts) - can contain the full corpus text
+/.convex-tmp/
 
 # test auth state — NEVER commit Clerk session tokens / cookies
 **/.clerk/

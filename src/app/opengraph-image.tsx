@@ -53,17 +53,20 @@ export default function OpengraphImage() {
           </div>
           <div
             style={{
+              display: "flex",
               fontSize: "40px",
               fontWeight: 800,
               letterSpacing: "-0.5px",
             }}
           >
-            UET <span style={{ color: "#d9b451" }}>GPT</span>
+            <span>UET&nbsp;</span>
+            <span style={{ color: "#d9b451" }}>GPT</span>
           </div>
         </div>
 
         <div
           style={{
+            display: "flex",
             padding: "8px 20px",
             borderRadius: "9999px",
             border: "1px solid rgba(217, 180, 81, 0.3)",
@@ -90,6 +93,7 @@ export default function OpengraphImage() {
       >
         <div
           style={{
+            display: "flex",
             fontSize: "64px",
             fontWeight: 800,
             lineHeight: 1.15,
@@ -100,6 +104,7 @@ export default function OpengraphImage() {
         </div>
         <div
           style={{
+            display: "flex",
             fontSize: "26px",
             lineHeight: 1.4,
             color: "#a1a1aa",
@@ -121,8 +126,10 @@ export default function OpengraphImage() {
           color: "#71717a",
         }}
       >
-        <div>uet-gpt.vercel.app</div>
-        <div style={{ color: "#d9b451" }}>RAG Synced 2026 • Verified Prospectus Data</div>
+        <div style={{ display: "flex" }}>uet-gpt.vercel.app</div>
+        <div style={{ display: "flex", color: "#d9b451" }}>
+          RAG Synced 2026 • Verified Prospectus Data
+        </div>
       </div>
     </div>,
     { ...size },

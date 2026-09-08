@@ -171,7 +171,7 @@ export function MeritCalculator() {
   // Target Department Gap Analysis
   const targetDept = useMemo(() => {
     return (
-      HISTORICAL_BENCHMARKS.find((d) => d.slug === selectedDeptSlug) ?? HISTORICAL_BENCHMARKS[0]
+      HISTORICAL_BENCHMARKS.find((d) => d.slug === selectedDeptSlug) ?? HISTORICAL_BENCHMARKS[0]!
     );
   }, [selectedDeptSlug]);
 

@@ -1,0 +1,25 @@
+# Exported by three-d-stage
+newmtl gold
+Kd 0.7913 0.5395 0.1329
+Ks 0.2000 0.2000 0.2000
+Ns 148
+d 1.0000
+
+newmtl gold_patina
+Kd 0.4342 0.2423 0.0284
+Ks 0.2000 0.2000 0.2000
+Ns 124
+d 1.0000
+
+newmtl seal_front
+Kd 1.0000 1.0000 1.0000
+Ks 0.2000 0.2000 0.2000
+Ns 100
+d 1.0000
+
+newmtl seal_back
+Kd 1.0000 1.0000 1.0000
+Ks 0.2000 0.2000 0.2000
+Ns 100
+d 1.0000
+

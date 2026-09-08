@@ -24,7 +24,7 @@ export const metadata: Metadata = {
         url: `${siteUrl}/opengraph-image`,
         width: 1200,
         height: 630,
-        alt: "Terms of Service — UET GPT",
+        alt: "Terms of Service | UET GPT",
       },
     ],
   },

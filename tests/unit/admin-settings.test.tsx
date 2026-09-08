@@ -128,7 +128,7 @@ import { toast } from "sonner";
 
 // Distinct spies per mutation so tests can assert the exact persistence call.
 // The page calls useMutation twice per render (upsertSettingsBatch, then
-// resetSettings), in that order, on EVERY render — including the re-render
+// resetSettings), in that order, on EVERY render  -  including the re-render
 // triggered by the dbSettings-merge useEffect. So we dispatch by call index
 // modulo 2: odd calls (1st of each render) → upsert, even calls (2nd) → reset.
 // This stays stable across re-renders, unlike a naive callCount===1 check.

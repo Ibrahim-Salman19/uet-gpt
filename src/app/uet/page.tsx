@@ -106,13 +106,13 @@ export default function UetPage() {
           <p className="text-lg text-[#a1a1aa] leading-relaxed">
             Welcome to the complete guide for <strong className="text-white">UET</strong>{" "}
             (University of Engineering and Technology, Taxila) powered by{" "}
-            <strong className="text-white">UET GPT</strong> — the open-source AI assistant.
+            <strong className="text-white">UET GPT</strong>: the open-source AI assistant.
           </p>
         </header>
 
         <section className="mb-12 grid grid-cols-1 gap-6 sm:grid-cols-2">
           <Link
-            href="/calculator"
+            href="/tools?tab=merit"
             className="group block rounded-xl border border-[#d9b451]/30 bg-[#09090b] p-6 transition-all hover:border-[#d9b451] hover:bg-[#18181b]"
           >
             <h2 className="text-xl font-semibold text-white group-hover:text-[#d9b451] mb-2">
@@ -137,7 +137,7 @@ export default function UetPage() {
           </Link>
 
           <Link
-            href="/uet-taxila/fee-structure"
+            href="/admissions?tab=fees"
             className="group block rounded-xl border border-[#27272a] bg-[#09090b] p-6 transition-all hover:border-[#d9b451]/50 hover:bg-[#18181b]"
           >
             <h2 className="text-xl font-semibold text-white group-hover:text-[#d9b451] mb-2">
@@ -149,7 +149,7 @@ export default function UetPage() {
           </Link>
 
           <Link
-            href="/uet-taxila/admissions"
+            href="/admissions?tab=overview"
             className="group block rounded-xl border border-[#27272a] bg-[#09090b] p-6 transition-all hover:border-[#d9b451]/50 hover:bg-[#18181b]"
           >
             <h2 className="text-xl font-semibold text-white group-hover:text-[#d9b451] mb-2">

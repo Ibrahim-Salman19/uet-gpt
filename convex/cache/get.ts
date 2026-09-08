@@ -67,7 +67,7 @@ async function getCachedEntry(
     }
 
     const altHit = altCandidate.alternateEmbeddings.some(
-      (altEmbedding) =>
+      (altEmbedding: number[]) =>
         cosineSimilarity(queryEmbedding, altEmbedding) >= CACHE_SIMILARITY_THRESHOLD,
     );
     if (altHit) {

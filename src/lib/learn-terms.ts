@@ -20,7 +20,7 @@ export interface LearnTerm {
   pageTitle: string;
   /** 150-160 chars for meta description */
   metaDescription: string;
-  /** 40-60 word lead paragraph — defines the term */
+  /** 40-60 word lead paragraph: defines the term */
   lead: string;
   /** Body sections: heading + paragraphs */
   sections: { heading: string; paragraphs: string[] }[];
@@ -39,19 +39,19 @@ export const LEARN_TERMS: LearnTerm[] = [
     pageTitle: "What is ECAT? UET Entry Test Explained | UET GPT",
     metaDescription:
       "Understand the ECAT entry test for UET Taxila: format, 33% merit weightage, scoring, eligibility, and preparation guidance from official sources.",
-    lead: "ECAT — Engineering College Admission Test — is the standardized entry test that applicants to undergraduate engineering and computing programs at UET Taxila must sit before their admission merit can be calculated. Conducted annually by UET Lahore for Punjab-domicile students, ECAT is mandatory for engineering programs and BS Computer Science.",
+    lead: "ECAT (Engineering College Admission Test) is the standardized entry test that applicants to undergraduate engineering and computing programs at UET Taxila must sit before their admission merit can be calculated. Conducted annually by UET Lahore for Punjab-domicile students, ECAT is mandatory for engineering programs and BS Computer Science.",
     sections: [
       {
         heading: "What ECAT tests",
         paragraphs: [
           "ECAT assesses aptitude and subject knowledge in Mathematics, Physics, Chemistry, and English. Students from an FSc Pre-Engineering background are tested in all four subjects. The paper is multiple-choice, timed, and held at designated centres across Punjab.",
-          "For BS Computer Science, BS Mathematics, and BS Physics applicants, ECAT is still required but the eligibility threshold on board marks is 50% (versus 60% for engineering programs), and the accepted subject combinations are broader — any HSSC combination that includes Mathematics or Physics, plus FSc Pre-Medical with Mathematics as an additional subject.",
+          "For BS Computer Science, BS Mathematics, and BS Physics applicants, ECAT is still required but the eligibility threshold on board marks is 50% (versus 60% for engineering programs), and the accepted subject combinations are broader: any HSSC combination that includes Mathematics or Physics, plus FSc Pre-Medical with Mathematics as an additional subject.",
         ],
       },
       {
         heading: "How ECAT contributes to UET Taxila merit",
         paragraphs: [
-          "In the UET Taxila merit formula, ECAT carries 33% of the weighted admission marks. The remaining 67% comes from previous academic results: HSSC Part-I (or the equivalent higher qualification) at 50% and SSC at 17%. This means a strong ECAT score can significantly lift an applicant whose earlier academic percentages were modest — and vice versa.",
+          "In the UET Taxila merit formula, ECAT carries 33% of the weighted admission marks. The remaining 67% comes from previous academic results: HSSC Part-I (or the equivalent higher qualification) at 50% and SSC at 17%. This means a strong ECAT score can significantly lift an applicant whose earlier academic percentages were modest, and vice versa.",
           "Example from the official prospectus: an applicant with 300/400 in ECAT, 700/1100 in SSC, 500/550 in HSSC Part-I, and a Hifz-e-Quran certificate scores [33 × (300/400) + 17 × (700/1100) + 50 × (500 + 20)/550] = 82.841% admission marks.",
         ],
       },
@@ -65,9 +65,9 @@ export const LEARN_TERMS: LearnTerm[] = [
       {
         heading: "Common mistakes around ECAT for UET Taxila",
         paragraphs: [
-          "1. Sitting ECAT after the UET Taxila application deadline — without a valid entry-test score your merit cannot be computed and your application will not be considered.",
-          "2. Assuming a high ECAT score alone guarantees admission — ECAT is 33% of merit; board marks still matter. Conversely, a weak ECAT score cannot be offset by strong board marks alone.",
-          "3. Rounding up board marks to meet the 60% eligibility threshold — the prospectus explicitly states that rounding off to reach 60% (or 50%) is not accepted.",
+          "1. Sitting ECAT after the UET Taxila application deadline: without a valid entry-test score your merit cannot be computed and your application will not be considered.",
+          "2. Assuming a high ECAT score alone guarantees admission: ECAT is 33% of merit; board marks still matter. Conversely, a weak ECAT score cannot be offset by strong board marks alone.",
+          "3. Rounding up board marks to meet the 60% eligibility threshold: the prospectus explicitly states that rounding off to reach 60% (or 50%) is not accepted.",
         ],
       },
     ],
@@ -103,7 +103,7 @@ export const LEARN_TERMS: LearnTerm[] = [
     pageTitle: "UET Taxila Merit Formula: Calculation Guide | UET GPT",
     metaDescription:
       "Calculate your UET Taxila admission aggregate: ECAT (33%), HSSC (50%), SSC (17%), plus Hifz-e-Quran/NCC bonus marks with official worked examples.",
-    lead: "The UET Taxila merit formula — officially called the admission marks formula — calculates a weighted percentage from three components: the ECAT entry test (33%), the HSSC or equivalent higher qualification (50%), and the SSC or equivalent (17%). This aggregate determines where an applicant stands on the merit list for their chosen discipline and category.",
+    lead: "The UET Taxila merit formula (officially called the admission marks formula) calculates a weighted percentage from three components: the ECAT entry test (33%), the HSSC or equivalent higher qualification (50%), and the SSC or equivalent (17%). This aggregate determines where an applicant stands on the merit list for their chosen discipline and category.",
     sections: [
       {
         heading: "The three components and their weights",
@@ -126,7 +126,7 @@ export const LEARN_TERMS: LearnTerm[] = [
         paragraphs: [
           "BSc/BASc and B.Tech holders who apply for higher studies use a different split: ECAT 33%, Degree result 30%, HSSC or DAE 20%, SSC 17%.",
           "Foreign (A-Level etc.) applicants use O-Level 67% in the SSC/HSSC portion. They must also provide an IBCC equivalence certificate.",
-          "The formula is applied consistently across all categories (Open Merit, reserved district, overseas, etc.) — only the pool of applicants you compete against differs by category, not the formula itself.",
+          "The formula is applied consistently across all categories (Open Merit, reserved district, overseas, etc.): only the pool of applicants you compete against differs by category, not the formula itself.",
         ],
       },
       {
@@ -174,7 +174,7 @@ export const LEARN_TERMS: LearnTerm[] = [
       {
         heading: "Minimum board marks requirement",
         paragraphs: [
-          "An applicant must have passed — or expect to pass — their HSSC (or equivalent) up to the latest annual examination with at least 60% unadjusted marks. This applies to all engineering programs. For BS Computer Science, BS Mathematics, and BS Physics the minimum is 50% unadjusted marks.",
+          "An applicant must have passed (or expect to pass) their HSSC (or equivalent) up to the latest annual examination with at least 60% unadjusted marks. This applies to all engineering programs. For BS Computer Science, BS Mathematics, and BS Physics the minimum is 50% unadjusted marks.",
           "The prospectus is explicit: rounding off a percentage figure to reach 60% (or 50% for CS/Mathematics/Physics) is NOT accepted towards eligibility. If your marks calculate to 59.9%, you do not meet the 60% threshold.",
           "A-Level and other foreign-qualification applicants must attach an IBCC (Inter Board Committee of Chairmen) equivalence certificate demonstrating the required percentage in the relevant subjects (Pre-Engineering combination for engineering programs).",
         ],
@@ -183,7 +183,7 @@ export const LEARN_TERMS: LearnTerm[] = [
         heading: "ECAT entry-test requirement",
         paragraphs: [
           "Every applicant to engineering programs and BS Computer Science must have appeared in the ECAT or an equivalent engineering entry test acceptable to PEC and UET Taxila. Without a valid entry-test score, merit cannot be computed.",
-          "There is no published minimum ECAT score for eligibility — the test result feeds into the merit formula (33% weight) rather than acting as a binary pass/fail gate on its own.",
+          "There is no published minimum ECAT score for eligibility: the test result feeds into the merit formula (33% weight) rather than acting as a binary pass/fail gate on its own.",
         ],
       },
       {
@@ -358,7 +358,7 @@ export const LEARN_TERMS: LearnTerm[] = [
       {
         heading: "Subsidized vs. partial-subsidized categories",
         paragraphs: [
-          "The key distinction in UET Taxila's fee structure is between subsidized seats (the majority) and partial-subsidized seats (Category S — All Pakistan, and Category X — children of overseas Pakistanis). Subsidized students pay Rs. 38,000 tuition per semester and Rs. 7,000 in admission charges. Category S and X students pay Rs. 130,000 tuition per semester and Rs. 300,000 in admission charges.",
+          "The key distinction in UET Taxila's fee structure is between subsidized seats (the majority) and partial-subsidized seats (Category S for All Pakistan, and Category X for children of overseas Pakistanis). Subsidized students pay Rs. 38,000 tuition per semester and Rs. 7,000 in admission charges. Category S and X students pay Rs. 130,000 tuition per semester and Rs. 300,000 in admission charges.",
           "The prospectus explicitly states there is no relaxation, concession, or waiver in fee for Category S and X students. The higher rate reflects the reduced subsidy from the university.",
         ],
       },
@@ -386,7 +386,7 @@ export const LEARN_TERMS: LearnTerm[] = [
       {
         heading: "Fee refund policy",
         paragraphs: [
-          "UET Taxila follows the National Level Fee-Refund Policy for HEIs of Pakistan: 100% refund up to the 7th day of commencement of classes, 50% from the 8th to the 15th day, and 0% from the 16th day onward. The timeline covers both weekdays and weekends. The refund percentage applies to fee components only — not to security deposits (which are refunded separately on clearance) or admission charges.",
+          "UET Taxila follows the National Level Fee-Refund Policy for HEIs of Pakistan: 100% refund up to the 7th day of commencement of classes, 50% from the 8th to the 15th day, and 0% from the 16th day onward. The timeline covers both weekdays and weekends. The refund percentage applies to fee components only, not to security deposits (which are refunded separately on clearance) or admission charges.",
         ],
       },
     ],
@@ -405,7 +405,7 @@ export const LEARN_TERMS: LearnTerm[] = [
       },
       {
         q: "What is the difference between Category S and subsidized fees?",
-        a: "Category S (All Pakistan partial-subsidized) students pay Rs. 300,000 admission charges and Rs. 130,000 per-semester tuition — significantly higher than subsidized students who pay Rs. 7,000 and Rs. 38,000 respectively. There is no concession or waiver for Category S.",
+        a: "Category S (All Pakistan partial-subsidized) students pay Rs. 300,000 admission charges and Rs. 130,000 per-semester tuition, which is significantly higher than subsidized students who pay Rs. 7,000 and Rs. 38,000 respectively. There is no concession or waiver for Category S.",
       },
     ],
     hubLinks: [
@@ -503,7 +503,7 @@ export function getTermBySlug(slug: string): LearnTerm | undefined {
   return LEARN_TERMS.find((t) => t.slug === slug);
 }
 
-/** Returns all slugs — used to generate static params. */
+/** Returns all slugs: used to generate static params. */
 export function getAllSlugs(): string[] {
   return LEARN_TERMS.map((t) => t.slug);
 }

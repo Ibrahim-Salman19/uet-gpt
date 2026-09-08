@@ -1,5 +1,5 @@
 /**
- * UET-GPT medallion — a struck gold coin whose two faces carry the
+ * UET-GPT medallion: a struck gold coin whose two faces carry the
  * university seal as a texture. The mark itself is the supplied PNG,
  * unaltered: nothing is redrawn, recoloured or cropped.
  *
@@ -65,7 +65,7 @@ export async function buildMedallion(THREE, textureUrl = './logo.png') {
   blank.rotation.x = Math.PI / 2;
   coin.add(blank);
 
-  // Milled (knurled) edge — 108 flutes around the rim.
+  // Milled (knurled) edge: 108 flutes around the rim.
   const TICKS = 144;
   const flutes = new THREE.InstancedMesh(
     new THREE.BoxGeometry(0.0013, T * 0.72, 0.0015), goldDark, TICKS

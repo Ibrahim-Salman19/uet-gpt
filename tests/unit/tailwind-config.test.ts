@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-// Tailwind v4 uses CSS-based configuration via @theme in globals.css — there
+// Tailwind v4 uses CSS-based configuration via @theme in globals.css  -  there
 // is no tailwind.config.ts file. This test verifies the design-token contract
 // instead: that globals.css defines the expected UET brand tokens and applies
 // them through the standard --color-* @theme aliases.

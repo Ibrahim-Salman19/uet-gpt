@@ -77,7 +77,7 @@ export default function AdminDocumentsPage() {
 
   const filteredDocs: Doc<"documents">[] = documents
     ? documents.filter(
-        (doc) =>
+        (doc: any) =>
           !search ||
           (doc.title ?? "").toLowerCase().includes(search.toLowerCase()) ||
           (doc.url ?? "").toLowerCase().includes(search.toLowerCase()),

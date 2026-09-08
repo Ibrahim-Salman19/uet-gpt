@@ -134,7 +134,7 @@ note:     an earlier attempt was refused by the permission classifier; a
 rollback: delete the index; nothing else references it yet
 ```
 
-### Step 3 - upsert the corpus  [owner: me, after steps 1-2]
+### Step 3 - upsert the corpus  [DONE - 2026-08-30, this file wasn't updated at the time]
 
 ```text
 requires: deterministic vector IDs derived from computeChunkKey, generation-
@@ -148,6 +148,16 @@ constraint: delete by explicit id, NEVER by metadata filter - measured as
           0.6s). Documented in the pinecone-p2-proof report.
 verify:   vector count matches, and ANN Recall@10 >= 0.98 vs exact cosine
           ground truth (mandate gate)
+status:   DONE. 747/747 batches, 0 failures, LSN-verified write visibility,
+          exact count match (44,792/44,792), 20/20 fetch-by-id spot-checks
+          correct - see
+          pinecone-p2-proof-2026-08/upload-full-corpus-run.log (committed to
+          git) and candidate-matrix.json's Pinecone verdict_summary. ANN
+          Recall@10 = 0.98 exact, confirmed via exact rational arithmetic
+          (mandate gate met at the boundary). This file's step markers were
+          not updated when this ran on 2026-08-30, one day after this file's
+          last prior edit - corrected 2026-09-04, no other content in this
+          step changed.
 ```
 
 ### Step 4 - choose the Convex backend  [owner: USER DECISION]
@@ -260,6 +270,158 @@ Whichever is chosen, it only stays healthy if step 5 holds.
   hybrid retrieval in convex/embeddings/search.ts work
 - retire the in-Convex embedding write path so the ~276 MB never comes back
 ```
+
+**Progress (2026-09-05):** `KNOWLEDGE_STORE_BACKEND`-gated dense-channel
+switch built and end-to-end verified against the local self-hosted
+deployment - see `convex/embeddings/cloudflareEmbed.ts` (live query-time
+1024d Cloudflare/Qwen3 embedding, matching the corpus's own embedding
+model), `convex/knowledgeStore/denseSearchAction.ts` (the Node-runtime
+Pinecone dense-search wrapper `search.ts` calls via `ctx.runAction`, since
+`search.ts` itself runs V8-isolate), and the `getRagIdAndTextByChunkRefs`
+query added to `convex/knowledgeStore/convexQueries.ts` (bridges Pinecone's
+`(documentId, chunkKey)` identity to the ragId space the rest of the
+retrieval pipeline is keyed by, reusing the fact that `crawledChunks` rows
+already carry both - schema.ts). Default (`convex`/unset) path is
+unchanged by inspection and a clean typecheck, but NOT exercised
+end-to-end locally - this deployment's Gemini key is a deliberate
+placeholder (resource-safety guard), so the old path 400s on
+`API_KEY_INVALID` here, unrelated to this change.
+
+**`denseSearchAction.ts` hardcodes `INDEX_NAME = "uetgpt-corpus-v1-qwen1024"`
+and `NAMESPACE = "corpus-v1-full"`** - the exact index/namespace the
+already-certified 44,792-vector corpus lives in (pre- the 2026-09-04
+source-file-only Prospectus cleanup - see
+`local-corpus-v1-freeze-2026-08/manifest.json`'s `amendments` field). If a
+Corpus V2 re-embed/re-upsert ever happens, this file's constants are the
+thing that must change in lockstep, or `search.ts` will keep querying the
+old index silently.
+
+**Not yet done:** retiring the in-Convex embedding write path (the actual
+"~276 MB never comes back" part of this step) - untouched so far, and NOT
+a quick flag-flip once you look at it (checked 2026-09-05):
+
+`convex/crawl/actions.ts`'s `embedSingleChunk` calls `rag.add(ctx, {...})`
+(the real Gemini call + the write into `@convex-dev/rag`'s own vector
+storage - this IS the ~276 MB). `result.entryId` from that call is the
+SOLE source of `crawledChunks.ragId` - a REQUIRED, indexed
+(`by_ragId`) field, not incidental bookkeeping. Three consumers depend on
+it directly: `crawl/queries.ts` `fullTextSearch` and
+`embeddings/chunkTextSearch.ts` (both return `ragId` as the citation/join
+key), and the new `getRagIdAndTextByChunkRefs` bridge this session added
+for the Pinecone dense channel (§ above) - which exists specifically
+*because* everything else is keyed by ragId. Skipping `rag.add()` removes
+the only thing that currently assigns that id, so this is a schema/identity
+design decision (where does `ragId` come from for chunks ingested after
+the switch?), not a one-line change - and it's coupled to the still-open
+export/import identity-continuity plan (§4 Step 4 note above): whichever
+Convex deployment ends up receiving future writes, and whichever `ragId`
+generation scheme is chosen, both need deciding together, not separately,
+or chunks written before/after cutover end up with `ragId`s from two
+different generators sharing one indexed column.
+
+**Interim option, distinct from this redesign:** `embedSingleChunk`'s real
+Gemini call is already gated behind
+`crawl/bulkOperationsControl:checkBulkOperationsEnabled` (the existing
+emergency-stop switch). Disabling bulk operations already stops in-Convex
+embedding writes operationally, today, with no code change - it just also
+stops the lexical/text side of ingestion, since the switch isn't scoped to
+just the embedding call. Whether that's an acceptable interim measure
+(defer the identity redesign; halt all new ingestion until the migration
+target is settled) is a call for the user, not decided here.
+
+**Export mechanism fixed to be per-table (2026-09-05).** The export/import
+identity-continuity plan above (move local's `documents`/`crawledChunks` into
+whichever Convex deployment becomes production, preserving `_id` so the
+44,792 Pinecone vectors' stored `documentId`/`chunkKey` metadata keeps
+resolving) needed a safe way to actually get the data out first. `npx convex
+export` has no per-table flag - it snapshots the ENTIRE deployment (every
+table, plus component storage such as `@convex-dev/rag`'s own ~183MB
+embeddings) as one server-side job, and repeated attempts against the
+44,792-row `crawledChunks` table OOM-killed the local self-hosted backend
+container (Docker exit 137, ~9 minutes in). Data survived the crash
+(container volume, not memory), but the whole-DB approach itself is unsafe
+at this data volume.
+
+Fixed by bypassing `npx convex export` entirely for migration purposes:
+`convex/admin/tableExport.ts` (`exportTablePage`, an `internalQuery`) pages
+through ONE table at a time via `.paginate()`, and `scripts/export_table.ts`
+walks it end-to-end using `ConvexHttpClient` + `setAdminAuth` (the same
+admin-key mechanism `npx convex run` uses internally, confirmed via Context7
+against Convex's own CLI source - this also avoids per-page `npx` cold-start
+cost, which would have made a ~900-page walk impractical). Restricted to an
+explicit allow-list of 12 tables worth migrating (`documents`,
+`crawledChunks`, `chunkParents`, and the small app-state tables) -
+deliberately excludes transient/operational tables (`crawlJobs`,
+`semanticCache`, `crawlStats`, `traceSpans`, etc.) that a fresh production
+deployment doesn't need seeded with local-dev history, and excludes the
+`@convex-dev/rag` component's embedding storage entirely, which is correct
+since that data is being retired in favor of Pinecone, not migrated.
+
+**Verified end-to-end against the real local deployment, including the exact
+table that OOM'd before:** all 12 tables exported successfully; `crawledChunks`
+(the large one) completed in ~20 minutes across 896 pages, 44,792/44,792 rows
+- exact match, 0 malformed rows (spot-checked: every row has `_id`,
+`_creationTime`, `documentId`, `chunkKey`), and `docker ps`/`docker stats`
+confirmed the backend container stayed healthy throughout (no restart, peak
+memory ~2.2GB of a 7.6GB limit - previously it was OOM-killed). Output lives
+at `.convex-tmp/table-export/*.jsonl` (gitignored - contains full corpus
+text, ~256MB total, not for commit). A few `crawledChunks` pages hit a
+transient "too many system operations" server timeout under cold cache
+(I/O latency against this environment's cross-filesystem Docker volume, NOT
+a crash) - the script retries the same page with backoff rather than
+aborting, and every retry succeeded.
+
+**Not yet done:** the actual `npx convex import --table <table> <file>
+--format jsonLines` step into a production target - still blocked on a
+deploy key (§4 above). Import is confirmed (Context7, Convex's own docs) to
+accept pre-existing `_id`/`_creationTime` values for both the ZIP-snapshot
+and single-table jsonLines paths, which is what makes this plan
+identity-preserving rather than a fresh re-ingest.
+
+**Two findings from inspecting the actual exported data (2026-09-05), not
+just the code - both change the plan above:**
+
+1. *Good news, narrows the ragId problem above.* Every one of the local
+   deployment's 44,792 `crawledChunks` rows (and all 1,891 `documents` rows)
+   carries `crawlSessionId`/`ragId` values from `convex/crawl/lexicalProof.ts`
+   (`ragId: "lexical-proof:<contentHash>"`), NOT a real `rag.add()` entryId -
+   that file's own header comment explains why: it was written specifically
+   to load the frozen corpus into local dev "with ZERO embedding/Gemini
+   calls," bypassing `embedSingleChunk`/`rag.add()` entirely (a resource-
+   safety measure, not an oversight). So this local deployment's
+   `@convex-dev/rag` component storage is empty - there is nothing to
+   dereference, and migrating these rows creates no dangling rag-component
+   references. Code that treats `ragId` as a real `EntryId` (`rag.delete()`
+   in `staleness.ts`/`mutations.ts`/etc.) already wraps the call in
+   try/catch and still deletes the row on failure (checked
+   `staleness.ts:deleteDocAndChunks`), so a synthetic ragId there produces a
+   harmless warning log, not a crash. The identity/schema redesign question
+   above is still real for FUTURE crawls through the normal pipeline, but
+   does not block migrating the EXISTING corpus as-is.
+
+2. *Bad news, a real pre-existing bug, unrelated to this session's work.*
+   `convex/crawl/chunking.ts`'s `generateChunks` sometimes pushes body
+   markdown into a chunk's `headingPath` instead of a short heading title
+   (e.g. one row's `headingPath` was a 2-entry array whose second entry was a
+   17KB table of links). Measured against the full export: 19,349/44,792
+   rows (43%) across 1,505/1,891 documents (80%) have a `headingPath` entry
+   over 200 bytes, adding ~155MB to `crawledChunks` - more than the ~93MB of
+   actual chunk text. Left in, this alone would land a fresh import close to
+   the same free-tier ceiling that disabled `adamant-stork-623` - the exact
+   failure this migration exists to avoid. Pinecone is unaffected
+   (`pineconeAdapter.ts` never stores `headingPath` in vector metadata), so
+   this is a Convex-storage and citation/context-label issue only, confined
+   to data that has not shipped to any real user yet.
+
+   Fixed for migration purposes (not at the source) via
+   `scripts/sanitize_heading_path_for_import.ts`: drops any `headingPath`
+   entry over 200 bytes (a real heading title is never that long; truncating
+   mid-string would leave garbled fragments visible in citations instead).
+   Run against the real export: `crawledChunks.jsonl` 255MB ->
+   `crawledChunks.import-ready.jsonl` 110MB, 44,792/44,792 rows intact,
+   19,358 rows had 19,430 entries dropped. The root cause in `chunking.ts`
+   itself is untouched - re-chunking the source markdown to fix it properly
+   is a separate, larger job than this migration and was not attempted.
 
 **Design issue to resolve before writing the adapter.** `KnowledgeStore`
 declares BOTH `denseSearch` and `lexicalSearch` on one interface, on the

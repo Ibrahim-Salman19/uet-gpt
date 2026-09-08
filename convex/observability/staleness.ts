@@ -20,7 +20,7 @@ export const checkStaleness = internalAction({
     const settingsList = await ctx.runQuery(internal.observability.internal.getSettingsBySection, {
       section: "observability",
     });
-    const sweepRaw = settingsList.find((s) => s.key === "observability_staleness_sweep")?.value;
+    const sweepRaw = (settingsList as Array<{ key: string; value: any }>).find((s) => s.key === "observability_staleness_sweep")?.value;
 
     let sweepState = {
       lastSweepStartedAt: null as number | null,

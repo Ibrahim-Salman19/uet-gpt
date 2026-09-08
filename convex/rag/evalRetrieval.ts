@@ -55,7 +55,7 @@ export const evalRetrieveDocuments = internalAction({
     baselineAPreRerank: v.array(rankedCandidateValidator),
     baselineBPostRerank: v.array(rankedCandidateValidator),
   }),
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<any> => {
     const limit = args.limit ?? 8;
     const rerankTopK = args.rerankTopK ?? 4;
 
@@ -70,7 +70,7 @@ export const evalRetrieveDocuments = internalAction({
     // precomputed queryEmbedding means its own internal HyDE auto-trigger
     // (search.ts's wordCount>15 branch, gated on `!args.queryEmbedding`)
     // never fires, keeping this call deterministic given deterministic input.
-    const baselineA = await ctx.runAction(internal.embeddings.search.searchDocumentsAction, {
+    const baselineA: any[] = await ctx.runAction(internal.embeddings.search.searchDocumentsAction, {
       queryText: args.queryText,
       queryEmbedding,
       limit,
@@ -81,25 +81,25 @@ export const evalRetrieveDocuments = internalAction({
     // (neither RERANKER_URL nor COHERE_API_KEY configured, verified during
     // this remediation), Cascade falls through to its deterministic Tier-1
     // word-overlap/position scoring - no external network call in the loop.
-    const reranked =
+    const reranked: any[] =
       baselineA.length === 0
         ? []
         : await ctx.runAction(internal.reranking.cascade.cascadeRerank, {
             query: args.queryText,
-            documents: baselineA.map((r) => ({ id: r.entryId, text: r.content })),
+            documents: baselineA.map((r: any) => ({ id: r.entryId, text: r.content })),
             topK: rerankTopK,
           });
 
     // Mirrors rerankSearchResults' own index-validation and field-merge
     // exactly (convex/rag/retrieval.ts:228-236).
-    const baselineB = reranked
-      .filter((item) => item.index >= 0 && item.index < baselineA.length)
-      .map((item) => {
+    const baselineB: any[] = reranked
+      .filter((item: any) => item.index >= 0 && item.index < baselineA.length)
+      .map((item: any) => {
         const original = baselineA[item.index]!;
         return { ...original, relevanceScore: item.score };
       });
 
-    const toRankedCandidate = (result: (typeof baselineA)[number]) => ({
+    const toRankedCandidate = (result: any) => ({
       entryId: result.entryId,
       url: result.url,
       title: result.title,

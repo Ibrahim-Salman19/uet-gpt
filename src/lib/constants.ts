@@ -69,7 +69,7 @@ export const UET_CRAWL_CONFIG = {
 export const APP_NAME = "UET GPT";
 export const APP_TAGLINE = "Your AI Guide to UET Taxila";
 export const APP_DESCRIPTION =
-  "UET GPT answers questions about UET Taxila — admissions, fees, ECAT, departments, and campus life. Free AI assistant powered by official university data.";
+  "UET GPT answers questions about UET Taxila: admissions, fees, ECAT, departments, and campus life. Free AI assistant powered by official university data.";
 export const APP_KEYWORDS = [
   "UET",
   "UET Taxila",

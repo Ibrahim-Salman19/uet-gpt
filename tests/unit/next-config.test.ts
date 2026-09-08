@@ -32,10 +32,27 @@ async function getHeaderMap(): Promise<Map<string, string>> {
 }
 
 describe("next config", () => {
-  it("defines security headers", () => {
-    // `redirects` was intentionally removed from next.config.mjs; only
-    // `headers` is defined now.
+  it("defines security headers and permanent redirects", async () => {
     expect(typeof config.headers).toBe("function");
+    expect(typeof config.redirects).toBe("function");
+
+    const redirects = await config.redirects!();
+    expect(redirects.length).toBe(14);
+    const sourceMap = new Map((redirects as Array<{ source: string; destination: string; permanent: boolean }>).map((r) => [r.source, r]));
+    expect(sourceMap.get("/calculator")).toEqual({ source: "/calculator", destination: "/tools?tab=merit", permanent: true });
+    expect(sourceMap.get("/gpa-calculator")).toEqual({ source: "/gpa-calculator", destination: "/tools?tab=gpa", permanent: true });
+    expect(sourceMap.get("/merit-archive")).toEqual({ source: "/merit-archive", destination: "/tools?tab=archive", permanent: true });
+    expect(sourceMap.get("/scholarship-finder")).toEqual({ source: "/scholarship-finder", destination: "/tools?tab=scholarships", permanent: true });
+    expect(sourceMap.get("/calendar")).toEqual({ source: "/calendar", destination: "/academics?tab=calendar", permanent: true });
+    expect(sourceMap.get("/resources")).toEqual({ source: "/resources", destination: "/academics?tab=resources", permanent: true });
+    expect(sourceMap.get("/uet-taxila/admissions")).toEqual({ source: "/uet-taxila/admissions", destination: "/admissions?tab=overview", permanent: true });
+    expect(sourceMap.get("/ecat-guide")).toEqual({ source: "/ecat-guide", destination: "/admissions?tab=ecat", permanent: true });
+    expect(sourceMap.get("/uet-taxila/fee-structure")).toEqual({ source: "/uet-taxila/fee-structure", destination: "/admissions?tab=fees", permanent: true });
+    expect(sourceMap.get("/scholarships")).toEqual({ source: "/scholarships", destination: "/admissions?tab=scholarships", permanent: true });
+    expect(sourceMap.get("/compare")).toEqual({ source: "/compare", destination: "/admissions?tab=compare", permanent: true });
+    expect(sourceMap.get("/bus-routes")).toEqual({ source: "/bus-routes", destination: "/campus-life?tab=transport", permanent: true });
+    expect(sourceMap.get("/societies")).toEqual({ source: "/societies", destination: "/campus-life?tab=societies", permanent: true });
+    expect(sourceMap.get("/directory")).toEqual({ source: "/directory", destination: "/campus-life?tab=directory", permanent: true });
   });
 
   it("sets the baseline security headers", async () => {

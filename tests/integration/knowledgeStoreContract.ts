@@ -5,7 +5,7 @@ import type { KnowledgeChunkInput, KnowledgeStore } from "../../convex/knowledge
 // Shared, backend-agnostic contract test suite (migration brief §7: "deterministic
 // contract tests shared by both [adapters]"). Called once per adapter with a
 // factory that hands back a fresh, isolated store instance per test. `ctx` is
-// passed straight through untouched — the Turso adapter ignores it, a future
+// passed straight through untouched  -  the Turso adapter ignores it, a future
 // Convex-adapter test file passes a real ActionCtx from its own test harness.
 
 function embedding(seed: number, dim = EMBEDDING_DIMENSION): Float32Array {

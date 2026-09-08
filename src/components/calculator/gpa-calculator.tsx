@@ -59,7 +59,7 @@ const PRESETS: Record<string, { label: string; courses: CourseRow[] }> = {
 
 export function GpaCalculator() {
   const [mode, setMode] = useState<"semester" | "planner">("semester");
-  const [courses, setCourses] = useState<CourseRow[]>(PRESETS.eng_sem1.courses);
+  const [courses, setCourses] = useState<CourseRow[]>(PRESETS.eng_sem1?.courses ?? []);
   const [previousCgpa, setPreviousCgpa] = useState<string>("");
   const [previousCredits, setPreviousCredits] = useState<string>("");
   const [copied, setCopied] = useState<boolean>(false);

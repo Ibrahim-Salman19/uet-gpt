@@ -226,17 +226,97 @@ export const searchDocumentsAction = internalAction({
     // Amendment #5: Candidate overfetch to prevent post-filter top-k starvation.
     const searchLimit = candidateLimit(limit);
 
-    const vectorRes = await rag.search(ctx, {
-      namespace: "uet-global",
-      query: args.queryEmbedding ?? finalQueryText,
-      limit: searchLimit,
-      chunkContext: { before: 0, after: 0 },
-      ...(args.category ? { filters: [{ name: "category", value: args.category }] } : {}),
-    });
+    // SHIP.md Step 5: KNOWLEDGE_STORE_BACKEND selects the dense channel only.
+    // Lexical (fullTextSearch/chunkTextSearch below) is already Convex-native
+    // and independent of this switch either way. Default ("convex" or unset)
+    // keeps today's @convex-dev/rag path byte-for-byte unchanged.
+    const usePineconeBackend = process.env.KNOWLEDGE_STORE_BACKEND === "pinecone";
 
-    const vectorRanked: Array<{ id: string; score: number }> = vectorRes.results.map(
-      (r: VectorSearchResult) => ({ id: r.entryId, score: r.score ?? 0 }),
-    );
+    let vectorRes: { results: VectorSearchResult[] } = { results: [] };
+    let vectorRanked: Array<{ id: string; score: number }> = [];
+    // Populated only on the Pinecone path - see the module-level note where
+    // this is consumed for why pickBestContent needs it: denseSearch always
+    // returns text: "", and docMeta.parentText is null for chunks with no
+    // distinct parent, so without this a dense-only hit renders with empty
+    // content (a real result observed in end-to-end testing, not a
+    // theoretical gap).
+    let denseHitContent: TextSearchResult[] = [];
+
+    if (usePineconeBackend) {
+      // Deliberately NOT args.queryEmbedding here - that vector, when the
+      // caller supplies one (convex/rag/retrieval.ts, reused from the
+      // semantic-cache lookup), is Gemini's 768d space. Pinecone's index is
+      // Cloudflare/Qwen3's 1024d space - a different, incompatible vector
+      // space keyed to the same corpus. Always embed fresh for this channel.
+      const cfEmbedding: number[] | null = await ctx.runAction(
+        internal.embeddings.cloudflareEmbed.cloudflareEmbedQuery,
+        { text: finalQueryText },
+      );
+
+      if (cfEmbedding === null) {
+        // No sane fallback vector exists - continue with lexical + FAQ only,
+        // but SAY SO in the existing [SEARCH] log line below rather than
+        // letting a silently-empty dense channel look identical to "no
+        // dense matches for this query".
+        console.warn(
+          "[SEARCH] Pinecone dense channel unavailable this query (cloudflareEmbedQuery " +
+            "returned null - see its own warning above for cause); continuing lexical+FAQ only",
+        );
+      } else {
+        const denseHits = await ctx.runAction(internal.knowledgeStore.denseSearchAction.denseSearch, {
+          queryEmbedding: cfEmbedding,
+          topK: searchLimit,
+          category: args.category,
+        });
+
+        // Pinecone hits are identified by (documentId, chunkKey); everything
+        // downstream (hybridRank fusion, batchFetchDocMeta, pickBestContent)
+        // is keyed by ragId, because the other two channels below always
+        // have been and citations elsewhere depend on that. Resolve once via
+        // the crawledChunks row both id schemes already share (schema.ts:
+        // ragId + chunkKey on the same row) rather than rekeying established
+        // call sites. text comes back in the same call - see denseHitContent
+        // above for why it's needed.
+        const resolved = await ctx.runQuery(
+          internal.knowledgeStore.convexQueries.getRagIdAndTextByChunkRefs,
+          { refs: denseHits.map((h) => ({ documentId: h.documentId, chunkKey: h.chunkKey })) },
+        );
+
+        vectorRanked = denseHits
+          .map((h, i) => ({ id: resolved[i]?.ragId ?? null, score: h.score }))
+          .filter((r): r is { id: string; score: number } => r.id !== null);
+
+        denseHitContent = resolved
+          .map((r) => ({ ragId: r.ragId, text: r.text }))
+          .filter((r): r is { ragId: string; text: string } => r.ragId !== null && r.text !== null)
+          .map((r) => ({ ragId: r.ragId, text: r.text, score: 0 }));
+
+        if (vectorRanked.length < denseHits.length) {
+          // A Pinecone vector with no matching crawledChunks row: the two
+          // backends have diverged (a stale/orphaned vector). Surfaced, not
+          // silently dropped-and-forgotten - see compositeStore.ts's own
+          // stats()/verifyIntegrity() rationale for why divergence should
+          // never be averaged away.
+          console.warn("[SEARCH] Pinecone dense channel: some hits had no matching ragId", {
+            denseHits: denseHits.length,
+            resolved: vectorRanked.length,
+          });
+        }
+      }
+    } else {
+      vectorRes = await rag.search(ctx, {
+        namespace: "uet-global",
+        query: args.queryEmbedding ?? finalQueryText,
+        limit: searchLimit,
+        chunkContext: { before: 0, after: 0 },
+        ...(args.category ? { filters: [{ name: "category", value: args.category }] } : {}),
+      });
+
+      vectorRanked = vectorRes.results.map((r: VectorSearchResult) => ({
+        id: r.entryId,
+        score: r.score ?? 0,
+      }));
+    }
 
     const [textResRaw, chunkTextResRaw] = await Promise.all([
       ctx.runQuery(internal.crawl.queries.fullTextSearch, {
@@ -288,11 +368,15 @@ export const searchDocumentsAction = internalAction({
       const finalScore = decision.penalized
         ? item.score * DEFAULT_STALE_SCORE_MULTIPLIER
         : item.score;
+      // denseHitContent is a pickBestContent content-lookup fallback ONLY -
+      // deliberately concatenated here, after chunkRanked (used for RRF
+      // fusion above) was already computed from chunkTextRes alone, so
+      // these entries never get a second, duplicate ranking contribution.
       const content = pickBestContent(
         docMeta,
         vectorRes.results as VectorSearchResult[],
         textRes,
-        chunkTextRes,
+        denseHitContent.length > 0 ? [...chunkTextRes, ...denseHitContent] : chunkTextRes,
         item.id,
       );
 
@@ -359,6 +443,7 @@ export const searchDocumentsAction = internalAction({
       latencyMs: searchLatency,
       queryRisk,
       mustAbstain,
+      denseBackend: usePineconeBackend ? "pinecone" : "convex",
       vectorResults: vectorRanked.length,
       textResults: textRes.length,
       fusedResults: fused.length,

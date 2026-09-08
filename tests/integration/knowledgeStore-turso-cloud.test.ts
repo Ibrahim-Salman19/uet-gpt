@@ -8,7 +8,7 @@ import { runKnowledgeStoreContractTests } from "./knowledgeStoreContract";
 
 // Same contract suite as knowledgeStore-turso.test.ts, but against the real
 // Turso Cloud database (TURSO_DATABASE_URL/TURSO_AUTH_TOKEN) instead of a
-// local file — exercises the actual HTTP/Cloud transport, not just the
+// local file  -  exercises the actual HTTP/Cloud transport, not just the
 // engine. Skips itself entirely (not a failure) when Cloud credentials
 // aren't configured, so `pnpm test` stays runnable without them.
 //

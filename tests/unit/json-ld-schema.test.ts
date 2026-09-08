@@ -29,4 +29,14 @@ describe("JSON-LD structured data schemas", () => {
     expect(softwareSchema.operatingSystem).toBe("Web, iOS, Android");
     expect(Array.isArray(softwareSchema.featureList)).toBe(true);
   });
+
+  it("declares valid 512x512 logo ImageObject URLs", () => {
+    expect(organizationSchema.logo.url).toContain("icon-512.png");
+    expect(organizationSchema.logo.width).toBe(512);
+    expect(organizationSchema.logo.height).toBe(512);
+
+    expect(collegeSchema.logo.url).toContain("icon-512.png");
+    expect(collegeSchema.logo.width).toBe(512);
+    expect(collegeSchema.logo.height).toBe(512);
+  });
 });

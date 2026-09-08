@@ -205,7 +205,7 @@ export const contextualizeChunks = internalAction({
     );
 
     // 2. Call Gemini in parallel
-    const contextualizePromises = chunks.map(async (chunk, index) => {
+    const contextualizePromises = chunks.map(async (chunk: any, index: number) => {
       const chunkId = batch[index];
       if (!chunk || !chunkId) return null;
       const text = await callGeminiContextualize(chunk.text, chunk.title, chunk.headingPath);

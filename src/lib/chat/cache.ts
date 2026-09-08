@@ -81,7 +81,7 @@ export function buildCacheWriteCallback(
           // inside convex/cache/set.ts:setFromServer (server-side) instead.
           const topSourceUrl = ragResult.sources[0]?.url ?? "";
           const freshnessTier = assignFreshnessTier(topSourceUrl);
-          const sourceEntryIds = ragResult.sources.map((s) => s.entryId).filter(Boolean);
+          const sourceEntryIds = ragResult.sources.map((s: any) => s.entryId).filter(Boolean);
 
           await convex.action(api.cache.set.setFromServer, {
             secret,

@@ -238,7 +238,7 @@ export default async function LearnTermPage({ params }: { params: Promise<{ slug
             </h2>
             <p className="text-sm text-[#a1a1aa] mb-6 max-w-xl mx-auto leading-relaxed">
               UET GPT is the AI guide to UET Taxila. Ask anything about admissions, programs, fees,
-              campus life, and more — grounded in official sources, free for every student.
+              campus life, and more: grounded in official sources, free for every student.
             </p>
             <Link
               href="/chat"

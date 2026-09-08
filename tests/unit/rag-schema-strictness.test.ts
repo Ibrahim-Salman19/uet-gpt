@@ -6,7 +6,7 @@ import { z } from "zod";
  * schemas used by the RAG pipeline.
  *
  * Background (Track C, 2026-07-26): Groq's strict JSON Schema mode requires
- * `additionalProperties: false` on every object — without it, gpt-oss models
+ * `additionalProperties: false` on every object  -  without it, gpt-oss models
  * return HTTP 400. In zod, this maps to `.strict()` (reject unknown keys). The
  * initial migration probe failed because the schemas were not strict; Diagnostic
  * Test 1+2 proved all 4 schemas work once `.strict()` is added. These tests
@@ -81,7 +81,7 @@ const schemas = [
   },
 ];
 
-describe("RAG structured-output schemas — Groq strict-schema compatibility", () => {
+describe("RAG structured-output schemas  -  Groq strict-schema compatibility", () => {
   for (const { name, schema, validSample } of schemas) {
     describe(`${name}`, () => {
       it("accepts a valid sample", () => {

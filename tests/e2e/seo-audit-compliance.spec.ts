@@ -46,31 +46,29 @@ test.describe("SEO Remediation End-to-End Audit Compliance", () => {
 
   test("sub-pages deliver optimized title lengths and cross-linking", async ({ page }) => {
     await page.goto("/uet-taxila");
-    const admissionsLink = page.locator('a[href="/uet-taxila/admissions"]');
+    const admissionsLink = page.locator('a[href="/admissions?tab=overview"]');
     await expect(admissionsLink.first()).toBeVisible();
 
-    await page.goto("/uet-taxila/admissions");
-    const feeLink = page.locator('a[href="/uet-taxila/fee-structure"]');
-    await expect(feeLink.first()).toBeVisible();
+    await page.goto("/admissions");
+    const heading = page.locator("h1");
+    await expect(heading).toBeVisible();
 
-    const calcLink = page.locator('a[href="/calculator"]');
-    await expect(calcLink.first()).toBeVisible();
+    const main = page.locator("main#main-content");
+    await expect(main).toBeVisible();
   });
 
-  test("merit calculator computes live aggregate and renders WebApplication schema", async ({
+  test("legacy calculator route 301 redirects to tools hub and renders calculator", async ({
     page,
   }) => {
     await page.goto("/calculator");
-    await expect(page).toHaveTitle(/UET Taxila Merit Calculator/);
-
-    const heading = page.locator("h1");
-    await expect(heading).toContainText("UET Taxila Merit Calculator");
+    await expect(page).toHaveURL(/.*\/tools\?tab=merit/);
+    await expect(page).toHaveTitle(/Engineering Tools/);
 
     const main = page.locator("main#main-content");
     await expect(main).toBeVisible();
 
     const schemas = await page.locator('script[type="application/ld+json"]').allTextContents();
-    const hasWebApp = schemas.some((s) => s.includes("WebApplication"));
-    expect(hasWebApp).toBe(true);
+    const hasFaq = schemas.some((s) => s.includes("FAQPage"));
+    expect(hasFaq).toBe(true);
   });
 });

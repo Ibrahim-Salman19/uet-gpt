@@ -48,7 +48,7 @@ describe("rate-limit", () => {
 
   // checkChatRateLimit is intentionally FAIL-OPEN: when Redis is unconfigured
   // (missing URL/token) it lets the request through with a synthetic allowance
-  // rather than blocking users — availability over throttling. Only
+  // rather than blocking users  -  availability over throttling. Only
   // checkAdminActionRateLimit fails closed. See src/lib/rate-limit.ts:94-103.
   it("allows requests when UPSTASH_REDIS_REST_URL is missing (fail-open)", async () => {
     delete process.env.UPSTASH_REDIS_REST_URL;

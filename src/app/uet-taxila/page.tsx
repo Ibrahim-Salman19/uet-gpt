@@ -25,7 +25,7 @@ export const metadata: Metadata = {
         url: `${siteUrl}/opengraph-image`,
         width: 1200,
         height: 630,
-        alt: "UET GPT — AI Assistant for UET Taxila",
+        alt: "UET GPT: AI Assistant for UET Taxila",
       },
     ],
   },

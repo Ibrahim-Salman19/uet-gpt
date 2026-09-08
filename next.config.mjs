@@ -1,7 +1,7 @@
 const isDev = process.env.NODE_ENV === "development";
 const scriptSrc = isDev
-  ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev https://*.clerk.com https://unpkg.com;"
-  : "script-src 'self' 'unsafe-inline' https://*.clerk.accounts.dev https://*.clerk.com https://unpkg.com;";
+  ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev https://*.clerk.com;"
+  : "script-src 'self' 'unsafe-inline' https://*.clerk.accounts.dev https://*.clerk.com;";
 
 const securityHeaders = [
   {

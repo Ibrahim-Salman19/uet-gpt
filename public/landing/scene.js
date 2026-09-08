@@ -61,7 +61,7 @@ scene.add(rig);
 /* ── scroll choreography ─────────────────────────────────────────────
    One keyframe per section, authored in screen space so placement is exact
    at any viewport:
-     x, y  centre position in NDC (-1 … +1 — left/bottom to right/top)
+     x, y  centre position in NDC (-1 … +1: left/bottom to right/top)
      s     coin diameter as a fraction of viewport height
      z     depth offset from the text plane (negative = further away)
      rx/ry/rz  attitude in radians

@@ -11,6 +11,8 @@ vi.mock("next/navigation", () => ({
 describe("Admissions Hub Page (/admissions)", () => {
   it("exports comprehensive metadata with canonical URL", () => {
     expect(metadata.title).toContain("Admissions, ECAT Guide & Fee Structure");
+    expect((metadata.description as string).length).toBeLessThanOrEqual(160);
+    expect((metadata.description as string).length).toBeGreaterThanOrEqual(130);
     expect(metadata.alternates?.canonical).toBe("https://uet-gpt.vercel.app/admissions");
   });
 

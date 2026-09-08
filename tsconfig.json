@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -21,10 +25,18 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"],
-      "convex/_generated/api": ["./convex/_generated/api"],
-      "convex/_generated/server": ["./convex/_generated/server"],
-      "convex/_generated/dataModel": ["./convex/_generated/dataModel"]
+      "@/*": [
+        "./src/*"
+      ],
+      "convex/_generated/api": [
+        "./convex/_generated/api"
+      ],
+      "convex/_generated/server": [
+        "./convex/_generated/server"
+      ],
+      "convex/_generated/dataModel": [
+        "./convex/_generated/dataModel"
+      ]
     },
     "baseUrl": ".",
     "ignoreDeprecations": "5.0"
@@ -39,5 +51,9 @@
     "next.config.mjs",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "convex"]
+  "exclude": [
+    "node_modules",
+    "convex",
+    "tests/integration"
+  ]
 }

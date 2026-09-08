@@ -10,6 +10,7 @@
 
 import type * as admin_settings from "../admin/settings.js";
 import type * as admin_stats from "../admin/stats.js";
+import type * as admin_tableExport from "../admin/tableExport.js";
 import type * as agent_contracts from "../agent/contracts.js";
 import type * as agent_execute from "../agent/execute.js";
 import type * as agent_policy from "../agent/policy.js";
@@ -55,6 +56,7 @@ import type * as doc_remove from "../doc/remove.js";
 import type * as doc_search from "../doc/search.js";
 import type * as doc_validator from "../doc/validator.js";
 import type * as embeddings_chunkTextSearch from "../embeddings/chunkTextSearch.js";
+import type * as embeddings_cloudflareEmbed from "../embeddings/cloudflareEmbed.js";
 import type * as embeddings_contextualize from "../embeddings/contextualize.js";
 import type * as embeddings_contextualizeCron from "../embeddings/contextualizeCron.js";
 import type * as embeddings_dimension from "../embeddings/dimension.js";
@@ -86,6 +88,7 @@ import type * as knowledgeStore_compositeStore from "../knowledgeStore/composite
 import type * as knowledgeStore_convexAdapter from "../knowledgeStore/convexAdapter.js";
 import type * as knowledgeStore_convexMutations from "../knowledgeStore/convexMutations.js";
 import type * as knowledgeStore_convexQueries from "../knowledgeStore/convexQueries.js";
+import type * as knowledgeStore_denseSearchAction from "../knowledgeStore/denseSearchAction.js";
 import type * as knowledgeStore_lifecycleTest from "../knowledgeStore/lifecycleTest.js";
 import type * as knowledgeStore_pineconeAdapter from "../knowledgeStore/pineconeAdapter.js";
 import type * as knowledgeStore_pineconeLifecycleTest from "../knowledgeStore/pineconeLifecycleTest.js";
@@ -140,6 +143,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   "admin/settings": typeof admin_settings;
   "admin/stats": typeof admin_stats;
+  "admin/tableExport": typeof admin_tableExport;
   "agent/contracts": typeof agent_contracts;
   "agent/execute": typeof agent_execute;
   "agent/policy": typeof agent_policy;
@@ -185,6 +189,7 @@ declare const fullApi: ApiFromModules<{
   "doc/search": typeof doc_search;
   "doc/validator": typeof doc_validator;
   "embeddings/chunkTextSearch": typeof embeddings_chunkTextSearch;
+  "embeddings/cloudflareEmbed": typeof embeddings_cloudflareEmbed;
   "embeddings/contextualize": typeof embeddings_contextualize;
   "embeddings/contextualizeCron": typeof embeddings_contextualizeCron;
   "embeddings/dimension": typeof embeddings_dimension;
@@ -216,6 +221,7 @@ declare const fullApi: ApiFromModules<{
   "knowledgeStore/convexAdapter": typeof knowledgeStore_convexAdapter;
   "knowledgeStore/convexMutations": typeof knowledgeStore_convexMutations;
   "knowledgeStore/convexQueries": typeof knowledgeStore_convexQueries;
+  "knowledgeStore/denseSearchAction": typeof knowledgeStore_denseSearchAction;
   "knowledgeStore/lifecycleTest": typeof knowledgeStore_lifecycleTest;
   "knowledgeStore/pineconeAdapter": typeof knowledgeStore_pineconeAdapter;
   "knowledgeStore/pineconeLifecycleTest": typeof knowledgeStore_pineconeLifecycleTest;

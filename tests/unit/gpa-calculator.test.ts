@@ -34,7 +34,7 @@ describe("UET Taxila GPA Calculator Logic", () => {
     let totalPoints = 0;
     let totalCredits = 0;
     for (const c of courses) {
-      totalPoints += GRADE_POINTS[c.grade] * c.ch;
+      totalPoints += GRADE_POINTS[c.grade]! * c.ch;
       totalCredits += c.ch;
     }
 
@@ -54,7 +54,7 @@ describe("UET Taxila GPA Calculator Logic", () => {
     let totalPoints = 0;
     let totalCredits = 0;
     for (const c of courses) {
-      totalPoints += GRADE_POINTS[c.grade] * c.ch;
+      totalPoints += GRADE_POINTS[c.grade]! * c.ch;
       totalCredits += c.ch;
     }
 

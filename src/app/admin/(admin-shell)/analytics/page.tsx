@@ -273,8 +273,8 @@ export default function AdminAnalyticsPage() {
     return <AnalyticsLoadingSkeleton />;
   }
 
-  const positiveFeedback = feedbackRecent.recent.filter((f) => f.rating === "thumbsUp").length;
-  const negativeFeedback = feedbackRecent.recent.filter((f) => f.rating === "thumbsDown").length;
+  const positiveFeedback = feedbackRecent.recent.filter((f: any) => f.rating === "thumbsUp").length;
+  const negativeFeedback = feedbackRecent.recent.filter((f: any) => f.rating === "thumbsDown").length;
   const totalRecent = positiveFeedback + negativeFeedback;
   const satisfactionRate = totalRecent > 0 ? Math.round((positiveFeedback / totalRecent) * 100) : 0;
 

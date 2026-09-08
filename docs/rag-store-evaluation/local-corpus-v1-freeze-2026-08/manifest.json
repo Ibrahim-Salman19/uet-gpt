@@ -67,5 +67,21 @@
     "failed_extract was missing from TERMINAL_STATES despite being definitionally final (scripts/uet_crawler/crawl_ledger.py)",
     "begin_run()'s exhaustive computation used max_depth (normally finite, unrelated) instead of max_pages, making FRONTIER_EXHAUSTED unreachable for any depth-bounded exhaustive crawl (scripts/crawler.py)"
   ],
-  "gitCommit": "e48421d (fix(crawler): make exhaustive-crawl completion detection actually reachable)"
+  "gitCommit": "e48421d (fix(crawler): make exhaustive-crawl completion detection actually reachable)",
+  "amendments": [
+    {
+      "date": "2026-09-04",
+      "action": "SOURCE-FILE-ONLY latest-year-only cleanup, per explicit user approval after being shown the full cost of a fuller removal (see docs/rag-store-evaluation/hybrid-retrieval-2026-08/report.md and the session transcript around this date). Removed 2 superseded documents from /mnt/d/uetgpt_corpus_v1/documents.jsonl: 'UET-Prospectus-2024.pdf' (documentId d4ae88df97226fa2db6aa5c01d59b6f05b18a7b569f11774a3679b20f9d12309, superseded by the already-present UET-Prospectus-2025.pdf) and 'Prospectus-PG-2021-onwards.pdf' (documentId 7d97b143b52a7712176e43c8b28f39d8424737a2a882fbc2ad45d40bb123729c, superseded by the already-present 'Prospectus 2026 onward 16-7-26.cdr', verified to contain substantial real extracted text - 136,091 chars - not empty/garbage before treating it as a valid replacement).",
+      "scopeExplicitlyLimited": "This is a source-file-only edit. The live Pinecone index (44,792 vectors, uetgpt-corpus-v1-qwen1024) and any local Convex copy were NOT touched - a full removal (deleting the corresponding vectors) was considered and explicitly deferred: the chunk-level file (embeddings/all_chunks.jsonl) links chunks to documents via a Convex-internal document id that does not match documents.jsonl's hash-based documentId in any static file checked, and this project's own established constraint is that Pinecone deletes must be by exact id only, never by metadata filter (delete-by-filter was measured unreliable in earlier work). Deleting without a verified id mapping was assessed as unsafe. This means Corpus V1 as actually embedded/upserted (44,792 vectors) is UNCHANGED and remains exactly what every certified number in this evaluation (Recall@10=0.98, HitRate@5, MRR, the golden-set's fee-discrepancy finding in report.md §9) was measured against. This edit only affects what a FUTURE re-embed/rebuild of the corpus would include.",
+      "otherYearlyReissuedFamiliesFoundButNotTouched": "A broader scan for year-numbered document families found several that superficially resemble the Prospectus pattern but are historical-record series, not reissued editions, and were deliberately left alone: IEEE_branch_YYYY_Annual_Report.pdf (2013-2025, 9 editions), Course Allocation Spring YYYY, Curriculum-YYYY.pdf, Entrepreneurship-YYYY.pdf, CPDCalendarYYYYUETTaxila.pdf, CPED-Fall-YYYY.pdf, 'Annual Report Cover Pages(YYYY-YYYY).pdf', FinalYearProjectsfor-YYYY-Session.pdf. Each year's record documents something that actually happened that year rather than superseding the prior year's content, so removing older ones would destroy real information rather than save redundant storage - not a match for the user's stated 'latest-year-only' policy, which was specifically about documents that get reissued with the same role each cycle (the Prospectus being the clear example).",
+      "fileIntegrity": {
+        "backupBeforeEdit": "/mnt/d/uetgpt_corpus_v1/documents.jsonl.pre-cleanup-20260904.bak (durable, same directory, verified identical via md5sum before the edit)",
+        "originalPermissions": "read-only (0555) since freeze time 2026-08-22 - temporarily chmod u+w for this approved edit, restored to 0555 immediately after",
+        "lineCountBefore": 1891,
+        "lineCountAfter": 1889,
+        "sha256After": "5e8df2d3206d7f46a6924c8975f48ba0a1430f210a2cd0164d0c267bf87978eb",
+        "everyRemainingLineValidatedAsParseableJson": true
+      }
+    }
+  ]
 }

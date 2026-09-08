@@ -112,6 +112,53 @@ export const getChunkHitsByKeys = internalQuery({
 });
 
 /**
+ * Batched (documentId, chunkKey) -> (ragId, text) lookup, same index as
+ * getChunkHitsByKeys above.
+ *
+ * Why this exists: a Pinecone denseSearch hit is identified by
+ * (documentId, chunkKey) - the vendor-neutral KnowledgeStore identity - but
+ * embeddings/search.ts's 3-way RRF fusion (hybridRank) and everything
+ * downstream of it (batchFetchDocMeta, pickBestContent) are keyed by ragId,
+ * the @convex-dev/rag component's internal entry id, because the OTHER two
+ * channels (fullTextSearch, chunkTextSearch) already return ragId and
+ * always have. Rather than rekeying those two established call sites (used
+ * elsewhere for citations) to a different id space, this resolves each
+ * Pinecone hit's ragId once so all three channels fuse in one shared id
+ * space unchanged.
+ *
+ * `text` is returned alongside ragId (not just via getChunkHitsByKeys
+ * separately) because pickBestContent's fallback chain needs a content
+ * source for a dense-only hit: pineconeAdapter.denseSearch always returns
+ * text: "" (Pinecone metadata carries identity fields only), and
+ * getDocumentsByEntryIds's parentText is null for chunks with no distinct
+ * parent - discovered via a real empty-content result in end-to-end testing
+ * (2026-09-05), not assumed. Both null when a hit has no matching
+ * crawledChunks row (should not happen for a chunk Pinecone just returned,
+ * but a stale Pinecone vector pointing at a since-deleted chunk is exactly
+ * the kind of divergence that must surface as "no match" rather than a
+ * thrown error).
+ */
+export const getRagIdAndTextByChunkRefs = internalQuery({
+  args: {
+    refs: v.array(v.object({ documentId: v.string(), chunkKey: v.string() })),
+  },
+  returns: v.array(v.object({ ragId: v.union(v.string(), v.null()), text: v.union(v.string(), v.null()) })),
+  handler: async (ctx, args) => {
+    const chunks = await Promise.all(
+      args.refs.map((ref) =>
+        ctx.db
+          .query("crawledChunks")
+          .withIndex("by_documentId_and_chunkKey", (q) =>
+            q.eq("documentId", ref.documentId as Id<"documents">).eq("chunkKey", ref.chunkKey),
+          )
+          .unique(),
+      ),
+    );
+    return chunks.map((chunk) => ({ ragId: chunk?.ragId ?? null, text: chunk?.text ?? null }));
+  },
+});
+
+/**
  * Direct BM25 lexical search over crawledChunks.search_text, returning
  * KnowledgeStore-shaped hits directly (no ragId round-trip needed — unlike
  * dense search, every field this boundary needs is already on the

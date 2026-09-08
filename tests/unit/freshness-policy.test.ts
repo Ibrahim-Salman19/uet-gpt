@@ -26,13 +26,13 @@ import {
 } from "../../convex/shared/freshnessPolicy";
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
-const NOW = Date.UTC(2026, 6, 28, 0, 0, 0); // 2026-07-28T00:00:00Z — fixed for determinism
+const NOW = Date.UTC(2026, 6, 28, 0, 0, 0); // 2026-07-28T00:00:00Z  -  fixed for determinism
 
 function dayOffset(days: number): number {
   return NOW - days * MS_PER_DAY;
 }
 
-describe("freshnessPolicy — identity", () => {
+describe("freshnessPolicy  -  identity", () => {
   it("exposes a stable policy version, owner, and review date", () => {
     expect(FRESHNESS_POLICY_VERSION).toBe("2026-07-staleness-mvp-1");
     expect(typeof FRESHNESS_POLICY_OWNER).toBe("string");
@@ -41,7 +41,7 @@ describe("freshnessPolicy — identity", () => {
   });
 });
 
-describe("freshnessPolicy — TTL constants", () => {
+describe("freshnessPolicy  -  TTL constants", () => {
   it("defines tier TTLs in days exactly as the provisional policy (high 14 / medium 60 / low 180)", () => {
     expect(FRESHNESS_TTL_DAYS).toEqual({ high: 14, medium: 60, low: 180 });
   });
@@ -64,7 +64,7 @@ describe("freshnessPolicy — TTL constants", () => {
   });
 });
 
-describe("freshnessPolicy — candidateLimit (overfetch)", () => {
+describe("freshnessPolicy  -  candidateLimit (overfetch)", () => {
   it("honours the floor of MIN_CANDIDATES for small k", () => {
     expect(candidateLimit(8)).toBe(30); // 8*3=24 < 30 => floor
     expect(candidateLimit(5)).toBe(30); // 5*3=15 < 30 => floor
@@ -90,7 +90,7 @@ describe("freshnessPolicy — candidateLimit (overfetch)", () => {
   });
 });
 
-describe("freshnessPolicy — status eligibility", () => {
+describe("freshnessPolicy  -  status eligibility", () => {
   it("treats active and indexed as eligible", () => {
     expect(RETRIEVAL_ELIGIBLE_STATUSES).toEqual(["active", "indexed"]);
     expect(isRetrievalEligibleStatus("active")).toBe(true);
@@ -127,7 +127,7 @@ describe("freshnessPolicy — status eligibility", () => {
   });
 });
 
-describe("freshnessPolicy — classifyFreshness: TTL boundaries", () => {
+describe("freshnessPolicy  -  classifyFreshness: TTL boundaries", () => {
   it("HIGH tier: 13 days old is fresh, 15 days old is aged", () => {
     const fresh = classifyFreshness({
       status: "active",
@@ -148,7 +148,7 @@ describe("freshnessPolicy — classifyFreshness: TTL boundaries", () => {
     });
     expect(aged.state).toBe("aged");
     expect(aged.penalized).toBe(true);
-    expect(aged.eligible).toBe(true); // aged but still eligible — penalty, not exclusion
+    expect(aged.eligible).toBe(true); // aged but still eligible  -  penalty, not exclusion
   });
 
   it("MEDIUM tier: 59 days old is fresh, 61 days old is aged", () => {
@@ -170,7 +170,7 @@ describe("freshnessPolicy — classifyFreshness: TTL boundaries", () => {
   });
 });
 
-describe("freshnessPolicy — classifyFreshness: missing / future / unknown", () => {
+describe("freshnessPolicy  -  classifyFreshness: missing / future / unknown", () => {
   it("missing crawledAt => unknown state, never fresh, eligible=true", () => {
     const d = classifyFreshness({ status: "active", now: NOW });
     expect(d.state).toBe("unknown");
@@ -219,12 +219,12 @@ describe("freshnessPolicy — classifyFreshness: missing / future / unknown", ()
   });
 });
 
-describe("freshnessPolicy — classifyFreshness: status precedence", () => {
+describe("freshnessPolicy  -  classifyFreshness: status precedence", () => {
   it("excluded status wins over a recent crawledAt (hard exclusion before scoring)", () => {
     for (const status of RETRIEVAL_EXCLUDED_STATUSES as readonly DocumentStatus[]) {
       const d = classifyFreshness({
         status,
-        crawledAt: NOW, // crawled just now — would be fresh otherwise
+        crawledAt: NOW, // crawled just now  -  would be fresh otherwise
         freshnessTier: "high",
         now: NOW,
       });
@@ -239,7 +239,7 @@ describe("freshnessPolicy — classifyFreshness: status precedence", () => {
     const d = classifyFreshness({
       status: "active",
       isStale: true,
-      crawledAt: NOW, // just now — but explicitly flagged
+      crawledAt: NOW, // just now  -  but explicitly flagged
       freshnessTier: "high",
       now: NOW,
     });
@@ -262,7 +262,7 @@ describe("freshnessPolicy — classifyFreshness: status precedence", () => {
   });
 });
 
-describe("freshnessPolicy — classifyQueryRisk (deterministic)", () => {
+describe("freshnessPolicy  -  classifyQueryRisk (deterministic)", () => {
   it("classifies fee/deadline/merit/admission/datesheet/schedule/eligibility as high", () => {
     for (const q of [
       "What is the fee structure?",
@@ -316,7 +316,7 @@ describe("freshnessPolicy — classifyQueryRisk (deterministic)", () => {
   });
 });
 
-describe("freshnessPolicy — shouldAbstainOnStaleOnly", () => {
+describe("freshnessPolicy  -  shouldAbstainOnStaleOnly", () => {
   it("high-impact + no fresh + all aged/unknown => ABSTAIN", () => {
     expect(
       shouldAbstainOnStaleOnly({
@@ -368,7 +368,7 @@ describe("freshnessPolicy — shouldAbstainOnStaleOnly", () => {
   });
 });
 
-describe("freshnessPolicy — sweep batch size", () => {
+describe("freshnessPolicy  -  sweep batch size", () => {
   it("defines a bounded sweep batch size", () => {
     expect(SWEEP_BATCH_SIZE).toBe(100);
     expect(SWEEP_BATCH_SIZE).toBeGreaterThan(0);
