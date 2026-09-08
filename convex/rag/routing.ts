@@ -4,6 +4,18 @@ import { z } from "zod";
 import { internalAction } from "../_generated/server";
 import { getStructuredModelChain, getTextModelChain } from "./modelRegistry";
 
+// Groq's gpt-oss models (the primary entry in both shared chains) reason by
+// default, and those reasoning tokens draw from the same maxOutputTokens
+// budget as the visible answer. At the small budgets these routing tasks use
+// (100-500 tokens for a one-line classification/rewrite), reasoning alone can
+// consume the entire budget and leave an empty result - observed directly:
+// rewriteQueryAction returned "" (falling back to the raw query) and
+// hydeQueryAction returned a several-word fragment, both with finish_reason
+// "length" and >90% of output tokens spent on hidden reasoning (2026-09-09).
+// "low" cuts reasoning to a handful of tokens without affecting non-Groq
+// providers in the chain (they ignore an unrecognized provider namespace).
+const LOW_REASONING = { groq: { reasoningEffort: "low" } };
+
 const INTENT_ENUM = [
   "admissions",
   "academic",
@@ -164,6 +176,7 @@ export const classifyQueryAction = internalAction({
             .strict(),
           prompt: `Classify the following user query about UET Taxila into one of the categories.\n<query>\n${JSON.stringify(args.query)}\n</query>`,
           temperature: 0,
+          providerOptions: LOW_REASONING,
         });
 
         const intent = object.intent;
@@ -201,6 +214,7 @@ export const rewriteQueryAction = internalAction({
           prompt: args.query,
           temperature: 0.3,
           maxOutputTokens: 100,
+          providerOptions: LOW_REASONING,
         });
         return text.trim() || args.query;
       } catch (error) {
@@ -215,18 +229,16 @@ export const hydeQueryAction = internalAction({
   args: { query: v.string() },
   returns: v.string(),
   handler: async (_ctx, args) => {
-    // HyDE prefers Gemini (cheapest, already used elsewhere); falls back to the
-    // shared Groq/Gemini text chain if no Gemini key is present.
-    const geminiKey =
-      process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY_1 || process.env.GEMINI_API_KEY_2;
-
-    const chain: Array<{ model: import("ai").LanguageModel; label: string }> = [];
-    if (geminiKey) {
-      const { createGoogleGenerativeAI } = await import("@ai-sdk/google");
-      const google = createGoogleGenerativeAI({ apiKey: geminiKey });
-      chain.push({ model: google("gemini-2.5-flash"), label: "google:gemini-2.5-flash" });
-    }
-    chain.push(...getTextModelChain());
+    // Uses the same shared text-model chain as rewriteQueryAction above.
+    // This previously special-cased a direct "gemini-2.5-flash" call first -
+    // that model "thinks" by default, and its reasoning tokens are drawn from
+    // the same maxOutputTokens budget as the visible answer, so at 200 tokens
+    // the actual HyDE paragraph was getting truncated to a few words (observed
+    // 2026-09-09: "UET Taxila is structured into several", finishReason
+    // "length", 189 of 196 output tokens spent on hidden reasoning). The
+    // shared chain's Gemini fallback (GEMINI_FALLBACK_MODEL, a non-thinking
+    // "-lite" model) doesn't have this problem.
+    const chain = getTextModelChain();
 
     if (chain.length === 0) return args.query;
 
@@ -239,6 +251,7 @@ export const hydeQueryAction = internalAction({
           prompt: args.query,
           temperature: 0.5,
           maxOutputTokens: 200,
+          providerOptions: LOW_REASONING,
         });
         return text.trim() || args.query;
       } catch (error) {

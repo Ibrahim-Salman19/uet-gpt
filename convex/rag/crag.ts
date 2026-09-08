@@ -86,6 +86,11 @@ export const evaluateChunks = internalAction({
             prompt: buildCragPrompt(args.query, batch),
             temperature: 0,
             maxOutputTokens: 500,
+            // Groq gpt-oss (chain's primary provider) reasons by default, and
+            // those tokens draw from this same budget - see rag/routing.ts's
+            // LOW_REASONING comment for the directly-observed failure mode
+            // (empty/truncated output, finish_reason "length") this avoids.
+            providerOptions: { groq: { reasoningEffort: "low" } },
           });
 
           // Defense-in-depth: clamp confidence to [0,1] before it reaches any

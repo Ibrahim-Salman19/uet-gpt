@@ -302,6 +302,31 @@ export const searchDocumentsAction = internalAction({
             resolved: vectorRanked.length,
           });
         }
+
+        // A block of text repeated across several overlapping chunk windows
+        // (observed: a page's nav/footer link list, chunked 5 near-identical
+        // ways) can consume most of a fixed-size dense window with the same
+        // content, crowding out that page's actual distinct chunks - and any
+        // other document's chunks - out of the searchLimit-sized candidate
+        // pool entirely. denseHits arrives score-sorted from Pinecone, so
+        // keeping the first (highest-scoring) occurrence per exact chunk
+        // text is correct.
+        const textByRagId = new Map(denseHitContent.map((h) => [h.ragId, h.text]));
+        const seenChunkText = new Set<string>();
+        const beforeDedup = vectorRanked.length;
+        vectorRanked = vectorRanked.filter((r) => {
+          const text = textByRagId.get(r.id);
+          if (text === undefined) return true;
+          if (seenChunkText.has(text)) return false;
+          seenChunkText.add(text);
+          return true;
+        });
+        if (vectorRanked.length < beforeDedup) {
+          console.log("[SEARCH] Pinecone dense channel: collapsed duplicate-content chunks", {
+            before: beforeDedup,
+            after: vectorRanked.length,
+          });
+        }
       }
     } else {
       vectorRes = await rag.search(ctx, {
