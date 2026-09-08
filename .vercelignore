@@ -1,0 +1,27 @@
+# Vercel CLI upload does NOT fall back to .gitignore when this file exists
+# or is absent for `vercel deploy` from a local checkout - it must list
+# local-only artifact directories explicitly, or they get tar'd and
+# uploaded on every deploy (hit the free-tier "more than 5000 files" cap
+# once already from node_modules bloat; archive_c_drive_run_* alone is
+# 708MB / 4281 files).
+archive_c_drive_run_*/
+.convex-tmp/
+local_corpus_pilot/
+graphify-out/
+.worktrees/
+.agent/
+.fallow/
+.zcode/
+.local/
+audit/
+logs/
+coverage/
+test-results/
+playwright-report/
+.pytest_cache/
+*.log
+
+# standard - Vercel builds from source, these are local build/dep artifacts
+node_modules
+.next
+.git
