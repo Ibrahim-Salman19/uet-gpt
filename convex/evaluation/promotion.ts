@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "../_generated/server";
+import { requireAdmin } from "../auth";
 
 export const registerAgentRelease = mutation({
   args: {
@@ -16,6 +17,7 @@ export const registerAgentRelease = mutation({
     previewEvaluationResult: v.string(),
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     return await ctx.db.insert("agentReleases", {
       ...args,
       status: "candidate",
@@ -38,6 +40,7 @@ export const promoteReleaseStatus = mutation({
     approvedBy: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const release = await ctx.db
       .query("agentReleases")
       .withIndex("by_releaseId", (q) => q.eq("releaseId", args.releaseId))

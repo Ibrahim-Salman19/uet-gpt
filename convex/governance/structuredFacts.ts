@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "../_generated/server";
+import { requireAdmin } from "../auth";
 
 export const insertStructuredFact = mutation({
   args: {
@@ -31,6 +32,7 @@ export const insertStructuredFact = mutation({
     ),
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     return await ctx.db.insert("structuredFacts", {
       ...args,
       createdAt: Date.now(),

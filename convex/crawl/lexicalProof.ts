@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
-import { action, internalMutation, internalQuery } from "../_generated/server";
+import { internalAction, internalMutation, internalQuery } from "../_generated/server";
 import {
   buildContextPrefix,
   generateChunks,
@@ -25,20 +25,17 @@ import {
 // component, so this is a legitimate value for a row that deliberately has
 // no vector embedding).
 //
-// The two entry points (ingestBatchForLexicalProof, searchChunksForProof)
-// are plain `action`, not `internalAction`: `npx convex run` passes args as a
-// CLI argument, which hits this sandbox's OS argument-size limit (~100-150KB,
-// well under a real document's size) for anything beyond a trivial payload -
-// there is no file/stdin-args option in the CLI. A public action can instead
-// be called over Convex's plain HTTP API (POST /api/action) with the JSON
-// payload as a genuine request body, with no such size constraint. This is
-// safe specifically because this deployment is the local self-hosted backend
-// on loopback (http://127.0.0.1:3210), never reachable from outside this
-// machine - the same reasoning documented in target_guard.py for why
-// scripts default to a loopback CONVEX_SITE_URL. Both mutations they call
-// into (insertChunksNoEmbedding, upsertDocument) remain internal-only.
+// The two entry points (ingestBatchForLexicalProof, searchChunksForProof) are
+// `internalAction`. They were originally plain `action` so the Phase 5 proof
+// scripts could POST large payloads to Convex's HTTP API directly, bypassing
+// `npx convex run`'s CLI argument-size limit - safe only as long as this ran
+// against a local loopback deployment. That assumption no longer holds once
+// this code is deployed to real production, so both were switched back to
+// internal-only; re-run future large-payload proofs against a local dev
+// deployment instead. Both mutations they call into (insertChunksNoEmbedding,
+// upsertDocument) remain internal-only.
 
-export const ingestBatchForLexicalProof = action({
+export const ingestBatchForLexicalProof = internalAction({
   args: {
     documents: v.array(
       v.object({
@@ -140,7 +137,7 @@ export const insertChunksNoEmbedding = internalMutation({
 });
 
 // Read-only proof queries - full-text search over the real chunk corpus.
-export const searchChunksForProof = action({
+export const searchChunksForProof = internalAction({
   args: { query: v.string(), limit: v.optional(v.number()) },
   handler: async (ctx, { query, limit }): Promise<unknown> => {
     return await ctx.runQuery(internal.crawl.lexicalProof._searchChunks, {
