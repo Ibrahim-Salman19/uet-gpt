@@ -9,6 +9,14 @@ _Date: 2026-07-16 · Skills: competitors, competitor-profiling_
 | Unofficial FB/WA groups | Community | Real student voices | Unstructured, unreliable, outdated |
 | UET Taxila website | Official | Authoritative | No Q&A; hard to navigate; static |
 | Paid ed-tech (Coursera etc.) | Courses | Structured learning | Not UET-specific; not free |
+| **Maqsad Blog** (blog.maqsad.io) | Content site | Ranks #1-3 for nearly every UET Taxila query checked in the 2026-09-10 SEO audit ("fee structure 2026", "admission requirements", "merit calculator", "UET Lahore vs Taxila") — high domain authority, fast-updated blog content | Static articles, no interactive tools, no citation-backed Q&A — exactly where UET GPT's fee simulator/merit calculator/chat should out-perform if it can win the same SERP real estate |
+| CampusAxis, eduvision.edu.pk, ilmkidunya, gotest.com.pk | Content aggregators | Also rank consistently across these queries | Generic aggregator content, not UET Taxila-specific depth |
+
+_Added 2026-09-10: `WebSearch` for UET GPT's core target queries returned zero results
+from uet-gpt.vercel.app; Maqsad Blog and the aggregators above occupied nearly every
+top result. This is the concrete evidence behind the "indexation looks near-zero"
+finding in `SEO-AUDIT-REPORT.md` — worth re-checking after the cloaking-bug fix in that
+report propagates and, separately, after a custom domain is in place._
 
 ## Comparison Pages to Build (programmatic-seo playbook)
 Capture high-intent "[X] vs UET Taxila" and "best engineering university Pakistan" queries.

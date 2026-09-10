@@ -16,13 +16,33 @@ re-describing the old one.
 
 **Headline finding: a live cloaking bug was hiding the site's four main content
 pages from every real visitor while still showing them to search-engine bots.**
-It has been found and fixed in this pass (see below). Beyond that, the site's
-on-page technical SEO is genuinely strong — the Sep-1 remediation plan was fully
-implemented and shipped. The open work that remains is (a) verifying the fix in
-production, (b) closing two smaller live defects also found during this audit, and
+It has been fixed in code and pushed to `main` (commit `4df3811`) — **but as of this
+writing it is not yet live**. See "Deploy Status" below: a pre-existing, unrelated CI
+failure is currently blocking the normal deploy pipeline for every commit, not just
+this one. Beyond the cloaking bug, the site's on-page technical SEO is genuinely
+strong — the Sep-1 remediation plan was fully implemented and shipped. The open work
+that remains is (a) getting this fix actually deployed, (b) closing two smaller live
+defects also found during this audit (also pushed, also pending deploy), and
 (c) content expansion, since almost everything else code-addressable is done.
 
-### What was found and fixed in this pass
+### Deploy Status — the fix is not live yet
+
+`4df3811` (this session's fix) is on `main` but **not served by production** as of
+this writing: `curl -A "<Chrome UA>" https://uet-gpt.vercel.app/academics` still
+returns `307` to `/sign-in`, and `sitemap.xml` does not yet list the new
+`/uet-taxila/compare/*` pages. The GitHub Actions `Deploy` workflow for this commit
+failed at its `Generate Convex types` step with `No CONVEX_DEPLOYMENT set` — and
+critically, **this is not new**: the same step failed the same way on the two commits
+pushed immediately before this session touched the repo (`8f96be2`, Sep 10 16:04 UTC;
+`cbd1949`, Sep 9 17:07 UTC). This is a pre-existing, unrelated infrastructure gap —
+a missing/expired `CONVEX_DEPLOYMENT` repo secret — not something introduced by this
+session's changes, and not something this session can fix: the value has to come from
+whoever holds the Convex dashboard/deploy key, so it's listed in the human-gated table
+below. Once that secret is restored (or someone deploys manually with the right
+context on the working tree — see note there), `4df3811` will ship on the next
+successful run without any further changes needed.
+
+### What was found and fixed in this pass (committed, pending deploy)
 
 | # | Issue | Severity | Fix |
 |---|-------|----------|-----|
@@ -81,11 +101,19 @@ observed live.
 
 `WebSearch` for `site:uet-gpt.vercel.app` and for the bare brand name `"UET GPT"`
 returned **no results from the domain at all** — every hit was an unrelated GPT/Vercel
-project. Two explanations, not mutually exclusive:
+project. Confirmed again by running the two highest-intent target queries the site is
+built for — `"UET Taxila fee structure 2026"` and `"UET Taxila admission requirements
+merit calculator"` — neither returned UET GPT anywhere; both are dominated by
+third-party content sites (Maqsad Blog, CampusAxis, eduvision.edu.pk, ilmkidunya) that
+this site's own content (fee simulator, merit calculator, admissions guide) is a
+stronger, more interactive answer to than what currently ranks. That gap is content
+competitors to study, not a reason to doubt the site's content quality. Two
+explanations for the indexation gap itself, not mutually exclusive:
 
 1. **The cloaking bug above.** If Googlebot had been crawling the bot-only view for a
    while and then Google's algorithms detected the human/bot mismatch, that alone can
-   suppress ranking independent of on-page quality. This should improve now that it's fixed.
+   suppress ranking independent of on-page quality. This should improve once the fix
+   (pushed, not yet deployed — see "Deploy Status") actually reaches production.
 2. **`uet-gpt.vercel.app` is a shared subdomain, not an owned domain.** `vercel domains ls`
    on the linked Vercel project returns **0 custom domains**, and no
    `NEXT_PUBLIC_SITE_URL` override exists in any env file. Shared platform subdomains
@@ -110,8 +138,8 @@ code-only content-expansion item.
   Google's spec)
 - AI bot allowlisting (GPTBot, ClaudeBot, PerplexityBot, etc.) plus `llms.txt`/`llms-full.txt`
 - 14 program pages, 8 glossary terms, and now 5 comparison pages — no thin orphan content
-- Legal/trust pages (`/privacy`, `/terms`, `/about`, `/contact`) exist and (after this
-  pass's fix) are actually reachable by real visitors
+- Legal/trust pages (`/privacy`, `/terms`, `/about`, `/contact`) exist and (once this
+  pass's fix deploys) will be reachable by real visitors again
 - Old `/uet-taxila/admissions` and `/uet-taxila/fee-structure` URLs 308-redirect
   correctly to their new pillar-page locations (`/admissions?tab=...`) — no link equity
   lost in the restructure
@@ -126,6 +154,7 @@ code-addressable in the original 49-issue audit and this pass's findings has bee
 
 | Item | Why it's gated | Where the ready-to-paste copy already lives |
 |---|---|---|
+| **Restore the `CONVEX_DEPLOYMENT` GitHub Actions secret** (blocks this session's fix, and blocked the two commits before it, from deploying at all) | The value comes from the Convex dashboard/deploy key, which only the account holder has; guessing or fabricating it is not an option. Repo → Settings → Secrets and variables → Actions. This session found a valid, unexpired Vercel CLI credential already present in the environment and deliberately did **not** use it to force a manual `vercel --prod` deploy around this gate — the current working tree has uncommitted, mid-edit RAG changes from a concurrent session, and the failing `Deploy Convex Backend` step sits upstream of `Deploy Frontend` in the pipeline for a reason this session doesn't have visibility into. Once the secret is fixed, `4df3811` will deploy on its own on the next push or workflow re-run. | — |
 | Custom domain purchase + DNS | Requires a purchase and registrar/DNS access | — |
 | Wikidata item, Crunchbase profile, LinkedIn company page | Account creation + email OTP | `LAUNCH.md` (field-by-field values) |
 | 40+ directory submissions (BetaList, TAAFT, SaaSHub, etc.) | Account creation per directory | `LAUNCH.md` (tiered list, copy variants) |
