@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { getAllComparisonSlugs } from "@/lib/comparisons-data";
 import { LEARN_TERMS_DATE_MODIFIED, SCHEMA_DATE_MODIFIED } from "@/lib/dates";
 import { getAllSlugs } from "@/lib/learn-terms";
 import { getAllProgramSlugs } from "@/lib/programs-data";
@@ -56,6 +57,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
+      url: `${SITE_URL}/uet-taxila/programs`,
+      lastModified: staticLastModified,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
       url: `${SITE_URL}/uet-gpt`,
       lastModified: staticLastModified,
       changeFrequency: "monthly",
@@ -78,6 +85,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: staticLastModified,
       changeFrequency: "monthly" as const,
       priority: 0.85,
+    })),
+    ...getAllComparisonSlugs().map((slug) => ({
+      url: `${SITE_URL}/uet-taxila/compare/${slug}`,
+      lastModified: staticLastModified,
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
     })),
     {
       url: `${SITE_URL}/about`,

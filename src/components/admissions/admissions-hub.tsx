@@ -680,6 +680,29 @@ export function AdmissionsHub() {
                 </tbody>
               </table>
             </div>
+
+            <div>
+              <h3 className="mb-3 text-xs font-mono uppercase tracking-wider text-[#a1a1aa]">
+                Full Breakdown Per University
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { slug: "uet-lahore", label: "vs. UET Lahore" },
+                  { slug: "nust", label: "vs. NUST" },
+                  { slug: "fast", label: "vs. FAST-NUCES" },
+                  { slug: "pieas", label: "vs. PIEAS" },
+                  { slug: "comsats", label: "vs. COMSATS" },
+                ].map((c) => (
+                  <Link
+                    key={c.slug}
+                    href={`/uet-taxila/compare/${c.slug}`}
+                    className="rounded-full border border-white/10 bg-[#0c0d10] px-4 py-2 text-xs text-[#a1a1aa] hover:border-[#d9b451]/50 hover:text-white transition-colors"
+                  >
+                    {c.label} &rarr;
+                  </Link>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </div>

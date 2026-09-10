@@ -10,14 +10,14 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app"
 export const metadata: Metadata = {
   title: "UET GPT: AI Guide & Tools for UET Taxila Admissions",
   description:
-    "Independent, open-source AI guide & tools for UET Taxila: real-time merit calculator, ECAT 2026 aggregates, 14 engineering syllabi, fee simulator, and campus transit guide.",
+    "Free, open-source AI guide for UET Taxila: merit calculator, ECAT 2026 aggregates, 14 engineering syllabi, fee simulator, and campus transit guide.",
   alternates: {
     canonical: siteUrl,
   },
   openGraph: {
     title: "UET GPT: AI Guide & Tools for UET Taxila Admissions",
     description:
-      "Independent, open-source AI guide & tools for UET Taxila: real-time merit calculator, ECAT 2026 aggregates, 14 engineering syllabi, fee simulator, and campus transit guide.",
+      "Free, open-source AI guide for UET Taxila: merit calculator, ECAT 2026 aggregates, 14 engineering syllabi, fee simulator, and campus transit guide.",
     url: siteUrl,
     type: "website",
     locale: "en_PK",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "UET GPT: AI Guide & Tools for UET Taxila Admissions",
     description:
-      "Independent, open-source AI guide & tools for UET Taxila: real-time merit calculator, ECAT 2026 aggregates, 14 engineering syllabi, fee simulator, and campus transit guide.",
+      "Free, open-source AI guide for UET Taxila: merit calculator, ECAT 2026 aggregates, 14 engineering syllabi, fee simulator, and campus transit guide.",
     images: [`${siteUrl}/opengraph-image`],
   },
 };

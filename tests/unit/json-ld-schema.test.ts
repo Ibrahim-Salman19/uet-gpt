@@ -2,9 +2,10 @@ import { describe, expect, it } from "vitest";
 import { collegeSchema, organizationSchema, softwareSchema, websiteSchema } from "@/lib/json-ld";
 
 describe("JSON-LD structured data schemas", () => {
-  it("organizationSchema contains multiple sameAs links and valid founder", () => {
+  it("organizationSchema contains only real, live sameAs links and a valid founder", () => {
     expect(Array.isArray(organizationSchema.sameAs)).toBe(true);
-    expect((organizationSchema.sameAs as string[]).length).toBeGreaterThanOrEqual(2);
+    expect((organizationSchema.sameAs as string[]).length).toBeGreaterThanOrEqual(1);
+    // No official Twitter/LinkedIn org account exists yet — don't assert fabricated profiles here.
     expect(organizationSchema.name).toBe("UET GPT");
   });
 

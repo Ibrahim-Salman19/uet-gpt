@@ -4,7 +4,7 @@
  */
 
 export const CURRENT_ACADEMIC_YEAR = "2026";
-export const SCHEMA_DATE_MODIFIED = "2026-09-01";
+export const SCHEMA_DATE_MODIFIED = "2026-09-10";
 export const LEARN_TERMS_DATE_MODIFIED = "2026-09-01";
 export const SITE_FOUNDING_YEAR = "2025";
 export const UET_TAXILA_FOUNDING_YEAR = "1975";
