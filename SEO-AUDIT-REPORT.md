@@ -76,15 +76,34 @@ var against a plain Chrome UA to catch this class of regression going forward.
   table). This is a different search intent than `/learn/ecat`'s "what is ECAT"
   definition page, so it's additive rather than cannibalizing. Reuses the exact
   verified facts already shipped in the admissions tab rather than introducing new claims.
+- **`/uet-taxila/bus-routes`, `/uet-taxila/hostels`, `/uet-taxila/academic-calendar`** —
+  same fix applied to `CampusLifeHub`'s `hostels`/`transport` tabs and `AcademicsHub`'s
+  `calendar` tab. Each page imports the underlying data array (`BUS_ROUTES`, `HOSTELS`,
+  `CALENDAR_EVENTS` — now exported from their hub components as the single source of
+  truth) rather than retyping the facts, so the page and the interactive tab can't drift
+  apart. Caught one real inaccuracy while building these: the site's own UI badge and
+  the comparison-page copy both say "25+ Routes," but `BUS_ROUTES` only has 6 entries.
+  The new bus-routes page uses the verified count (6) instead of repeating the
+  unsupported figure — the badge/copy elsewhere is unchanged (pre-existing, out of this
+  pass's scope) but worth a follow-up fix or removal.
 
-Both patterns follow the same fix: rich content that already existed but was trapped
-behind a shared tab URL and couldn't independently rank got its own page. Before
-building either, `/learn/scholarships` was checked as a candidate for the same
-treatment and found to **already be a full "types & application" guide** (4 sections
-including "How to apply," 4 FAQs) — building a separate dedicated scholarships page
-would have cannibalized it rather than filled a gap, so that item was dropped rather
-than built. Worth checking any future "still codeable" candidate the same way before
-building it.
+All 8 new pages follow the same fix: rich content that already existed but was trapped
+behind a shared tab URL and couldn't independently rank got its own page. Every tab
+across `admissions-hub.tsx`, `academics-hub.tsx`, `campus-life-hub.tsx`, and
+`tools-hub.tsx` was screened as a candidate before deciding what to build:
+
+| Screened candidate | Verdict | Why |
+|---|---|---|
+| `/learn/scholarships` (vs. `?tab=scholarships`) | **Dropped** | Already a full "types & application" guide (4 sections, 4 FAQs) — a separate page would cannibalize it |
+| `/admissions?tab=overview`, `?tab=fees` | **Dropped** | Already the core identity/title of the `/admissions` pillar page itself, not a trapped side-topic |
+| `/academics?tab=resources` | **Dropped** | Thin (2 short lists) and overlaps `/learn/obe-framework` |
+| `/academics?tab=programs` | **Dropped** | Already has 14 dedicated `/uet-taxila/programs/[slug]` pages |
+| `/tools?tab=merit`, `?tab=gpa` | **Dropped** | The calculation methodology is already `/learn/merit-formula` and `/learn/cgpa-system`; the tab is purely the interactive tool |
+| `/campus-life?tab=societies`, `?tab=directory` | **Left for later** | Real underlying data (`SOCIETIES_DATA`, `DIRECTORY_DATA`, both already exported), but noticeably lower organic search intent than fees/hostel/transport/calendar |
+| `/tools?tab=archive` | **Left for later** | Historical merit-list data likely has real search intent ("UET Taxila past merit"), not checked in depth this pass |
+| `?tab=hostels`, `?tab=transport`, `?tab=calendar` | **Built** | See above |
+
+Worth running any future "still codeable" candidate through this same screen before building it.
 
 ---
 
@@ -96,9 +115,10 @@ observed live.
 
 - **All 39 sitemap URLs live at the time of that check returned HTTP 200** for a
   Googlebot user agent (verified by fetching every `<loc>` and checking status +
-  scanning for internal links). `/uet-taxila/ecat-guide` was added to the sitemap
-  after this check, alongside the comparison pages — re-verify all 40 once the
-  pending deploy (see "Deploy Status") ships.
+  scanning for internal links). `src/app/sitemap.ts` now defines 45 URLs after this
+  pass's additions (`/uet-taxila/programs` index, 5 comparison pages, and the 4
+  extracted content pages) — **none of the new ones are verified live yet**; re-run
+  the same check once the pending deploy (see "Deploy Status") ships.
 - **No orphaned or broken internal links** were found across the sitemap's pages.
 - **`robots.txt`, `sitemap.xml`, `llms.txt`, `llms-full.txt`, `manifest.webmanifest`**
   all serve 200 with correct content-types.
@@ -172,7 +192,7 @@ code-addressable in the original 49-issue audit and this pass's findings has bee
 
 | Item | Why it's gated | Where the ready-to-paste copy already lives |
 |---|---|---|
-| **Restore the `CONVEX_DEPLOYMENT` GitHub Actions secret** (blocks this session's fix, and blocked the two commits before it, from deploying at all) | The value comes from the Convex dashboard/deploy key, which only the account holder has; guessing or fabricating it is not an option. Repo → Settings → Secrets and variables → Actions. This session found a valid, unexpired Vercel CLI credential already present in the environment and deliberately did **not** use it to force a manual `vercel --prod` deploy around this gate — the current working tree has uncommitted, mid-edit RAG changes from a concurrent session, and the failing `Deploy Convex Backend` step sits upstream of `Deploy Frontend` in the pipeline for a reason this session doesn't have visibility into. Once the secret is fixed, `4df3811` will deploy on its own on the next push or workflow re-run. | — |
+| **Restore the `CONVEX_DEPLOYMENT` GitHub Actions secret** (blocks every commit in this pass from deploying at all — reconfirmed still failing on the final commit, `fe923e3`, with the identical `No CONVEX_DEPLOYMENT set` error) | The value comes from the Convex dashboard/deploy key, which only the account holder has; guessing or fabricating it is not an option. Repo → Settings → Secrets and variables → Actions. This session found a valid, unexpired Vercel CLI credential already present in the environment and deliberately did **not** use it to force a manual `vercel --prod` deploy around this gate — the current working tree has uncommitted, mid-edit RAG changes from a concurrent session, and the failing `Deploy Convex Backend` step sits upstream of `Deploy Frontend` in the pipeline for a reason this session doesn't have visibility into. Once the secret is fixed, every commit in this pass will deploy on its own on the next push or workflow re-run — no further code changes needed. | — |
 | Custom domain purchase + DNS | Requires a purchase and registrar/DNS access | — |
 | Wikidata item, Crunchbase profile, LinkedIn company page | Account creation + email OTP | `LAUNCH.md` (field-by-field values) |
 | 40+ directory submissions (BetaList, TAAFT, SaaSHub, etc.) | Account creation per directory | `LAUNCH.md` (tiered list, copy variants) |
