@@ -91,7 +91,8 @@ export const LEARN_TERMS: LearnTerm[] = [
     ],
     hubLinks: [
       { label: "Admissions & Aid Hub", href: "/admissions?tab=overview" },
-      { label: "ECAT Strategy Guide", href: "/admissions?tab=ecat" },
+      { label: "ECAT Preparation Guide", href: "/uet-taxila/ecat-guide" },
+      { label: "Live ECAT Score Simulator", href: "/admissions?tab=ecat" },
       { label: "Merit Calculator", href: "/tools?tab=merit" },
     ],
     datePublished: "2026-07-16",

@@ -312,14 +312,23 @@ export function AdmissionsHub() {
 
         {activeTab === "ecat" && (
           <div className="space-y-8">
-            <div>
-              <h2 className="text-xl font-bold text-white">
-                ECAT 2026 Strategy Guide &amp; Interactive Score Simulator
-              </h2>
-              <p className="mt-1 text-xs text-[#a1a1aa]">
-                400-marks computer-based test conducted by UET Lahore (100 MCQs total: +4 marks per
-                correct answer, -1 mark penalty per incorrect answer).
-              </p>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <h2 className="text-xl font-bold text-white">
+                  ECAT 2026 Strategy Guide &amp; Interactive Score Simulator
+                </h2>
+                <p className="mt-1 text-xs text-[#a1a1aa]">
+                  400-marks computer-based test conducted by UET Lahore (100 MCQs total: +4 marks
+                  per correct answer, -1 mark penalty per incorrect answer).
+                </p>
+              </div>
+              <Link
+                href="/uet-taxila/ecat-guide"
+                className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-[#d9b451]/30 px-4 py-2 text-xs font-mono font-bold uppercase text-[#d9b451] hover:bg-[#d9b451]/10 transition-colors"
+              >
+                <span>Full Syllabus &amp; Time Strategy</span>
+                <span>&rarr;</span>
+              </Link>
             </div>
 
             {/* Interactive ECAT Simulator */}

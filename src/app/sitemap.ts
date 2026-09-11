@@ -63,6 +63,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.85,
     },
     {
+      url: `${SITE_URL}/uet-taxila/ecat-guide`,
+      lastModified: staticLastModified,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
       url: `${SITE_URL}/uet-gpt`,
       lastModified: staticLastModified,
       changeFrequency: "monthly",
