@@ -69,6 +69,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.85,
     },
     {
+      url: `${SITE_URL}/uet-taxila/bus-routes`,
+      lastModified: staticLastModified,
+      changeFrequency: "monthly",
+      priority: 0.75,
+    },
+    {
+      url: `${SITE_URL}/uet-taxila/hostels`,
+      lastModified: staticLastModified,
+      changeFrequency: "monthly",
+      priority: 0.75,
+    },
+    {
+      url: `${SITE_URL}/uet-taxila/academic-calendar`,
+      lastModified: staticLastModified,
+      changeFrequency: "weekly",
+      priority: 0.75,
+    },
+    {
       url: `${SITE_URL}/uet-gpt`,
       lastModified: staticLastModified,
       changeFrequency: "monthly",

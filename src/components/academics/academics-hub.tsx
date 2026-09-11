@@ -29,7 +29,7 @@ const TABS: { id: AcademicTab; label: string; badge?: string; desc: string }[] =
   },
 ];
 
-const CALENDAR_EVENTS = [
+export const CALENDAR_EVENTS = [
   {
     category: "admissions",
     date: "July 15 - August 10, 2026",
@@ -391,6 +391,13 @@ export function AcademicsHub() {
                   Official dates for entrance tests, merit admissions clearance, semester starts,
                   and examinations.
                 </p>
+                <Link
+                  href="/uet-taxila/academic-calendar"
+                  className="mt-2 inline-flex items-center gap-1.5 text-xs font-mono font-bold uppercase text-[#d9b451] hover:underline"
+                >
+                  <span>Full Calendar Page</span>
+                  <span>&rarr;</span>
+                </Link>
               </div>
 
               {/* Category Filter */}

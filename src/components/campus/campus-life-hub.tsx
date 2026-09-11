@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useId, useMemo, useState } from "react";
 import { CampusDirectory } from "@/components/directory/campus-directory";
@@ -35,7 +36,7 @@ const TABS: { id: CampusTab; label: string; badge?: string; desc: string }[] = [
   },
 ];
 
-const HOSTELS = [
+export const HOSTELS = [
   {
     name: "Sir Syed Hall (Boys)",
     capacity: "250+ Residents",
@@ -184,6 +185,13 @@ export function CampusLifeHub() {
                   uninterrupted solar backup, and student-run dining mess.
                 </p>
               </div>
+              <Link
+                href="/uet-taxila/hostels"
+                className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-[#d9b451]/30 px-4 py-2 text-xs font-mono font-bold uppercase text-[#d9b451] hover:bg-[#d9b451]/10 transition-colors"
+              >
+                <span>Full Hall Guide</span>
+                <span>&rarr;</span>
+              </Link>
             </div>
 
             {/* 5 Hostels Cards */}
@@ -451,14 +459,23 @@ export function CampusLifeHub() {
 
         {activeTab === "transport" && (
           <div className="space-y-6">
-            <div>
-              <h2 className="text-xl font-bold text-white">
-                University Commuter Bus Routes &amp; Timetable
-              </h2>
-              <p className="mt-1 text-xs text-[#a1a1aa]">
-                Search pickup points, fleet departure timings, and return schedules across the Twin
-                Cities.
-              </p>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <h2 className="text-xl font-bold text-white">
+                  University Commuter Bus Routes &amp; Timetable
+                </h2>
+                <p className="mt-1 text-xs text-[#a1a1aa]">
+                  Search pickup points, fleet departure timings, and return schedules across the
+                  Twin Cities.
+                </p>
+              </div>
+              <Link
+                href="/uet-taxila/bus-routes"
+                className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-[#d9b451]/30 px-4 py-2 text-xs font-mono font-bold uppercase text-[#d9b451] hover:bg-[#d9b451]/10 transition-colors"
+              >
+                <span>Full Route List</span>
+                <span>&rarr;</span>
+              </Link>
             </div>
             <BusRoutesExplorer />
           </div>

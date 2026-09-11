@@ -278,9 +278,9 @@ export const LEARN_TERMS: LearnTerm[] = [
       },
     ],
     hubLinks: [
-      { label: "Hostels & Residential Halls", href: "/campus-life?tab=hostels" },
+      { label: "Hostel Halls & Fees Guide", href: "/uet-taxila/hostels" },
       { label: "Fee Simulator", href: "/admissions?tab=fees" },
-      { label: "Bus Routes & Timetables", href: "/campus-life?tab=transport" },
+      { label: "Bus Routes Guide", href: "/uet-taxila/bus-routes" },
     ],
     datePublished: "2026-07-16",
     dateModified: LEARN_TERMS_DATE_MODIFIED,
