@@ -62,14 +62,29 @@ var against a plain Chrome UA to catch this class of regression going forward.
 
 ### New content shipped this pass
 
-Five UET Taxila vs. peer-university comparison pages
-(`/uet-taxila/compare/{uet-lahore,nust,fast,pieas,comsats}`) — the one item from
-`docs/marketing/competitors.md`'s programmatic-SEO plan that was still unbuilt.
-Each page has its own title/canonical/FAQ schema (independent from the existing
-`/admissions?tab=compare` table, which shares one canonical URL and cannot rank
-per-competitor on its own), sourced 2026 tuition/entry-test/ranking data cross-checked
-against each university's admissions pages, and is cross-linked from the admissions
-comparison tab and included in the sitemap.
+- **Five UET Taxila vs. peer-university comparison pages**
+  (`/uet-taxila/compare/{uet-lahore,nust,fast,pieas,comsats}`) — the one item from
+  `docs/marketing/competitors.md`'s programmatic-SEO plan that was still unbuilt.
+  Each page has its own title/canonical/FAQ schema (independent from the existing
+  `/admissions?tab=compare` table, which shares one canonical URL and cannot rank
+  per-competitor on its own), sourced 2026 tuition/entry-test/ranking data cross-checked
+  against each university's admissions pages, and is cross-linked from the admissions
+  comparison tab and included in the sitemap.
+- **`/uet-taxila/ecat-guide`** — the subject-wise high-yield topics, marking scheme,
+  and 3-pass time-management strategy previously only existed inside the interactive
+  simulator at `/admissions?tab=ecat` (same shared-canonical problem as the comparison
+  table). This is a different search intent than `/learn/ecat`'s "what is ECAT"
+  definition page, so it's additive rather than cannibalizing. Reuses the exact
+  verified facts already shipped in the admissions tab rather than introducing new claims.
+
+Both patterns follow the same fix: rich content that already existed but was trapped
+behind a shared tab URL and couldn't independently rank got its own page. Before
+building either, `/learn/scholarships` was checked as a candidate for the same
+treatment and found to **already be a full "types & application" guide** (4 sections
+including "How to apply," 4 FAQs) — building a separate dedicated scholarships page
+would have cannibalized it rather than filled a gap, so that item was dropped rather
+than built. Worth checking any future "still codeable" candidate the same way before
+building it.
 
 ---
 
@@ -79,8 +94,11 @@ Checks below were run directly against production with `curl` (multiple user age
 and `WebSearch`, not inferred from source code — this report only asserts what was
 observed live.
 
-- **All 39 sitemap URLs return HTTP 200** for a Googlebot user agent (verified by
-  fetching every `<loc>` and checking status + scanning for internal links).
+- **All 39 sitemap URLs live at the time of that check returned HTTP 200** for a
+  Googlebot user agent (verified by fetching every `<loc>` and checking status +
+  scanning for internal links). `/uet-taxila/ecat-guide` was added to the sitemap
+  after this check, alongside the comparison pages — re-verify all 40 once the
+  pending deploy (see "Deploy Status") ships.
 - **No orphaned or broken internal links** were found across the sitemap's pages.
 - **`robots.txt`, `sitemap.xml`, `llms.txt`, `llms-full.txt`, `manifest.webmanifest`**
   all serve 200 with correct content-types.
@@ -164,9 +182,10 @@ code-addressable in the original 49-issue audit and this pass's findings has bee
 ## Remaining Work — Still Codeable (not done in this pass, lower priority than the cloaking fix)
 
 - Urdu/Roman Urdu content cluster (Phase 4.10 from the original plan) — large effort, not started
-- Blog / ECAT-prep content cluster (Phase 4.3) — not started
-- Scholarship guide as a dedicated page (partially covered today by `/admissions?tab=scholarships`,
-  but not as an independently-titled, independently-rankable page)
+- Broader ECAT-prep blog cluster beyond the one guide page shipped this pass (Phase 4.3) —
+  e.g. subject-specific deep-dives, past-paper analysis — not started
+- ~~Scholarship guide as a dedicated page~~ — checked and dropped: `/learn/scholarships`
+  already covers this (see "New content shipped this pass")
 - Nonce-based CSP migration to drop `unsafe-inline` (security hardening, not ranking-critical)
 
 ---
