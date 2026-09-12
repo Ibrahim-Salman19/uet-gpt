@@ -60,6 +60,7 @@ export const LEARN_TERMS: LearnTerm[] = [
         paragraphs: [
           "For Punjab-domicile students, the combined engineering entry test is conducted by UET Lahore. UET Taxila also accepts any other entry test for engineering programs that is designated as acceptable to PEC (Pakistan Engineering Council) and the university. Applicants are responsible for registering for ECAT through UET Lahore's admissions portal and sitting the test before the UET Taxila admissions deadline.",
           "Students from other provinces or with foreign qualifications may use equivalent tests acceptable to PEC. A-Level applicants must also attach an IBCC equivalence certificate showing at least 60% (or 50% for CS/Mathematics/Physics) in the relevant subjects.",
+          'UET Taxila\'s official 2026 eligibility criteria list the entry-test requirement as "TCAT / ECAT / Equivalent acceptable to PEC & UET Taxila" for every eligible department. ECAT remains the term used on the official merit calculator and by most applicants; TCAT appears alongside it in the eligibility table as an accepted equivalent.',
         ],
       },
       {
@@ -87,6 +88,10 @@ export const LEARN_TERMS: LearnTerm[] = [
       {
         q: "Who conducts ECAT for UET Taxila?",
         a: "For Punjab-domicile students the combined ECAT is conducted by UET Lahore. UET Taxila also accepts entry tests for engineering programs approved by PEC.",
+      },
+      {
+        q: "Is TCAT the same as ECAT for UET Taxila?",
+        a: 'UET Taxila\'s official 2026 eligibility criteria list the entry-test requirement as "TCAT / ECAT / Equivalent acceptable to PEC & UET Taxila" for every eligible department, grouping both as accepted entry tests. ECAT is the term used on the official merit calculator and by most FSc Pre-Engineering applicants.',
       },
     ],
     hubLinks: [

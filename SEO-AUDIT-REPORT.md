@@ -172,8 +172,69 @@ explanations for the indexation gap itself, not mutually exclusive:
 that isn't a code change**: buying a custom domain (e.g. `uetgpt.com` / `.pk`) and
 pointing it at the Vercel project would very likely matter more for indexation than
 any further metadata tuning. It requires a purchase decision and DNS access, so it's
-noted here rather than done — everything else in this report is either fixed or is a
-code-only content-expansion item.
+noted here rather than done.
+
+---
+
+## Content Accuracy — Verified Against Primary Sources
+
+Fetching the actual competitor pages that outrank this site (Maqsad Blog, CampusAxis,
+eduvision.edu.pk) surfaced a real terminology gap, which was then checked against
+UET Taxila's own official admissions portal (`admissions.uettaxila.edu.pk`, live for
+Fall 2026 admissions) rather than taken on a single blog's word:
+
+- **"TCAT" is real, official terminology this site never used.** The official
+  `Admission_Eligibility.php` page lists the entry-test requirement for every eligible
+  department as *"TCAT / ECAT / Equivalent acceptable to PEC & UET Taxila."* This
+  site's content used "ECAT" exclusively — accurate, since ECAT is what the official
+  merit calculator itself labels the field and what most FSc Pre-Engineering applicants
+  sit, but a real keyword gap: anyone searching "UET Taxila TCAT" found nothing.
+  **Fixed**: added a paragraph and a new FAQ to `/learn/ecat` (`src/lib/learn-terms.ts`)
+  citing the official table directly, without overclaiming the exact relationship
+  between the two terms beyond what the source states.
+- **An unverified claim was deliberately left alone.** Maqsad's guide states ECAT
+  "Negative Marking: None for 2026" — directly contradicting the +4/-1 marking scheme
+  already built into this site's live interactive ECAT score simulator (and, by
+  extension, this pass's own `/uet-taxila/ecat-guide` page, which reused that scheme
+  as an established fact). The official pages fetched this pass (eligibility table,
+  merit calculator) don't state a marking scheme either way, so this **could not be
+  confirmed or refuted** from a primary source. Given the stakes — a wrong marking
+  scheme would give students actively wrong exam strategy — this was **not** changed
+  on a single secondary source's word. Whoever holds a current ECAT past paper or the
+  official test-conduction notice should verify this specifically; if negative marking
+  really was dropped for 2026, both the simulator's scoring logic and `ecat-guide`'s
+  strategy content need updating together.
+- **Closing-merit figures don't reconcile cleanly with a second source.** eduvision's
+  2026 fee/merit table lists closing merits (e.g. Computer Science 79.32%, Mechanical
+  77.19%) that differ from this site's `MERIT_ARCHIVE_DATA` 2025 figures (CS 80.450%,
+  Mechanical 73.890%) by more than a one-year drift would typically explain, and not
+  in a consistent direction across disciplines (some higher, some lower). This may be
+  explained by different admission rounds/categories rather than an actual error, but
+  it wasn't resolved this pass — **not changed**, flagged here for whoever maintains
+  `MERIT_ARCHIVE_DATA` to reconcile against the source prospectus/merit-list PDFs
+  directly rather than a third-party aggregator.
+
+None of this is a "still codeable SEO" item in the tab-extraction sense — it's a
+product-accuracy finding that surfaced *because* the competitor-gap research this pass
+did was grounded in fetching real pages rather than search snippets. Everything else
+in this report is either fixed or is a code-only content-expansion item.
+
+## UI Copy vs. Data Mismatches (found, not fixed — one item, two locations)
+
+Two places in the codebase assert counts that the underlying data array doesn't
+support — the same defect class, found while extracting two different pages this pass.
+Both are cosmetic (they don't affect functionality) but are exactly the kind of detail
+a prospective student might notice and lose trust over:
+
+| Location | Claims | Actual (from the data array) |
+|---|---|---|
+| `campus-life-hub.tsx` `TABS` array (`transport` badge) + `comparisons-data.ts` copy | "25+ Routes" | `BUS_ROUTES` has 6 entries |
+| `tools-hub.tsx` `TABS` array (`archive` badge) | "2021-2025" (5-year) | `MERIT_ARCHIVE_DATA` covers 2022-2025 (4 years) |
+
+Both left as-is deliberately: neither was in the exact block being edited for this
+pass's cross-links (unlike the *tab body* header text in each hub, which was corrected
+while already being touched — see "New content shipped this pass"). Fix both in one
+pass rather than piecemeal.
 
 ---
 
@@ -196,8 +257,13 @@ code-only content-expansion item.
 
 These need a real account under a real identity, email OTP verification, or a purchase
 decision — creating them on someone's behalf without that person present is an identity
-and reversibility risk this session won't take on unprompted. Everything else
-code-addressable in the original 49-issue audit and this pass's findings has been done.
+and reversibility risk this session won't take on unprompted. The original 49-issue
+audit is fully resolved. What's left from *this* pass's own findings is smaller and
+tracked in its own sections rather than claimed as done here: the two UI copy/data
+mismatches above (cosmetic, low priority, fixable in one pass), `societies`/`directory`
+tab extraction (screened twice, consistently lower priority than what got built), and
+the content-accuracy items above that need a human with a primary source to resolve,
+not code.
 
 | Item | Why it's gated | Where the ready-to-paste copy already lives |
 |---|---|---|
