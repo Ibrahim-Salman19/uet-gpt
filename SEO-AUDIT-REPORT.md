@@ -86,8 +86,18 @@ var against a plain Chrome UA to catch this class of regression going forward.
   The new bus-routes page uses the verified count (6) instead of repeating the
   unsupported figure — the badge/copy elsewhere is unchanged (pre-existing, out of this
   pass's scope) but worth a follow-up fix or removal.
+- **`/uet-taxila/closing-merit`** — 4 years of real Category A closing merit
+  (2022-2025) plus 2025 Category S, across all 15 disciplines, extracted from
+  `/tools?tab=archive`. The richest dataset extracted this pass (60 real data points)
+  and a distinct query from `/learn/merit-formula` (calculation method vs. historical
+  cutoffs). Same inaccuracy pattern found again: the tab claimed "5-Year (2021-2025)"
+  and "14 disciplines" while the actual data (`MERIT_ARCHIVE_DATA`) has 4 years and 15
+  entries — fixed the tab's own header text while editing it for the cross-link, but
+  left the tab-selector badge (a separate, untouched block making the same "2021-2025"
+  claim) alone, logged here rather than silently patched, matching how the bus-routes
+  badge was handled.
 
-All 8 new pages follow the same fix: rich content that already existed but was trapped
+All 9 new pages follow the same fix: rich content that already existed but was trapped
 behind a shared tab URL and couldn't independently rank got its own page. Every tab
 across `admissions-hub.tsx`, `academics-hub.tsx`, `campus-life-hub.tsx`, and
 `tools-hub.tsx` was screened as a candidate before deciding what to build:
@@ -99,9 +109,8 @@ across `admissions-hub.tsx`, `academics-hub.tsx`, `campus-life-hub.tsx`, and
 | `/academics?tab=resources` | **Dropped** | Thin (2 short lists) and overlaps `/learn/obe-framework` |
 | `/academics?tab=programs` | **Dropped** | Already has 14 dedicated `/uet-taxila/programs/[slug]` pages |
 | `/tools?tab=merit`, `?tab=gpa` | **Dropped** | The calculation methodology is already `/learn/merit-formula` and `/learn/cgpa-system`; the tab is purely the interactive tool |
-| `/campus-life?tab=societies`, `?tab=directory` | **Left for later** | Real underlying data (`SOCIETIES_DATA`, `DIRECTORY_DATA`, both already exported), but noticeably lower organic search intent than fees/hostel/transport/calendar |
-| `/tools?tab=archive` | **Left for later** | Historical merit-list data likely has real search intent ("UET Taxila past merit"), not checked in depth this pass |
-| `?tab=hostels`, `?tab=transport`, `?tab=calendar` | **Built** | See above |
+| `/campus-life?tab=societies`, `?tab=directory` | **Left for later** | Real underlying data (`SOCIETIES_DATA`, `DIRECTORY_DATA`, both already exported), but noticeably lower organic search intent than fees/hostel/transport/calendar/merit |
+| `?tab=hostels`, `?tab=transport`, `?tab=calendar`, `?tab=archive` | **Built** | See above |
 
 Worth running any future "still codeable" candidate through this same screen before building it.
 
@@ -115,10 +124,10 @@ observed live.
 
 - **All 39 sitemap URLs live at the time of that check returned HTTP 200** for a
   Googlebot user agent (verified by fetching every `<loc>` and checking status +
-  scanning for internal links). `src/app/sitemap.ts` now defines 45 URLs after this
-  pass's additions (`/uet-taxila/programs` index, 5 comparison pages, and the 4
-  extracted content pages) — **none of the new ones are verified live yet**; re-run
-  the same check once the pending deploy (see "Deploy Status") ships.
+  scanning for internal links). `src/app/sitemap.ts` now defines 46 URLs after this
+  pass's additions (`/uet-taxila/programs` index, 5 comparison pages, and 5 extracted
+  content pages) — **none of the new ones are verified live yet**; re-run the same
+  check once the pending deploy (see "Deploy Status") ships.
 - **No orphaned or broken internal links** were found across the sitemap's pages.
 - **`robots.txt`, `sitemap.xml`, `llms.txt`, `llms-full.txt`, `manifest.webmanifest`**
   all serve 200 with correct content-types.
@@ -192,7 +201,7 @@ code-addressable in the original 49-issue audit and this pass's findings has bee
 
 | Item | Why it's gated | Where the ready-to-paste copy already lives |
 |---|---|---|
-| **Restore the `CONVEX_DEPLOYMENT` GitHub Actions secret** (blocks every commit in this pass from deploying at all — reconfirmed still failing on the final commit, `fe923e3`, with the identical `No CONVEX_DEPLOYMENT set` error) | The value comes from the Convex dashboard/deploy key, which only the account holder has; guessing or fabricating it is not an option. Repo → Settings → Secrets and variables → Actions. This session found a valid, unexpired Vercel CLI credential already present in the environment and deliberately did **not** use it to force a manual `vercel --prod` deploy around this gate — the current working tree has uncommitted, mid-edit RAG changes from a concurrent session, and the failing `Deploy Convex Backend` step sits upstream of `Deploy Frontend` in the pipeline for a reason this session doesn't have visibility into. Once the secret is fixed, every commit in this pass will deploy on its own on the next push or workflow re-run — no further code changes needed. | — |
+| **Restore the `CONVEX_DEPLOYMENT` GitHub Actions secret** (blocks every commit in this pass from deploying at all — reconfirmed still failing as of `fe923e3` on 2026-09-11, same `No CONVEX_DEPLOYMENT set` error since at least `cbd1949` on 2026-09-09) | The value comes from the Convex dashboard/deploy key, which only the account holder has; guessing or fabricating it is not an option. Repo → Settings → Secrets and variables → Actions. This session found a valid, unexpired Vercel CLI credential already present in the environment and deliberately did **not** use it to force a manual `vercel --prod` deploy around this gate — the current working tree has uncommitted, mid-edit RAG changes from a concurrent session, and the failing `Deploy Convex Backend` step sits upstream of `Deploy Frontend` in the pipeline for a reason this session doesn't have visibility into. Once the secret is fixed, every commit in this pass will deploy on its own on the next push or workflow re-run — no further code changes needed. | — |
 | Custom domain purchase + DNS | Requires a purchase and registrar/DNS access | — |
 | Wikidata item, Crunchbase profile, LinkedIn company page | Account creation + email OTP | `LAUNCH.md` (field-by-field values) |
 | 40+ directory submissions (BetaList, TAAFT, SaaSHub, etc.) | Account creation per directory | `LAUNCH.md` (tiered list, copy variants) |
