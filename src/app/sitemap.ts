@@ -87,6 +87,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.75,
     },
     {
+      url: `${SITE_URL}/uet-taxila/closing-merit`,
+      lastModified: staticLastModified,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
       url: `${SITE_URL}/uet-gpt`,
       lastModified: staticLastModified,
       changeFrequency: "monthly",

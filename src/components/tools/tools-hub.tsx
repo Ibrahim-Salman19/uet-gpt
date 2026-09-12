@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { GpaCalculator } from "@/components/calculator/gpa-calculator";
@@ -114,13 +115,23 @@ export function ToolsHub() {
 
         {activeTab === "archive" && (
           <div className="space-y-6">
-            <div>
-              <h2 className="text-xl font-bold text-white">
-                5-Year Historical Closing Merit Cutoffs (2021 – 2025)
-              </h2>
-              <p className="mt-1 text-xs text-[#a1a1aa]">
-                Analyze admission trends across all 14 engineering and computing disciplines.
-              </p>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <h2 className="text-xl font-bold text-white">
+                  Historical Closing Merit Cutoffs (2022 – 2025)
+                </h2>
+                <p className="mt-1 text-xs text-[#a1a1aa]">
+                  Analyze admission trends across all 15 engineering, computing, and sciences
+                  disciplines.
+                </p>
+              </div>
+              <Link
+                href="/uet-taxila/closing-merit"
+                className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-[#d9b451]/30 px-4 py-2 text-xs font-mono font-bold uppercase text-[#d9b451] hover:bg-[#d9b451]/10 transition-colors"
+              >
+                <span>Full Merit Table</span>
+                <span>&rarr;</span>
+              </Link>
             </div>
             <MeritArchiveExplorer />
           </div>
