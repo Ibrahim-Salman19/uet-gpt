@@ -50,6 +50,8 @@ successful run without any further changes needed.
 | 2 | Homepage meta description was 172 characters — Google truncates around 155-160, so the SERP snippet was being cut mid-word | MEDIUM | Shortened to 147 chars in `src/app/page.tsx` (title/OG/Twitter description) |
 | 3 | `tests/unit/json-ld-schema.test.ts` asserted `organizationSchema.sameAs` must have ≥2 entries — the only way to satisfy that honestly would be inventing a Twitter/LinkedIn account that doesn't exist yet (per `LAUNCH.md`: "N/A — no official UET GPT account exists") | LOW (test hygiene) | Relaxed the assertion to ≥1 and documented why; did **not** fabricate social profiles |
 | 4 | `SCHEMA_DATE_MODIFIED` was hardcoded to `2026-09-01`, 9 days stale relative to real content changes | LOW | Bumped to `2026-09-10` in `src/lib/dates.ts` |
+| 6 | **Factually wrong exam advice:** the site claimed ECAT has +4/−1 negative marking (the /admissions simulator deducted marks and the ECAT guide told students not to guess). UET Lahore's official page says *"no negative marking in ECAT"* | **HIGH** (accuracy) | Commit `8cf94a6` (pushed, **not live**: same `CONVEX_DEPLOYMENT` deploy block). Simulator now scores correct × 4; all copy corrected. See Content Accuracy |
+| 7 | "TCAT" was treated as an ECAT alias; it is UET Taxila's own separate entry test, and the site had zero coverage for it | MEDIUM (accuracy + keyword gap) | `8cf94a6`: corrected `/learn/ecat`, added `/learn/tcat` |
 | 5 | `/uet-taxila/programs` (the program index page, live and linked from every one of the 14 program pages' breadcrumbs) was missing from `sitemap.xml` | LOW | Added to `src/app/sitemap.ts` |
 
 ### Why the cloaking bug escaped the existing E2E suite
@@ -214,6 +216,13 @@ Fall 2026 admissions) rather than taken on a single blog's word:
     stale: its header still says "Registration Opening Soon" while the homepage has
     already posted later merit lists. The homepage and the advert win. **Future runs:
     do not flip this back based on FAQS.php.**
+  - **Same guard for negative marking:** ilmkidunya and several aggregators still
+    publish +4/−1 for ECAT. The source of record is `https://ecat.uet.edu.pk/General/Ecat`.
+    Do not revert the no-negative-marking correction on a blog's word.
+  - **Not checked:** the chatbot's RAG corpus lives in Convex, not in the repo. A
+    repo-wide grep found no +4/−1 text, but crawled third-party or older pages in the
+    corpus could still carry it. Query the corpus for "negative marking" before
+    trusting chatbot answers on this; re-crawling was out of scope per CLAUDE.md.
   - **Fixed**: `/learn/ecat` (lead, format paragraph, TCAT paragraph and FAQs) now says
     that either test is accepted and that TCAT is UET Taxila's own. There is a new
     `/learn/tcat` glossary page, which is in the sitemap via `getAllSlugs`.

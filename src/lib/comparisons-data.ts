@@ -227,7 +227,7 @@ export const COMPARISONS: ComparisonEntry[] = [
       {
         feature: "Entry Test",
         uetTaxila: "TCAT (UET Taxila) or ECAT (UET Lahore: 100 MCQs, no negative marking)",
-        peer: "PIEAS Entry Test (≈100 MCQs, no negative marking)",
+        peer: "PIEAS's own entry test",
       },
       {
         feature: "Merit Formula",
@@ -253,7 +253,7 @@ export const COMPARISONS: ComparisonEntry[] = [
     faqs: [
       {
         q: "Can I use my ECAT score to get into PIEAS?",
-        a: "No. PIEAS conducts its own separate entry test (roughly 100 MCQs with no negative marking) and does not accept ECAT scores for undergraduate admission.",
+        a: "No. PIEAS conducts its own separate entry test and does not accept ECAT scores for undergraduate admission.",
       },
       {
         q: "Is PIEAS more affordable than UET Taxila?",
