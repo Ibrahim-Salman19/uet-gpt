@@ -39,12 +39,12 @@ export const LEARN_TERMS: LearnTerm[] = [
     pageTitle: "What is ECAT? UET Entry Test Explained | UET GPT",
     metaDescription:
       "Understand the ECAT entry test for UET Taxila: format, 33% merit weightage, scoring, eligibility, and preparation guidance from official sources.",
-    lead: "ECAT (Engineering College Admission Test) is the standardized entry test that applicants to undergraduate engineering and computing programs at UET Taxila must sit before their admission merit can be calculated. Conducted annually by UET Lahore for Punjab-domicile students, ECAT is mandatory for engineering programs and BS Computer Science.",
+    lead: "ECAT (Engineering College Admission Test) is the combined engineering entry test conducted by UET Lahore for public engineering institutions in Punjab. UET Taxila accepts ECAT, its own TCAT, or an equivalent PEC-acceptable test, and an entry-test score is required before admission merit can be calculated for engineering and computing programs.",
     sections: [
       {
         heading: "What ECAT tests",
         paragraphs: [
-          "ECAT assesses aptitude and subject knowledge in Mathematics, Physics, Chemistry, and English. Students from an FSc Pre-Engineering background are tested in all four subjects. The paper is multiple-choice, timed, and held at designated centres across Punjab.",
+          "ECAT is an intermediate-level, 100-minute multiple-choice test of 100 questions: 10 English questions and 90 divided equally across three subjects. UET Lahore offers it in five subject combinations, including Mathematics-Physics-Chemistry for FSc Pre-Engineering students and Mathematics-Physics-Computer Science for ICS students. Each correct answer is worth 4 marks (400 total), and UET Lahore states there is no negative marking and no passing threshold.",
           "For BS Computer Science, BS Mathematics, and BS Physics applicants, ECAT is still required but the eligibility threshold on board marks is 50% (versus 60% for engineering programs), and the accepted subject combinations are broader: any HSSC combination that includes Mathematics or Physics, plus FSc Pre-Medical with Mathematics as an additional subject.",
         ],
       },
@@ -60,7 +60,7 @@ export const LEARN_TERMS: LearnTerm[] = [
         paragraphs: [
           "For Punjab-domicile students, the combined engineering entry test is conducted by UET Lahore. UET Taxila also accepts any other entry test for engineering programs that is designated as acceptable to PEC (Pakistan Engineering Council) and the university. Applicants are responsible for registering for ECAT through UET Lahore's admissions portal and sitting the test before the UET Taxila admissions deadline.",
           "Students from other provinces or with foreign qualifications may use equivalent tests acceptable to PEC. A-Level applicants must also attach an IBCC equivalence certificate showing at least 60% (or 50% for CS/Mathematics/Physics) in the relevant subjects.",
-          'UET Taxila\'s official 2026 eligibility criteria list the entry-test requirement as "TCAT / ECAT / Equivalent acceptable to PEC & UET Taxila" for every eligible department. ECAT remains the term used on the official merit calculator and by most applicants; TCAT appears alongside it in the eligibility table as an accepted equivalent.',
+          'UET Taxila\'s official 2026 eligibility criteria list the entry-test requirement as "TCAT / ECAT / Equivalent acceptable to PEC & UET Taxila" for every eligible department. TCAT (Taxila Competency Assessment Test) is a separate, PEC-designated test that UET Taxila conducts itself, with its own registration portal and test dates, so applicants can use either test.',
         ],
       },
       {
@@ -75,7 +75,7 @@ export const LEARN_TERMS: LearnTerm[] = [
     faqs: [
       {
         q: "Is ECAT mandatory for all UET Taxila admissions?",
-        a: "Yes, for undergraduate engineering programs and BS Computer Science, a valid ECAT (or an equivalent entry test acceptable to PEC and UET Taxila) score is mandatory. Without it, an applicant's merit cannot be calculated and the application is not considered.",
+        a: "No single test is mandatory, but an entry-test score is. For undergraduate engineering and computing programs, UET Taxila requires a valid ECAT, TCAT, or equivalent PEC-acceptable test score. Without one, an applicant's merit cannot be calculated and the application is not considered.",
       },
       {
         q: "How much does ECAT count in the UET Taxila merit formula?",
@@ -91,7 +91,7 @@ export const LEARN_TERMS: LearnTerm[] = [
       },
       {
         q: "Is TCAT the same as ECAT for UET Taxila?",
-        a: 'UET Taxila\'s official 2026 eligibility criteria list the entry-test requirement as "TCAT / ECAT / Equivalent acceptable to PEC & UET Taxila" for every eligible department, grouping both as accepted entry tests. ECAT is the term used on the official merit calculator and by most FSc Pre-Engineering applicants.',
+        a: 'No. TCAT (Taxila Competency Assessment Test) is conducted by UET Taxila itself and registered through entrytest.uettaxila.edu.pk, while ECAT is conducted by UET Lahore. UET Taxila\'s 2026 eligibility criteria accept either ("TCAT / ECAT / Equivalent acceptable to PEC & UET Taxila").',
       },
     ],
     hubLinks: [
@@ -101,6 +101,60 @@ export const LEARN_TERMS: LearnTerm[] = [
       { label: "Merit Calculator", href: "/tools?tab=merit" },
     ],
     datePublished: "2026-07-16",
+    dateModified: LEARN_TERMS_DATE_MODIFIED,
+  },
+  {
+    slug: "tcat",
+    title: "TCAT (Taxila Competency Assessment Test)",
+    pageTitle: "What is TCAT? UET Taxila Entry Test 2026 Explained | UET GPT",
+    metaDescription:
+      "TCAT is UET Taxila's own PEC-designated entry test: registration portal, Rs. 3,000 fee, Fall 2026 TCAT-VII dates, and how it differs from UET Lahore's ECAT.",
+    lead: "TCAT (Taxila Competency Assessment Test) is the Pakistan Engineering Council (PEC) designated entry test that UET Taxila conducts itself for admission to its Engineering, Engineering Technology, Computer Science, and Artificial Intelligence programs. It runs in multiple rounds per admission cycle at the UET Taxila campus, separately from UET Lahore's ECAT.",
+    sections: [
+      {
+        heading: "How to register for TCAT",
+        paragraphs: [
+          "Registration is online only, at entrytest.uettaxila.edu.pk: complete your profile, upload a photo, choose your test group, generate the challan, and pay the Rs. 3,000 non-refundable fee through 1BILL-Invoice in any banking app. Then print your admit card and appear at the PRISM Block, UET Taxila, on your chosen date. Once the admit card is issued, the test date cannot be changed.",
+        ],
+      },
+      {
+        heading: "TCAT-VII dates for Fall 2026 admissions",
+        paragraphs: [
+          "UET Taxila's TCAT-VII advertisement for Fall 2026 lists three test dates: 18 September 2026 (apply by 15 September, admit card 17 September), 25 September 2026 (apply by 22 September, admit card 24 September), and 2 October 2026 (apply by 29 September, admit card 1 October). An earlier round, TCAT-III, was held in July 2026.",
+        ],
+      },
+      {
+        heading: "TCAT vs ECAT",
+        paragraphs: [
+          'UET Taxila\'s 2026 eligibility criteria list the entry-test requirement as "TCAT / ECAT / Equivalent acceptable to PEC & UET Taxila", so either test can be used. ECAT is conducted by UET Lahore through its own portal; TCAT is conducted by UET Taxila. The official merit formula gives the entry test 33% weight, alongside 50% for HSSC Part-I (or equivalent) and 17% for SSC.',
+          "UET Taxila's TCAT advertisements do not publish the paper format or marking scheme. Check the entry-test portal before your test date rather than assuming TCAT follows ECAT's pattern.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        q: "Who conducts TCAT?",
+        a: "UET Taxila conducts TCAT itself. It is a PEC-designated entry test held at the PRISM Block on the UET Taxila campus, separate from the ECAT conducted by UET Lahore.",
+      },
+      {
+        q: "What is the TCAT registration fee?",
+        a: "The TCAT test fee is Rs. 3,000 (non-refundable), paid during online registration at entrytest.uettaxila.edu.pk.",
+      },
+      {
+        q: "When is TCAT 2026 for Fall admissions?",
+        a: "The TCAT-VII round for Fall 2026 has test dates on 18 September, 25 September, and 2 October 2026, with application deadlines of 15, 22, and 29 September respectively.",
+      },
+      {
+        q: "Can I apply to UET Taxila with ECAT instead of TCAT?",
+        a: 'Yes. UET Taxila\'s 2026 eligibility criteria accept "TCAT / ECAT / Equivalent acceptable to PEC & UET Taxila" for engineering and computing programs.',
+      },
+    ],
+    hubLinks: [
+      { label: "What is ECAT?", href: "/learn/ecat" },
+      { label: "Admissions & Aid Hub", href: "/admissions?tab=overview" },
+      { label: "Merit Calculator", href: "/tools?tab=merit" },
+    ],
+    datePublished: "2026-09-14",
     dateModified: LEARN_TERMS_DATE_MODIFIED,
   },
   {

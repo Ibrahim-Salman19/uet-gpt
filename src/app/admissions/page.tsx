@@ -48,9 +48,9 @@ const admissionsFaqs = [
       "Category A consists of Open Merit subsidized seats (primarily for Punjab domicile holders) with government-subsidized tuition of approximately PKR 48,000–55,000/semester. Category S consists of Partial Subsidized (Self-Finance) seats open nationwide with tuition of approximately PKR 135,000–145,000/semester and slightly lower merit cutoffs.",
   },
   {
-    question: "How does negative marking work in the ECAT entry test?",
+    question: "Is there negative marking in the ECAT entry test?",
     answer:
-      "The ECAT test contains 100 MCQs (400 total marks). Each correct answer awards +4 marks, while an incorrect response deducts -1 mark. Unattempted questions award 0 marks.",
+      "No. According to UET Lahore's official ECAT page, the test contains 100 MCQs (400 total marks), each correct answer is worth 4 marks, and there is no negative marking or passing threshold. Wrong and unattempted answers both score 0.",
   },
 ];
 

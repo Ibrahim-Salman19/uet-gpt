@@ -19,7 +19,7 @@ const TABS: { id: AdmissionTab; label: string; badge?: string; desc: string }[] 
     id: "ecat",
     label: "ECAT Strategy Guide",
     badge: "400 Marks",
-    desc: "Subject weightages, negative marking rules (-1), and interactive score simulator",
+    desc: "Subject weightages, marking scheme (no negative marking), and interactive score simulator",
   },
   {
     id: "fees",
@@ -145,8 +145,7 @@ export function AdmissionsHub() {
     const totalAttempted = totalCorrect + totalWrong;
     const totalUnattempted = Math.max(0, 100 - totalAttempted);
 
-    const rawMarks = totalCorrect * 4 - totalWrong * 1;
-    const finalMarks = Math.max(0, Math.min(400, rawMarks));
+    const finalMarks = Math.min(400, totalCorrect * 4);
     const percentage = (finalMarks / 400) * 100;
     const accuracy = totalAttempted > 0 ? (totalCorrect / totalAttempted) * 100 : 0;
 
@@ -319,7 +318,7 @@ export function AdmissionsHub() {
                 </h2>
                 <p className="mt-1 text-xs text-[#a1a1aa]">
                   400-marks computer-based test conducted by UET Lahore (100 MCQs total: +4 marks
-                  per correct answer, -1 mark penalty per incorrect answer).
+                  per correct answer, no negative marking).
                 </p>
               </div>
               <Link
@@ -337,8 +336,8 @@ export function AdmissionsHub() {
                 <div>
                   <h3 className="text-base font-bold text-white">Live ECAT Score Simulator</h3>
                   <p className="text-xs text-[#a1a1aa]">
-                    Simulate your correct vs incorrect responses to see your net score after
-                    negative marking.
+                    Simulate your correct vs incorrect responses. ECAT has no negative marking, so
+                    only correct answers change your score.
                   </p>
                 </div>
                 <div className="text-right">
@@ -377,7 +376,7 @@ export function AdmissionsHub() {
                   </div>
                   <div>
                     <label className="text-[10px] text-rose-400 block mb-0.5 cursor-pointer">
-                      <span>Wrong (-1): {mathWrong}</span>
+                      <span>Wrong (0): {mathWrong}</span>
                       <input
                         type="range"
                         min={0}
@@ -411,7 +410,7 @@ export function AdmissionsHub() {
                   </div>
                   <div>
                     <label className="text-[10px] text-rose-400 block mb-0.5 cursor-pointer">
-                      <span>Wrong (-1): {physicsWrong}</span>
+                      <span>Wrong (0): {physicsWrong}</span>
                       <input
                         type="range"
                         min={0}
@@ -445,7 +444,7 @@ export function AdmissionsHub() {
                   </div>
                   <div>
                     <label className="text-[10px] text-rose-400 block mb-0.5 cursor-pointer">
-                      <span>Wrong (-1): {chemWrong}</span>
+                      <span>Wrong (0): {chemWrong}</span>
                       <input
                         type="range"
                         min={0}
@@ -479,7 +478,7 @@ export function AdmissionsHub() {
                   </div>
                   <div>
                     <label className="text-[10px] text-rose-400 block mb-0.5 cursor-pointer">
-                      <span>Wrong (-1): {engWrong}</span>
+                      <span>Wrong (0): {engWrong}</span>
                       <input
                         type="range"
                         min={0}
@@ -556,7 +555,7 @@ export function AdmissionsHub() {
                   </li>
                   <li>
                     &bull; <strong className="text-white">Pass 3 (80-100 min):</strong> Review
-                    flagged questions; avoid pure random guessing.
+                    flagged questions and attempt all of them (no negative marking).
                   </li>
                 </ul>
               </div>

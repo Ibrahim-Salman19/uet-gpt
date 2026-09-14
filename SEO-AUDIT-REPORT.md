@@ -183,27 +183,56 @@ eduvision.edu.pk) surfaced a real terminology gap, which was then checked agains
 UET Taxila's own official admissions portal (`admissions.uettaxila.edu.pk`, live for
 Fall 2026 admissions) rather than taken on a single blog's word:
 
-- **"TCAT" is real, official terminology this site never used.** The official
-  `Admission_Eligibility.php` page lists the entry-test requirement for every eligible
-  department as *"TCAT / ECAT / Equivalent acceptable to PEC & UET Taxila."* This
-  site's content used "ECAT" exclusively — accurate, since ECAT is what the official
-  merit calculator itself labels the field and what most FSc Pre-Engineering applicants
-  sit, but a real keyword gap: anyone searching "UET Taxila TCAT" found nothing.
-  **Fixed**: added a paragraph and a new FAQ to `/learn/ecat` (`src/lib/learn-terms.ts`)
-  citing the official table directly, without overclaiming the exact relationship
-  between the two terms beyond what the source states.
-- **An unverified claim was deliberately left alone.** Maqsad's guide states ECAT
-  "Negative Marking: None for 2026" — directly contradicting the +4/-1 marking scheme
-  already built into this site's live interactive ECAT score simulator (and, by
-  extension, this pass's own `/uet-taxila/ecat-guide` page, which reused that scheme
-  as an established fact). The official pages fetched this pass (eligibility table,
-  merit calculator) don't state a marking scheme either way, so this **could not be
-  confirmed or refuted** from a primary source. Given the stakes — a wrong marking
-  scheme would give students actively wrong exam strategy — this was **not** changed
-  on a single secondary source's word. Whoever holds a current ECAT past paper or the
-  official test-conduction notice should verify this specifically; if negative marking
-  really was dropped for 2026, both the simulator's scoring logic and `ecat-guide`'s
-  strategy content need updating together.
+- **ECAT negative marking: RESOLVED on 2026-09-14. The site was wrong.** UET Lahore's
+  official ECAT page (`https://ecat.uet.edu.pk/General/Ecat`, fetched directly) says:
+  *"Each correct answer is worth four points. There is no passing threshold for any
+  program and no negative marking in ECAT as well."* The site claimed +4/-1 in four
+  places, and the /admissions simulator even subtracted marks for wrong answers.
+  **Fixed**:
+  - `admissions-hub.tsx`: the simulator now scores correct × 4, the sliders read
+    "Wrong (0)", and the header copy, tab description and Pass-3 advice are corrected.
+  - `/admissions` FAQ.
+  - `/uet-taxila/ecat-guide`: meta description, intro, marking line, the Pass-3
+    strategy (now "attempt everything" instead of "don't guess"), and the FAQs. The
+    subject list also gains the official Statistics combination.
+  - PIEAS comparison (`comparisons-data.ts`): removed the false "unlike ECAT" contrast.
+    PIEAS's own no-negative-marking claim is unverified and was left as is.
+- **TCAT is a separate test that UET Taxila conducts itself. It is not an alias of
+  ECAT.** Primary sources:
+  - The live `admissions.uettaxila.edu.pk/index.php` banners separate "TCAT-2026
+    (Conducted by UET Taxila)" from "ECAT-2026 (Conducted by UET Lahore)".
+  - The official TCAT-VII Fall 2026 advert says: Taxila Competency Assessment Test,
+    PEC-designated, for Engineering, Engineering Technology, CS and AI programs. It
+    lists registration at `entrytest.uettaxila.edu.pk`, a Rs. 3,000 non-refundable fee
+    paid via 1BILL, and tests at the PRISM Block. Test dates are 18 Sep, 25 Sep and
+    02 Oct 2026 (apply by 15/22/29 Sep), and the date is locked once the admit card is
+    issued.
+  - The eligibility table accepts *"TCAT / ECAT / Equivalent acceptable to PEC & UET
+    Taxila."*
+  - **Source conflict, resolved deliberately:** `FAQS.php` says "TCAT/ECAT/Equivalent
+    ... is conducted by UET Lahore. Register at admission.uet.edu.pk." That page is
+    stale: its header still says "Registration Opening Soon" while the homepage has
+    already posted later merit lists. The homepage and the advert win. **Future runs:
+    do not flip this back based on FAQS.php.**
+  - **Fixed**: `/learn/ecat` (lead, format paragraph, TCAT paragraph and FAQs) now says
+    that either test is accepted and that TCAT is UET Taxila's own. There is a new
+    `/learn/tcat` glossary page, which is in the sitemap via `getAllSlugs`.
+  - **Deliberately NOT written:** TCAT's paper format or marking scheme. Neither
+    official advert publishes one, and the entry-test portal is a JS-only shell.
+    Third-party blogs guess at it ("MCQs from Math, Physics, Chemistry/CS, English")
+    without a source.
+  - **Open question:** Maqsad's "Rs 3,000 / no negative marking" line could describe
+    either test. Rs 3,000 is also the ECAT Phase-2 fee.
+- **Fee figures: calculator vs official FAQ, not reconciled.**
+  - The official FAQ gives Regular (Subsidized) ≈ Rs. 104,800 for the first semester
+    without hostel, Partial-Subsidized ≈ Rs. 339,800+, and hostel ≈ Rs. 36,000–40,000
+    for the first semester.
+  - The fee calculator uses tuition of 48,000/52,000 subsidized, and the /admissions
+    FAQ says "PKR 48,000–55,000/semester".
+  - These may measure different things (tuition only vs. the full first-semester
+    charge including one-time admission fees), so nothing was changed. Whoever
+    maintains the fee data should reconcile it against the official fee-structure
+    notice.
 - **Closing-merit figures don't reconcile cleanly with a second source.** eduvision's
   2026 fee/merit table lists closing merits (e.g. Computer Science 79.32%, Mechanical
   77.19%) that differ from this site's `MERIT_ARCHIVE_DATA` 2025 figures (CS 80.450%,

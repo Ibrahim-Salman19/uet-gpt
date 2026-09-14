@@ -8,7 +8,7 @@ import { BreadcrumbJsonLd } from "@/lib/json-ld";
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://uet-gpt.vercel.app";
 
 const title = `ECAT ${CURRENT_ACADEMIC_YEAR} Preparation Guide: Syllabus, Strategy & Time Management`;
-const description = `How to prepare for ECAT ${CURRENT_ACADEMIC_YEAR}: subject-wise high-yield topics, the 400-mark negative-marking scheme, and a 3-pass time-management strategy for UET Taxila's entry test.`;
+const description = `How to prepare for ECAT ${CURRENT_ACADEMIC_YEAR}: subject-wise high-yield topics, the 400-mark scoring (no negative marking), and a 3-pass time-management strategy for UET Taxila applicants.`;
 
 export const metadata: Metadata = {
   title,
@@ -52,14 +52,14 @@ const SUBJECTS = [
     topics: ["Electromagnetism", "Alternating Current", "Nuclear Physics", "Thermodynamics"],
   },
   {
-    name: "Chemistry / Computer Science",
+    name: "Chemistry / Computer Science / Statistics",
     questions: 30,
     maxMarks: 120,
     topics: [
       "Organic Reaction Mechanisms",
       "Chemical Equilibrium",
       "Electrochemistry",
-      "(CS candidates: programming fundamentals in lieu of Chemistry)",
+      "(Computer Science or Statistics replaces Chemistry in other official subject combinations)",
     ],
   },
   {
@@ -84,22 +84,22 @@ const TIME_PASSES = [
   {
     pass: "Pass 3",
     window: "80-100 minutes",
-    desc: "Review flagged questions only. Avoid pure random guessing — the -1 penalty per wrong answer means a blind guess is expected-value-negative unless you can eliminate at least one of the four options first.",
+    desc: "Return to every flagged question and answer all of them. UET Lahore states there is no negative marking in ECAT, so a blank earns nothing while an educated guess (after eliminating options) can only add marks.",
   },
 ];
 
 const faqs = [
   {
     q: "How many questions are on the ECAT test?",
-    a: "ECAT has 100 multiple-choice questions worth 400 total marks: 30 Mathematics, 30 Physics, 30 Chemistry (or Computer Science for CS-track candidates), and 10 English, completed in 100 minutes.",
+    a: "ECAT has 100 multiple-choice questions worth 400 total marks: 10 English questions and 90 questions divided equally across your three chosen subjects (for FSc Pre-Engineering: 30 Mathematics, 30 Physics, 30 Chemistry), completed in 100 minutes.",
   },
   {
     q: "Does ECAT have negative marking?",
-    a: "Yes. Each correct answer is worth +4 marks and each incorrect answer costs -1 mark. Leaving a question blank costs 0 marks, so guessing only makes sense once you can eliminate at least one of the four options.",
+    a: "No. UET Lahore's official ECAT page states that each correct answer is worth 4 marks and there is no negative marking and no passing threshold. A wrong answer and a blank both score 0, so you should attempt every question.",
   },
   {
     q: "What are the highest-yield topics to study for ECAT?",
-    a: "Based on UET Taxila's recurring ECAT pattern: Conic Sections, Differentiation, Integration, Trigonometry and Vectors in Mathematics; Electromagnetism, Alternating Current, Nuclear Physics and Thermodynamics in Physics; and Organic Reaction Mechanisms, Chemical Equilibrium and Electrochemistry in Chemistry.",
+    a: "Commonly recommended high-yield FSc topics are Conic Sections, Differentiation, Integration, Trigonometry and Vectors in Mathematics; Electromagnetism, Alternating Current, Nuclear Physics and Thermodynamics in Physics; and Organic Reaction Mechanisms, Chemical Equilibrium and Electrochemistry in Chemistry.",
   },
   {
     q: "How much time should I spend per ECAT question?",
@@ -173,11 +173,11 @@ export default function EcatGuidePage() {
             ECAT {CURRENT_ACADEMIC_YEAR} Preparation Guide
           </h1>
           <p className="text-base sm:text-lg text-[#a1a1aa] leading-relaxed max-w-3xl">
-            ECAT (Engineering College Admission Test) is the 400-mark, negative-marked entry test
-            UET Lahore conducts for UET Taxila and the wider Punjab engineering-admission system. It
-            contributes 33% of your final merit aggregate. Here's the subject-wise syllabus
-            breakdown, the marking scheme, and a time-management strategy for the 100-minute test
-            window.
+            ECAT (Engineering College Admission Test) is the 400-mark entry test UET Lahore conducts
+            for public engineering institutions in Punjab, and one of the entry tests UET Taxila
+            accepts alongside its own TCAT. The entry test contributes 33% of your final merit
+            aggregate. Here's the subject-wise syllabus breakdown, the marking scheme, and a
+            time-management strategy for the 100-minute test window.
           </p>
         </header>
 
@@ -187,7 +187,12 @@ export default function EcatGuidePage() {
             Subject-Wise Syllabus &amp; High-Yield Topics
           </h2>
           <p className="text-sm text-[#a1a1aa] mb-6">
-            Each correct answer is worth +4 marks; each incorrect answer costs -1 mark.
+            Each correct answer is worth 4 marks. There is no negative marking in ECAT. Applicants
+            taking UET Taxila&apos;s own TCAT instead should see the{" "}
+            <Link href="/learn/tcat" className="text-[#d9b451] hover:underline">
+              TCAT registration and test dates
+            </Link>
+            .
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {SUBJECTS.map((s) => (
@@ -239,7 +244,7 @@ export default function EcatGuidePage() {
               Live Score Simulator &rarr;
             </h3>
             <p className="text-xs text-[#a1a1aa]">
-              Drag correct/wrong sliders per subject and see your net score in real time.
+              Drag the correct-answer slider per subject and see your score in real time.
             </p>
           </Link>
           <Link

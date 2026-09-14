@@ -217,17 +217,16 @@ export const COMPARISONS: ComparisonEntry[] = [
     peerStrengths: [
       "Very small class sizes and high faculty-to-student research exposure",
       "Strong applied-physics, nuclear engineering, and reactor-technology specializations",
-      "No negative marking on its own entry test, unlike ECAT's marking scheme",
     ],
     uetTaxilaStrengths: [
       "14 departments across mainstream civil, mechanical, electrical, and computing engineering versus PIEAS's narrower specialization",
-      "Uses ECAT, the same test most Punjab pre-engineering students already prepare for",
+      "Accepts ECAT, the test most Punjab pre-engineering students already prepare for, as well as its own TCAT",
       "Larger campus with 5 residential halls and a dedicated commuter bus network",
     ],
     rows: [
       {
         feature: "Entry Test",
-        uetTaxila: "ECAT (100 MCQs, negative marking)",
+        uetTaxila: "TCAT (UET Taxila) or ECAT (UET Lahore: 100 MCQs, no negative marking)",
         peer: "PIEAS Entry Test (≈100 MCQs, no negative marking)",
       },
       {
