@@ -65,6 +65,7 @@ import type * as embeddings_generate from "../embeddings/generate.js";
 import type * as embeddings_hybridRank from "../embeddings/hybridRank.js";
 import type * as embeddings_idf from "../embeddings/idf.js";
 import type * as embeddings_metadata from "../embeddings/metadata.js";
+import type * as embeddings_nearDuplicates from "../embeddings/nearDuplicates.js";
 import type * as embeddings_search from "../embeddings/search.js";
 import type * as emergencyStop from "../emergencyStop.js";
 import type * as eval from "../eval.js";
@@ -198,6 +199,7 @@ declare const fullApi: ApiFromModules<{
   "embeddings/hybridRank": typeof embeddings_hybridRank;
   "embeddings/idf": typeof embeddings_idf;
   "embeddings/metadata": typeof embeddings_metadata;
+  "embeddings/nearDuplicates": typeof embeddings_nearDuplicates;
   "embeddings/search": typeof embeddings_search;
   emergencyStop: typeof emergencyStop;
   eval: typeof eval;
