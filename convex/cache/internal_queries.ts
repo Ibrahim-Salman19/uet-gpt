@@ -34,6 +34,9 @@ const cacheEntryValidator = v.object({
   alternateQueryTexts: v.optional(v.array(v.string())),
   alternateEmbeddings: v.optional(v.array(v.array(v.float64()))),
   maxDocumentUpdatedAt: v.optional(v.number()),
+  sourceDocVersions: v.optional(
+    v.array(v.object({ documentId: v.id("documents"), contentHash: v.optional(v.string()) })),
+  ),
 });
 
 export const getCacheEntry = internalQuery({
@@ -140,6 +143,34 @@ export const getDocByEntryId = internalQuery({
     const doc = await ctx.db.get(chunk.documentId);
     if (!doc) return null;
     return { updatedAt: doc.updatedAt, crawledAt: doc.crawledAt };
+  },
+});
+
+export const getSourceDocStates = internalQuery({
+  args: { documentIds: v.array(v.id("documents")) },
+  returns: v.array(
+    v.union(
+      v.object({
+        contentHash: v.optional(v.string()),
+        isStale: v.optional(v.boolean()),
+        lifecycleStatus: v.optional(v.string()),
+      }),
+      v.null(),
+    ),
+  ),
+  handler: async (ctx, args) => {
+    if (args.documentIds.length > 500)
+      throw new ConvexError("Cannot check more than 500 documents at a time");
+    const docs = await Promise.all(args.documentIds.map((id) => ctx.db.get(id)));
+    return docs.map((doc) =>
+      doc
+        ? {
+            contentHash: doc.contentHash,
+            isStale: doc.isStale,
+            lifecycleStatus: doc.lifecycleStatus,
+          }
+        : null,
+    );
   },
 });
 

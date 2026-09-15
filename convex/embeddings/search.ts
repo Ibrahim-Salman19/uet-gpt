@@ -98,6 +98,7 @@ function pickBestContent(
   textRes: TextSearchResult[],
   chunkTextRes: TextSearchResult[],
   itemId: string,
+  chunkContextualizedTextRes: TextSearchResult[] = [],
 ): string {
   // Determine base detailed content (prioritize parent document chunk for context richness)
   let baseContent = "";
@@ -115,6 +116,15 @@ function pickBestContent(
         const chunkMatch = chunkTextRes.find((r) => r.ragId === itemId);
         if (chunkMatch) {
           baseContent = chunkMatch.text;
+        } else {
+          // Falls back here only for chunks that ranked via the
+          // search_contextualized_text channel (Phase 4) but weren't already
+          // found above - runContextualized returns the chunk's raw text
+          // (not the context blurb), so this is real content, not the summary.
+          const contextualizedMatch = chunkContextualizedTextRes.find((r) => r.ragId === itemId);
+          if (contextualizedMatch) {
+            baseContent = contextualizedMatch.text;
+          }
         }
       }
     }
@@ -263,11 +273,14 @@ export const searchDocumentsAction = internalAction({
             "returned null - see its own warning above for cause); continuing lexical+FAQ only",
         );
       } else {
-        const denseHits = await ctx.runAction(internal.knowledgeStore.denseSearchAction.denseSearch, {
-          queryEmbedding: cfEmbedding,
-          topK: searchLimit,
-          category: args.category,
-        });
+        const denseHits = await ctx.runAction(
+          internal.knowledgeStore.denseSearchAction.denseSearch,
+          {
+            queryEmbedding: cfEmbedding,
+            topK: searchLimit,
+            category: args.category,
+          },
+        );
 
         // Pinecone hits are identified by (documentId, chunkKey); everything
         // downstream (hybridRank fusion, batchFetchDocMeta, pickBestContent)
@@ -343,7 +356,7 @@ export const searchDocumentsAction = internalAction({
       }));
     }
 
-    const [textResRaw, chunkTextResRaw] = await Promise.all([
+    const [textResRaw, chunkTextResRaw, chunkContextualizedTextResRaw] = await Promise.all([
       ctx.runQuery(internal.crawl.queries.fullTextSearch, {
         query: finalQueryText,
         limit: searchLimit,
@@ -352,17 +365,32 @@ export const searchDocumentsAction = internalAction({
         query: finalQueryText,
         limit: Math.min(20, searchLimit),
       }),
+      ctx.runQuery(internal.embeddings.chunkTextSearch.runContextualized, {
+        query: finalQueryText,
+        limit: Math.min(20, searchLimit),
+      }),
     ]);
 
     const textRes = textResRaw as TextSearchResult[];
     const chunkTextRes = chunkTextResRaw as TextSearchResult[];
+    const chunkContextualizedTextRes = chunkContextualizedTextResRaw as TextSearchResult[];
 
     const textRanked = textRes.map((r) => ({ id: r.ragId, score: r.score }));
     const chunkRanked = chunkTextRes.map((r) => ({ id: r.ragId, score: r.score }));
+    const chunkContextualizedRanked = chunkContextualizedTextRes.map((r) => ({
+      id: r.ragId,
+      score: r.score,
+    }));
 
-    // 3-way RRF fusion across overfetched candidate pools
+    // 4-way RRF fusion across overfetched candidate pools. The contextualized
+    // channel is weighted at half of the already-half-weighted chunk-text
+    // channel: it's a new, unevaluated signal covering only whatever fraction
+    // of the corpus has been contextualized so far (Phase 4 of the retrieval-
+    // pipeline remediation plan) - conservative until real eval data supports
+    // raising it.
     const fused = hybridRank(vectorRanked, textRanked, RRF_K, adaptiveWeights, "reciprocal", [
       { results: chunkRanked, weight: adaptiveWeights.text * 0.5 },
+      { results: chunkContextualizedRanked, weight: adaptiveWeights.text * 0.25 },
     ]);
 
     const docMap = await batchFetchDocMeta(ctx, fused);
@@ -403,6 +431,7 @@ export const searchDocumentsAction = internalAction({
         textRes,
         denseHitContent.length > 0 ? [...chunkTextRes, ...denseHitContent] : chunkTextRes,
         item.id,
+        chunkContextualizedTextRes,
       );
 
       enrichedResults.push({

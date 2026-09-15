@@ -1,7 +1,14 @@
 import { ConvexError, type Infer, v } from "convex/values";
-import { internal } from "../_generated/api";
+import { api, internal } from "../_generated/api";
 import { action } from "../_generated/server";
+import {
+  type CandidateEvidenceSummary,
+  type EvidenceDecisionInput,
+  evaluateEvidenceGate,
+} from "../governance/evidenceGate";
 import { recordTiming, truncateQuery } from "../observability/metrics";
+import { classifyQueryRisk } from "../shared/freshnessPolicy";
+import { isOfficialUrlAllowed } from "../verification/officialSourceVerifier";
 import { type ConfidenceTier, CRAG_CONFIG, INJECTION_RE, MAX_QUERY_LEN } from "./constants";
 
 function scanForInjection(query: string): string {
@@ -31,9 +38,10 @@ function determineConfidenceTier(results: { relevanceScore: number }[]): {
       tier: "refuse",
       instruction:
         "SYSTEM INSTRUCTION TO AI: No relevant information was found for this query. " +
-        "You MUST respond exactly with: " +
+        "Do not state any UET-specific facts, figures, dates, or names. You MUST respond with: " +
         "'I don't have verified information about this - please check uettaxila.edu.pk directly.' " +
-        "Do not attempt to guess or hallucinate an answer.\n\n",
+        "Do not attempt to guess or hallucinate an answer. " +
+        "(If the user is only greeting you or asking what you can help with, reply briefly and politely instead.)\n\n",
     };
   }
   const topScore = results[0]!.relevanceScore;
@@ -75,7 +83,7 @@ function determineConfidenceTier(results: { relevanceScore: number }[]): {
       instruction:
         "SYSTEM INSTRUCTION TO AI: Retrieved documents have moderate relevance (score 0.40–0.60). " +
         "You MUST cite specific sources by name for every factual claim. " +
-        "If a claim cannot be attributed to a source, qualify it with 'approximately' or 'generally'.\n\n",
+        "If a claim cannot be attributed to a source, leave it out rather than hedging it.\n\n",
     };
   }
   return { tier: "normal", instruction: "" };
@@ -180,6 +188,13 @@ type SearchResult = {
   relevanceScore: number;
   content: string;
   headingPath?: string[];
+  // Present on results from searchDocumentsAction (embeddings/search.ts computes
+  // these per-candidate via shared/freshnessPolicy.ts) but not declared on that
+  // action's TS-checked return type here, so treat as loose/untrusted strings.
+  freshnessState?: string;
+  applicability?: string;
+  crawledAt?: number;
+  freshnessTier?: string;
 };
 
 async function searchVectorDB(
@@ -251,6 +266,94 @@ function buildSourcesFromResults(results: SearchResult[]): SourceEntry[] {
   }));
 }
 
+function narrowFreshnessState(value: string | undefined): "fresh" | "aged" | "unknown" {
+  return value === "fresh" || value === "aged" ? value : "unknown";
+}
+
+function narrowApplicability(
+  value: string | undefined,
+): "current" | "historical" | "session_specific" | "expired" | "timeless" | "unknown" {
+  // The live pipeline only ever produces "current" | "unknown" today
+  // (embeddings/search.ts); the other literals exist on the shared
+  // Applicability type but have no current producer.
+  return value === "current" ? "current" : "unknown";
+}
+
+/**
+ * Pure mapping from a live query + search results onto evaluateEvidenceGate's
+ * input shape. Extracted from runEvidenceGateShadow so the mapping itself -
+ * the part with real risk of being wrong (see that function's docstring) - is
+ * directly unit-testable without mocking a Convex ctx. See
+ * tests/unit/evidence-gate-shadow-mapping.test.ts.
+ */
+export function buildEvidenceGateInput(
+  safeQuestion: string,
+  finalResults: SearchResult[],
+): EvidenceDecisionInput {
+  const risk = classifyQueryRisk(safeQuestion);
+  const queryRisk: EvidenceDecisionInput["queryRisk"] =
+    risk === "high" ? "high_current" : risk === "medium" ? "medium_current" : "low_current";
+  const temporalIntent: EvidenceDecisionInput["temporalIntent"] =
+    risk === "low" ? "unknown" : "current";
+
+  const candidates: CandidateEvidenceSummary[] = finalResults.map((r) => ({
+    id: r.entryId,
+    authority: isOfficialUrlAllowed(r.url) ? "official_primary" : "unknown",
+    freshnessState: narrowFreshnessState(r.freshnessState),
+    applicability: narrowApplicability(r.applicability),
+  }));
+
+  return { queryRisk, temporalIntent, candidates };
+}
+
+/**
+ * SHADOW MODE ONLY (retrieval-pipeline remediation plan, Phase 3): computes what
+ * evaluateEvidenceGate WOULD decide for this query and logs it via the existing
+ * observability pipeline. Deliberately never reads its return value into the
+ * response - do not wire this into `context`/`sources`/`cragTier` until the
+ * shadow-mode review bar in the plan (200 queries / one week, checked against
+ * high_current queries specifically) has been reviewed.
+ *
+ * queryRisk/temporalIntent are approximations: classifyQueryRisk only has a
+ * 3-value "high"|"medium"|"low" scale (mapped 1:1 onto evidenceGate's
+ * "*_current" values below), and temporalIntent has no live producer at all
+ * (the only source, routing/understandQuery.ts, is dormant/retired) - it's
+ * defaulted to "current" for high/medium risk since evaluateEvidenceGate only
+ * consults temporalIntent after the high_current branch has already returned.
+ * authority is derived from isOfficialUrlAllowed (verification/officialSourceVerifier.ts)
+ * since the corpus is crawled exclusively from uettaxila.edu.pk subdomains
+ * (scripts/crawl_config.json); sources without a checkable URL (e.g. FAQ
+ * entries with no sourceUrl) are conservatively treated as non-primary.
+ */
+async function runEvidenceGateShadow(
+  ctx: any,
+  safeQuestion: string,
+  finalResults: SearchResult[],
+): Promise<void> {
+  try {
+    const verdict = evaluateEvidenceGate(buildEvidenceGateInput(safeQuestion, finalResults));
+
+    await ctx.runMutation(api.observability.events.logOperationalEvent, {
+      event: "evidence_gate_shadow_verdict",
+      reason: verdict.reasonCode,
+      queryRisk: verdict.queryRisk,
+      eligibleSources: verdict.eligibleSourcesCount,
+      freshPrimarySources: verdict.freshPrimarySourcesCount,
+      agedSources: verdict.agedSourcesCount,
+      unknownFreshnessSources: verdict.unknownFreshnessSourcesCount,
+      metadataJson: JSON.stringify({
+        shadowMode: true,
+        decision: verdict.decision,
+        freshSourcesCount: verdict.freshSourcesCount,
+        currentApplicabilityConfirmed: verdict.currentApplicabilityConfirmed,
+        temporalIntent: verdict.temporalIntent,
+      }),
+    });
+  } catch (e) {
+    console.warn("[EVIDENCE_GATE_SHADOW] failed, response unaffected:", e);
+  }
+}
+
 type CragEval = { index: number; relevant: boolean; confidence: number };
 
 /** CRAG evaluation: uses Groq to judge chunk relevance, adjusts tier. */
@@ -311,14 +414,8 @@ async function evaluateWithCrag(
       };
     }
 
-    if (relevantChunks.length <= 2) {
-      return {
-        finalResults: relevantChunks,
-        finalSources: buildSourcesFromResults(relevantChunks),
-        tier: "hedge",
-      };
-    }
-
+    // Few survivors is not low confidence: a fee or deadline usually lives in one
+    // chunk. The tier comes from the surviving chunks' scores (determineConfidenceTier).
     return {
       finalResults: relevantChunks,
       finalSources: buildSourcesFromResults(relevantChunks),
@@ -359,12 +456,16 @@ async function searchAndRerank(
 
 type SourceEntry = Infer<typeof sourceValidator>;
 
+// The confidence-tier directive is returned separately from `context` so the
+// chat route can place it in trusted system text. It used to be prepended to
+// `context`, which buildSystemPrompt fences as untrusted data the model is told
+// never to obey, so every refuse/hedge/cite directive was silently neutralized.
 async function buildResponseContext(
   ctx: any,
   internalActions: any,
   searchResults: SearchResult[],
   overrideTier?: ConfidenceTier | null,
-): Promise<string> {
+): Promise<{ context: string; answerInstruction: string }> {
   let context: string;
 
   if (searchResults.length === 0) {
@@ -378,6 +479,10 @@ async function buildResponseContext(
           url: r.url,
           title: r.title,
           headingPath: r.headingPath,
+          crawledAt: r.crawledAt,
+          freshnessTier: r.freshnessTier,
+          freshnessState: r.freshnessState,
+          applicability: r.applicability,
         })),
         maxTokens: 3000,
       });
@@ -403,20 +508,52 @@ async function buildResponseContext(
     }
   }
 
+  let answerInstruction: string;
   if (overrideTier === "refuse") {
     // CRAG judged the chunks irrelevant - use the genuine empty-retrieval refuse
     // instruction (determineConfidenceTier no longer hard-refuses on a low score alone).
-    const { instruction } = determineConfidenceTier([]);
-    if (instruction) context = instruction + context;
+    answerInstruction = determineConfidenceTier([]).instruction;
   } else if (overrideTier === "hedge") {
-    const { instruction } = determineConfidenceTier([{ relevanceScore: 0.3 }]);
-    if (instruction) context = instruction + context;
+    answerInstruction = determineConfidenceTier([{ relevanceScore: 0.3 }]).instruction;
   } else {
-    const { instruction } = determineConfidenceTier(searchResults);
-    if (instruction) context = instruction + context;
+    answerInstruction = determineConfidenceTier(searchResults).instruction;
   }
 
-  return context;
+  return { context, answerInstruction: answerInstruction.trim() };
+}
+
+const MAX_HISTORY_MESSAGES = 6;
+const MAX_HISTORY_CHARS_PER_MESSAGE = 1000;
+
+async function resolveStandaloneQuestion(
+  ctx: any,
+  internals: any,
+  question: string,
+  history: Array<{ role: "user" | "assistant"; content: string }>,
+): Promise<string> {
+  const recent = history
+    .slice(-MAX_HISTORY_MESSAGES)
+    .map((m) => ({ role: m.role, content: m.content.slice(0, MAX_HISTORY_CHARS_PER_MESSAGE) }))
+    .filter((m) => m.content.trim().length > 0);
+  if (!recent.some((m) => m.role === "user")) return question;
+
+  try {
+    const condensed: string = (
+      await ctx.runAction(internals.rag.routing.condenseQuestionAction, {
+        question,
+        history: recent,
+      })
+    ).trim();
+    // The rewrite is model output derived from user-controlled text: hold it to the
+    // same checks as the original question, and fall back to the original if it fails.
+    if (!condensed || condensed.length > MAX_QUERY_LEN || INJECTION_RE.test(condensed)) {
+      return question;
+    }
+    return condensed;
+  } catch (e) {
+    console.warn("Question condensing failed, using the original question:", e);
+    return question;
+  }
 }
 
 // ── Exported action ───────────────────────────────────────────────────────
@@ -424,12 +561,27 @@ async function buildResponseContext(
 export const retrieveContext = action({
   args: {
     question: v.string(),
+    // Prior turns (oldest first, excluding `question`), used only to make a
+    // follow-up question standalone before retrieval.
+    history: v.optional(
+      v.array(
+        v.object({
+          role: v.union(v.literal("user"), v.literal("assistant")),
+          content: v.string(),
+        }),
+      ),
+    ),
   },
   returns: v.object({
     intent: v.string(),
     context: v.string(),
     sources: v.array(sourceValidator),
     cachedResponse: v.union(v.string(), v.null()),
+    // Trusted confidence-tier directive for the answer model (empty when none).
+    answerInstruction: v.optional(v.string()),
+    // The standalone question retrieval actually ran on (a condensed follow-up),
+    // so the cache write keys on the same text the cache read used.
+    retrievalQuestion: v.optional(v.string()),
     model: v.optional(v.string()),
     queryEmbedding: v.array(v.float64()),
   }),
@@ -445,7 +597,12 @@ export const retrieveContext = action({
     const _i: any = internal;
 
     const timer = recordTiming();
-    const safeQuestion = scanForInjection(args.question);
+    const safeQuestion = await resolveStandaloneQuestion(
+      ctx,
+      _i,
+      scanForInjection(args.question),
+      args.history ?? [],
+    );
 
     console.log("[RETRIEVAL] Query start", {
       query: truncateQuery(safeQuestion),
@@ -557,7 +714,17 @@ export const retrieveContext = action({
       });
     }
 
-    const context = await buildResponseContext(ctx, _i, finalResults, cragTier);
+    // Shadow mode: computes and logs what evaluateEvidenceGate would decide,
+    // never affects context/sources/response. See runEvidenceGateShadow's
+    // docstring and the retrieval-pipeline remediation plan, Phase 3.
+    await runEvidenceGateShadow(ctx, safeQuestion, finalResults);
+
+    const { context, answerInstruction } = await buildResponseContext(
+      ctx,
+      _i,
+      finalResults,
+      cragTier,
+    );
 
     const totalLatency = timer.end();
     console.log("[RETRIEVAL] Query complete", {
@@ -571,9 +738,13 @@ export const retrieveContext = action({
     return {
       intent,
       context,
+      answerInstruction,
       sources: finalSources,
       cachedResponse: null,
-      queryEmbedding,
+      retrievalQuestion: safeQuestion,
+      // Cache writes must use the same key space as cache reads: the HyDE-free
+      // rewrite embedding, not the HyDE search embedding (a different vector).
+      queryEmbedding: cacheEmbedding,
     };
   },
 });

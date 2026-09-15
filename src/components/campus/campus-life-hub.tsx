@@ -6,6 +6,7 @@ import { useId, useMemo, useState } from "react";
 import { CampusDirectory } from "@/components/directory/campus-directory";
 import { SocietiesDirectory } from "@/components/societies/societies-directory";
 import { BusRoutesExplorer } from "@/components/transport/bus-routes-explorer";
+import { HOSTELS } from "@/lib/campus-data";
 
 type CampusTab = "hostels" | "transport" | "societies" | "directory";
 
@@ -33,64 +34,6 @@ const TABS: { id: CampusTab; label: string; badge?: string; desc: string }[] = [
     label: "Campus Directory",
     badge: "Phonebook",
     desc: "Searchable contact numbers, direct phone extensions, and departmental official emails",
-  },
-];
-
-export const HOSTELS = [
-  {
-    name: "Sir Syed Hall (Boys)",
-    capacity: "250+ Residents",
-    roomTypes: "2-Seater & 3-Seater Dorms",
-    targetBatch: "Freshmen & 2nd Year Undergraduates",
-    facilities: [
-      "Fiber Optic Internet",
-      "Common TV Lounge",
-      "Table Tennis Arena",
-      "Filtered RO Water Plant",
-    ],
-    desc: "Primary residential hall for incoming undergraduate engineers with dedicated common study rooms, 24/7 solar backup power, and recreational areas.",
-  },
-  {
-    name: "Allama Iqbal Hall (Boys)",
-    capacity: "300+ Residents",
-    roomTypes: "Cubicles (Singles) & 2-Seaters",
-    targetBatch: "3rd Year & Final Year (Senior) Undergraduates",
-    facilities: ["Quiet Study Rooms", "Badminton Court", "Laundry Facility", "Subsidized Canteen"],
-    desc: "Senior undergraduate residential block with cubicles for Final Year Project (FYP) researchers and direct access to Central Library.",
-  },
-  {
-    name: "Ali Hall (Boys)",
-    capacity: "280+ Residents",
-    roomTypes: "2-Seater & 3-Seater Rooms",
-    targetBatch: "2nd & 3rd Year Undergraduates",
-    facilities: [
-      "Uninterrupted Solar Power",
-      "Indoor Sports Arena",
-      "Modern Dining Hall",
-      "CCTV Security",
-    ],
-    desc: "Modern residential hall equipped with high-speed campus LAN ports, solar energy inverters, and hygienic dining mess.",
-  },
-  {
-    name: "Quaid-e-Azam Hall (Boys)",
-    capacity: "320+ Residents",
-    roomTypes: "Dormitories & 2-Seaters",
-    targetBatch: "Undergraduates & Postgraduate Scholars",
-    facilities: ["Sports Complex Access", "Gymnasium Proximity", "Mosque Adjacent", "Guest Rooms"],
-    desc: "Largest on-campus residential block situated right next to the University Main Stadium, Gymnasium, and Central Mosque.",
-  },
-  {
-    name: "Fatima Jinnah Hall (Girls)",
-    capacity: "350+ Residents",
-    roomTypes: "Cubicles, 2-Seaters & 3-Seater Suites",
-    targetBatch: "All Undergraduate & Postgraduate Female Students",
-    facilities: [
-      "24/7 Dedicated Female Security",
-      "On-Site Gymnasium",
-      "Exclusive Dining Mess",
-      "Private Courtyard & Garden",
-    ],
-    desc: "State-of-the-art secure female residential complex featuring round-the-clock CCTV surveillance, biometric access, and dedicated transport pickup.",
   },
 ];
 

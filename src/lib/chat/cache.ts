@@ -51,6 +51,12 @@ function base64Json(value: unknown): string {
   return btoa(binString);
 }
 
+// Emitted at most once per warm server instance: the point of reporting a
+// missing INTERNAL_API_SECRET is to make it impossible to miss on the
+// observability dashboard, not to write a traceSpans row on every single
+// chat response for as long as the secret stays unset.
+let hasReportedMissingCacheSecret = false;
+
 // Only spend an extra LLM + embedding call generating alternate phrasings for
 // queries that are plausibly recurring (short, natural-language questions).
 // Long/one-off prompts rarely benefit from alternate-phrasing cache lookups, so
@@ -70,6 +76,25 @@ export function buildCacheWriteCallback(
       console.error(
         "INTERNAL_API_SECRET is not set - skipping semantic cache write (server-trust required).",
       );
+      if (!hasReportedMissingCacheSecret) {
+        hasReportedMissingCacheSecret = true;
+        // Fire-and-forget: this must never block or fail the response that's
+        // already been streamed to the user by the time this callback runs.
+        after(async () => {
+          try {
+            await convex.mutation(api.observability.events.logOperationalEvent, {
+              event: "semantic_cache_write_skipped",
+              reason: "INTERNAL_API_SECRET_MISSING_ERROR",
+              metadataJson: JSON.stringify({
+                detail:
+                  "Semantic cache write path is disabled because INTERNAL_API_SECRET is unset. Reads still work against existing entries, but no new entries are being written.",
+              }),
+            });
+          } catch (err) {
+            console.error("Failed to report missing INTERNAL_API_SECRET to observability:", err);
+          }
+        });
+      }
       return;
     }
     if (ragResult.queryEmbedding && ragResult.queryEmbedding.length > 0) {
@@ -85,7 +110,9 @@ export function buildCacheWriteCallback(
 
           await convex.action(api.cache.set.setFromServer, {
             secret,
-            queryText: question,
+            // retrievalQuestion is set on every generated (cache-miss) answer; the
+            // fallback only covers cache-hit/off-topic results, which never reach onFinish.
+            queryText: ragResult.retrievalQuestion ?? question,
             queryEmbedding: ragResult.queryEmbedding,
             response: text,
             sources: ragResult.sources,

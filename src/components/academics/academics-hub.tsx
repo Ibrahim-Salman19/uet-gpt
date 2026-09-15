@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
+import { CALENDAR_EVENTS } from "@/lib/campus-data";
 import { CURRENT_ACADEMIC_YEAR } from "@/lib/dates";
 import { PROGRAMS_DATA, type ProgramDetail } from "@/lib/programs-data";
 
@@ -26,51 +27,6 @@ const TABS: { id: AcademicTab; label: string; badge?: string; desc: string }[] =
     label: "Past Papers & OBE Grading",
     badge: "Washington Accord",
     desc: "Course Learning Outcomes (CLOs), exam rubrics, and Central Library access",
-  },
-];
-
-export const CALENDAR_EVENTS = [
-  {
-    category: "admissions",
-    date: "July 15 - August 10, 2026",
-    title: "ECAT 2026 Registration Window",
-    desc: "Online registration for the combined engineering entrance exam on the admission portal.",
-  },
-  {
-    category: "admissions",
-    date: "August 15 - August 22, 2026",
-    title: "ECAT Examination Conduction",
-    desc: "Computer-based testing across multiple designated testing centers across Pakistan.",
-  },
-  {
-    category: "admissions",
-    date: "August 28, 2026",
-    title: "ECAT Official Results Announcement",
-    desc: "Publication of computerized scores and individual percentile ranks.",
-  },
-  {
-    category: "admissions",
-    date: "September 05, 2026",
-    title: "First Merit List Announcement",
-    desc: "Display of 1st merit list for Category A (Subsidized) and Category S (Self-Finance).",
-  },
-  {
-    category: "classes",
-    date: "September 28, 2026",
-    title: "Freshmen Orientation & Classes Commence",
-    desc: "Official orientation day and commencement of regular Fall 2026 undergraduate classes.",
-  },
-  {
-    category: "exams",
-    date: "November 23 - November 28, 2026",
-    title: "Mid-Semester Examination Week",
-    desc: "Centralized 9th-week written assessments mapped directly to course CLOs.",
-  },
-  {
-    category: "exams",
-    date: "January 25 - February 06, 2027",
-    title: "End-Semester Final Examinations",
-    desc: "Comprehensive 18th-week final theory exams and Open-Ended Lab (OEL) assessments.",
   },
 ];
 

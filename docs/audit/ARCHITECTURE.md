@@ -2,6 +2,15 @@
 
 Reference: `docs/audit/SNAPSHOT_20260726T094113Z.json`. This documents what the code actually does, not aspirations.
 
+> **Note (2026-09-10):** this is a point-in-time snapshot, kept as-is for historical accuracy —
+> not re-diagrammed here. Some of the "DEAD"/"DYING" model callouts below are now stale: as of
+> September 2026 the contextualizer runs `gemini-3.5-flash-lite` (not the dead `gemini-2.0-flash`
+> shown below) and the dying Groq Llama models have been replaced by `openai/gpt-oss-20b` /
+> `openai/gpt-oss-120b`. A follow-up snapshot audit would be needed to re-verify the rest of this
+> diagram against current code; a September 2026 retrieval-pipeline audit found other drift
+> between docs and code — see `docs/rag-verification/final-production-verdict.md`'s correction
+> section.
+
 ## Discovery → Answer pipeline
 
 ```

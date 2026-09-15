@@ -162,6 +162,19 @@ status:   DONE. 747/747 batches, 0 failures, LSN-verified write visibility,
 
 ### Step 4 - choose the Convex backend  [owner: USER DECISION]
 
+> **Correction (2026-09-13):** a direct, live check of `.env.vercel-production.local` (production
+> deploy key, values not otherwise read/reported) found `NEXT_PUBLIC_CONVEX_URL` points at
+> **`modest-peacock-120.convex.cloud`** — a deployment name that appears nowhere else in this
+> doc or anywhere else in the repo. It is none of adamant-stork-623, rugged-bird-156, or
+> confident-viper-402 discussed below. Its env store is live and answers real queries (confirmed
+> via `npx convex env list`/`env get`), with `KNOWLEDGE_STORE_BACKEND=pinecone`,
+> `CLOUDFLARE_ACCOUNT_ID`/`CLOUDFLARE_API_TOKEN`/`PINECONE_API_KEY` all present, and
+> `RERANKER_URL`/`COHERE_API_KEY`/`INTERNAL_API_SECRET` all absent. Whatever debate below this
+> point led to a decision, the deployment actually live in production today is this
+> undocumented fourth one — this note does not attempt to reconstruct how or when that happened,
+> only to record what's confirmed. Worth reconciling deliberately rather than treating the
+> discussion below as still describing the open question.
+
 The blocker with no technical workaround. Options:
 
 ```text

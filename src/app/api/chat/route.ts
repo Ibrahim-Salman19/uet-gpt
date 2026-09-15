@@ -20,7 +20,11 @@ async function handlePost(req: NextRequest): Promise<Response> {
   if (phase1 instanceof NextResponse) return phase1;
   const phase2 = await authAndRateLimitPhase(req);
   if (phase2 instanceof NextResponse) return phase2;
-  const phase3 = await convexRagAndModelPhase(phase2.userId, phase1.question);
+  const phase3 = await convexRagAndModelPhase(
+    phase2.userId,
+    phase1.question,
+    phase1.messages.slice(0, -1),
+  );
   if (phase3 instanceof NextResponse) return phase3;
   return buildStreamResponse(
     phase1.messages,

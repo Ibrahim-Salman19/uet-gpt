@@ -23,9 +23,12 @@ function formatChunkHeader(chunk: {
     chunk.crawledAt && Number.isFinite(chunk.crawledAt)
       ? new Date(chunk.crawledAt).toISOString().split("T")[0]
       : "unavailable";
-  const tier = chunk.freshnessTier ?? "low";
-  const state = chunk.freshnessState ?? (dateStr === "unavailable" ? "unknown" : "fresh");
-  const applicability = chunk.applicability ?? (state === "fresh" ? "current" : "unknown");
+  const tier = chunk.freshnessTier ?? "unknown";
+  // Never infer freshness from the mere presence of a crawl timestamp: the answer
+  // model treats these labels as authoritative (a "fresh"/"current" default would
+  // let an old fee or deadline be presented as current).
+  const state = chunk.freshnessState ?? "unknown";
+  const applicability = chunk.applicability ?? "unknown";
 
   return `${sectionLabel}Source: [${chunk.title}](${chunk.url})
 Retrieved: ${dateStr}

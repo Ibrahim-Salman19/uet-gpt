@@ -82,27 +82,49 @@ async function getCachedEntry(
   return null;
 }
 
-async function checkSourceStaleness(ctx: ActionCtx, entry: Doc<"semanticCache">): Promise<boolean> {
-  const sourceEntryIds = entry.sourceEntryIds;
-  if (!sourceEntryIds || sourceEntryIds.length === 0) return false;
+type SourceDocVersion = { documentId: Id<"documents">; contentHash?: string };
+type CurrentSourceDocState = {
+  contentHash?: string;
+  isStale?: boolean;
+  lifecycleStatus?: string;
+} | null;
 
-  // Fast path: use denormalized maxDocumentUpdatedAt if available
-  if (entry.maxDocumentUpdatedAt) {
-    return entry.maxDocumentUpdatedAt > entry.createdAt;
-  }
-
-  // Fallback: fetch all source docs in a single query
-  try {
-    const docs = await ctx.runQuery(internal.cache.internal_queries.getDocsByEntryIds, {
-      entryIds: sourceEntryIds,
-    });
-    if (docs.some((d) => d.doc && d.doc.updatedAt > entry.createdAt)) {
-      return true;
+/**
+ * Source-version validity for a cache hit. Returns the invalidation reason, or
+ * null when every source document is unchanged and still servable.
+ * `current[i]` is the present state of `snapshot[i].documentId` (null = deleted).
+ * Entries with cited sources but no snapshot (written before snapshots existed)
+ * cannot be verified and are treated as invalid.
+ */
+export function findSourceInvalidation(
+  entry: { sourceEntryIds?: string[]; sourceDocVersions?: SourceDocVersion[] },
+  current: CurrentSourceDocState[],
+): string | null {
+  if (!entry.sourceEntryIds || entry.sourceEntryIds.length === 0) return null;
+  const snapshot = entry.sourceDocVersions;
+  if (!snapshot) return "SOURCE_VERSIONS_UNKNOWN";
+  for (let i = 0; i < snapshot.length; i++) {
+    const doc = current[i];
+    if (!doc) return "SOURCE_DOCUMENT_MISSING";
+    if (doc.contentHash !== snapshot[i]!.contentHash) return "SOURCE_DOCUMENT_CHANGED";
+    if (doc.isStale === true) return "SOURCE_DOCUMENT_STALE";
+    if (doc.lifecycleStatus !== undefined && doc.lifecycleStatus !== "active") {
+      return "SOURCE_DOCUMENT_RETIRED";
     }
-  } catch (err) {
-    console.error("checkSourceStaleness query failed:", err);
   }
-  return false;
+  return null;
+}
+
+async function checkSourceInvalidation(
+  ctx: ActionCtx,
+  entry: Doc<"semanticCache">,
+): Promise<string | null> {
+  const snapshot = entry.sourceDocVersions;
+  if (!snapshot || snapshot.length === 0) return findSourceInvalidation(entry, []);
+  const current = await ctx.runQuery(internal.cache.internal_queries.getSourceDocStates, {
+    documentIds: snapshot.map((s) => s.documentId),
+  });
+  return findSourceInvalidation(entry, current);
 }
 
 async function findMatchingCacheEntry(
@@ -123,8 +145,12 @@ async function findMatchingCacheEntry(
   const cached = await getCachedEntry(ctx, queryEmbedding);
   if (!cached) return null;
 
-  const [isStale, sourceExistsResult] = await Promise.all([
-    checkSourceStaleness(ctx, cached.entry),
+  const [invalidation, sourceExistsResult] = await Promise.all([
+    checkSourceInvalidation(ctx, cached.entry).catch((err) => {
+      // Fail closed (miss without deleting): an unverifiable hit is not served.
+      console.error("checkSourceInvalidation query failed:", err);
+      return "SOURCE_CHECK_FAILED";
+    }),
     cached.entry.sourceEntryIds && cached.entry.sourceEntryIds.length > 0
       ? ctx.runQuery(internal.cache.internal_queries.chunksExistByRagIds, {
           ragIds: cached.entry.sourceEntryIds,
@@ -132,9 +158,10 @@ async function findMatchingCacheEntry(
       : Promise.resolve(null),
   ]);
 
-  if (isStale) return null;
+  if (invalidation === "SOURCE_CHECK_FAILED") return null;
 
-  if (sourceExistsResult && !sourceExistsResult.every(Boolean)) {
+  if (invalidation || (sourceExistsResult && !sourceExistsResult.every(Boolean))) {
+    console.log("[CACHE] Invalidated", { reason: invalidation ?? "SOURCE_CHUNK_MISSING" });
     await ctx.runMutation(internal.cache.internal_queries.deleteCacheEntry, {
       id: cached.entryId,
     });

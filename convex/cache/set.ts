@@ -61,15 +61,13 @@ export const set = internalMutation({
     }
     const ttl: number = tierToTtl(args.freshnessTier, args.ttlMs ?? FRESHNESS_TTL.medium);
 
-    let maxDocUpdatedAt = args.maxDocumentUpdatedAt;
-
-    // If caller didn't provide maxDocumentUpdatedAt, derive it from ALL source
-    // documents. The denormalized value is trusted by the read fast-path
-    // (get.ts checkSourceStaleness) for the entire entry, so it must cover every
-    // source - sampling only a prefix would let updates to later sources go
-    // undetected and serve stale answers. Resolve ragId -> chunk in batches of
-    // 100 to bound the concurrent query fan-out.
-    if (maxDocUpdatedAt === undefined && args.sourceEntryIds && args.sourceEntryIds.length > 0) {
+    // Snapshot the contentHash of EVERY source document so the read path
+    // (get.ts findSourceInvalidation) can reject the hit once any of them
+    // changes - including changes to chunks this answer did not cite, which
+    // the ragId existence check cannot see. Resolve ragId -> chunk in batches
+    // of 100 to bound the concurrent query fan-out.
+    let sourceDocVersions: Array<{ documentId: Id<"documents">; contentHash?: string }> | undefined;
+    if (args.sourceEntryIds && args.sourceEntryIds.length > 0) {
       const docIds = new Set<Id<"documents">>();
       const RESOLVE_BATCH = 100;
       for (let i = 0; i < args.sourceEntryIds.length; i += RESOLVE_BATCH) {
@@ -86,14 +84,13 @@ export const set = internalMutation({
         }
       }
       const uniqueDocIds = Array.from(docIds);
+      sourceDocVersions = [];
       for (let i = 0; i < uniqueDocIds.length; i += RESOLVE_BATCH) {
         const docs = await Promise.all(
           uniqueDocIds.slice(i, i + RESOLVE_BATCH).map((id) => ctx.db.get(id)),
         );
         for (const doc of docs) {
-          if (doc && (maxDocUpdatedAt === undefined || doc.updatedAt > maxDocUpdatedAt)) {
-            maxDocUpdatedAt = doc.updatedAt;
-          }
+          if (doc) sourceDocVersions.push({ documentId: doc._id, contentHash: doc.contentHash });
         }
       }
     }
@@ -109,7 +106,10 @@ export const set = internalMutation({
       expiresAt: Date.now() + ttl,
       createdAt: Date.now(),
       sourceEntryIds: args.sourceEntryIds,
-      ...(maxDocUpdatedAt !== undefined ? { maxDocumentUpdatedAt: maxDocUpdatedAt } : {}),
+      ...(args.maxDocumentUpdatedAt !== undefined
+        ? { maxDocumentUpdatedAt: args.maxDocumentUpdatedAt }
+        : {}),
+      ...(sourceDocVersions ? { sourceDocVersions } : {}),
       ...(args.alternateQueryTexts ? { alternateQueryTexts: args.alternateQueryTexts } : {}),
       ...(args.alternateEmbeddings ? { alternateEmbeddings: args.alternateEmbeddings } : {}),
     };

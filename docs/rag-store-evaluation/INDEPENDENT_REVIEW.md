@@ -1,5 +1,14 @@
 # Independent review package (Agent B) - status as of 2026-08-29, last updated 2026-09-02
 
+> **Correction (2026-09-13):** a direct, live check of the production Convex deployment's env
+> store (via the deploy key in `.env.vercel-production.local`) found production is in fact
+> already running `KNOWLEDGE_STORE_BACKEND=pinecone`, on a deployment
+> (`modest-peacock-120.convex.cloud`) not mentioned anywhere in this document or `docs/SHIP.md`.
+> Whatever this document's "NOT READY" verdict was meant to gate, a cutover to Pinecone has
+> already happened in production as of this date, through a path this review evidently didn't
+> track. This note doesn't reopen or re-litigate the review below - it records that the
+> real-world state has moved past what this document currently describes.
+
 Prepared per mandate §68/§73: a passing benchmark does not authorize
 production cutover, and the agent who built the system must not self-certify
 it. This document is the entry point for that review - what to check, where

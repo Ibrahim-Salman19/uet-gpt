@@ -71,7 +71,7 @@ export const rerank = action({
       }
     }
 
-    // Tier 2: Cohere free rerank fallback (100 calls/day limit)
+    // Tier 2: Cohere free rerank fallback (trial keys: 1,000 calls/month, 10 req/min - per Cohere's rate-limits docs, not 100/day)
     const cohereKey = process.env.COHERE_API_KEY;
     if (cohereKey && docs.length > 0) {
       try {

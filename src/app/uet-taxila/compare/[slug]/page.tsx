@@ -172,7 +172,9 @@ export default async function ComparisonPage({ params }: PageProps) {
             <ul className="space-y-3">
               {cmp.peerStrengths.map((s) => (
                 <li key={s} className="flex items-start gap-3 text-sm text-zinc-200">
-                  <span className="text-emerald-400 font-mono text-xs font-bold mt-0.5">&check;</span>
+                  <span className="text-emerald-400 font-mono text-xs font-bold mt-0.5">
+                    &check;
+                  </span>
                   <span>{s}</span>
                 </li>
               ))}

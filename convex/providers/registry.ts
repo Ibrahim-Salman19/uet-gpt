@@ -55,7 +55,7 @@ export const PRODUCTION_MODEL_REGISTRY: Record<ModelTask, ModelRouteDefinition> 
   reranking: {
     task: "reranking",
     primaryProvider: "cohere",
-    primaryModel: "rerank-v3.5",
+    primaryModel: "rerank-v4.0-fast",
     fallbackProvider: "local",
     fallbackModel: "bge-reranker-large",
   },

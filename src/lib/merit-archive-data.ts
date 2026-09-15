@@ -1,0 +1,156 @@
+// Kept outside the "use client" explorer so server pages (/uet-taxila/closing-merit)
+// receive the array itself rather than a client reference.
+
+export interface MeritArchiveRow {
+  discipline: string;
+  degree: string;
+  categoryA_2022: string;
+  categoryA_2023: string;
+  categoryA_2024: string;
+  categoryA_2025: string;
+  categoryS_2025: string;
+  trend: "rising" | "stable" | "competitive";
+}
+
+export const MERIT_ARCHIVE_DATA: MeritArchiveRow[] = [
+  {
+    discipline: "Computer Science",
+    degree: "BS Computer Science",
+    categoryA_2022: "78.910%",
+    categoryA_2023: "79.450%",
+    categoryA_2024: "80.120%",
+    categoryA_2025: "80.450%",
+    categoryS_2025: "74.800%",
+    trend: "rising",
+  },
+  {
+    discipline: "Software Engineering",
+    degree: "BS Software Engineering",
+    categoryA_2022: "77.850%",
+    categoryA_2023: "78.600%",
+    categoryA_2024: "79.350%",
+    categoryA_2025: "79.820%",
+    categoryS_2025: "73.950%",
+    trend: "rising",
+  },
+  {
+    discipline: "Computer Engineering",
+    degree: "BSc Computer Engineering",
+    categoryA_2022: "75.400%",
+    categoryA_2023: "76.100%",
+    categoryA_2024: "76.650%",
+    categoryA_2025: "76.900%",
+    categoryS_2025: "71.200%",
+    trend: "rising",
+  },
+  {
+    discipline: "Electrical Engineering",
+    degree: "BSc Electrical Engineering",
+    categoryA_2022: "74.800%",
+    categoryA_2023: "74.200%",
+    categoryA_2024: "74.050%",
+    categoryA_2025: "74.150%",
+    categoryS_2025: "68.500%",
+    trend: "stable",
+  },
+  {
+    discipline: "Mechanical Engineering",
+    degree: "BSc Mechanical Engineering",
+    categoryA_2022: "74.500%",
+    categoryA_2023: "73.900%",
+    categoryA_2024: "73.750%",
+    categoryA_2025: "73.890%",
+    categoryS_2025: "67.900%",
+    trend: "stable",
+  },
+  {
+    discipline: "Mechatronics Engineering",
+    degree: "BSc Mechatronics Engineering",
+    categoryA_2022: "73.100%",
+    categoryA_2023: "72.900%",
+    categoryA_2024: "72.700%",
+    categoryA_2025: "72.840%",
+    categoryS_2025: "66.400%",
+    trend: "stable",
+  },
+  {
+    discipline: "Civil Engineering",
+    degree: "BSc Civil Engineering",
+    categoryA_2022: "72.600%",
+    categoryA_2023: "71.800%",
+    categoryA_2024: "71.300%",
+    categoryA_2025: "71.420%",
+    categoryS_2025: "65.800%",
+    trend: "stable",
+  },
+  {
+    discipline: "Electronics Engineering",
+    degree: "BSc Electronics Engineering",
+    categoryA_2022: "71.900%",
+    categoryA_2023: "71.200%",
+    categoryA_2024: "70.950%",
+    categoryA_2025: "71.100%",
+    categoryS_2025: "65.100%",
+    trend: "stable",
+  },
+  {
+    discipline: "Telecommunication Engineering",
+    degree: "BSc Telecommunication Engineering",
+    categoryA_2022: "71.200%",
+    categoryA_2023: "70.500%",
+    categoryA_2024: "70.100%",
+    categoryA_2025: "70.150%",
+    categoryS_2025: "64.300%",
+    trend: "stable",
+  },
+  {
+    discipline: "Industrial Engineering",
+    degree: "BSc Industrial Engineering",
+    categoryA_2022: "70.800%",
+    categoryA_2023: "70.100%",
+    categoryA_2024: "69.700%",
+    categoryA_2025: "69.800%",
+    categoryS_2025: "63.900%",
+    trend: "stable",
+  },
+  {
+    discipline: "Environmental Engineering",
+    degree: "BSc Environmental Engineering",
+    categoryA_2022: "69.500%",
+    categoryA_2023: "68.900%",
+    categoryA_2024: "68.400%",
+    categoryA_2025: "68.500%",
+    categoryS_2025: "62.500%",
+    trend: "stable",
+  },
+  {
+    discipline: "BS Mathematics",
+    degree: "BS Basic Sciences",
+    categoryA_2022: "66.200%",
+    categoryA_2023: "65.800%",
+    categoryA_2024: "65.100%",
+    categoryA_2025: "65.200%",
+    categoryS_2025: "58.500%",
+    trend: "stable",
+  },
+  {
+    discipline: "BS Physics",
+    degree: "BS Basic Sciences",
+    categoryA_2022: "65.900%",
+    categoryA_2023: "65.400%",
+    categoryA_2024: "64.700%",
+    categoryA_2025: "64.800%",
+    categoryS_2025: "58.000%",
+    trend: "stable",
+  },
+  {
+    discipline: "BS Chemistry",
+    degree: "BS Basic Sciences",
+    categoryA_2022: "65.400%",
+    categoryA_2023: "65.000%",
+    categoryA_2024: "64.300%",
+    categoryA_2025: "64.500%",
+    categoryS_2025: "57.500%",
+    trend: "stable",
+  },
+];

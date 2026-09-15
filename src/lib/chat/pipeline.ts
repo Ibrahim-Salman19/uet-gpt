@@ -83,10 +83,16 @@ function mapRagError(err: unknown): NextResponse {
 function fetchRagData(
   convex: ConvexHttpClient,
   question: string,
+  history: { role: string; content: string }[],
 ): Promise<RagResult | NextResponse> {
   return convex
     .action(api.rag.retrieval.retrieveContext, {
       question,
+      // retrieveContext keeps only the most recent turns; send no more than it uses.
+      history: history.slice(-6).map((m) => ({
+        role: m.role === "assistant" ? ("assistant" as const) : ("user" as const),
+        content: m.content.slice(0, 1000),
+      })),
     })
     .catch((err) => mapRagError(err));
 }
@@ -104,6 +110,7 @@ export async function authAndRateLimitPhase(
 export async function convexRagAndModelPhase(
   userId: string,
   question: string,
+  history: { role: string; content: string }[] = [],
 ): Promise<
   | { convex: ConvexHttpClient; ragResult: RagResult; preferredModelKey: string | undefined }
   | NextResponse
@@ -122,7 +129,7 @@ export async function convexRagAndModelPhase(
   }
 
   const [ragOrError, preferredModelKey] = await Promise.all([
-    fetchRagData(convexOrError, question),
+    fetchRagData(convexOrError, question, history),
     getPreferredModel(convexOrError, userId),
   ]);
   if (ragOrError instanceof NextResponse) return ragOrError;
@@ -153,7 +160,11 @@ export async function buildStreamResponse(
   if (models.length === 0) {
     return NextResponse.json({ error: "No AI providers available" }, { status: 500 });
   }
-  const systemPrompt = buildSystemPrompt(ragResult.context, ragResult.intent);
+  const systemPrompt = buildSystemPrompt(
+    ragResult.context,
+    ragResult.intent,
+    ragResult.answerInstruction,
+  );
   // Roles are constrained to "user"/"assistant" by MessageSchema (validate.ts),
   // so this narrows safely to the AI SDK's ModelMessage shape.
   const modelMessages: ModelMessage[] = messages.map((m) => ({

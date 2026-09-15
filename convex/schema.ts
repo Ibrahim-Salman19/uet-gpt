@@ -122,6 +122,12 @@ export default defineSchema({
     alternateQueryTexts: v.optional(v.array(v.string())),
     alternateEmbeddings: v.optional(v.array(v.array(v.float64()))),
     maxDocumentUpdatedAt: v.optional(v.number()),
+    // Per-source-document contentHash snapshot taken at write time. The read
+    // path compares it to each document's current contentHash (updatedAt is
+    // not usable: it is bumped on every recrawl, even when content is unchanged).
+    sourceDocVersions: v.optional(
+      v.array(v.object({ documentId: v.id("documents"), contentHash: v.optional(v.string()) })),
+    ),
   })
     .index("by_expiresAt", ["expiresAt"])
     .vectorIndex("by_queryEmbedding", { vectorField: "queryEmbedding", dimensions: 768 }),
@@ -331,7 +337,13 @@ export default defineSchema({
     .index("by_documentId_and_chunkKey", ["documentId", "chunkKey"])
     .index("by_ragId", ["ragId"])
     .index("by_contextualizedText", ["contextualizedText"])
-    .searchIndex("search_text", { searchField: "text" }),
+    .searchIndex("search_text", { searchField: "text" })
+    // Retrieval-pipeline remediation plan, Phase 4: contextualizedText (the
+    // Gemini-generated context blurb - see embeddings/contextualize.ts) was
+    // being generated and stored but never searched. A document only matches
+    // this index once contextualizedText is set, so this only covers whatever
+    // fraction of the corpus the contextualization cron has processed so far.
+    .searchIndex("search_contextualized_text", { searchField: "contextualizedText" }),
 
   // WS-1: Normalized parent storage. The parent chunk text used to be duplicated
   // onto every child via crawledChunks.parentText (K× duplication per parent,
