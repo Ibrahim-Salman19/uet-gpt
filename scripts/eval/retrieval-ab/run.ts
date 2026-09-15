@@ -24,6 +24,8 @@
  *
  *   npx tsx scripts/eval/retrieval-ab/run.ts --cache <queries.json> --out <results.json> [--inspect]
  *     [--rerank]  (also recall@4 after the production word-overlap cascade vs Cloudflare bge-reranker-base)
+ *     [--budget]  (recall after the topK cut + buildContext char budget, for k 4/5/6/8 and maxTokens
+ *                  3000/4500/6000; base vs nav-chunk demotion vs near-duplicate removal) [--dump-text]
  *     [--temps 0,0]  (rewrite,HyDE temperatures; use a separate --cache file per setting/sample)
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
@@ -35,6 +37,7 @@ import { makeFunctionReference } from "convex/server";
 import { config as loadEnv } from "dotenv";
 import { hybridRank } from "../../../convex/embeddings/hybridRank";
 import { estimateIdf } from "../../../convex/embeddings/idf";
+import { dropNearDuplicates } from "../../../convex/embeddings/nearDuplicates";
 import { candidateLimit } from "../../../convex/shared/freshnessPolicy";
 
 const ROOT = resolve(__dirname, "../../..");
@@ -156,14 +159,35 @@ const cloudflareRerank = makeFunctionReference<"action">(
 // hybridRank fuses by rank only; score is carried to satisfy its input type.
 type Hit = { id: string; text: string; url: string; score: number };
 
+// Approximate length of formatChunkHeader's Section/Source/Retrieved/Freshness lines.
+const CONTEXT_HEADER_CHARS = 220;
+
+const NAV_LINK_SHARE = 0.6;
+const LINK_LINE = /^\s*- \[.*\]\(<?https?:\/\//;
+
+// Share of a chunk's non-empty lines that are bare markdown link list items.
+function linkShare(text: string): number {
+  const lines = text.split("\n").filter((l) => l.trim());
+  return lines.length ? lines.filter((l) => LINK_LINE.test(l)).length / lines.length : 0;
+}
+
 // Top-4 after reranking the fused top-8 (retrieval.ts passes topK 4 to the LLM context).
-async function rerankTop4(fn: typeof cascadeRerank, query: string, hits: Hit[]): Promise<Hit[]> {
+function rerankTop4(fn: typeof cascadeRerank, query: string, hits: Hit[]): Promise<Hit[]> {
+  return rerankTopK(fn, query, hits, 4);
+}
+
+async function rerankTopK(
+  fn: typeof cascadeRerank,
+  query: string,
+  hits: Hit[],
+  topK: number,
+): Promise<Hit[]> {
   if (hits.length === 0) return [];
   const out = (await retry(() =>
     client.action(fn, {
       query,
       documents: hits.map((h) => ({ id: h.id, text: h.text })),
-      topK: 4,
+      topK,
     }),
   )) as Array<{ index: number }>;
   return out.filter((r) => r.index >= 0 && r.index < hits.length).map((r) => hits[r.index]!);
@@ -259,6 +283,7 @@ async function main() {
   const tally = Object.fromEntries(variants.map((v) => [v, { hit: 0, n: 0 }]));
   const perQuery: unknown[] = [];
   const rerankTally: Record<string, { hit: number; n: number }> = {};
+  const budgetTally: Record<string, { hit: number; n: number }> = {};
 
   for (const g of golden) {
     const rel = g.relevantChunkKeys.map((k) => labels.get(k)).filter((l): l is Label => !!l);
@@ -278,7 +303,8 @@ async function main() {
       dense(g.query, limit),
     ]);
     // d2: optional second dense channel (e.g. HyDE and the raw question), same weight as d.
-    const fuse = (d: Hit[], lx: typeof lexRw, d2?: Hit[]): Hit[] => {
+    // dedupe: apply search.ts's dropNearDuplicates to the whole fused pool before the cut to 8.
+    const fuse = (d: Hit[], lx: typeof lexRw, d2?: Hit[], dedupe = false): Hit[] => {
       const byId = new Map<string, Hit>();
       for (const h of [...d, ...(d2 ?? []), ...lx.text, ...lx.ctx])
         if (!byId.has(h.id)) byId.set(h.id, h);
@@ -287,10 +313,13 @@ async function main() {
         { results: lx.ctx, weight: weights.text * 0.25 },
         ...(d2 ? [{ results: d2, weight: weights.vector }] : []),
       ]);
-      return fused
-        .slice(0, FINAL_K)
-        .map((f) => byId.get(f.id)!)
-        .filter(Boolean);
+      const hits = fused.map((f) => byId.get(f.id)!).filter(Boolean);
+      return dedupe
+        ? dropNearDuplicates(
+            hits.map((h) => ({ ...h, content: h.text })),
+            FINAL_K,
+          )
+        : hits.slice(0, FINAL_K);
     };
     const results = {
       old_lexHyde_denseHyde: fuse(dHy, lexHy),
@@ -330,6 +359,52 @@ async function main() {
         rerankTally[k] ??= { hit: 0, n: 0 };
         rerankTally[k]!.n++;
         if (h) rerankTally[k]!.hit++;
+      }
+    }
+    if (args.includes("--budget")) {
+      // Does a relevant chunk survive retrieval.ts's topK cut AND buildContext's char budget
+      // (maxTokens*4, chunks packed greedily in score order, a chunk that doesn't fit is skipped)?
+      const ordered = await rerankTopK(cascadeRerank, rewrite, results.lexRewrite_denseBoth, 8);
+      const dedupedPool = fuse(dHy, lexRw, dQ, true);
+      const orderedDeduped = await rerankTopK(cascadeRerank, rewrite, dedupedPool, 8);
+      // "demote": chunks that are mostly markdown link lines (the crawler's nav/resource
+      // manifest) are moved behind content chunks, keeping order otherwise.
+      const demoted = [
+        ...ordered.filter((h) => linkShare(h.text) < NAV_LINK_SHARE),
+        ...ordered.filter((h) => linkShare(h.text) >= NAV_LINK_SHARE),
+      ];
+      const at: Record<string, boolean> = {};
+      for (const [name, list] of [
+        ["base", ordered],
+        ["demote", demoted],
+        ["dedupe", orderedDeduped],
+      ] as const) {
+        for (const k of [4, 5, 6, 8]) {
+          for (const maxTokens of [3000, 4500, 6000]) {
+            let used = 0;
+            const packed: Hit[] = [];
+            for (const h of list.slice(0, k)) {
+              const len = CONTEXT_HEADER_CHARS + h.text.length + 9;
+              if (used + len > maxTokens * 4) continue;
+              packed.push(h);
+              used += len;
+            }
+            at[`${name}|k${k}|tok${maxTokens}`] = packed.some((h) => isRelevant(h, rel));
+          }
+        }
+      }
+      row.contextBudget = at;
+      row.dedupedPoolSize = dedupedPool.length;
+      row.top8 = ordered.map((h) => ({
+        chars: h.text.length,
+        linkShare: +linkShare(h.text).toFixed(2),
+        relevant: isRelevant(h, rel),
+        ...(args.includes("--dump-text") ? { text: h.text } : {}),
+      }));
+      for (const [key, h] of Object.entries(at)) {
+        budgetTally[key] ??= { hit: 0, n: 0 };
+        budgetTally[key]!.n++;
+        if (h) budgetTally[key]!.hit++;
       }
     }
     row.channelHits = {
@@ -375,8 +450,14 @@ async function main() {
   const rerankSummary = Object.fromEntries(
     Object.entries(rerankTally).map(([k, t]) => [k, +(t.hit / t.n).toFixed(3)]),
   );
-  console.log(JSON.stringify({ summary, rerankSummary }, null, 2));
-  writeFileSync(outPath, JSON.stringify({ summary, rerankSummary, perQuery }, null, 2));
+  const budgetSummary = Object.fromEntries(
+    Object.entries(budgetTally).map(([k, t]) => [k, +(t.hit / t.n).toFixed(3)]),
+  );
+  console.log(JSON.stringify({ summary, rerankSummary, budgetSummary }, null, 2));
+  writeFileSync(
+    outPath,
+    JSON.stringify({ summary, rerankSummary, budgetSummary, perQuery }, null, 2),
+  );
 }
 
 main().catch((e) => {

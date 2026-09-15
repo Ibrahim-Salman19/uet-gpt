@@ -21,6 +21,7 @@ import {
   shouldAbstainOnStaleOnly,
 } from "../shared/freshnessPolicy";
 import { hybridRank } from "./hybridRank";
+import { dropNearDuplicates } from "./nearDuplicates";
 
 // Re-exported for existing external references; the implementation now
 // lives in ./hybridRank.ts (see that file's header comment for why).
@@ -506,7 +507,7 @@ export const searchDocumentsAction = internalAction({
       (a, b) => b.relevanceScore - a.relevanceScore,
     );
 
-    const finalResults = combinedResults.slice(0, limit).map((r) => {
+    const finalResults = dropNearDuplicates(combinedResults, limit).map((r) => {
       const isDoc = "headingPath" in r;
       const doc = isDoc ? (r as EnrichedResult) : undefined;
       return {
