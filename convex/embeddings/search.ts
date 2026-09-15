@@ -356,17 +356,24 @@ export const searchDocumentsAction = internalAction({
       }));
     }
 
+    // Lexical channels search the keyword query, never the HyDE paragraph. HyDE is a
+    // dense-retrieval technique; as a BM25 query a 3-5 sentence hypothetical answer is
+    // mostly generic words, and Convex full-text search only uses 16 terms. Measured on
+    // production 2026-09-15: "first merit list display date Fall 2026 UET Taxila
+    // admissions" ranked the Schedule.php merit-list chunk #1; a HyDE-style paragraph for
+    // the same question did not return it in the top 20 (meeting minutes, IEEE reports).
+    const lexicalQueryText = args.queryText;
     const [textResRaw, chunkTextResRaw, chunkContextualizedTextResRaw] = await Promise.all([
       ctx.runQuery(internal.crawl.queries.fullTextSearch, {
-        query: finalQueryText,
+        query: lexicalQueryText,
         limit: searchLimit,
       }),
       ctx.runQuery(internal.embeddings.chunkTextSearch.run, {
-        query: finalQueryText,
+        query: lexicalQueryText,
         limit: Math.min(20, searchLimit),
       }),
       ctx.runQuery(internal.embeddings.chunkTextSearch.runContextualized, {
-        query: finalQueryText,
+        query: lexicalQueryText,
         limit: Math.min(20, searchLimit),
       }),
     ]);
