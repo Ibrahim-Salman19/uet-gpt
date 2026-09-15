@@ -23,6 +23,8 @@
  * freshness filtering, and its rewrite/HyDE text is sampled per request.
  *
  *   npx tsx scripts/eval/retrieval-ab/run.ts --cache <queries.json> --out <results.json> [--inspect]
+ *     [--rerank]  (also recall@4 after the production word-overlap cascade vs Cloudflare bge-reranker-base)
+ *     [--temps 0,0]  (rewrite,HyDE temperatures; use a separate --cache file per setting/sample)
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -97,24 +99,36 @@ const gemini = createGoogleGenerativeAI({
   apiKey: process.env.GEMINI_API_KEY_2 || process.env.GEMINI_API_KEY,
 })("gemini-3.5-flash-lite");
 
+// --temps <rewrite>,<hyde> overrides the production sampling temperatures (0.3,0.5).
+const argTemps = process.argv.includes("--temps")
+  ? process.argv[process.argv.indexOf("--temps") + 1]!.split(",").map(Number)
+  : [0.3, 0.5];
+
+// Sequential, paced calls: the free Gemini tier allows 15 requests/minute per key.
+async function generatePaced(system: string, prompt: string, temperature: number, max: number) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      await new Promise((r) => setTimeout(r, 4500));
+      const { text } = await generateText({
+        model: gemini,
+        system,
+        prompt,
+        temperature,
+        maxOutputTokens: max,
+        maxRetries: 0,
+      });
+      return text.trim() || prompt;
+    } catch (e) {
+      if (attempt >= 4) throw e;
+      await new Promise((r) => setTimeout(r, 60_000));
+    }
+  }
+}
+
 async function enrich(query: string) {
-  const [rw, hy] = await Promise.all([
-    generateText({
-      model: gemini,
-      system: REWRITE_SYSTEM,
-      prompt: query,
-      temperature: 0.3,
-      maxOutputTokens: 100,
-    }),
-    generateText({
-      model: gemini,
-      system: HYDE_SYSTEM,
-      prompt: query,
-      temperature: 0.5,
-      maxOutputTokens: 200,
-    }),
-  ]);
-  return { rewrite: rw.text.trim() || query, hyde: hy.text.trim() || query };
+  const rewrite = await generatePaced(REWRITE_SYSTEM, query, argTemps[0]!, 100);
+  const hyde = await generatePaced(HYDE_SYSTEM, query, argTemps[1]!, 200);
+  return { rewrite, hyde };
 }
 
 // ---- Production channels ----------------------------------------------------------------
@@ -134,7 +148,26 @@ const refsToRag = makeFunctionReference<"query">(
   "knowledgeStore/convexQueries:getRagIdAndTextByChunkRefs",
 );
 
-type Hit = { id: string; text: string; url: string };
+const cascadeRerank = makeFunctionReference<"action">("reranking/cascade:cascadeRerank");
+const cloudflareRerank = makeFunctionReference<"action">(
+  "reranking/cloudflareRerank:cloudflareRerank",
+);
+
+// hybridRank fuses by rank only; score is carried to satisfy its input type.
+type Hit = { id: string; text: string; url: string; score: number };
+
+// Top-4 after reranking the fused top-8 (retrieval.ts passes topK 4 to the LLM context).
+async function rerankTop4(fn: typeof cascadeRerank, query: string, hits: Hit[]): Promise<Hit[]> {
+  if (hits.length === 0) return [];
+  const out = (await retry(() =>
+    client.action(fn, {
+      query,
+      documents: hits.map((h) => ({ id: h.id, text: h.text })),
+      topK: 4,
+    }),
+  )) as Array<{ index: number }>;
+  return out.filter((r) => r.index >= 0 && r.index < hits.length).map((r) => hits[r.index]!);
+}
 
 async function retry<T>(fn: () => Promise<T>): Promise<T> {
   for (let attempt = 0; ; attempt++) {
@@ -157,17 +190,22 @@ async function lexical(text: string, limit: number) {
     ) as Promise<Array<{ ragId: string; text: string; url: string }>>,
   ]);
   return {
-    text: fts.map((r) => ({ id: r.ragId, text: r.text, url: r.url })),
+    text: fts.map((r) => ({ id: r.ragId, text: r.text, url: r.url, score: 0 })),
     chunk: fts
       .slice(0, Math.min(20, limit))
-      .map((r) => ({ id: r.ragId, text: r.text, url: r.url })),
-    ctx: ctxd.map((r) => ({ id: r.ragId, text: r.text, url: r.url })),
+      .map((r) => ({ id: r.ragId, text: r.text, url: r.url, score: 0 })),
+    ctx: ctxd.map((r) => ({ id: r.ragId, text: r.text, url: r.url, score: 0 })),
   };
 }
 
 async function dense(text: string, limit: number): Promise<Hit[]> {
-  const emb = (await retry(() => client.action(cfEmbed, { text }))) as number[] | null;
-  if (!emb) return [];
+  // cloudflareEmbedQuery returns null on a timeout; retry so a transient failure doesn't
+  // silently score a query with an empty dense channel.
+  const emb = (await retry(async () => {
+    const e = (await client.action(cfEmbed, { text })) as number[] | null;
+    if (!e) throw new Error("cloudflareEmbedQuery returned null");
+    return e;
+  })) as number[];
   const hits = (await retry(() =>
     client.action(denseSearch, { queryEmbedding: emb, topK: limit }),
   )) as Array<{
@@ -184,7 +222,7 @@ async function dense(text: string, limit: number): Promise<Hit[]> {
   resolved.forEach((r) => {
     if (!r.ragId || r.text === null || seen.has(r.text)) return; // search.ts dedups by text
     seen.add(r.text);
-    out.push({ id: r.ragId, text: r.text, url: "" });
+    out.push({ id: r.ragId, text: r.text, url: "", score: 0 });
   });
   return out;
 }
@@ -216,9 +254,11 @@ async function main() {
     "new_lexRewrite_denseHyde",
     "lexRewrite_denseRewrite",
     "lexRewrite_denseQuestion",
+    "lexRewrite_denseBoth",
   ] as const;
   const tally = Object.fromEntries(variants.map((v) => [v, { hit: 0, n: 0 }]));
   const perQuery: unknown[] = [];
+  const rerankTally: Record<string, { hit: number; n: number }> = {};
 
   for (const g of golden) {
     const rel = g.relevantChunkKeys.map((k) => labels.get(k)).filter((l): l is Label => !!l);
@@ -237,12 +277,15 @@ async function main() {
       dense(rewrite, limit),
       dense(g.query, limit),
     ]);
-    const fuse = (d: Hit[], lx: typeof lexRw): Hit[] => {
+    // d2: optional second dense channel (e.g. HyDE and the raw question), same weight as d.
+    const fuse = (d: Hit[], lx: typeof lexRw, d2?: Hit[]): Hit[] => {
       const byId = new Map<string, Hit>();
-      for (const h of [...d, ...lx.text, ...lx.ctx]) if (!byId.has(h.id)) byId.set(h.id, h);
+      for (const h of [...d, ...(d2 ?? []), ...lx.text, ...lx.ctx])
+        if (!byId.has(h.id)) byId.set(h.id, h);
       const fused = hybridRank(d, lx.text, RRF_K, weights, "reciprocal", [
         { results: lx.chunk, weight: weights.text * 0.5 },
         { results: lx.ctx, weight: weights.text * 0.25 },
+        ...(d2 ? [{ results: d2, weight: weights.vector }] : []),
       ]);
       return fused
         .slice(0, FINAL_K)
@@ -254,6 +297,7 @@ async function main() {
       new_lexRewrite_denseHyde: fuse(dHy, lexRw),
       lexRewrite_denseRewrite: fuse(dRw, lexRw),
       lexRewrite_denseQuestion: fuse(dQ, lexRw),
+      lexRewrite_denseBoth: fuse(dHy, lexRw, dQ),
     };
     const row: Record<string, unknown> = { query: g.query, rewrite };
     for (const v of variants) {
@@ -261,6 +305,32 @@ async function main() {
       tally[v]!.n++;
       if (hit) tally[v]!.hit++;
       row[v] = hit;
+    }
+    if (args.includes("--rerank")) {
+      const at4: Record<string, boolean> = {};
+      for (const v of [
+        "new_lexRewrite_denseHyde",
+        "lexRewrite_denseQuestion",
+        "lexRewrite_denseBoth",
+      ] as const) {
+        const top8 = results[v];
+        const [tier1, cfQuestion, cfRewrite] = await Promise.all([
+          rerankTop4(cascadeRerank, rewrite, top8),
+          rerankTop4(cloudflareRerank, g.query, top8),
+          rerankTop4(cloudflareRerank, rewrite, top8),
+        ]);
+        const hit = (hs: Hit[]) => hs.some((h) => isRelevant(h, rel));
+        at4[`${v}|fused`] = hit(top8.slice(0, 4));
+        at4[`${v}|tier1`] = hit(tier1);
+        at4[`${v}|cfQuestion`] = hit(cfQuestion);
+        at4[`${v}|cfRewrite`] = hit(cfRewrite);
+      }
+      row.recallAt4 = at4;
+      for (const [k, h] of Object.entries(at4)) {
+        rerankTally[k] ??= { hit: 0, n: 0 };
+        rerankTally[k]!.n++;
+        if (h) rerankTally[k]!.hit++;
+      }
     }
     row.channelHits = {
       lexRewrite: lexRw.text.slice(0, FINAL_K).some((h) => isRelevant(h, rel)),
@@ -302,8 +372,11 @@ async function main() {
       { recallAt8: +(t.hit / t.n).toFixed(3), hits: t.hit, queries: t.n },
     ]),
   );
-  console.log(JSON.stringify(summary, null, 2));
-  writeFileSync(outPath, JSON.stringify({ summary, perQuery }, null, 2));
+  const rerankSummary = Object.fromEntries(
+    Object.entries(rerankTally).map(([k, t]) => [k, +(t.hit / t.n).toFixed(3)]),
+  );
+  console.log(JSON.stringify({ summary, rerankSummary }, null, 2));
+  writeFileSync(outPath, JSON.stringify({ summary, rerankSummary, perQuery }, null, 2));
 }
 
 main().catch((e) => {

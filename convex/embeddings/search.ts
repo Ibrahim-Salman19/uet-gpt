@@ -177,6 +177,8 @@ export const searchDocumentsAction = internalAction({
     queryText: v.string(),
     queryEmbedding: v.optional(v.array(v.float64())),
     hydeQuery: v.optional(v.string()),
+    // The user's (standalone) question, searched as a second dense channel alongside HyDE.
+    questionText: v.optional(v.string()),
     limit: v.optional(v.number()),
     category: v.optional(v.string()),
   },
@@ -251,96 +253,118 @@ export const searchDocumentsAction = internalAction({
     // content (a real result observed in end-to-end testing, not a
     // theoretical gap).
     let denseHitContent: TextSearchResult[] = [];
+    let questionRanked: Array<{ id: string; score: number }> = [];
 
     if (usePineconeBackend) {
-      // Deliberately NOT args.queryEmbedding here - that vector, when the
-      // caller supplies one (convex/rag/retrieval.ts, reused from the
-      // semantic-cache lookup), is Gemini's 768d space. Pinecone's index is
-      // Cloudflare/Qwen3's 1024d space - a different, incompatible vector
-      // space keyed to the same corpus. Always embed fresh for this channel.
-      const cfEmbedding: number[] | null = await ctx.runAction(
-        internal.embeddings.cloudflareEmbed.cloudflareEmbedQuery,
-        { text: finalQueryText },
-      );
-
-      if (cfEmbedding === null) {
-        // No sane fallback vector exists - continue with lexical + FAQ only,
-        // but SAY SO in the existing [SEARCH] log line below rather than
-        // letting a silently-empty dense channel look identical to "no
-        // dense matches for this query".
-        console.warn(
-          "[SEARCH] Pinecone dense channel unavailable this query (cloudflareEmbedQuery " +
-            "returned null - see its own warning above for cause); continuing lexical+FAQ only",
-        );
-      } else {
-        const denseHits = await ctx.runAction(
-          internal.knowledgeStore.denseSearchAction.denseSearch,
-          {
-            queryEmbedding: cfEmbedding,
-            topK: searchLimit,
-            category: args.category,
-          },
+      const runPineconeDense = async (text: string) => {
+        let vectorRanked: Array<{ id: string; score: number }> = [];
+        let denseHitContent: TextSearchResult[] = [];
+        // Deliberately NOT args.queryEmbedding here - that vector, when the
+        // caller supplies one (convex/rag/retrieval.ts, reused from the
+        // semantic-cache lookup), is Gemini's 768d space. Pinecone's index is
+        // Cloudflare/Qwen3's 1024d space - a different, incompatible vector
+        // space keyed to the same corpus. Always embed fresh for this channel.
+        const cfEmbedding: number[] | null = await ctx.runAction(
+          internal.embeddings.cloudflareEmbed.cloudflareEmbedQuery,
+          { text },
         );
 
-        // Pinecone hits are identified by (documentId, chunkKey); everything
-        // downstream (hybridRank fusion, batchFetchDocMeta, pickBestContent)
-        // is keyed by ragId, because the other two channels below always
-        // have been and citations elsewhere depend on that. Resolve once via
-        // the crawledChunks row both id schemes already share (schema.ts:
-        // ragId + chunkKey on the same row) rather than rekeying established
-        // call sites. text comes back in the same call - see denseHitContent
-        // above for why it's needed.
-        const resolved = await ctx.runQuery(
-          internal.knowledgeStore.convexQueries.getRagIdAndTextByChunkRefs,
-          { refs: denseHits.map((h) => ({ documentId: h.documentId, chunkKey: h.chunkKey })) },
-        );
+        if (cfEmbedding === null) {
+          // No sane fallback vector exists - continue with lexical + FAQ only,
+          // but SAY SO in the existing [SEARCH] log line below rather than
+          // letting a silently-empty dense channel look identical to "no
+          // dense matches for this query".
+          console.warn(
+            "[SEARCH] Pinecone dense channel unavailable this query (cloudflareEmbedQuery " +
+              "returned null - see its own warning above for cause); continuing lexical+FAQ only",
+          );
+        } else {
+          const denseHits = await ctx.runAction(
+            internal.knowledgeStore.denseSearchAction.denseSearch,
+            {
+              queryEmbedding: cfEmbedding,
+              topK: searchLimit,
+              category: args.category,
+            },
+          );
 
-        vectorRanked = denseHits
-          .map((h, i) => ({ id: resolved[i]?.ragId ?? null, score: h.score }))
-          .filter((r): r is { id: string; score: number } => r.id !== null);
+          // Pinecone hits are identified by (documentId, chunkKey); everything
+          // downstream (hybridRank fusion, batchFetchDocMeta, pickBestContent)
+          // is keyed by ragId, because the other two channels below always
+          // have been and citations elsewhere depend on that. Resolve once via
+          // the crawledChunks row both id schemes already share (schema.ts:
+          // ragId + chunkKey on the same row) rather than rekeying established
+          // call sites. text comes back in the same call - see denseHitContent
+          // above for why it's needed.
+          const resolved = await ctx.runQuery(
+            internal.knowledgeStore.convexQueries.getRagIdAndTextByChunkRefs,
+            { refs: denseHits.map((h) => ({ documentId: h.documentId, chunkKey: h.chunkKey })) },
+          );
 
-        denseHitContent = resolved
-          .map((r) => ({ ragId: r.ragId, text: r.text }))
-          .filter((r): r is { ragId: string; text: string } => r.ragId !== null && r.text !== null)
-          .map((r) => ({ ragId: r.ragId, text: r.text, score: 0 }));
+          vectorRanked = denseHits
+            .map((h, i) => ({ id: resolved[i]?.ragId ?? null, score: h.score }))
+            .filter((r): r is { id: string; score: number } => r.id !== null);
 
-        if (vectorRanked.length < denseHits.length) {
-          // A Pinecone vector with no matching crawledChunks row: the two
-          // backends have diverged (a stale/orphaned vector). Surfaced, not
-          // silently dropped-and-forgotten - see compositeStore.ts's own
-          // stats()/verifyIntegrity() rationale for why divergence should
-          // never be averaged away.
-          console.warn("[SEARCH] Pinecone dense channel: some hits had no matching ragId", {
-            denseHits: denseHits.length,
-            resolved: vectorRanked.length,
+          denseHitContent = resolved
+            .map((r) => ({ ragId: r.ragId, text: r.text }))
+            .filter(
+              (r): r is { ragId: string; text: string } => r.ragId !== null && r.text !== null,
+            )
+            .map((r) => ({ ragId: r.ragId, text: r.text, score: 0 }));
+
+          if (vectorRanked.length < denseHits.length) {
+            // A Pinecone vector with no matching crawledChunks row: the two
+            // backends have diverged (a stale/orphaned vector). Surfaced, not
+            // silently dropped-and-forgotten - see compositeStore.ts's own
+            // stats()/verifyIntegrity() rationale for why divergence should
+            // never be averaged away.
+            console.warn("[SEARCH] Pinecone dense channel: some hits had no matching ragId", {
+              denseHits: denseHits.length,
+              resolved: vectorRanked.length,
+            });
+          }
+
+          // A block of text repeated across several overlapping chunk windows
+          // (observed: a page's nav/footer link list, chunked 5 near-identical
+          // ways) can consume most of a fixed-size dense window with the same
+          // content, crowding out that page's actual distinct chunks - and any
+          // other document's chunks - out of the searchLimit-sized candidate
+          // pool entirely. denseHits arrives score-sorted from Pinecone, so
+          // keeping the first (highest-scoring) occurrence per exact chunk
+          // text is correct.
+          const textByRagId = new Map(denseHitContent.map((h) => [h.ragId, h.text]));
+          const seenChunkText = new Set<string>();
+          const beforeDedup = vectorRanked.length;
+          vectorRanked = vectorRanked.filter((r) => {
+            const text = textByRagId.get(r.id);
+            if (text === undefined) return true;
+            if (seenChunkText.has(text)) return false;
+            seenChunkText.add(text);
+            return true;
           });
+          if (vectorRanked.length < beforeDedup) {
+            console.log("[SEARCH] Pinecone dense channel: collapsed duplicate-content chunks", {
+              before: beforeDedup,
+              after: vectorRanked.length,
+            });
+          }
         }
+        return { vectorRanked, denseHitContent };
+      };
 
-        // A block of text repeated across several overlapping chunk windows
-        // (observed: a page's nav/footer link list, chunked 5 near-identical
-        // ways) can consume most of a fixed-size dense window with the same
-        // content, crowding out that page's actual distinct chunks - and any
-        // other document's chunks - out of the searchLimit-sized candidate
-        // pool entirely. denseHits arrives score-sorted from Pinecone, so
-        // keeping the first (highest-scoring) occurrence per exact chunk
-        // text is correct.
-        const textByRagId = new Map(denseHitContent.map((h) => [h.ragId, h.text]));
-        const seenChunkText = new Set<string>();
-        const beforeDedup = vectorRanked.length;
-        vectorRanked = vectorRanked.filter((r) => {
-          const text = textByRagId.get(r.id);
-          if (text === undefined) return true;
-          if (seenChunkText.has(text)) return false;
-          seenChunkText.add(text);
-          return true;
-        });
-        if (vectorRanked.length < beforeDedup) {
-          console.log("[SEARCH] Pinecone dense channel: collapsed duplicate-content chunks", {
-            before: beforeDedup,
-            after: vectorRanked.length,
-          });
-        }
+      // Dense retrieval runs on the HyDE paragraph and, when given, on the user's own
+      // question, fused as two channels. Golden-set eval against production (2026-09-15,
+      // 23 queries): a relevant chunk reached the fused top 8 for 61% of queries with
+      // HyDE alone, 70% with the question alone, and 83% with both. HyDE helps bare
+      // keyword queries; the question helps natural questions HyDE paraphrases away.
+      const denseTexts = [finalQueryText];
+      if (args.questionText && args.questionText !== finalQueryText) {
+        denseTexts.push(args.questionText);
       }
+      const denseChannels = await Promise.all(denseTexts.map(runPineconeDense));
+      vectorRanked = denseChannels[0]!.vectorRanked;
+      questionRanked = denseChannels[1]?.vectorRanked ?? [];
+      denseHitContent = denseChannels.flatMap((c) => c.denseHitContent);
     } else {
       vectorRes = await rag.search(ctx, {
         namespace: "uet-global",
@@ -398,6 +422,7 @@ export const searchDocumentsAction = internalAction({
     const fused = hybridRank(vectorRanked, textRanked, RRF_K, adaptiveWeights, "reciprocal", [
       { results: chunkRanked, weight: adaptiveWeights.text * 0.5 },
       { results: chunkContextualizedRanked, weight: adaptiveWeights.text * 0.25 },
+      { results: questionRanked, weight: adaptiveWeights.vector },
     ]);
 
     const docMap = await batchFetchDocMeta(ctx, fused);

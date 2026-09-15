@@ -213,6 +213,7 @@ async function searchVectorDB(
       queryText: rewrittenQuery || safeQuestion,
       queryEmbedding,
       hydeQuery: hydeQuery,
+      questionText: safeQuestion,
       limit: 8,
     });
   } catch (e) {

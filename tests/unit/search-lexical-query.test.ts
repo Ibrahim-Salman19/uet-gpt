@@ -43,3 +43,50 @@ describe("searchDocumentsAction query routing", () => {
     expect(vi.mocked(rag.search).mock.calls[0]?.[1]).toMatchObject({ query: hyde });
   });
 });
+
+describe("searchDocumentsAction dense channels (pinecone backend)", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("searches both the HyDE paragraph and the question, and fuses hits from each", async () => {
+    vi.stubEnv("KNOWLEDGE_STORE_BACKEND", "pinecone");
+    const { getFunctionName } = await import("convex/server");
+    const hyde = "UET Taxila admits DAE holders into the second year of engineering programmes.";
+    const question = "Does UET Taxila accept DAE students for lateral entry?";
+    const embeddedTexts: string[] = [];
+
+    const runAction = vi.fn(async (ref: unknown, args: Record<string, unknown>) => {
+      const name = getFunctionName(ref as never);
+      if (name.endsWith("cloudflareEmbedQuery")) {
+        embeddedTexts.push(args.text as string);
+        return args.text === hyde ? [1] : [2];
+      }
+      if (name.endsWith("denseSearch")) {
+        const chunkKey = (args.queryEmbedding as number[])[0] === 1 ? "hyde-hit" : "question-hit";
+        return [{ documentId: `doc-${chunkKey}`, chunkKey, score: 0.9 }];
+      }
+      return [];
+    });
+    const runQuery = vi.fn(async (ref: unknown, args: Record<string, unknown>) => {
+      if (getFunctionName(ref as never).endsWith("getRagIdAndTextByChunkRefs")) {
+        return (args.refs as Array<{ chunkKey: string }>).map((r) => ({
+          ragId: `rag-${r.chunkKey}`,
+          text: `text of ${r.chunkKey}`,
+        }));
+      }
+      return [];
+    });
+
+    const results = (await (searchDocumentsAction as unknown as { handler: Function }).handler(
+      { runQuery, runAction, runMutation: vi.fn() },
+      { queryText: "UET Taxila DAE lateral entry", hydeQuery: hyde, questionText: question, limit: 8 },
+    )) as Array<{ entryId: string; content: string }>;
+
+    expect(embeddedTexts.sort()).toEqual([hyde, question].sort());
+    expect(results.map((r) => r.entryId).sort()).toEqual(["rag-hyde-hit", "rag-question-hit"]);
+    expect(results.find((r) => r.entryId === "rag-question-hit")?.content).toBe(
+      "text of question-hit",
+    );
+  });
+});
