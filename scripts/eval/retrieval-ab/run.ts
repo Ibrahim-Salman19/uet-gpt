@@ -26,6 +26,8 @@
  *     [--rerank]  (also recall@4 after the production word-overlap cascade vs Cloudflare bge-reranker-base)
  *     [--budget]  (recall after the topK cut + buildContext char budget, for k 4/5/6/8 and maxTokens
  *                  3000/4500/6000; base vs nav-chunk demotion vs near-duplicate removal) [--dump-text]
+ *     [--answers]  (end-to-end answers for queries in answerRubrics.ts: pre-8cf42e2 retrieval vs current,
+ *                   answered and rubric-graded by Gemini; ~4 Gemini calls per query)
  *     [--temps 0,0]  (rewrite,HyDE temperatures; use a separate --cache file per setting/sample)
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
@@ -38,6 +40,9 @@ import { config as loadEnv } from "dotenv";
 import { hybridRank } from "../../../convex/embeddings/hybridRank";
 import { estimateIdf } from "../../../convex/embeddings/idf";
 import { dropNearDuplicates } from "../../../convex/embeddings/nearDuplicates";
+import { buildContext } from "../../../convex/rag/context";
+import { buildSystemPrompt } from "../../../src/lib/prompt";
+import { ANSWER_RUBRICS } from "./answerRubrics";
 import { candidateLimit } from "../../../convex/shared/freshnessPolicy";
 
 const ROOT = resolve(__dirname, "../../..");
@@ -162,6 +167,9 @@ type Hit = { id: string; text: string; url: string; score: number };
 // Approximate length of formatChunkHeader's Section/Source/Retrieved/Freshness lines.
 const CONTEXT_HEADER_CHARS = 220;
 
+// Convex internal; see scripts/eval/answer-accuracy/run.ts for the same unsupported access.
+const buildContextHandler = (buildContext as unknown as { _handler: Function })._handler;
+
 const NAV_LINK_SHARE = 0.6;
 const LINK_LINE = /^\s*- \[.*\]\(<?https?:\/\//;
 
@@ -284,6 +292,7 @@ async function main() {
   const perQuery: unknown[] = [];
   const rerankTally: Record<string, { hit: number; n: number }> = {};
   const budgetTally: Record<string, { hit: number; n: number }> = {};
+  const answerTally: Record<string, { pass: number; n: number }> = {};
 
   for (const g of golden) {
     const rel = g.relevantChunkKeys.map((k) => labels.get(k)).filter((l): l is Label => !!l);
@@ -407,6 +416,55 @@ async function main() {
         if (h) budgetTally[key]!.hit++;
       }
     }
+    if (args.includes("--answers") && ANSWER_RUBRICS[g.query]) {
+      // End-to-end: production cascade to top 4 -> real buildContext -> real buildSystemPrompt ->
+      // answer (Gemini) -> rubric judge (Gemini). CRAG and the confidence directive are skipped
+      // for both variants; freshness headers are "unknown" for both.
+      const configs = {
+        morning: results.new_lexRewrite_denseHyde, // deployed before 8cf42e2
+        current: fuse(dHy, lexRw, dQ, true), // 8cf42e2 + near-duplicate removal
+      };
+      const answers: Record<string, unknown> = {};
+      for (const [name, pool] of Object.entries(configs)) {
+        const top4 = await rerankTopK(cascadeRerank, rewrite, pool, 4);
+        const context: string = await buildContextHandler(
+          {},
+          {
+            maxTokens: 3000,
+            chunks: top4.map((h, i) => ({
+              content: h.text,
+              relevanceScore: 1 - i * 0.1,
+              url: h.text.match(/^URL Path: (.*)$/m)?.[1] ?? "",
+              title: h.text.match(/^Document Title: (.*)$/m)?.[1] ?? "",
+            })),
+          },
+        );
+        const response = await generatePaced(
+          buildSystemPrompt(context || null, "general"),
+          g.query,
+          0.3,
+          1500,
+        );
+        const verdictText = await generatePaced(
+          "You grade a university chatbot answer against a rubric. Reply with PASS or FAIL on the first line, then one sentence of reason.",
+          `QUESTION: ${g.query}\n\nRUBRIC (authoritative ground truth): ${ANSWER_RUBRICS[g.query]}\n\nCHATBOT ANSWER:\n${response}`,
+          0,
+          300,
+        );
+        const pass = /^\W*PASS/i.test(verdictText);
+        answerTally[name] ??= { pass: 0, n: 0 };
+        answerTally[name]!.n++;
+        if (pass) answerTally[name]!.pass++;
+        answers[name] = { pass, verdict: verdictText, response, relevantInContext: top4.some((h) => isRelevant(h, rel)) };
+      }
+      row.answers = answers;
+      console.log(
+        "  answers:",
+        Object.entries(answers)
+          .map(([n, a]) => `${n}=${(a as { pass: boolean }).pass ? "PASS" : "FAIL"}`)
+          .join(" "),
+      );
+    }
     row.channelHits = {
       lexRewrite: lexRw.text.slice(0, FINAL_K).some((h) => isRelevant(h, rel)),
       lexHyde: lexHy.text.slice(0, FINAL_K).some((h) => isRelevant(h, rel)),
@@ -453,10 +511,13 @@ async function main() {
   const budgetSummary = Object.fromEntries(
     Object.entries(budgetTally).map(([k, t]) => [k, +(t.hit / t.n).toFixed(3)]),
   );
-  console.log(JSON.stringify({ summary, rerankSummary, budgetSummary }, null, 2));
+  const answerSummary = Object.fromEntries(
+    Object.entries(answerTally).map(([k, t]) => [k, `${t.pass}/${t.n}`]),
+  );
+  console.log(JSON.stringify({ summary, rerankSummary, budgetSummary, answerSummary }, null, 2));
   writeFileSync(
     outPath,
-    JSON.stringify({ summary, rerankSummary, budgetSummary, perQuery }, null, 2),
+    JSON.stringify({ summary, rerankSummary, budgetSummary, answerSummary, perQuery }, null, 2),
   );
 }
 
