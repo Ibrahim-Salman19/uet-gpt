@@ -243,10 +243,9 @@ export const getOverviewData = query({
 });
 
 const DASHBOARD_STATS_PAGE_SIZE = 1000;
-// Must exceed the 1-hour cron interval (crons.ts: "compute-dashboard-stats")
-// comfortably, mirroring workflow.ts's failStuckJobs 3h-timeout-vs-2h-cron
-// pattern, so a genuinely stuck build self-heals rather than blocking every
-// future rebuild forever.
+// A build normally finishes in seconds; a buildInProgress flag older than this
+// is treated as stuck, so the next (daily, crons.ts: "compute-dashboard-stats")
+// tick restarts it rather than a stuck build blocking every future rebuild.
 const STUCK_BUILD_TIMEOUT_MS = 2 * 60 * 60 * 1000;
 
 const DASHBOARD_STATS_PHASES = [

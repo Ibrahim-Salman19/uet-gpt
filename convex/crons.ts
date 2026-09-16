@@ -132,12 +132,17 @@ crons.daily(
   internal.observability.staleness.checkStaleness,
 );
 
-// STATS-001: Pre-compute dashboard statistics hourly.
+// STATS-001: Pre-compute dashboard statistics daily.
 // Was every 5 min (288 runs/day) and full-scanned five whole tables - including
 // the embedding-heavy semanticCache - which was the dominant DB-bandwidth driver
-// (cost scaled O(cacheRows × embeddingSize) × 288/day). An admin count dashboard
-// does not need 5-minute freshness; computeDashboardStats additionally re-counts
-// the heavy semanticCache only ~4×/day. See convex/admin/stats.ts.
-crons.interval("compute-dashboard-stats", { hours: 1 }, internal.admin.stats.computeDashboardStats);
+// (cost scaled O(cacheRows × embeddingSize) × 288/day). Hourly still paged the
+// whole documents table 24×/day, a large share of the Free plan's 1 GB/month
+// Database I/O. An admin count dashboard does not need sub-day freshness. Runs at
+// 00:15 UTC so computeDashboardStats's cache recount (UTC hours 0/6/12/18) runs.
+crons.daily(
+  "compute-dashboard-stats",
+  { hourUTC: 0, minuteUTC: 15 },
+  internal.admin.stats.computeDashboardStats,
+);
 
 export default crons;
