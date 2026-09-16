@@ -20,6 +20,7 @@ import {
   candidateLimit,
   classifyFreshness,
   classifyQueryRisk,
+  isRetrievalEligibleLifecycle,
   isRetrievalEligibleStatus,
   shouldAbstainOnStaleOnly,
   ttlCutoffMs,
@@ -87,6 +88,20 @@ describe("freshnessPolicy  -  candidateLimit (overfetch)", () => {
     expect(MIN_CANDIDATES).toBe(30);
     expect(candidateLimit(0)).toBe(30);
     expect(candidateLimit(-5)).toBe(30);
+  });
+});
+
+describe("freshnessPolicy  -  lifecycle eligibility", () => {
+  it("keeps documents with no lifecycleStatus retrievable (every production document today)", () => {
+    expect(isRetrievalEligibleLifecycle(undefined)).toBe(true);
+    expect(isRetrievalEligibleLifecycle(null)).toBe(true);
+    expect(isRetrievalEligibleLifecycle("active")).toBe(true);
+  });
+
+  it("excludes superseded, withdrawn and every other non-active lifecycle state", () => {
+    for (const s of ["superseded", "withdrawn", "explicitly_stale", "quarantined", "deleted", ""]) {
+      expect(isRetrievalEligibleLifecycle(s)).toBe(false);
+    }
   });
 });
 

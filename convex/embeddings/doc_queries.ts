@@ -113,6 +113,7 @@ export const getDocumentsByEntryIds = internalQuery({
           freshnessTier: v.optional(v.string()),
           isStale: v.optional(v.boolean()),
           status: v.optional(v.string()),
+          lifecycleStatus: v.optional(v.string()),
           lastVerifiedAt: v.optional(v.number()),
           parentText: v.optional(v.string()),
           headingPath: v.optional(v.array(v.string())),
@@ -192,6 +193,7 @@ export const getDocumentsByEntryIds = internalQuery({
               freshnessTier: doc.freshnessTier ?? undefined,
               isStale: doc.isStale ?? undefined,
               status: doc.status ?? undefined,
+              lifecycleStatus: doc.lifecycleStatus ?? undefined,
               lastVerifiedAt: (doc.metadata as { lastVerifiedAt?: number } | undefined)
                 ?.lastVerifiedAt,
               parentText: chunk.parentId ? parentsById.get(chunk.parentId)?.text : chunk.parentText,
@@ -214,6 +216,7 @@ export const getDocumentsByEntryIds = internalQuery({
             freshnessTier: fallbackDoc.freshnessTier ?? undefined,
             isStale: fallbackDoc.isStale ?? undefined,
             status: fallbackDoc.status ?? undefined,
+            lifecycleStatus: fallbackDoc.lifecycleStatus ?? undefined,
             lastVerifiedAt: (fallbackDoc.metadata as { lastVerifiedAt?: number } | undefined)
               ?.lastVerifiedAt,
             parentText: undefined,

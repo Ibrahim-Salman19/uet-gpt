@@ -17,6 +17,7 @@ import {
   classifyFreshness,
   classifyQueryRisk,
   DEFAULT_STALE_SCORE_MULTIPLIER,
+  isRetrievalEligibleLifecycle,
   isRetrievalEligibleStatus,
   shouldAbstainOnStaleOnly,
 } from "../shared/freshnessPolicy";
@@ -58,6 +59,7 @@ type DocMeta = {
   freshnessTier?: string;
   isStale?: boolean;
   status?: string;
+  lifecycleStatus?: string;
   lastVerifiedAt?: number;
   parentText?: string;
   headingPath?: string[];
@@ -83,6 +85,7 @@ async function batchFetchDocMeta(
         freshnessTier: doc.freshnessTier,
         isStale: doc.isStale,
         status: doc.status,
+        lifecycleStatus: doc.lifecycleStatus,
         lastVerifiedAt: doc.lastVerifiedAt,
         parentText: doc.parentText,
         headingPath: doc.headingPath,
@@ -436,6 +439,10 @@ export const searchDocumentsAction = internalAction({
 
       // Amendment #4: Hard exclusion by status
       if (docMeta?.status && !isRetrievalEligibleStatus(docMeta.status)) {
+        continue;
+      }
+      // Superseded/withdrawn documents (e.g. last year's Prospectus) stay stored but are not retrieved.
+      if (!isRetrievalEligibleLifecycle(docMeta?.lifecycleStatus)) {
         continue;
       }
 

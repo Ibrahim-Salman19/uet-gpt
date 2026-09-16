@@ -142,6 +142,16 @@ export function isRetrievalEligibleStatus(status: string | undefined | null): bo
   return (RETRIEVAL_ELIGIBLE_STATUSES as readonly string[]).includes(status);
 }
 
+/**
+ * documents.lifecycleStatus gate (shared/invariants.ts: retrievable only while
+ * lifecycleStatus is active). Unset means active: no production document had the
+ * field set when this gate was added, so treating unset as excluded would empty
+ * retrieval. Any other value (superseded, withdrawn, ...) is excluded.
+ */
+export function isRetrievalEligibleLifecycle(lifecycleStatus: string | undefined | null): boolean {
+  return lifecycleStatus === undefined || lifecycleStatus === null || lifecycleStatus === "active";
+}
+
 // ---------------------------------------------------------------------------
 // Freshness state classification
 // ---------------------------------------------------------------------------

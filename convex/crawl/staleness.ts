@@ -307,3 +307,30 @@ export const flagExpiredDocuments = internalMutation({
     };
   },
 });
+
+/**
+ * Sets documents.lifecycleStatus on one document. Search skips any document whose
+ * lifecycleStatus is set and not "active" (isRetrievalEligibleLifecycle), so this
+ * retires a superseded edition without deleting its chunks or vectors. Undo by
+ * setting "active". Returns the previous value.
+ */
+export const setDocumentLifecycleStatus = internalMutation({
+  args: {
+    documentId: v.id("documents"),
+    lifecycleStatus: v.union(
+      v.literal("active"),
+      v.literal("superseded"),
+      v.literal("withdrawn"),
+      v.literal("explicitly_stale"),
+      v.literal("quarantined"),
+      v.literal("deleted"),
+    ),
+  },
+  returns: v.object({ url: v.string(), previous: v.union(v.string(), v.null()) }),
+  handler: async (ctx, args) => {
+    const doc = await ctx.db.get(args.documentId);
+    if (!doc) throw new Error(`document ${args.documentId} not found`);
+    await ctx.db.patch(args.documentId, { lifecycleStatus: args.lifecycleStatus });
+    return { url: doc.url, previous: doc.lifecycleStatus ?? null };
+  },
+});
