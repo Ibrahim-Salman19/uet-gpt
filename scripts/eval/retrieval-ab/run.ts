@@ -28,8 +28,20 @@
  *                  3000/4500/6000; base vs nav-chunk demotion vs near-duplicate removal) [--dump-text]
  *     [--answers]  (end-to-end answers for queries in answerRubrics.ts: pre-8cf42e2 retrieval vs current,
  *                   answered and rubric-graded by Gemini; ~4 Gemini calls per query)
+ *                 newestEdition row: older-year copies of the same URL family dropped before the cut to 8;
+ *                 dedupeNav row: deployed order with bare-navigation-link chunks moved behind the rest;
+ *                 lexQ/lexQchunk rows (with --lex-question): extra lexical channel on the raw question;
+ *                 fusedOrder row: no rerank; tier1Local8/cosine8/cosine24: local Tier 1, raw vs length-normalised; pool16/pool24 rows: the reranker gets 16/24 deduplicated candidates instead of 8
+ *     [--answers-newest]  (with --answers: current retrieval vs older editions dropped)
+ *     [--answers-k6]  (with --answers: current retrieval, reranker keeps 4 vs 6 chunks)
+ *     [--rerank-rows cohere_q24,cf_rw24,...]  (with --budget: Cohere rerank-v4.0-fast or Cloudflare bge-reranker-base
+ *                  called directly on the deduplicated 8/24 pool with the raw question (q) or the rewrite (rw);
+ *                  scores logged per query)
+ *     [--answers-rerank cohere_q24]  (with --answers: current retrieval vs that row's top 4; ~1 reranker call per rubric query)
+ *     [--cohere-cache <file>]  (Cohere responses by query+documents; trial keys: 10 calls/min, 1,000/month)
  *     [--temps 0,0]  (rewrite,HyDE temperatures; use a separate --cache file per setting/sample)
  */
+import { createHash } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
@@ -179,6 +191,41 @@ function linkShare(text: string): number {
   return lines.length ? lines.filter((l) => LINK_LINE.test(l)).length / lines.length : 0;
 }
 
+// Bare navigation link: short anchor text, no crawler-appended " — description", nothing after the
+// link but an optional (pdf)/(image)/(video) tag. Lines that carry facts after the link (staff
+// "— Name, Email, Ph" image captions, dated notice titles) are not counted.
+const NAV_LINE = /^\s*- \[[^\]—]{0,60}\]\(<?https?:\/\/[^)\s]*>?\)\s*(\((pdf|image|video)\))?\s*$/;
+function navShare(text: string): number {
+  const lines = text.split("\n").filter((l) => l.trim());
+  return lines.length ? lines.filter((l) => NAV_LINE.test(l)).length / lines.length : 0;
+}
+
+// Superseded editions: among candidates whose URL paths differ only in a 4-digit year
+// (UET-Prospectus-2024.pdf vs UET-Prospectus-2025.pdf), keep only the newest year.
+const YEAR = /(?<!\d)(?:19|20)\d{2}(?!\d)/g;
+function editionPath(h: Hit): string {
+  const raw = h.text.match(/^URL Path: (\S+)/m)?.[1] ?? "";
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
+}
+function dropOlderEditions(hits: Hit[]): Hit[] {
+  const newest = new Map<string, number>();
+  for (const h of hits) {
+    const years = editionPath(h).match(YEAR);
+    if (!years) continue;
+    const family = editionPath(h).replace(YEAR, "YYYY");
+    newest.set(family, Math.max(newest.get(family) ?? 0, Math.max(...years.map(Number))));
+  }
+  return hits.filter((h) => {
+    const years = editionPath(h).match(YEAR);
+    if (!years) return true;
+    return Math.max(...years.map(Number)) >= newest.get(editionPath(h).replace(YEAR, "YYYY"))!;
+  });
+}
+
 // Top-4 after reranking the fused top-8 (retrieval.ts passes topK 4 to the LLM context).
 function rerankTop4(fn: typeof cascadeRerank, query: string, hits: Hit[]): Promise<Hit[]> {
   return rerankTopK(fn, query, hits, 4);
@@ -259,6 +306,117 @@ async function dense(text: string, limit: number): Promise<Hit[]> {
   return out;
 }
 
+// Local copy of cascade.ts Tier 1 (word overlap 0.6 + position 0.4, overlap >= 0.1 filter).
+// "cosine" divides the shared-word count by sqrt(|query words| * |chunk words|) instead of
+// |query words| alone, so long link manifests stop accumulating overlap for free; scores are
+// rescaled by the pool maximum to keep the 0.6/0.4 blend comparable.
+function tier1Words(s: string): Set<string> {
+  return new Set(s.toLowerCase().replace(/[^\w\s]/g, "").split(/\s+/).filter(Boolean));
+}
+function tier1Local(query: string, hits: Hit[], k: number, cosine: boolean): Hit[] {
+  const q = tier1Words(query);
+  const scored = hits.map((h, i) => {
+    const c = tier1Words(h.text);
+    let shared = 0;
+    for (const w of q) if (c.has(w)) shared++;
+    const overlap = q.size && c.size ? shared / q.size : 0;
+    const norm = q.size && c.size ? shared / Math.sqrt(q.size * c.size) : 0;
+    return { h, i, overlap, norm };
+  });
+  const maxNorm = Math.max(1e-9, ...scored.map((d) => d.norm));
+  const withScore = scored.map((d) => ({
+    ...d,
+    combined: 0.6 * (cosine ? d.norm / maxNorm : d.overlap) + 0.4 * (1 - d.i / hits.length),
+  }));
+  const filtered = withScore.filter((d) => d.overlap >= 0.1);
+  if (filtered.length === 0) return withScore.slice(0, k).map((d) => d.h);
+  return filtered.sort((a, b) => b.combined - a.combined).slice(0, k).map((d) => d.h);
+}
+
+// ---- Cohere rerank (direct v2 call, not the Convex cascade) ------------------------------
+// cascade.ts gives Cohere only Tier-1's top 15 after its word-overlap filter, which is the
+// heuristic under test, so the harness calls the endpoint itself. Calls are sequential,
+// paced for the trial limit (10/min), and cached by (model, query, documents).
+const COHERE_MODEL = "rerank-v4.0-fast";
+const cohereCachePath = process.argv.includes("--cohere-cache")
+  ? process.argv[process.argv.indexOf("--cohere-cache") + 1]!
+  : null;
+const cohereCache: Record<string, Array<{ index: number; relevance_score: number }>> =
+  cohereCachePath && existsSync(cohereCachePath) ? JSON.parse(readFileSync(cohereCachePath, "utf8")) : {};
+let lastCohereCall = 0;
+let cohereCalls = 0;
+
+async function cohereRerank(query: string, hits: Hit[]): Promise<Array<Hit & { rerankScore: number }>> {
+  if (hits.length === 0) return [];
+  const documents = hits.map((h) => h.text);
+  const key = createHash("sha256").update(JSON.stringify([COHERE_MODEL, query, documents])).digest("hex");
+  let results = cohereCache[key];
+  for (let attempt = 0; !results; attempt++) {
+    const wait = lastCohereCall + 6500 - Date.now();
+    if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+    lastCohereCall = Date.now();
+    cohereCalls++;
+    const res = await fetch("https://api.cohere.com/v2/rerank", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.COHERE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ model: COHERE_MODEL, query, documents, top_n: documents.length }),
+    });
+    if (res.ok) {
+      results = ((await res.json()) as { results: Array<{ index: number; relevance_score: number }> }).results;
+      cohereCache[key] = results;
+      if (cohereCachePath) writeFileSync(cohereCachePath, JSON.stringify(cohereCache));
+    } else if (attempt >= 4 || (res.status !== 429 && res.status < 500)) {
+      throw new Error(`Cohere rerank ${res.status}: ${(await res.text()).slice(0, 200)}`);
+    } else {
+      await new Promise((r) => setTimeout(r, 60_000));
+    }
+  }
+  return results
+    .filter((r) => r.index >= 0 && r.index < hits.length)
+    .map((r) => ({ ...hits[r.index]!, rerankScore: r.relevance_score }));
+}
+
+// cloudflareRerank swallows failures and returns input order scored 1 - i/topK; treat that as an error.
+async function cfRerank(query: string, hits: Hit[]): Promise<Array<Hit & { rerankScore: number }>> {
+  if (hits.length === 0) return [];
+  const out = await retry(async () => {
+    const r = (await client.action(cloudflareRerank, {
+      query,
+      documents: hits.map((h) => ({ id: h.id, text: h.text })),
+      topK: hits.length,
+    })) as Array<{ index: number; score: number }>;
+    if (r.every((x, i) => x.index === i && x.score === 1 - i / hits.length))
+      throw new Error("cloudflareRerank fell back to input order");
+    return r;
+  });
+  return out
+    .filter((r) => r.index >= 0 && r.index < hits.length)
+    .map((r) => ({ ...hits[r.index]!, rerankScore: r.score }));
+}
+
+// Row spec "<cohere|cf>_<q|rw><8|24>": reranker, query text, deduplicated pool depth.
+function parseRerankSpec(spec: string) {
+  const m = spec.match(/^(cohere|cf)_(q|rw)(8|24)$/);
+  if (!m) throw new Error(`bad rerank row ${spec}`);
+  return { rank: m[1] === "cohere" ? cohereRerank : cfRerank, useQuestion: m[2] === "q", depth: Number(m[3]) };
+}
+
+// Chunks known (from probes) to answer a query better than its golden label.
+const TARGET_SNIPPETS: Record<string, string[]> = {
+  "What is the minimum percentage required in FSc for admission to UET Taxila?": [
+    "60% unadjusted",
+    "at least 60% marks for engineering",
+  ],
+  "fee structure": ["104,800"],
+  "What is the fee structure for BS Software Engineering at UET Taxila?": ["104,800"],
+};
+function hasTarget(query: string, h: Hit): boolean {
+  return (TARGET_SNIPPETS[query] ?? []).some((s) => norm(h.text).includes(s));
+}
+
 // ---- Scoring ----------------------------------------------------------------------------
 
 function isRelevant(hit: Hit, labels: Label[]): boolean {
@@ -293,6 +451,10 @@ async function main() {
   const rerankTally: Record<string, { hit: number; n: number }> = {};
   const budgetTally: Record<string, { hit: number; n: number }> = {};
   const answerTally: Record<string, { pass: number; n: number }> = {};
+  const rerankSpecs = args.includes("--rerank-rows")
+    ? args[args.indexOf("--rerank-rows") + 1]!.split(",")
+    : [];
+  rerankSpecs.forEach(parseRerankSpec);
 
   for (const g of golden) {
     const rel = g.relevantChunkKeys.map((k) => labels.get(k)).filter((l): l is Label => !!l);
@@ -313,7 +475,7 @@ async function main() {
     ]);
     // d2: optional second dense channel (e.g. HyDE and the raw question), same weight as d.
     // dedupe: apply search.ts's dropNearDuplicates to the whole fused pool before the cut to 8.
-    const fuse = (d: Hit[], lx: typeof lexRw, d2?: Hit[], dedupe = false): Hit[] => {
+    const fuse = (d: Hit[], lx: typeof lexRw, d2?: Hit[], dedupe = false, poolSize = FINAL_K): Hit[] => {
       const byId = new Map<string, Hit>();
       for (const h of [...d, ...(d2 ?? []), ...lx.text, ...lx.ctx])
         if (!byId.has(h.id)) byId.set(h.id, h);
@@ -326,9 +488,21 @@ async function main() {
       return dedupe
         ? dropNearDuplicates(
             hits.map((h) => ({ ...h, content: h.text })),
-            FINAL_K,
+            poolSize,
           )
-        : hits.slice(0, FINAL_K);
+        : hits.slice(0, poolSize);
+    };
+    // Same fused pool as the deployed config, with older editions removed before the cut to 8.
+    const fuseNewest = (): Hit[] => {
+      const byId = new Map<string, Hit>();
+      for (const h of [...dHy, ...dQ, ...lexRw.text, ...lexRw.ctx]) if (!byId.has(h.id)) byId.set(h.id, h);
+      const fused = hybridRank(dHy, lexRw.text, RRF_K, weights, "reciprocal", [
+        { results: lexRw.chunk, weight: weights.text * 0.5 },
+        { results: lexRw.ctx, weight: weights.text * 0.25 },
+        { results: dQ, weight: weights.vector },
+      ]);
+      const hits = dropOlderEditions(fused.map((f) => byId.get(f.id)!).filter(Boolean));
+      return dropNearDuplicates(hits.map((h) => ({ ...h, content: h.text })), FINAL_K);
     };
     const results = {
       old_lexHyde_denseHyde: fuse(dHy, lexHy),
@@ -376,6 +550,56 @@ async function main() {
       const ordered = await rerankTopK(cascadeRerank, rewrite, results.lexRewrite_denseBoth, 8);
       const dedupedPool = fuse(dHy, lexRw, dQ, true);
       const orderedDeduped = await rerankTopK(cascadeRerank, rewrite, dedupedPool, 8);
+      // pool16/pool24: hand the reranker a deeper deduplicated candidate list than production's 8.
+      const pool16 = await rerankTopK(cascadeRerank, rewrite, fuse(dHy, lexRw, dQ, true, 16), 8);
+      const deep24 = fuse(dHy, lexRw, dQ, true, 24);
+      // --lex-question: an extra lexical channel on the raw question (the rewrite can drift,
+      // e.g. "fee structure" -> "fee structure tuition fees payment schedule").
+      let lexQPool: Hit[] | null = null;
+      let lexQChunkPool: Hit[] | null = null;
+      if (args.includes("--lex-question")) {
+        const lexQ = await lexical(g.query, limit);
+        const fuseLexQ = (withChunk: boolean): Hit[] => {
+          const byId = new Map<string, Hit>();
+          for (const h of [...dHy, ...dQ, ...lexRw.text, ...lexRw.ctx, ...lexQ.text]) if (!byId.has(h.id)) byId.set(h.id, h);
+          const fused = hybridRank(dHy, lexRw.text, RRF_K, weights, "reciprocal", [
+            { results: lexRw.chunk, weight: weights.text * 0.5 },
+            { results: lexRw.ctx, weight: weights.text * 0.25 },
+            { results: dQ, weight: weights.vector },
+            { results: lexQ.text, weight: weights.text },
+            ...(withChunk ? [{ results: lexQ.chunk, weight: weights.text * 0.5 }] : []),
+          ]);
+          const hits = fused.map((f) => byId.get(f.id)!).filter(Boolean);
+          return dropNearDuplicates(hits.map((h) => ({ ...h, content: h.text })), FINAL_K);
+        };
+        lexQPool = fuseLexQ(false);
+        lexQChunkPool = fuseLexQ(true);
+      }
+      const pool24 = await rerankTopK(cascadeRerank, rewrite, deep24, 8);
+      row.relevantInPool24 = deep24.some((h) => isRelevant(h, rel));
+      const rerankRows: Array<[string, Hit[]]> = [];
+      const rerankLog: Record<string, unknown> = {};
+      for (const spec of rerankSpecs) {
+        const { rank, useQuestion, depth } = parseRerankSpec(spec);
+        const ranked = await rank(useQuestion ? g.query : rewrite, depth === 8 ? dedupedPool : deep24);
+        rerankRows.push([spec, ranked]);
+        rerankLog[spec] = ranked.map((h) => ({
+          score: +h.rerankScore.toPrecision(4),
+          relevant: isRelevant(h, rel),
+          target: hasTarget(g.query, h),
+          path: editionPath(h),
+        }));
+      }
+      if (rerankSpecs.length) row.rerank = rerankLog;
+      if (TARGET_SNIPPETS[g.query]) {
+        row.targets = {
+          inPool24: deep24.some((h) => hasTarget(g.query, h)),
+          dedupeTop4: orderedDeduped.slice(0, 4).some((h) => hasTarget(g.query, h)),
+          ...Object.fromEntries(
+            rerankRows.map(([name, list]) => [`${name}Top4`, list.slice(0, 4).some((h) => hasTarget(g.query, h))]),
+          ),
+        };
+      }
       // "demote": chunks that are mostly markdown link lines (the crawler's nav/resource
       // manifest) are moved behind content chunks, keeping order otherwise.
       const demoted = [
@@ -387,6 +611,23 @@ async function main() {
         ["base", ordered],
         ["demote", demoted],
         ["dedupe", orderedDeduped],
+        ["fusedOrder", dedupedPool], // no rerank: deduplicated fusion order
+        ["newestEdition", await rerankTopK(cascadeRerank, rewrite, fuseNewest(), 8)],
+        [
+          "dedupeNav",
+          [
+            ...orderedDeduped.filter((h) => navShare(h.text) < NAV_LINK_SHARE),
+            ...orderedDeduped.filter((h) => navShare(h.text) >= NAV_LINK_SHARE),
+          ],
+        ],
+        ["lexQ", lexQPool ? await rerankTopK(cascadeRerank, rewrite, lexQPool, 8) : orderedDeduped],
+        ["lexQchunk", lexQChunkPool ? await rerankTopK(cascadeRerank, rewrite, lexQChunkPool, 8) : orderedDeduped],
+        ["tier1Local8", tier1Local(rewrite, dedupedPool, 8, false)], // parity check vs "dedupe"
+        ["cosine8", tier1Local(rewrite, dedupedPool, 8, true)],
+        ["cosine24", tier1Local(rewrite, deep24, 8, true)],
+        ["pool16", pool16],
+        ["pool24", pool24],
+        ...rerankRows,
       ] as const) {
         for (const k of [4, 5, 6, 8]) {
           for (const maxTokens of [3000, 4500, 6000]) {
@@ -404,6 +645,10 @@ async function main() {
       }
       row.contextBudget = at;
       row.dedupedPoolSize = dedupedPool.length;
+      row.navDemoted = orderedDeduped.filter((h) => navShare(h.text) >= NAV_LINK_SHARE).map((h) => ({
+        relevant: isRelevant(h, rel),
+        head: h.text.slice(0, 160),
+      }));
       row.top8 = ordered.map((h) => ({
         chars: h.text.length,
         linkShare: +linkShare(h.text).toFixed(2),
@@ -420,13 +665,36 @@ async function main() {
       // End-to-end: production cascade to top 4 -> real buildContext -> real buildSystemPrompt ->
       // answer (Gemini) -> rubric judge (Gemini). CRAG and the confidence directive are skipped
       // for both variants; freshness headers are "unknown" for both.
-      const configs = {
-        morning: results.new_lexRewrite_denseHyde, // deployed before 8cf42e2
-        current: fuse(dHy, lexRw, dQ, true), // 8cf42e2 + near-duplicate removal
-      };
+      // --answers-k6: current retrieval with the reranker keeping 4 vs 6 chunks (same 3000-token budget).
+      const deployed = fuse(dHy, lexRw, dQ, true); // 8cf42e2 + near-duplicate removal
+      const answersRerank = args.includes("--answers-rerank")
+        ? args[args.indexOf("--answers-rerank") + 1]!
+        : null;
+      // reranked: an already-ordered list used as is (no cascade call).
+      const rr = answersRerank ? parseRerankSpec(answersRerank) : null;
+      const configs: Record<string, { pool: Hit[]; k: number; reranked?: boolean }> = rr
+        ? {
+            current: { pool: deployed, k: 4 },
+            [answersRerank!]: {
+              pool: await rr.rank(
+                rr.useQuestion ? g.query : rewrite,
+                rr.depth === 8 ? deployed : fuse(dHy, lexRw, dQ, true, 24),
+              ),
+              k: 4,
+              reranked: true,
+            },
+          }
+        : args.includes("--answers-k6")
+        ? { current: { pool: deployed, k: 4 }, k6: { pool: deployed, k: 6 } }
+        : args.includes("--answers-newest")
+        ? { current: { pool: deployed, k: 4 }, newest: { pool: fuseNewest(), k: 4 } }
+        : {
+            morning: { pool: results.new_lexRewrite_denseHyde, k: 4 }, // deployed before 8cf42e2
+            current: { pool: deployed, k: 4 },
+          };
       const answers: Record<string, unknown> = {};
-      for (const [name, pool] of Object.entries(configs)) {
-        const top4 = await rerankTopK(cascadeRerank, rewrite, pool, 4);
+      for (const [name, { pool, k, reranked }] of Object.entries(configs)) {
+        const top4 = reranked ? pool.slice(0, k) : await rerankTopK(cascadeRerank, rewrite, pool, k);
         const context: string = await buildContextHandler(
           {},
           {
@@ -455,7 +723,7 @@ async function main() {
         answerTally[name] ??= { pass: 0, n: 0 };
         answerTally[name]!.n++;
         if (pass) answerTally[name]!.pass++;
-        answers[name] = { pass, verdict: verdictText, response, relevantInContext: top4.some((h) => isRelevant(h, rel)) };
+        answers[name] = { top4Paths: top4.map(editionPath), targetInContext: top4.some((h) => hasTarget(g.query, h)), pass, verdict: verdictText, response, relevantInContext: top4.some((h) => isRelevant(h, rel)) };
       }
       row.answers = answers;
       console.log(
@@ -515,6 +783,7 @@ async function main() {
     Object.entries(answerTally).map(([k, t]) => [k, `${t.pass}/${t.n}`]),
   );
   console.log(JSON.stringify({ summary, rerankSummary, budgetSummary, answerSummary }, null, 2));
+  if (cohereCalls) console.log(`Cohere API calls this run: ${cohereCalls}`);
   writeFileSync(
     outPath,
     JSON.stringify({ summary, rerankSummary, budgetSummary, answerSummary, perQuery }, null, 2),
