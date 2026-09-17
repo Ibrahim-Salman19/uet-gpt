@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { internalQuery, mutation, query } from "./_generated/server";
+import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import { requireAdmin } from "./auth";
 
 export const addFaq = mutation({
@@ -46,6 +46,40 @@ export const searchFaqs = internalQuery({
       .filter((q) =>
         q.or(q.eq(q.field("expiresAt"), undefined), q.gt(q.field("expiresAt"), args.now)),
       )
-      .take(3);
+      .take(8);
+  },
+});
+
+/**
+ * Replace the FAQ entries that came from one official page (embeddings/search.ts merges
+ * matching FAQs into retrieval). Loaded from scripts/faq/official-faqs.json by
+ * scripts/faq/load_official_faqs.cjs, so re-running the loader refreshes rather than
+ * duplicates. Batched per source page to stay inside one mutation transaction.
+ */
+export const replaceFaqsForSource = internalMutation({
+  args: {
+    sourceUrl: v.string(),
+    entries: v.array(v.object({ question: v.string(), answer: v.string() })),
+  },
+  returns: v.object({ removed: v.number(), inserted: v.number() }),
+  handler: async (ctx, args) => {
+    const existing = await ctx.db.query("faqs").take(200);
+    let removed = 0;
+    for (const faq of existing) {
+      if (faq.sourceUrl === args.sourceUrl) {
+        await ctx.db.delete(faq._id);
+        removed++;
+      }
+    }
+    const now = Date.now();
+    for (const entry of args.entries) {
+      await ctx.db.insert("faqs", {
+        question: entry.question,
+        answer: entry.answer,
+        sourceUrl: args.sourceUrl,
+        createdAt: now,
+      });
+    }
+    return { removed, inserted: args.entries.length };
   },
 });

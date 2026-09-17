@@ -3,12 +3,15 @@ import { internal } from "../_generated/api";
 import { type ActionCtx, internalAction } from "../_generated/server";
 import { recordTiming } from "../observability/metrics";
 import { rag } from "../rag/instance";
+import { FAQ_MIN_COVERAGE, faqCoverage } from "../shared/faqMatch";
 import { estimateIdf } from "./idf";
 
-// FAQ results are fused on the same reciprocal-rank scale as document results
-// (1/(RRF_K + rank)) rather than by multiplying a raw, unbounded BM25 _score by
-// a magic constant. FAQ_WEIGHT scales that rank-decay relative to the document
-// channels; tune it with a retrieval eval rather than by hand.
+// A verified FAQ that actually matches the asked question is scored against the
+// document channels rather than on its own scale: 1/(RRF_K + rank) = 0.0167 sat
+// below the 8th document (~0.019), so FAQ hits were always cut before reranking.
+// FAQ_WEIGHT is now a multiplier on the 4th-best document score, i.e. 1.0 means
+// "worth as much as the last document that reaches the reranker"; tune it with a
+// retrieval eval rather than by hand.
 const FAQ_WEIGHT = 1.0;
 const RRF_K = 60;
 
@@ -151,6 +154,7 @@ async function fetchActiveFaqs(
     content: string;
     url: string;
     title: string;
+    coverage: number;
     relevanceScore: number;
     freshnessState: "fresh" | "aged" | "unknown";
     applicability: "current" | "unknown";
@@ -161,15 +165,18 @@ async function fetchActiveFaqs(
     const faqs = await ctx.runQuery(internal.faq.searchFaqs, { query: queryText, now });
     return faqs
       .filter((f: FaqResult) => !f.expiresAt || f.expiresAt > now)
-      .map((faq: FaqResult, rank: number) => ({
+      .map((faq: FaqResult) => ({
         entryId: faq._id,
         content: `FAQ: ${faq.question}\nAnswer: ${faq.answer}`,
         url: faq.sourceUrl || "Verified FAQ Database",
         title: faq.question,
-        relevanceScore: FAQ_WEIGHT * (1 / (RRF_K + rank)),
+        coverage: faqCoverage(queryText, faq.question),
+        relevanceScore: 0,
         freshnessState: "fresh" as const,
         applicability: "current" as const,
-      }));
+      }))
+      .filter((faq) => faq.coverage >= FAQ_MIN_COVERAGE)
+      .sort((a, b) => b.coverage - a.coverage);
   } catch (err) {
     console.error("FAQ search failed, falling back to empty FAQ list:", err);
     return [];
@@ -509,7 +516,18 @@ export const searchDocumentsAction = internalAction({
       });
     }
 
-    const faqResults = (await fetchActiveFaqs(ctx, args.queryText)).slice(0, 2);
+    // Matched against the user's own words: the rewrite paraphrases the question,
+    // and the FAQ gate compares it with the FAQ's question wording.
+    const matchedFaqs = (await fetchActiveFaqs(ctx, args.questionText ?? args.queryText)).slice(
+      0,
+      2,
+    );
+    const anchorScore =
+      sortedEnriched[Math.min(3, sortedEnriched.length - 1)]?.relevanceScore ?? 1 / RRF_K;
+    const faqResults = matchedFaqs.map((faq, rank) => ({
+      ...faq,
+      relevanceScore: FAQ_WEIGHT * anchorScore * (1 + (matchedFaqs.length - rank) * 1e-3),
+    }));
     const combinedResults = [...faqResults, ...sortedEnriched].sort(
       (a, b) => b.relevanceScore - a.relevanceScore,
     );
