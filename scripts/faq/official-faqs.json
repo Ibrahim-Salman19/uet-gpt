@@ -15,6 +15,16 @@
   "sourceUrl": "https://admissions.uettaxila.edu.pk/FAQS.php"
  },
  {
+  "question": "What is the minimum percentage required in FSc for admission?",
+  "answer": "You must have passed F.Sc (Pre-Engineering) / ICS / DAE (relevant field) or equivalent with at least **60% marks** for Engineering programs and **50% marks** for BS Math/ Physics /Computer Science / Engineering Technology programs. You must also appear in the TCAT/ECAT/Equivalent test.",
+  "sourceUrl": "https://admissions.uettaxila.edu.pk/FAQS.php"
+ },
+ {
+  "question": "What percentage of marks is required in FSc, ICS or DAE to be eligible?",
+  "answer": "You must have passed F.Sc (Pre-Engineering) / ICS / DAE (relevant field) or equivalent with at least **60% marks** for Engineering programs and **50% marks** for BS Math/ Physics /Computer Science / Engineering Technology programs. You must also appear in the TCAT/ECAT/Equivalent test.",
+  "sourceUrl": "https://admissions.uettaxila.edu.pk/FAQS.php"
+ },
+ {
   "question": "What is TCAT/ECAT/Equivalent and when is the test held?",
   "answer": "TCAT/ECAT/Equivalent (Engineering University Admission Test) is conducted by UET Lahore. Registration usually starts in February/March. Register at [admission.uet.edu.pk](<https://admission.uet.edu.pk/>).",
   "sourceUrl": "https://admissions.uettaxila.edu.pk/FAQS.php"

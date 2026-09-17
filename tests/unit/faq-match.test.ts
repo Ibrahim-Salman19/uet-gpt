@@ -34,6 +34,17 @@ describe("faqMatch - FAQ retrieval gate", () => {
     ).toBeGreaterThanOrEqual(FAQ_MIN_COVERAGE);
   });
 
+  it("admits the alias wording carried in the FAQ data file", () => {
+    // official-faqs.json repeats the eligibility answer under this wording, because the
+    // page's own question ("eligibility criteria") shares no content word with it.
+    expect(
+      faqCoverage(
+        "What is the minimum percentage required in FSc for admission to UET Taxila?",
+        "What is the minimum percentage required in FSc for admission?",
+      ),
+    ).toBe(1);
+  });
+
   it("rejects a FAQ that merely shares a common word", () => {
     // "semester" alone must not pull the grade-sheet FAQ into a fee question.
     expect(
