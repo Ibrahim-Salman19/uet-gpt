@@ -325,11 +325,16 @@ export const setDocumentLifecycleStatus = internalMutation({
       v.literal("quarantined"),
       v.literal("deleted"),
     ),
+    // Guards against flagging the wrong id: the call fails unless the document URL ends with this.
+    expectUrlSuffix: v.string(),
   },
   returns: v.object({ url: v.string(), previous: v.union(v.string(), v.null()) }),
   handler: async (ctx, args) => {
     const doc = await ctx.db.get(args.documentId);
     if (!doc) throw new Error(`document ${args.documentId} not found`);
+    if (!doc.url.endsWith(args.expectUrlSuffix)) {
+      throw new Error(`document ${args.documentId} is ${doc.url}, not *${args.expectUrlSuffix}`);
+    }
     await ctx.db.patch(args.documentId, { lifecycleStatus: args.lifecycleStatus });
     return { url: doc.url, previous: doc.lifecycleStatus ?? null };
   },

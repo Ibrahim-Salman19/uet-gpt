@@ -83,6 +83,9 @@ async function main() {
       makeFunctionReference("knowledgeStore/convexQueries:getChunkHitsByRagIds"),
       { ragIds: rows.slice(0, 3).map((r) => r.ragId) },
     );
+    if (sample.filter(Boolean).length !== Math.min(3, rows.length)) {
+      throw new Error("could not read the sample chunks to verify --expect-path; aborting");
+    }
     for (const hit of sample) {
       const path = hit?.text.match(/^URL Path: (\S+)/m)?.[1];
       if (path !== expectPath) throw new Error(`chunk URL Path ${path} does not match ${expectPath}; aborting`);
