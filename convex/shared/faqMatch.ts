@@ -1,6 +1,10 @@
 /**
  * Gate for the FAQ retrieval channel (embeddings/search.ts: fetchActiveFaqs).
  *
+ * contentTokens is also used by reranking/cascade.ts to score query/chunk word
+ * overlap, so changes to STOP_WORDS or stem() move the final ranking of every
+ * answer, not just FAQ admission.
+ *
  * Convex's search index matches any shared term, so a question containing only
  * "UET Taxila" would pull an unrelated FAQ into every answer. A FAQ is therefore
  * only allowed into the candidate pool when the asked question's content words

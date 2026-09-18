@@ -2,6 +2,7 @@
 import { v } from "convex/values";
 import { internalAction } from "../_generated/server";
 import { CASCADE_CONFIG } from "../rag/constants";
+import { contentTokens } from "../shared/faqMatch";
 
 // Bound external reranker latency so a hung/slow reranker degrades quickly to
 // the next cascade tier (Groq/Cohere) instead of stalling the whole retrieval
@@ -22,23 +23,38 @@ async function fetchWithTimeout(
   }
 }
 
-function computeWordOverlap(query: string, chunk: string): number {
-  const queryWords = new Set(
-    query
+function rawWords(text: string): Set<string> {
+  return new Set(
+    text
       .toLowerCase()
       .replace(/[^\w\s]/g, "")
       .split(/\s+/)
       .filter(Boolean),
   );
+}
+
+/**
+ * Share of the query's words that the chunk contains.
+ *
+ * Stop words are removed from both sides first (contentTokens). Counting them
+ * let sheer length win: on "Can I freeze my semester at UET Taxila and what is
+ * the procedure?" a 2019 IEEE annual report matched 10 of the 13 query words
+ * ("can", "i", "my", "at", "uet", "taxila", "and", ...) and scored 0.77, above
+ * the semester-freezing rules at 0.46. Production never reaches a real
+ * cross-encoder (no RERANKER_URL, no COHERE_API_KEY), so this score alone picks
+ * the 4 chunks the answer is written from.
+ *
+ * A query made up entirely of stop words has no content tokens to compare, so
+ * it falls back to raw word overlap rather than scoring every chunk 0.
+ */
+export function computeWordOverlap(query: string, chunk: string): number {
+  const queryContent = contentTokens(query);
+  const useContentTokens = queryContent.size > 0;
+
+  const queryWords = useContentTokens ? queryContent : rawWords(query);
   if (queryWords.size === 0) return 0;
 
-  const chunkWords = new Set(
-    chunk
-      .toLowerCase()
-      .replace(/[^\w\s]/g, "")
-      .split(/\s+/)
-      .filter(Boolean),
-  );
+  const chunkWords = useContentTokens ? contentTokens(chunk) : rawWords(chunk);
   if (chunkWords.size === 0) return 0;
 
   let overlap = 0;
