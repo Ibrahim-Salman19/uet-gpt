@@ -69,14 +69,29 @@ type DocMeta = {
   contextualizedText?: string;
 };
 
+// getDocumentsByEntryIds hard-throws above 100 ids, and searchVectorDB in
+// rag/retrieval.ts catches a thrown search by returning [] - which
+// determineConfidenceTier([]) turns into tier "refuse". So an oversized fused
+// pool did not degrade the answer, it silently became "I don't have verified
+// information about this" (observed in production 2026-09-18 on a long query:
+// "Cannot query more than 100 entry IDs at a time"). Fetch in batches instead.
+const DOC_META_BATCH = 100;
+
 async function batchFetchDocMeta(
   ctx: ActionCtx,
   fused: FusedItem[],
 ): Promise<Map<string, DocMeta>> {
   const entryIds = fused.map((f) => f.id);
-  const lookups = await ctx.runQuery(internal.embeddings.doc_queries.getDocumentsByEntryIds, {
-    entryIds,
-  });
+  const batches = [];
+  for (let i = 0; i < entryIds.length; i += DOC_META_BATCH) {
+    batches.push(entryIds.slice(i, i + DOC_META_BATCH));
+  }
+  const lookupBatches = await Promise.all(
+    batches.map((ids) =>
+      ctx.runQuery(internal.embeddings.doc_queries.getDocumentsByEntryIds, { entryIds: ids }),
+    ),
+  );
+  const lookups = lookupBatches.flat();
 
   const docMap = new Map<string, DocMeta>();
   for (const { entryId, doc } of lookups) {
