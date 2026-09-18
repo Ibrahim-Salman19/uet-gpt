@@ -238,6 +238,33 @@ export const condenseQuestionAction = internalAction({
   },
 });
 
+/**
+ * Strip specifics the rewriter invented that the user never asked for.
+ *
+ * rewriteQueryAction is a small model at temperature 0.3 and it pads queries with
+ * numbers. Observed 2026-09-18: "UET Taxila admission last date 2024 deadline",
+ * "merit list announcement date 2024 2025 2026 ... 2043" (twenty years), and a
+ * leaked control token in "entry test timing 2024 <|constrain|>**".
+ *
+ * An invented year is actively harmful rather than merely noisy: the lexical
+ * search channels and reranking/cascade.ts both score on word overlap, so a
+ * hallucinated "2024" promotes retired 2024 editions over the current ones,
+ * which is exactly what the document lifecycle gate exists to prevent. Years the
+ * user did write are kept.
+ */
+export function sanitizeRewrittenQuery(rewritten: string, original: string): string {
+  const askedYears = new Set(original.match(/\b(?:19|20)\d{2}\b/g) ?? []);
+  const cleaned = rewritten
+    .replace(/<\|[^|]*\|>/g, " ")
+    .replace(/\*+/g, " ")
+    .replace(/\b(?:19|20)\d{2}\b/g, (year) => (askedYears.has(year) ? year : " "))
+    .replace(/\s[-\u2013\u2014]+(?=\s)/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  // A rewrite that sanitises down to punctuation is worse than no rewrite.
+  return /[a-z]/i.test(cleaned) ? cleaned : original;
+}
+
 export const rewriteQueryAction = internalAction({
   args: { query: v.string() },
   returns: v.string(),
@@ -253,13 +280,14 @@ export const rewriteQueryAction = internalAction({
             "You are a search expert. Rewrite the user's query to be a concise keyword-rich search query. " +
             "If the query is written in Roman Urdu (Urdu language written using Latin/English characters, e.g., 'fees kitni hai', 'daakhila kab hoga', 'hostel kahan hai', 'documents kya chahiye'), detect it, translate it to English first, and then rewrite it into keyword-rich English search terms. " +
             "Expand abbreviations like 'UET' to 'University of Engineering and Technology'. " +
+            "Never add a year, date, or figure that the user did not write: the corpus spans many years and an invented year retrieves the wrong edition. " +
             "Output ONLY the final rewritten keyword-rich search query in English, and absolutely nothing else.",
           prompt: args.query,
           temperature: 0.3,
           maxOutputTokens: 100,
           providerOptions: LOW_REASONING,
         });
-        return text.trim() || args.query;
+        return sanitizeRewrittenQuery(text.trim(), args.query) || args.query;
       } catch (error) {
         console.warn(`rewriteQuery: ${label} failed, trying next provider:`, error);
       }
@@ -290,7 +318,8 @@ export const hydeQueryAction = internalAction({
         const { text } = await generateText({
           model,
           system:
-            "You are an expert on UET Taxila. Write a hypothetical, 3-5 sentence factual paragraph that directly answers the user's query. Pretend you are writing an official website excerpt.",
+            "You are an expert on UET Taxila. Write a hypothetical, 3-5 sentence factual paragraph that directly answers the user's query. Pretend you are writing an official website excerpt. " +
+            "Always write in English, whatever language the query uses: this paragraph is embedded and matched against an English-only corpus, and a Roman Urdu query was answered in Urdu and in Devanagari script (observed 2026-09-18).",
           prompt: args.query,
           temperature: 0.5,
           maxOutputTokens: 200,
