@@ -53,4 +53,59 @@ describe("sanitizeRewrittenQuery", () => {
     const original = "When is the entry test?";
     expect(sanitizeRewrittenQuery("2024 **", original)).toBe(original);
   });
+  // Every `rewritten` below is real production output captured 2026-09-18 by
+  // calling rag/routing:rewriteQueryAction against the deployed rewriter.
+  it("keeps only the query preceding a synonym dump", () => {
+    expect(
+      sanitizeRewrittenQuery(
+        "BS program fee structure keywords: BS program tuition fees, BS program cost, BS program fee details, BS program tuition breakdown, BS program fee schedule, BS program cost structure",
+        "What is the fee structure for BS programs?",
+      ),
+    ).toBe("BS program fee structure");
+  });
+
+  it("collapses a dump whose label is capitalised and spaced", () => {
+    expect(
+      sanitizeRewrittenQuery(
+        "hostel charges Keywords : hostel fees, accommodation cost, room rent",
+        "What are the hostel charges?",
+      ),
+    ).toBe("hostel charges");
+  });
+
+  it("keeps the first item when the dump has no query before the label", () => {
+    expect(
+      sanitizeRewrittenQuery(
+        "keywords: admission deadline last date, apply online, application form",
+        "When is the last date to apply?",
+      ),
+    ).toBe("admission deadline last date");
+  });
+
+  it("strips a trailing bare label the model leaked", () => {
+    expect(
+      sanitizeRewrittenQuery(
+        "BS program tuition fee structure keywords",
+        "What is the fee structure for BS programs?",
+      ),
+    ).toBe("BS program tuition fee structure");
+  });
+
+  it("leaves a clean short rewrite untouched", () => {
+    expect(
+      sanitizeRewrittenQuery(
+        "BS Software Engineering fee structure University of Engineering and Technology Taxila",
+        "What is the fee structure for BS Software Engineering at UET Taxila?",
+      ),
+    ).toBe("BS Software Engineering fee structure University of Engineering and Technology Taxila");
+  });
+
+  it("does not treat a genuine question about keywords as a dump", () => {
+    expect(
+      sanitizeRewrittenQuery(
+        "research paper keywords guidelines University of Engineering and Technology Taxila",
+        "What are the keywords guidelines for research papers?",
+      ),
+    ).toBe("research paper keywords guidelines University of Engineering and Technology Taxila");
+  });
 });

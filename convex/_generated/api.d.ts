@@ -126,6 +126,7 @@ import type * as reranking_groqRerank from "../reranking/groqRerank.js";
 import type * as reranking_rerank from "../reranking/rerank.js";
 import type * as routing_understandQuery from "../routing/understandQuery.js";
 import type * as security_requestGuard from "../security/requestGuard.js";
+import type * as shared_faqMatch from "../shared/faqMatch.js";
 import type * as shared_freshnessPolicy from "../shared/freshnessPolicy.js";
 import type * as shared_invariants from "../shared/invariants.js";
 import type * as threads from "../threads.js";
@@ -260,6 +261,7 @@ declare const fullApi: ApiFromModules<{
   "reranking/rerank": typeof reranking_rerank;
   "routing/understandQuery": typeof routing_understandQuery;
   "security/requestGuard": typeof security_requestGuard;
+  "shared/faqMatch": typeof shared_faqMatch;
   "shared/freshnessPolicy": typeof shared_freshnessPolicy;
   "shared/invariants": typeof shared_invariants;
   threads: typeof threads;
