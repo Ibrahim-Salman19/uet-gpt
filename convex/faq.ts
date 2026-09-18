@@ -37,6 +37,19 @@ export const listFaqs = query({
   },
 });
 
+/**
+ * Candidate pool handed to the FAQ gate, not the number of FAQs that reach an answer.
+ *
+ * The search index matches raw terms and does not stem, but the gate that decides which
+ * FAQ is relevant (shared/faqMatch.ts: faqCoverage) does. So a student asking to "freeze"
+ * a semester does not rank the "How to get freezing of a Semester?" entry, even though the
+ * gate would score it 0.67. Measured against production on 2026-09-18: at take(8) that
+ * question returned eight unrelated admissions FAQs and not the freezing one, while asking
+ * about "freezing" returned it first. Take a pool wide enough that the stemming gate is
+ * what selects, then embeddings/search.ts keeps only its best 2 matches.
+ */
+const FAQ_CANDIDATE_POOL = 50;
+
 export const searchFaqs = internalQuery({
   args: { query: v.string(), now: v.number() },
   handler: async (ctx, args) => {
@@ -46,7 +59,7 @@ export const searchFaqs = internalQuery({
       .filter((q) =>
         q.or(q.eq(q.field("expiresAt"), undefined), q.gt(q.field("expiresAt"), args.now)),
       )
-      .take(8);
+      .take(FAQ_CANDIDATE_POOL);
   },
 });
 

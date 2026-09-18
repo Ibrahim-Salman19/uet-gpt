@@ -111,5 +111,26 @@ export function faqCoverage(question: string, faqQuestion: string): number {
   return matched / asked.size;
 }
 
+/**
+ * Share of the FAQ question's own content words that the asked question covers.
+ *
+ * Used only to break ties on faqCoverage. "How to apply for the Degree?" and "How to
+ * apply for a particular Bonafied Certificate?" both cover 2 of the 4 content words in
+ * "What is the procedure to apply for a degree certificate at UET Taxila?", so coverage
+ * alone leaves the order to chance; the first is entirely about what was asked and the
+ * second brings a different subject with it.
+ */
+export function faqSpecificity(question: string, faqQuestion: string): number {
+  const inFaqQuestion = contentTokens(faqQuestion);
+  if (inFaqQuestion.size === 0) return 0;
+
+  const asked = contentTokens(question);
+  let matched = 0;
+  for (const token of inFaqQuestion) {
+    if (asked.has(token)) matched++;
+  }
+  return matched / inFaqQuestion.size;
+}
+
 /** A FAQ joins the candidate pool only at or above this coverage. */
 export const FAQ_MIN_COVERAGE = 0.5;

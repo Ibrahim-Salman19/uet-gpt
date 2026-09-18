@@ -3,7 +3,7 @@ import { internal } from "../_generated/api";
 import { type ActionCtx, internalAction } from "../_generated/server";
 import { recordTiming } from "../observability/metrics";
 import { rag } from "../rag/instance";
-import { FAQ_MIN_COVERAGE, faqCoverage } from "../shared/faqMatch";
+import { FAQ_MIN_COVERAGE, faqCoverage, faqSpecificity } from "../shared/faqMatch";
 import { estimateIdf } from "./idf";
 
 // A verified FAQ that actually matches the asked question is scored against the
@@ -155,6 +155,7 @@ async function fetchActiveFaqs(
     url: string;
     title: string;
     coverage: number;
+    specificity: number;
     relevanceScore: number;
     freshnessState: "fresh" | "aged" | "unknown";
     applicability: "current" | "unknown";
@@ -163,20 +164,26 @@ async function fetchActiveFaqs(
   try {
     const now = Date.now();
     const faqs = await ctx.runQuery(internal.faq.searchFaqs, { query: queryText, now });
-    return faqs
-      .filter((f: FaqResult) => !f.expiresAt || f.expiresAt > now)
-      .map((faq: FaqResult) => ({
-        entryId: faq._id,
-        content: `FAQ: ${faq.question}\nAnswer: ${faq.answer}`,
-        url: faq.sourceUrl || "Verified FAQ Database",
-        title: faq.question,
-        coverage: faqCoverage(queryText, faq.question),
-        relevanceScore: 0,
-        freshnessState: "fresh" as const,
-        applicability: "current" as const,
-      }))
-      .filter((faq) => faq.coverage >= FAQ_MIN_COVERAGE)
-      .sort((a, b) => b.coverage - a.coverage);
+    return (
+      faqs
+        .filter((f: FaqResult) => !f.expiresAt || f.expiresAt > now)
+        .map((faq: FaqResult) => ({
+          entryId: faq._id,
+          content: `FAQ: ${faq.question}\nAnswer: ${faq.answer}`,
+          url: faq.sourceUrl || "Verified FAQ Database",
+          title: faq.question,
+          coverage: faqCoverage(queryText, faq.question),
+          specificity: faqSpecificity(queryText, faq.question),
+          relevanceScore: 0,
+          freshnessState: "fresh" as const,
+          applicability: "current" as const,
+        }))
+        .filter((faq) => faq.coverage >= FAQ_MIN_COVERAGE)
+        // Ties on coverage are common because the questions are short; the more
+        // specific FAQ wins, so "How to apply for the Degree?" beats the bonafide
+        // certificate entry on a degree-certificate question.
+        .sort((a, b) => b.coverage - a.coverage || b.specificity - a.specificity)
+    );
   } catch (err) {
     console.error("FAQ search failed, falling back to empty FAQ list:", err);
     return [];

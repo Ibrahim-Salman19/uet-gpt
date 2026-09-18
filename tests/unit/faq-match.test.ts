@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { contentTokens, FAQ_MIN_COVERAGE, faqCoverage } from "../../convex/shared/faqMatch";
+import {
+  contentTokens,
+  FAQ_MIN_COVERAGE,
+  faqCoverage,
+  faqSpecificity,
+} from "../../convex/shared/faqMatch";
 
 // Questions and FAQ wording taken from scripts/faq/official-faqs.json.
 describe("faqMatch - FAQ retrieval gate", () => {
@@ -70,6 +75,29 @@ describe("faqMatch - FAQ retrieval gate", () => {
   it("needs a single-word question to match that word", () => {
     expect(faqCoverage("how to apply", "How can I apply for Undergraduate Admissions?")).toBe(1);
     expect(faqCoverage("contact number", "How can I contact the Admission Office?")).toBe(0);
+  });
+
+  it("breaks a coverage tie toward the more specific FAQ", () => {
+    // Both cover 2 of the 4 content words in the asked question, so coverage alone
+    // leaves the winner to file order; the degree entry is entirely on topic.
+    const asked = "What is the procedure to apply for a degree certificate at UET Taxila?";
+    expect(faqCoverage(asked, "How to apply for the Degree?")).toBe(
+      faqCoverage(asked, "How to apply for a particular Bonafied Certificate?"),
+    );
+    expect(faqSpecificity(asked, "How to apply for the Degree?")).toBeGreaterThan(
+      faqSpecificity(asked, "How to apply for a particular Bonafied Certificate?"),
+    );
+  });
+
+  it("admits the freezing FAQ for a question that says 'freeze'", () => {
+    // The Convex search index does not stem, so this entry never reached the gate
+    // until faq.ts widened the candidate pool; the gate itself always matched it.
+    expect(
+      faqCoverage(
+        "Can I freeze my semester at UET Taxila and what is the procedure?",
+        "How to get freezing of a Semester?",
+      ),
+    ).toBeGreaterThanOrEqual(FAQ_MIN_COVERAGE);
   });
 
   it("returns 0 when the question has no content words", () => {
