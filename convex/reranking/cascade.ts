@@ -23,6 +23,15 @@ async function fetchWithTimeout(
   }
 }
 
+// rag/routing.ts:rewriteQueryAction expands "UET" to "University of Engineering
+// and Technology", so these words reach the reranker on nearly every query no
+// matter the topic and carry no signal about it. STOP_WORDS already drops
+// "university", "engineering", "of", "and" and "taxila"; "technology" is the one
+// that survives as a content word. It is dropped here rather than in the shared
+// STOP_WORDS because faqMatch gates FAQs on the raw user question, where
+// "technology" is a real topic word (UET runs Engineering Technology degrees).
+const REWRITER_EXPANSION_WORDS = ["technology"];
+
 function rawWords(text: string): Set<string> {
   return new Set(
     text
@@ -49,6 +58,9 @@ function rawWords(text: string): Set<string> {
  */
 export function computeWordOverlap(query: string, chunk: string): number {
   const queryContent = contentTokens(query);
+  for (const word of REWRITER_EXPANSION_WORDS) {
+    queryContent.delete(word);
+  }
   const useContentTokens = queryContent.size > 0;
 
   const queryWords = useContentTokens ? queryContent : rawWords(query);

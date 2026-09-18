@@ -42,6 +42,20 @@ describe("cascade computeWordOverlap", () => {
     expect(computeWordOverlap("who is this", "who is this person")).toBeGreaterThan(0);
   });
 
+  it("ignores the rewriter's expansion of UET", () => {
+    // rewriteQueryAction turns "UET Taxila" into "University of Engineering and
+    // Technology Taxila", so "technology" reaches the reranker on almost every
+    // query; a chunk must not score on it alone.
+    const rewritten =
+      "BS Software Engineering fee structure University of Engineering and Technology Taxila";
+    expect(
+      computeWordOverlap(rewritten, "Department of Technology, University of Engineering"),
+    ).toBe(0);
+    expect(
+      computeWordOverlap(rewritten, "BS Software Engineering fee structure per semester"),
+    ).toBe(1);
+  });
+
   it("returns 0 for an empty chunk", () => {
     expect(computeWordOverlap(FREEZE_QUESTION, "")).toBe(0);
   });
