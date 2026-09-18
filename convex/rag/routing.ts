@@ -251,10 +251,35 @@ export const condenseQuestionAction = internalAction({
  * hallucinated "2024" promotes retired 2024 editions over the current ones,
  * which is exactly what the document lifecycle gate exists to prevent. Years the
  * user did write are kept.
+ *
+ * The model also answers the word "keyword-rich" literally and appends a synonym
+ * list: "BS program fee structure keywords: BS program tuition fees, BS program
+ * cost, ..." (measured 2026-09-18: 8 of 10 runs of the identical question "What
+ * is the fee structure for BS programs?", 44 words each). That dump is worse than
+ * an invented year. computeWordOverlap divides the number of matched words by the
+ * size of the QUERY, so padding the query with 40 synonyms mathematically caps
+ * every chunk's score: the same question scored 0.700 raw but 0.550-0.590
+ * expanded, falling under CRAG_CONFIG.skipThreshold (0.6). Below that threshold
+ * the CRAG judge runs, finds the diluted query matched scholarship forms and
+ * progress reports instead of the fee table, and overrides the tier to "refuse" -
+ * so the bot answers "I don't have verified information about this" while the
+ * answering passage sits in the corpus. The prompt below no longer asks for
+ * "keyword-rich" output, but the rewriter is a small model at temperature 0.3 over
+ * a provider fallback chain, so the format cannot be guaranteed by prompting; the
+ * label is stripped here as well, where it is deterministic and testable.
  */
 export function sanitizeRewrittenQuery(rewritten: string, original: string): string {
   const askedYears = new Set(original.match(/\b(?:19|20)\d{2}\b/g) ?? []);
-  const cleaned = rewritten
+  // Keep only what precedes the synonym dump; the text before the label is the
+  // real rewrite. A dump with nothing before it keeps its first item instead.
+  const labelled = rewritten.match(/^([\s\S]*?)\bkeywords?\s*:([\s\S]*)$/i);
+  let body = rewritten;
+  if (labelled) {
+    const prefix = labelled[1]!.trim();
+    body = prefix || labelled[2]!.split(",")[0]!.trim();
+  }
+  const cleaned = body
+    .replace(/\s*\bkeywords?\b\s*$/i, " ")
     .replace(/<\|[^|]*\|>/g, " ")
     .replace(/\*+/g, " ")
     .replace(/\b(?:19|20)\d{2}\b/g, (year) => (askedYears.has(year) ? year : " "))
@@ -277,11 +302,13 @@ export const rewriteQueryAction = internalAction({
         const { text } = await generateText({
           model,
           system:
-            "You are a search expert. Rewrite the user's query to be a concise keyword-rich search query. " +
-            "If the query is written in Roman Urdu (Urdu language written using Latin/English characters, e.g., 'fees kitni hai', 'daakhila kab hoga', 'hostel kahan hai', 'documents kya chahiye'), detect it, translate it to English first, and then rewrite it into keyword-rich English search terms. " +
+            "You are a search expert. Rewrite the user's query into a short search query of at most 12 words. " +
+            "If the query is written in Roman Urdu (Urdu language written using Latin/English characters, e.g., 'fees kitni hai', 'daakhila kab hoga', 'hostel kahan hai', 'documents kya chahiye'), detect it, translate it to English first, and then rewrite it into short English search terms. " +
             "Expand abbreviations like 'UET' to 'University of Engineering and Technology'. " +
             "Never add a year, date, or figure that the user did not write: the corpus spans many years and an invented year retrieves the wrong edition. " +
-            "Output ONLY the final rewritten keyword-rich search query in English, and absolutely nothing else.",
+            "Output ONLY the rewritten query itself, in English: one short phrase, with no label, " +
+            "no 'keywords:' prefix and no comma-separated list of synonyms. " +
+            "Padding the query with synonyms makes the retrieval scoring worse, not better.",
           prompt: args.query,
           temperature: 0.3,
           maxOutputTokens: 100,

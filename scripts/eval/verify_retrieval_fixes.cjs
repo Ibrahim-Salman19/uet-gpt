@@ -49,20 +49,41 @@ let failures = 0;
 
 async function checkSearches() {
   console.log("== retrieval: does the answering passage reach the final 4? ==");
+  console.log("   live shape: retrieval and reranking run on the REWRITTEN query, which is");
+  console.log("   what rag/retrieval.ts passes (searchVectorDB queryText, rerankSearchResults");
+  console.log("   query) - measuring with the raw question tests a path production never takes.");
   for (const [question, evidence] of SEARCHES) {
+    const rewritten =
+      (await convex.action(makeFunctionReference("rag/routing:rewriteQueryAction"), {
+        query: question,
+      })) || question;
+    const hydeQuery = await convex.action(makeFunctionReference("rag/routing:hydeQueryAction"), {
+      query: question,
+    });
     const candidates = await convex.action(
       makeFunctionReference("embeddings/search:searchDocumentsAction"),
-      { queryText: question, questionText: question, limit: 8 },
+      { queryText: rewritten, hydeQuery, questionText: question, limit: 8 },
     );
     const ranked = await convex.action(makeFunctionReference("reranking/cascade:cascadeRerank"), {
-      query: question,
+      query: rewritten,
       documents: candidates.map((c) => ({ id: c.entryId, text: c.content })),
       topK: 4,
     });
     const final = ranked.map((r) => candidates[r.index]).filter(Boolean);
     const hit = final.findIndex((c) => evidence.test(c.content));
-    if (hit < 0) failures++;
-    console.log(`\n  ${hit >= 0 ? `PASS (rank ${hit + 1})` : "FAIL"}  ${question}`);
+    // Under CRAG_CONFIG.skipThreshold the CRAG judge runs and can override the tier
+    // to "refuse", which makes the bot emit the fixed "no verified information" line
+    // even when the answering passage did reach the final 4.
+    const topScore = ranked.length > 0 ? ranked[0].score : 0;
+    const cragRuns = topScore < 0.6;
+    if (hit < 0 || cragRuns) failures++;
+    console.log(
+      `\n  ${hit >= 0 ? `PASS (rank ${hit + 1})` : "FAIL (answer passage absent)"}  ${question}`,
+    );
+    console.log(`      rewritten: ${rewritten.slice(0, 130)}`);
+    console.log(
+      `      topScore ${topScore.toFixed(3)} ${cragRuns ? "FAIL (< 0.6 -> CRAG runs, can refuse)" : "ok (>= 0.6 -> CRAG skipped)"}`,
+    );
     for (const c of final) {
       console.log(`      ${c.content.startsWith("FAQ: ") ? "[FAQ]" : "     "} ${short(c.url)}`);
     }
