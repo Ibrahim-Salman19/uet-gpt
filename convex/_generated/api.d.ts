@@ -129,6 +129,7 @@ import type * as security_requestGuard from "../security/requestGuard.js";
 import type * as shared_faqMatch from "../shared/faqMatch.js";
 import type * as shared_freshnessPolicy from "../shared/freshnessPolicy.js";
 import type * as shared_invariants from "../shared/invariants.js";
+import type * as shared_refusal from "../shared/refusal.js";
 import type * as threads from "../threads.js";
 import type * as threads_validator from "../threads/validator.js";
 import type * as users from "../users.js";
@@ -264,6 +265,7 @@ declare const fullApi: ApiFromModules<{
   "shared/faqMatch": typeof shared_faqMatch;
   "shared/freshnessPolicy": typeof shared_freshnessPolicy;
   "shared/invariants": typeof shared_invariants;
+  "shared/refusal": typeof shared_refusal;
   threads: typeof threads;
   "threads/validator": typeof threads_validator;
   users: typeof users;
