@@ -2070,6 +2070,23 @@ query and is the classic failure in this design:
 * The usual query-vs-document `taskType` error does not apply: the code records that "taskType
   parameter has no effect on gemini-embedding-2 (confirmed bug)".
 
+| `chat/models.ts` | model selection and the preferred-model override | **sound.** `buildFallbackChain` puts the user's preference first and dedupes by id; Groq's `openai/gpt-oss-120b` and Cerebras's `gpt-oss-120b` are distinct ids, so the filter cannot drop the wrong one |
+
+### 27.1 Out of scope, but flagged — a second source of UET facts
+
+`src/lib/programs-data.ts` (756 lines), `learn-terms.ts`, `comparisons-data.ts`, `campus-data.ts` and
+`merit-archive-data.ts` are **hardcoded UET facts** rendering the programmatic pages
+(`/uet-taxila/programs/[slug]`, `/uet-taxila/compare/[slug]`, closing-merit, and so on).
+
+Verified they do **not** feed the chatbot: nothing under `src/lib/chat/`, `src/hooks/use-chat.ts` or
+`convex/` imports them. So they are outside this audit's subject, which is the chatbot's answers.
+
+They are worth the owner's attention anyway. They are a **second source of truth for the same facts the
+chatbot answers from** — fees, merit, programmes — maintained by hand rather than crawled, with no
+freshness metadata, no `dropOlderEditions`, and none of the grounding machinery this document spends 26
+sections on. A visitor can read a hardcoded merit figure on a programme page and get a different answer
+from the chatbot on the same site. Nothing here measured whether they agree.
+
 Two things were *suspected* and disproved by reading rather than assuming, both recorded because the
 suspicion was reasonable:
 
