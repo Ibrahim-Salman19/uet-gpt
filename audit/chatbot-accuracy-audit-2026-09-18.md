@@ -1074,3 +1074,86 @@ The same regex is in `scripts/eval/retrieval-ab/run.ts:loadLabels`.
 an estimate. Before any retrieval work is justified by a recall delta, the ground truth needs
 multi-chunk labels — "any chunk that answers this" rather than "this chunk" — or the metric will keep
 scoring correct retrievals as failures and could drive a harmful change.
+
+---
+
+## 15. F-9 (High) — proof-of-concept rows from a local-dev experiment are live in the production corpus
+
+Found 2026-09-19 while hydrating the §14 frozen capture with chunk text. Not previously reported.
+
+### 15.1 What happened
+
+`convex/crawl/lexicalProof.ts` is the Phase-5 "minimal lexical capacity proof". Its own header says it
+loads the frozen Corpus V1 (`docs/rag-store-evaluation/local-corpus-v1-freeze-2026-08/`) into **"this
+local dev deployment's `documents` + `crawledChunks` tables"**, and it deliberately writes chunks with
+**no embedding** ("ZERO embedding/Gemini calls"), using a placeholder identifier:
+
+```ts
+ragId: `lexical-proof:${chunk.contentHash}`,     // lexicalProof.ts:127
+crawlSessionId: "phase5-lexical-proof",          // lexicalProof.ts:58
+```
+
+The file even records that it was hardened after the fact because "that assumption no longer holds once
+this code is deployed to real production". The rows are in production now, and there is **no cleanup
+function anywhere in the repo**.
+
+### 15.2 They are being retrieved and served
+
+Measured over the §14 capture (10 golden queries, 79 unique retrieved candidates):
+
+| | |
+|---|---|
+| candidates whose ragId is a `lexical-proof:` row | **4 / 79** (2 of 10 queries) |
+| candidates with **no `crawledChunks` row at all** (dangling) | **5 / 79** |
+
+```
+0a5abd0e "Who is the Vice Chancellor?"   rank 1  -> /EventDetails/PEC-FYDP-Cheque-Distribution-...
+0a5abd0e                                  rank 8  -> /oldWeb.asp
+9a07498d "Can I freeze my semester?"      rank 2  -> /Advertisement_admission.php
+9a07498d                                  rank 5  -> /Advertisements.php
+```
+
+A proof-of-concept row takes **rank 1** on the Vice Chancellor query.
+
+Because these rows have no embedding, the dense channel can never return them — only the lexical/BM25
+channel over `crawledChunks.search_text` does. They therefore enter the fusion through exactly one
+channel, which the RRF weighting was not calibrated for, and `search.ts`'s dedupe-by-text can retain the
+proof copy in preference to the properly embedded one.
+
+They are not junk: they are real UET content from the 2026-08 freeze. That makes the harm **stale
+duplicates crowding the candidate pool**, not gibberish — and it interacts with F-3/`dropOlderEditions`,
+which reasons about editions using document metadata these rows do not carry in the normal way.
+
+### 15.3 A second defect: the ragId is content-hash-keyed, so it collides
+
+`lexical-proof:${chunk.contentHash}` is not unique per row — two chunks with identical content produce
+the same ragId. All four observed `lexical-proof:` candidates resolve to **more than one**
+`crawledChunks` row.
+
+`crawledChunks.by_ragId` is read in 11 places. Two use `.unique()`, which **throws** on a duplicate:
+
+| call site | verdict |
+|---|---|
+| `knowledgeStore/convexQueries.ts:69` `getChunkHitsByRagIds` | throws; reachable only via `convexAdapter`, which production bypasses (`KNOWLEDGE_STORE_BACKEND=pinecone`) and which only `lifecycleTest.ts` imports |
+| `embeddings/doc_queries.ts:56` `getDocumentByEntryId` | throws; **has no callers at all** — pre-existing dead code, flagged not deleted per CLAUDE.md §3 |
+
+**Live blast radius is therefore zero today** — the production path
+(`doc_queries.ts:134 getDocumentsByEntryIds`) uses `.first()`. But `.first()` silently returns an
+*arbitrary* one of the colliding rows, so a retrieved chunk can be attributed to the wrong source
+document, and with it the wrong url, freshness tier, staleness flag and lifecycle status. Flipping
+`KNOWLEDGE_STORE_BACKEND` to `convex` would turn the latent throw into a live retrieval crash.
+
+### 15.4 Recommended remediation — needs authorization, deliberately not actioned
+
+This is a corpus mutation and is out of scope for anything this session was authorized to run.
+
+1. **Scope it first.** Count `documents` with `crawlSessionId === "phase5-lexical-proof"` via the
+   existing `by_session` index, and their chunks. Cheap and read-only; no such query exists yet.
+2. **Prefer a read-side guard to a delete**, on the same reasoning as the cached-refusal fix in
+   `cache/get.ts`: excluding `lexical-proof:` ragIds in the lexical channel neutralises the whole
+   population at once, is reversible, and destroys nothing. Only do this after step 1 confirms the
+   content also exists in properly embedded form, or it would remove real answers.
+3. Change the two `.unique()` calls to `.first()` (or fix the ragId scheme) so a data collision cannot
+   become a retrieval crash.
+4. Separately investigate the **5/79 dangling candidates** — retrieved entries with no backing
+   `crawledChunks` row, which is a different integrity failure from this one.
