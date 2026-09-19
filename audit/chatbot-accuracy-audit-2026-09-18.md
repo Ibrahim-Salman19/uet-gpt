@@ -1447,3 +1447,61 @@ rejected on evidence rather than dropped silently.
 What remains open is narrower than previously stated: `freshnessState` conflates "recently crawled" with
 "current", and the label would be more honest **renamed** (e.g. `Last fetched`) than re-derived. That is
 cosmetic next to the answer behaviour, which the §18.3 prompt fix already corrects.
+
+---
+
+## 19. CORRECTION — the §14 capture under-represents the FAQ channel, and the FAQ gate is NOT defective
+
+### 19.1 The near-miss
+
+`faqCoverage` divides shared content words by the **asked** question's length, and the merge drops any
+FAQ below `FAQ_MIN_COVERAGE` (0.5). Run against the §14 capture's rewrites, that looked like a critical
+defect on the flagship query:
+
+```
+8fe9e8f2 "What is the fee structure for BS Software Engineering at UET Taxila?"
+   raw question : coverage 0.50  PASSES   <- "What is the fee structure for the first semester?"
+   rewrite      : coverage 0.40  FILTERED    ("University of Engineering and Technology Taxila BS ...")
+21ce9642  raw 0.50 PASSES -> rewrite 0.00 FILTERED
+```
+
+The rewriter expands "UET" to "University of Engineering and Technology", and the added content words
+dilute the ratio below the gate — discarding the FAQ that states the fee outright.
+
+**It is not a production defect.** `convex/embeddings/search.ts:607` already gates on the raw question:
+
+```ts
+const matchedFaqs = (await fetchActiveFaqs(ctx, args.questionText ?? args.queryText))
+```
+
+and `convex/rag/retrieval.ts:217` passes `questionText: safeQuestion`. Production has always matched
+FAQs against what the user actually asked. This is consistent with §3.3, which found the FAQ chunk
+*did* reach rank 4 on this query in production.
+
+### 19.2 What IS wrong: the harness, and therefore some numbers above
+
+`convex/rag/evalRetrieval.ts` never forwarded `questionText`, so every capture made through it gates
+FAQs against the **rewrite**. The harness is therefore systematically *weaker than production at
+retrieving verified FAQs* — the corpus's highest-quality source (§17).
+
+Consequences for figures already reported here:
+
+* **§14.7's `8fe9e8f2` "the entire pool is postgraduate, not one undergraduate fee chunk" is a harness
+  artefact**, and now has a precise mechanism: the FAQ carrying the fee was gated out at 0.40 before
+  the pool was assembled. §14.7 flagged it as channel-dependent; this is the specific channel.
+* `21ce9642` is affected the same way and should no longer be called a "genuine miss" without a re-run.
+* The 7/10 recall figure is a floor for a second, independent reason on top of §17's.
+* §14's core finding is **unaffected**: every (overlap, position) weighting ranks identically, which is
+  a property of the tie structure within whatever pool is handed to the reranker.
+
+`questionText` is now forwarded (`evalRetrieval.ts`), but the fix **cannot be deployed** — `npx convex
+deploy` is refused by the auto-mode classifier — so `frozen.json` has not been re-captured and the
+figures above stand as recorded, with this caveat attached. Re-running the §14 capture after that
+deploy is the first thing worth doing.
+
+### 19.3 Why this was nearly reported as a critical bug
+
+The measurement was real and the arithmetic was right; the error was measuring the harness's behaviour
+and attributing it to production. The check that caught it was reading the actual call site rather than
+stopping at the gate function — the same failure mode as §13's "component-green / system-red", in the
+opposite direction: a component measured red while the system was green.

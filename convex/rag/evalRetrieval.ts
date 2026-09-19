@@ -42,6 +42,16 @@ export const evalRetrieveDocuments = internalAction({
     // Exact text to embed and search with - the caller (the evaluator) is
     // responsible for any normalization; this endpoint does none itself.
     queryText: v.string(),
+    // The RAW user question, before rewrite/HyDE. Without it this harness is not
+    // production-faithful for the FAQ channel: embeddings/search.ts:607 gates FAQs with
+    // `args.questionText ?? args.queryText`, and retrieval.ts:217 passes the raw question,
+    // because faqCoverage divides shared content words by the ASKED question's length -
+    // so a rewrite that expands "UET" to "University of Engineering and Technology"
+    // dilutes coverage below FAQ_MIN_COVERAGE and drops the FAQ. Measured 2026-09-19 on
+    // "fee structure for BS Software Engineering": 0.50 (passes) on the raw question
+    // versus 0.40 (filtered) on the rewrite. Omitting it makes this harness strictly
+    // weaker than production at retrieving verified FAQs.
+    questionText: v.optional(v.string()),
     // Matches searchVectorDB's real production call site default (limit: 8,
     // convex/rag/retrieval.ts:201).
     limit: v.optional(v.number()),
@@ -72,6 +82,7 @@ export const evalRetrieveDocuments = internalAction({
     // never fires, keeping this call deterministic given deterministic input.
     const baselineA: any[] = await ctx.runAction(internal.embeddings.search.searchDocumentsAction, {
       queryText: args.queryText,
+      questionText: args.questionText,
       queryEmbedding,
       limit,
       category: args.category,
