@@ -17,6 +17,20 @@ describe("isRefusalAnswer", () => {
       ).toBe(true);
     });
 
+    it("catches the second production refusal, which cited two sources and quoted a fee", () => {
+      // 2026-09-19, after the CRAG fix: retrieval delivered 2 sources and the figures
+      // reached the model (logs: resultCount 2, sourceCount 2, cragTier null), and it
+      // STILL opened with the refusal. That is what the GROUNDING_RULES edit addresses;
+      // until it takes effect this answer must not be cached.
+      expect(
+        isRefusalAnswer(
+          "I\u2019m sorry, but I couldn\u2019t find verified information about the fee structure " +
+            "specifically for BS programs in the available sources. The only fee details provided " +
+            "relate to the first-semester fees (Regular \u2248 Rs 104,800).",
+        ),
+      ).toBe(true);
+    });
+
     it("catches the canonical refusal the refuse tier orders verbatim", () => {
       expect(isRefusalAnswer(REFUSAL_TEXT)).toBe(true);
     });
@@ -81,6 +95,19 @@ describe("isRefusalAnswer", () => {
         isRefusalAnswer(
           "I can't process images. Verified information about fees is in the 2025 Prospectus: " +
             "first semester dues are Rs. 101,800.",
+        ),
+      ).toBe(false);
+    });
+
+    it("keeps the substance-first partial answer the grounding rules now ask for", () => {
+      // src/lib/prompt.ts instructs the model to lead with what the reference data does
+      // support and only then name the gap. Those answers must stay cacheable, otherwise
+      // the prompt fix and this guard would cancel each other out.
+      expect(
+        isRefusalAnswer(
+          "First-semester fees for BS programmes are Rs 104,800 (Regular) and Rs 339,800 " +
+            "(Partial-Subsidized) according to the FAQs page. I couldn't find verified " +
+            "information about the fee structure beyond the first semester.",
         ),
       ).toBe(false);
     });

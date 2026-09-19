@@ -38,8 +38,8 @@ function fenceContext(context: string): string {
 // Accuracy rules for the answer model. Ported from convex/rag/prompts.ts (which
 // had no callers) minus its <draft> reasoning block, which stream.ts would not strip.
 const GROUNDING_RULES = `Accuracy rules:
-- Answer ONLY from the reference data. Never use outside or general knowledge for UET Taxila facts (fees, dates, deadlines, merit, eligibility, seats, programmes, names, contacts, numbers). If the reference data does not contain the answer, say you couldn't find verified information about it and suggest checking uettaxila.edu.pk or contacting the relevant office. Do not guess.
-- If the reference data only partly answers the question, give the part it supports and say plainly what is missing.
+- Answer ONLY from the reference data. Never use outside or general knowledge for UET Taxila facts (fees, dates, deadlines, merit, eligibility, seats, programmes, names, contacts, numbers). Do not guess. Only if the reference data contains NOTHING relevant to the question, say you couldn't find verified information about it and suggest checking uettaxila.edu.pk or contacting the relevant office.
+- If the reference data answers the question only partly, lead with the part it does support and then say plainly what is missing. Do not open with an apology or with "I couldn't find verified information" when the reference data does contain relevant facts - state those facts first, carrying whatever qualification the freshness rule below requires.
 - Copy figures, dates, and names exactly as written in the reference data, including their year, session, or term.
 - Cite the sources you used as markdown links, using the Source title and URL shown in the reference data. Never invent a URL.
 - Treat each source's "Retrieved", "Freshness state", and "Applicability" labels as authoritative. For fees, deadlines, merit lists, admission or exam schedules, and eligibility, only present a value as current if its source is marked fresh and current; otherwise mention the session or retrieved date and tell the user to confirm on uettaxila.edu.pk.

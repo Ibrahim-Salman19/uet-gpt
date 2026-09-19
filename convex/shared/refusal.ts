@@ -28,8 +28,17 @@
 export const REFUSAL_TEXT =
   "I don't have verified information about this - please check uettaxila.edu.pk directly.";
 
-/** A genuine refusal states itself immediately; this bounds false positives. */
-const REFUSAL_HEAD_CHARS = 240;
+/**
+ * A genuine refusal states itself immediately - in both answers recovered from
+ * production the phrase begins around character 17 ("I'm sorry, but I couldn't
+ * find verified information..."). The window has to stay tight enough that a
+ * partial answer which LEADS with the facts and only then names the gap is not
+ * mistaken for a refusal, because src/lib/prompt.ts now instructs the model to
+ * write exactly that. A short partial answer can still trip this; the cost is a
+ * cache miss on an answer that only partly covers the question, which is a
+ * reasonable thing not to store for five days.
+ */
+const REFUSAL_HEAD_CHARS = 80;
 
 /**
  * Model output uses typographic punctuation ("I'm", "couldn't"), so the literal

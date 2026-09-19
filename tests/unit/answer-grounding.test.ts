@@ -42,6 +42,24 @@ describe("buildSystemPrompt grounding", () => {
     expect(prompt).toContain("Do not answer UET Taxila-specific questions");
   });
 
+  it("reserves the refusal wording for reference data with nothing relevant in it", () => {
+    // 2026-09-19: retrieval delivered 2 sources containing the fee figures (logs:
+    // resultCount 2, sourceCount 2, cragTier null, so answerInstruction was empty and
+    // these rules were the only thing shaping the reply), and the model still opened
+    // with "I'm sorry, but I couldn't find verified information...". Rule 1 told it to
+    // say that when the data "does not contain the answer" and rule 2 told it to give
+    // the part that is supported; the two conflicted and the first one won.
+    const prompt = buildSystemPrompt("Fees are Rs 104,800.", "academic");
+
+    expect(prompt).toContain("Only if the reference data contains NOTHING relevant");
+    expect(prompt).toContain("lead with the part it does support");
+    expect(prompt).toContain("Do not open with an apology");
+    // The refusal instruction must not be stated unconditionally.
+    expect(prompt).not.toContain(
+      "If the reference data does not contain the answer, say you couldn't find",
+    );
+  });
+
   it("places the confidence directive outside the untrusted fence", () => {
     const directive = "SYSTEM INSTRUCTION TO AI: No relevant information was found.";
     const prompt = buildSystemPrompt("some chunk", "general", directive);
