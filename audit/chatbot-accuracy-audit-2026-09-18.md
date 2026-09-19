@@ -52,6 +52,27 @@ page-level label scoring (§17.3), a `Source year` context header (§18.4), edit
 session — the logs contain only this work's own probes — so the live fixes are deployed and
 unit-tested, never observed on a real request.
 
+**How to close that gap (deliberately not run).** The only thing in this repo that can exercise the true
+authenticated path is the Playwright suite: `retrieveContext` requires a Clerk identity and a Convex
+deploy key cannot supply one (`convex/rag/smokeRetrieval.ts:5-8`), but `tests/e2e/global.setup.ts` signs
+in through real Clerk, and `playwright.config.ts` takes `PLAYWRIGHT_TEST_BASE_URL`, so it can be aimed
+at production:
+
+```
+PLAYWRIGHT_TEST_BASE_URL=https://uet-gpt.vercel.app npx playwright test tests/e2e/chat-flow.spec.ts
+```
+
+This was **not** run here, and the reason is not timidity about tests. `global.setup.ts` authenticates as
+`ibrahim.pk848@gmail.com` — a real person's account — so against production it writes real threads and
+messages into the production database under that identity, and spends Groq quota from the same budget
+that rate-limited the live bot for ~24h on 2026-09-15. Creating data in production under someone's
+personal identity is the owner's call, not an agent's.
+
+Worth adding when it is run, per the original plan's Workstream 2: ask the fee question and assert the
+reply is not the refusal string. That single assertion is the only end-to-end check that would confirm
+the eight live fixes on the real path. Note `playwright.config.ts`'s `webServer` block still points at
+`localhost:3001`, so aiming at production needs that skipped or the local server running alongside.
+
 > **Three separate numbers, never collapsed.** Retrieval accuracy, answer accuracy, and ground-truth
 > integrity are reported as independent axes. A single headline "accuracy %" for this system would be
 > meaningless, because ~39% of the scoreable eval set rests on ground truth the project itself has
