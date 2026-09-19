@@ -2054,6 +2054,22 @@ measured around.
 | `chat/csrf.ts` + `middleware.ts` | request gating | **sound**, and strict enough that unauthenticated verification of the API is impossible (§ status index) |
 | `chat/cache.ts` `encodeSourcesHeader` | citation transport | **sound.** Caps sources, truncates excerpts, drops excerpts, then empties — a graceful ladder. Production sends 4 sources ≈ 2.9 KB against a 6,000-byte limit, so no rung past the first is reached |
 
+| `embeddings/generate.ts` + `cloudflareEmbed.ts` | the embedding foundation of dense retrieval | **sound.** Two spaces, correctly separated and enforced |
+| `shared/invariants.ts` | dimension/finiteness assertions | **sound.** Both call sites pass the dimension explicitly; the 768 default is never relied on |
+
+**On the embedding architecture specifically**, since a mismatch there would silently degrade every
+query and is the classic failure in this design:
+
+* Gemini `gemini-embedding-2` at **768d** serves the semantic cache and the Convex vector path.
+* Cloudflare `@cf/qwen/qwen3-embedding-0.6b` at **1024d** serves the Pinecone path — and its header
+  records that this is "the SAME model, endpoint, and request shape used to build the index".
+* The 768d vector is **never** used against Pinecone. `search.ts:380` guards it in as many words:
+  *"Deliberately NOT args.queryEmbedding here"*.
+* `assertEmbeddingDimension` is invoked on both paths with its dimension passed explicitly
+  (`DENSE_DIM` 1024, `EMBEDDING_DIMENSION` 768), so its 768 default cannot mask a mismatch.
+* The usual query-vs-document `taskType` error does not apply: the code records that "taskType
+  parameter has no effect on gemini-embedding-2 (confirmed bug)".
+
 Two things were *suspected* and disproved by reading rather than assuming, both recorded because the
 suspicion was reasonable:
 
