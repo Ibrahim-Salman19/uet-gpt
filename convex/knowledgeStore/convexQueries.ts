@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import type { Doc, Id } from "../_generated/dataModel";
-import { type QueryCtx, internalQuery } from "../_generated/server";
+import { internalQuery, type QueryCtx } from "../_generated/server";
 
 // Internal read primitives the Convex KnowledgeStore adapter needs that don't
 // already exist as reusable exports elsewhere. Existing hydration queries
@@ -67,7 +67,19 @@ export const getChunkHitsByRagIds = internalQuery({
         ctx.db
           .query("crawledChunks")
           .withIndex("by_ragId", (q) => q.eq("ragId", ragId))
-          .unique(),
+          // .first(), not .unique(): ragId is NOT unique in practice. Audit §15 (F-9)
+          // found rows written by crawl/lexicalProof.ts keyed `lexical-proof:${contentHash}`,
+          // so two chunks with identical content collide, and .unique() throws for the
+          // WHOLE batch when any single id in it is duplicated - observed live on
+          // 2026-09-19, six times, against real production data. Nine of the eleven other
+          // by_ragId readers already use .first(); this one and the dead
+          // embeddings/doc_queries.ts:getDocumentByEntryId were the exceptions.
+          //
+          // .first() returns an arbitrary one of the colliding rows, which is a real but
+          // lesser problem than failing the batch: it degrades one chunk's provenance
+          // instead of losing every chunk in the request. The duplicate rows themselves
+          // are the actual defect and are tracked in §15.4.
+          .first(),
       ),
     );
     return Promise.all(
@@ -142,7 +154,9 @@ export const getRagIdAndTextByChunkRefs = internalQuery({
   args: {
     refs: v.array(v.object({ documentId: v.string(), chunkKey: v.string() })),
   },
-  returns: v.array(v.object({ ragId: v.union(v.string(), v.null()), text: v.union(v.string(), v.null()) })),
+  returns: v.array(
+    v.object({ ragId: v.union(v.string(), v.null()), text: v.union(v.string(), v.null()) }),
+  ),
   handler: async (ctx, args) => {
     const chunks = await Promise.all(
       args.refs.map((ref) =>
