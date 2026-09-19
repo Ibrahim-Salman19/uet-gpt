@@ -6,33 +6,35 @@ import type * as ThreeType from "three";
 type NumericProp = "x" | "y" | "z" | "s" | "rx" | "ry" | "rz";
 type TransformState = Record<NumericProp, number>;
 
-interface Keyframe {
+interface KeyframeDef {
   sel: string;
-  x: number;
-  y: number;
-  z: number;
-  s: number;
+  uX: number; // Container-normalized X [-1: left edge, 0: center, +1: right edge]
+  y: number; // Screen-normalized Y [-1: bottom, 0: center, +1: top]
+  z: number; // Frustum depth
+  s: number; // Scale fraction of viewport height
   rx: number;
   ry: number;
   rz: number;
 }
 
-interface Stop extends Keyframe {
+interface ComputedStop extends TransformState {
   at: number;
   m: Record<NumericProp, number>;
 }
 
-const KEYS: Keyframe[] = [
-  { sel: "#hero", x: 0.0, y: 0.44, z: 0.0, s: 0.34, rx: 0.05, ry: 0.0, rz: 0.0 },
-  { sel: "#stats", x: 0.64, y: 0.22, z: -0.35, s: 0.44, rx: 0.16, ry: 1.2, rz: -0.07 },
-  { sel: "#pillars", x: -0.52, y: 0.16, z: -0.4, s: 0.42, rx: 0.28, ry: Math.PI, rz: 0.05 },
-  { sel: "#faq", x: 0.52, y: 0.2, z: -0.5, s: 0.34, rx: 0.22, ry: 5.2, rz: 0.08 },
-  { sel: "footer", x: 0.0, y: 0.4, z: 0.0, s: 0.36, rx: 0.04, ry: Math.PI * 2, rz: 0.0 },
+const KEYFRAMES: KeyframeDef[] = [
+  { sel: "#hero", uX: 0.52, y: 0.05, z: 0.0, s: 0.44, rx: 0.05, ry: 0.0, rz: 0.0 },
+  { sel: "#stats", uX: 0.7, y: 0.2, z: -0.35, s: 0.4, rx: 0.16, ry: 1.2, rz: -0.05 },
+  { sel: "#pillars", uX: -0.65, y: 0.12, z: -0.4, s: 0.38, rx: 0.28, ry: Math.PI, rz: 0.04 },
+  { sel: "#faq", uX: 0.64, y: 0.16, z: -0.45, s: 0.32, rx: 0.22, ry: 5.2, rz: 0.06 },
+  { sel: "footer", uX: 0.0, y: 0.34, z: 0.0, s: 0.34, rx: 0.04, ry: Math.PI * 2, rz: 0.0 },
 ];
 
 const PROPS: NumericProp[] = ["x", "y", "z", "s", "rx", "ry", "rz"];
-const CAM_Z = 3;
-const HALF_TAN = Math.tan((32 * Math.PI) / 360);
+const CAM_Z = 3.0;
+const FOV_DEG = 32;
+const HALF_TAN = Math.tan((FOV_DEG * Math.PI) / 360);
+const CONTAINER_MAX_W = 1152; // max-w-6xl
 
 export function MedallionCanvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -53,6 +55,8 @@ export function MedallionCanvas() {
 
     let animId: number;
     let renderer: ThreeType.WebGLRenderer | null = null;
+    let pmremTexture: ThreeType.Texture | null = null;
+    let resizeObserver: ResizeObserver | null = null;
     const cleanupFns: Array<() => void> = [];
 
     import("three")
@@ -73,7 +77,7 @@ export function MedallionCanvas() {
         renderer.toneMappingExposure = 1.25;
 
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
+        const camera = new THREE.PerspectiveCamera(FOV_DEG, 1, 0.1, 100);
         camera.position.set(0, 0, CAM_Z);
 
         // Studio environment reflection gradient map
@@ -96,7 +100,8 @@ export function MedallionCanvas() {
           eq.mapping = THREE.EquirectangularReflectionMapping;
           eq.colorSpace = THREE.SRGBColorSpace;
           const pmrem = new THREE.PMREMGenerator(renderer);
-          scene.environment = pmrem.fromEquirectangular(eq).texture;
+          pmremTexture = pmrem.fromEquirectangular(eq).texture;
+          scene.environment = pmremTexture;
           pmrem.dispose();
           eq.dispose();
         }
@@ -112,7 +117,7 @@ export function MedallionCanvas() {
         backLight.position.set(-1.8, 1.4, -3.0);
         scene.add(backLight);
 
-        // Build Struck Gold Medallion with UET Seal
+        // Struck Gold Medallion with UET Seal
         const R = 0.05;
         const T = 0.011;
         const FACE = R * 0.9;
@@ -120,6 +125,11 @@ export function MedallionCanvas() {
 
         const textureLoader = new THREE.TextureLoader();
         const seal = await textureLoader.loadAsync("/landing/logo.png").catch(() => null);
+
+        if (!isMounted) {
+          seal?.dispose();
+          return;
+        }
 
         if (seal) {
           seal.colorSpace = THREE.SRGBColorSpace;
@@ -174,17 +184,15 @@ export function MedallionCanvas() {
           V(R, T / 2 - 0.003),
         ];
         const profile = [...half.map((p) => V(p.x, -p.y)).reverse(), ...half];
-        const blank = new THREE.Mesh(new THREE.LatheGeometry(profile, 160), gold);
+        const blankGeo = new THREE.LatheGeometry(profile, 160);
+        const blank = new THREE.Mesh(blankGeo, gold);
         blank.name = "blank";
         blank.rotation.x = Math.PI / 2;
         coin.add(blank);
 
         const TICKS = 144;
-        const flutes = new THREE.InstancedMesh(
-          new THREE.BoxGeometry(0.0013, T * 0.72, 0.0015),
-          goldDark,
-          TICKS,
-        );
+        const fluteGeo = new THREE.BoxGeometry(0.0013, T * 0.72, 0.0015);
+        const flutes = new THREE.InstancedMesh(fluteGeo, goldDark, TICKS);
         flutes.name = "milled_edge";
         flutes.frustumCulled = false;
         const m = new THREE.Matrix4();
@@ -197,21 +205,18 @@ export function MedallionCanvas() {
         flutes.rotation.x = Math.PI / 2;
         coin.add(flutes);
 
+        const circleGeo = new THREE.CircleGeometry(FACE, 160);
+        const torusGeo = new THREE.TorusGeometry(FACE + 0.0008, 0.0007, 16, 160);
+
         for (const side of [1, -1]) {
           const tag = side > 0 ? "front" : "back";
-          const disc = new THREE.Mesh(
-            new THREE.CircleGeometry(FACE, 160),
-            side > 0 ? enamelFront : enamelBack,
-          );
+          const disc = new THREE.Mesh(circleGeo, side > 0 ? enamelFront : enamelBack);
           disc.name = `seal_${tag}`;
           disc.position.z = side * (FIELD_Z + 0.0004);
           if (side < 0) disc.rotation.y = Math.PI;
           coin.add(disc);
 
-          const ring = new THREE.Mesh(
-            new THREE.TorusGeometry(FACE + 0.0008, 0.0007, 16, 160),
-            gold,
-          );
+          const ring = new THREE.Mesh(torusGeo, gold);
           ring.name = `bezel_inner_${tag}`;
           ring.position.z = side * (FIELD_Z + 0.0004);
           coin.add(ring);
@@ -225,7 +230,7 @@ export function MedallionCanvas() {
         scene.add(rig);
 
         // Scroll Choreography Setup
-        let stops: Stop[] = [];
+        let stops: ComputedStop[] = [];
         let aspect = 1;
 
         function measure() {
@@ -237,90 +242,141 @@ export function MedallionCanvas() {
           camera.aspect = aspect;
           camera.updateProjectionMatrix();
 
-          const navEl = document.querySelector("header") || document.querySelector("nav");
-          const navH = navEl?.getBoundingClientRect().height || 0;
-          const navNdc = (2 * navH) / h;
-          const narrow = w < 900;
+          const maxScroll = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
 
-          const rawStops: Stop[] = KEYS.map((k) => {
+          // Continuous container-relative horizontal scaling
+          const padding = 48; // px-6 equivalent
+          const effectiveContainerW = Math.min(w - padding, CONTAINER_MAX_W);
+          const responsiveBlend = Math.min(Math.max((w - 520) / (960 - 520), 0), 1);
+          const isNarrow = w < 640;
+          const isDesktop = w >= 1024;
+
+          const rawStops: ComputedStop[] = KEYFRAMES.map((k, idx) => {
             const el = document.querySelector(k.sel);
-            if (!el) return null;
-            const box = el.getBoundingClientRect();
-            const at = box.top + window.scrollY + box.height / 2 - h / 2;
-            const s = k.s * (narrow ? 0.65 : 1);
+            let at = 0;
+
+            if (idx === 0) {
+              at = 0; // Guaranteed start at page top
+            } else if (idx === KEYFRAMES.length - 1) {
+              at = maxScroll; // Guaranteed arrival at document bottom
+            } else if (el) {
+              const box = el.getBoundingClientRect();
+              at = box.top + window.scrollY + box.height / 2 - h / 2;
+            } else {
+              at = (idx / (KEYFRAMES.length - 1)) * maxScroll;
+            }
+
+            // Adapt Hero position: Desktop sits in right column, Mobile sits centered at top
+            let uX = k.uX;
+            let targetY = k.y;
+            let baseScale = k.s;
+
+            if (idx === 0) {
+              if (isDesktop) {
+                uX = 0.52;
+                targetY = 0.05;
+                baseScale = 0.44;
+              } else {
+                uX = 0.0;
+                targetY = 0.38;
+                baseScale = 0.32;
+              }
+            }
+
+            // Container-anchored NDC X coordinate
+            const pixelX = uX * (effectiveContainerW / 2) * responsiveBlend;
+            const ndcX = (2 * pixelX) / w;
+
+            // Scale & clamp vertical NDC to ensure seal stays comfortably on screen
+            const s = baseScale * (isNarrow ? 0.65 : 1);
             const halfExtent = s * Math.abs(Math.cos(k.rx)) + 0.09 * s * Math.abs(Math.sin(k.rx));
             const y = Math.min(
-              Math.max(k.y * (narrow ? 0.88 : 1), -1 + 0.05 + halfExtent),
-              1 - navNdc - 0.05 - halfExtent,
+              Math.max(targetY * (isNarrow ? 0.9 : 1), -1 + 0.05 + halfExtent),
+              1 - 0.12 - halfExtent, // Keep clear of navbar
             );
+
             return {
-              ...k,
               at,
-              x: k.x * (narrow ? 0.2 : 1),
+              x: ndcX,
               y,
+              z: k.z,
               s,
+              rx: k.rx,
+              ry: k.ry,
+              rz: k.rz,
               m: { x: 0, y: 0, z: 0, s: 0, rx: 0, ry: 0, rz: 0 },
             };
-          }).filter((s): s is Stop => s !== null);
+          });
 
-          if (rawStops.length === 0) {
-            // Fallback if no target elements exist
-            stops = [
-              {
-                sel: "#hero",
-                at: 0,
-                x: 0,
-                y: 0.44,
-                z: 0,
-                s: 0.34,
-                rx: 0.05,
-                ry: 0,
-                rz: 0,
-                m: { x: 0, y: 0, z: 0, s: 0, rx: 0, ry: 0, rz: 0 },
-              },
-            ];
-            return;
+          // Sort and enforce strict monotonicity
+          rawStops.sort((a, b) => a.at - b.at);
+          const firstRaw = rawStops[0];
+          const lastRaw = rawStops[rawStops.length - 1];
+          if (firstRaw) firstRaw.at = 0;
+          if (lastRaw) lastRaw.at = maxScroll;
+
+          const minInterval = 120;
+          for (let i = 1; i < rawStops.length - 1; i++) {
+            const stop = rawStops[i];
+            const prevStop = rawStops[i - 1];
+            if (!stop || !prevStop) continue;
+            stop.at = Math.max(stop.at, prevStop.at + minInterval);
+            stop.at = Math.min(stop.at, maxScroll - minInterval * (rawStops.length - 1 - i));
           }
 
-          rawStops.sort((a, b) => a.at - b.at);
           stops = rawStops;
 
-          // Catmull-Rom tangents for C1 continuous motion
-          for (let i = 0; i < stops.length; i++) {
-            const curStop = stops[i];
-            if (!curStop) continue;
-            const p = stops[i - 1] ?? curStop;
-            const n = stops[i + 1] ?? curStop;
-            const span = n.at - p.at;
-            curStop.m = {
-              x: span > 0 ? (n.x - p.x) / span : 0,
-              y: span > 0 ? (n.y - p.y) / span : 0,
-              z: span > 0 ? (n.z - p.z) / span : 0,
-              s: span > 0 ? (n.s - p.s) / span : 0,
-              rx: span > 0 ? (n.rx - p.rx) / span : 0,
-              ry: span > 0 ? (n.ry - p.ry) / span : 0,
-              rz: span > 0 ? (n.rz - p.rz) / span : 0,
-            };
+          // Fritsch-Carlson Monotone Cubic Spline Tangents (PCHIP)
+          for (const q of PROPS) {
+            const n = stops.length;
+            if (n < 2) continue;
+            const deltas: number[] = new Array(n - 1).fill(0);
+            for (let i = 0; i < n - 1; i++) {
+              const cur = stops[i];
+              const nxt = stops[i + 1];
+              if (!cur || !nxt) continue;
+              const dx = nxt.at - cur.at;
+              deltas[i] = dx > 0 ? (nxt[q] - cur[q]) / dx : 0;
+            }
+
+            const firstStop = stops[0];
+            const lastStop = stops[n - 1];
+            if (firstStop) firstStop.m[q] = deltas[0] ?? 0;
+            if (lastStop) lastStop.m[q] = deltas[n - 2] ?? 0;
+
+            for (let i = 1; i < n - 1; i++) {
+              const stop = stops[i];
+              if (!stop) continue;
+              const dPrev = deltas[i - 1] ?? 0;
+              const dCur = deltas[i] ?? 0;
+              if (dPrev * dCur <= 0) {
+                // Local extremum: flatten tangent to guarantee zero overshoot
+                stop.m[q] = 0;
+              } else {
+                // Harmonic mean for shape-preserving continuity
+                stop.m[q] = (2 * dPrev * dCur) / (dPrev + dCur);
+              }
+            }
           }
         }
 
         const outValues: TransformState = {
           x: 0,
-          y: 0,
+          y: 0.05,
           z: 0,
-          s: 0,
-          rx: 0,
+          s: 0.44,
+          rx: 0.05,
           ry: 0,
           rz: 0,
         };
 
-        function sample(yPos: number): TransformState | null {
-          if (!stops.length) return null;
+        function sample(yPos: number): TransformState {
+          if (!stops.length) return outValues;
           const first = stops[0];
-          if (!first) return null;
+          if (!first) return outValues;
           if (yPos <= first.at) return first;
           const last = stops[stops.length - 1];
-          if (!last) return null;
+          if (!last) return outValues;
           if (yPos >= last.at) return last;
 
           let i = 0;
@@ -332,17 +388,20 @@ export function MedallionCanvas() {
               break;
             }
           }
+
           const a = stops[i];
           const b = stops[i + 1];
           if (!a || !b) return last;
           const dx = b.at - a.at;
-          const tNorm = dx > 0 ? (yPos - a.at) / dx : 0;
-          const t2 = tNorm * tNorm;
-          const t3 = t2 * tNorm;
+          const t = dx > 0 ? (yPos - a.at) / dx : 0;
+          const t2 = t * t;
+          const t3 = t2 * t;
+
           const h00 = 2 * t3 - 3 * t2 + 1;
-          const h10 = t3 - 2 * t2 + tNorm;
+          const h10 = t3 - 2 * t2 + t;
           const h01 = -2 * t3 + 3 * t2;
           const h11 = t3 - t2;
+
           for (const q of PROPS) {
             outValues[q] = h00 * a[q] + h10 * dx * a.m[q] + h01 * b[q] + h11 * dx * b.m[q];
           }
@@ -357,20 +416,28 @@ export function MedallionCanvas() {
 
         measure();
 
-        const handleResize = () => measure();
-        window.addEventListener("resize", handleResize);
-        cleanupFns.push(() => window.removeEventListener("resize", handleResize));
-
-        // Details toggles on FAQ page expand content and shift positions
-        const detailsList = document.querySelectorAll("details");
-        detailsList.forEach((d) => {
-          d.addEventListener("toggle", measure);
-        });
+        // Safe relayout handling
+        document.fonts?.ready.then(() => measure());
+        window.addEventListener("load", measure);
+        window.addEventListener("resize", measure);
         cleanupFns.push(() => {
-          detailsList.forEach((d) => {
-            d.removeEventListener("toggle", measure);
-          });
+          window.removeEventListener("load", measure);
+          window.removeEventListener("resize", measure);
         });
+
+        // ResizeObserver to detect layout expansion without layout thrashing
+        const mainEl = document.querySelector("main") || document.body;
+        let lastHeight = 0;
+        resizeObserver = new ResizeObserver((entries) => {
+          const entry = entries[0];
+          if (!entry) return;
+          const h = Math.round(entry.contentRect.height);
+          if (Math.abs(h - lastHeight) > 4) {
+            lastHeight = h;
+            measure();
+          }
+        });
+        resizeObserver.observe(mainEl);
 
         // Mouse Parallax
         let mx = 0;
@@ -378,17 +445,17 @@ export function MedallionCanvas() {
         let tmx = 0;
         let tmy = 0;
         const handlePointerMove = (e: PointerEvent) => {
-          tmx = (e.clientX / window.innerWidth - 0.5) * 0.26;
-          tmy = (e.clientY / window.innerHeight - 0.5) * 0.2;
+          tmx = (e.clientX / window.innerWidth - 0.5) * 0.22;
+          tmy = (e.clientY / window.innerHeight - 0.5) * 0.16;
         };
         window.addEventListener("pointermove", handlePointerMove, { passive: true });
         cleanupFns.push(() => window.removeEventListener("pointermove", handlePointerMove));
 
         const cur: TransformState = {
           x: 0,
-          y: 0.44,
+          y: 0.05,
           z: 0,
-          s: 0.34,
+          s: 0.44,
           rx: 0.05,
           ry: 0,
           rz: 0,
@@ -406,18 +473,17 @@ export function MedallionCanvas() {
           lastT = now;
           const t = (now - t0) / 1000;
 
+          // Asymptotically chase scroll position
           const d = window.scrollY - sy;
           sy = Math.abs(d) < 0.4 || !primed ? window.scrollY : sy + d * (1 - Math.exp(-dt / 0.085));
 
           const sampled = sample(sy);
-          if (sampled) {
-            for (const q of PROPS) cur[q] = sampled[q];
-          }
+          for (const q of PROPS) cur[q] = sampled[q];
           if (!primed) primed = true;
 
-          const intro = reduced ? 1 : easeOut(Math.min(t / 1.5, 1));
+          const intro = reduced ? 1 : easeOut(Math.min(t / 1.4, 1));
           if (canvas) {
-            canvas.style.opacity = (intro * 0.9).toFixed(3);
+            canvas.style.opacity = (intro * 0.92).toFixed(3);
           }
 
           mx += (tmx - mx) * (1 - Math.exp(-dt / 0.34));
@@ -427,17 +493,21 @@ export function MedallionCanvas() {
             x: cur.x,
             y: cur.y,
             z: cur.z,
-            s: cur.s * (0.8 + 0.2 * intro),
+            s: cur.s * (0.82 + 0.18 * intro),
           });
 
-          rig.position.y += reduced ? 0 : Math.sin(t * 0.55) * 0.01;
+          // Floating bobbing motion
+          rig.position.y += reduced ? 0 : Math.sin(t * 0.55) * 0.008;
+
+          // Parallax applied to rig
           rig.rotation.x = my;
           rig.rotation.y = mx;
 
+          // Choreographed attitude applied to pivot
           pivot.rotation.x = cur.rx;
           pivot.rotation.z = cur.rz;
           pivot.rotation.y =
-            cur.ry - (1 - intro) * 0.85 + (reduced ? 0 : Math.sin(t * 0.31) * 0.03);
+            cur.ry - (1 - intro) * 0.6 + (reduced ? 0 : Math.sin(t * 0.31) * 0.025);
 
           renderer.render(scene, camera);
           animId = requestAnimationFrame(frame);
@@ -447,13 +517,17 @@ export function MedallionCanvas() {
 
         cleanupFns.push(() => {
           cancelAnimationFrame(animId);
-          blank.geometry.dispose();
-          flutes.geometry.dispose();
+          resizeObserver?.disconnect();
+          blankGeo.dispose();
+          fluteGeo.dispose();
+          circleGeo.dispose();
+          torusGeo.dispose();
           gold.dispose();
           goldDark.dispose();
           enamelFront.dispose();
           enamelBack.dispose();
           seal?.dispose();
+          pmremTexture?.dispose();
           renderer?.dispose();
         });
       })
@@ -472,7 +546,7 @@ export function MedallionCanvas() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 w-full h-full pointer-events-none z-0 opacity-0 transition-opacity duration-1000"
+      className="fixed inset-0 w-full h-full pointer-events-none z-0 opacity-0"
     />
   );
 }

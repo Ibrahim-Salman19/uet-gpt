@@ -107,72 +107,87 @@ export default function HomePage() {
         <PublicNav />
 
         <main id="main-content" className="relative z-10 flex-1">
-          {/* Asymmetric High-Impact Hero */}
-          <section id="hero" className="px-6 pt-24 pb-16 max-w-6xl mx-auto">
-            <div className="flex flex-col items-center text-center">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#d9b451]/30 bg-[#d9b451]/10 text-[#d9b451] text-xs font-mono uppercase tracking-widest mb-6">
-                <span className="h-2 w-2 rounded-full bg-[#d9b451] animate-pulse" />
-                <span>Independent, Open-Source AI Guide &bull; UET Taxila</span>
-              </div>
+          {/* Asymmetric High-Impact Hero with Zero Fold Clipping */}
+          <section id="hero" className="px-4 sm:px-6 pt-6 sm:pt-10 pb-16 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              {/* Left Column: Core Value Proposition & Actions (7 cols on desktop, full width on mobile) */}
+              <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left">
+                {/* Mobile-only compact medallion stage */}
+                <div
+                  className="lg:hidden w-full h-[150px] sm:h-[180px] pointer-events-none"
+                  aria-hidden="true"
+                />
 
-              <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-white mb-6 leading-[1.08] max-w-4xl">
-                Engineering Intelligence for{" "}
-                <span className="font-serif italic font-normal text-[#d9b451]">UET Taxila</span>
-              </h1>
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#d9b451]/30 bg-[#d9b451]/10 text-[#d9b451] text-xs font-mono uppercase tracking-widest mb-4">
+                  <span className="h-2 w-2 rounded-full bg-[#d9b451] animate-pulse" />
+                  <span>Independent, Open-Source AI Guide &bull; UET Taxila</span>
+                </div>
 
-              <p className="text-base sm:text-lg text-[#a1a1aa] max-w-2xl mx-auto mb-8 leading-relaxed font-normal">
-                Everything you need for undergraduate admissions, PEC Washington Accord degree
-                syllabi, real-time aggregate calculation, semester GPA tracking, and campus transit
-                , grounded in verified university data.
-              </p>
+                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white mb-4 leading-[1.08] max-w-2xl">
+                  Engineering Intelligence for{" "}
+                  <span className="font-serif italic font-normal text-[#d9b451]">UET Taxila</span>
+                </h1>
 
-              <p className="text-xs text-[#71717a] mb-8">Last updated: {SCHEMA_DATE_MODIFIED}</p>
+                <p className="text-sm sm:text-base text-[#a1a1aa] max-w-xl mb-6 leading-relaxed font-normal">
+                  Everything you need for undergraduate admissions, PEC Washington Accord degree
+                  syllabi, real-time aggregate calculation, semester GPA tracking, and campus
+                  transit, grounded in verified university data.
+                </p>
 
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full sm:w-auto">
-                <Link
-                  href="/chat"
-                  className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#d9b451] text-[#07080a] font-bold hover:bg-[#f0d178] transition-all text-sm font-mono tracking-wider uppercase shadow-xl shadow-[#d9b451]/15 min-h-[46px] flex items-center justify-center"
-                >
-                  Ask UET GPT Anything &rarr;
-                </Link>
-                <Link
-                  href="/tools?tab=merit"
-                  className="w-full sm:w-auto px-8 py-3.5 rounded-xl border border-[#d9b451]/40 text-[#d9b451] hover:bg-[#d9b451]/10 transition-all text-sm font-mono tracking-wider uppercase min-h-[46px] flex items-center justify-center"
-                >
-                  Calculate Merit Aggregate
-                </Link>
-                <Link
-                  href="/admissions"
-                  className="w-full sm:w-auto px-8 py-3.5 rounded-xl border border-white/15 text-white hover:border-white/30 transition-all text-sm font-mono tracking-wider uppercase min-h-[46px] flex items-center justify-center"
-                >
-                  Admissions {CURRENT_ACADEMIC_YEAR}
-                </Link>
-              </div>
+                <p className="text-xs text-[#71717a] mb-6">Last updated: {SCHEMA_DATE_MODIFIED}</p>
 
-              {/* Interactive Quick-Jump Prompt Chips */}
-              <div className="mt-10 w-full max-w-3xl pt-8 border-t border-white/10">
-                <span className="text-[11px] font-mono uppercase tracking-widest text-[#71717a] block mb-3">
-                  Direct Tools &amp; Curriculums:
-                </span>
-                <div className="flex flex-wrap items-center justify-center gap-2">
-                  {QUICK_PROMPTS.map((prompt) => (
-                    <Link
-                      key={prompt.label}
-                      href={prompt.href}
-                      className="group flex items-center gap-2 rounded-lg border border-white/10 bg-[#0c0d10] px-3.5 py-1.5 text-xs font-mono text-zinc-300 hover:border-[#d9b451]/50 hover:bg-[#121318] hover:text-white transition-all"
-                    >
-                      <span className="text-[9px] uppercase font-bold text-[#d9b451] bg-[#d9b451]/10 px-1.5 py-0.5 rounded">
-                        {prompt.badge}
-                      </span>
-                      <span>{prompt.label}</span>
-                      <span className="text-zinc-500 group-hover:text-[#d9b451] group-hover:translate-x-0.5 transition-transform">
-                        &rarr;
-                      </span>
-                    </Link>
-                  ))}
+                {/* Action Buttons */}
+                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 w-full sm:w-auto mb-8">
+                  <Link
+                    href="/chat"
+                    className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-[#d9b451] text-[#07080a] font-bold hover:bg-[#f0d178] transition-all text-xs font-mono tracking-wider uppercase shadow-xl shadow-[#d9b451]/15 min-h-[44px] flex items-center justify-center"
+                  >
+                    Ask UET GPT Anything &rarr;
+                  </Link>
+                  <Link
+                    href="/tools?tab=merit"
+                    className="w-full sm:w-auto px-6 py-3.5 rounded-xl border border-[#d9b451]/40 text-[#d9b451] hover:bg-[#d9b451]/10 transition-all text-xs font-mono tracking-wider uppercase min-h-[44px] flex items-center justify-center"
+                  >
+                    Calculate Merit Aggregate
+                  </Link>
+                  <Link
+                    href="/admissions"
+                    className="w-full sm:w-auto px-6 py-3.5 rounded-xl border border-white/15 text-white hover:border-white/30 transition-all text-xs font-mono tracking-wider uppercase min-h-[44px] flex items-center justify-center"
+                  >
+                    Admissions {CURRENT_ACADEMIC_YEAR}
+                  </Link>
+                </div>
+
+                {/* Interactive Quick-Jump Prompt Chips */}
+                <div className="w-full pt-6 border-t border-white/10">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-[#71717a] block mb-2.5">
+                    Direct Tools &amp; Curriculums:
+                  </span>
+                  <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
+                    {QUICK_PROMPTS.map((prompt) => (
+                      <Link
+                        key={prompt.label}
+                        href={prompt.href}
+                        className="group flex items-center gap-2 rounded-lg border border-white/10 bg-[#0c0d10] px-3.5 py-1.5 text-xs font-mono text-zinc-300 hover:border-[#d9b451]/50 hover:bg-[#121318] hover:text-white transition-all"
+                      >
+                        <span className="text-[9px] uppercase font-bold text-[#d9b451] bg-[#d9b451]/10 px-1.5 py-0.5 rounded">
+                          {prompt.badge}
+                        </span>
+                        <span>{prompt.label}</span>
+                        <span className="text-zinc-500 group-hover:text-[#d9b451] group-hover:translate-x-0.5 transition-transform">
+                          &rarr;
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               </div>
+
+              {/* Right Column: Dedicated Desktop 3D Medallion Viewing Stage (5 cols) */}
+              <div
+                className="hidden lg:flex lg:col-span-5 h-[460px] w-full items-center justify-center pointer-events-none"
+                aria-hidden="true"
+              />
             </div>
           </section>
 
