@@ -39,8 +39,24 @@ export function guardChunkSize(text: string): string[] {
   return result.length > 0 ? result : [text.slice(0, MAX_SAFE_CHARS)];
 }
 
+/**
+ * Is this chunk worth storing, or is it a heading/separator with no content?
+ *
+ * A token must contain at least one alphanumeric character to count. Without that,
+ * markdown syntax was counted as content: `"##### Eligibility Criteria by Program"` is
+ * four words, but `#####` is longer than one character and was counted as a fifth,
+ * carrying the chunk past this gate. That exact chunk is live in production and was
+ * measured occupying **rank 1** for the query "eligibility criteria", contributing 37
+ * characters of real content to the answer context (audit §22, root cause in §25).
+ *
+ * `#` alone never had this effect - it is a single character, already excluded - so the
+ * bug only ever admitted h2-h6 headings, table separator rows (`---`) and bold markers.
+ *
+ * NOTE: this governs INGESTION. Stubs already stored stay until their document is
+ * re-crawled; it stops the population growing, it does not clean it up.
+ */
 export function isQualityChunk(text: string): boolean {
-  const words = text.split(/\s+/).filter((w) => w.trim().length > 1);
+  const words = text.split(/\s+/).filter((w) => w.trim().length > 1 && /[a-z0-9]/i.test(w));
   if (words.length < 5) return false;
   return true;
 }
@@ -269,9 +285,15 @@ export function normalizeContent(text: string): string {
     .replace(/\r\n/g, "\n")
     .replace(/[ \t]+\n/g, "\n")
     // Remove lines that are just navigation links typical of header/sidebar menus
-    .replace(/^[ \t]*[\*•-]?\s*\[?(Home|Admissions?|Academics?|Departments?|Faculties|Contact\s*Us|Downloads?|Gallery|Sitemap|Examinations?|Registrar|Careers?|About\s*Us|Research|News|Events|Notice\s*Board|Administration|Vice\s*Chancellor)\]?\(.*?\)[ \t]*\n?/gim, "")
+    .replace(
+      /^[ \t]*[*•-]?\s*\[?(Home|Admissions?|Academics?|Departments?|Faculties|Contact\s*Us|Downloads?|Gallery|Sitemap|Examinations?|Registrar|Careers?|About\s*Us|Research|News|Events|Notice\s*Board|Administration|Vice\s*Chancellor)\]?\(.*?\)[ \t]*\n?/gim,
+      "",
+    )
     // Remove social media sharing / contact links
-    .replace(/^[ \t]*[\*•-]?\s*\[?(Facebook|Twitter|LinkedIn|Instagram|Youtube|Pinterest|Google\+|RSS|Mail)\]?\(.*?\)[ \t]*\n?/gim, "")
+    .replace(
+      /^[ \t]*[*•-]?\s*\[?(Facebook|Twitter|LinkedIn|Instagram|Youtube|Pinterest|Google\+|RSS|Mail)\]?\(.*?\)[ \t]*\n?/gim,
+      "",
+    )
     .replace(/^[ \t]*\[[^\]]*\]\(#[^)]*\)[ \t]*\n?/gm, "")
     .replace(/^[ \t]*\|[ \t]*\|[ \t]*\n?/gm, "");
 

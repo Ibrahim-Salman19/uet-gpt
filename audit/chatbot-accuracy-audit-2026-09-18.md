@@ -1904,3 +1904,50 @@ was not worth the risk to live traffic. Calls are now paced 22s apart; the harne
 
 So F-16's **defect** is measured and its **fix** is not. Do not ship the prompt change on the strength of
 the reasoning alone — that is exactly the mistake §14, §17.4, §18.4 and §18.5 record.
+
+---
+
+## 25. F-17 — root cause of the stub chunks: `isQualityChunk` counts markdown syntax as content
+
+§22 measured that 5 of 40 answer-context slots carry under 150 characters of real content, the worst
+being `/Admission_Eligibility.php` at **37 characters** — a bare heading — sitting at **rank 1** for
+"eligibility criteria". This is why.
+
+### 25.1 The bug
+
+`convex/crawl/chunking.ts:isQualityChunk` is the ingestion gate, applied at `chunking.ts:217`. It
+required ≥5 tokens longer than one character. The chunk that reached production tokenizes as:
+
+```
+"##### Eligibility Criteria by Program"
+  -> ["#####", "Eligibility", "Criteria", "by", "Program"]      5 tokens  -> KEPT
+"Eligibility Criteria by Program"                               (identical content, no marker)
+  -> ["Eligibility", "Criteria", "by", "Program"]               4 tokens  -> dropped
+```
+
+**The markdown heading marker was counted as a word.** `#####` is five characters, so it passed the
+`length > 1` test and supplied the fifth "word" that carried a four-word heading past the gate.
+
+`#` alone never did this — one character, already excluded — so the defect admitted **h2–h6 headings**
+only, along with table separator rows (`---`) and bold markers (`**`).
+
+Two things were checked and are *not* the cause: the crawler's `Document Title: … URL Path: …` prefix is
+added at `chunking.ts:437`, **after** filtering, so the gate does see raw content; and the filter is
+genuinely wired in, not dead code.
+
+### 25.2 Fix
+
+A token must now contain at least one alphanumeric character. That excludes `#####`, `---` and `**`
+together without regex gymnastics, and every pre-existing assertion still passes — including
+`"returns true for markdown tables (dense content)"`, whose `|` cells were already excluded by the
+length test and whose `---` separators are now excluded too, leaving six real tokens.
+
+57 tests pass in `tests/convex/crawl/webhook.test.ts`, including four new assertions; `tsc` clean.
+
+### 25.3 Limitation — this does not clean up what is already stored
+
+`isQualityChunk` governs **ingestion**. Chunks already in the corpus stay until their document is
+re-crawled, so the stubs §22 measured are still being served. This stops the population growing; it does
+not shrink it. Removing the existing ones is a corpus operation and belongs with the F-9 decision.
+
+**Not deployed** — `npx convex deploy` remains refused by the auto-mode classifier. Joins the queue.

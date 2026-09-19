@@ -22,13 +22,9 @@ vi.mock("../../../convex/_generated/api", () => ({
   },
 }));
 
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { createHmac } from "node:crypto";
-import {
-  chunkMarkdown,
-  normalizeContent,
-  isQualityChunk,
-} from "../../../convex/crawl/chunking";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { chunkMarkdown, isQualityChunk, normalizeContent } from "../../../convex/crawl/chunking";
 
 function computeSignature(timestamp: string, rawBody: string, secret: string): string {
   return createHmac("sha256", secret).update(`${timestamp}.${rawBody}`).digest("hex");
@@ -59,6 +55,21 @@ describe("isQualityChunk", () => {
   it("counts only words with length > 1", () => {
     expect(isQualityChunk("a b c d valid one two three")).toBe(false);
     expect(isQualityChunk("a b c d valid one two three four")).toBe(true);
+  });
+
+  it("does not count markdown syntax as content", () => {
+    // Audit §25: "#####" is longer than one character, so it was counted as a fifth
+    // word and carried a four-word heading past this gate. That exact chunk is live in
+    // production and was measured at rank 1 for "eligibility criteria", contributing 37
+    // characters of real content to the answer context.
+    expect(isQualityChunk("##### Eligibility Criteria by Program")).toBe(false);
+    expect(isQualityChunk("Eligibility Criteria by Program")).toBe(false);
+    // Separator rows and bold markers must not pad a chunk either.
+    expect(isQualityChunk("## Contact details\n---\n**")).toBe(false);
+    // ...while the same heading with real content after it is still kept.
+    expect(isQualityChunk("##### Eligibility Criteria by Program\nYou must have passed FSc.")).toBe(
+      true,
+    );
   });
 });
 
@@ -97,7 +108,8 @@ describe("normalizeContent", () => {
 
 describe("chunkMarkdown", () => {
   it("splits a 3200-char prose document into chunks with 300-char overlap", () => {
-    const paragraph = "This is a sentence of prose to fill up space and make this document long enough to exceed the three thousand character limit. ";
+    const paragraph =
+      "This is a sentence of prose to fill up space and make this document long enough to exceed the three thousand character limit. ";
     let doc = "";
     while (doc.length < 3200) {
       doc += paragraph;
@@ -115,7 +127,7 @@ describe("chunkMarkdown", () => {
 
   it("does not split a 3200-char document mid-table", () => {
     let doc = "| Header 1 | Header 2 |\n|---|---|\n";
-    let row = "| cell 1 | cell 2 |\n";
+    const row = "| cell 1 | cell 2 |\n";
     while (doc.length < 3200) {
       doc += row;
     }
@@ -125,8 +137,10 @@ describe("chunkMarkdown", () => {
   });
 
   it("injects breadcrumbs for headers into split chunks", () => {
-    const doc = `## Admissions Process 2025\n\nThis is the admissions process. We will now have a very long paragraph that causes a split. ` +
-      "prose ".repeat(600) + "\n\nHere is the rest of the text.";
+    const doc =
+      `## Admissions Process 2025\n\nThis is the admissions process. We will now have a very long paragraph that causes a split. ` +
+      "prose ".repeat(600) +
+      "\n\nHere is the rest of the text.";
     const chunks = chunkMarkdown(doc, 3000);
     expect(chunks.length).toBe(4);
     // Breadcrumbs are stored in headingPath, not prepended to text
@@ -137,7 +151,8 @@ describe("chunkMarkdown", () => {
   });
 
   it("does not apply overlap on explicit header splits", () => {
-    const doc = "Some normal text here that is sufficiently long enough to pass the forty character minimum requirement for a chunk to be kept.\n\n## Next Header is a Custom Section Header\n\nSome more text here that is also sufficiently long enough to exceed the forty character limit so it gets pushed as a chunk.";
+    const doc =
+      "Some normal text here that is sufficiently long enough to pass the forty character minimum requirement for a chunk to be kept.\n\n## Next Header is a Custom Section Header\n\nSome more text here that is also sufficiently long enough to exceed the forty character limit so it gets pushed as a chunk.";
     const chunks = chunkMarkdown(doc, 200, 20);
     expect(chunks.length).toBe(2);
     expect(chunks[0]!.text).not.toContain("## Next Header");
@@ -148,7 +163,8 @@ describe("chunkMarkdown", () => {
   it("parent-child chunking correctly generates parent chunks and child chunks with parent mapping", () => {
     const title = "UET Guide";
     const contextPrefix = `Document Title: ${title}\nContext: General info\n\n`;
-    const text = "This is a sentence that goes on and on to fill up the parent and child chunks. ".repeat(50);
+    const text =
+      "This is a sentence that goes on and on to fill up the parent and child chunks. ".repeat(50);
     const parentChunks = chunkMarkdown(text, 3000, 300);
     expect(parentChunks.length).toBeGreaterThan(1);
     const chunks: any[] = [];
@@ -178,7 +194,8 @@ describe("chunkMarkdown", () => {
   });
 
   it("returns single chunk for content smaller than maxChunkSize", () => {
-    const text = "This is a short document with enough meaningful content to pass the quality filter.";
+    const text =
+      "This is a short document with enough meaningful content to pass the quality filter.";
     const chunks = chunkMarkdown(text, 3000);
     expect(chunks.length).toBe(1);
     expect(chunks[0]!.text).toContain("short document");
@@ -186,7 +203,9 @@ describe("chunkMarkdown", () => {
 
   it("splits markdown tables row-by-row when they exceed maxChunkSize", () => {
     const header = "| Name | Department | Grade |\n| --- | --- | --- |\n";
-    const rows = Array.from({ length: 50 }, (_, i) => `| Student ${i} | CS | A${i % 5} |\n`).join("");
+    const rows = Array.from({ length: 50 }, (_, i) => `| Student ${i} | CS | A${i % 5} |\n`).join(
+      "",
+    );
     const doc = header + rows;
     const chunks = chunkMarkdown(doc, 300, 30);
     expect(chunks.length).toBeGreaterThan(1);
@@ -197,7 +216,11 @@ describe("chunkMarkdown", () => {
   });
 
   it("splits prose blocks by sentence boundaries", () => {
-    const sentences = Array.from({ length: 100 }, (_, i) => `This is sentence number ${i} in the test document. More words here to make it longer. `);
+    const sentences = Array.from(
+      { length: 100 },
+      (_, i) =>
+        `This is sentence number ${i} in the test document. More words here to make it longer. `,
+    );
     const doc = sentences.join("\n\n");
     const chunks = chunkMarkdown(doc, 2000, 200);
     expect(chunks.length).toBeGreaterThan(1);
@@ -211,19 +234,23 @@ describe("chunkMarkdown", () => {
   });
 
   it("preserves unicode content", () => {
-    const doc = "University of Engineering and Technology Taxila\n\n" +
+    const doc =
+      "University of Engineering and Technology Taxila\n\n" +
       "علاقہ: ٹیکسلا، پنجاب، پاکستان\n\n" +
       "This is English text alongside Urdu content. ".repeat(50);
     const chunks = chunkMarkdown(doc, 2000, 200);
     expect(chunks.length).toBeGreaterThanOrEqual(1);
-    const allText = chunks.map(c => c.text).join(" ");
+    const allText = chunks.map((c) => c.text).join(" ");
     expect(allText).toContain("ٹیکسلا");
     expect(allText).toContain("University of Engineering");
   });
 
   it("handles code blocks without splitting mid-block", () => {
-    const doc = "# API Reference\n\n```typescript\nconst result = await ctx.runQuery(api.search.fullText, {\n  query: searchQuery," +
-      "\n  limit: 10,\n});\nconsole.log(result);\n```\n\nMore text here that continues the documentation. ".repeat(30);
+    const doc =
+      "# API Reference\n\n```typescript\nconst result = await ctx.runQuery(api.search.fullText, {\n  query: searchQuery," +
+      "\n  limit: 10,\n});\nconsole.log(result);\n```\n\nMore text here that continues the documentation. ".repeat(
+        30,
+      );
     const chunks = chunkMarkdown(doc, 1000, 100);
     expect(chunks.length).toBeGreaterThanOrEqual(1);
   });
@@ -240,7 +267,10 @@ describe("chunkMarkdown", () => {
   });
 
   it("applies overlap on large blocks that are split", () => {
-    const doc = "This is a long text that will need to be split into multiple chunks with proper overlap. ".repeat(300);
+    const doc =
+      "This is a long text that will need to be split into multiple chunks with proper overlap. ".repeat(
+        300,
+      );
     const chunks = chunkMarkdown(doc, 2000, 300);
     expect(chunks.length).toBeGreaterThan(1);
     if (chunks.length >= 2) {
@@ -354,11 +384,9 @@ describe("crawlWebhook", () => {
   });
 
   it("rejects invalid timestamp (NaN) with 400", async () => {
-    const req = createSignedRequest(
-      { task_id: "t1" },
-      "test-webhook-secret-12345",
-      { timestamp: "not-a-number" },
-    );
+    const req = createSignedRequest({ task_id: "t1" }, "test-webhook-secret-12345", {
+      timestamp: "not-a-number",
+    });
     const res = await crawlWebhook(mockCtx, req);
     expect(res.status).toBe(400);
   });
@@ -535,7 +563,10 @@ describe("resetWebhook", () => {
   it("rejects a request with no signature headers at all (the old bearer-token scheme no longer works)", async () => {
     const req = new Request("http://localhost/api/reset", {
       method: "POST",
-      headers: { "content-type": "application/json", Authorization: "Bearer test-reset-secret-67890" },
+      headers: {
+        "content-type": "application/json",
+        Authorization: "Bearer test-reset-secret-67890",
+      },
       body: "",
     });
     const res = await resetWebhook(mockCtx, req);
@@ -615,7 +646,13 @@ describe("ingestWebhook", () => {
   }
 
   it("rejects payload larger than 4MB with 413", async () => {
-    const largeBody = { url: "https://example.com", markdown: "x".repeat(4_200_000), contentHash: "abc", crawlSessionId: "s1", sourceType: "html" };
+    const largeBody = {
+      url: "https://example.com",
+      markdown: "x".repeat(4_200_000),
+      contentHash: "abc",
+      crawlSessionId: "s1",
+      sourceType: "html",
+    };
     const req = createRequest(largeBody, "test-auth-token");
     const res = await ingestWebhook(mockCtx, req);
     expect(res.status).toBe(413);
@@ -630,13 +667,16 @@ describe("ingestWebhook", () => {
   });
 
   it("rejects non-UET domain URLs with 403", async () => {
-    const req = createRequest({
-      url: "https://evil-site.com/malware",
-      markdown: "some content with enough words for quality",
-      contentHash: "hash1",
-      crawlSessionId: "s1",
-      sourceType: "html",
-    }, "test-auth-token");
+    const req = createRequest(
+      {
+        url: "https://evil-site.com/malware",
+        markdown: "some content with enough words for quality",
+        contentHash: "hash1",
+        crawlSessionId: "s1",
+        sourceType: "html",
+      },
+      "test-auth-token",
+    );
     const res = await ingestWebhook(mockCtx, req);
     expect(res.status).toBe(403);
     const text = await res.text();
@@ -644,13 +684,16 @@ describe("ingestWebhook", () => {
   });
 
   it("rejects malformed URLs with 400", async () => {
-    const req = createRequest({
-      url: "not-a-valid-url",
-      markdown: "some content with enough words for quality",
-      contentHash: "hash1",
-      crawlSessionId: "s1",
-      sourceType: "html",
-    }, "test-auth-token");
+    const req = createRequest(
+      {
+        url: "not-a-valid-url",
+        markdown: "some content with enough words for quality",
+        contentHash: "hash1",
+        crawlSessionId: "s1",
+        sourceType: "html",
+      },
+      "test-auth-token",
+    );
     const res = await ingestWebhook(mockCtx, req);
     expect(res.status).toBe(400);
     const text = await res.text();
@@ -659,25 +702,31 @@ describe("ingestWebhook", () => {
 
   it("allows pdf:// URLs through domain check", async () => {
     mockCtx.runMutation.mockResolvedValue({ action: "inserted", documentId: "doc123" as any });
-    const req = createRequest({
-      url: "pdf://some-local-file.pdf",
-      markdown: "PDF content with enough words for testing quality filter purposes.",
-      contentHash: "hash-pdf-1",
-      crawlSessionId: "s1",
-      sourceType: "pdf",
-    }, "test-auth-token");
+    const req = createRequest(
+      {
+        url: "pdf://some-local-file.pdf",
+        markdown: "PDF content with enough words for testing quality filter purposes.",
+        contentHash: "hash-pdf-1",
+        crawlSessionId: "s1",
+        sourceType: "pdf",
+      },
+      "test-auth-token",
+    );
     const res = await ingestWebhook(mockCtx, req);
     expect(res.status).toBe(200);
   });
 
   it("rejects unauthorized requests when auth token is configured", async () => {
-    const req = createRequest({
-      url: "https://web.uettaxila.edu.pk/page",
-      markdown: "some content with enough words for quality",
-      contentHash: "hash1",
-      crawlSessionId: "s1",
-      sourceType: "html",
-    }, "wrong-token");
+    const req = createRequest(
+      {
+        url: "https://web.uettaxila.edu.pk/page",
+        markdown: "some content with enough words for quality",
+        contentHash: "hash1",
+        crawlSessionId: "s1",
+        sourceType: "html",
+      },
+      "wrong-token",
+    );
     const res = await ingestWebhook(mockCtx, req);
     expect(res.status).toBe(401);
   });
@@ -698,15 +747,19 @@ describe("ingestWebhook", () => {
 
   it("happy path: upserts document and enqueues chunks for new document", async () => {
     mockCtx.runMutation.mockResolvedValue({ action: "inserted", documentId: "doc123" as any });
-    const req = createRequest({
-      url: "https://web.uettaxila.edu.pk/academics",
-      markdown: "## Academics\n\nThe university offers many programs across engineering disciplines. This content has enough words to pass the quality filter and generate multiple chunks for embedding purposes.",
-      contentHash: "hash-unique",
-      crawlSessionId: "session-1",
-      title: "Academics Page",
-      sourceType: "html",
-      freshnessTier: "high",
-    }, "test-auth-token");
+    const req = createRequest(
+      {
+        url: "https://web.uettaxila.edu.pk/academics",
+        markdown:
+          "## Academics\n\nThe university offers many programs across engineering disciplines. This content has enough words to pass the quality filter and generate multiple chunks for embedding purposes.",
+        contentHash: "hash-unique",
+        crawlSessionId: "session-1",
+        title: "Academics Page",
+        sourceType: "html",
+        freshnessTier: "high",
+      },
+      "test-auth-token",
+    );
     const res = await ingestWebhook(mockCtx, req);
     expect(res.status).toBe(200);
     const json = await res.json();
@@ -729,13 +782,17 @@ describe("ingestWebhook", () => {
     // differently-formatted URL would fail upsertDocument's exact-string
     // by_url lookup and create a duplicate document instead of updating it.
     mockCtx.runMutation.mockResolvedValue({ action: "inserted", documentId: "doc789" as any });
-    const req = createRequest({
-      url: "https://web.uettaxila.edu.pk/academics/?utm_source=test#section",
-      markdown: "## Academics\n\nThe university offers many programs across engineering disciplines. This content has enough words to pass the quality filter and generate multiple chunks for embedding purposes.",
-      contentHash: "hash-canon",
-      crawlSessionId: "session-canon",
-      sourceType: "html",
-    }, "test-auth-token");
+    const req = createRequest(
+      {
+        url: "https://web.uettaxila.edu.pk/academics/?utm_source=test#section",
+        markdown:
+          "## Academics\n\nThe university offers many programs across engineering disciplines. This content has enough words to pass the quality filter and generate multiple chunks for embedding purposes.",
+        contentHash: "hash-canon",
+        crawlSessionId: "session-canon",
+        sourceType: "html",
+      },
+      "test-auth-token",
+    );
     const res = await ingestWebhook(mockCtx, req);
     expect(res.status).toBe(200);
     const upsertCalls = mockCtx.runMutation.mock.calls.filter(
@@ -750,13 +807,16 @@ describe("ingestWebhook", () => {
 
   it("returns skipped action when content is unchanged", async () => {
     mockCtx.runMutation.mockResolvedValue({ action: "skipped", documentId: "doc123" as any });
-    const req = createRequest({
-      url: "https://web.uettaxila.edu.pk/unchanged",
-      markdown: "same content as before with enough words for quality",
-      contentHash: "same-hash",
-      crawlSessionId: "s1",
-      sourceType: "html",
-    }, "test-auth-token");
+    const req = createRequest(
+      {
+        url: "https://web.uettaxila.edu.pk/unchanged",
+        markdown: "same content as before with enough words for quality",
+        contentHash: "same-hash",
+        crawlSessionId: "s1",
+        sourceType: "html",
+      },
+      "test-auth-token",
+    );
     const res = await ingestWebhook(mockCtx, req);
     expect(res.status).toBe(200);
     const json = await res.json();
@@ -769,13 +829,17 @@ describe("ingestWebhook", () => {
 
   it("handles missing title gracefully", async () => {
     mockCtx.runMutation.mockResolvedValue({ action: "inserted", documentId: "doc456" as any });
-    const req = createRequest({
-      url: "https://web.uettaxila.edu.pk/no-title",
-      markdown: "This page has no title but should still be processed with enough words for the quality filter.",
-      contentHash: "hash-no-title",
-      crawlSessionId: "s1",
-      sourceType: "html",
-    }, "test-auth-token");
+    const req = createRequest(
+      {
+        url: "https://web.uettaxila.edu.pk/no-title",
+        markdown:
+          "This page has no title but should still be processed with enough words for the quality filter.",
+        contentHash: "hash-no-title",
+        crawlSessionId: "s1",
+        sourceType: "html",
+      },
+      "test-auth-token",
+    );
     const res = await ingestWebhook(mockCtx, req);
     expect(res.status).toBe(200);
     const upsertCalls = mockCtx.runMutation.mock.calls.filter(
