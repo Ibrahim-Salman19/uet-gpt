@@ -913,3 +913,124 @@ sharpens it: a green gate on *every individual stage* still says nothing, becaus
 how the stages compose. The only two artefacts that revealed real user-visible behaviour in this entire
 engagement were **the user's screenshot** and **the production logs** — neither of which any automated
 check in this repo consults.
+
+---
+
+## 14. F-4 measured and REJECTED, 2026-09-19 — the reranker is inert, and retrieval is the real bottleneck
+
+§8 item 8 parked the F-4 reranker formula change as "a two-part change — formula **plus**
+recalibrating all three thresholds against freshly measured distributions". That measurement has now
+been taken, and it does not support making the change at all.
+
+**Harness:** `scripts/eval/rerank-position/run.ts`, over the ten stratified golden queries of §3.2.
+One read-only production capture (10 `searchDocumentsAction` calls, ≈7% of the Convex Free-plan I/O
+budget) frozen to `frozen.json`; every variant below is then re-scored offline for free.
+
+The harness never recomputes `wordOverlap` — it **inverts** it out of the deployed score,
+`overlap = (score − positionWeight × (1 − i/poolSize)) / overlapWeight`, recovering `i` by matching
+each post-rerank candidate back to its pre-rerank position by `entryId`. This matters: the only chunk
+text available is `evalRetrieveDocuments`' 500-char `contentExcerpt`, and a length-sensitive score
+recomputed over truncated text would silently measure the wrong quantity. Inversion needs no text.
+
+### 14.1 Every weighting of (overlap, position) ranks identically — including no reranker at all
+
+| variant | recall@3 | recall@4 |
+|---|---|---|
+| **NULL: unfiltered fused order, no rerank, no filter** | **7/10** | **7/10** |
+| deployed `0.6 × overlap + 0.4 × position` | 7/10 | 7/10 |
+| pure overlap, position as tie-break only | 7/10 | 7/10 |
+| 0.2/0.8, 0.5/0.5, 0.8/0.2 | 7/10 | 7/10 |
+| RRF-style position `60/(60+i)` | 7/10 | 7/10 |
+
+Identical totals **and** identical per-query hit patterns. The top-1 chunk is unchanged on **0 of 10**
+queries under pure overlap.
+
+### 14.2 Why — `computeWordOverlap` has almost no resolving power on real queries
+
+Inverted overlap per candidate, in fused-retrieval order:
+
+```
+28c28a29   1 distinct value across 8 candidates:  1.00 x8
+f3d60458   1 distinct value across 4 candidates:  1.00 x4
+a694cc1c   1 distinct value across 8 candidates:  0.50 x8
+9a07498d   2 distinct of 8      26e87704   2 distinct of 7
+0a5abd0e   2 distinct of 4      a670a78c   2 distinct of 8      2dfb5097   2 distinct of 7
+8fe9e8f2   3 distinct of 8      21ce9642   3 distinct of 8
+```
+
+`computeWordOverlap` divides shared words by the **query's** content-word count, and production
+rewrites are 2–7 content words. The score is therefore quantised to a handful of values, ties are
+pervasive, and the tie-break — the incoming fused order — decides the ranking. §3.4 reported this as a
+short-query edge case; it is the general case. **On 3 of 10 queries the reranker cannot distinguish any
+candidate in the pool from any other.**
+
+This is the mechanism behind **S-1**, and it is a stronger statement than S-1 made. S-1 observed that
+`topRerankScore` was 0.800–1.000 on 10/10 and concluded the tier bands were unreachable. The reason is
+that the score is `positionWeight + overlapWeight × (a coarse ratio that is usually 1.0)`. On
+`a694cc1c` every one of the 8 candidates scores overlap 0.50, the reranker has zero information, and
+the pipeline still reports `topRerankScore 0.700` — above `skipThreshold`, so CRAG is skipped and
+`determineConfidenceTier` returns `normal` with an empty instruction. **`topRerankScore` is not a
+confidence signal, and gating CRAG and all four tier bands on it is unjustified.**
+
+### 14.3 There is no headroom for any reranker on this query set
+
+| | |
+|---|---|
+| recall@8 — relevant chunk anywhere in the pool | 7/10 |
+| recall@4 — unfiltered fused order, before any rerank | 7/10 |
+| **headroom (`recall@8 − recall@4`)** | **0/10** |
+| relevant chunks eaten by `minWordOverlap` | **0/10** |
+
+Every relevant chunk that reaches the candidate pool is **already inside the top 4** before reranking
+runs. No reranking formula — lexical, length-normalised, or a real cross-encoder — can raise recall@4
+here; it can only lower it. The `minWordOverlap` filter dropped 4, 4, 1 and 1 candidates on four
+queries and never dropped a relevant one.
+
+The three misses (`8fe9e8f2`, `21ce9642`, `26e87704`) are **pool misses**: the answering chunk never
+entered the 8 candidates. Those are retrieval failures, not reranking failures.
+
+### 14.4 Consequences
+
+1. **The F-4 formula change is rejected, not deferred.** Shipping it would be churn against measured
+   evidence of no effect. `tests/unit/cascade-score-scale.test.ts` continues to pin the current scale.
+2. **Length normalisation (`shared/√(|q|·|c|)`) should not be measured on this query set.** With zero
+   headroom it is structurally incapable of showing a gain. It needs a set with measured rerank
+   headroom — pool contains the answer, top-4 does not — and this set contains no such query.
+3. **The accuracy lever is retrieval recall@8**, not reranking or gate calibration. That is a
+   different workstream and needs its own authorization and I/O budget.
+4. Caveat carried forward from §3.1: the label matcher has a known false-MISS artefact (FAQ-channel
+   rendering vs the `crawledChunks` row), and 4 of these 10 golden labels are flagged `contested`. Both
+   affect the 7/10 **level**. Neither affects the **comparisons**, which use the same matcher on both
+   sides. Note that `8fe9e8f2` is scored ABSENT here and §3.3 established that its answering passage
+   *did* reach rank 4 through the FAQ channel — so at least one of the three "pool misses" above is
+   very likely that same artefact, and `26e87704` was flagged in §3.1 as possibly the same.
+
+### 14.6 Scope limit — the two findings do not rest on the same evidence
+
+`evalRetrieveDocuments` issues **one** search with the rewrite text. Production fuses **three**
+channels (rewrite dense, HyDE dense, lexical) before cutting to 8. The pool measured here is therefore
+production-*shaped* but not production's pool, and the two findings above are not equally exposed to
+that:
+
+* **"Every weighting ranks identically" is robust.** It follows from the tie structure of
+  `computeWordOverlap`, which is a property of query length and chunk content, not of how the pool was
+  assembled. A 2-content-word query quantises overlap to {0, 0.5, 1.0} whatever produced the 8
+  candidates. This is what the rejection of the F-4 formula change actually rests on.
+* **"Headroom is zero" is pool-dependent and should be read as applying to this capture only.** A
+  richer 3-channel fused pool could place a relevant chunk in the pool but outside the top 4, which is
+  exactly the condition that would give a reranker something to do. Nothing here rules that out.
+
+Establishing headroom on production's real fused pool needs the `retrieval-ab` harness (which builds
+all three channels) with `--dump-text`, not this one — a larger, separately budgeted run.
+
+### 14.5 A measurement error worth recording
+
+The first run of this harness reported recall@4 falling 7/10 → 5/10 under pure overlap, and the top-1
+chunk changing on 5 of 10 queries. Both were artefacts of the harness itself: inverting the score in
+floating point leaves ~1e-16 of dust, and comparing unrounded overlaps promoted that dust to a ranking
+decision. Genuine gaps between these overlap values are at least 1/12. Rounding to 1e-6 before sorting
+collapsed the difference to 0/10 and 7/10 → 7/10. The harness now rounds, with a comment saying why.
+
+A second error in the same run: the "no rerank" baseline was computed over `baselineBPostRerank`,
+which is already past the `minWordOverlap` filter — so it compared the reranker against itself and
+left the filter untested. The NULL row above uses `baselineAPreRerank`, the untouched pool.
