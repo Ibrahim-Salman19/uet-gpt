@@ -1,0 +1,915 @@
+# UET GPT — Chatbot Accuracy Audit
+
+**Date:** 2026-09-18
+**Auditor:** automated audit agent (read-only)
+**Deployment audited:** Convex prod `modest-peacock-120` (live corpus), plus the offline answer harness over `local_corpus_pilot/documents.jsonl`
+**Raw run outputs:** `/tmp/claude-0/-mnt-c-Users-hafiz-UETGPT/1ca54e80-3133-4cf7-8f56-386518230365/scratchpad/`
+(`aa_batch1..4.json`, `axisB_results.json`, `axisB.ts`, `feeprobe.ts`)
+
+> **Three separate numbers, never collapsed.** Retrieval accuracy, answer accuracy, and ground-truth
+> integrity are reported as independent axes. A single headline "accuracy %" for this system would be
+> meaningless, because ~39% of the scoreable eval set rests on ground truth the project itself has
+> marked UNCONFIRMED.
+
+---
+
+## 0. Executive summary
+
+| Axis | Measured result | Basis |
+|---|---|---|
+| **A — Answer-layer accuracy** | **19 / 19 cases pass** on the current prompt path (10 answerable, 5 not-in-sources, 1 stale-value, 2 no-context, 1 refuse-directive). **0 over-refusals. 0 hallucinated figures.** | 38 Gemini generations, harness `scripts/eval/answer-accuracy/run.ts`, hand-graded against `cases.ts` rubrics |
+| **A (regression delta)** | Old prompt path: **17 / 19**. The 2 failures are exactly the class the new prompt was built to stop — `no-context-vc` invented a Vice Chancellor's name from general knowledge. | same run, `old` arm |
+| **B — Retrieval accuracy** | **recall@8 = 8/10 mechanical (9/10 after manual verification); recall@4 = 7/10 mechanical (8/10 verified).** 1 genuine rerank loss. | 10 stratified golden queries, live prod, production call shape |
+| **C — Ground-truth integrity** | **27 / 50** golden entries have **zero** labelled relevant chunks (unscoreable). Of the 23 scoreable, **9 (39%)** carry contested / UNCONFIRMED / corrected provenance. | `scripts/eval/golden_set_verified.jsonl` |
+
+**The three findings that matter most, none of which were previously known:**
+
+1. **F-1 (Critical).** On the flagship fee query the reranker puts **three postgraduate (M.Sc./Ph.D.)
+   fee tables above the correct undergraduate answer**, scores the top one 0.850 — which **skips CRAG
+   entirely** — and labels every one of them `freshnessState=fresh, applicability=current`. The answer
+   model is therefore told, by trusted metadata, that an MSc fee table is a current source for a BS
+   question, with no relevance safety net. §3.3
+2. **F-5 (Critical).** The **semantic cache has no refusal guard, and a cached refusal is the most
+   durable object in the system**: it gets the *longest* TTL (5 days) precisely because it cites no
+   sources, and `findSourceInvalidation` returns `null` on its first line for a zero-source entry — so
+   it is **structurally immune to invalidation** and survives a re-crawl that adds the very content
+   whose absence caused the refusal. One transient CRAG misfire poisons a 0.92-cosine neighbourhood of
+   question space for 5 days. Fix is one clause. §5.1
+3. **F-3 (High).** The **document-lifecycle gate is a no-op across the entire corpus.**
+   `lifecycleStatus` and `isStale` are absent on **all 1,891 documents**, and
+   `isRetrievalEligibleLifecycle(undefined)` returns `true`. 13 URL families hold multiple year
+   editions simultaneously (including `UET-Prospectus-2024.pdf` *and* `2025.pdf`, and 14 editions of
+   the IEEE annual report). This is the root cause of the reported hostel-fee edition gap, and it was
+   observed live: the `contact number` query's top 2 results are both chunks of a **2021** IEEE
+   student-branch annual report. §5.2
+
+---
+
+## 1. Method, scope and limitations
+
+### 1.1 Probe shape (the trap this audit had to avoid)
+
+Production's path is
+`retrieveContext` (`convex/rag/retrieval.ts:562`) → condense → intent classify → `enrichQuery` →
+semantic cache → `searchVectorDB` → `rerankSearchResults` → CRAG (conditional) → `buildContext` → answer model.
+
+The Axis-B probe (`scratchpad/axisB.ts`) reuses the reviewed live shape from
+`scripts/eval/verify_retrieval_fixes.cjs` exactly:
+
+* reranks on the **rewritten** query (`convex/rag/retrieval.ts:236` passes `query: rewrittenQuery || safeQuestion`);
+* passes `hydeQuery` **explicitly** to `searchDocumentsAction`, so query length cannot silently switch
+  a query between 2 and 3 retrieval channels (`convex/embeddings/search.ts:258`);
+* confirmed against the source that production's `enrichQuery` (`convex/rag/retrieval.ts:115`)
+  generates HyDE **unconditionally**, so `search.ts`'s `wordCount > 15` auto-HyDE branch is dead code
+  for the chat path.
+
+**Deliberate substitution (disclosed):** rewrite and HyDE were generated locally on
+`gemini-3.5-flash-lite` using the **current** `convex/rag/routing.ts` prompts verbatim, then passed
+through the real `sanitizeRewrittenQuery`. `rewriteQueryAction` / `hydeQueryAction` run on
+`getTextModelChain()`, whose primary is Groq (`convex/rag/modelRegistry.ts:78`) — the quota that serves
+live traffic. This is the same substitution `scripts/eval/retrieval-ab/run.ts` documents and uses.
+`gemini-3.5-flash-lite` is that chain's own fallback tier, not a foreign model.
+
+**CRAG was not invoked** (`evaluateChunks` is also Groq-primary). `topRerankScore` vs
+`CRAG_CONFIG.skipThreshold = 0.6` is recorded instead, so every "CRAG would/​would not run" statement in
+this report is **estimated**, not measured.
+
+### 1.2 What was skipped, and why (computed, not assumed)
+
+| Harness | Decision | Computed reason |
+|---|---|---|
+| `scripts/eval/retrieval-ab/run.ts` | **Skipped** | Its golden path is hardcoded (`resolve(ROOT, "scripts/eval/golden_set_verified.jsonl")`, line 432) and it has **no `--only` flag**, so it cannot be subset without editing a project file. It would score **23** queries (computed locally: entries with ≥1 `relevantChunkKeys` whose `label_review.md` snippet survives the ≥25-char filter) at **2 LLM calls/query for enrichment = 46 calls**, plus ~13 prod channel calls/query (4 lexical queries + 3 × [cfEmbed + denseSearch + refsToRag]). 46 calls alone would blow the 60-call fence on top of Axis A. |
+| `scripts/eval/verify_retrieval_fixes.cjs` | **Skipped as a run; audited as an artefact** | ~17 LLM calls through `getTextModelChain()` (Groq-primary) — the exact quota fence #1 protects. Its *content* produced finding **F-7** (§5.5) at zero cost. |
+| `pnpm test` | **Not re-run** | The stated baseline is already captured in this session's `scratchpad/full_run.json`: `numTotalTests: 496, numPassedTests: 492, numFailedTests: 4, numFailedTestSuites: 4`. Matches the given baseline (the file counts 203 *suites*, the baseline quotes 76 *files* — same run, different unit). **No delta introduced; nothing was modified.** |
+
+### 1.3 Measured vs estimated
+
+* **Measured:** all Axis A generated text; all Axis B recall/rank/score numbers; all corpus statistics
+  in §5.2–5.4 (computed over the full 44,792-row / 1,891-row exports); all code behaviour cited by file:line.
+* **Estimated:** "CRAG would run" flags (§1.1); prod Database-Storage attribution (§5.4) — derived from
+  the 2026-09-05 `.convex-tmp/table-export/` snapshot of the migration source, not from the prod dashboard.
+* **Unverified:** whether prod's `KNOWLEDGE_STORE_BACKEND` is `pinecone` (inferred from
+  `retrieval-ab/run.ts`'s docstring, not read from the deployment).
+
+### 1.4 Limitations
+
+* The Convex dashboard is behind a WorkOS sign-in that was **not** used. §5.4 is a code/export-derived
+  estimate and does **not** reconcile to the reported 874.71 MB.
+* `retrieveContext` was **not** called (it writes semantic-cache entries; previously denied by the
+  permission classifier). Every retrieval measurement therefore reconstructs the pipeline stage by
+  stage rather than invoking the public action.
+* Axis A is **offline by construction** — it holds retrieval fixed on pilot-corpus pages and varies only
+  what the answer model sees. It measures the *answer layer*. It does **not** measure what production
+  retrieval actually feeds that layer; §3 does.
+* Single sample per case (`--samples 1`). The answer model is at `temperature: 0.3`, so per-case
+  results are indicative, not a stable rate.
+
+---
+
+## 2. Axis A — Answer-layer accuracy (centerpiece)
+
+**Command (4 batches, `--samples 1 --no-judge`, Gemini default provider):**
+
+```
+node_modules/.bin/tsx scripts/eval/answer-accuracy/run.ts --samples 1 --no-judge \
+  --only <ids> --out <scratchpad>/aa_batchN.json
+```
+
+> `--no-judge` hard-codes `correct: false`, so the printed `correctRate: 0` in the run JSON is a
+> **sentinel, not a measurement**. Only the `response` strings are data. All grading below is manual,
+> against the `cases.ts` rubric, with the generated text quoted.
+
+### 2.1 Results — current ("new") prompt path
+
+| # | Case | Kind | Verdict | Evidence from the generated text |
+|---|---|---|---|---|
+| 1 | `seats-se-punjab` | answerable | **PASS** | "there are **66** Punjab (Open Merit) seats allocated for Software Engineering" |
+| 2 | `seats-cs-total` | answerable | **PASS** | "the total number of seats in BS Computer Science is **150**" |
+| 3 | `cs-premedical` | answerable | **PASS** | "one-third of the seats in Computer Science for every category are reserved for Pre-Medical candidates… any unfilled seats will be transferred to the other group" |
+| 4 | `fee-subsidy-categories` | answerable | **PASS** | "the fee is not subsidized for categories **S** and **X**" — and quoted **no** fee amount, as the rubric requires |
+| 5 | `classes-start` | answerable | **PASS** | "regular classes for the 1st semester start on **31st August, 2026 (Monday)**" |
+| 6 | `hifz-test` | answerable | **PASS** | "**Date:** 24th May, 2026 (Sunday) / **Time:** 10:00 AM / **Venue:** Jamia Masjid Bilal U.E.T. Taxila" |
+| 7 | `merit-list-1` | answerable | **PASS** | "the 1st Merit List (Cycle - I) is scheduled to be displayed on **04th June, 2026 (Thursday)**" |
+| 8 | `prospectus-charge` | answerable | **PASS** | "the prospectus costs RS.1500 per copy (Prospectus Charges + Processing Fee) at UET Centers" |
+| 9 | `admissions-contact` | answerable | **PASS** | "**Email:** ug.admission@uettaxila.edu.pk / **Phone:** +92-51-9047400-412" — no invented details |
+| 10 | `roman-urdu-classes` | answerable | **PASS** | "**31st August, 2026 (Monday)** se shuru hongi" — correct date, answered in Roman Urdu |
+| 11 | `last-date-missing` | not_in_sources | **PASS** | "the last date for the online submission of admission forms is not specified (listed as \"--\")" — states no date |
+| 12 | `hostel-fee` | not_in_sources | **PASS** | "I couldn't find verified information about the hostel fee per semester… in the reference data" — no amount |
+| 13 | `tuition-se` | not_in_sources | **PASS** | "I could not find verified information about the semester tuition fee for BS Software Engineering" — did **not** mis-sell Rs. 1500 as tuition |
+| 14 | `closing-merit` | not_in_sources | **PASS** | "I couldn't find verified information about the closing merit" — no percentage |
+| 15 | `civil-dept-fee` | not_in_sources | **PASS** | "I could not find verified information about the admission fee for the Civil Engineering department" |
+| 16 | `entry-test-2025-row` | stale_value | **PASS** | "the specific entry test date for Computer Science for Fall 2026 is **not explicitly listed as a Fall 2026 date**. However, the schedule mentions… \"3rd Test - 15th July, 2025 (Tuesday)\"… please confirm" — flags the 2025 row instead of presenting it as the Fall 2026 date |
+| 17 | `no-context-vc` | no_context | **PASS** | "I couldn't find verified information about the current Vice Chancellor" — names **no** person |
+| 18 | `no-context-ms-fee` | no_context | **PASS** | "I couldn't find verified information regarding the fee for MS Mechanical Engineering… in my current records" |
+| 19 | `refuse-directive-scholarship` | refuse_directive | **PASS** | verbatim: "I don't have verified information about this - please check uettaxila.edu.pk directly." |
+
+**19 cases total** (10 answerable + 5 not_in_sources + 1 stale_value + 2 no_context + 1 refuse_directive — `cases.ts` defines 19, and the 4 batches ran 5+5+5+4 = 19 × 2 arms = the 38 generations reported in §9).
+
+**Over-refusal: 0 / 10 answerable cases.** No answerable case emitted
+"I don't have verified information about this". **Hallucination: 0 / 19.** Every UET-specific figure,
+date, name and contact in every answer traces to the fixture page body.
+
+### 2.2 Regression delta vs the pre-2026-09-15 prompt ("old" arm)
+
+Same 19 cases, 17 pass. The 2 failures are precisely the hazard class the current prompt closes:
+
+* **`no-context-vc` — hallucinated a named person with zero context.**
+  Old: *"Based on my general knowledge up to my last update, **Prof. Dr. Inayatullah Khan** has been
+  serving as the Vice Chancellor…"*
+  New: *"I couldn't find verified information about the current Vice Chancellor of UET Taxila."*
+* **`no-context-ms-fee` — unsupported institutional detail with zero context.**
+  Old: *"…fee structures at UET Taxila are revised periodically by the university administration…
+  contacting the Directorate of Advanced Studies and Research (AS&R) or the Treasurer's Office"* — none
+  of which came from any source.
+
+The mechanism is `src/lib/prompt.ts`'s no-context branch, which now forbids answering UET-specific
+questions from general knowledge, where the old branch said *"Answer based on your general knowledge
+about UET Taxila"*. **This change is doing real work and should not be regressed.**
+
+### 2.3 What Axis A does *not* clear
+
+Every Axis-A answer that quoted a figure also appended a hedge ("retrieved from an aged source",
+"please confirm"), driven by `Freshness state: aged` in the chunk header (fixtures crawled 2026-08-20,
+graded at 2026-09-18). **Live production chunks are labelled differently:** the Axis-B probe observed
+`freshnessState=fresh, applicability=current` on all four final chunks of the flagship fee query
+(§3.3), including a page that is wrong for the question. So the live bot will hedge **less** than these
+fixture answers, on sources that deserve **more** hedging. Axis A's clean sheet is a statement about the
+answer layer given good context — not about what production feeds it.
+
+---
+
+## 3. Axis B — Retrieval accuracy
+
+**Sample:** 10 of the 23 scoreable golden queries, stratified: 3 contested-provenance, 3 bare-keyword
+(2-word) queries, 3 full-sentence clean, 1 Roman Urdu.
+**Scoring:** `retrieval-ab`'s matcher — `norm()` + 60-char label snippet containment against
+`label_review.md` / `delta_label_review.md`.
+
+### 3.1 Headline
+
+| Metric | Mechanical | Manually verified |
+|---|---|---|
+| recall@8 (fused candidate pool) | **8 / 10** | **9 / 10** |
+| recall@4 (after production `cascadeRerank`) | **7 / 10** | **8 / 10** |
+| CRAG would run (topRerankScore < 0.6) | **0 / 10** | — |
+
+The mechanical-vs-verified gap is one query, and the correction matters (§3.3): the label matcher
+scored the flagship fee query a MISS, but manual content inspection shows the answering passage **did**
+reach rank 4 — through the FAQ channel, whose rendering (`FAQ: …Answer: …`) differs from the
+`crawledChunks` row the label was taken from, so snippet containment fails. **Reported as an artefact of
+the matcher, not a retrieval miss** — exactly the kind of error that would have made this audit
+confidently wrong.
+
+`eligibility criteria` (`26e877048af0f6ee`) is also a mechanical MISS whose final-4 contains a
+`/FAQS.php` FAQ-channel chunk; it **may** be the same artefact but was **not** verified (budget). Treat
+recall as bounded: **8–9 / 10 @8, 7–8 / 10 @4**.
+
+### 3.2 Per-query detail
+
+| Query (golden id) | rewrite (words) | rank@8 | rank@4 | topRerank | Note |
+|---|---|---|---|---|---|
+| fee structure for BS Software Engineering (`8fe9e8f2`) | 7 | — | *(4, verified)* | 0.850 | **See §3.3 — the critical case** |
+| Programming Fundamentals credit hours (`28c28a29`) | 10 | 1 | **1** | 1.000 | clean |
+| Vice Chancellor (`0a5abd0e`) | 10 | 3 | **3** | 0.800 | clean |
+| degree certificate procedure (`21ce9642`) | 10 | 2 | **2** | 1.000 | clean |
+| freeze semester (`9a07498d`) | 7 | 1 | **1** | 0.850 | clean |
+| admission k liye zaruri documents (`a670a78c`) | 5 | 2 | **2** | 1.000 | Roman Urdu → correct English rewrite |
+| eligibility criteria (`26e87704`) | 2 | — | — | 1.000 | MISS (possible matcher artefact, unverified) |
+| important dates (`f3d60458`) | 2 | 1 | **1** | 1.000 | clean |
+| contact number (`a694cc1c`) | 2 | 5 | — | 1.000 | **genuine rerank loss — see §3.4** |
+| fee structure (`2dfb5097`) | 2 | 2 | **1** | 0.950 | clean |
+
+### 3.3 F-1 (Critical) — postgraduate fee tables outrank the undergraduate answer, and CRAG is skipped
+
+Live prod, production call shape (`scratchpad/feeprobe.ts`).
+Question: *"What is the fee structure for BS Software Engineering at UET Taxila?"*
+Rewrite: `UET Taxila BS Software Engineering fee structure`
+
+```
+candidates=8  topScore=0.850  CRAG SKIPPED
+any candidate in the 8 containing 104,800: true
+
+FINAL #1 score=0.850  https://web.uettaxila.edu.pk/SED/PG-fee.asp
+   freshnessState=fresh applicability=current tier=undefined isStale=undefined
+   "...**FEE AND OTHER CHARGES (M.Sc. Software Engineering)** **Fee Structure M.Sc. Software
+    Engineering** **Subject** **Pakistani (Rs)** **Foreigners(US$)** **Non-Recurring..."
+
+FINAL #2 score=0.800  https://web.uettaxila.edu.pk/SED/PG-fee.asp
+   freshnessState=fresh applicability=current
+   "...**Degree Fee** 1000 100 **Late Fee (at the start of Semester)** 100/-per day 10 ...
+    **FEE AND OTHER CHARGES (Ph.D. Software Engineering)**..."
+
+FINAL #3 score=0.600  https://web.uettaxila.edu.pk/SED/downloads.asp
+   freshnessState=fresh applicability=current
+   "...**DOWNLOADS** [PGS Performa for Synopsis Approval](...)..."   (a link manifest)
+
+FINAL #4 score=0.550  https://admissions.uettaxila.edu.pk/FAQS.php
+   freshnessState=fresh applicability=current
+   "FAQ: What is the fee structure for the first semester? Answer: • Regular (Subsidized)
+    ≈ Rs. 104,800 (without hostel) • Partial-Subsidized (S & X categories) ≈ Rs. 339,800+
+    Exact fee is mentioned in the prospectus and on the fee structure page."
+```
+
+Three compounding defects in one query:
+
+1. **Wrong degree level ranked first.** The user asked about **BS** (undergraduate). Ranks 1–2 are
+   **M.Sc. and Ph.D.** fee tables; rank 3 is a downloads link manifest. The only chunk that answers the
+   question is **last**, at 0.550.
+2. **The safety net is disabled by the failure itself.** `topRerankScore = 0.850 ≥ CRAG_CONFIG.skipThreshold`
+   (`convex/rag/retrieval.ts:697`), so the CRAG relevance judge — the only component that could
+   recognise "these are postgraduate fees" — **never runs**. `determineConfidenceTier` then returns
+   tier `normal` with an **empty** instruction (`convex/rag/retrieval.ts:89`): no hedge, no citation
+   requirement. High lexical overlap on the wrong document buys full confidence.
+3. **The freshness metadata actively endorses the wrong source.** All four chunks carry
+   `freshnessState=fresh, applicability=current`. `src/lib/prompt.ts`'s `GROUNDING_RULES` instruct the
+   model to *"Treat each source's Retrieved, Freshness state, and Applicability labels as
+   authoritative"* and to present a fee as current when its source is marked fresh and current. The
+   model is therefore **told** that an M.Sc. fee table is a current, authoritative source for a BS
+   question.
+
+**Concrete failure scenario.** A prospective BS Software Engineering applicant asks about fees. The
+pipeline returns three MSc/PhD fee tables at scores 0.85/0.80/0.60 and the correct FAQ at 0.55. CRAG is
+skipped; the tier is `normal`, so no hedge is injected; `buildContext` sorts by score, putting two MSc
+tables first. The most likely outputs are (a) MSc/PhD figures presented as the BS fee, or (b) the
+FAQ's **Rs. 104,800** — which, per §4, matches **none** of the five official First-Semester totals in
+the three real Prospectus editions. **There is no path through this query that produces a figure the
+audit can call correct.**
+
+### 3.4 F-4 (High) — the Tier-1 lexical reranker drops the answer for short queries
+
+`contact number` (`a694cc1c`): the labelled relevant chunk is at **rank 5 of 8** in the fused pool and
+is **eliminated by the rerank to top-4**. What replaced it:
+
+```
+FINAL #1  /ieee/Downloads/IEEE_branch_2021_Annual_Report.pdf   (1600 chars)
+FINAL #2  /ieee/Downloads/IEEE_branch_2021_Annual_Report.pdf   (1314 chars)
+FINAL #3  /Test_Centers.php
+FINAL #4  /Minutes_of_Meetings.asp
+```
+
+Mechanism: production `cascadeRerank` is unconditionally Tier-1 lexical — no `RERANKER_URL` and no
+`COHERE_API_KEY` exist in `.env.vercel-production.local` (verified, presence-check only) — scoring
+`0.6 × wordOverlap + 0.4 × positionScore`, with `computeWordOverlap` dividing matches by the **query**
+word count. `computeWordOverlap` returns `overlap / queryWords.size` (`convex/reranking/cascade.ts:77`), with weights `overlapWeight 0.6 / positionWeight 0.4 / minWordOverlap 0.1` (`convex/rag/constants.ts:45-47`). "contact" and "number" both survive stop-word filtering, so for this 2-word query the overlap term is quantised to {0, 0.5, 1.0}: any chunk containing
+both "contact" and "number" ties at the maximum, and the tie is broken by **fused position alone**.
+A long 2021 PDF that happens to contain both words is indistinguishable from the actual contact page.
+Note the top score is **1.000**, so CRAG is skipped here too.
+
+This compounds F-3: the winning chunks are from a **2021** edition of a document with 14 editions in
+the corpus (§5.2).
+
+### 3.5 What is working
+
+* The rewriter sanitizer fix is live and effective. All 10 rewrites are **2–10 words**, none carries an
+  invented year, none carries a `keywords:` synonym dump. Contrast with this session's pre-fix capture
+  (`scratchpad/date_rewrites.json`): `"UET Taxila merit list announcement date 2024 2025 2026 … 2043"`
+  (20 invented years) and `"entry test timing 2024 <|constrain|>**"` (a leaked control token).
+* Consequently **CRAG would run on 0 / 10 queries** (all topRerankScores 0.800–1.000), versus the
+  pre-fix regime where query padding depressed scores to 0.550–0.590 and tripped spurious refusals.
+  **This fixed the over-refusal bug — and in doing so removed the safety net that F-1 needs.** The
+  0.6 threshold is now almost never reached from above; CRAG has gone from over-firing to
+  near-never-firing.
+* Roman Urdu handling is correct: `"admission k liye zaruri documents kya hain?"` →
+  `"required documents for university admission"`, hit at rank 2.
+
+---
+
+## 4. Axis C — Ground-truth integrity (reported as its own axis)
+
+### 4.1 How much of the eval set is actually scoreable
+
+| | Count | Share |
+|---|---|---|
+| Golden entries total | 50 | 100% |
+| **Zero labelled relevant chunks** → cannot score recall at all | **27** | **54%** |
+| Scoreable (≥1 relevant chunk key resolving to a ≥25-char label snippet) | 23 | 46% |
+| **Of those 23: contested / UNCONFIRMED / corrected provenance** | **9** | **39% of scoreable** |
+
+The 9 contested-but-scoreable entries:
+`8fe9e8f2dfe15d2e` (BS SE fee), `2dfb5097fc1ca481` (fee structure), `93971e85e247fde9` (academic
+calendar dates), `809427d946da55fe` (CS dept head email), `0a5abd0e1ccc4e3a` (Vice Chancellor),
+`067a5f0f244a6e34` (registrar contact), `92caae0e08262a70` (campus location),
+`bb92759aba56e8f6` (transport), `f3d60458e68e2e86` (important dates).
+
+Two further entries are flagged but unscoreable (`fc1c0652eda046e9` 4-year total tuition,
+`0516bcbb0e07b76d` spring-2025 exam schedule), giving **11 / 50 flagged overall**.
+
+### 4.2 The fee question has no correct answer to grade against
+
+Verbatim from the golden set's own provenance (`8fe9e8f2dfe15d2e`):
+
+> "PDFTOTEXT_VERIFIED (2026-09-03… all three currently-existing Prospectus editions… 2023: Resident
+> 97,000/251,000 / Non-Resident 84,000/238,000; 2024: 94,000/249,000; 2025: 101,800/256,800 — confirmed
+> no 2026 edition exists yet (HTTP 404)… **None of the 5 official First-Semester totals across 3 real
+> editions equal 104,800/339,800+.** This is now a confirmed, unexplained discrepancy on the live
+> FAQS.php page itself, not a stale-edition artifact — the FAQ page's own text hedges *'Exact fee is
+> mentioned in the prospectus,'* suggesting even the site's authors treat this figure as an
+> approximation… The original AUTHORITATIVE_SOURCE_MATCH claim… **should now be treated as UNCONFIRMED,
+> not settled.**"
+
+The corpus contains **exactly one** chunk with that figure —
+`chunkKey 047ea82187b988440580aa7760da5ee71889c0eb0a0896d05b5c12b45a2b6183`
+(`ragId: lexical-proof:b58110f6…`), which is precisely this query's `relevantChunkKeys[0]`:
+
+> `## What is the fee structure for the first semester?  • Regular (Subsidized) ≈ Rs. 104,800 (without
+> hostel) • Partial-Subsidized (S & X categories) ≈ Rs. 339,800+  Exact fee is mentioned in the
+> prospectus and on the fee structure page.`
+
+**Consequence for any scoring regime.** "Correct retrieval" on this query is defined as retrieving a
+figure the project has itself ruled unreconcilable with every official source, and which the source
+page hedges. §3.3 shows that chunk *does* reach the final context — so a naive grader would score this
+query **PASS** while the user receives a number no Prospectus edition supports. **This is the single
+strongest argument in the audit against a collapsed accuracy score.**
+
+Fee amounts also changed materially between editions (`fc1c0652eda046e9` provenance): Admission Charges
+(Partial-Subsidized) 70,000 → 300,000; Bus Fare 16,000/4,000 → 22,000/10,000; a new SAP charge in 2025;
+and the 2025 edition's *"Grand Total of 4 years"* row is **blank**. There is no single authoritative
+4-year total in the current edition at all.
+
+### 4.3 Other ground-truth defects worth recording
+
+* **`bb92759aba56e8f6` (transport) — the labels are wrong, and the record says so.** Both "independent"
+  relevant chunks are chunks of **the same** page, and that page is *"Strategic Academia-Industry
+  Collaboration … Fast Cables Limited"*, not a transport page. A raw-curl check of the real
+  `Bus_Route.php` **contradicts** the corpus claim: the live page describes a one-day entry-test
+  shuttle (Islamabad, Rawalpindi, Wah Cantt/Taxila — **no Hassan Abdal**) and states *"candidates will
+  travel on their own to their designated test centers."* Provenance: *"the underlying chunk-labeling
+  defect… remains unresolved."* This entry should be **excluded** from scoring, not graded.
+* **`809427d946da55fe` (CS dept head email) — resolved, and worth keeping as a template.** The
+  obfuscated mailto was Cloudflare `data-cfemail` hex, decoded directly to `helpdesk.cs@uettaxila.edu.pk`
+  — an exact match. This is the one contested entry that was closed by direct decoding rather than an
+  AI-summarised fetch.
+* **Provenance tiering is uneven.** Across 50 entries: `LLM_JUDGED` 52 mentions, `AUTHORITATIVE_SOURCE_MATCH` 25,
+  `LIVE_SOURCE_VERIFIED` 23, but `USER_SCREENSHOT_VERIFIED` only 2 and `PDFTOTEXT_VERIFIED` only 2.
+  The great majority of labels rest on an LLM reading the chunk against the query — the weakest tier —
+  while the two strongest tiers were applied only to the fee dispute.
+
+---
+
+## 5. Known open defects
+
+### 5.1 F-5 (Critical) — the semantic cache has no refusal guard; the blast radius is worse than reported
+
+**Full trace, every step cited:**
+
+1. CRAG judges all chunks irrelevant → `evaluateWithCrag` returns `{ finalResults: [], finalSources: [], tier: "refuse" }`
+   (`convex/rag/retrieval.ts:401` / `:414`).
+2. `buildResponseContext` sets `answerInstruction = determineConfidenceTier([]).instruction`
+   (`convex/rag/retrieval.ts:513-516`) → the verbatim refusal directive.
+3. `retrieveContext` returns `sources: []` but **still returns `queryEmbedding: cacheEmbedding`**
+   (`convex/rag/retrieval.ts:758`).
+4. The answer streams; `onFinish` fires `buildCacheWriteCallback`, whose only guard is
+   `if (ragResult.queryEmbedding && ragResult.queryEmbedding.length > 0)`
+   (`src/lib/chat/cache.ts:104`). **Non-empty. The refusal is written.**
+5. `const topSourceUrl = ragResult.sources[0]?.url ?? ""` (`src/lib/chat/cache.ts:107`) → `""`.
+   `assignFreshnessTier("")` (`convex/crawl/chunking.ts:283`) matches neither homepage literal, no
+   `highKeywords` substring, and not `department|faculty|program` → returns **`"low"`**.
+6. `tierToTtl("low", …)` → `FRESHNESS_TTL.low = 5 * DAY` (`convex/cache/set.ts:11`).
+   **A refusal gets the longest TTL in the system — 5 days — precisely because it cites nothing.**
+7. `sourceEntryIds = ragResult.sources.map(...)` (`src/lib/chat/cache.ts:109`) → `[]`. On read,
+   `findSourceInvalidation` returns `null` at its **first line**
+   (`convex/cache/get.ts:103`: `if (!entry.sourceEntryIds || entry.sourceEntryIds.length === 0) return null;`).
+   **A cached refusal is structurally immune to source invalidation.** It survives a re-crawl that adds
+   the very content whose absence caused the refusal.
+8. Read side: `getCachedEntry` vector-searches `semanticCache` and accepts any entry with
+   `_score >= CACHE_SIMILARITY_THRESHOLD = 0.92` (`convex/constants.ts:1`). The refusal is served to
+   **every semantically similar question**, not just the exact one.
+
+**Net blast radius: one transient CRAG misfire poisons a 0.92-cosine neighbourhood of question space
+for 5 days, with no invalidation path except the 12-hourly expiry sweep
+(`convex/crons.ts:18`) — which only deletes rows *after* `expiresAt`.**
+
+**Concrete failure scenario.** A user asks "What is the hostel fee?" during a window where CRAG misjudges
+the retrieved chunks. The bot refuses. That refusal is cached for 5 days. For the next 5 days every user
+asking "hostel fees?", "how much is the hostel per semester?", "hostel charges at UET Taxila" (all within
+0.92 cosine) receives *"I don't have verified information about this"* — even after the nightly crawl
+ingests the hostel fee page, because the entry cites no sources and is therefore never invalidated.
+
+**Minimal guard (do not implement — audit only):** in `buildCacheWriteCallback`
+(`src/lib/chat/cache.ts:104`), add `&& ragResult.sources.length > 0` to the write condition. One
+clause. It blocks every zero-source answer — both the CRAG-refuse path and the empty-retrieval
+path — from ever entering the cache, and needs no schema change, no TTL change and no Convex deploy of
+new logic beyond that file. A belt-and-braces second clause would be to skip when the answer text
+equals the verbatim refusal string.
+
+### 5.2 F-3 (High) — the document-lifecycle gate is a no-op; every old edition is retrievable
+
+**Measured over the full `.convex-tmp/table-export/documents.jsonl` (1,891 rows, 2026-09-05 snapshot of
+the migration source):**
+
+```
+lifecycleStatus: Counter({'<absent>': 1891})
+isStale:         Counter({'<absent>': 1891})
+```
+
+`convex/embeddings/search.ts:474` filters candidates with
+`if (!isRetrievalEligibleLifecycle(docMeta?.lifecycleStatus))`, and
+`isRetrievalEligibleLifecycle` (`convex/crawl/staleness.ts`) is:
+
+```ts
+return lifecycleStatus === undefined || lifecycleStatus === null || lifecycleStatus === "active";
+```
+
+`undefined → true`. **The gate passes 100% of documents.** The same `undefined` also short-circuits the
+cache's `lifecycleStatus !== undefined && lifecycleStatus !== "active"` check (`convex/cache/get.ts:112`).
+
+**13 URL families hold more than one year edition simultaneously**, including:
+
+| Editions present | URL family |
+|---|---|
+| 2024, **2025** | `admissions.uettaxila.edu.pk/Downloads/UET-Prospectus-YYYY.pdf` |
+| 2012–**2025** (14 editions) | `web.uettaxila.edu.pk/ieee/Downloads/IEEE_branch_YYYY_Annual_Report.pdf` |
+| 2010, 2015, 2016, 2019–2022 | `.../IE/ugsDownloads/Projects/FinalYearProjectsfor-YYYY-Session.pdf` |
+| 2017, 2018, 2020 | `.../EncED/UG_Downloads/curriculum/Curriculum-YYYY.pdf` |
+
+This directly violates the standing rule to keep only the latest-year edition of yearly documents, and
+it is **not theoretical**: §3.4 shows the live `contact number` query's top **two** results are both
+chunks of `IEEE_branch_2021_Annual_Report.pdf`.
+
+**Hostel-fee diagnosis (D2).** Both editions are in the corpus with no lifecycle differentiation:
+
+```
+.../PageContents/hostels/Allotment%20Policy%202023-24.pdf
+    title: "Procedure For Allotment in I-Hall (03F &04 sessions)"      <- year NOT in the title
+.../PageContents/hostels/Allotment%20Policy%202024-25%20for%20Boys%20H...
+    title: "Allotment Policy 2024-25 for Boys Hostels (Fall-2024) 2021, ..."
+.../PageContents/hostels/Allotment-Policy-for-Year-2022-23.pdf
+    plus 3 near-duplicate "Allotment Schedule 2023-24 (Sessions …)" documents
+```
+
+Three causes, in order of impact:
+1. **No edition filter exists in the production path.** `dropOlderEditions` / the `newestEdition` row
+   live only in `scripts/eval/retrieval-ab/run.ts` (lines ~205-220) as an **experiment**. `grep` for
+   `dropOlderEditions|newestEdition|supersed` in `convex/embeddings/search.ts` and
+   `convex/rag/retrieval.ts` returns nothing.
+2. **The lifecycle gate that should have retired the 2023-24 policy never fires** (above).
+3. **The year is only in the URL path, not in the 2023-24 document's title or body**, so neither the
+   lexical channel (`text`) nor the word-overlap reranker can prefer the newer edition — while the
+   2024-25 file *does* carry the year in its title, and is therefore penalised by no mechanism but
+   helped by none either. Ranking between them is effectively arbitrary.
+
+### 5.3 F-2 — **WITHDRAWN as a production finding** (and how it was caught)
+
+**This finding was measured, then falsified by a cross-check. It is retained in full because the
+falsification is itself a result: it shows the corpus export that is easiest to reach is *not* the one
+production runs on.**
+
+**What was measured.** Over `.convex-tmp/table-export/crawledChunks.jsonl` (44,792 rows, 254.9 MiB),
+`headingPath` accounted for **58.1%** of all chunk bytes (148.1 MiB — more than `text`), with p90 =
+16,302 B, because a "heading" was sometimes an entire crawler link manifest. Worst case, 17,489 rendered
+chars in 2 elements:
+
+```json
+["DuesSection", "Official resources\n- [New List for University Refundable Security Cheques.
+ Click here to download List.](<.../ChequeList-16-12-2021.xlsx>) (spreadsheet)\n- [New List …"]
+```
+
+Since `convex/rag/context.ts:63-72` **skips — never truncates** — any chunk whose rendered block exceeds
+`maxTokens * 4 = 12,000` chars, that implied **8,635 chunks (19.28%) could never reach the answer model**.
+
+**What falsified it.** The 11 live prod queries recorded `headingPath` length for all ~44 final chunks.
+**Maximum observed: 267 chars.** Observing zero chunks ≥3,000 chars in ~44 draws at the claimed p=0.33
+has probability ~1e-8. That is not a ranking coincidence — it is a contradiction, and it pointed at the
+two export files sitting side by side:
+
+```
+crawledChunks.jsonl              266,864,080 B   headingPath avg 3,472 B/row   (58.1% of bytes)
+crawledChunks.import-ready.jsonl 114,792,460 B   headingPath avg    66 B/row   ( 2.6% of bytes)
+```
+
+`scripts/export_table.ts`'s docstring identifies `import-ready` as the file formatted for
+`npx convex import` — **the artifact actually migrated to prod**. Measured over the full import-ready
+file (same 44,792 rows):
+
+| Metric | `crawledChunks.jsonl` (local dev) | **`import-ready.jsonl` (prod shape)** |
+|---|---|---|
+| `headingPath` share of bytes | 58.1% (148.1 MiB) | **2.6% (2.9 MiB)** |
+| `headingPath` rendered chars: median / p99 / **max** | 151 / 16,302 / 17,489 | **48 / 224 / 420** |
+| Max rendered header chars | 17,489 | **580** |
+| **Chunks exceeding the 12,000-char budget** | 8,635 (19.28%) | **0 (0.000%)** |
+
+**Conclusion: in production, zero chunks are unreachable for this reason.** The live max of 267 chars
+sits comfortably inside the import-ready distribution (p99 = 224, max = 420). The `headingPath` bloat was
+stripped by the migration transform and describes a **pre-migration local-dev artifact only**.
+
+**What genuinely remains (downgraded to Low).** `convex/rag/context.ts:71` still uses `continue`, not
+`break` or truncate. So when the *cumulative* budget is exhausted, a smaller lower-ranked chunk can
+leapfrog a larger higher-ranked one into the context, silently and unlogged. With live final-chunk
+contents measured at 200–1,600 chars each (§3.3, §3.4), four chunks total well under 12,000, so this is
+**latent, not currently firing**. The citation/grounding gap it would create is real but presently
+unexercised: `finalSources` is still built **before** `buildContext` (`convex/rag/retrieval.ts:723`), so
+if the budget ever does bind, `X-Sources` would cite a document the model never saw.
+
+### 5.4 F-6 (High) — Convex Database Storage: derived breakdown (874.71 MB vs 512 MB Free-plan limit)
+
+The dashboard was **not** accessed (WorkOS sign-in, out of scope). Derived from
+`.convex-tmp/table-export/` and `convex/schema.ts`. **Using the prod-shape `import-ready` figures per
+§5.3, not the local-dev export:**
+
+| Source | Bytes | Basis |
+|---|---|---|
+| `crawledChunks` documents (prod shape) | **109.7 MiB** (44,792 rows; 82.0% is `text`) | measured, full `import-ready` file |
+| `documents` | 1.09 MiB (1,891 rows) | measured |
+| `@convex-dev/rag` component storage (embeddings) | **~183 MB** | quoted in `scripts/export_table.ts`'s docstring |
+| **Subtotal attributable** | **≈ 294 MB of 874.71 MB (34%)** | |
+| **Residual ≈ 580 MB — unattributed** | | see below |
+| `semanticCache` | **not exported — the leading suspect** | a 768-dim `queryEmbedding` **per row** (~6 KB of float64 alone), **plus** the full response, the `sources` array with 300-char excerpts, `sourceDocVersions`, and *optional* `alternateEmbeddings` (an **array of** 768-dim vectors). `convex/crons.ts:137-138` calls it "the embedding-heavy semanticCache — which was the dominant DB-bandwidth driver (cost scaled O(cacheRows × embeddingSize) × 288/day)". It also carries a `vectorIndex` (`convex/schema.ts:133`), which is indexed storage on top of the rows. |
+| Index storage on `crawledChunks` | not separable | a `search_text` search index over 90 MiB of text, plus `by_ragId` and `by_documentId_and_chunkKey` |
+| Tables created after the 2026-09-05 snapshot | not in export | `traceSpans`, `dashboardStats`, `crawlStats` |
+| All other exported tables | ~0 | `users`, `faqs`, `feedback`, `evalResults`, `rateLimits`, `sourceRegistry`, `structuredFacts`, `chunkParents`, `adminAuditLog` are **all 0 bytes** |
+
+**Revised conclusion — and it changes the remediation.** With `headingPath` ruled out, the ~580 MB
+residual is dominated by `semanticCache` + index storage, **not** by chunk content. This makes **F-5's
+one-line refusal guard a storage fix as well as an accuracy fix**: every zero-source refusal currently
+inserts a row carrying a 768-dim embedding and holds it for the maximum 5-day TTL. Obtaining a real
+per-table breakdown requires either dashboard access or running `scripts/export_table.ts semanticCache`
+against prod — the latter was **not** attempted (it pages the whole table through prod DB I/O and would
+consume a large share of the 60 MB budget).
+
+### 5.5 F-7 (High) — the regression gate asserts the disputed figure as ground truth
+
+`scripts/eval/verify_retrieval_fixes.cjs:29`:
+
+```js
+const SEARCHES = [
+  ["What is the fee structure for BS Software Engineering at UET Taxila?", /104,?800/],
+```
+
+The gate's PASS criterion for the flagship fee query is a regex for **104,800** — the number §4.2
+establishes matches **none** of the five official First-Semester totals across the three real Prospectus
+editions, and which the source FAQ page hedges. "All 5 checks pass" therefore passes **because** the
+pipeline retrieves the UNCONFIRMED figure. If the corpus were corrected to a Prospectus-backed number,
+**this gate would start failing.** It is currently a regression test against a disputed fact, and it is
+the *only* automated retrieval gate in the repo.
+
+### 5.6 F-8 (Medium) — the faithfulness judge exists but is not wired in
+
+`convex/rag/faithfulness.ts:27-33` states plainly: *"This is an intentionally available safety net that
+is NOT yet wired into the generation flow."* `judgeFaithfulness` is never called from
+`src/lib/chat/pipeline.ts` or `src/lib/chat/stream.ts`. The system has **no post-generation grounding
+check**: nothing verifies that the streamed answer's claims appear in the retrieved sources. Given F-1
+(wrong-degree-level sources ranked first with full confidence), this is the missing last line of defence.
+
+---
+
+## 6. Systemic review of the answer path
+
+**Reviewed:** `convex/rag/prompts.ts`, `convex/rag/context.ts`, `convex/rag/faithfulness.ts`,
+`convex/rag/crag.ts`, `src/lib/prompt.ts`, plus `convex/rag/retrieval.ts` and `src/lib/chat/pipeline.ts`.
+
+| # | Hazard | Evidence | Severity |
+|---|---|---|---|
+| S-1 | **Confidence tiers are miscalibrated against the only reranker that exists.** `determineConfidenceTier` bands on 0.2 / 0.4 / 0.6 (`convex/rag/retrieval.ts:48-88`), but production's Tier-1 lexical scorer produced 0.800–1.000 on **10 of 10** live queries (§3.2). The `hedge` (<0.4) and `cite` (0.4–0.6) tiers are effectively **unreachable**; every query lands on `normal`, whose instruction is the **empty string** (`:89`). The graduated-confidence design is inert in production. | §3.2 + `retrieval.ts:32-89` | **High** |
+| S-2 | **`skipThreshold = 0.6` gates CRAG on the same uncalibrated scale.** Because the fixed rewriter now reliably produces ≥0.8, CRAG fired on **0/10** queries. The bug fix that stopped spurious refusals also removed the only relevance safety net — see F-1. | `retrieval.ts:697`, §3.5 | **High** |
+| S-3 | **`freshnessTier` is `undefined` on live chunks.** Every chunk in the live probe returned `tier=undefined` and `isStale=undefined`, yet `freshnessState=fresh, applicability=current`. `formatChunkHeader` then emits `Freshness tier: unknown` beside `Freshness state: fresh`. `GROUNDING_RULES` tells the model to treat these as authoritative and to gate fee/deadline currency on them — on data that is partly absent. | `feeprobe.ts` output; `context.ts:29-37`; `prompt.ts` GROUNDING_RULES | **Medium** |
+| S-4 | **The Sandwich Strategy reorders chunks *after* budgeting, then re-sorts nothing.** `buildContext` packs greedily in score order, then interleaves `[1st, 3rd, …, 4th, 2nd]` (`context.ts:80-92`). Combined with S-1 (all scores near-identical) the ordering carries little signal, and the highest-scored chunk can end up adjacent to the lowest. | `context.ts:80-92` | **Low** |
+| S-5 | **Dead prompt with a conflicting contract.** `convex/rag/prompts.ts` `SYSTEM_PROMPT` mandates a `<draft>` chain-of-draft block and a different refusal string (*"I couldn't find specific information about this in the UET Taxila website…"*) from the live one (*"I don't have verified information about this…"*). `src/lib/prompt.ts`'s comment confirms it was ported "minus its `<draft>` reasoning block, which stream.ts would not strip". `FEW_SHOT_EXAMPLES` additionally contains a **fabricated** fee ("Rs. 45,000 per semester") against a **non-existent** URL. **No caller** (verified: `grep -rn "SYSTEM_PROMPT\|FEW_SHOT_EXAMPLES"` over `convex/ src/ scripts/ tests/` returns only the auto-generated `convex/_generated/api.d.ts` and two comments). Reinstating it would leak `<draft>` blocks to users and inject an invented fee as an exemplar. *(Pre-existing dead code — reported, not removed.)* | `convex/rag/prompts.ts` | **Medium (latent)** |
+| S-6 | **The context fence is sound; the directive placement is correct.** Confirmed fixed: `answerInstruction` is passed as a **separate** trusted parameter (`pipeline.ts` → `buildSystemPrompt(context, intent, answerInstruction)`) and rendered **outside** the `<<<UET_CONTEXT>>>` fence (`prompt.ts`). The historical bug — directives prepended into the fenced context the model is told to disobey — is genuinely resolved. | `prompt.ts`, `retrieval.ts:460-463` | *(resolved — no action)* |
+| S-7 | **CRAG judges on `safeQuestion`, the reranker on `rewrittenQuery`.** `evaluateWithCrag` passes `query: safeQuestion` (`retrieval.ts:378`) while `rerankSearchResults` passes `rewrittenQuery` (`:236`). Defensible (CRAG should see user intent), but it means the two gates disagree about what the query *is*, and only the reranker's view sets the threshold that decides whether CRAG runs at all. | `retrieval.ts:236` vs `:378` | **Low** |
+| S-8 | **No answer-side citation verification.** `GROUNDING_RULES` asks for markdown citations and says "Never invent a URL", but nothing checks the emitted links against `finalSources`. Combined with F-2's gap (sources cited that were never in context), a plausible-looking citation can point at a page that did not support the claim. | `prompt.ts`; §5.3 | **Medium** |
+
+---
+
+## 7. Findings ranked by severity
+
+| # | Severity | Finding | Failure scenario (input/state → what the user sees) |
+|---|---|---|---|
+| **F-1** | **Critical** | PG fee tables outrank the UG answer; 0.850 top score skips CRAG; all sources labelled `fresh/current` (§3.3) | BS applicant asks about SE fees → context is 2 M.Sc./Ph.D. fee tables + a downloads link list + the FAQ last → answer quotes postgraduate figures, or the unreconciled Rs. 104,800, **with no hedge** (tier `normal`, empty instruction) |
+| **F-5** | **Critical** | Semantic cache has no refusal guard; refusals get the **longest** TTL (5 d) and are **immune to source invalidation** (§5.1) | One CRAG misfire on "hostel fee" → refusal cached 5 days → every question within 0.92 cosine gets "I don't have verified information", **even after a crawl ingests the page**, because the entry cites no sources |
+| **F-3** | **High** | Lifecycle gate is a no-op (`lifecycleStatus` absent on 1,891/1,891 docs); 13 multi-edition URL families; no production edition filter (§5.2) | "What are the hostel charges?" → the 2023-24 allotment policy (whose title omits the year) outranks the 2024-25 one → the user is quoted a retired policy as current |
+| **F-4** | **High** | Tier-1 lexical rerank drops the answer on short queries; 2-word queries quantise overlap to {0, 0.5, 1.0} and tie-break on fused position (§3.4) | "contact number" → top 2 results are both chunks of a **2021** IEEE student-branch annual report; the real contact chunk is evicted from rank 5; top score 1.000 so CRAG is skipped |
+| **F-6** | **High** | Database Storage 874.71 MB vs the 512 MB Free-plan limit; only ~294 MB (34%) is attributable from exports. The ~580 MB residual is dominated by the unexported, embedding-heavy `semanticCache` + index storage (§5.4) | Over-limit deployment. Every cached **refusal** (F-5) adds a 768-dim-embedding row held for the maximum 5-day TTL, so F-5's guard is also the cheapest storage lever |
+| **F-7** | **High** | The only automated retrieval gate asserts the disputed 104,800 figure as ground truth (§5.5) | Correcting the corpus to a Prospectus-backed number would make the gate **fail**; today it green-lights a figure no Prospectus supports |
+| **S-1** | **High** | Confidence tiers (0.2/0.4/0.6) unreachable on the deployed lexical scorer; every query lands on `normal` with an empty instruction (§6) | High-impact fee/deadline answers ship with no hedge and no citation requirement, regardless of true retrieval quality |
+| **F-8** | **Medium** | `judgeFaithfulness` exists but is not wired into generation (§5.6) | No post-hoc check that the streamed answer's claims appear in the sources |
+| **S-5** | **Medium (latent)** | Dead `convex/rag/prompts.ts` with a `<draft>` mandate, a conflicting refusal string, and a fabricated Rs. 45,000 few-shot against a non-existent URL (§6) | If ever reinstated: `<draft>` leaks to users and an invented fee is presented as an exemplar |
+| **S-3 / S-8** | **Medium** | `freshnessTier` undefined while `freshnessState=fresh`; no verification of emitted citations (§6) | The model is told partly-absent metadata is authoritative; citations can point at pages that did not support the claim |
+| **F-2** | **Low** *(was Critical; withdrawn)* | `buildContext` skips rather than truncates an over-budget chunk (`context.ts:71` `continue`), so a smaller lower-ranked chunk can leapfrog a larger higher-ranked one, unlogged. **The 19.28%-unreachable claim was falsified**: it held only for the pre-migration local export, not the corpus prod runs (§5.3) | Latent. Would require the cumulative 12,000-char budget to bind; live final chunks measure 200–1,600 chars each, so it is not currently firing. If it did, `X-Sources` would cite a document the model never saw |
+| **C-1** | **Process** | 27/50 golden entries unscoreable; 39% of the scoreable remainder contested; transport entry's labels are known-wrong (§4) | Any future "accuracy %" computed over this set is not interpretable |
+
+---
+
+## 8. Prioritized remediation list (audit only — nothing was implemented)
+
+Each item is scoped to the smallest change that fixes the finding.
+
+1. **[F-5, one line]** In `src/lib/chat/cache.ts:104`, add `&& ragResult.sources.length > 0` to the
+   cache-write condition. Blocks every zero-source answer (CRAG-refuse and empty-retrieval) from being
+   cached. No schema, TTL or read-path change.
+2. **[F-6, measurement first — do not guess]** The ~580 MB residual is unattributed. Before any storage
+   work, get the real per-table numbers: either dashboard access, or `scripts/export_table.ts semanticCache`
+   against prod (budget its DB I/O first — it pages the whole table). **Do not** act on the withdrawn
+   `headingPath` hypothesis (§5.3); the prod corpus does not have that bloat. Item 1's refusal guard is
+   the cheapest storage lever available today and should ship regardless.
+3. **[F-2, two lines, Low]** In `convex/rag/context.ts:71`, replace `continue` with a truncate-to-fit, or at
+   minimum `console.warn` the skipped chunk's url so budget-driven chunk loss is observable if it ever
+   starts firing. Currently latent.
+4. **[F-1 + S-1 + S-2, one constant + one guard]** ~~Either (a) lower `CRAG_CONFIG.skipThreshold` so CRAG
+   actually runs on the 0.8–0.9 band where F-1 lives, or (b)~~ **CORRECTION (2026-09-18): option (a) was
+   backwards and must not be implemented.** `skipCrag = topRerankScore >= skipThreshold`, so *lowering*
+   the threshold makes CRAG run **less** often, not more; reaching the 0.8–0.9 band would require
+   *raising* it above 0.85, which turns CRAG on for effectively all traffic and spends an LLM call per
+   query on the same free tiers that took the live bot down for ~24h on 2026-09-15. Option (b) is the
+   only correct one: make CRAG unconditional for
+   `classifyQueryRisk === "high"` queries (fees, deadlines, merit). The current threshold is calibrated
+   against a scoring scale that no longer produces values below it. **Do not revert the rewriter
+   sanitizer to re-trip CRAG** — that would restore the over-refusal bug.
+5. **[F-3, one filter]** Port `dropOlderEditions` from `scripts/eval/retrieval-ab/run.ts` into
+   `convex/embeddings/search.ts` before the cut to 8, keyed on the `URL Path:` year family. Independently,
+   backfill `lifecycleStatus` so `isRetrievalEligibleLifecycle` stops passing 100% of documents — the
+   gate is currently dead code.
+6. **[F-7, one regex]** Change `scripts/eval/verify_retrieval_fixes.cjs:29`'s fee assertion from
+   `/104,?800/` to a source-agnostic check (e.g. the chunk's URL is `/FAQS.php` **or** a Prospectus
+   fee-table chunk), and add a comment recording that the figure itself is UNCONFIRMED. The gate should
+   assert *retrieval*, not a disputed *fact*.
+7. **[C-1, eval hygiene]** Mark the 9 contested scoreable entries and exclude `bb92759aba56e8f6`
+   (transport — labels known-wrong) from scoring. Report golden-set recall over the **14 clean scoreable
+   entries**, with the contested 9 reported separately. Never publish a single number over all 50.
+8. **[F-4, one formula]** Replace `computeWordOverlap`'s divide-by-query-length with the
+   length-normalised variant already prototyped as `tier1Local(..., cosine: true)` in
+   `retrieval-ab/run.ts` (shared / √(|q|·|c|)), which stops long documents accumulating overlap for free
+   and de-quantises 2-word queries.
+9. **[F-8, one call site]** Wire `judgeFaithfulness` into `src/lib/chat/stream.ts`'s `onFinish` in
+   **shadow mode first** (log only, no user impact) to size the real hallucination rate before gating on it.
+10. **[S-5, deletion]** `convex/rag/prompts.ts` has no callers and contains a fabricated fee exemplar.
+    Flagged for the owner's decision — **not deleted** (pre-existing dead code, outside audit scope).
+
+---
+
+## 9. Resource consumption
+
+| Resource | Amount | Detail |
+|---|---|---|
+| **LLM generation calls** | **59** (budget ~60) | All **Gemini** `gemini-3.5-flash-lite` via `GEMINI_API_KEY_2`. **Zero Groq. Zero Cerebras.** Breakdown: Axis A 38 (batch1 10, batch2 10, batch3 10, batch4 8 = **19 cases** × 2 arms — 2 per case, `old` + `new` arms, `--samples 1 --no-judge`); Axis B 20 (10 queries × rewrite + HyDE); flagship fee re-probe 1 (HyDE only; the rewrite was reused). **No 429s, no retries — verified**, not assumed: `withRetry` logs `retrying in Ns` to stderr on every retry, and `grep -c "retrying in"` over the captured batch-2/3/4 output returns **0** (batch 1 ran in the foreground with clean output). 59 is therefore an exact count, not a floor. |
+| **Convex prod DB I/O** | **≈ 4.4 MB of the ~60 MB budget (7%)** | **11** `searchDocumentsAction` calls × ~0.4 MB (10 Axis B + 1 fee re-probe). **11** `cascadeRerank` calls — pure compute over documents passed in the request, no DB reads. **Zero** `retrieveContext` calls. **Zero** mutations. |
+| **Prod calls avoided** | ~46 LLM + ~300 channel calls | by skipping `retrieval-ab/run.ts` (§1.2) |
+| **Local compute** | 2 full passes over the 255 MB `crawledChunks` export | CPU-only, ~3 min total |
+| **Wall clock** | ≈ 55 min | dominated by the 4 sequential Axis-A batches and Axis-B's 4.5 s free-tier pacing |
+| **Writes made** | 2 locations only | this report, and `scratchpad/` (`axisB.ts`, `feeprobe.ts`, `aa_batch1..4.json`, `axisB_results.json`) |
+
+**Infrastructure fences honoured:** no `npx convex deploy`, no crawls, no re-embeds, no prod mutations,
+no new Convex deployment, no git commits/pushes/branch changes, no `git stash`. The dirty working-tree
+file `scripts/eval/verify_retrieval_fixes.cjs` was **read only** and left untouched. No secret value was
+printed — env checks were presence-only.
+
+---
+
+## 10. Limitations / denied or skipped checks
+
+1. **`retrieveContext` not invoked** — it writes semantic-cache entries (previously denied,
+   `[Modify Shared Resources]`). All retrieval measurements reconstruct the pipeline stage by stage.
+   **Not attempted; no workaround constructed.**
+2. **Convex dashboard not accessed** — WorkOS sign-in, explicitly out of scope. §5.4 is an
+   export-derived **estimate** that accounts for ~439 MB of the reported 874.71 MB; the residual is
+   attributed but not measured.
+3. **`retrieval-ab/run.ts` not run** — 46 LLM calls for enrichment alone, no `--only` flag, hardcoded
+   golden path (§1.2). Axis B used a 10-query stratified subset through an equivalent live shape instead.
+4. **`verify_retrieval_fixes.cjs` not run** — ~17 Groq-primary LLM calls. Its regression-gate status is
+   therefore carried over from the brief, **not re-measured**; its content produced F-7.
+5. **`pnpm test` not re-run** — baseline taken from this session's `scratchpad/full_run.json`
+   (492/496 passing, 4 suites failing). **No delta to report.**
+6. **CRAG never invoked** — all "CRAG would run" statements are **estimated** from
+   `topRerankScore` vs 0.6.
+7. **`eligibility criteria` (`26e877048af0f6ee`) miss not root-caused** — it may be the same
+   FAQ-channel label-matching artefact as the fee query (§3.1) or a genuine miss. Budget exhausted;
+   recall is reported as a **range** (8–9/10 @8, 7–8/10 @4) rather than a point estimate.
+8. **Single sample per case** (`--samples 1`, temperature 0.3). Axis A results are per-case verdicts,
+   not stable rates.
+9. **Prod `KNOWLEDGE_STORE_BACKEND` not read** — Pinecone inferred from `retrieval-ab/run.ts`'s docstring.
+10. **Corpus statistics are from the 2026-09-05 export, not a live prod read** — and the export directory
+    contains **two** files for the same table. `crawledChunks.jsonl` is the raw local-dev dump;
+    `crawledChunks.import-ready.jsonl` is what was migrated to prod. They disagree by 152 MB, entirely in
+    `headingPath`. An earlier draft of this report built a Critical finding on the wrong file; it was
+    caught by cross-checking against the 44 live `headingPath` observations collected in Axis B and is
+    documented in full in §5.3. **Any future corpus analysis must use `import-ready`.** The live Axis-B
+    probe independently corroborates the remaining snapshot-based inferences (2021 IEEE editions are
+    retrievable in prod today; header lengths match the import-ready distribution).
+11. **`semanticCache` was never exported or sized.** The largest single term in the storage question is
+    therefore unmeasured (§5.4). Reported as a residual, not attributed to a guess.
+
+---
+
+## 11. Remediation status (2026-09-18, post-audit implementation)
+
+Implemented in the working tree, typecheck clean (`tsc --noEmit` exit 0), **45/45 unit tests passing
+across the 9 related suites**. **Not deployed, and not exercised against the live deployment** — every
+claim below rests on typecheck and unit tests only. The F-1 path in particular has never run against a
+real CRAG verdict. Production deploy is the user's action.
+
+| # | Finding | Status | Change |
+|---|---|---|---|
+| 1 | **F-5** semantic cache refusal guard | **FIXED** | `src/lib/chat/cache.ts` — cache write now requires `ragResult.sources.length > 0`. `setFromServer` has exactly one caller (verified by grep across `convex/` and `src/`), so this one guard closes the whole path. |
+| 6 | **F-7** gate asserts a disputed fact | **FIXED** | `scripts/eval/verify_retrieval_fixes.cjs` — the fee check is now source-agnostic (`isUndergradFeeSource`, matching FAQ/prospectus/fee-structure urls while excluding `PG-fee`/PhD/M.Sc). Also warns when a postgraduate fee source outranks the undergraduate answer. |
+| 4 | **F-1** PG fee tables outrank UG, CRAG skipped | **FIXED (option b)** | `convex/rag/retrieval.ts` — `classifyQueryRisk(safeQuestion) === "high"` forces CRAG regardless of rerank score. A forced run that leaves no survivor falls back to the **least-confidently-rejected** chunk (`pickLeastRejectedIndex`) under the `hedge` tier, never to the rerank's top hit. See the keep-rule note below. `allIrrelevant` still refuses even when forced. 6 unit tests in `tests/unit/crag-forced-fallback.test.ts`. |
+| 5a | **F-3** superseded editions retrievable | **FIXED (retrieval-side)** | `convex/embeddings/search.ts` — new exported `dropOlderEditions` applied to `sortedEnriched` before the FAQ merge and the cut to `limit`. Conservative in three ways: a url with no year, or the only member of its family, is never dropped; two urls share a family only when identical apart from the year; and **a year the user explicitly asked for is protected**, so "IEEE annual report 2021" still retrieves the 2021 edition even though 2024 exists — mirroring the `askedYears` guard in `sanitizeRewrittenQuery`. 13 unit tests in `tests/unit/drop-older-editions.test.ts`. |
+| 7 | **C-1** contested ground truth graded as truth | **FIXED** | `scripts/eval/golden_set_verified.jsonl` — 11 entries marked `groundTruth: "contested"`, `bb92759aba56e8f6` additionally `excludeFromScoring: true` with a reason. `scripts/eval/retrieval-ab/run.ts` honours both and now reports `recallAt8Uncontested` over the **14 clean scoreable** entries alongside the headline number. Counts independently reproduce §4.1 (50 total / 23 scoreable / 14 clean). |
+| 3 | **F-2** silent budget-driven chunk loss | **FIXED** | `convex/rag/context.ts` — `console.warn` naming the dropped chunk's url and the budget shortfall. Truncate-to-fit deliberately not implemented; the condition is still latent and a warn makes it observable first. |
+
+### Deliberately NOT implemented — each needs its own decision
+
+| # | Item | Why it is held |
+|---|---|---|
+| 8 | **F-4** reranker formula (`shared / √(\|q\|·\|c\|)`) | **Not a drop-in, and shipping it alone would be a regression.** It changes the score *scale*, and three separate consumers read that score as an absolute: `skipThreshold` 0.6, `minWordOverlap` 0.1, and `determineConfidenceTier`'s tier boundaries. Worked example: `contact number` against a ~150-content-token chunk goes from `2/2 = 1.0` to `2/√(2·150) ≈ 0.12`; weighted with a perfect position score that is `≈ 0.47` — below `skipThreshold`. Every query would fall under it, CRAG would run on all traffic, and `determineConfidenceTier` would push the corpus into the hedge/refuse band. The `retrieval-ab` prototype used it for *relative* ranking, where scale is free. This is a two-part change — formula **plus** recalibrating all three thresholds against freshly measured distributions — and must be its own piece of work. |
+| 5b | **F-3** `lifecycleStatus` backfill | Production mutation over 1,891 documents. Needs explicit authorization and an I/O budget. The retrieval-side filter above covers the symptom in the meantime; `isRetrievalEligibleLifecycle` remains dead code until this lands. |
+| 2 | **F-6** `semanticCache` export / storage attribution | Unbudgeted prod I/O — pages the whole embedding-heavy table. Needs its own authorization. Item 1's refusal guard is the cheapest storage lever and ships regardless. |
+| 9 | **F-8** shadow-mode `judgeFaithfulness` | Adds an LLM call to **every** production answer. That is a quota decision for the owner, not a code change to slip in — the same free tiers rate-limited the live bot for ~24h on 2026-09-15. |
+| 10 | **S-5** dead `convex/rag/prompts.ts` | Pre-existing dead code. CLAUDE.md §3 says mention, do not delete. Unchanged, and flagged again here. |
+
+### Why the no-survivor fallback is not `results[0]`
+
+The first implementation of this guard kept `results.slice(0, 1)` — the top pre-CRAG chunk. On the
+query the guard exists for, that is **`PG-fee.asp` at 0.850**: the very chunk CRAG was force-run to
+reject. The answer model would have received an M.Sc. fee table as its single source under the hedge
+tier's *"answer ONLY from the provided context"*, and presented a postgraduate fee as the BS fee with a
+"based on limited information" prefix. A confident wrong number is worse than the refusal it replaced,
+so that would have re-created F-1 through a new door.
+
+The shipped rule uses CRAG's own verdicts: keep the chunk with the **lowest rejection confidence**
+(`pickLeastRejectedIndex`, exported and unit-tested against the measured F-1 pool, where it must return
+index 3 — the undergraduate FAQ — and explicitly not index 0). The `allIrrelevant` branch is
+deliberately left refusing even on a forced run: every chunk there was rejected above
+`highConfidenceThreshold`, so no chunk remains that CRAG had any doubt about, and refusing is the
+honest answer.
+
+### Cost consequence of the F-1 fix — read before deploying
+
+`HIGH_IMPACT_KEYWORDS` is **25 terms** and broader than it first looks: besides `fee`, `tuition`,
+`deadline`, `merit`, `entry test`, `admission`, `schedule`, `eligibility`, `result` and `registration`,
+it also matches `apply`, `application`, `submit`, `submission` and `register` as plain substrings. A
+question merely containing the word "apply" is high-impact. Forcing CRAG on `risk === "high"` therefore
+adds one LLM call to a **large fraction of real traffic**, not a rare tail — measure it with the new
+`[RETRIEVAL] CRAG forced (high-impact query above skipThreshold)` log line before assuming it is
+affordable. Two mitigations
+are already in place: `evaluateWithCrag` catches a failed judge and continues with the unmodified
+results (so exhausting the quota degrades CRAG to a no-op rather than breaking answers), and
+`demoteInsteadOfRefuse` prevents the extra run from ever producing a refusal. If quota pressure
+appears, the narrowing is one line — replace `classifyQueryRisk(...) === "high"` with a tighter
+fee/deadline/merit-only predicate.
+
+### The regression gate was itself made stale by the F-1 fix
+
+Forcing CRAG on high-impact queries changed which branch production takes, so
+`verify_retrieval_fixes.cjs` — which mirrors that logic — would have simulated a path production no
+longer follows, the precise failure this project has been bitten by twice. It now mirrors the new rule:
+CRAG runs when the top score is below `skipThreshold` **or** the query is high-impact, `allIrrelevant`
+always refuses, and no-survivors-without-allIrrelevant refuses only when the run was *not* forced.
+
+The `HIGH_IMPACT_KEYWORDS` list is **read out of `convex/shared/freshnessPolicy.ts` at runtime** rather
+than copied, and throws loudly if the declaration is reshaped. This was not caution for its own sake: a
+hand-maintained copy was written first and had already drifted by 5 keywords (`submit`, `submission`,
+`apply`, `application`, `last date to apply`) before the mismatch was caught by diffing the two lists.
+
+**Verification gap.** `verify_retrieval_fixes.cjs` is ~17 **Groq-primary** LLM calls per run, plus one
+CRAG judge per high-impact question now — the exact quota that rate-limited production on 2026-09-15.
+None of the changes above have been exercised against the live deployment; they are verified only by
+typecheck, lint, and unit tests.
+
+---
+
+## 12. Production incident, 2026-09-18 — F-5 was only half fixed
+
+After the remediation deploy, the user re-ran the original question in the live chat and got the
+refusal **three times**. Two distinct signatures appeared:
+
+1. the exact verbatim refusal string with **zero sources** (attempts 1 and 3);
+2. a *paraphrased* refusal **with 2 sources attached** — both `/FAQS.php` chunks, both containing
+   `≈ Rs. 104,800` (attempt 2).
+
+Signature 2 is the one that breaks the obvious hypotheses: the answering passage was in front of the
+model and it still declined.
+
+### What was measured, in order
+
+| Stage | Result |
+|---|---|
+| Retrieval + rerank (live prod, production call shape) | `topScore 0.700`, **rank 1 = `/FAQS.php` containing the answer**, rank 2 the same page at 0.550 |
+| Forced CRAG (`fee` is high-impact, so §11's fix makes it run) | `idx0 relevant=true conf=0.95`, `idx1 relevant=true conf=0.90`, `PG-fee.asp relevant=false conf=0.20`, advertisement `relevant=false conf=0.15` → **2/4 survivors, `allIrrelevant=false`, answers normally** |
+| Answer model, offline, given exactly that context via the real `buildContext` + real `buildSystemPrompt` | **Answered correctly**, quoting both figures, citing both sources, and noting that detail beyond the first semester is not in the provided data |
+
+So retrieval, the reranker, the newly-forced CRAG judge and the answer model were each verified
+**working** on the exact failing question. The refusals were **cached entries being replayed**.
+
+A hypothesis worth recording as *falsified*: the first guess was that §11's own forced-CRAG change had
+caused the regression, since `fee` is a high-impact keyword and the `allIrrelevant` branch was
+deliberately left refusing even on a forced run. The CRAG verdicts above disprove it — CRAG judged both
+FAQ chunks relevant at 0.95/0.90 and dropped exactly the two chunks that should be dropped.
+
+### The gap: the write guard cannot retract what is already stored
+
+§11 item 1 stopped the pipeline from *writing* sourceless answers. It has no effect on the entries
+already in `semanticCache`, and those are the worst possible residents: a 5-day TTL (the longest
+bucket, assigned *because* there is no source url for `assignFreshnessTier` to classify) and an empty
+`sourceEntryIds` that makes `findSourceInvalidation` return null on its first line — so they cannot be
+evicted by re-crawling, and they are served to anything within 0.92 cosine.
+
+### Fix: reject sourceless entries on READ
+
+`convex/cache/get.ts` — new `isServableCacheEntry`, applied at **both** return sites in
+`getCachedEntry`, folds the existing expiry check together with a sources check and logs
+`[CACHE] Ignoring stored refusal (no sources) - treating as a miss`.
+
+Chosen over purging the table deliberately: a purge is a destructive production mutation over an
+embedding-heavy table whose scan cost is unbudgeted (§5.4 puts the unattributed residual at ~580 MB),
+whereas the read guard neutralises the entire existing population the moment it deploys, costs nothing,
+requires no authorization to delete user-visible data, and lets the poisoned rows age out on their own.
+
+**Lesson for this project's verification practice.** Every check before this incident stopped at
+retrieval, and each one passed while production was still broken, because the semantic cache sits in
+front of retrieval and none of the probes went through it. `retrieveContext` — the only entry point
+that consults the cache — was never exercised, having been denied earlier as a shared-resource write.
+A green retrieval gate says nothing about what a user receives.
+
+---
+
+## 13. Production regression, 2026-09-18/19 — caused by §11's own F-1 fix
+
+The refusal persisted after the §12 cache guard deployed. Production logs
+(`npx convex logs --prod`) settled it in one record:
+
+```
+[RETRIEVAL] Query start            query: 'What is the fee stru...'
+[CACHE] Miss
+[SEARCH] Hybrid search complete    queryRisk: 'high'  mustAbstain: false  finalResults: 8
+[RETRIEVAL] Search complete        resultCount: 4
+[RETRIEVAL] CRAG forced (high-impact query above skipThreshold)   topRerankScore: 0.7
+[RETRIEVAL] Query complete         resultCount: 0  sourceCount: 0  cragTier: 'refuse'
+```
+
+`topRerankScore 0.7` is **above** `skipThreshold`. Before §11, this query skipped CRAG entirely and
+answered. §11 made `classifyQueryRisk === "high"` force the judge; the judge returned `allIrrelevant`;
+and that branch had been **deliberately exempted** from the `neverRefuse` guard. Result: `resultCount 0`,
+`sourceCount 0`, and the verbatim refusal string — the user's original bug, reintroduced through a new
+door by the fix meant to prevent it. `demoteInsteadOfRefuse` never fired; its warn line is absent from
+the logs because it only covered the *other* no-survivor exit.
+
+### Why the diagnostics missed it
+
+Six stage-by-stage probes all passed: retrieval put the answer chunk at rank 1 in 3/3 runs, a 6-run CRAG
+variance test refused **0/6**, embeddings returned 768 dims, the cache returned a miss, and the answer
+model — handed the real context — answered correctly. Every one reconstructed the pipeline; none ran
+`retrieveContext`, which requires a Clerk user identity that a deploy key does not provide. The
+composed function behaved differently from the sum of its parts, and only the logs showed it.
+
+An earlier hypothesis in this same investigation — that the live bundle pointed at a second Convex
+deployment (`happy-otter-123` appears in the shipped JS) — was checked and **falsified**: that string is
+the example URL inside a `ConvexReactClient` error message, not a deployment. The app targets
+`modest-peacock-120` correctly.
+
+### Fix
+
+`convex/rag/retrieval.ts` — the `allIrrelevant` branch now honours `neverRefuse`, and on a forced run
+returns the **entire pre-CRAG pool** under the `hedge` tier rather than refusing or narrowing to one
+chunk. When the judge rejects everything it has produced no usable ranking signal, so there is nothing
+to demote toward, and keeping one chunk risks discarding the one holding the answer. Falling back to the
+full set reproduces exactly what skipping CRAG would have done.
+
+**The invariant now enforced: forcing the CRAG judge can never leave the user worse off than not running
+it.** A forced run may reorder or qualify; it may not withhold.
+
+### The verification lesson, restated
+
+§12 already noted that a green retrieval gate says nothing about what a user receives. This incident
+sharpens it: a green gate on *every individual stage* still says nothing, because the defect lived in
+how the stages compose. The only two artefacts that revealed real user-visible behaviour in this entire
+engagement were **the user's screenshot** and **the production logs** — neither of which any automated
+check in this repo consults.
