@@ -4,8 +4,8 @@ vi.mock("../../convex/_generated/server", () => ({
   internalQuery: (opts: { handler: Function }) => ({ handler: opts.handler }),
 }));
 
-import { buildContext } from "../../convex/rag/context";
 import { INJECTION_RE } from "../../convex/rag/constants";
+import { buildContext } from "../../convex/rag/context";
 import { buildSystemPrompt } from "../../src/lib/prompt";
 
 type ContextChunk = {
@@ -22,7 +22,10 @@ type ContextChunk = {
 async function runBuildContext(chunks: ContextChunk[]): Promise<string> {
   const handler = (
     buildContext as unknown as {
-      handler: (ctx: unknown, args: { chunks: ContextChunk[]; maxTokens: number }) => Promise<string>;
+      handler: (
+        ctx: unknown,
+        args: { chunks: ContextChunk[]; maxTokens: number },
+      ) => Promise<string>;
     }
   ).handler;
   return handler({}, { chunks, maxTokens: 3000 });
@@ -30,7 +33,10 @@ async function runBuildContext(chunks: ContextChunk[]): Promise<string> {
 
 describe("buildSystemPrompt grounding", () => {
   it("restricts answers to the reference data when context exists", () => {
-    const prompt = buildSystemPrompt("Source: [Fees](https://uettaxila.edu.pk/fees)\n\nRs. 1", "admissions");
+    const prompt = buildSystemPrompt(
+      "Source: [Fees](https://uettaxila.edu.pk/fees)\n\nRs. 1",
+      "admissions",
+    );
     expect(prompt).toContain("Answer ONLY from the reference data");
     expect(prompt).toContain("Never invent a URL");
     expect(prompt).not.toMatch(/provide what you know/i);
@@ -58,6 +64,25 @@ describe("buildSystemPrompt grounding", () => {
     expect(prompt).not.toContain(
       "If the reference data does not contain the answer, say you couldn't find",
     );
+  });
+
+  it("does not let a 'fresh' label pass an old edition off as current", () => {
+    // Audit §18: freshnessState comes from classifyFreshness, which compares crawledAt
+    // against a TTL - it means "we fetched this page recently", not "this is the current
+    // edition". Measured over the 2026-09-19 capture, 3 of the 4 dated URLs reaching the
+    // answer context were at least two editions behind (a 2017 journal, the 2023 Rule
+    // Book, a 2024 event page) and ALL of them were rendered "fresh"/"current".
+    //
+    // The old rule made exactly that the test for presenting a fee as current, so its own
+    // "otherwise tell the user to confirm" clause could never fire - measured 0/5 against
+    // the real answer model, versus 4/5 once the rule described what the labels mean.
+    const prompt = buildSystemPrompt("Fees are Rs 104,800.", "admissions");
+
+    expect(prompt).toContain("NOT which edition its content is");
+    expect(prompt).toContain('marked "fresh" and "current" can still be an old edition');
+    expect(prompt).toContain("go by the year, session or edition written in the source text");
+    // The label must no longer be sufficient licence on its own.
+    expect(prompt).not.toContain("only present a value as current if its source is marked fresh");
   });
 
   it("places the confidence directive outside the untrusted fence", () => {

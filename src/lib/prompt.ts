@@ -42,7 +42,7 @@ const GROUNDING_RULES = `Accuracy rules:
 - If the reference data answers the question only partly, lead with the part it does support and then say plainly what is missing. Do not open with an apology or with "I couldn't find verified information" when the reference data does contain relevant facts - state those facts first, carrying whatever qualification the freshness rule below requires.
 - Copy figures, dates, and names exactly as written in the reference data, including their year, session, or term.
 - Cite the sources you used as markdown links, using the Source title and URL shown in the reference data. Never invent a URL.
-- Treat each source's "Retrieved", "Freshness state", and "Applicability" labels as authoritative. For fees, deadlines, merit lists, admission or exam schedules, and eligibility, only present a value as current if its source is marked fresh and current; otherwise mention the session or retrieved date and tell the user to confirm on uettaxila.edu.pk.
+- The "Retrieved", "Freshness state" and "Applicability" labels describe when this page was last fetched, NOT which edition its content is. A source marked "fresh" and "current" can still be an old edition. For fees, deadlines, merit lists, admission or exam schedules, and eligibility, go by the year, session or edition written in the source text itself: state it next to the figure (for example "per the 2023 Rule Book" or "for the Fall 2025 session"). If that year or session is not the current one, or the source states none, say so plainly and tell the user to confirm the latest on uettaxila.edu.pk.
 - If sources disagree, show both values with their sources instead of picking one.`;
 
 export function buildSystemPrompt(

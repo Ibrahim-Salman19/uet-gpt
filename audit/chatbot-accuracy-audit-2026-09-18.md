@@ -1312,3 +1312,79 @@ Inspecting the real top-4 text suggested navigation boilerplate ("Quick Links", 
 (`linkShare >= 0.6`, the threshold its `demote`/`dedupeNav` rows use): **0 of 40 top-4 slots** qualify.
 The hypothesis is not supported at that threshold and the nav-demotion experiment should not be
 prioritised on the strength of eyeballing chunk text, which is what suggested it.
+
+---
+
+## 18. F-11 (High) — "Freshness state: fresh" means recently CRAWLED, not current edition
+
+### 18.1 The defect
+
+`convex/shared/freshnessPolicy.ts:classifyFreshness` derives `state` from `crawledAt` against a
+per-tier TTL, plus the `isStale` flag. It therefore measures **when we last fetched the page**, not
+which edition the content is. `convex/rag/context.ts:formatChunkHeader` renders that into the prompt as
+
+```
+Freshness state: fresh
+Applicability: current
+```
+
+and `GROUNDING_RULES` told the model to treat those labels as authoritative — *"only present a value as
+current if its source is marked fresh and current"*. **A 2023 fee document, crawled last week, passes
+that test.** The rule's protection is defeated by the very label it depends on.
+
+`applicability` carries no independent signal either: it is `"current"` whenever state is fresh and
+`"unknown"` otherwise, so it restates `state` rather than adding to it.
+
+### 18.2 Measured over the §14 capture
+
+All 40 top-4 context slots were labelled `freshnessState: fresh` and `applicability: current`; zero were
+`unknown` or `aged`. `freshnessTier` was absent on all 40, so it renders as `"unknown"`.
+
+Of the 4 slots whose URL carries a year, **3 are at least two editions behind — and all 3 are labelled
+fresh/current**:
+
+| query | year | document |
+|---|---|---|
+| `a694cc1c` contact number | **2017** | `/techJournal/2017/No4/TECHNICAL_JOURNAL_VOL_22_NO_4.pdf` |
+| `2dfb5097` **fee structure** | **2023** | `/Downloads/Rule-Book-2023.pdf` |
+| `0a5abd0e` Vice Chancellor | 2024 | `/EventDetails/PEC-FYDP-Cheque-Distribution-...` |
+
+The `2dfb5097` row is the sharp one: the query is about fees, and a 2023 document is presented to the
+answer model as authoritative-current.
+
+This is the same family as F-3 (`lifecycleStatus` is a no-op, so every old edition stays retrievable):
+F-3 lets the old edition be retrieved, F-11 tells the model to trust it.
+
+### 18.3 Fix shipped, and what was measured
+
+The freshness rule in `src/lib/prompt.ts` now states what the labels actually mean and sends the model
+to the year/session written in the source text. A/B against the real answer model
+(`openai/gpt-oss-120b`, `temperature: 0.3`, production's frozen top-4 for "fee structure", only that one
+rule varied), `scripts/eval/freshness-ab/run.ts`:
+
+| | OLD rule | NEW rule |
+|---|---|---|
+| tells the user to confirm with the university | **0/5** | **4/5** |
+| tripped the refusal detector (regression check) | 0/5 | 0/5 |
+| names an edition / flags that none is stated | 5/5 | 5/5 |
+
+The 0/5 in the first row is the defect made visible: the old rule's own *"otherwise … tell the user to
+confirm"* branch never executed, because its precondition is satisfied by every chunk production
+retrieves.
+
+**The third row does not discriminate and is reported only so it is not quietly dropped.** Its regex
+matches words present in the frozen context itself ("prospectus", "rule book", a bare year), so any
+answer quoting the context trips it under both arms — a metric-design flaw of the same kind as the
+`isRefusalAnswer` mis-measurement recorded in §13.
+
+**Not tested:** whether the new rule over-qualifies when a source genuinely *is* the current edition.
+The frozen context contains no such case — the FAQ chunk carrying the figures states no year at all.
+That is the check to run if answers start hedging too much.
+
+### 18.4 Not fixed — the label itself
+
+The prompt change is a mitigation; it does not make the metadata correct. `freshnessState` still cannot
+distinguish a 2017 document from a 2026 one. Deriving an edition signal from the year in the URL or
+title (the `dropOlderEditions` regex already does this for candidate filtering) and surfacing it in the
+header would fix the label rather than instruct the model around it. That is a `convex/` change and
+needs its own measurement.
