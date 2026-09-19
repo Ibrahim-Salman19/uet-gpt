@@ -32,21 +32,58 @@ function isPartialThinkTag(buffer: string): boolean {
   return "<think>".startsWith(buffer) || "</think>".startsWith(buffer);
 }
 
-function finalizeStream(
+/**
+ * Closes the stream, then decides whether the answer is good enough to hand to onFinish
+ * (whose only job is the semantic-cache write).
+ *
+ * The mid-stream-error path below already refuses to call onFinish so that "a
+ * truncated/error answer is never written to the semantic cache". A model that stops
+ * because it hit `maxOutputTokens` is the same kind of answer - cut off mid-sentence -
+ * but it arrives down the NORMAL completion path, so it was being cached like a complete
+ * one. `streamText` exposes the distinction as `result.finishReason`, which was simply
+ * never plumbed this far: the onFinish signature is (text, model) throughout.
+ *
+ * Caching a truncated answer is worse than returning one. The user who triggered it sees
+ * it once; a cached copy is replayed to every semantically similar question until the TTL
+ * expires or a source changes.
+ *
+ * If the reason cannot be determined the write is skipped as well - failing closed, the
+ * same posture as checkSourceInvalidation in convex/cache/get.ts, since the cost of
+ * skipping a cache write is one repeated computation and the cost of a bad write is a
+ * persistent wrong answer.
+ */
+async function finalizeStream(
   buffer: string,
   accumulatedText: string,
   onFinish: ((text: string, model: string) => void) | undefined,
   controller: ReadableStreamDefaultController,
   model: LanguageModel,
+  finishReason: PromiseLike<string> | undefined,
 ) {
   if (buffer && !isPartialThinkTag(buffer)) {
     controller.enqueue(buffer);
     accumulatedText += buffer;
   }
   controller.close();
-  if (onFinish) {
-    onFinish(accumulatedText, getModelName(model));
+  if (!onFinish) return;
+
+  let reason: string | undefined;
+  try {
+    reason = await finishReason;
+  } catch (e) {
+    console.warn(`[STREAM] finishReason unavailable (model: ${getModelName(model)}):`, e);
+    return;
   }
+
+  if (reason === "length") {
+    console.warn("[STREAM] Answer hit maxOutputTokens - streaming it but NOT caching", {
+      model: getModelName(model),
+      chars: accumulatedText.length,
+    });
+    return;
+  }
+
+  onFinish(accumulatedText, getModelName(model));
 }
 
 function processChunk(
@@ -102,6 +139,7 @@ function streamWithStrippedThinking(
   model: LanguageModel,
   state: { isThinking: boolean },
   onFinish?: (text: string, model: string) => void,
+  finishReason?: PromiseLike<string>,
 ): ReadableStream<string> {
   return new ReadableStream({
     async start(controller) {
@@ -112,7 +150,14 @@ function streamWithStrippedThinking(
         while (true) {
           const { done, value } = await reader.read();
           if (done) {
-            finalizeStream(buf.current, accumulated.current, onFinish, controller, model);
+            await finalizeStream(
+              buf.current,
+              accumulated.current,
+              onFinish,
+              controller,
+              model,
+              finishReason,
+            );
             break;
           }
           processChunk(value, buf, accumulated, state, controller);
@@ -190,6 +235,7 @@ async function tryModelWithFallback(model: LanguageModel, config: StreamConfig) 
     model,
     state,
     config.onFinish,
+    result.finishReason,
   );
 
   return new Proxy(result, {
