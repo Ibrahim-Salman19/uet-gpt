@@ -1841,3 +1841,66 @@ Unlike §20.3 and §22, the blocker is not just the broken metric. `searchDocume
 to override the fusion weights, so comparing pool composition under different weights needs new Convex
 code **and** a deploy, neither of which is available. The finding is recorded with its evidence and the
 arithmetic that makes the dead branch provable; the fix is not attempted.
+
+---
+
+## 24. F-16 (High) — CRAG's `confidence` has no defined meaning, and two live gates read it oppositely
+
+### 24.1 The one signal that is NOT inert
+
+Unlike the reranker score (§14), the freshness label (§18) and the fusion weights (§23), CRAG's judge
+genuinely discriminates. Measured by calling the **real deployed** `rag/crag:evaluateChunks` on the real
+production top-4 of each golden query (`scripts/eval/rerank-position/cragConfidence.ts`, 10 calls):
+
+| | |
+|---|---|
+| per-chunk verdicts | 40 (25 relevant, 15 rejected) |
+| distinct confidence values emitted | **14** — 0.05, 0.1, 0.15, 0.2, 0.4, 0.8, 0.85, 0.9, 0.92, 0.93, 0.95, 0.98, 0.99, 1 |
+| range | 0.05 – 1.00 |
+| queries where `allIrrelevant` would fire | **0 / 10** |
+
+That is a real distribution, not a constant. Worth stating plainly after three findings in the other
+direction: **the CRAG judge works.**
+
+### 24.2 But the scale is undefined, and the model uses it two ways at once
+
+`convex/rag/crag.ts:buildCragPrompt` says only *"determine if it is relevant"* and asks for
+`{relevant, confidence}`. Nothing states what `confidence` measures. The model answers accordingly —
+within the same run:
+
+```
+21ce9642   n@0.90  n@0.85  n@0.80     <- reads as "certain it is irrelevant"
+8fe9e8f2   n@0.20  n@0.15  n@0.10     <- reads as "its relevance is low"
+```
+
+Under a single consistent reading one of those is incoherent. `8fe9e8f2`'s chunks 2–4 are postgraduate
+fee tables and a PhD scholar biography against a **BS fee** query — the model cannot be *unsure* they
+are irrelevant, so those low numbers are a relevance score, not a confidence.
+
+**9 of the 15 rejections fall below the 0.7 gate.**
+
+### 24.3 Two consumers, opposite interpretations
+
+| consumer | what it assumes |
+|---|---|
+| `retrieval.ts:454` `allIrrelevant` | `!relevant && confidence > 0.7` — high means *certainly* irrelevant |
+| `retrieval.ts:381` `pickLeastRejectedIndex` | takes the **minimum** confidence as "least confidently rejected" |
+
+Under the relevance-score reading, `pickLeastRejectedIndex` selects the **least relevant** chunk — the
+exact opposite of its documented intent, and it is live at `retrieval.ts:407`. On `8fe9e8f2` it would
+pick the `n@0.10` chunk out of 0.20/0.15/0.10.
+
+### 24.4 Candidate fix, measured only as far as the quota allowed
+
+Define the scale in the prompt: *"confidence is how certain you are of your own verdict… a chunk you are
+sure is irrelevant has HIGH confidence, not low."* The A/B harness is written
+(`scripts/eval/crag-confidence-ab/run.ts`) with the prediction stated up front — `8fe9e8f2`'s clearly
+irrelevant chunks should move from ~0.15 to high confidence.
+
+**It was not run to completion.** The first attempt hit Groq's 8,000 tokens-per-minute ceiling partway
+through: each call carries four full chunks (~2,400 tokens), and that budget is shared with the live
+bot, which Groq rate-limited for ~24h on 2026-09-15. Spending more of it on an exploratory measurement
+was not worth the risk to live traffic. Calls are now paced 22s apart; the harness is committed unrun.
+
+So F-16's **defect** is measured and its **fix** is not. Do not ship the prompt change on the strength of
+the reasoning alone — that is exactly the mistake §14, §17.4, §18.4 and §18.5 record.
