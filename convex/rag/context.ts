@@ -68,6 +68,11 @@ export const buildContext = internalQuery({
       const header = formatChunkHeader(chunk);
       const chunkText = `${header}\n\n${chunk.content}\n\n---\n\n`;
       if (currentChars + chunkText.length > maxChars) {
+        console.warn("[CONTEXT] Chunk dropped: does not fit the token budget", {
+          url: chunk.url,
+          chunkChars: chunkText.length,
+          remainingChars: maxChars - currentChars,
+        });
         continue;
       }
       budgetedChunks.push(chunk);

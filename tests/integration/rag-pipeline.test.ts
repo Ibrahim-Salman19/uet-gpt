@@ -336,4 +336,138 @@ describe("RAG Pipeline Integration", () => {
       expect(result.answerInstruction).toContain("uettaxila.edu.pk directly");
     });
   });
+
+  // Regression gate for the 2026-09-18 production outage. Stage-level probes all
+  // passed while users were being refused, because none of them ran retrieveContext
+  // itself - the composition was the defect. These cases therefore assert through the
+  // composed entry point, and they are written to FAIL against the pre-fix code.
+  //
+  // The invariant: forcing the CRAG judge on a high-impact query must never leave the
+  // user worse off than not running it. Forcing is meant to REORDER away from a
+  // confidently-wrong top hit, never to withhold an answer the reranker was confident
+  // about.
+  describe("retrieveContext - forced CRAG never refuses", () => {
+    // Every result index below follows createMockCtx's ordered runAction stub:
+    // 0 classify, 1 rewrite, 2 HyDE, 3 cache embedding, 4 cache lookup,
+    // 5 query embedding, 6 search, 7 rerank, 8 CRAG.
+    const PROSPECTUS_CHUNK = "First semester dues for BS programs total Rs. 101,800.";
+    const FAQ_CHUNK = "Exact fee is mentioned in the prospectus.";
+    const feeSearchResults = [
+      {
+        entryId: "e1",
+        url: "https://web.uettaxila.edu.pk/prospectus/",
+        title: "Prospectus",
+        relevanceScore: 0.7,
+        content: PROSPECTUS_CHUNK,
+      },
+      {
+        entryId: "e2",
+        url: "https://web.uettaxila.edu.pk/FAQS.php",
+        title: "FAQs",
+        relevanceScore: 0.65,
+        content: FAQ_CHUNK,
+      },
+    ];
+    const feeRerank = [
+      { text: PROSPECTUS_CHUNK, score: 0.7, index: 0 },
+      { text: FAQ_CHUNK, score: 0.65, index: 1 },
+    ];
+
+    it("hedges on the full pool when a forced run rejects every chunk at high confidence", async () => {
+      const ctx = createMockCtx();
+      ctx._setResults({
+        0: "admissions",
+        1: "BS program fee structure UET Taxila",
+        2: "hyde: fee structure",
+        3: Array(768).fill(0.1),
+        4: null,
+        5: Array(768).fill(0.1),
+        6: feeSearchResults,
+        7: feeRerank,
+        // Exactly what production returned: every chunk rejected, each above
+        // CRAG_CONFIG.highConfidenceThreshold (0.7), which is the allIrrelevant gate.
+        8: [
+          { index: 0, relevant: false, confidence: 0.95 },
+          { index: 1, relevant: false, confidence: 0.9 },
+        ],
+      });
+
+      // "fee" puts classifyQueryRisk at "high", so CRAG is forced even though the top
+      // rerank score (0.7) is above CRAG_CONFIG.skipThreshold (0.6) and would otherwise
+      // have skipped the judge entirely and answered normally.
+      const result = await (retrieveContext as any).handler(ctx as any, {
+        question: "What is the fee structure for BS programs?",
+      });
+
+      // Production logged resultCount: 0, sourceCount: 0, cragTier: 'refuse' here.
+      expect(result.sources).toHaveLength(2);
+      expect(result.context).toContain("101,800");
+      expect(result.answerInstruction).not.toContain("No relevant information was found");
+      expect(result.answerInstruction).toContain("limited information");
+    });
+
+    it("demotes to the least-rejected chunk when a forced run rejects every chunk below the confidence gate", async () => {
+      const ctx = createMockCtx();
+      ctx._setResults({
+        0: "admissions",
+        1: "BS program fee structure UET Taxila",
+        2: "hyde: fee structure",
+        3: Array(768).fill(0.1),
+        4: null,
+        5: Array(768).fill(0.1),
+        6: feeSearchResults,
+        7: feeRerank,
+        // Below highConfidenceThreshold, so this is NOT allIrrelevant - it falls to the
+        // someIrrelevant branch with zero survivors. The chunk kept must be the one the
+        // judge rejected least confidently (index 1 at 0.4), never blindly index 0.
+        8: [
+          { index: 0, relevant: false, confidence: 0.6 },
+          { index: 1, relevant: false, confidence: 0.4 },
+        ],
+      });
+
+      const result = await (retrieveContext as any).handler(ctx as any, {
+        question: "What is the fee structure for BS programs?",
+      });
+
+      expect(result.sources).toHaveLength(1);
+      expect(result.sources[0].entryId).toBe("e2");
+      expect(result.answerInstruction).not.toContain("No relevant information was found");
+      expect(result.answerInstruction).toContain("limited information");
+    });
+
+    it("still refuses when CRAG rejects every chunk on a query that was not forced", async () => {
+      const ctx = createMockCtx();
+      ctx._setResults({
+        0: "general",
+        1: "vice chancellor UET Taxila",
+        2: "hyde: vice chancellor",
+        3: Array(768).fill(0.1),
+        4: null,
+        5: Array(768).fill(0.1),
+        6: [
+          {
+            entryId: "e9",
+            url: "https://web.uettaxila.edu.pk/sports/",
+            title: "Sports",
+            relevanceScore: 0.5,
+            content: "The annual sports gala was held last week.",
+          },
+        ],
+        7: [{ text: "The annual sports gala was held last week.", score: 0.5, index: 0 }],
+        8: [{ index: 0, relevant: false, confidence: 0.95 }],
+      });
+
+      // No HIGH_IMPACT_KEYWORDS term, so classifyQueryRisk is not "high" and the run is
+      // not forced; the top score (0.5) is under skipThreshold so CRAG still runs. This
+      // guards the fix against over-correcting into "never refuse anything".
+      const result = await (retrieveContext as any).handler(ctx as any, {
+        question: "Who is the Vice Chancellor of UET Taxila?",
+      });
+
+      expect(result.sources).toHaveLength(0);
+      expect(result.context).toBe("");
+      expect(result.answerInstruction).toContain("No relevant information was found");
+    });
+  });
 });

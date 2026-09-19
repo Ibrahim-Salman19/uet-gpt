@@ -357,12 +357,72 @@ async function runEvidenceGateShadow(
 
 type CragEval = { index: number; relevant: boolean; confidence: number };
 
+type CragOutcome = {
+  finalResults: SearchResult[];
+  finalSources: SourceEntry[];
+  tier: ConfidenceTier | null;
+};
+
+/**
+ * Of a set of chunks CRAG rejected outright, the index it was LEAST confident about
+ * rejecting, or -1 if there is no such chunk.
+ *
+ * Used for both no-survivor exits, so the rejections may all be high-confidence
+ * (the allIrrelevant case). "Least rejected" is still the best available signal there.
+ *
+ * Emphatically not index 0. On the query this whole path exists for - "fee structure
+ * for BS Software Engineering" - rank 0 is the M.Sc. fee table scoring 0.850, which is
+ * exactly what CRAG was force-run to reject. Falling back to the rerank's top hit would
+ * hand the answer model a postgraduate fee table as its single source and, under the
+ * hedge tier's "answer ONLY from the provided context", get it presented as the BS fee.
+ * A confident wrong number is worse than the refusal it replaced.
+ */
+export function pickLeastRejectedIndex(cragEval: CragEval[], count: number): number {
+  let bestIndex = -1;
+  let bestConfidence = Number.POSITIVE_INFINITY;
+  for (let i = 0; i < count; i++) {
+    const verdict = cragEval.find((e) => e.index === i);
+    if (!verdict || verdict.relevant) continue;
+    if (verdict.confidence < bestConfidence) {
+      bestConfidence = verdict.confidence;
+      bestIndex = i;
+    }
+  }
+  return bestIndex;
+}
+
+/**
+ * When CRAG is force-run on a high-impact query (see skipCrag below) and leaves no
+ * survivor, keep the least-confidently-rejected chunk under the hedge tier rather than
+ * refusing - the judge was invoked to reorder away from a confidently-wrong top hit,
+ * not to empty a pool the reranker scored well.
+ *
+ * This covers BOTH no-survivor exits, including allIrrelevant. A forced run happens
+ * only when the reranker already scored the pool at or above skipThreshold, so the
+ * pre-CRAG state was "answer this"; letting the judge turn that into a refusal is a
+ * strict regression, which is exactly what reached users on 2026-09-18.
+ */
+function demoteInsteadOfRefuse(results: SearchResult[], cragEval: CragEval[]): CragOutcome {
+  const keepIndex = pickLeastRejectedIndex(cragEval, results.length);
+  const keep = keepIndex >= 0 ? results[keepIndex] : undefined;
+  if (!keep) {
+    return { finalResults: [], finalSources: [], tier: "refuse" };
+  }
+  const kept = [keep];
+  console.warn("[RETRIEVAL] Forced CRAG left no survivors - hedging on least-rejected chunk", {
+    keptRank: keepIndex + 1,
+    keptUrl: kept[0]?.url,
+  });
+  return { finalResults: kept, finalSources: buildSourcesFromResults(kept), tier: "hedge" };
+}
+
 /** CRAG evaluation: uses Groq to judge chunk relevance, adjusts tier. */
 async function evaluateWithCrag(
   ctx: any,
   internals: any,
   safeQuestion: string,
   results: SearchResult[],
+  neverRefuse = false,
 ): Promise<{
   finalResults: SearchResult[];
   finalSources: SourceEntry[];
@@ -398,6 +458,33 @@ async function evaluateWithCrag(
   const someIrrelevant = cragEval.some((e: CragEval) => !e.relevant);
 
   if (allIrrelevant) {
+    // A FORCED run must never refuse. Measured in production 2026-09-18: "What is the
+    // fee structure for BS programs?" retrieved 8, reranked to 4 at topRerankScore 0.7
+    // - comfortably above skipThreshold, i.e. the exact case that used to skip CRAG and
+    // answer correctly - and the forced judge then returned allIrrelevant, giving
+    // resultCount 0, sourceCount 0, cragTier 'refuse' and the verbatim refusal string to
+    // the user. Forcing the judge is meant to REORDER away from a confidently-wrong top
+    // hit, never to withhold an answer the reranker was confident about. An earlier
+    // version of this branch exempted itself from neverRefuse on the theory that a
+    // uniformly high-confidence rejection is worth honouring; production disproved it.
+    //
+    // Keep the WHOLE pre-CRAG pool here, not the single least-rejected chunk. When the
+    // judge rejects everything it has produced no usable ranking signal, so there is
+    // nothing to demote toward and narrowing to one chunk could discard the very chunk
+    // that holds the answer. Falling back to the full set is exactly what skipping CRAG
+    // would have done - the guarantee being restored is that forcing the judge can never
+    // leave the user worse off than not running it - with the hedge tier added so the
+    // answer is qualified rather than asserted flatly.
+    if (neverRefuse) {
+      console.warn("[RETRIEVAL] Forced CRAG rejected every chunk - hedging on the full pool", {
+        poolSize: results.length,
+      });
+      return {
+        finalResults: results,
+        finalSources: buildSourcesFromResults(results),
+        tier: "hedge",
+      };
+    }
     return { finalResults: [], finalSources: [], tier: "refuse" };
   }
 
@@ -408,6 +495,7 @@ async function evaluateWithCrag(
     });
 
     if (relevantChunks.length === 0) {
+      if (neverRefuse) return demoteInsteadOfRefuse(results, cragEval);
       return {
         finalResults: [],
         finalSources: [],
@@ -693,8 +781,18 @@ export const retrieveContext = action({
     // tier threshold, trust the rerank ordering and reserve CRAG for
     // borderline/low-confidence retrievals. Saves a Groq call per query on the
     // common high-confidence path.
+    // ...except for high-impact queries. A confidently-wrong top hit scores just as
+    // high as a right one: "fee structure for BS Software Engineering" ranks the M.Sc.
+    // and Ph.D. fee tables at 0.850/0.800 and the undergraduate answer last at 0.550,
+    // and because 0.850 clears skipThreshold the only component that could notice the
+    // degree-level mismatch never runs. The tier then resolves to "normal" with an
+    // empty instruction, so nothing hedges either. For fees, deadlines and merit the
+    // judge is worth the LLM call on every query; demoteInsteadOfRefuse keeps that
+    // extra run from opening a new path to the refusal string.
     const topRerankScore = results[0]?.relevanceScore ?? 0;
-    const skipCrag = results.length > 0 && topRerankScore >= CRAG_CONFIG.skipThreshold;
+    const forceCrag = classifyQueryRisk(safeQuestion) === "high";
+    const skipCrag =
+      !forceCrag && results.length > 0 && topRerankScore >= CRAG_CONFIG.skipThreshold;
 
     const {
       finalResults,
@@ -706,10 +804,18 @@ export const retrieveContext = action({
           finalSources: buildSourcesFromResults(results),
           tier: null as ConfidenceTier | null,
         }
-      : await evaluateWithCrag(ctx, _i, safeQuestion, results);
+      : await evaluateWithCrag(ctx, _i, safeQuestion, results, forceCrag);
 
     if (skipCrag) {
       console.log("[RETRIEVAL] CRAG skipped (high-confidence rerank)", {
+        query: truncateQuery(safeQuestion),
+        topRerankScore,
+      });
+    } else if (forceCrag && topRerankScore >= CRAG_CONFIG.skipThreshold) {
+      // Logged separately from the ordinary low-score path: this is the branch that
+      // spends an LLM call the old threshold would have saved, so its real frequency
+      // is what to measure if quota pressure ever shows up.
+      console.log("[RETRIEVAL] CRAG forced (high-impact query above skipThreshold)", {
         query: truncateQuery(safeQuestion),
         topRerankScore,
       });
