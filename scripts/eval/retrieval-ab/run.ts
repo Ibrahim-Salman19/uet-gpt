@@ -103,7 +103,15 @@ function loadLabels(): Map<string, Label> {
   return labels;
 }
 
-type Golden = { queryId: string; query: string; relevantChunkKeys: string[] };
+type Golden = {
+  queryId: string;
+  query: string;
+  relevantChunkKeys: string[];
+  /** "contested" = the labels rest on provenance the project has since downgraded. */
+  groundTruth?: string;
+  /** Labels known to be wrong; grading against them measures nothing. */
+  excludeFromScoring?: boolean;
+};
 
 // ---- Query enrichment (production prompts) ----------------------------------------------
 
@@ -433,7 +441,7 @@ async function main() {
     .split("\n")
     .filter(Boolean)
     .map((l) => JSON.parse(l) as Golden)
-    .filter((g) => g.relevantChunkKeys.length > 0);
+    .filter((g) => g.relevantChunkKeys.length > 0 && !g.excludeFromScoring);
 
   const cache: Record<string, { rewrite: string; hyde: string }> = existsSync(cachePath)
     ? JSON.parse(readFileSync(cachePath, "utf8"))
@@ -447,6 +455,12 @@ async function main() {
     "lexRewrite_denseBoth",
   ] as const;
   const tally = Object.fromEntries(variants.map((v) => [v, { hit: 0, n: 0 }]));
+  // Recall over the entries whose ground truth is NOT contested, kept alongside the
+  // headline number. 9 of the 23 scoreable entries carry provenance the project has
+  // downgraded to UNCONFIRMED - most visibly the fee queries, where the labelled chunk
+  // holds a figure that matches no Prospectus edition. Averaging those together with
+  // the clean entries produces one number that cannot be acted on; report both.
+  const cleanTally = Object.fromEntries(variants.map((v) => [v, { hit: 0, n: 0 }]));
   const perQuery: unknown[] = [];
   const rerankTally: Record<string, { hit: number; n: number }> = {};
   const budgetTally: Record<string, { hit: number; n: number }> = {};
@@ -516,6 +530,10 @@ async function main() {
       const hit = results[v].some((h) => isRelevant(h, rel));
       tally[v]!.n++;
       if (hit) tally[v]!.hit++;
+      if (g.groundTruth !== "contested") {
+        cleanTally[v]!.n++;
+        if (hit) cleanTally[v]!.hit++;
+      }
       row[v] = hit;
     }
     if (args.includes("--rerank")) {
@@ -770,7 +788,15 @@ async function main() {
   const summary = Object.fromEntries(
     Object.entries(tally).map(([v, t]) => [
       v,
-      { recallAt8: +(t.hit / t.n).toFixed(3), hits: t.hit, queries: t.n },
+      {
+        recallAt8: +(t.hit / t.n).toFixed(3),
+        hits: t.hit,
+        queries: t.n,
+        recallAt8Uncontested: cleanTally[v]!.n
+          ? +(cleanTally[v]!.hit / cleanTally[v]!.n).toFixed(3)
+          : null,
+        uncontestedQueries: cleanTally[v]!.n,
+      },
     ]),
   );
   const rerankSummary = Object.fromEntries(
