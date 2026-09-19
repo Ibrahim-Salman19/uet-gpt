@@ -1034,3 +1034,43 @@ collapsed the difference to 0/10 and 7/10 → 7/10. The harness now rounds, with
 A second error in the same run: the "no rerank" baseline was computed over `baselineBPostRerank`,
 which is already past the `minWordOverlap` filter — so it compared the reranker against itself and
 left the filter untested. The NULL row above uses `baselineAPreRerank`, the untouched pool.
+
+### 14.7 The three "pool misses", diagnosed — real recall is better than 7/10 suggests
+
+Diagnosed offline from the same frozen capture, no further production reads. The three are three
+*different* things, and only one is a clean retrieval failure.
+
+**`8fe9e8f2` "fee structure for BS Software Engineering" — degree-level confusion, channel-dependent.**
+The entire 8-candidate pool is postgraduate: `/SED/PG-fee.asp` (×2), `/SED/downloads.asp`, the Rule
+Book, `/CS/profile_MS.asp` (×2, PhD scholar profiles), `/Downloads/PGAdmissions/Prospectus-PG-2021-onwards.pdf`,
+and an Electronics workshops page. **Not one undergraduate fee chunk.** This is F-1 in the raw: the
+rewrite `"University of Engineering and Technology Taxila BS Software Engineering fee structure"`
+matches the Software Engineering *department's* postgraduate fee page far more strongly than the
+university-wide FAQ, and "BS" carries no weight against the department name. Note this capture uses a
+single search channel; §3.3 established that production's three-channel fusion *does* surface
+`/FAQS.php` here, so this is a channel-dependent miss, not a claim about live retrieval.
+
+**`21ce9642` "degree certificate procedure" — a genuine miss.** The labelled `/ExamsFAQ.aspx` is
+absent. The pool is topically adjacent but wrong: a provisional-degree-issue *form* PDF, the alumni
+FAQ, the 1993 Ordinance, the 1994 Act, a PhD application form.
+
+**`26e87704` "eligibility criteria" — the retrieval is good and the metric is under-crediting it.**
+Rank 1 is `/Admission_Eligibility.php` ("eligibility criteria by program") and rank 4 is `/FAQS.php`
+("FAQ: what are the eligibility criteria for admission? Answer: you must have passed F.Sc
+(pre-engineering) / ICS…"). That is the answer. It scores a MISS only because `relevantChunkKeys`
+names exactly one chunk — a different one — and retrieval found a better one.
+
+**A real bug in the label matcher, with zero measured impact here.** `26e87704`'s label is defensible:
+its own note records that the chunk's *body* is a nav link but its crawled **Document Title** field
+states the fact ("Admission Procedure (Only those candidates are eligible to apply who appeared in
+TCAT/ECAT-2025…)"). The matcher, however, strips exactly that prefix before taking its snippet —
+`text.replace(/^Document Title: .*? URL Path: \S+\s*/, "")` — so a chunk whose relevance lives in its
+title can never be matched even when it *is* retrieved. Measured both ways (body-only vs body-or-title):
+**7/10 → 7/10, identical patterns**, because this chunk was not retrieved at all. Flagged, not fixed.
+The same regex is in `scripts/eval/retrieval-ab/run.ts:loadLabels`.
+
+**Consequence for every recall number in this document.** Of the three misses, one is a metric artefact
+(`26e87704`), one is channel-dependent (`8fe9e8f2`), and one is real (`21ce9642`). 7/10 is a floor, not
+an estimate. Before any retrieval work is justified by a recall delta, the ground truth needs
+multi-chunk labels — "any chunk that answers this" rather than "this chunk" — or the metric will keep
+scoring correct retrievals as failures and could drive a harmful change.
