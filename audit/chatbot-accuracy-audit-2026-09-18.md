@@ -2036,3 +2036,29 @@ the class of operation this session is not authorized to start. Recorded for the
 
 The cheap first step is not a code change: confirm whether the Gemini contextualization path still fails
 before touching the rate, since raising the limit on a broken path changes nothing.
+
+---
+
+## 27. Audited and found sound — what was checked and had no defect
+
+Recorded so these are not re-audited. Every component on the accuracy path has now been read, not just
+measured around.
+
+| component | checked | verdict |
+|---|---|---|
+| `rag/routing.ts` `condenseQuestionAction` | follow-up resolution for multi-turn | **sound.** Fences the transcript, forbids following instructions inside it, temperature 0, returns the message unchanged when already standalone, keeps the user's language |
+| `rag/retrieval.ts` `resolveStandaloneQuestion` | how history reaches the condenser | **sound.** Caps at 6 messages × 1,000 chars, skips when no user turn is present, re-validates the model's output against the same `MAX_QUERY_LEN` and `INJECTION_RE` as the original question, falls back to the original on any failure |
+| `rag/context.ts` `buildContext` | context assembly and budget | **sound.** Greedy pack in rank order with `continue` (not `break`), so a later smaller chunk still fits; sandwich ordering for lost-in-the-middle; measured at 43% of budget worst case (§18) |
+| `embeddings/hybridRank.ts` | channel fusion | **sound.** Textbook RRF, `1/(k+rank)`, k=60. The defect is in the *weights* it is handed (§23), not in the fusion |
+| HyDE wiring | whether the channel is live | **live and measured.** `search.ts` embeds both the HyDE paragraph and the raw question as separate dense channels, with its own recorded recall — 70% question-only vs 83% with both |
+| `chat/csrf.ts` + `middleware.ts` | request gating | **sound**, and strict enough that unauthenticated verification of the API is impossible (§ status index) |
+| `chat/cache.ts` `encodeSourcesHeader` | citation transport | **sound.** Caps sources, truncates excerpts, drops excerpts, then empties — a graceful ladder. Production sends 4 sources ≈ 2.9 KB against a 6,000-byte limit, so no rung past the first is reached |
+
+Two things were *suspected* and disproved by reading rather than assuming, both recorded because the
+suspicion was reasonable:
+
+* **The crawler prefix does not defeat `isQualityChunk`.** It is added at `chunking.ts:437`, after the
+  filter at `:217`. The real cause was markdown syntax counted as words (§25).
+* **`estimateIdf` does not receive the HyDE paragraph.** It reads `args.queryText` at `search.ts:339`,
+  before `finalQueryText` is reassigned at `:344`, so §23's arithmetic — computed against the 12-word
+  rewrite — holds.
