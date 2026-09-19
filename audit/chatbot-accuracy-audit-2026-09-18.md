@@ -1951,3 +1951,59 @@ re-crawled, so the stubs §22 measured are still being served. This stops the po
 not shrink it. Removing the existing ones is a corpus operation and belongs with the F-9 decision.
 
 **Not deployed** — `npx convex deploy` remains refused by the auto-mode classifier. Joins the queue.
+
+---
+
+## 26. F-18 (High) — the contextualized-text retrieval channel is empty, and cannot fill at its configured rate
+
+### 26.1 Measured
+
+Probing the **real** `contextualizedText` field of every chunk retrieved across the §14 capture
+(`scripts/eval/rerank-position/contextCoverage.ts`, Convex queries only — no LLM calls):
+
+| | |
+|---|---|
+| retrieved chunks probed | 79 |
+| resolved in `crawledChunks` | 70 (the other 9 are FAQ-channel or F-9 rows) |
+| **`contextualizedText` present** | **0 / 70 (0%)** |
+
+Two things follow directly:
+
+* `search_contextualized_text` is one of production's retrieval channels
+  (`embeddings/chunkTextSearch:runContextualized`, wired at `search.ts:490`). A document only matches
+  that index once `contextualizedText` is set, so **the channel returns nothing, for every query**.
+* The Anthropic Contextual Retrieval pattern is implemented — `search.ts:213` "Prepend contextualized
+  summary to the detailed text" — and **never fires**, so no chunk carries the surrounding context that
+  technique exists to supply.
+
+### 26.2 Why
+
+`convex/embeddings/contextualizeCron.ts` says so in its own header:
+
+> "Track B restores the Gemini contextualization path that **has been failing since 2026-06-01**."
+
+The cron is not disabled: `AUTO_BACKFILL_AFTER_MODEL_RECOVERY` is opt-**out** (anything but the literal
+`"false"` allows it) and is **not set** on the production deployment, so the gate passes. What limits it
+is the rate — `DEFAULT_DAILY_LIMIT = 10`, described in `crons.ts` as "up to 10 chunks/day (reduced from
+50 to save bandwidth & respect 250 RPD free tier)".
+
+**At 10 chunks/day, every 1,000 chunks takes 100 days.** Against a corpus of 1,891 documents — which is
+several thousand chunks — this channel cannot become useful on any horizon that matters, even with the
+Gemini path fully restored.
+
+### 26.3 What this cannot distinguish
+
+0/70 is consistent with *"still failing"* and with *"running, but has covered a fraction too small to
+appear in a 70-chunk sample"*. Separating them needs a corpus-wide count of chunks with
+`contextualizedText` set — a full-table scan, which the Convex Free-plan I/O budget does not justify
+spending on a diagnostic here. Either way the operational conclusion is the same: **the channel is empty
+now and the configured rate cannot fill it.**
+
+### 26.4 Not actioned
+
+Raising the daily limit is a bandwidth and free-tier-quota decision with an explicit paper trail
+(`crons.ts` records the 50 → 10 reduction as deliberate), and re-running the path at volume is exactly
+the class of operation this session is not authorized to start. Recorded for the owner.
+
+The cheap first step is not a code change: confirm whether the Gemini contextualization path still fails
+before touching the rate, since raising the limit on a broken path changes nothing.
