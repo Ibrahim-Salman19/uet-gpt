@@ -1157,3 +1157,80 @@ This is a corpus mutation and is out of scope for anything this session was auth
    become a retrieval crash.
 4. Separately investigate the **5/79 dangling candidates** — retrieved entries with no backing
    `crawledChunks` row, which is a different integrity failure from this one.
+
+---
+
+## 16. F-10 (Critical) — the semantic cache has never written an entry in production
+
+Found 2026-09-19 from production `traceSpans`. Explains the empty `semanticCache` table observed
+during the §12 investigation, which at the time was read only as "no cached refusal is masking the fix".
+
+### 16.1 Evidence
+
+`src/lib/chat/cache.ts:buildCacheWriteCallback` refuses to write without a server-trust secret and logs
+the refusal once per serverless instance:
+
+```
+name:       semantic_cache_write_skipped
+reasonCode: INTERNAL_API_SECRET_MISSING_ERROR
+status:     error
+```
+
+Production `traceSpans` holds **15** of these, spanning **2026-09-15 18:46:53 → 2026-09-19 04:48:08 UTC**,
+and the most recent of them is the **newest row in the entire table**. Presence checks on both sides of
+the handshake (names only, no values read):
+
+| | `INTERNAL_API_SECRET` |
+|---|---|
+| Vercel production (`.env.vercel-production.local`, pulled) | **absent** |
+| Convex production (`npx convex env list`) | **absent** |
+
+Both are required. `convex/cache/set.ts:setFromServer` admits a write only when
+`args.secret && internalSecret && constantTimeCompare(args.secret, internalSecret)`, and otherwise
+throws `"Authentication required or invalid API secret"` — so even setting it on Vercel alone would
+still fail, silently from the user's point of view, because the write is fire-and-forget inside `after()`.
+
+### 16.2 Consequence
+
+**Every user question runs the full pipeline.** Embedding, vector search, cascade rerank, CRAG where
+forced, and answer generation — on every request, with no query ever served from cache. The
+`[CACHE] Miss` line in the logs is not a cold cache warming up; it is the only outcome the system can
+produce.
+
+This is an accuracy finding, not merely a cost one:
+
+1. **Quota burn.** The LLM call volume is the maximum the design allows. The live bot was rate-limited
+   for ~24h by Groq's free daily budget on 2026-09-15 — the same date as the earliest skip event
+   recorded here. See the limitation below before reading that as proven causation.
+2. **Fallback drift.** When the primary model is rate-limited, `LLM_FALLBACK_CHAIN` moves traffic to a
+   different model mid-incident, so answer quality changes for reasons unrelated to retrieval.
+3. **No answer consistency.** With `temperature: 0.3` and non-deterministic retrieval, the same question
+   asked twice can return materially different answers. The cache is what would have made a verified
+   good answer reproducible.
+4. **Latency on every request**, which compounds the streaming-deadline defect fixed in `b6dbf24`.
+
+It also means the W1 cache-refusal guards shipped earlier this session (`cache/get.ts` read guard,
+`cache.ts` write guard) are — for now — protecting a path that never executes. They remain correct and
+necessary the moment the secret is set, which is precisely when a bad entry could first be stored.
+
+### 16.3 Limitation
+
+`traceSpans` itself contains no row older than 2026-09-15, so this evidence cannot distinguish "the
+cache write broke on 2026-09-15" from "operational-event logging began on 2026-09-15". What is
+established is that **throughout the entire observed window, including the most recent request, no
+cache write has succeeded**. The correlation with the 2026-09-15 Groq rate-limiting incident is
+suggestive, not demonstrated.
+
+### 16.4 Fix — requires the user; secret values are out of scope for this session
+
+Generate one shared secret and set it in **both** places, then redeploy:
+
+```
+npx convex env set INTERNAL_API_SECRET '<value>' --env-file .env.vercel-production.local
+# and add the SAME value to Vercel: Project → Settings → Environment Variables → Production
+```
+
+Afterwards, confirm the fix by checking that no new `semantic_cache_write_skipped` row appears in
+`traceSpans` and that `semanticCache` becomes non-empty. Note the W1 guards will then be live for the
+first time, so watch for `[CACHE] Ignoring stored refusal` lines — those indicate the guards working,
+not a regression.
