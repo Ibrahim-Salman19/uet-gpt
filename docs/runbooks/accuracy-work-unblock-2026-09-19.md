@@ -1,7 +1,8 @@
 # Unblocking the queued accuracy work (2026-09-19)
 
-Eight accuracy fixes are live. Four more are committed, tested and **undeployed**, and four decisions
-are outstanding. This is the order to do them in and what each one costs.
+Eight accuracy fixes were live before 2026-09-19, and the queued Convex commits were deployed that
+day (§2). What remains is the Vercel half of the cache secret (§1) and four decisions. This is the
+order to do them in and what each one costs.
 
 Full evidence for everything below: `audit/chatbot-accuracy-audit-2026-09-18.md` (status index at the
 top; F-9 §15, F-10 §16, F-11 §18, F-12 §20, F-13 §21).
@@ -13,6 +14,13 @@ top; F-9 §15, F-10 §16, F-11 §18, F-12 §20, F-13 §21).
 `INTERNAL_API_SECRET` is absent from **both** Vercel and Convex, so the cache has never written an
 entry and every question runs the full pipeline. That is maximum LLM call volume, and the most
 plausible contributor to the ~24h Groq rate-limit on 2026-09-15 (audit §16).
+
+**Status 2026-09-19:** the Convex half is set (confirmed present by name; the value was never printed).
+The Vercel half is **not set** - the auto-mode classifier denied that write (`Secret-Store Writes`), so
+it is the owner's to run. Until it exists Vercel fails closed and skips every cache write
+(`src/lib/chat/cache.ts:75`), so this is a safe intermediate state, not a regression. The value was
+generated in the session scratchpad; if that is gone, generate a fresh one and set it in **both** places
+again, since a mismatched pair fails exactly like an absent one.
 
 Generate one value and set it in **both** places — `setFromServer` constant-time-compares the caller's
 secret against Convex's own copy, so one side alone still fails, silently, because the write is
@@ -29,7 +37,14 @@ empty.
 **Expect:** `[CACHE] Ignoring stored refusal` lines may now appear. That is the W1 guard working for the
 first time — it has been protecting a path that never executed.
 
-## 2. Deploy the four queued Convex commits
+## 2. Deploy the four queued Convex commits - DONE 2026-09-19
+
+Deployed with the command below, together with the Vercel build of the same commit (`e3269c6`).
+Verified against production, not just the CLI's success message: `npx convex function-spec` lists
+`crawl/lexicalProofAudit:scopeLexicalProofRows`. The working tree held no uncommitted `convex/` edits
+when this ran - checked afterwards by confirming that two mutations added by unrelated uncommitted work
+(`deleteUserAccountData`, `exportUserData`) are absent from production. Note that `npx convex deploy`
+ships the working directory's `convex/`, not the commit, so run it from a clean tree.
 
 ```bash
 npx convex deploy -y --env-file .env.vercel-production.local
