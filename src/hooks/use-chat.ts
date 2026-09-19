@@ -4,6 +4,7 @@ import type { ConvexReactClient } from "convex/react";
 import { useConvex, useMutation } from "convex/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { createInactivityDeadline } from "@/lib/inactivity-deadline";
 import { isAuthRefreshRace, retryWithBackoff } from "@/lib/retry";
 import type { Source } from "@/lib/types";
 import { api } from "../../convex/_generated/api";
@@ -150,7 +151,9 @@ async function executeStreamPhase(
   abortController: AbortController,
   isRetryRequest: boolean,
 ): Promise<StreamResult> {
-  const timeoutId = setTimeout(() => {
+  // Inactivity, not total duration: see createInactivityDeadline's docstring. The
+  // previous fixed whole-turn deadline killed long-but-healthy answers mid-stream.
+  const deadline = createInactivityDeadline(() => {
     if (abortController.signal.aborted) return;
     abortController.abort();
     toast.error("Response took too long. Please try again.");
@@ -211,6 +214,8 @@ async function executeStreamPhase(
     if (!reader) throw new Error("No response body reader available");
     streamRegistry.update(threadId, "", sources);
     const accumulatedText = await readStreamBody(reader, (text) => {
+      // Progress: the answer is still arriving, so the stall clock starts over.
+      deadline.reset();
       streamRegistry.update(threadId, text, sources);
     });
     await saveAssistantMessage(insertMutation, threadId, accumulatedText, sources);
@@ -221,7 +226,7 @@ async function executeStreamPhase(
     }
     return { ok: false, error: getErrorMessage(err) };
   } finally {
-    clearTimeout(timeoutId);
+    deadline.clear();
   }
 }
 
