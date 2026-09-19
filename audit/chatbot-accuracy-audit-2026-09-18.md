@@ -2078,8 +2078,14 @@ query and is the classic failure in this design:
 `merit-archive-data.ts` are **hardcoded UET facts** rendering the programmatic pages
 (`/uet-taxila/programs/[slug]`, `/uet-taxila/compare/[slug]`, closing-merit, and so on).
 
-Verified they do **not** feed the chatbot: nothing under `src/lib/chat/`, `src/hooks/use-chat.ts` or
-`convex/` imports them. So they are outside this audit's subject, which is the chatbot's answers.
+Verified they do **not** feed the chatbot, by both routes they could:
+
+* **Not imported** — nothing under `src/lib/chat/`, `src/hooks/use-chat.ts` or `convex/` references them.
+* **Not crawled** — `convex/crawl/actions.ts` restricts crawling to `SITEMAP_ALLOWED_DOMAIN_SUFFIX =
+  "uettaxila.edu.pk"` with an explicit guard against off-domain fetches, so this site's own programmatic
+  pages cannot enter the corpus.
+
+So they are outside this audit's subject, which is the chatbot's answers.
 
 They are worth the owner's attention anyway. They are a **second source of truth for the same facts the
 chatbot answers from** — fees, merit, programmes — maintained by hand rather than crawled, with no
