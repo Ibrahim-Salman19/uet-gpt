@@ -6,6 +6,52 @@
 **Raw run outputs:** `/tmp/claude-0/-mnt-c-Users-hafiz-UETGPT/1ca54e80-3133-4cf7-8f56-386518230365/scratchpad/`
 (`aa_batch1..4.json`, `axisB_results.json`, `axisB.ts`, `feeprobe.ts`)
 
+## STATUS INDEX — as of 2026-09-19 (read this first)
+
+This document grew across a long remediation session. What follows is where things actually stand, so
+nobody re-derives it from 21 sections.
+
+**Shipped and live in production** (Vercel, verified by deployment alias each time):
+
+| fix | where | section |
+|---|---|---|
+| a forced CRAG run can never refuse | `rag/retrieval.ts` | §13 |
+| cached refusals rejected on read *and* write | `cache/get.ts`, `chat/cache.ts` | §12 |
+| answers lead with the facts they have | `lib/prompt.ts` | §13 |
+| assistant replies survive a Clerk token refresh | `hooks/use-chat.ts` | — |
+| long answers are no longer cut off mid-stream | `hooks/use-chat.ts` | — |
+| answers truncated at `maxOutputTokens` are never cached | `chat/stream.ts` | — |
+| a "fresh" label can no longer pass an old edition off as current | `lib/prompt.ts` | §18.3 |
+| long conversations no longer brick themselves | `chat/validate.ts` | §21 |
+
+**Committed but NOT deployed** — `npx convex deploy` is refused by the auto-mode classifier:
+
+| fix | section |
+|---|---|
+| Roman Urdu questions can reach a verified FAQ *(user-facing)* | §20 |
+| duplicate `ragId` cannot crash a chunk lookup | §15.3 |
+| the eval harness gates FAQs as production does | §19 |
+| a bounded read-only scoping query for the F-9 rows | §15.4 |
+
+**Open, needing a decision rather than more work:**
+
+1. `INTERNAL_API_SECRET` is absent from **both** Vercel and Convex, so the semantic cache has never
+   written an entry and every question runs the full pipeline (§16). Two places, one value.
+2. F-9: proof-of-concept rows from a local-dev experiment are live in the production corpus and being
+   served (§15). Scope it with the queued query before deleting or hiding anything.
+3. The golden set cannot see FAQ-channel answers at all, so recall deltas cannot justify retrieval work
+   until it can (§17, §19). Needs labelling judgment, not code.
+4. W4 `lifecycleStatus` backfill — 1,891 rows, dry-run first.
+
+**Measured and REJECTED** — each was built or probed, and the evidence is recorded so none is rebuilt
+on the strength of sounding right: the F-4 reranker formula (§14), nav-chunk demotion (§17.4),
+page-level label scoring (§17.3), a `Source year` context header (§18.4), edition-aware freshness
+(§18.5), and the Dice FAQ normalisation (§20.3 — promising, but evidence too thin to ship).
+
+**Standing caveat on every number here.** Production served **no real user traffic** during this
+session — the logs contain only this work's own probes — so the live fixes are deployed and
+unit-tested, never observed on a real request.
+
 > **Three separate numbers, never collapsed.** Retrieval accuracy, answer accuracy, and ground-truth
 > integrity are reported as independent axes. A single headline "accuracy %" for this system would be
 > meaningless, because ~39% of the scoreable eval set rests on ground truth the project itself has
