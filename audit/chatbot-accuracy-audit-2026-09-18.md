@@ -1413,8 +1413,37 @@ the value as current. The defect is the false assertion, not a missing field, wh
 fix in §18.3 works (0/5 → 4/5) and the header fix does not.
 
 The change was reverted rather than shipped; `convex/shared/sourceEdition.ts` and its tests were
-removed rather than left as unused code. What remains genuinely unfixed is the metadata itself:
-`freshnessState` still cannot distinguish a 2017 document from a 2026 one, and the honest fix is for
-`classifyFreshness` to take an edition signal into account rather than for the header to carry a second
-opinion. That is a `convex/` change with a real behavioural blast radius (it feeds the stale-score
-multiplier at `search.ts:549`) and needs its own measurement.
+removed rather than left as unused code.
+
+### 18.5 And edition-aware freshness is rejected too — the "old" documents are the newest there are
+
+The remaining proposal was to make `classifyFreshness` itself edition-aware, so a 2023 document would
+report `aged` instead of `fresh`. Probed before building it
+(`scripts/eval/rerank-position/editions.ts`, four read-only `evalRetrieveDocuments` calls). The premise
+is false:
+
+| probe | what the corpus actually holds |
+|---|---|
+| "Rule Book" | **all 8 candidates are `/Downloads/Rule-Book-2023.pdf`.** No 2024 or 2025 edition exists. |
+| "admission guidelines" | only `Admission_Guidelines_2023.pdf`; its 2024 hit is `/icacee2024`, a conference — a different family |
+
+`Rule-Book-2023.pdf` is not a stale edition. **It is the current rule book** — the newest UET has
+published. Marking it `aged` would be wrong in the opposite direction, and not merely cosmetically:
+`aged` sets `penalized: true`, which applies `DEFAULT_STALE_SCORE_MULTIPLIER` (0.3) at `search.ts:549`,
+rescaling the score that every relevance gate compares against. On a corpus whose newest documents are
+several years old, an absolute-year rule would demote the best available source on exactly the
+high-stakes queries (fees, rules, admission guidelines) and could push it under `skipThreshold` into the
+hedge tiers. That is a regression, not a fix.
+
+The signal that *is* correct here is the relative one — "does a newer edition of this same family
+exist?" — and it is **already implemented and shipped** as `dropOlderEditions`
+(`convex/embeddings/search.ts:139`), which filters superseded editions before rerank.
+
+So F-11 is closed by the §18.3 prompt fix alone, and that fix is the right shape: the honest thing to
+tell a user is *"the latest rule book is from 2023"*, not to hide it or to pretend it is current. Both
+alternatives — a header field (§18.4) and edition-aware freshness (§18.5) — were built or probed and
+rejected on evidence rather than dropped silently.
+
+What remains open is narrower than previously stated: `freshnessState` conflates "recently crawled" with
+"current", and the label would be more honest **renamed** (e.g. `Last fetched`) than re-derived. That is
+cosmetic next to the answer behaviour, which the §18.3 prompt fix already corrects.
