@@ -1155,8 +1155,8 @@ This is a corpus mutation and is out of scope for anything this session was auth
    content also exists in properly embedded form, or it would remove real answers.
 3. Change the two `.unique()` calls to `.first()` (or fix the ragId scheme) so a data collision cannot
    become a retrieval crash.
-4. Separately investigate the **5/79 dangling candidates** — retrieved entries with no backing
-   `crawledChunks` row, which is a different integrity failure from this one.
+4. ~~Separately investigate the 5/79 dangling candidates~~ — **WITHDRAWN, see §17.** Those are FAQ-channel
+   candidates carrying `faqs` table ids, not dangling references. Not a defect.
 
 ---
 
@@ -1234,3 +1234,62 @@ Afterwards, confirm the fix by checking that no new `semantic_cache_write_skippe
 `traceSpans` and that `semanticCache` becomes non-empty. Note the W1 guards will then be live for the
 first time, so watch for `[CACHE] Ignoring stored refusal` lines — those indicate the guards working,
 not a regression.
+
+
+---
+
+## 17. The FAQ channel is structurally invisible to the golden-set metric
+
+Correction to §15.4 item 4, and the precise mechanism behind §14.7's "7/10 is a floor".
+
+### 17.1 What the "dangling" candidates actually were
+
+§15.2 reported 5/79 retrieved candidates with no `crawledChunks` row and §15.4 filed them as a second
+integrity failure to investigate. That was wrong. `convex/embeddings/search.ts:243-248` merges verified
+FAQs into the candidate pool with ids from the **`faqs` table**:
+
+```ts
+.map((faq: FaqResult) => ({
+  entryId: faq._id,                                        // a `faqs` id, NOT a crawledChunks ragId
+  content: `FAQ: ${faq.question}\nAnswer: ${faq.answer}`,  // and a different rendering
+  ...
+```
+
+Looking those ids up in `crawledChunks` by `ragId` correctly returns nothing. Nothing is dangling and
+there is no second integrity failure. The genuine F-9 rows are a separate, smaller set: of the 6
+unresolvable top-4 slots, **2 are `lexical-proof:` rows and 4 are FAQ-channel chunks**
+(`/FAQS.php` ×3, `/ExamsFAQ.aspx`).
+
+### 17.2 Why this makes the recall metric structurally wrong
+
+The golden set's `relevantChunkKeys` are `crawledChunks` chunkKeys, and the label matcher compares
+against `crawledChunks` row text. **An FAQ-channel answer can therefore never match a label, however
+correct it is.** Every query the FAQ channel answers scores a MISS by construction.
+
+This is the mechanism §3.1 half-saw — it reported the flagship fee query as "a MISS that manual
+inspection shows reached rank 4 through the FAQ channel, whose rendering differs from the
+`crawledChunks` row the label was taken from" — and filed it as a matcher *artefact* affecting one
+query. It is not an artefact. It is a structural blind spot affecting **every** FAQ-answered query.
+
+Measured over the §14 capture: **4 of 40 top-4 context slots (10%) are verified FAQ answers**, and they
+are invisible to scoring. `26e87704` ("eligibility criteria") is fully explained by it — §14.7 found its
+top-4 contains the `/FAQS.php` chunk stating the criteria outright, while the metric scored it a miss.
+
+This is the good news the label-based number was hiding: verified FAQs are the highest-quality source in
+the corpus (human-curated, `verified_faq` in the schema's source enum), the FAQ merge is working, and
+**the metric penalises retrieval precisely when it returns the best available answer.**
+
+### 17.3 Consequence
+
+Any future retrieval change scored against this golden set is scored by a metric that cannot see 10% of
+the context and is biased *against* the best channel. Before recall deltas can justify a retrieval
+change, the ground truth has to be able to reference `faqs` ids as well as `crawledChunks` chunkKeys -
+or score FAQ hits on a separate axis. This is a prerequisite, not a refinement.
+
+### 17.4 One hypothesis tested and rejected, recorded so it is not retried
+
+Inspecting the real top-4 text suggested navigation boilerplate ("Quick Links", "Visual resource",
+"Untitled Document") was consuming context slots. Measured with `retrieval-ab`'s own detector
+(`linkShare >= 0.6`, the threshold its `demote`/`dedupeNav` rows use): **0 of 40 top-4 slots** qualify.
+The hypothesis is not supported at that threshold and the nav-demotion experiment should not be
+prioritised on the strength of eyeballing chunk text, which is what suggested it.
