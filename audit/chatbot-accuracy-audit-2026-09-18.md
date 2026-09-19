@@ -1369,6 +1369,13 @@ Measured over the §14 capture: **4 of 40 top-4 context slots (10%) are verified
 are invisible to scoring. `26e87704` ("eligibility criteria") is fully explained by it — §14.7 found its
 top-4 contains the `/FAQS.php` chunk stating the criteria outright, while the metric scored it a miss.
 
+> **Correction (see §22).** An earlier version of this section said retrieval "nailed" `26e87704`
+> because rank 1 was `/Admission_Eligibility.php`. That judged the URL, not the content. Read as text,
+> rank 1 carries **37 characters** after boilerplate — the bare heading "Eligibility Criteria by
+> Program" — rank 2 is a link list and rank 3 is an off-topic Software Engineering *events* page. Only
+> rank 4, the FAQ, answers the question. The section's actual claim stands (a correct FAQ answer cannot
+> match a chunk-key label), but retrieval on that query was one useful chunk out of four, not four.
+
 This is the good news the label-based number was hiding: verified FAQs are the highest-quality source in
 the corpus (human-curated, `verified_faq` in the schema's source enum), the FAQ merge is working, and
 **the metric penalises retrieval precisely when it returns the best available answer.**
@@ -1741,3 +1748,40 @@ The "drops the oldest turns" test initially failed — and the *test* was wrong,
 summed to 28,050 characters, under the 32,000 budget, so keeping all three turns was correct behaviour.
 Corrected to 38,050. Noted because a failing test is not automatically evidence of a broken
 implementation, and this one nearly prompted a "fix" to code that was right.
+
+
+---
+
+## 22. F-14 (Medium) — near-empty stub chunks occupy answer-context slots
+
+Measured over the 34 top-4 chunks whose text is resolvable (the other 6 are FAQ-channel or F-9 rows),
+stripping the crawler's own `Document Title: … URL Path: …` prefix and `Source: <…>` line, which are
+identical on every chunk of a page and carry no answer content:
+
+| | |
+|---|---|
+| top-4 slots with **under 150 characters** of real content | **5 / 40** |
+| chunks that are **≥50% boilerplate** | 3 / 34 |
+| chunks that are **≥30% boilerplate** | 8 / 34 |
+| median content length | 618 chars |
+| smallest | **95 chars total, 54% boilerplate** |
+
+The clearest case is `26e87704` "eligibility criteria", whose **rank 1** is
+`/Admission_Eligibility.php` at **37 characters** of content — the heading "Eligibility Criteria by
+Program" and nothing else. A context slot is spent on a heading while the answer sits at rank 4.
+
+This is the same family as the audit's earlier observation that `ProcedureAndRequirements2.php`
+candidates are "confirmed near-empty stubs (full text is just the title + source URL)", now quantified
+across a real retrieved population rather than one query.
+
+**Why it is only Medium.** `buildContext` is nowhere near its budget — §18's measurement showed the
+largest rendered context at 5,212 of 12,000 characters — so a stub is not evicting a better chunk on
+length. The cost is the top-K cut: `rerankSearchResults` keeps 4, so a stub in the top 4 is one of four
+chances to include the answer, spent on nothing.
+
+**Candidate fix, not implemented.** Drop candidates below a minimum real-content length before the
+top-K cut. It is cheap and the data to size the threshold is in
+`scripts/eval/rerank-position/chunks.json`. It is not implemented here for the same reason as §20.3's
+Dice normalisation: it changes which chunks reach every answer, and the only metric available to
+validate it cannot see FAQ-channel answers at all (§17) — so a recall delta would be measuring the
+wrong thing. The FAQ ground-truth decision gates this too.
