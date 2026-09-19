@@ -1562,9 +1562,40 @@ Cost: one extra `searchFaqs` query per request when the two texts differ, over a
 0.29 FILTERED "assalam o alaikum, can you please tell me what is the fee structure for BS ..."
 ```
 
-Both want the same FAQ. The greeting tokens are content words and there is no stemming, so `fees` does
-not match `fee` either. Fixing that means changing the normalisation itself (or stemming), which moves
-the gate for every query and needs its own measurement — deliberately out of scope here.
+Both want the same FAQ. The greeting words are content tokens and dilute the denominator.
+
+**Correction to an earlier draft of this section:** it claimed "there is no stemming". That is wrong —
+`contentTokens` does stem (`structure` → `structur`, `software` → `softwar`, and
+`contentTokens("freezing programs")` equals `contentTokens("freeze program")`, asserted in
+`tests/unit/faq-match.test.ts`). What is true is narrower: the stemmer does not reduce `fees` to `fee`,
+so that particular plural misses. (`engineering` is separately a stop word.)
+
+**The normalisation was then measured rather than left as an open question.** Five candidates, scored
+over every FAQ used as its own query plus a greeted variant (ground truth true by construction), at the
+same 0.5 gate:
+
+| normalisation | verbatim passes | greeted passes | wrong FAQ passes gate |
+|---|---|---|---|
+| current `m/|asked|` | 30/32 | 27/32 | 2 |
+| symmetric `max(m/|a|, m/|f|)` | 28/32 | 30/32 | 6 |
+| **Dice `2m/(|a|+|f|)`** | **32/32** | **32/32** | **0** |
+| overlap `m/min(|a|,|f|)` | 28/32 | 30/32 | 6 |
+| Jaccard `m/|union|` | 32/32 | 27/32 | 0 |
+
+Dice dominates on every axis. Checked against the **10 real golden queries** as well (raw question and
+rewrite, max of both): **no gate decision changes on any of them**, and one selection improves —
+`21ce9642` "procedure to apply for a degree certificate" currently picks *"How to apply for a particular
+Bonafied Certificate?"* while Dice picks *"How to apply for the Degree?"*. That is precisely the tie
+`faqSpecificity`'s own docstring describes as unbreakable by coverage; Dice breaks it correctly, because
+the longer Bonafide question is penalised by its own length.
+
+**Not implemented, deliberately.** The strongest numbers above are synthetic — the verbatim row is
+trivially favourable to Dice, since a question matched against itself scores 1.0 by construction — and
+the real-data evidence is 10 queries showing one improvement and no regressions. That is encouraging but
+thin for a change that moves the gate for *every* query and silently redefines what the 0.5 threshold
+means. It wants an end-to-end A/B over a larger query set, which needs the Convex deploy that is
+currently blocked. Recorded here with its evidence so the next person starts from the measurement rather
+than the idea.
 
 ### 20.4 Deployment
 
