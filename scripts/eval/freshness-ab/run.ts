@@ -102,7 +102,59 @@ const NO_YEAR_FLAG =
   /\b(does not (specify|state|mention)|no (specific )?(year|session|edition)|not stated|unspecified|isn'?t specified|does not indicate)\b/i;
 const CONFIRM = /\b(confirm|verify|check)\b[^.]{0,60}\b(uettaxila|website|office)\b/i;
 
+// Second experiment (--edition): the rule A/B above is settled and recorded in audit
+// §18.3. This one holds the SHIPPED rule fixed and varies only whether the context header
+// carries the "Source year:" line added to convex/rag/context.ts, to find out whether that
+// line changes anything or is inert. Without it the model has no field that distinguishes an
+// edition; with it the Rule Book reads 2023 and the FAQ reads "not stated in this source".
+const CONTEXT_WITH_YEAR = CONTEXT.replace(
+  /Applicability: current\n\n## What is the fee structure/,
+  "Applicability: current\nSource year: not stated in this source\n\n## What is the fee structure",
+).replace(
+  /Applicability: current\n\n##### /,
+  "Applicability: current\nSource year: 2023\n\n##### ",
+);
+
+async function editionMain() {
+  if (CONTEXT_WITH_YEAR === CONTEXT) {
+    throw new Error("The Source year lines were not spliced in - the CONTEXT fixture changed.");
+  }
+  const system = promptFor("new");
+  let totalTokens = 0;
+  for (const [label, ctx] of [
+    ["WITHOUT Source year (context.ts before the change)", CONTEXT],
+    ["WITH Source year (context.ts after the change)", CONTEXT_WITH_YEAR],
+  ] as const) {
+    let flagsNoYear = 0;
+    let namesRuleBookYear = 0;
+    let refused = 0;
+    let sample = "";
+    for (let i = 0; i < RUNS; i++) {
+      const { text, usage } = await generateText({
+        model,
+        system: system.replace(CONTEXT, ctx),
+        prompt: QUESTION,
+        temperature: 0.3,
+        maxOutputTokens: 2000,
+        maxRetries: 2,
+      });
+      totalTokens += usage?.totalTokens ?? 0;
+      if (NO_YEAR_FLAG.test(text)) flagsNoYear++;
+      if (/\b2023\b/.test(text)) namesRuleBookYear++;
+      if (isRefusalAnswer(text)) refused++;
+      if (i === 0) sample = text.replace(/\s+/g, " ").slice(0, 240);
+    }
+    console.log(`\n== ${label} ==`);
+    console.log(`  says the fee source states no year/session : ${flagsNoYear}/${RUNS}`);
+    console.log(`  names the Rule Book's 2023 edition         : ${namesRuleBookYear}/${RUNS}`);
+    console.log(`  tripped the refusal detector               : ${refused}/${RUNS}`);
+    console.log(`  sample: ${sample}`);
+  }
+  console.log(`\nprovider groq, ${totalTokens} tokens total across ${RUNS * 2} calls`);
+}
+
 async function main() {
+  if (process.argv.includes("--edition")) return editionMain();
   let totalTokens = 0;
   for (const arm of ["old", "new"] as const) {
     const system = promptFor(arm);

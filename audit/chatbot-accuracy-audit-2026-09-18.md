@@ -1381,10 +1381,40 @@ answer quoting the context trips it under both arms — a metric-design flaw of 
 The frozen context contains no such case — the FAQ chunk carrying the figures states no year at all.
 That is the check to run if answers start hedging too much.
 
-### 18.4 Not fixed — the label itself
+### 18.4 The header-side fix was built, measured, and REJECTED as redundant
 
-The prompt change is a mitigation; it does not make the metadata correct. `freshnessState` still cannot
-distinguish a 2017 document from a 2026 one. Deriving an edition signal from the year in the URL or
-title (the `dropOlderEditions` regex already does this for candidate filtering) and surfacing it in the
-header would fix the label rather than instruct the model around it. That is a `convex/` change and
-needs its own measurement.
+The obvious follow-up — stop instructing the model around bad metadata and instead surface the
+edition directly, by extracting the year from the URL/title (as `dropOlderEditions` already does) and
+adding a `Source year:` line to `formatChunkHeader` — was implemented, unit-tested and measured. It
+does not work, and the reason is instructive.
+
+Coverage first, over all 56 distinct source URLs in the §14 capture: 14 identify a year, 42 do not. The
+14 are clean, with no false positives from phone numbers or fee amounts, and two are only reachable
+through the title — `/EnergyEnggTech/Curriculum.asp`, whose URL carries no year at all but whose title
+is *"Course Scheme for session 2017"*, and `/ProcedureAndRequirements.php` → *"TCAT/ECAT-2025"*. So the
+extractor itself is sound.
+
+The A/B (shipped rule held fixed, only the header varied, same model and temperature):
+
+| | without `Source year` | with it |
+|---|---|---|
+| names the Rule Book's **2023** edition | **5/5** | 4/5 |
+| says the fee source states no year | 0/5 | 1/5 |
+| refusal regression | 0/5 | 0/5 |
+
+**The model already names 2023 five times out of five without the line.** `formatChunkHeader` renders
+`Source: [${title}](${url})`, so `/Downloads/Rule-Book-2023.pdf` is already in the context — the new
+field restated information the model could already read.
+
+That reframes F-11 correctly. **The edition was never hidden; the freshness labels were actively
+contradicting it.** The model could see `Rule-Book-2023.pdf` and was simultaneously told
+`Freshness state: fresh / Applicability: current` and — by the old rule — that this licensed presenting
+the value as current. The defect is the false assertion, not a missing field, which is why the prompt
+fix in §18.3 works (0/5 → 4/5) and the header fix does not.
+
+The change was reverted rather than shipped; `convex/shared/sourceEdition.ts` and its tests were
+removed rather than left as unused code. What remains genuinely unfixed is the metadata itself:
+`freshnessState` still cannot distinguish a 2017 document from a 2026 one, and the honest fix is for
+`classifyFreshness` to take an edition signal into account rather than for the header to carry a second
+opinion. That is a `convex/` change with a real behavioural blast radius (it feeds the stale-score
+multiplier at `search.ts:549`) and needs its own measurement.
