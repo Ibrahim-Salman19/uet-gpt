@@ -3,6 +3,7 @@ import type { ConvexHttpClient } from "convex/browser";
 import type { FunctionReturnType } from "convex/server";
 import { after } from "next/server";
 import { assignFreshnessTier } from "../../../convex/crawl/chunking";
+import { isRefusalAnswer } from "../../../convex/shared/refusal";
 
 /**
  * RAG result type inferred directly from the Convex action's `returns` validator,
@@ -97,7 +98,22 @@ export function buildCacheWriteCallback(
       }
       return;
     }
-    if (ragResult.queryEmbedding && ragResult.queryEmbedding.length > 0) {
+    // A zero-source answer is a refusal (CRAG dropped every chunk, or retrieval came
+    // back empty). Caching one is doubly wrong: assignFreshnessTier("") matches no
+    // keyword and returns "low" - the LONGEST ttl bucket - precisely because there is
+    // no source url to classify, and an empty sourceEntryIds makes findSourceInvalidation
+    // return null on its first line, so the entry is structurally immune to invalidation
+    // and survives the very re-crawl that adds the missing content. Never store one.
+    // ...and a refusal can also arrive WITH sources: the hedge tier and GROUNDING_RULES
+    // instruct the model to say in its own words that it found no verified information,
+    // which it does while still citing the chunks it rejected. That paraphrase passes
+    // every structural check, so the answer text has to be inspected directly.
+    if (
+      ragResult.queryEmbedding &&
+      ragResult.queryEmbedding.length > 0 &&
+      ragResult.sources.length > 0 &&
+      !isRefusalAnswer(text)
+    ) {
       after(async () => {
         try {
           // Multi-vector cache "alternates" are intentionally NOT generated here:

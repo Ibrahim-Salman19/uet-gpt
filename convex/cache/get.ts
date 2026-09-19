@@ -4,6 +4,7 @@ import type { Doc, Id } from "../_generated/dataModel";
 import { type ActionCtx, internalAction } from "../_generated/server";
 import { CACHE_SIMILARITY_THRESHOLD } from "../constants";
 import { truncateQuery } from "../observability/metrics";
+import { isRefusalAnswer } from "../shared/refusal";
 
 export function cosineSimilarity(a: number[], b: number[]) {
   if (a.length === 0 || b.length === 0) return 0;
@@ -24,6 +25,47 @@ export function cosineSimilarity(a: number[], b: number[]) {
   const denominator = Math.sqrt(normA) * Math.sqrt(normB);
   if (denominator === 0) return 0;
   return dotProduct / denominator;
+}
+
+/**
+ * A cache entry is servable only if it is unexpired AND actually cites sources.
+ *
+ * The sourceless case is a cached REFUSAL, and serving one is how a transient
+ * retrieval failure becomes a persistent wrong answer. Such an entry is the worst
+ * possible thing to keep: assignFreshnessTier("") matches no keyword and returns
+ * "low", the LONGEST ttl (5 days), precisely because there was no source url to
+ * classify; and its empty sourceEntryIds makes findSourceInvalidation return null
+ * immediately, so it is structurally immune to the invalidation that a re-crawl
+ * would otherwise trigger. It cannot be evicted by fixing the corpus.
+ *
+ * src/lib/chat/cache.ts now refuses to WRITE these, but that cannot retract the
+ * ones already stored - observed in production on 2026-09-18, where "What is the
+ * fee structure for BS programs?" kept returning the refusal string while live
+ * retrieval, CRAG and the answer model were all verified to handle it correctly.
+ * Rejecting them on READ neutralises the whole existing population at once,
+ * without a mutation, and lets them age out on their own.
+ */
+function isServableCacheEntry(entry: Doc<"semanticCache"> | null): entry is Doc<"semanticCache"> {
+  if (!entry || entry.expiresAt < Date.now()) return false;
+  if (!entry.sources || entry.sources.length === 0) {
+    console.warn("[CACHE] Ignoring stored refusal (no sources) - treating as a miss", {
+      queryText: entry.queryText?.slice(0, 80),
+    });
+    return false;
+  }
+  // The structural check above cannot see a refusal that cites sources, which is what
+  // the hedge tier and the answer prompt's grounding rules actually produce: the model
+  // is told to say in its own words that it found no verified information, and it does
+  // so while still listing the chunks it rejected. Observed in production 2026-09-18.
+  // Logged separately from the sourceless case so production logs say which guard fired.
+  if (isRefusalAnswer(entry.response)) {
+    console.warn("[CACHE] Ignoring stored refusal (refusal wording) - treating as a miss", {
+      queryText: entry.queryText?.slice(0, 80),
+      sourceCount: entry.sources.length,
+    });
+    return false;
+  }
+  return true;
 }
 
 async function getCachedEntry(
@@ -50,7 +92,7 @@ async function getCachedEntry(
       const entry = await ctx.runQuery(internal.cache.internal_queries.getCacheEntry, {
         id: res._id,
       });
-      if (!entry || entry.expiresAt < Date.now()) continue;
+      if (!isServableCacheEntry(entry)) continue;
       return { entry, entryId: res._id };
     }
 
@@ -74,7 +116,7 @@ async function getCachedEntry(
       const entry = await ctx.runQuery(internal.cache.internal_queries.getCacheEntry, {
         id: res._id,
       });
-      if (!entry || entry.expiresAt < Date.now()) continue;
+      if (!isServableCacheEntry(entry)) continue;
       return { entry, entryId: res._id };
     }
   }

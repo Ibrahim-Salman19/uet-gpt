@@ -7,6 +7,7 @@ import {
   evaluateEvidenceGate,
 } from "../governance/evidenceGate";
 import { recordTiming, truncateQuery } from "../observability/metrics";
+import { REFUSAL_TEXT } from "../shared/refusal";
 import { classifyQueryRisk } from "../shared/freshnessPolicy";
 import { isOfficialUrlAllowed } from "../verification/officialSourceVerifier";
 import { type ConfidenceTier, CRAG_CONFIG, INJECTION_RE, MAX_QUERY_LEN } from "./constants";
@@ -39,7 +40,7 @@ function determineConfidenceTier(results: { relevanceScore: number }[]): {
       instruction:
         "SYSTEM INSTRUCTION TO AI: No relevant information was found for this query. " +
         "Do not state any UET-specific facts, figures, dates, or names. You MUST respond with: " +
-        "'I don't have verified information about this - please check uettaxila.edu.pk directly.' " +
+        `'${REFUSAL_TEXT}' ` +
         "Do not attempt to guess or hallucinate an answer. " +
         "(If the user is only greeting you or asking what you can help with, reply briefly and politely instead.)\n\n",
     };
@@ -63,7 +64,7 @@ function determineConfidenceTier(results: { relevanceScore: number }[]): {
         "'Based on limited information available - ' and end with " +
         "'For authoritative details, please verify at uettaxila.edu.pk.' " +
         "If the provided context genuinely does not contain the answer, respond exactly with: " +
-        "'I don't have verified information about this - please check uettaxila.edu.pk directly.' " +
+        `'${REFUSAL_TEXT}' ` +
         "Never invent facts beyond the provided context.\n\n",
     };
   }
