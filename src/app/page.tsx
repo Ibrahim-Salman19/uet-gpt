@@ -108,7 +108,7 @@ export default function HomePage() {
 
         <main id="main-content" className="relative z-10 flex-1">
           {/* Asymmetric High-Impact Hero */}
-          <section className="px-6 pt-24 pb-16 max-w-6xl mx-auto">
+          <section id="hero" className="px-6 pt-24 pb-16 max-w-6xl mx-auto">
             <div className="flex flex-col items-center text-center">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#d9b451]/30 bg-[#d9b451]/10 text-[#d9b451] text-xs font-mono uppercase tracking-widest mb-6">
                 <span className="h-2 w-2 rounded-full bg-[#d9b451] animate-pulse" />
@@ -177,7 +177,10 @@ export default function HomePage() {
           </section>
 
           {/* Institutional Pedigree Statistics Bar */}
-          <section className="px-6 py-12 max-w-6xl mx-auto border-y border-white/10 bg-[#0c0d10]/60">
+          <section
+            id="stats"
+            className="px-6 py-12 max-w-6xl mx-auto border-y border-white/10 bg-[#0c0d10]/60"
+          >
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
               {STATS.map((stat) => (
                 <div key={stat.label} className="space-y-1">
@@ -194,7 +197,7 @@ export default function HomePage() {
           </section>
 
           {/* 4 Core Pillars Bento Grid */}
-          <section className="px-6 py-20 max-w-6xl mx-auto">
+          <section id="pillars" className="px-6 py-20 max-w-6xl mx-auto">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
               <div>
                 <span className="text-xs font-mono uppercase tracking-widest text-[#d9b451] font-bold">
