@@ -4,6 +4,7 @@ import type { ConvexReactClient } from "convex/react";
 import { useConvex, useMutation } from "convex/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { isAuthRefreshRace, retryWithBackoff } from "@/lib/retry";
 import type { Source } from "@/lib/types";
 import { api } from "../../convex/_generated/api";
 import { streamRegistry } from "./stream-registry";
@@ -116,12 +117,19 @@ async function saveAssistantMessage(
   sources: Source[],
 ): Promise<void> {
   if (!text.trim()) return;
-  await insertMutation({
-    threadId,
-    role: "assistant",
-    content: text,
-    sources: sources && sources.length > 0 ? sources : undefined,
-  });
+  // Losing this write is not cosmetic: the reply is already on screen, but the next
+  // turn builds its history from the DB, so the thread would carry the question with
+  // no answer and condenseQuestionAction would resolve the follow-up against a hole.
+  await retryWithBackoff(
+    () =>
+      insertMutation({
+        threadId,
+        role: "assistant",
+        content: text,
+        sources: sources && sources.length > 0 ? sources : undefined,
+      }),
+    { maxRetries: 3, baseDelayMs: 500, shouldRetry: isAuthRefreshRace },
+  );
 }
 
 type StreamResult = { ok: true } | { ok: false; error: string | "aborted" };

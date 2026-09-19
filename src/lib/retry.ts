@@ -40,6 +40,31 @@ function isTransientError(error: unknown): boolean {
 }
 
 /**
+ * A message write rejected with "Authentication required" is a token-refresh race, not a
+ * real authorization failure, and is the one ConvexError worth retrying.
+ *
+ * ConvexProviderWithClerk re-mints the Clerk session token periodically; a mutation issued
+ * in that gap reaches the server with no identity and requireAuth (convex/auth.ts:78)
+ * rejects it. Observed in production 2026-09-19 09:49:23 on a session whose *user* message
+ * had inserted successfully moments earlier - the user was signed in throughout, and only
+ * the assistant save landed in the gap.
+ *
+ * Safe to retry even though messages:insert is not idempotent: requireAuth runs before any
+ * write, and a Convex mutation that throws rolls back, so nothing was stored and a retry
+ * cannot duplicate the message. Note this is deliberately NARROWER than isTransientError -
+ * it does not retry network errors, where the mutation may have committed and only the
+ * acknowledgement was lost, which retrying could turn into a duplicate reply.
+ */
+export function isAuthRefreshRace(error: unknown): boolean {
+  const data = (error as { data?: unknown } | null)?.data;
+  const parts = [
+    error instanceof Error ? error.message : typeof error === "string" ? error : "",
+    typeof data === "string" ? data : "",
+  ];
+  return parts.join(" ").includes("Authentication required");
+}
+
+/**
  * Retry an async function with exponential backoff.
  * Used for critical mutations that must eventually succeed (user sync, message save).
  *
