@@ -62,8 +62,22 @@ served bundle".
 
 It does **not** extend to the rest. The streaming deadline has no distinctive string literal, and the
 truncation guard (`chat/stream.ts`), the history trim (`chat/validate.ts`) and the prompt changes
-(`lib/prompt.ts`) are server-side and never reach a client bundle. Confirming those still requires the
-authenticated end-to-end run described below.
+(`lib/prompt.ts`) are server-side and never reach a client bundle.
+
+**An unauthenticated probe was attempted for the history trim, and is structurally impossible.** The
+idea was sound: `src/app/api/chat/route.ts` runs `validateRequestPhase` **before**
+`authAndRateLimitPhase`, so an oversized-but-trimmable body would be judged by the new code and only
+then rejected by auth — distinguishing the old `413 Request body too large` from the new behaviour with
+no write, no session and no LLM call. `checkCsrf` even admits `Sec-Fetch-Site: same-origin`.
+
+It cannot work. Clerk middleware intercepts first: both a small control body and a 42,025-character
+oversized body return `307` to `/sign-in`, with `x-clerk-auth-reason: session-token-and-uat-missing`.
+`src/middleware.ts`'s matcher covers `/(api|trpc)(.*)` and exempts only `/api/webhooks`, `/api/health`
+and `/api/cron`, so **no unauthenticated request reaches the route handler at all.**
+
+The verification gap for server-side behaviour is therefore structural, not a matter of ingenuity: it
+requires a real Clerk session, which requires the Playwright path below, which writes production data
+under a real person's identity.
 
 **How to close that gap (deliberately not run).** The only thing in this repo that can exercise the true
 authenticated path is the Playwright suite: `retrieveContext` requires a Clerk identity and a Convex
