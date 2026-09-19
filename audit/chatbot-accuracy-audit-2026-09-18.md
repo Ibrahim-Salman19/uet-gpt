@@ -52,6 +52,19 @@ page-level label scoring (§17.3), a `Source year` context header (§18.4), edit
 session — the logs contain only this work's own probes — so the live fixes are deployed and
 unit-tested, never observed on a real request.
 
+**Partially closed by bundle inspection (read-only, no writes, no quota).** Fetching the deployed chat
+route's JavaScript confirms the client-side fix is physically present in what production serves:
+`/_next/static/chunks/12060k27muzl..js` contains `"Authentication required"` — the literal introduced by
+`isAuthRefreshRace` in `df9f416` — alongside `"socket hang up"` and `"optimistic concurrency"`, the
+pre-existing `isTransientError` strings, which identifies the chunk as `src/lib/retry.ts` carrying the
+new predicate. This raises the auth-race retry from "the deploy command exited 0" to "the code is in the
+served bundle".
+
+It does **not** extend to the rest. The streaming deadline has no distinctive string literal, and the
+truncation guard (`chat/stream.ts`), the history trim (`chat/validate.ts`) and the prompt changes
+(`lib/prompt.ts`) are server-side and never reach a client bundle. Confirming those still requires the
+authenticated end-to-end run described below.
+
 **How to close that gap (deliberately not run).** The only thing in this repo that can exercise the true
 authenticated path is the Playwright suite: `retrieveContext` requires a Clerk identity and a Convex
 deploy key cannot supply one (`convex/rag/smokeRetrieval.ts:5-8`), but `tests/e2e/global.setup.ts` signs
