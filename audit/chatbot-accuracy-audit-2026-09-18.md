@@ -1785,3 +1785,59 @@ top-K cut. It is cheap and the data to size the threshold is in
 Dice normalisation: it changes which chunks reach every answer, and the only metric available to
 validate it cannot see FAQ-channel answers at all (§17) — so a recall delta would be measuring the
 wrong thing. The FAQ ground-truth decision gates this too.
+
+---
+
+## 23. F-15 (Medium) — the "adaptive" fusion weights are inert, and the rewrite pushes them the wrong way
+
+`convex/embeddings/idf.ts:estimateIdf` sets the weights `hybridRank` fuses the dense and lexical
+channels with. Despite the file name it never consults the corpus: `rareTermRatio` is
+`uniqueRatio * 0.6 + min(1, avgWordLength/8) * 0.4`, i.e. **non-repetition and word length**, not term
+rarity. True IDF needs document frequencies; this is a proxy for them.
+
+### 23.1 It carries almost no information
+
+Measured over the 10 golden queries, each in both phrasings (raw question and the rewrite production
+actually searches with) — 20 measurements:
+
+| | |
+|---|---|
+| `rareTermRatio` observed range | **0.85 – 1.00** (theoretical 0–1) |
+| saturated at exactly 1.00 | **6 / 20** |
+
+The compression is structural, not a sampling accident. Any query whose content words do not repeat has
+`uniqueRatio = 1`, so `rareTermRatio ≥ 0.6` before word length is considered. The consequences:
+
+* **The `{vector: 1.5, text: 0.5}` setting for short queries is unreachable.** It applies only when
+  `rareTermRatio ≤ 0.7`, which with non-repeating words needs average content-word length **≤ 2
+  characters**. Every short query in the sample got the `{1.2, 0.8}` override instead.
+* In the 5–15 word band, `rareTermRatio ≈ 0.9–1.0` collapses the formula to `vector ≈ 1.0–1.05`,
+  `text ≈ 0.95–1.0` — i.e. **`{1.0, 1.0}`, no adaptation at all**.
+* The `> 15 words` branch never fired; production rewrites are capped at 12 words by
+  `rewriteQueryAction`'s own prompt.
+
+So the adaptive weighting resolves, in practice, to exactly two fixed settings: `{1.2, 0.8}` for short
+queries and ≈`{1.0, 1.0}` for everything else.
+
+**This is the third mechanism in this pipeline measured to be inert**, after the Tier-1 reranker score
+(§14: every weighting ranks identically) and the freshness label (§18: 40/40 slots read "fresh").
+Each is computed, consumed by a downstream gate, and carries no information. That pattern is worth more
+than any one of the three findings.
+
+### 23.2 And the rewrite moves it the wrong way
+
+`rareTermRatio` rises with average word length, and `rewriteQueryAction` expands "UET" to "University of
+Engineering and Technology" — long words that `convex/reranking/cascade.ts` separately documents as
+carrying no topic signal ("these words reach the reranker on nearly every query no matter the topic").
+
+Measured: the rewrite shifts weight **toward the lexical channel on 6 of 10 queries**. The lexical
+channel then matches those same uninformative expansion words site-wide. This is a plausible
+contributor to the pool misses of §14.7 — `8fe9e8f2`'s pool is entirely Software Engineering
+*department* pages, which is exactly what a lexical match on "Software Engineering" returns.
+
+### 23.3 Not fixed — and this one genuinely cannot be measured here
+
+Unlike §20.3 and §22, the blocker is not just the broken metric. `searchDocumentsAction` exposes no way
+to override the fusion weights, so comparing pool composition under different weights needs new Convex
+code **and** a deploy, neither of which is available. The finding is recorded with its evidence and the
+arithmetic that makes the dead branch provable; the fix is not attempted.
