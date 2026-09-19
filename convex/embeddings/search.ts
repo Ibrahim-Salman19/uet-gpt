@@ -3,7 +3,7 @@ import { internal } from "../_generated/api";
 import { type ActionCtx, internalAction } from "../_generated/server";
 import { recordTiming } from "../observability/metrics";
 import { rag } from "../rag/instance";
-import { FAQ_MIN_COVERAGE, faqCoverage, faqSpecificity } from "../shared/faqMatch";
+import { bestFaqMatch, FAQ_MIN_COVERAGE } from "../shared/faqMatch";
 import { estimateIdf } from "./idf";
 
 // A verified FAQ that actually matches the asked question is scored against the
@@ -218,9 +218,24 @@ function pickBestContent(
   return baseContent || docMeta?.contextualizedText || "";
 }
 
+/**
+ * Verified FAQs matching the question, considered under EVERY phrasing we have of it.
+ *
+ * Audit §20: this used to take one string - the user's own words. That is right for
+ * English, where the rewrite only paraphrases, but it makes the FAQ channel unreachable
+ * for Roman Urdu, which is a first-class supported input (rewriteQueryAction translates
+ * it explicitly). "fees kitni hai BS Software Engineering ki" shares no content token with
+ * "What is the fee structure for the first semester?", AND the search index over English
+ * FAQ questions returns nothing for it, so the best source in the corpus is dropped twice
+ * over before any scoring happens.
+ *
+ * Both layers therefore take every phrasing: each distinct text runs the search (results
+ * merged by id) and coverage is the best across them (bestFaqMatch). English is unaffected
+ * because the raw question already scores highest there.
+ */
 async function fetchActiveFaqs(
   ctx: ActionCtx,
-  queryText: string,
+  questionTexts: readonly string[],
 ): Promise<
   Array<{
     entryId: string;
@@ -236,7 +251,20 @@ async function fetchActiveFaqs(
 > {
   try {
     const now = Date.now();
-    const faqs = await ctx.runQuery(internal.faq.searchFaqs, { query: queryText, now });
+    const texts = [...new Set(questionTexts.map((t) => t.trim()).filter(Boolean))];
+    if (texts.length === 0) return [];
+
+    // One search per distinct phrasing; the index is over English FAQ questions, so the
+    // translated rewrite is the only one that can return anything for a Roman Urdu ask.
+    const pools = await Promise.all(
+      texts.map((query) => ctx.runQuery(internal.faq.searchFaqs, { query, now })),
+    );
+    const byId = new Map<string, FaqResult>();
+    for (const pool of pools) {
+      for (const faq of pool as FaqResult[]) byId.set(String(faq._id), faq);
+    }
+    const faqs = [...byId.values()];
+
     return (
       faqs
         .filter((f: FaqResult) => !f.expiresAt || f.expiresAt > now)
@@ -245,8 +273,7 @@ async function fetchActiveFaqs(
           content: `FAQ: ${faq.question}\nAnswer: ${faq.answer}`,
           url: faq.sourceUrl || "Verified FAQ Database",
           title: faq.question,
-          coverage: faqCoverage(queryText, faq.question),
-          specificity: faqSpecificity(queryText, faq.question),
+          ...bestFaqMatch(texts, faq.question),
           relevanceScore: 0,
           freshnessState: "fresh" as const,
           applicability: "current" as const,
@@ -602,12 +629,13 @@ export const searchDocumentsAction = internalAction({
       });
     }
 
-    // Matched against the user's own words: the rewrite paraphrases the question,
-    // and the FAQ gate compares it with the FAQ's question wording.
-    const matchedFaqs = (await fetchActiveFaqs(ctx, args.questionText ?? args.queryText)).slice(
-      0,
-      2,
-    );
+    // The user's own words first - the rewrite only paraphrases in English, and the FAQ
+    // gate compares against the FAQ's own question wording. The rewrite is included as
+    // well because it is the ONLY phrasing that has been translated out of Roman Urdu,
+    // without which that whole class of question cannot reach a verified FAQ (audit §20).
+    const matchedFaqs = (
+      await fetchActiveFaqs(ctx, [args.questionText ?? args.queryText, args.queryText])
+    ).slice(0, 2);
     const anchorScore =
       sortedEnriched[Math.min(3, sortedEnriched.length - 1)]?.relevanceScore ?? 1 / RRF_K;
     const faqResults = matchedFaqs.map((faq, rank) => ({

@@ -134,3 +134,39 @@ export function faqSpecificity(question: string, faqQuestion: string): number {
 
 /** A FAQ joins the candidate pool only at or above this coverage. */
 export const FAQ_MIN_COVERAGE = 0.5;
+
+/**
+ * Best coverage/specificity for one FAQ across every phrasing of the user's question.
+ *
+ * The FAQ gate was matched against the user's own words, which is right for English - the
+ * rewrite paraphrases, and the FAQ's wording is what we want to compare against. It breaks
+ * completely for Roman Urdu, a first-class supported input: "fees kitni hai BS Software
+ * Engineering ki" shares NO content token with "What is the fee structure for the first
+ * semester?", so coverage is 0.00 and the FAQ carrying the answer is dropped. Only the
+ * rewrite, which rewriteQueryAction translates to English, can match it - measured
+ * 2026-09-19 on the golden set's Roman Urdu query, "admission k liye zaruri documents kya
+ * hain?": 0.29 (filtered) on the user's words, 1.00 (passes) on the rewrite.
+ *
+ * Taking the max over both phrasings keeps the English behaviour identical - the raw
+ * question already wins there, because a rewrite that expands "UET" to "University of
+ * Engineering and Technology" only dilutes coverage - while recovering the translated form.
+ */
+export function bestFaqMatch(
+  questionTexts: readonly string[],
+  faqQuestion: string,
+): { coverage: number; specificity: number } {
+  let coverage = 0;
+  let specificity = 0;
+  for (const text of questionTexts) {
+    const c = faqCoverage(text, faqQuestion);
+    if (c > coverage) {
+      coverage = c;
+      specificity = faqSpecificity(text, faqQuestion);
+    } else if (c === coverage) {
+      // Same coverage from two phrasings: keep the more specific reading rather than
+      // letting argument order decide.
+      specificity = Math.max(specificity, faqSpecificity(text, faqQuestion));
+    }
+  }
+  return { coverage, specificity };
+}

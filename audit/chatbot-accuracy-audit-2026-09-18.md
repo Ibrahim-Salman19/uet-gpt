@@ -1505,3 +1505,68 @@ The measurement was real and the arithmetic was right; the error was measuring t
 and attributing it to production. The check that caught it was reading the actual call site rather than
 stopping at the gate function — the same failure mode as §13's "component-green / system-red", in the
 opposite direction: a component measured red while the system was green.
+
+---
+
+## 20. F-12 (High) — Roman Urdu questions cannot reach a verified FAQ at all
+
+### 20.1 The defect
+
+Verified FAQs are the highest-quality source in the corpus (§17): human-curated, `verified_faq` in the
+schema's source enum, and measured occupying 4 of 40 top-4 context slots. Two independent layers decide
+whether one is merged into retrieval, and **both were keyed on the user's untranslated words**:
+
+1. `convex/faq.ts:searchFaqs` — a full-text search over the **English** `faqs.question` field.
+2. `convex/embeddings/search.ts:fetchActiveFaqs` — `faqCoverage(queryText, faq.question)` against
+   `FAQ_MIN_COVERAGE` (0.5).
+
+The call site passed one string, `args.questionText ?? args.queryText`, i.e. the raw question. Measured
+against the real FAQ corpus (`scripts/faq/official-faqs.json`, 32 entries):
+
+| asked | coverage vs the FAQ that answers it | |
+|---|---|---|
+| `fees kitni hai BS Software Engineering ki` | **0.00** | filtered |
+| `admission k liye zaruri documents kya hain?` (golden `a670a78c`) | **0.29** | filtered |
+| …the same question after rewrite: `required documents for university admission` | **1.00** | passes |
+
+Roman Urdu shares no content token with an English FAQ question, so coverage is 0 — and the search
+index, being over English text, returns no candidates for it in the first place. The FAQ is dropped
+twice over, before any scoring happens.
+
+This is not an edge case. Roman Urdu is a **first-class supported input**: `rewriteQueryAction`'s system
+prompt handles it explicitly with worked examples ("fees kitni hai", "daakhila kab hoga"), and the
+verified golden set includes such a query. The rewrite is the only phrasing that has been translated
+into the FAQ's language — and it was the one phrasing the FAQ path never saw.
+
+### 20.2 Fix
+
+`fetchActiveFaqs` now takes every phrasing of the question: each distinct text runs the search (results
+merged by id) and coverage is the best across them, via a new pure `bestFaqMatch` in
+`convex/shared/faqMatch.ts`. The call site passes the raw question **and** the rewrite.
+
+English behaviour is unchanged, and this is asserted rather than assumed: on
+`"What is the fee structure for BS Software Engineering at UET Taxila?"` the raw question scores 0.50
+and its rewrite only 0.40 — expanding "UET" to "University of Engineering and Technology" adds content
+words that *dilute* a ratio normalised by the asked question's length — so the max is the raw question's
+score either way. 4 unit tests in `tests/unit/faq-roman-urdu.test.ts` cover the Roman Urdu recovery, the
+English no-change, and that an unrelated FAQ is still rejected under every phrasing.
+
+Cost: one extra `searchFaqs` query per request when the two texts differ, over a 32-row table.
+
+### 20.3 Known residual, not fixed
+
+`faqCoverage` normalises by the **asked** question's length, so politeness and greetings still dilute it:
+
+```
+0.50 PASSES   "what is the fee structure for BS Software Engineering at UET Taxila"
+0.29 FILTERED "assalam o alaikum, can you please tell me what is the fee structure for BS ..."
+```
+
+Both want the same FAQ. The greeting tokens are content words and there is no stemming, so `fees` does
+not match `fee` either. Fixing that means changing the normalisation itself (or stemming), which moves
+the gate for every query and needs its own measurement — deliberately out of scope here.
+
+### 20.4 Deployment
+
+**Not deployed.** `npx convex deploy` is refused by the auto-mode classifier, so this joins the queue
+with the §15 scoping query, the duplicate-ragId fix and the §19 harness fix.
