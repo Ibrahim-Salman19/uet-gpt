@@ -1601,3 +1601,49 @@ than the idea.
 
 **Not deployed.** `npx convex deploy` is refused by the auto-mode classifier, so this joins the queue
 with the §15 scoping query, the duplicate-ragId fix and the §19 harness fix.
+
+---
+
+## 21. F-13 (High) — a long conversation bricks itself permanently
+
+### 21.1 The defect
+
+`src/lib/chat/validate.ts` bounded the prompt by rejecting the request outright:
+
+```ts
+const MAX_TOTAL_CHARS = 32_000;
+if (totalChars > MAX_TOTAL_CHARS) {
+  return NextResponse.json({ error: "Request body too large" }, { status: 413 });
+}
+```
+
+The bound itself is right — it exists so an unbounded prompt cannot run up token cost. The **failure
+mode** is not. Assistant replies are capped at `maxOutputTokens: 2000` (~8,000 characters,
+`src/lib/chat/pipeline.ts`) and are stored and resent as conversation history, so a thread of
+substantive answers — exactly what this bot produces for fee, admission and eligibility questions —
+crosses 32,000 characters after roughly **four exchanges**.
+
+From that point the thread is **permanently unusable**: every subsequent message 413s, the user is told
+only "Request body too large", and nothing indicates that the thread is the problem or that starting a
+new one would fix it. It cannot self-heal, because the history that broke it is resent every time.
+
+### 21.2 Fix
+
+`trimHistoryToBudget` keeps the newest turns that fit and drops the oldest, rather than failing. A 413
+is still returned when the newest message *alone* exceeds the budget, which is a genuinely oversized
+request.
+
+The cost bound the original code protected is unchanged — the prompt still stays under 32,000
+characters, asserted directly in the tests. And dropping old turns is what the rest of the pipeline
+already assumes: `pipeline.ts:92` passes only `history.slice(-6)` to retrieval, so the dropped turns
+were contributing nothing to the answer while consuming the budget that broke the request.
+
+6 tests in `tests/unit/history-budget.test.ts`, including the ~4-exchange thread that used to 413, that
+the asked question always survives, that the oldest go first, and that the cost bound still holds.
+
+### 21.3 A test bug worth recording
+
+The "drops the oldest turns" test initially failed — and the *test* was wrong, not the code. Its fixture
+summed to 28,050 characters, under the 32,000 budget, so keeping all three turns was correct behaviour.
+Corrected to 38,050. Noted because a failing test is not automatically evidence of a broken
+implementation, and this one nearly prompted a "fix" to code that was right.

@@ -28,6 +28,46 @@ const ChatRequestSchema = z
 export type ChatMessage = { role: string; content: string };
 export type RawMessage = z.infer<typeof MessageSchema>;
 
+export const MAX_TOTAL_CHARS = 32_000;
+
+/**
+ * Keep the most recent turns that fit the prompt budget, rather than rejecting the request.
+ *
+ * This used to be a hard `413 Request body too large` on the whole conversation, which made
+ * long threads fail PERMANENTLY: assistant replies are capped at 2000 output tokens
+ * (~8,000 characters) and are themselves stored and resent as history, so a thread of
+ * substantive answers crosses 32,000 characters after roughly four exchanges - and from
+ * then on every further message in it 413s. The user is not told which thread is bricked
+ * or that starting a new one would fix it.
+ *
+ * Dropping the oldest turns is what the rest of the pipeline already assumes: the RAG call
+ * only ever looks at the last 6 messages (src/lib/chat/pipeline.ts), so old turns were
+ * contributing nothing to retrieval while consuming the budget that broke the request.
+ *
+ * Returns null only when the newest message ALONE exceeds the budget, which is a genuinely
+ * oversized request and still deserves a 413.
+ */
+export function trimHistoryToBudget(
+  messages: ChatMessage[],
+  maxChars: number,
+): ChatMessage[] | null {
+  const last = messages[messages.length - 1];
+  if (!last) return null;
+  if (last.content.length > maxChars) return null;
+
+  const kept: ChatMessage[] = [last];
+  let used = last.content.length;
+  // Newest-first, so the turns nearest the question are the ones that survive.
+  for (let i = messages.length - 2; i >= 0; i--) {
+    const message = messages[i];
+    if (!message) continue;
+    if (used + message.content.length > maxChars) break;
+    kept.unshift(message);
+    used += message.content.length;
+  }
+  return kept;
+}
+
 export function parseBodyOrError(
   bodyText: string,
 ): { messages: ChatMessage[]; rawMessages: RawMessage[] } | NextResponse {
@@ -57,14 +97,15 @@ export function parseBodyOrError(
   }));
 
   // Defense in depth: even with per-field caps, the extracted text (which feeds
-  // the LLM prompt) must stay within an overall budget to bound token cost.
-  const MAX_TOTAL_CHARS = 32_000;
-  const totalChars = messages.reduce((sum, m) => sum + m.content.length, 0);
-  if (totalChars > MAX_TOTAL_CHARS) {
+  // the LLM prompt) must stay within an overall budget to bound token cost. That
+  // budget is still enforced - trimHistoryToBudget just drops the OLDEST turns to
+  // meet it instead of failing the request.
+  const trimmed = trimHistoryToBudget(messages, MAX_TOTAL_CHARS);
+  if (!trimmed) {
     return NextResponse.json({ error: "Request body too large" }, { status: 413 });
   }
 
-  return { messages, rawMessages: parsed.data.messages };
+  return { messages: trimmed, rawMessages: parsed.data.messages };
 }
 
 export async function validateRequestPhase(
