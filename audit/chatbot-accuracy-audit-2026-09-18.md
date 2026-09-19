@@ -1595,10 +1595,39 @@ Consequences for figures already reported here:
 * §14's core finding is **unaffected**: every (overlap, position) weighting ranks identically, which is
   a property of the tie structure within whatever pool is handed to the reranker.
 
-`questionText` is now forwarded (`evalRetrieval.ts`), but the fix **cannot be deployed** — `npx convex
-deploy` is refused by the auto-mode classifier — so `frozen.json` has not been re-captured and the
-figures above stand as recorded, with this caveat attached. Re-running the §14 capture after that
-deploy is the first thing worth doing.
+### 19.4 A SECOND harness gap, found later — only one of production's two dense channels
+
+`questionText` was not the only omission. On the Pinecone path — the production backend — `search.ts`
+sets `finalQueryText = args.hydeQuery` and then embeds **two** dense channels:
+
+```ts
+const denseTexts = [finalQueryText];                     // the HyDE paragraph
+if (args.questionText && args.questionText !== finalQueryText) {
+  denseTexts.push(args.questionText);                    // and the raw question
+}
+```
+
+Its own comment records why, with measured recall: *"HyDE alone, 70% with the question alone, and 83%
+with both. HyDE helps bare keyword queries; the question helps natural questions HyDE paraphrases
+away."*
+
+`evalRetrieveDocuments` passed neither, so every capture ran **one** dense channel — the rewrite —
+where production runs two, and the precomputed `queryEmbedding` it passes is ignored entirely on this
+path. The harness therefore understates pool quality on the dense side as well as the FAQ side.
+
+This compounds §19.2: **`frozen.json`'s pools are weaker than production's in two independent ways.**
+Every pool-composition figure derived from it — §14.7's misses, §22's stub counts, §26's
+contextualization coverage — is a lower bound on production, not an estimate of it.
+
+Both `questionText` and `hydeQuery` are now forwarded (`evalRetrieval.ts`), but the fix **cannot be
+deployed** — `npx convex deploy` is refused by the auto-mode classifier — so `frozen.json` has not been
+re-captured and the figures above stand as recorded, with this caveat attached. Re-running the §14
+capture after that deploy is the first thing worth doing.
+
+Findings NOT affected, because they do not depend on which chunks are in the pool: §14's core result
+(every (overlap, position) weighting ranks identically — a property of the tie structure inside whatever
+pool arrives), §23's fusion-weight arithmetic, §24's CRAG confidence distribution, and §25's
+`isQualityChunk` root cause.
 
 ### 19.3 Why this was nearly reported as a critical bug
 

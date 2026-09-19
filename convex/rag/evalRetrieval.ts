@@ -52,6 +52,13 @@ export const evalRetrieveDocuments = internalAction({
     // versus 0.40 (filtered) on the rewrite. Omitting it makes this harness strictly
     // weaker than production at retrieving verified FAQs.
     questionText: v.optional(v.string()),
+    // The HyDE paragraph, which production generates in enrichQuery and passes through.
+    // On the Pinecone path (the production backend) search.ts sets
+    // `finalQueryText = args.hydeQuery` and then embeds BOTH it and questionText as two
+    // separate dense channels - its own comment records the measured recall: 70% with the
+    // question alone, 83% with both. Omitting hydeQuery leaves this harness running ONE
+    // dense channel where production runs two, which understates pool quality.
+    hydeQuery: v.optional(v.string()),
     // Matches searchVectorDB's real production call site default (limit: 8,
     // convex/rag/retrieval.ts:201).
     limit: v.optional(v.number()),
@@ -83,6 +90,7 @@ export const evalRetrieveDocuments = internalAction({
     const baselineA: any[] = await ctx.runAction(internal.embeddings.search.searchDocumentsAction, {
       queryText: args.queryText,
       questionText: args.questionText,
+      hydeQuery: args.hydeQuery,
       queryEmbedding,
       limit,
       category: args.category,
