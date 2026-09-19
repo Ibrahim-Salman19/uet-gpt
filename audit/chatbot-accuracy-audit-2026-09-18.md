@@ -1279,12 +1279,31 @@ This is the good news the label-based number was hiding: verified FAQs are the h
 the corpus (human-curated, `verified_faq` in the schema's source enum), the FAQ merge is working, and
 **the metric penalises retrieval precisely when it returns the best available answer.**
 
-### 17.3 Consequence
+### 17.3 Consequence, and a cheap workaround that was tried and does NOT work
 
 Any future retrieval change scored against this golden set is scored by a metric that cannot see 10% of
-the context and is biased *against* the best channel. Before recall deltas can justify a retrieval
-change, the ground truth has to be able to reference `faqs` ids as well as `crawledChunks` chunkKeys -
-or score FAQ hits on a separate axis. This is a prerequisite, not a refinement.
+the context and is biased *against* the best channel. This is a prerequisite to retrieval work, not a
+refinement.
+
+The obvious cheap fix - score a *page-level* axis alongside the chunk-level one, crediting any retrieved
+chunk whose URL matches the labelled chunk's URL, which would let an FAQ rendering of a labelled page
+count - was implemented and measured over the §14 capture. It recovers nothing:
+
+| axis over the same production top-4 | recall@4 |
+|---|---|
+| chunk-level (current: 60-char snippet containment) | **7/10** |
+| page-level (URL of the labelled chunk appears in the top 4) | **7/10** |
+
+The two axes agree on all ten queries. The reason is that the blind spot is not a *rendering* mismatch,
+as §3.1 assumed - it is a *document* mismatch. On `26e87704` the labelled chunk is on
+`/ProcedureAndRequirements.php` while the FAQ that actually answers the question is on `/FAQS.php`: a
+different page, so no URL-based rule can connect them.
+
+**Therefore the ground truth genuinely needs new labels, not a smarter matcher.** Each affected query
+needs a human decision that "this FAQ entry also answers this question", recorded with its own
+provenance tier. That is a labelling judgment on a human-curated dataset and is deliberately left to the
+project owner; it is not something to infer automatically, which is exactly how a golden set stops being
+ground truth.
 
 ### 17.4 One hypothesis tested and rejected, recorded so it is not retried
 
