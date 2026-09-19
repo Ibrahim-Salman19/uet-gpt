@@ -114,6 +114,64 @@ async function batchFetchDocMeta(
   return docMap;
 }
 
+const EDITION_YEAR = /(?<!\d)(?:19|20)\d{2}(?!\d)/g;
+
+/**
+ * Among candidates whose urls differ ONLY in a 4-digit year, keep the newest.
+ *
+ * isRetrievalEligibleLifecycle above is the intended gate for superseded editions,
+ * but it passes every document whose lifecycleStatus is unset - which is all of
+ * them until the field is backfilled - so it currently filters nothing. Until that
+ * backfill lands, this closes the hole at retrieval time: the audit found a 2021
+ * IEEE annual report (one of 14 editions of the same url family) taking the top two
+ * slots for "contact number", and both the 2024 and 2025 Prospectus retrievable
+ * side by side.
+ *
+ * Deliberately conservative in three ways: a url with no year, or the only member of
+ * its family, is never dropped; two urls collapse into one family only when they are
+ * identical apart from the year, so a year that is not an edition marker (a news slug,
+ * a campaign page) cannot take an unrelated page down with it; and any year the user
+ * explicitly asked for is protected, so "IEEE annual report 2021" still retrieves the
+ * 2021 edition even though 2024 exists. That last rule mirrors the askedYears guard in
+ * rag/routing.ts's sanitizeRewrittenQuery - superseding an edition is the right default,
+ * never an override of what was actually requested.
+ */
+export function dropOlderEditions<T extends { url: string }>(results: T[], queryText = ""): T[] {
+  const askedYears = new Set((queryText.match(EDITION_YEAR) ?? []).map(Number));
+  const familyYear = (url: string): { family: string; year: number } | null => {
+    let path: string;
+    try {
+      path = decodeURIComponent(url);
+    } catch {
+      path = url;
+    }
+    const years = path.match(EDITION_YEAR);
+    if (!years) return null;
+    return {
+      family: path.replace(EDITION_YEAR, "YYYY"),
+      year: Math.max(...years.map(Number)),
+    };
+  };
+
+  const tagged = results.map((r) => ({ result: r, edition: familyYear(r.url) }));
+  const newest = new Map<string, number>();
+  for (const { edition } of tagged) {
+    if (!edition) continue;
+    newest.set(edition.family, Math.max(newest.get(edition.family) ?? 0, edition.year));
+  }
+  return tagged
+    .filter(
+      // The `?? edition.year` can only fire if a family went missing from the map it
+      // was just built from; defaulting to KEEP means any such surprise cannot silently
+      // drop a result.
+      ({ edition }) =>
+        edition === null ||
+        askedYears.has(edition.year) ||
+        edition.year >= (newest.get(edition.family) ?? edition.year),
+    )
+    .map(({ result }) => result);
+}
+
 function pickBestContent(
   docMeta: DocMeta | undefined,
   vectorRes: VectorSearchResult[],
@@ -518,7 +576,13 @@ export const searchDocumentsAction = internalAction({
       });
     }
 
-    const sortedEnriched = enrichedResults.sort((a, b) => b.relevanceScore - a.relevanceScore);
+    const sortedEnriched = dropOlderEditions(
+      enrichedResults.sort((a, b) => b.relevanceScore - a.relevanceScore),
+      // The user's own words, not the rewrite: the rewriter's sanitizer already strips
+      // years nobody asked for, so questionText is the honest source for "which edition
+      // did they actually name?".
+      args.questionText ?? args.queryText,
+    );
 
     // Check query risk & staleness abstention (Amendment #6)
     const queryRisk = classifyQueryRisk(args.queryText);
