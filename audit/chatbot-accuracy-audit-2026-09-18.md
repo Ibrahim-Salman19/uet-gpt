@@ -47,8 +47,8 @@ nobody re-derives it from 21 sections.
    has yet been observed written**, so the cache is enabled but unproven until `semanticCache` is non-empty.
 2. ~~F-9~~ - **withdrawn as framed (§15.5).** Do not exclude `lexical-proof:` ragIds: they are the corpus.
    The narrow residue is the duplicate-`ragId` collision (§15.3), whose crash is already fixed by `.first()`.
-3. The golden set cannot see FAQ-channel answers at all, so recall deltas cannot justify retrieval work
-   until it can (§17, §19). Needs labelling judgment, not code.
+3. ~~FAQ labels~~ — assistant-judged labels now exist and make FAQ answers visible to the recall metric
+   (§29). They are provisional and unreviewed; an owner spot-check of the 26 labels would upgrade them.
 4. ~~W4 backfill~~ — **done in a narrower form (§28):** 11 replaced editions retired; the other 1,880
    rows need no value. Two judgement calls held back for the owner: the boys-only hostel policy, and 23
    annual-report / per-session / batch-specific documents.
@@ -2197,3 +2197,42 @@ interact with this gate. Undo per document: `--status active`.
   filter `dropOlderEditions` still treats these as editions and keeps its explicit-year override. Marking
   them `superseded` would remove that override; do it only if the standing "latest edition only" rule is
   meant to cover annual reports and per-session lists.
+
+---
+
+## 29. FAQ ground truth (assistant-judged) and the first production-faithful capture (2026-09-20)
+
+Closes the gap §17 identified, provisionally. Two things were done.
+
+**1. FAQ labels.** All 50 golden queries were read against all 32 official FAQs, and 26 labels were written
+across 18 queries (10 with a `clear` label, the rest `partial` or ambiguous) into
+`scripts/eval/faq_labels_assistant_judged.json`. The file is tier `ASSISTANT_JUDGED_UNREVIEWED`, kept apart
+from `golden_set_verified.jsonl` so the verified set is not contaminated. §17.3 said this judgement belonged
+to the owner and should not be inferred automatically; the owner then delegated it, so the labels exist, but
+they are the assistant's, not independent, and a spot-check of the 26 would upgrade them.
+
+**2. A production-faithful capture.** `run.ts --faithful` forwards `questionText` and a `hydeQuery` as
+`retrieval.ts` does, with HyDE generated on Gemini (never Groq). The earlier commit that made the Convex
+action accept those fields had never been wired into the script, so every previous capture omitted them.
+Captured after the queued Convex commits were deployed, into `frozen.faithful.json`:
+
+| over the same 10 queries | recall@4 |
+|---|---|
+| earlier, unfaithful capture (chunk labels only) | 7/10 |
+| **faithful, chunk labels only** | **8/10** |
+| faithful, + FAQ credit, `clear` labels | **9/10** |
+| faithful, + FAQ credit, `clear` + `partial` labels | **10/10** |
+
+* FAQ answers occupy **5 of 40** served top-4 slots (12%), up from 4 of 40. The flagship fee question
+  `8fe9e8f2` now gets the verified fee FAQ; the unfaithful capture had none for it.
+* Both remaining chunk-level misses (`26e87704` eligibility, `8fe9e8f2` fee structure) are answered by a
+  verified FAQ, which is §17's point made measurable.
+* **Reranker headroom is 0/10 again**, now on faithful data: "no rerank at all" scores 8/10 at recall@4,
+  the same as the deployed formula. The F-4 rejection stands.
+
+**Read this with its limits.** Ten stratified queries, not fifty. The FAQ figures rest on assistant-judged
+labels. `8fe9e8f2` is a `contested` golden label and its FAQ match is `partial` (the FAQ gives a
+first-semester figure, not a Software Engineering one). What the numbers do support: on this sample the
+answer reaches the top four in essentially every case once the FAQ channel is counted, so retrieval into the
+top four is not where the remaining error is. What they do not support is a claim about the other 40 queries,
+or about whether the generated answers were right, which no retrieval metric here measures.

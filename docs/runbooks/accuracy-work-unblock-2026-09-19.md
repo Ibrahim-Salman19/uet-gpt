@@ -2,7 +2,7 @@
 
 Eight accuracy fixes were live before 2026-09-19, and the queued Convex commits were deployed that
 day (§2). The cache secret is now set in both places (§1) and F-9 was withdrawn after measurement (§3). What
-remains is the FAQ ground-truth decision; W4 is done in a narrower form (§6). This is the
+remains is owner review of judgement calls (§5, §6) and confirming the cache writes once real traffic arrives (§1). This is the
 order to do them in and what each one costs.
 
 Full evidence for everything below: `audit/chatbot-accuracy-audit-2026-09-18.md` (status index at the
@@ -64,28 +64,27 @@ documents hold only those rows, and 74 of the 79 candidates in the §14 capture 
 **Do not add a read-side guard excluding `lexical-proof:` ragIds** - it would hide nearly all retrieval.
 Evidence, and the narrow defect that survives (duplicate ragIds, citation-only impact): audit §15.5.
 
-## 4. Re-capture the retrieval baseline (after step 2)
+## 4. Re-capture the retrieval baseline - DONE 2026-09-20
 
-`b4976c6` fixes a harness fidelity gap: it never forwarded `questionText`, so captures gated FAQs
-against the rewrite rather than the raw question, making it weaker than production at retrieving FAQs.
+The harness's `--faithful` mode now forwards `questionText` and `hydeQuery` (the earlier fix only changed the
+Convex side; the script never sent them). Captured after step 2 into `frozen.faithful.json`:
 
 ```bash
-npx tsx scripts/eval/rerank-position/run.ts        # re-capture
-npx tsx scripts/eval/rerank-position/run.ts --replay   # free re-analysis thereafter
+npx tsx scripts/eval/rerank-position/run.ts --faithful            # re-capture (10 Gemini calls, 10 prod reads)
+npx tsx scripts/eval/rerank-position/run.ts --faithful --replay   # free re-analysis thereafter
 ```
 
-This replaces several caveated numbers in §14/§15 with real ones — in particular whether `8fe9e8f2` and
-`21ce9642` are genuine retrieval misses or were harness artefacts.
+Result: chunk-label recall@4 is 8/10, not the 7/10 the unfaithful capture gave. Audit §29.
 
-## 5. The FAQ ground-truth decision — gates all future retrieval work
+## 5. The FAQ ground-truth decision - done provisionally 2026-09-20
 
-The golden set's `relevantChunkKeys` are `crawledChunks` chunk keys, and FAQ-channel answers carry
-`faqs` ids, so **a correct FAQ answer can never match a label** (§17). 10% of context slots are
-invisible to scoring, and the metric penalises retrieval exactly when it returns the best source.
+The golden set's chunk-key labels cannot match an FAQ answer (audit §17), so it was blind to the FAQ channel.
+The assistant read all 50 queries against all 32 official FAQs and wrote 26 labels across 18 queries into
+`scripts/eval/faq_labels_assistant_judged.json`, tier `ASSISTANT_JUDGED_UNREVIEWED`, kept apart from the
+verified golden set. `run.ts --replay` now reports recall with and without FAQ credit.
 
-A page-level scoring axis was tried and **does not** recover it — the FAQ lives on a different page from
-the label (§17.3). This needs a human decision per affected query that a given FAQ also answers it,
-recorded with its own provenance tier. Until then, **a recall delta cannot justify a retrieval change.**
+**Your call, optional:** spot-check the 26 labels (each has a one-line `why`). Until then a recall delta
+should not justify a retrieval change on its own; prefer the `clear`-only figure. Audit §29.
 
 ## 6. W4 - done in a narrower form (2026-09-20)
 

@@ -39,6 +39,12 @@
  *
  *   npx tsx scripts/eval/rerank-position/run.ts            # measure (hits production)
  *   npx tsx scripts/eval/rerank-position/run.ts --replay   # re-analyse frozen.json offline
+ *   npx tsx scripts/eval/rerank-position/run.ts --faithful # production-faithful capture -> frozen.faithful.json
+ *
+ * --faithful also forwards `questionText` (the raw question, which gates the FAQ channel) and a
+ * `hydeQuery` (which feeds the second dense channel), as retrieval.ts does. The default capture
+ * omits both and so understates production, most of all for FAQ-answered queries. Combine with
+ * --replay to re-analyse the faithful file. HyDE is generated on Gemini, never Groq.
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -51,8 +57,10 @@ import { sanitizeRewrittenQuery } from "../../../convex/rag/routing";
 
 const HERE = resolve(__dirname);
 const ROOT = resolve(__dirname, "../../..");
-const FROZEN = resolve(HERE, "frozen.json");
+const FAITHFUL = process.argv.includes("--faithful");
+const FROZEN = resolve(HERE, FAITHFUL ? "frozen.faithful.json" : "frozen.json");
 const REWRITES = resolve(HERE, "rewrites.json");
+const HYDES = resolve(HERE, "hydes.json");
 const REPLAY = process.argv.includes("--replay");
 
 function loadEnvFile(path: string): Record<string, string> {
@@ -74,6 +82,13 @@ const REWRITE_SYSTEM =
   "Output ONLY the rewritten query itself, in English: one short phrase, with no label, " +
   "no 'keywords:' prefix and no comma-separated list of synonyms. " +
   "Padding the query with synonyms makes the retrieval scoring worse, not better.";
+
+// Verbatim from convex/rag/routing.ts (hydeQueryAction). Production feeds it the RAW question,
+// in parallel with the rewrite (retrieval.ts:123). Not the production text-model chain, which
+// leads with Groq: this runs on Gemini so an eval cannot spend the live bot's free-tier budget.
+const HYDE_SYSTEM =
+  "You are an expert on UET Taxila. Write a hypothetical, 3-5 sentence factual paragraph that directly answers the user's query. Pretend you are writing an official website excerpt. " +
+  "Always write in English, whatever language the query uses: this paragraph is embedded and matched against an English-only corpus, and a Roman Urdu query was answered in Urdu and in Devanagari script (observed 2026-09-18).";
 
 // The ten stratified queries of audit §3.2, so the numbers here sit beside a published table.
 const QUERY_IDS = [
@@ -170,6 +185,10 @@ async function capture(): Promise<Frozen> {
     ? JSON.parse(readFileSync(REWRITES, "utf8"))
     : {};
 
+  const cachedHydes: Record<string, string> = existsSync(HYDES)
+    ? JSON.parse(readFileSync(HYDES, "utf8"))
+    : {};
+
   const rows: Frozen["rows"] = [];
   for (const g of loadGolden()) {
     let rewrite = cachedRewrites[g.queryId];
@@ -188,10 +207,30 @@ async function capture(): Promise<Frozen> {
       writeFileSync(REWRITES, JSON.stringify(cachedRewrites, null, 2));
     }
 
+    let hyde: string | undefined;
+    if (FAITHFUL) {
+      hyde = cachedHydes[g.queryId];
+      if (!hyde) {
+        await new Promise((r) => setTimeout(r, 4500)); // free tier: 15 req/min
+        const { text } = await generateText({
+          model: gemini,
+          system: HYDE_SYSTEM,
+          prompt: g.query,
+          temperature: 0.5,
+          maxOutputTokens: 200,
+          maxRetries: 2,
+        });
+        hyde = text.trim() || g.query;
+        cachedHydes[g.queryId] = hyde;
+        writeFileSync(HYDES, JSON.stringify(cachedHydes, null, 2));
+      }
+    }
+
     // rerankTopK 8 (not production's 4): we need every candidate's score to recover the
     // full distribution. The rerank itself is unchanged by asking for more of its output.
     const res = (await client.action(evalRetrieve, {
       queryText: rewrite,
+      ...(FAITHFUL ? { questionText: g.query, hydeQuery: hyde } : {}),
       limit: 8,
       rerankTopK: 8,
     })) as { baselineAPreRerank: Candidate[]; baselineBPostRerank: Candidate[] };
@@ -238,6 +277,7 @@ function analyse(frozen: Frozen) {
   let recallOld = 0;
   let recallNew = 0;
   let scored = 0;
+  const served: ServedRow[] = [];
 
   console.log(
     "\nquery            | old top | tier     | new top | tier     | top1 | recall@4 old->new",
@@ -289,6 +329,13 @@ function analyse(frozen: Frozen) {
       rNew = hn ? "HIT" : "miss";
     }
 
+    // What production actually served: the deployed formula's order, top 4.
+    served.push({
+      queryId: row.queryId,
+      top4: oldOrder.slice(0, 4),
+      chunkHit: rOld === "HIT" ? true : rOld === "miss" ? false : null,
+    });
+
     console.log(
       `${row.queryId.slice(0, 8)}${g.groundTruth === "contested" ? "*" : " "}        | ` +
         `${(oldTop ?? 0).toFixed(3)}   | ${oldTier.padEnd(8)} | ` +
@@ -306,10 +353,54 @@ function analyse(frozen: Frozen) {
   console.log(
     `recall@4               : ${recallOld}/${scored} -> ${recallNew}/${scored} (labelled queries only)`,
   );
+  faqCreditReport(served);
   console.log(
     `\nskipThreshold ${CRAG_CONFIG.skipThreshold}: a tier of "normal" also means CRAG is skipped ` +
       `(unless the query is high-impact, which forces it regardless).`,
   );
+}
+
+type ServedRow = {
+  queryId: string;
+  top4: Array<{ contentExcerpt: string }>;
+  chunkHit: boolean | null;
+};
+
+/**
+ * The chunk-label metric above cannot see the FAQ channel: an FAQ candidate carries a `faqs` id and
+ * its own "FAQ: ... Answer: ..." rendering, so a correct FAQ answer never matches a chunk-text label
+ * (audit section 17). This adds credit from scripts/eval/faq_labels_assistant_judged.json.
+ *
+ * Those labels are tier ASSISTANT_JUDGED_UNREVIEWED - not owner-verified - so treat the result as
+ * provisional, prefer the clear-only line, and do not use it alone to justify a retrieval change.
+ */
+function faqCreditReport(served: ServedRow[]) {
+  const file = JSON.parse(
+    readFileSync(resolve(ROOT, "scripts/eval/faq_labels_assistant_judged.json"), "utf8"),
+  ) as { labels: Array<{ queryId: string; faq: string; strength: "clear" | "partial" }> };
+  const shows = (row: ServedRow, faq: string) =>
+    row.top4.some((c) => norm(c.contentExcerpt).startsWith(norm(`FAQ: ${faq}`)));
+
+  let denom = 0;
+  let chunkOnly = 0;
+  let withClear = 0;
+  let withAny = 0;
+  for (const row of served) {
+    const mine = file.labels.filter((l) => l.queryId === row.queryId);
+    if (row.chunkHit === null && mine.length === 0) continue; // nothing to score this query against
+    denom++;
+    const chunk = row.chunkHit === true;
+    if (chunk) chunkOnly++;
+    if (chunk || mine.some((l) => l.strength === "clear" && shows(row, l.faq))) withClear++;
+    if (chunk || mine.some((l) => shows(row, l.faq))) withAny++;
+  }
+  console.log(
+    "\nFAQ credit (audit section 17; labels are ASSISTANT_JUDGED_UNREVIEWED, so provisional):",
+  );
+  console.log(`  queries with a chunk label or an FAQ label : ${denom}`);
+  console.log(`  recall@4, chunk labels only                : ${chunkOnly}/${denom}`);
+  console.log(`  + FAQ credit, clear labels                 : ${withClear}/${denom}`);
+  console.log(`  + FAQ credit, clear + partial labels       : ${withAny}/${denom}`);
 }
 
 /**

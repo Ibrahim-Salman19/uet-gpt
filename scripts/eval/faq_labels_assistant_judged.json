@@ -1,0 +1,218 @@
+{
+ "provenance": "ASSISTANT_JUDGED_UNREVIEWED",
+ "judgedAt": "2026-09-20",
+ "method": "Each of the 50 golden queries was read against all 32 official FAQs (scripts/faq/official-faqs.json). A label means the FAQ's answer text contains what the query asks: 'clear' if it answers it, 'partial' if it answers a substantive part or is ambiguous. Judged from the FAQ text and the query alone, before any retrieval output was consulted for these pairs; conservative on purpose.",
+ "caveat": "Not owner-verified and not independent of the assistant that built the harness. Use only to make FAQ answers visible to the recall metric (audit §17). Do NOT use it alone to justify a retrieval change; prefer the clear-only figure. Kept apart from golden_set_verified.jsonl so the verified set is not contaminated.",
+ "queriesWithAnyLabel": 18,
+ "queriesWithClearLabel": 10,
+ "labels": [
+  {
+   "queryId": "8fe9e8f2dfe15d2e",
+   "query": "What is the fee structure for BS Software Engineering at UET Taxila?",
+   "faq": "What is the fee structure for the first semester?",
+   "faqSource": "/FAQS.php",
+   "strength": "partial",
+   "why": "Gives the first-semester fee (~Rs 104,800 regular) but not programme-specific; says exact fees are in the prospectus."
+  },
+  {
+   "queryId": "74c9b0d4368cc597",
+   "query": "How much does a student pay per semester in BS Computer Science?",
+   "faq": "What is the fee structure for the first semester?",
+   "faqSource": "/FAQS.php",
+   "strength": "partial",
+   "why": "First-semester figure only; not BS Computer Science specific."
+  },
+  {
+   "queryId": "d9ad8a444d6c7741",
+   "query": "Are there any additional charges apart from tuition in UET Taxila fee structure?",
+   "faq": "Is hostel facility available?",
+   "faqSource": "/FAQS.php",
+   "strength": "partial",
+   "why": "Hostel dues (~Rs 36-40k) are one additional charge; the FAQ is not a list of all extra charges."
+  },
+  {
+   "queryId": "379d79b1e7ee91b2",
+   "query": "What are the eligibility criteria for admission to BS Computer Science at UET Taxila?",
+   "faq": "What are the eligibility criteria for admission?",
+   "faqSource": "/FAQS.php",
+   "strength": "clear",
+   "why": "States the admission eligibility criteria (F.Sc/ICS/DAE, 60%)."
+  },
+  {
+   "queryId": "379d79b1e7ee91b2",
+   "query": "What are the eligibility criteria for admission to BS Computer Science at UET Taxila?",
+   "faq": "What is the minimum percentage required in FSc for admission?",
+   "faqSource": "/FAQS.php",
+   "strength": "partial",
+   "why": "Same answer text, worded around the percentage."
+  },
+  {
+   "queryId": "379d79b1e7ee91b2",
+   "query": "What are the eligibility criteria for admission to BS Computer Science at UET Taxila?",
+   "faq": "What percentage of marks is required in FSc, ICS or DAE to be eligible?",
+   "faqSource": "/FAQS.php",
+   "strength": "partial",
+   "why": "Same answer text, worded around the percentage."
+  },
+  {
+   "queryId": "9e51f9dc27154685",
+   "query": "What is the minimum percentage required in FSc for admission to UET Taxila?",
+   "faq": "What is the minimum percentage required in FSc for admission?",
+   "faqSource": "/FAQS.php",
+   "strength": "clear",
+   "why": "Asks exactly the minimum FSc percentage."
+  },
+  {
+   "queryId": "9e51f9dc27154685",
+   "query": "What is the minimum percentage required in FSc for admission to UET Taxila?",
+   "faq": "What percentage of marks is required in FSc, ICS or DAE to be eligible?",
+   "faqSource": "/FAQS.php",
+   "strength": "clear",
+   "why": "Asks exactly the required percentage."
+  },
+  {
+   "queryId": "9e51f9dc27154685",
+   "query": "What is the minimum percentage required in FSc for admission to UET Taxila?",
+   "faq": "What are the eligibility criteria for admission?",
+   "faqSource": "/FAQS.php",
+   "strength": "clear",
+   "why": "Answer states at least 60% marks."
+  },
+  {
+   "queryId": "928451f564ccf0a4",
+   "query": "Does UET Taxila accept DAE students for lateral entry?",
+   "faq": "Can DAE students apply for admission?",
+   "faqSource": "/FAQS.php",
+   "strength": "partial",
+   "why": "Confirms DAE holders can apply; does not address 'lateral entry' specifically."
+  },
+  {
+   "queryId": "fa7779e221583d3d",
+   "query": "What is the merit list procedure for UET Taxila admissions?",
+   "faq": "How is the merit calculated?",
+   "faqSource": "/FAQS.php",
+   "strength": "partial",
+   "why": "The merit formula is part of the procedure, not the whole."
+  },
+  {
+   "queryId": "fa7779e221583d3d",
+   "query": "What is the merit list procedure for UET Taxila admissions?",
+   "faq": "When are the merit lists announced?",
+   "faqSource": "/FAQS.php",
+   "strength": "partial",
+   "why": "When merit lists are announced."
+  },
+  {
+   "queryId": "fa7779e221583d3d",
+   "query": "What is the merit list procedure for UET Taxila admissions?",
+   "faq": "What steps need to follow after merit list?",
+   "faqSource": "/FAQS.php",
+   "strength": "partial",
+   "why": "Steps after the merit list."
+  },
+  {
+   "queryId": "1e3f0c84cff8af35",
+   "query": "What is the phone number of UET Taxila main campus?",
+   "faq": "How can I contact the Admission Office?",
+   "faqSource": "/FAQS.php",
+   "strength": "partial",
+   "why": "Gives the Admission Office phone (+92-51-9047400-412), not necessarily the campus main number."
+  },
+  {
+   "queryId": "e1d169833b2c6fe2",
+   "query": "Does UET Taxila have a student hostel on campus?",
+   "faq": "Is hostel facility available?",
+   "faqSource": "/FAQS.php",
+   "strength": "clear",
+   "why": "Answers whether hostel facility is available."
+  },
+  {
+   "queryId": "21ce9642f1250090",
+   "query": "What is the procedure to apply for a degree certificate at UET Taxila?",
+   "faq": "How to apply for the Degree?",
+   "faqSource": "/ExamsFAQ.aspx",
+   "strength": "clear",
+   "why": "How to apply for the Degree."
+  },
+  {
+   "queryId": "9a07498d5501476c",
+   "query": "Can I freeze my semester at UET Taxila and what is the procedure?",
+   "faq": "How to get freezing of a Semester?",
+   "faqSource": "/ExamsFAQ.aspx",
+   "strength": "clear",
+   "why": "How to get freezing of a semester, with the form and policy."
+  },
+  {
+   "queryId": "b87404f973dbea76",
+   "query": "fees jama karwane ka tariqa kya hai UET Taxila mein?",
+   "faq": "What is the Application Processing Fee and how do I pay it?",
+   "faqSource": "/FAQS.php",
+   "strength": "partial",
+   "why": "Roman Urdu 'how to deposit fees'. AMBIGUOUS: this FAQ covers the application processing fee only, not semester fees."
+  },
+  {
+   "queryId": "57aa4c0c6221f855",
+   "query": "UET Taxila mein hostel ki fees kitni hai?",
+   "faq": "Is hostel facility available?",
+   "faqSource": "/FAQS.php",
+   "strength": "clear",
+   "why": "Roman Urdu 'hostel fees': answers with hostel dues (~Rs 36-40k)."
+  },
+  {
+   "queryId": "a670a78c21212bf6",
+   "query": "admission k liye zaruri documents kya hain?",
+   "faq": "What documents are required at the time of admission?",
+   "faqSource": "/FAQS.php",
+   "strength": "clear",
+   "why": "Documents required at admission."
+  },
+  {
+   "queryId": "26e877048af0f6ee",
+   "query": "eligibility criteria",
+   "faq": "What are the eligibility criteria for admission?",
+   "faqSource": "/FAQS.php",
+   "strength": "clear",
+   "why": "States the eligibility criteria."
+  },
+  {
+   "queryId": "26e877048af0f6ee",
+   "query": "eligibility criteria",
+   "faq": "What is the minimum percentage required in FSc for admission?",
+   "faqSource": "/FAQS.php",
+   "strength": "partial",
+   "why": "Same answer, worded around the percentage."
+  },
+  {
+   "queryId": "26e877048af0f6ee",
+   "query": "eligibility criteria",
+   "faq": "What percentage of marks is required in FSc, ICS or DAE to be eligible?",
+   "faqSource": "/FAQS.php",
+   "strength": "partial",
+   "why": "Same answer, worded around the percentage."
+  },
+  {
+   "queryId": "a694cc1c788c4df0",
+   "query": "contact number",
+   "faq": "How can I contact the Admission Office?",
+   "faqSource": "/FAQS.php",
+   "strength": "partial",
+   "why": "Admission Office email/phone; the query 'contact number' is ambiguous."
+  },
+  {
+   "queryId": "876b5dc3e98c81ea",
+   "query": "how to apply",
+   "faq": "How can I apply for Undergraduate Admissions at UET Taxila?",
+   "faqSource": "/FAQS.php",
+   "strength": "clear",
+   "why": "How to apply for undergraduate admissions."
+  },
+  {
+   "queryId": "2dfb5097fc1ca481",
+   "query": "fee structure",
+   "faq": "What is the fee structure for the first semester?",
+   "faqSource": "/FAQS.php",
+   "strength": "clear",
+   "why": "The FAQ is literally 'What is the fee structure for the first semester?'."
+  }
+ ]
+}
