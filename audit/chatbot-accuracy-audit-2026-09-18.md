@@ -49,7 +49,9 @@ nobody re-derives it from 21 sections.
    The narrow residue is the duplicate-`ragId` collision (§15.3), whose crash is already fixed by `.first()`.
 3. The golden set cannot see FAQ-channel answers at all, so recall deltas cannot justify retrieval work
    until it can (§17, §19). Needs labelling judgment, not code.
-4. W4 `lifecycleStatus` backfill — 1,891 rows, dry-run first.
+4. ~~W4 backfill~~ — **done in a narrower form (§28):** 11 replaced editions retired; the other 1,880
+   rows need no value. Two judgement calls held back for the owner: the boys-only hostel policy, and 23
+   annual-report / per-session / batch-specific documents.
 
 **Measured and REJECTED** — each was built or probed, and the evidence is recorded so none is rebuilt
 on the strength of sounding right: the F-4 reranker formula (§14), nav-chunk demotion (§17.4),
@@ -2149,3 +2151,49 @@ suspicion was reasonable:
 * **`estimateIdf` does not receive the HyDE paragraph.** It reads `args.queryText` at `search.ts:339`,
   before `finalQueryText` is reassigned at `:344`, so §23's arithmetic — computed against the 12-word
   rewrite — holds.
+
+---
+
+## 28. W4 — supersession applied in a narrower form (2026-09-20)
+
+The plan called for backfilling `lifecycleStatus` on all 1,891 documents. That was unnecessary:
+`isRetrievalEligibleLifecycle` treats an unset field as eligible, so only the *superseded* rows need a
+value. Backfilling `"active"` onto the rest would change nothing and write 1,880 rows for no effect. The
+documents table also carries no edition metadata (`metadata` holds only `sourceType`), so the plan's "build
+the set from document metadata" was not possible; the URL and title are the only signals.
+
+**Rule.** A newer document *replaces* an older one only for time-bound, forward-looking material: a
+prospectus, an events calendar, a timetable, a semester's course pages, a hostel allotment policy. It does
+not replace a record of a different period or batch.
+
+**Applied** with the existing suffix-guarded, reversible `scripts/set_document_lifecycle.cjs`. Eleven
+documents are now `superseded`, replaced by nine active editions, removing 996 chunks (about 2% of the
+corpus) from retrieval:
+
+| retired | replaced by |
+|---|---|
+| `UET-Prospectus-2024.pdf` (893 chunks) — **already superseded before this session**, found by the dry run | `UET-Prospectus-2025.pdf` |
+| `CPDCalendar2021…`, `CPDCalendar2023…` | `CPDCalendar2024…` |
+| `CPED-Autumn-2021.pdf` | `CPED-Autumn-2023.pdf` |
+| `CMS/AUT2013/{ieHRMbs,ieDEbs,ieEMbs,ieNAbs,ieWPbs}/index.asp` | the matching `AUT2014` pages |
+| `Allotment-Policy-for-Year-2022-23.pdf`, `Revised Approved Allotment Policy.pdf` (2018-19) | `Allotment Policy 2023-24.pdf` |
+
+**Verified.** Read-back from production: 11 of 11 superseded with chunks intact, 9 of 9 replacements
+untouched. Behaviour: none of the 11 appeared in the top 15 for three relevant queries while the current
+editions did. Positive control: asking for "Allotment Policy for Year 2022-23" *by exact name* no longer
+returns that document, and returns the active 2023-24 and 2024-25 policies instead. No chunk in any of the 36
+candidate documents shares a ragId with another document (0 of 1,958 rows), so the §15.3 collision does not
+interact with this gate. Undo per document: `--status active`.
+
+**Deliberately held back — these need the owner's judgement, not a rule.**
+
+* **Hostel 2023-24 vs 2024-25.** The newer policy is titled *for Boys Hostels*; the 2023-24 text has no
+  gender terms; no girls' 2024-25 policy exists in the corpus. Superseding 2023-24 could remove the only
+  girls'-hostel rules. Both stay active.
+* **23 older members of same-family series that are records or batch-specific, not replacements:** IEEE
+  annual reports 2012-2024 (13 documents, about 800 chunks; an earlier finding had a 2021 one taking the top two slots
+  for "contact number", which is a precision problem), final-year-project lists by session (6), curricula
+  2017 and 2018 (2; earlier batches follow them), Entrepreneurship outlines 2017 and 2020 (2). The runtime
+  filter `dropOlderEditions` still treats these as editions and keeps its explicit-year override. Marking
+  them `superseded` would remove that override; do it only if the standing "latest edition only" rule is
+  meant to cover annual reports and per-session lists.

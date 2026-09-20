@@ -2,7 +2,7 @@
 
 Eight accuracy fixes were live before 2026-09-19, and the queued Convex commits were deployed that
 day (§2). The cache secret is now set in both places (§1) and F-9 was withdrawn after measurement (§3). What
-remains is the FAQ ground-truth decision and W4. This is the
+remains is the FAQ ground-truth decision; W4 is done in a narrower form (§6). This is the
 order to do them in and what each one costs.
 
 Full evidence for everything below: `audit/chatbot-accuracy-audit-2026-09-18.md` (status index at the
@@ -87,11 +87,17 @@ A page-level scoring axis was tried and **does not** recover it — the FAQ live
 the label (§17.3). This needs a human decision per affected query that a given FAQ also answers it,
 recorded with its own provenance tier. Until then, **a recall delta cannot justify a retrieval change.**
 
-## 6. W4 `lifecycleStatus` backfill — needs its own authorization
+## 6. W4 - done in a narrower form (2026-09-20)
 
-1,891 rows, all missing the field. Dry-run first; the backfill activates five already-wired consumers at
-once.
+Not a 1,891-row backfill: an unset `lifecycleStatus` already counts as eligible, so only superseded rows
+need a value. Eleven documents that a newer one *replaces* (Prospectus 2024, two CPD calendars, a CPED
+timetable, five 2013 semester pages, two old hostel policies) are now `superseded`; verified by read-back
+and by a retrieval positive control. Undo one with `node scripts/set_document_lifecycle.cjs --document-id
+<id> --expect-url-suffix <suffix> --status active`. Detail and the table: audit §28.
 
+**Your call, not mine:** (a) the boys-only 2024-25 hostel policy vs the general 2023-24 one - superseding the
+older could remove the only girls' rules, so both stay active; (b) 23 annual-report / per-session /
+batch-specific documents that are records rather than replacements, left as editions under the runtime filter.
 ---
 
 ## Optional: close the verification gap
