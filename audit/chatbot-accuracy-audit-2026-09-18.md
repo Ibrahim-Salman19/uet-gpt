@@ -6,10 +6,17 @@
 **Raw run outputs:** `/tmp/claude-0/-mnt-c-Users-hafiz-UETGPT/1ca54e80-3133-4cf7-8f56-386518230365/scratchpad/`
 (`aa_batch1..4.json`, `axisB_results.json`, `axisB.ts`, `feeprobe.ts`)
 
-## STATUS INDEX — as of 2026-09-19 (read this first)
+## STATUS INDEX — as of 2026-09-20 (read this first)
 
 This document grew across a long remediation session. What follows is where things actually stand, so
 nobody re-derives it from 21 sections.
+
+> **Update 2026-09-20.** (1) The queued Convex commits below are now **deployed**, together with a
+> Vercel build of the same commit; the "not deployed" notes inside individual sections predate this.
+> (2) **F-9 is withdrawn as framed (§15.5):** the `lexical-proof:` rows are not contamination, they are
+> the production corpus, and the guard §15.4 recommended would hide nearly all retrieval.
+> (3) `INTERNAL_API_SECRET` is now set in both Convex and Vercel and the build redeployed, but no cache
+> entry has been observed written yet: the cache is enabled, not proven.
 
 **Shipped and live in production** (Vercel, verified by deployment alias each time):
 
@@ -24,21 +31,22 @@ nobody re-derives it from 21 sections.
 | a "fresh" label can no longer pass an old edition off as current | `lib/prompt.ts` | §18.3 |
 | long conversations no longer brick themselves | `chat/validate.ts` | §21 |
 
-**Committed but NOT deployed** — `npx convex deploy` is refused by the auto-mode classifier:
+**Committed, then deployed 2026-09-20** once the owner authorized it:
 
 | fix | section |
 |---|---|
 | Roman Urdu questions can reach a verified FAQ *(user-facing)* | §20 |
 | duplicate `ragId` cannot crash a chunk lookup | §15.3 |
 | the eval harness gates FAQs as production does | §19 |
-| a bounded read-only scoping query for the F-9 rows | §15.4 |
+| a bounded read-only scoping query (it settled F-9: withdrawn, §15.5) | §15.4 |
 
 **Open, needing a decision rather than more work:**
 
-1. `INTERNAL_API_SECRET` is absent from **both** Vercel and Convex, so the semantic cache has never
-   written an entry and every question runs the full pipeline (§16). Two places, one value.
-2. F-9: proof-of-concept rows from a local-dev experiment are live in the production corpus and being
-   served (§15). Scope it with the queued query before deleting or hiding anything.
+1. `INTERNAL_API_SECRET` was absent from **both** Vercel and Convex, so the semantic cache had never
+   written an entry (§16). It is now set in both (2026-09-20) and the Vercel build redeployed; **no entry
+   has yet been observed written**, so the cache is enabled but unproven until `semanticCache` is non-empty.
+2. ~~F-9~~ - **withdrawn as framed (§15.5).** Do not exclude `lexical-proof:` ragIds: they are the corpus.
+   The narrow residue is the duplicate-`ragId` collision (§15.3), whose crash is already fixed by `.first()`.
 3. The golden set cannot see FAQ-channel answers at all, so recall deltas cannot justify retrieval work
    until it can (§17, §19). Needs labelling judgment, not code.
 4. W4 `lifecycleStatus` backfill — 1,891 rows, dry-run first.
@@ -1171,7 +1179,10 @@ scoring correct retrievals as failures and could drive a harmful change.
 
 ---
 
-## 15. F-9 (High) — proof-of-concept rows from a local-dev experiment are live in the production corpus
+## 15. F-9 - WITHDRAWN as framed (see §15.5): the "proof-of-concept" rows are the production corpus
+
+> **Corrected 2026-09-20 - read §15.5 first.** The headline below is wrong and the remediation in §15.4
+> would hide nearly all retrieval. §15.1-15.4 are kept unedited so the error is auditable.
 
 Found 2026-09-19 while hydrating the §14 frozen capture with chunk text. Not previously reported.
 
@@ -1251,6 +1262,43 @@ This is a corpus mutation and is out of scope for anything this session was auth
    become a retrieval crash.
 4. ~~Separately investigate the 5/79 dangling candidates~~ — **WITHDRAWN, see §17.** Those are FAQ-channel
    candidates carrying `faqs` table ids, not dangling references. Not a defect.
+
+### 15.5 Correction (2026-09-20) - F-9 is withdrawn as framed
+
+Sections 15.1-15.4 are left as written so the error is auditable. Their headline is wrong: the
+`lexical-proof:` rows are **not** a stray population mixed into a properly embedded corpus. They **are**
+the production corpus. Whatever the history of `lexicalProof.ts`, this id scheme and session tag are what
+the production corpus carries.
+
+Measured against real production data:
+
+| evidence | result |
+|---|---|
+| candidate ragIds in the §14 capture (real production retrievals) | **74 of 79** are `lexical-proof:`; the other 5 are FAQ-channel ids |
+| those 74 looked up in the local table export (`.convex-tmp/`) | **74 / 74** present |
+| production `scopeLexicalProofRows`, 30 documents, 40-chunk cap, result `truncated: true` | **30 / 30** documents hold only `lexical-proof:` chunks: 538 chunks, **0** with any other ragId, 0 documents with both kinds. The sample includes the admissions home page, `Schedule.php` and `Seats_Allocation.php` |
+| the local export | 1,891 / 1,891 documents tagged `phase5-lexical-proof`; 44,792 / 44,792 chunks |
+
+Every candidate the pipeline returned resolves to a `lexical-proof:` id, including those from the dense
+channel, so the Pinecone vector ids must use the same scheme (inferred from the retrievals, not read from
+the Pinecone index).
+
+**Consequence.** The §15.4 recommendation - exclude `lexical-proof:` ragIds as a "reversible, destroys
+nothing" guard - would hide essentially all retrieval. It is withdrawn. Its own precondition ("only after
+step 1 confirms the content also exists in properly embedded form") was the right gate, and it fails.
+
+**What §15.2 got wrong.** "4 / 79 candidates are `lexical-proof:` rows" was actually the count of
+candidates whose ragId **collides** across several rows - the four `unique()` crashes logged at 8:37 PM on
+2026-09-19. I mislabelled a collision count as a population count. The rank-1 hit on "Who is the Vice
+Chancellor?" is therefore an ordinary retrieval-quality miss, not a proof row displacing a real one.
+
+**What still stands.** §15.3 is real and narrower. `lexical-proof:<contentHash>` is not unique per row:
+44,792 export rows share only **35,367** distinct ragIds, so 9,425 rows (21%) duplicate another row's id.
+The `.first()` fix removes the crash, but a chunk is still attributed to an *arbitrary* one of the rows
+sharing its ragId, so the cited URL, freshness and lifecycle state can come from the wrong document. The
+text is identical, so the answer is unaffected; the citation may not be. Fixing it needs a ragId scheme
+that includes the document - a corpus and Pinecone re-key, which is a separate authorization and not worth
+doing for a citation nit.
 
 ---
 
@@ -1350,8 +1398,8 @@ FAQs into the candidate pool with ids from the **`faqs` table**:
 ```
 
 Looking those ids up in `crawledChunks` by `ragId` correctly returns nothing. Nothing is dangling and
-there is no second integrity failure. The genuine F-9 rows are a separate, smaller set: of the 6
-unresolvable top-4 slots, **2 are `lexical-proof:` rows and 4 are FAQ-channel chunks**
+there is no second integrity failure. Of the 6
+unresolvable top-4 slots, **2 are `lexical-proof:` ragIds that collide across rows (§15.5) and 4 are FAQ-channel chunks**
 (`/FAQS.php` ×3, `/ExamsFAQ.aspx`).
 
 ### 17.2 Why this makes the recall metric structurally wrong
@@ -1783,7 +1831,7 @@ implementation, and this one nearly prompted a "fix" to code that was right.
 
 ## 22. F-14 (Medium) — near-empty stub chunks occupy answer-context slots
 
-Measured over the 34 top-4 chunks whose text is resolvable (the other 6 are FAQ-channel or F-9 rows),
+Measured over the 34 top-4 chunks whose text is resolvable (the other 6 are FAQ-channel chunks or colliding-ragId rows, §15.5),
 stripping the crawler's own `Document Title: … URL Path: …` prefix and `Source: <…>` line, which are
 identical on every chunk of a page and carry no answer content:
 
@@ -1977,7 +2025,7 @@ length test and whose `---` separators are now excluded too, leaving six real to
 
 `isQualityChunk` governs **ingestion**. Chunks already in the corpus stay until their document is
 re-crawled, so the stubs §22 measured are still being served. This stops the population growing; it does
-not shrink it. Removing the existing ones is a corpus operation and belongs with the F-9 decision.
+not shrink it. Removing the existing ones is a corpus operation that needs its own authorization (F-9 was withdrawn, §15.5).
 
 **Not deployed** — `npx convex deploy` remains refused by the auto-mode classifier. Joins the queue.
 
@@ -1993,7 +2041,7 @@ Probing the **real** `contextualizedText` field of every chunk retrieved across 
 | | |
 |---|---|
 | retrieved chunks probed | 79 |
-| resolved in `crawledChunks` | 70 (the other 9 are FAQ-channel or F-9 rows) |
+| resolved in `crawledChunks` | 70 (the other 9 are FAQ-channel chunks or colliding-ragId rows, §15.5) |
 | **`contextualizedText` present** | **0 / 70 (0%)** |
 
 Two things follow directly:

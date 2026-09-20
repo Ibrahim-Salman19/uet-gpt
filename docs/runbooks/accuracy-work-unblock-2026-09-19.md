@@ -1,7 +1,8 @@
 # Unblocking the queued accuracy work (2026-09-19)
 
 Eight accuracy fixes were live before 2026-09-19, and the queued Convex commits were deployed that
-day (§2). What remains is the Vercel half of the cache secret (§1) and four decisions. This is the
+day (§2). The cache secret is now set in both places (§1) and F-9 was withdrawn after measurement (§3). What
+remains is the FAQ ground-truth decision and W4. This is the
 order to do them in and what each one costs.
 
 Full evidence for everything below: `audit/chatbot-accuracy-audit-2026-09-18.md` (status index at the
@@ -15,12 +16,9 @@ top; F-9 §15, F-10 §16, F-11 §18, F-12 §20, F-13 §21).
 entry and every question runs the full pipeline. That is maximum LLM call volume, and the most
 plausible contributor to the ~24h Groq rate-limit on 2026-09-15 (audit §16).
 
-**Status 2026-09-19:** the Convex half is set (confirmed present by name; the value was never printed).
-The Vercel half is **not set** - the auto-mode classifier denied that write (`Secret-Store Writes`), so
-it is the owner's to run. Until it exists Vercel fails closed and skips every cache write
-(`src/lib/chat/cache.ts:75`), so this is a safe intermediate state, not a regression. The value was
-generated in the session scratchpad; if that is gone, generate a fresh one and set it in **both** places
-again, since a mismatched pair fails exactly like an absent one.
+**Status 2026-09-20: done.** `INTERNAL_API_SECRET` is set in Convex and in Vercel production (one value,
+generated once) and the Vercel build was redeployed so it takes effect. **Not yet observed working:** the
+write is fire-and-forget and no traffic has arrived since, so the verification below is still open.
 
 Generate one value and set it in **both** places — `setFromServer` constant-time-compares the caller's
 secret against Convex's own copy, so one side alone still fails, silently, because the write is
@@ -57,21 +55,14 @@ npx convex deploy -y --env-file .env.vercel-production.local
 | `b4976c6` | the eval harness gates FAQs the way production does (§19) |
 | `3c2b722` | a bounded, read-only scoping query for the F-9 rows (§15.4) |
 
-## 3. Scope F-9, then decide remediation
+## 3. F-9 - scoped, and WITHDRAWN as framed
 
-Local-dev proof-of-concept rows (`crawl/lexicalProof.ts`) are live in the production corpus and being
-served — one took **rank 1** on "Who is the Vice Chancellor?" (§15).
+Done 2026-09-20 with the bounded scoping query (30 documents, 40-chunk cap). The premise was wrong:
+`lexical-proof:` rows are not stray proof-of-concept data, they are the production corpus. 30 of 30 sampled
+documents hold only those rows, and 74 of the 79 candidates in the §14 capture carry that id scheme.
 
-```bash
-npx convex run crawl/lexicalProofAudit:scopeLexicalProofRows '{}' --env-file .env.vercel-production.local
-```
-
-Read-only and bounded. The number that decides the fix is **`documentsWithOnlyProofChunks`**:
-
-* **0** → the content also exists properly embedded, so a read-side guard excluding `lexical-proof:`
-  ragIds is safe and reversible, and destroys nothing.
-* **> 0** → those documents exist *only* as proof rows, and excluding them would **delete real answers**
-  from retrieval. Re-ingest instead.
+**Do not add a read-side guard excluding `lexical-proof:` ragIds** - it would hide nearly all retrieval.
+Evidence, and the narrow defect that survives (duplicate ragIds, citation-only impact): audit §15.5.
 
 ## 4. Re-capture the retrieval baseline (after step 2)
 

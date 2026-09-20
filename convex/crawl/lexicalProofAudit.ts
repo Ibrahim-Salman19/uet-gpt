@@ -9,6 +9,9 @@ import { internalQuery } from "../_generated/server";
 // properly embedded chunks - because if they do not, excluding these rows would
 // remove real answers rather than stale duplicates.
 //
+// RESULT (2026-09-20, audit §15.5): they do not. 30/30 sampled production documents hold ONLY these
+// rows, so they ARE the corpus and must not be excluded. Kept as a bounded, read-only audit tool.
+//
 // Deliberately bounded. `maxDocuments`/`maxChunksPerDocument` cap the rows read so
 // this cannot become an unbounded scan against the Convex Free-plan I/O budget;
 // `truncated` reports whether the cap was hit. No mutation, no delete.
