@@ -33,6 +33,7 @@ import type * as crawl_emergencyStop from "../crawl/emergencyStop.js";
 import type * as crawl_exportCorpus from "../crawl/exportCorpus.js";
 import type * as crawl_jobs from "../crawl/jobs.js";
 import type * as crawl_lexicalProof from "../crawl/lexicalProof.js";
+import type * as crawl_lexicalProofAudit from "../crawl/lexicalProofAudit.js";
 import type * as crawl_list from "../crawl/list.js";
 import type * as crawl_mutations from "../crawl/mutations.js";
 import type * as crawl_queries from "../crawl/queries.js";
@@ -169,6 +170,7 @@ declare const fullApi: ApiFromModules<{
   "crawl/exportCorpus": typeof crawl_exportCorpus;
   "crawl/jobs": typeof crawl_jobs;
   "crawl/lexicalProof": typeof crawl_lexicalProof;
+  "crawl/lexicalProofAudit": typeof crawl_lexicalProofAudit;
   "crawl/list": typeof crawl_list;
   "crawl/mutations": typeof crawl_mutations;
   "crawl/queries": typeof crawl_queries;
