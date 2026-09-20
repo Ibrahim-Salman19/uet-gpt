@@ -74,7 +74,9 @@ npx tsx scripts/eval/rerank-position/run.ts --faithful            # re-capture (
 npx tsx scripts/eval/rerank-position/run.ts --faithful --replay   # free re-analysis thereafter
 ```
 
-Result: chunk-label recall@4 is 8/10, not the 7/10 the unfaithful capture gave. Audit §29.
+Result: chunk-label recall@4 is 8/10, not the 7/10 the unfaithful capture gives. A control (unfaithful capture
+against today's deployment, `--out frozen.control-unfaithful.json`) also gives 7/10, so forwarding the two fields,
+not the deploy, is the cause. With FAQ credit from `clear` labels it is 9/10. Audit §29.
 
 ## 5. The FAQ ground-truth decision - done provisionally 2026-09-20
 

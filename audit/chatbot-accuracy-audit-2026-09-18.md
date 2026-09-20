@@ -2218,10 +2218,17 @@ Captured after the queued Convex commits were deployed, into `frozen.faithful.js
 
 | over the same 10 queries | recall@4 |
 |---|---|
-| earlier, unfaithful capture (chunk labels only) | 7/10 |
-| **faithful, chunk labels only** | **8/10** |
-| faithful, + FAQ credit, `clear` labels | **9/10** |
-| faithful, + FAQ credit, `clear` + `partial` labels | **10/10** |
+| earlier unfaithful capture, before the Convex deploy (chunk labels only) | 7/10 |
+| **control:** unfaithful capture against today's deployment (chunk labels only) | 7/10 |
+| faithful capture, today's deployment (chunk labels only) | 8/10 |
+| **faithful, + FAQ credit, `clear` labels — the figure to quote** | **9/10** |
+| faithful, + FAQ credit, `clear` + `partial` labels | 10/10 (see below) |
+
+**Attribution.** The two unfaithful captures, one before the deploy and one after, agree: 7/10 and 4 of 40 FAQ
+slots. So the deploy did not move this metric on these queries, and the gain to 8/10 and the extra FAQ slot
+come from forwarding `questionText` and `hydeQuery`. The control is `frozen.control-unfaithful.json`. (An
+earlier draft of this section attributed the gain without the control; the deploy also changed FAQ matching
+and excluded 11 documents, so it was a real confound.)
 
 * FAQ answers occupy **5 of 40** served top-4 slots (12%), up from 4 of 40. The flagship fee question
   `8fe9e8f2` now gets the verified fee FAQ; the unfaithful capture had none for it.
@@ -2229,6 +2236,10 @@ Captured after the queued Convex commits were deployed, into `frozen.faithful.js
   verified FAQ, which is §17's point made measurable.
 * **Reranker headroom is 0/10 again**, now on faithful data: "no rerank at all" scores 8/10 at recall@4,
   the same as the deployed formula. The F-4 rejection stands.
+
+**Quote 9/10, not 10/10.** The 10/10 needs the `partial` label on `8fe9e8f2`, whose own note says the FAQ
+gives a first-semester figure rather than a Software Engineering one: it does not answer the query, and
+counting it is the failure §17.3 warned about.
 
 **Read this with its limits.** Ten stratified queries, not fifty. The FAQ figures rest on assistant-judged
 labels. `8fe9e8f2` is a `contested` golden label and its FAQ match is `partial` (the FAQ gives a

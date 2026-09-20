@@ -58,7 +58,12 @@ import { sanitizeRewrittenQuery } from "../../../convex/rag/routing";
 const HERE = resolve(__dirname);
 const ROOT = resolve(__dirname, "../../..");
 const FAITHFUL = process.argv.includes("--faithful");
-const FROZEN = resolve(HERE, FAITHFUL ? "frozen.faithful.json" : "frozen.json");
+const OUT_AT = process.argv.indexOf("--out");
+// --out <file> keeps a control capture from overwriting the committed baseline.
+const FROZEN = resolve(
+  HERE,
+  OUT_AT !== -1 ? process.argv[OUT_AT + 1]! : FAITHFUL ? "frozen.faithful.json" : "frozen.json",
+);
 const REWRITES = resolve(HERE, "rewrites.json");
 const HYDES = resolve(HERE, "hydes.json");
 const REPLAY = process.argv.includes("--replay");
